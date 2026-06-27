@@ -2,7 +2,7 @@
 
 import FootprintsClient from '@/app/(blog)/footprints/FootprintsClient';
 import { getThemeComponents } from '@/lib/theme';
-import { normalizeThemeName } from './lib/blog-api';
+import { normalizeThemeName } from '@shared/blog-theme';
 import type { RoutePageData } from '@/lib/route-page-data';
 import type { UtterlogBoot } from './types';
 

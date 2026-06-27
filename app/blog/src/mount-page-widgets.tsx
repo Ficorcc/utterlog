@@ -7,7 +7,7 @@ import { ThemeProvider } from '@/lib/theme-context';
 import { NavigationProvider } from '@/lib/navigation';
 import { CommentSectionLive as AzureCommentSectionLive } from '@/themes/Azure/PostInteractive';
 import { CommentSectionLive as NebulaCommentSectionLive } from '@/themes/Nebula/PostInteractive';
-import { normalizeThemeName } from './lib/blog-api';
+import { normalizeThemeName } from '@shared/blog-theme';
 import { resolveLivePage } from './live-page-registry';
 import type { UtterlogBoot } from './types';
 

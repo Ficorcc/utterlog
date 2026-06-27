@@ -15,6 +15,7 @@
       "@/lib/blog-api": ["./app/blog/src/lib/blog-api.ts"],
       "@/lib/theme": ["./app/blog/src/lib/theme.ts"],
       "@/*": ["./app/web/*"],
+      "@shared/*": ["./app/shared/*"],
       "next/link": ["./app/blog/src/shims/link.tsx"],
       "next/navigation": ["./app/next-shim/navigation.ts"],
       "next/script": ["./app/blog/src/shims/script.tsx"],

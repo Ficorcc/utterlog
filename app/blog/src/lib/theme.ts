@@ -7,7 +7,7 @@ import * as Azure from '@/themes/Azure';
 import * as Nebula from '@/themes/Nebula';
 import AzureManifest from '@/themes/Azure/theme.json';
 import NebulaManifest from '@/themes/Nebula/theme.json';
-import { normalizeThemeName } from './blog-api';
+import { normalizeThemeName } from '@shared/blog-theme';
 
 export interface MenuPosition {
   key: string;

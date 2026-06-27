@@ -3,4 +3,4 @@ export {
   blogThemeAccentAttr,
   normalizeBlogTheme,
   resolveBlogTheme,
-} from '../../shared/blog-theme';
+} from '@shared/blog-theme';
