@@ -441,7 +441,7 @@
 [data-theme="Utterlog"] .post-list-link:hover .post-list-title { color: var(--color-primary) !important; }
 
 /* Pre blocks without language class */
-[data-theme="Utterlog"] .blog-prose pre:not([class*="language-"]) { background-color: #1d1f21; color: #c5c8c6; }
+[data-theme="Utterlog"] .blog-prose pre:not([class*="language-"]) { background-color: var(--color-bg-code-block); color: var(--color-text-code-block); }
 [data-theme="Utterlog"] .blog-prose pre:not([class*="language-"]) code { background: none; padding: 0; color: inherit; font-family: var(--font-mono); }
 
 /* HR, Table */
