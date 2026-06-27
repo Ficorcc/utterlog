@@ -141,7 +141,6 @@ export default function DashboardPage() {
   };
 
   const maxS = Math.max(...sparkline.map(s => s.visits), 1);
-  const trendChartHeight = 96;
 
   const dateLabels = (() => {
     const result: Array<{ month: string; day: string; showMonth: boolean } | null> = [];
@@ -178,9 +177,9 @@ export default function DashboardPage() {
 
       {/* Trend + Quick Actions */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px', alignItems: 'start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px', alignItems: 'stretch' }}>
           {/* Trend Chart */}
-          <div className="card" style={{ padding: '20px 20px 10px', alignSelf: 'start', height: 'fit-content', minHeight: 0 }}>
+          <div className="card" style={{ padding: '20px 20px 10px', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <i className="fa-sharp fa-light fa-chart-column" style={{ fontSize: '15px', color: 'var(--color-primary)' }} />
@@ -195,27 +194,27 @@ export default function DashboardPage() {
                 </span>
               </div>
             </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '3px', height: `${trendChartHeight}px` }}>
+            <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+              <div style={{ flex: 1, minHeight: 96, display: 'flex', alignItems: 'flex-end', gap: '3px' }}>
                 {sparkline.map((s, i) => {
-                  const totalH = Math.max(Math.round((s.visits / maxS) * trendChartHeight), s.visits > 0 ? 4 : 2);
+                  const totalH = Math.max(Math.round((s.visits / maxS) * 100), s.visits > 0 ? 4 : 2);
                   const visitorRatio = s.visits > 0 ? s.visitors / s.visits : 0;
-                  const visitorH = Math.round(totalH * visitorRatio);
+                  const visitorH = Math.max(0, Math.min(100, Math.round(visitorRatio * 100)));
                   return (
                     <div
                       key={i}
                       title={t('admin.dashboard.trendTooltip', '{date}  访问 {visits} · 访客 {visitors}', { date: s.date, visits: s.visits, visitors: s.visitors })}
                       style={{
                         flex: 1, display: 'flex', flexDirection: 'column-reverse',
-                        height: `${totalH}px`, cursor: 'pointer',
+                        height: `${totalH}%`, maxHeight: '100%', cursor: 'pointer',
                       }}
                     >
                       <div style={{
-                        height: `${visitorH}px`,
+                        height: `${visitorH}%`,
                         backgroundColor: 'var(--color-primary)',
                       }} />
                       <div style={{
-                        height: `${totalH - visitorH}px`,
+                        height: `${100 - visitorH}%`,
                         backgroundColor: 'color-mix(in srgb, var(--color-primary) 25%, transparent)',
                       }} />
                     </div>
