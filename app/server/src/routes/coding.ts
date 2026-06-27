@@ -257,11 +257,12 @@ async function fetchGitHubContributionCalendar(login: string) {
   return { contributions, yearTotal, allTotal };
 }
 
-async function githubAllPublicEvents(owner: string, maxPages = 3) {
+async function githubAllPublicEvents(owner: string, maxPages = 3, timeoutMs = 12000) {
   const all: any[] = [];
   for (let page = 1; page <= maxPages; page++) {
     const batch = await githubJson<any[]>(
       `/users/${encodeURIComponent(owner)}/events/public?per_page=100&page=${page}`,
+      timeoutMs,
     );
     if (!batch.length) break;
     all.push(...batch);
@@ -285,6 +286,7 @@ async function fetchGitHubFollowingLogins(owner: string, max: number) {
   }
   const batch = await githubJson<Array<{ login?: string }>>(
     `/users/${encodeURIComponent(owner)}/following?per_page=${Math.min(max, 100)}`,
+    5000,
   );
   return batch.map((item) => String(item.login || '').trim()).filter(Boolean).slice(0, max);
 }
@@ -489,16 +491,11 @@ async function codingPayload(c: Context) {
   const followingMax = Math.min(30, Math.max(0, Number(await optionValue('coding_github_following_max', '20')) || 20));
   if (includeFollowing && owners[0]) {
     const ownerKeys = new Set(owners.map((owner) => owner.toLowerCase()));
-    const followingLogins = await fetchGitHubFollowingLogins(owners[0], followingMax).catch(() => [] as string[]);
-    for (const login of followingLogins) {
-      if (ownerKeys.has(login.toLowerCase())) continue;
-      try {
-        const followingEvents = await githubAllPublicEvents(login);
-        events.push(...followingEvents.map(toCodingActivity));
-      } catch {
-        // skip one following user
-      }
-    }
+    const followingLogins = (await fetchGitHubFollowingLogins(owners[0], followingMax).catch(() => [] as string[]))
+      .filter((login) => !ownerKeys.has(login.toLowerCase()))
+      .slice(0, 10);
+    const batches = await Promise.all(followingLogins.map((login) => githubAllPublicEvents(login, 1, 5000).catch(() => [] as any[])));
+    for (const batch of batches) events.push(...batch.map(toCodingActivity));
   }
   if (!yearContributions) {
     const dayIndex = new Map(contributions.map((day, index) => [day.date, index]));
