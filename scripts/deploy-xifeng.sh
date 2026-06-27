@@ -106,7 +106,13 @@ require_cmd() {
   done
 }
 
-require_cmd git docker bun gzip
+require_cmd git bun gzip
+
+if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+  HAS_LOCAL_DOCKER=1
+else
+  HAS_LOCAL_DOCKER=0
+fi
 
 GIT_SHA="$(git rev-parse HEAD)"
 GIT_SHA_SHORT="$(git rev-parse --short HEAD)"
@@ -200,7 +206,7 @@ EOF
 log "备份服务器旧镜像 ..."
 "${SSH[@]}" "docker tag ${IMAGE_REF} ${IMAGE_NAME}:backup-\$(date +%Y%m%d%H%M%S) 2>/dev/null || true"
 
-if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+if [ "$HAS_LOCAL_DOCKER" -eq 1 ]; then
   log "本地构建镜像 ${IMAGE_REF} (${PLATFORM}) ..."
   docker build \
     --platform "$PLATFORM" \
