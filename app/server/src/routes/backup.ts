@@ -1,16 +1,33 @@
 import type { Hono } from 'hono';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
-import { mkdir, rm } from 'node:fs/promises';
+import { cp, mkdir, rm } from 'node:fs/promises';
 import { basename, dirname, join } from 'node:path';
 import { auth } from '../auth/middleware';
 import { validateBackupZipEntries } from '../backup/zip-safety';
 import { config } from '../config';
-import { one } from '../db/helpers';
+import { nowUnix, one } from '../db/helpers';
 import { optionValue, saveOption } from '../db/options';
 import { badRequest, notFound, ok } from '../http/response';
-import { putStorageObject, storageSettings } from '../media/storage';
+import { publicStorageUrl, putStorageObject, storageSettings } from '../media/storage';
 
 const backupDir = process.env.BACKUP_DIR || 'backups';
+
+async function runCommand(cmd: string[]) {
+  const proc = Bun.spawn(cmd, { stdout: 'pipe', stderr: 'pipe', env: { ...process.env, PGPASSWORD: config.dbPassword } });
+  const [stdout, stderr, code] = await Promise.all([
+    new Response(proc.stdout).text(),
+    new Response(proc.stderr).text(),
+    proc.exited,
+  ]);
+  return { code, stdout, stderr };
+}
+
+async function restoreExtractedFiles(root: string) {
+  const uploadsRoot = join(root, 'uploads');
+  const contentRoot = join(root, 'content');
+  if (existsSync(uploadsRoot)) await cp(uploadsRoot, config.uploadDir, { recursive: true, force: true });
+  if (existsSync(contentRoot)) await cp(contentRoot, config.contentDir, { recursive: true, force: true });
+}
 
 function safeBackupPath(filename?: string) {
   if (!filename) return '';
