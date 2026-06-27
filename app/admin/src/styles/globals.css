@@ -233,11 +233,11 @@ body {
   --shadow-1: 0 1px 3px rgba(0,0,0,0.08);
   --shadow-2: 0 4px 12px rgba(0,0,0,0.10);
 
-  /* Radius (§9.1: 6 / 8 px only) */
-  --radius-sm: 6px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-hero: 8px;
+  /* Radius — 全局直角（§9 设计 Token） */
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-hero: 0;
 
   /* =========================================================
      Admin component sizing tokens (legacy aliases — prefer
@@ -255,9 +255,9 @@ body {
   --ctrl-pad-sm: 0 12px;
   --ctrl-pad-md: 0 18px;
   --ctrl-pad-lg: 0 24px;
-  --ctrl-radius: 6px;
-  --card-radius: 6px;
-  --card-radius-hero: 8px;
+  --ctrl-radius: 0;
+  --card-radius: 0;
+  --card-radius-hero: 0;
 
   --settings-section-gap: 24px;
   --settings-section-title-size: 14px;
@@ -1092,7 +1092,7 @@ textarea.settings-input {
   padding: 0.125rem 0.625rem;
   font-size: 0.75rem;
   font-weight: 500;
-  border-radius: 3px;
+  border-radius: 0;
 }
 
 .table {

@@ -121,7 +121,7 @@ export default function MediaPage() {
           {files.map((file) => (
             <div
               key={file.id}
-              className="group relative aspect-square bg-soft rounded-[4px] overflow-hidden border border-line hover:border-blue-500 transition-colors"
+              className="group relative aspect-square bg-soft overflow-hidden border border-line hover:border-blue-500 transition-colors"
             >
               <div className="w-full h-full flex items-center justify-center">
                 {file.mime_type?.startsWith('image/') ? (
@@ -177,7 +177,7 @@ export default function MediaPage() {
             <i className="fa-solid fa-xmark" style={{ fontSize: '14px' }} />
           </button>
           {previewUrl && (
-            <img src={previewUrl} alt="Preview" className="w-full rounded-[4px]" />
+            <img src={previewUrl} alt="Preview" className="w-full" />
           )}
         </div>
       </Modal>

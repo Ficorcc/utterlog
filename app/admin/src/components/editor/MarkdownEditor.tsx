@@ -604,7 +604,7 @@ export default function MarkdownEditor({
     // the textarea's last rows and its scrollbar → users reported
     // "can't scroll down" and "left content incomplete".
     <div
-      className={`flex flex-col border border-line rounded-[4px] overflow-hidden bg-card ${className}`}
+      className={`flex flex-col border border-line overflow-hidden bg-card ${className}`}
       style={{ minHeight }}
     >
       {/* Toolbar — flex-shrink: 0 keeps it from being squeezed when

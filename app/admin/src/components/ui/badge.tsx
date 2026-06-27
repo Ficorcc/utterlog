@@ -17,7 +17,7 @@ export function Badge({ children, variant = 'default' }: BadgeProps) {
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center',
-      padding: '2px 8px', borderRadius: '3px',
+      padding: '2px 8px', borderRadius: '0',
       fontSize: '12px', fontWeight: 500,
       backgroundColor: s.bg, color: s.color,
     }}>
