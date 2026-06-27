@@ -7,7 +7,7 @@ import { validateBackupZipEntries } from '../backup/zip-safety';
 import { config } from '../config';
 import { nowUnix, one } from '../db/helpers';
 import { optionValue, saveOption } from '../db/options';
-import { badRequest, notFound, ok } from '../http/response';
+import { badRequest, fail, notFound, ok } from '../http/response';
 import { publicStorageUrl, putStorageObject, storageSettings } from '../media/storage';
 
 const backupDir = process.env.BACKUP_DIR || 'backups';
@@ -312,7 +312,7 @@ export function registerBackupRoutes(app: Hono) {
       await saveOption('backup_last_status', `ok: ${backup.filename}, destination=${backup.destination}, deleted=${deleted}`);
       return ok(c, { ...backup, deleted_old_backups: deleted });
     } catch (err) {
-      return c.json({ success: false, error: { code: 'DUMP_ERROR', message: err instanceof Error ? err.message : '数据库导出失败' } }, 500);
+      return fail(c, 500, 'DUMP_ERROR', err instanceof Error ? err.message : '数据库导出失败');
     }
   });
   app.post('/api/v1/backup/import', auth, async (c) => {
@@ -327,7 +327,7 @@ export function registerBackupRoutes(app: Hono) {
     try {
       validateBackupZipEntries(uploadedBytes);
     } catch (err) {
-      return c.json({ success: false, error: { code: 'ZIP_UNSAFE', message: err instanceof Error ? err.message : '备份文件不安全' } }, 400);
+      return fail(c, 400, 'ZIP_UNSAFE', err instanceof Error ? err.message : '备份文件不安全');
     }
     writeFileSync(tmpPath, uploadedBytes);
     await mkdir(extractDir, { recursive: true });
@@ -335,7 +335,7 @@ export function registerBackupRoutes(app: Hono) {
     if (unzip.code !== 0) {
       await rm(tmpPath, { force: true }).catch(() => {});
       await rm(extractDir, { recursive: true, force: true }).catch(() => {});
-      return c.json({ success: false, error: { code: 'ZIP_ERROR', message: unzip.stderr || '无效的备份文件' } }, 400);
+      return fail(c, 400, 'ZIP_ERROR', unzip.stderr || '无效的备份文件');
     }
     const dbPath = join(extractDir, 'database.sql');
     await restoreExtractedFiles(extractDir);
@@ -347,7 +347,7 @@ export function registerBackupRoutes(app: Hono) {
       if (restore.code !== 0) {
         await rm(tmpPath, { force: true }).catch(() => {});
         await rm(extractDir, { recursive: true, force: true }).catch(() => {});
-        return c.json({ success: false, error: { code: 'RESTORE_ERROR', message: restore.stderr || '数据库恢复失败' } }, 500);
+        return fail(c, 500, 'RESTORE_ERROR', restore.stderr || '数据库恢复失败');
       }
       dbRestored = true;
     }

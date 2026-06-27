@@ -16,7 +16,7 @@
  * 一处加 token 三处都得加。
  */
 
-export interface PermalinkPreset {
+interface PermalinkPreset {
   key: string;
   label: string;
   template: string;

@@ -1,11 +1,5 @@
 import nodemailer from 'nodemailer';
-import { table } from './config';
-import { one } from './db/helpers';
-
-async function optionValue(name: string, fallback = '') {
-  const row = await one<{ value: string }>(`select value from ${table('options')} where name = $1`, [name]).catch(() => null);
-  return row?.value ?? fallback;
-}
+import { optionValue } from './db/options';
 
 function fromAddress(from: string, name: string) {
   return name ? `${name} <${from}>` : from;

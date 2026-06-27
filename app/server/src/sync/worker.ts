@@ -3,6 +3,7 @@ import { mkdir } from 'node:fs/promises';
 import { basename, extname, join } from 'node:path';
 import { config, table } from '../config';
 import { exec, many, nowUnix, one } from '../db/helpers';
+import { optionValue } from '../db/options';
 import { lookupGeoIp, normalizeGeoProvider } from '../geoip';
 import { assertPublicHttpUrl } from '../http/public-url';
 
@@ -56,11 +57,6 @@ async function updateJob(jobId: string, patch: Record<string, unknown>) {
 
 async function failJob(jobId: string, message: string) {
   await updateJob(jobId, { status: 'failed', error_message: message.slice(0, 1000), finished_at: nowUnix() });
-}
-
-async function optionValue(name: string, fallback = '') {
-  const row = await one<{ value: string }>(`select value from ${table('options')} where name = $1`, [name]).catch(() => null);
-  return row?.value ?? fallback;
 }
 
 async function scanPostsForMedia(jobId: string, siteUuid: string) {

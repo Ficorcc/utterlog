@@ -1,12 +1,5 @@
 import { sql } from './client';
 
-export function ident(name: string) {
-  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name)) {
-    throw new Error(`unsafe SQL identifier: ${name}`);
-  }
-  return `"${name}"`;
-}
-
 export async function one<T extends Record<string, unknown>>(query: string, params: unknown[] = []) {
   const rows = await sql.unsafe<T[]>(query, params as any[]);
   return rows[0] || null;

@@ -4,7 +4,7 @@ import { auth } from '../auth/middleware';
 import { table } from '../config';
 import { exec, intParam, many, nowUnix, one } from '../db/helpers';
 import { optionValue } from '../db/options';
-import { badRequest, ok } from '../http/response';
+import { badRequest, fail, ok } from '../http/response';
 
 function firstNonEmpty(...values: unknown[]) {
   for (const value of values) {
@@ -275,7 +275,7 @@ export function registerFootprintRoutes(app: Hono) {
     try {
       const payload = await fetchJson<any>(`https://v.wpista.com/marker/geocode?address=${encodeURIComponent(query)}`);
       if (payload.status !== 'success' || payload.code !== 200) {
-        return c.json({ success: false, error: { code: 'GEOCODE_FAILED', message: '地理编码服务没有返回有效结果' } }, 502);
+        return fail(c, 502, 'GEOCODE_FAILED', '地理编码服务没有返回有效结果');
       }
       const message = payload.message || {};
       let city = String(body.city || '').trim() || pickGeocodeCity(message.results || []);
@@ -291,7 +291,7 @@ export function registerFootprintRoutes(app: Hono) {
         provider: 'wpista',
       });
     } catch (err) {
-      return c.json({ success: false, error: { code: 'GEOCODE_FAILED', message: err instanceof Error ? err.message : '地理编码失败' } }, 502);
+      return fail(c, 502, 'GEOCODE_FAILED', err instanceof Error ? err.message : '地理编码失败');
     }
   });
   app.get('/api/v1/location/reverse', async (c) => {

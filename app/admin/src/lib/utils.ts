@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { formatWithAdminTimeZone } from './timezone';
-import { generateSlug, toDate, truncate } from '../../../shared/string-utils';
+import { toDate } from '../../../shared/string-utils';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -38,5 +38,3 @@ export function formatRelativeTime(date: string | number | Date, t?: Translate):
   if (minutes > 0) return t ? t('admin.time.minutesAgo', '{count}分钟前', { count: minutes }) : `${minutes}分钟前`;
   return t ? t('admin.time.justNow', '刚刚') : '刚刚';
 }
-
-export { generateSlug, truncate };

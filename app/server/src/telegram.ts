@@ -1,10 +1,6 @@
 import { config, table } from './config';
 import { exec, many, nowUnix, one } from './db/helpers';
-
-async function optionValue(name: string, fallback = '') {
-  const row = await one<{ value: string }>(`select value from ${table('options')} where name = $1`, [name]).catch(() => null);
-  return row?.value ?? fallback;
-}
+import { optionValue } from './db/options';
 
 async function saveOption(name: string, value: string) {
   const now = nowUnix();

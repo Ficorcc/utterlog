@@ -6,7 +6,7 @@ import { auth, currentUserId, optionalAuth } from '../auth/middleware';
 import { config, table } from '../config';
 import { exec, intParam, many, nowUnix, one, pageParams } from '../db/helpers';
 import { optionValue, saveOption } from '../db/options';
-import { badRequest, forbidden, notFound, ok, paginate } from '../http/response';
+import { badRequest, fail, forbidden, notFound, ok, paginate } from '../http/response';
 import { storeUploadedBytes } from '../media/storage';
 import { ephemeral } from '../store/ephemeral';
 import {
@@ -1358,14 +1358,14 @@ export function registerAiRoutes(app: Hono) {
       if (!res.ok || result.error) {
         const message = result.error?.message || result.error || `HTTP ${res.status}`;
         await logAi(currentUserId(c), { endpoint, model, slug: 'test' }, `test-${providerType}`, 'error', String(message));
-        return c.json({ success: false, error: { code: 'API_ERROR', message: String(message) } }, 400);
+        return fail(c, 400, 'API_ERROR', String(message));
       }
       if (providerType === 'embedding') {
         const embedding = result.data?.[0]?.embedding || result.embedding;
         if (!Array.isArray(embedding) || embedding.length === 0) {
           const message = 'embedding provider 返回为空';
           await logAi(currentUserId(c), { endpoint, model, slug: 'test' }, 'test-embedding', 'error', message);
-          return c.json({ success: false, error: { code: 'API_ERROR', message } }, 400);
+          return fail(c, 400, 'API_ERROR', message);
         }
         await logAi(currentUserId(c), { endpoint, model, slug: 'test' }, 'test-embedding', 'success', `embedding:${embedding.length}`);
         return ok(c, { ok: true, content: `Embedding OK (${embedding.length} dimensions)`, model });
@@ -1374,7 +1374,7 @@ export function registerAiRoutes(app: Hono) {
       await logAi(currentUserId(c), { endpoint, model, slug: 'test' }, 'test-text', 'success', String(content || 'OK'));
       return ok(c, { ok: true, content: String(content || 'OK'), model });
     } catch (err) {
-      return c.json({ success: false, error: { code: 'CONNECTION_ERROR', message: err instanceof Error ? err.message : 'AI 连接失败' } }, 400);
+      return fail(c, 400, 'CONNECTION_ERROR', err instanceof Error ? err.message : 'AI 连接失败');
     }
   });
   app.post('/api/v1/ai/generate-image', auth, async (c) => {
@@ -1384,7 +1384,7 @@ export function registerAiRoutes(app: Hono) {
     try {
       return ok(c, await callAiImage(prompt, currentUserId(c), String(body.size || '')));
     } catch (err) {
-      return c.json({ success: false, error: { code: 'GENERATION_FAILED', message: err instanceof Error ? err.message : '图片生成失败' } }, 500);
+      return fail(c, 500, 'GENERATION_FAILED', err instanceof Error ? err.message : '图片生成失败');
     }
   });
   app.post('/api/v1/ai/cover', auth, async (c) => {
@@ -1401,7 +1401,7 @@ export function registerAiRoutes(app: Hono) {
     try {
       return ok(c, { ...(await callAiImage(prompt, currentUserId(c))), prompt });
     } catch (err) {
-      return c.json({ success: false, error: { code: 'GENERATION_FAILED', message: err instanceof Error ? err.message : 'AI 生成封面失败' } }, 500);
+      return fail(c, 500, 'GENERATION_FAILED', err instanceof Error ? err.message : 'AI 生成封面失败');
     }
   });
   app.post('/api/v1/ai/chat', auth, async (c) => {
@@ -1566,7 +1566,7 @@ export function registerAiRoutes(app: Hono) {
       const columns = rows.length ? Object.keys(rows[0]) : [];
       return ok(c, { columns, rows, count: rows.length, sql: safe.sql });
     } catch (err) {
-      return c.json({ success: false, error: { code: 'QUERY_ERROR', message: err instanceof Error ? err.message : '查询失败' } }, 400);
+      return fail(c, 400, 'QUERY_ERROR', err instanceof Error ? err.message : '查询失败');
     }
   });
   app.post('/api/v1/ai/reader-chat', optionalAuth, async (c) => {
@@ -1619,7 +1619,7 @@ export function registerAiRoutes(app: Hono) {
     }
 
     if ((await optionValue('ai_chat_guest', 'false')).toLowerCase() !== 'true' && currentUserId(c) === 0) {
-      return c.json({ success: false, error: { code: 'GUEST_BLOCKED', message: '请先登录后再使用 AI 聊天' } }, 401);
+      return fail(c, 401, 'GUEST_BLOCKED', '请先登录后再使用 AI 聊天');
     }
 
     const sessionId = safeSessionId(body.session_id || body.sessionId) || `r_${postId}_${randomUUID()}`;
@@ -1685,21 +1685,21 @@ export function registerAiRoutes(app: Hono) {
     try {
       return ok(c, await startAiBatch('questions', currentUserId(c)));
     } catch (err) {
-      return c.json({ success: false, error: { code: 'NO_AI_PROVIDER', message: err instanceof Error ? err.message : '启动失败' } }, 400);
+      return fail(c, 400, 'NO_AI_PROVIDER', err instanceof Error ? err.message : '启动失败');
     }
   });
   app.post('/api/v1/ai/batch-summary', auth, async (c) => {
     try {
       return ok(c, await startAiBatch('summary', currentUserId(c)));
     } catch (err) {
-      return c.json({ success: false, error: { code: 'NO_AI_PROVIDER', message: err instanceof Error ? err.message : '启动失败' } }, 400);
+      return fail(c, 400, 'NO_AI_PROVIDER', err instanceof Error ? err.message : '启动失败');
     }
   });
   app.post('/api/v1/ai/batch-all', auth, async (c) => {
     try {
       return ok(c, await startAiBatch('all', currentUserId(c)));
     } catch (err) {
-      return c.json({ success: false, error: { code: 'NO_AI_PROVIDER', message: err instanceof Error ? err.message : '启动失败' } }, 400);
+      return fail(c, 400, 'NO_AI_PROVIDER', err instanceof Error ? err.message : '启动失败');
     }
   });
   app.post('/api/v1/ai/batch-delete', auth, async (c) => {

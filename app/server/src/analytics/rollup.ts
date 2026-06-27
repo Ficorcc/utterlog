@@ -1,5 +1,6 @@
 import { config, table } from '../config';
 import { exec, many, nowUnix, one } from '../db/helpers';
+import { optionValue } from '../db/options';
 
 const retentionDays = 90;
 const dimensions: Record<string, string> = {
@@ -13,11 +14,6 @@ export function rowsChanged(result: unknown) {
     return Number((result as { count?: number }).count || 0);
   }
   return 0;
-}
-
-async function optionValue(name: string, fallback = '') {
-  const row = await one<{ value: string }>(`select value from ${table('options')} where name = $1`, [name]).catch(() => null);
-  return row?.value ?? fallback;
 }
 
 async function siteTimeZone() {

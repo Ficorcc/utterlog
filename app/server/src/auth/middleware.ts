@@ -4,7 +4,7 @@ import { forbidden, unauthorized } from '../http/response';
 import { one } from '../db/helpers';
 import { table } from '../config';
 
-export type AuthVariables = {
+type AuthVariables = {
   userId?: number;
   userRole?: string;
 };

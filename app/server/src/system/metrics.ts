@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { platform, release } from 'node:os';
+import { platform } from 'node:os';
 import { join } from 'node:path';
 
 let cachedCpuPercent = 0;
@@ -71,10 +71,6 @@ export function getHostUptimeSeconds() {
 
 export function getHostUptimeLabel() {
   return formatUptime(getHostUptimeSeconds());
-}
-
-export function getOsLabel() {
-  return `${platform()} ${release()}`;
 }
 
 let cachedAppVersion = '';

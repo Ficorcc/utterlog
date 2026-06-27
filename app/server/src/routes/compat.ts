@@ -21,7 +21,7 @@ import { exec, intParam, many, nowUnix, one, pageParams } from '../db/helpers';
 import { optionValue, saveOption } from '../db/options';
 import { sendConfiguredEmail } from '../email';
 import { assertPublicHttpUrl, normalizePublicHttpUrl } from '../http/public-url';
-import { badRequest, forbidden, notFound, ok, paginate, unauthorized } from '../http/response';
+import { badRequest, fail, forbidden, notFound, ok, paginate, unauthorized } from '../http/response';
 import { publicStorageUrl, putStorageObject, storageSettings, storeUploadedBytes } from '../media/storage';
 import { runtimePaths } from '../paths';
 import { ephemeral } from '../store/ephemeral';
@@ -2013,7 +2013,7 @@ export function registerCompatRoutes(app: Hono) {
     ).catch(() => null);
     if (user?.totp_enabled) return badRequest(c, '两步验证已启用', 'TOTP_ALREADY_ENABLED');
     if (!user?.totp_secret) return badRequest(c, '请先设置两步验证', 'TOTP_NOT_SETUP');
-    if (!user?.totp_secret || !verifyTotp(user.totp_secret, String(body.code || ''))) return c.json({ success: false, error: { code: 'INVALID_TOTP', message: '验证码错误' } }, 400);
+    if (!user?.totp_secret || !verifyTotp(user.totp_secret, String(body.code || ''))) return fail(c, 400, 'INVALID_TOTP', '验证码错误');
     const backup = await generateTotpBackupCodes();
     await exec(
       `update ${table('users')} set totp_enabled = true, totp_backup_codes = $1, updated_at = $2 where id = $3`,
@@ -2033,7 +2033,7 @@ export function registerCompatRoutes(app: Hono) {
     if (!user) return notFound(c, '用户');
     if (!user.totp_enabled) return badRequest(c, '两步验证未启用', 'TOTP_NOT_ENABLED');
     const passwordOK = await Bun.password.verify(password, user.password).catch(() => false);
-    if (!passwordOK) return c.json({ success: false, error: { code: 'INVALID_PASSWORD', message: '密码错误' } }, 401);
+    if (!passwordOK) return fail(c, 401, 'INVALID_PASSWORD', '密码错误');
     const codeOK = verifyTotp(user.totp_secret, code) || await consumeTotpBackupCode(user.id, user.totp_backup_codes, code);
     if (!codeOK) return badRequest(c, '验证码错误', 'INVALID_CODE');
     await exec(
@@ -2054,7 +2054,7 @@ export function registerCompatRoutes(app: Hono) {
     ).catch(() => null);
     const code = String(body.code || '');
     const codeOK = !!user?.totp_enabled && (verifyTotp(user.totp_secret, code) || await consumeTotpBackupCode(user.id, user.totp_backup_codes, code));
-    if (!codeOK) return c.json({ success: false, error: { code: 'INVALID_TOTP', message: '验证码错误' } }, 400);
+    if (!codeOK) return fail(c, 400, 'INVALID_TOTP', '验证码错误');
     if (tempToken) await ephemeral.del(`totp-login:${tempToken}`);
     return ok(c, await issueCompatTokens(user));
   });
@@ -2234,14 +2234,14 @@ export function registerCompatRoutes(app: Hono) {
   });
   app.get('/api/v1/notifications/stream', async (c) => {
     const token = String(new URL(c.req.url).searchParams.get('token') || '').trim();
-    if (!token) return c.json({ success: false, error: { code: 'UNAUTHORIZED', message: '缺少 token' } }, 401);
+    if (!token) return fail(c, 401, 'UNAUTHORIZED', '缺少 token');
     let userId = 0;
     try {
       userId = (await verifyAccessToken(token)).userId;
       const user = await one<{ status: string }>(`select status from ${table('users')} where id = $1`, [userId]);
       if (!user || user.status !== 'active') throw new Error('inactive user');
     } catch {
-      return c.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Token 无效或已过期' } }, 401);
+      return fail(c, 401, 'UNAUTHORIZED', 'Token 无效或已过期');
     }
     let timer: ReturnType<typeof setInterval> | null = null;
     const stream = new ReadableStream({
@@ -2416,7 +2416,7 @@ export function registerCompatRoutes(app: Hono) {
     try {
       return ok(c, { url: feedUrl, items: await fetchRssFeed(feedUrl) });
     } catch (err) {
-      return c.json({ success: false, error: { code: 'RSS_PARSE_FAILED', message: err instanceof Error ? err.message : 'RSS 解析失败' } }, 502);
+      return fail(c, 502, 'RSS_PARSE_FAILED', err instanceof Error ? err.message : 'RSS 解析失败');
     }
   });
   app.get('/api/v1/social/feed-timeline', optionalAuth, async (c) => {
@@ -2509,7 +2509,7 @@ export function registerCompatRoutes(app: Hono) {
   app.post('/api/v1/admin/system/upgrade', auth, async (c) => {
     const current = await upgradeStatusPayload();
     if (current.running) {
-      return c.json({ success: false, error: { code: 'UPGRADE_IN_PROGRESS', message: '升级正在进行，请稍候' } }, 409);
+      return fail(c, 409, 'UPGRADE_IN_PROGRESS', '升级正在进行，请稍候');
     }
     const probe = await runtimeUpgradeProbe();
     if (!probe.supported) {
@@ -2622,7 +2622,7 @@ export function registerCompatRoutes(app: Hono) {
     try {
       return ok(c, await parseMediaUrl(url));
     } catch (err) {
-      return c.json({ success: false, error: { code: 'PARSE_ERROR', message: err instanceof Error ? err.message : '无法解析此链接' } }, 400);
+      return fail(c, 400, 'PARSE_ERROR', err instanceof Error ? err.message : '无法解析此链接');
     }
   });
   app.post('/api/v1/media/douban-import', auth, async (c) => {
@@ -2692,7 +2692,7 @@ export function registerCompatRoutes(app: Hono) {
         },
       });
     } catch {
-      return c.json({ success: false, error: { code: 'INVALID_TOKEN', message: 'Token 无效或已过期' } }, 401);
+      return fail(c, 401, 'INVALID_TOKEN', 'Token 无效或已过期');
     }
   });
   app.post('/api/v1/comments/federated', async (c) => {
@@ -2769,10 +2769,10 @@ export function registerCompatRoutes(app: Hono) {
       body: JSON.stringify({ token }),
       signal: AbortSignal.timeout(5000),
     }).catch(() => null);
-    if (!verify?.ok) return c.json({ success: false, error: { code: 'INVALID_PASSPORT', message: '身份验证失败' } }, 401);
+    if (!verify?.ok) return fail(c, 401, 'INVALID_PASSPORT', '身份验证失败');
     const payload: any = await verify.json().catch(() => ({}));
     const data: any = payload?.data || {};
-    if (!payload.success || !data.valid) return c.json({ success: false, error: { code: 'INVALID_PASSPORT', message: '身份验证失败' } }, 401);
+    if (!payload.success || !data.valid) return fail(c, 401, 'INVALID_PASSPORT', '身份验证失败');
     return ok(c, {
       identified: true,
       utterlog_id: data.utterlog_id || '',
@@ -2799,7 +2799,7 @@ export function registerCompatRoutes(app: Hono) {
     try {
       return ok(c, await pushNetworkSiteInfo());
     } catch (err) {
-      return c.json({ success: false, error: { code: 'HUB_UNREACHABLE', message: err instanceof Error ? err.message : '无法连接 Utterlog 中心' } }, 502);
+      return fail(c, 502, 'HUB_UNREACHABLE', err instanceof Error ? err.message : '无法连接 Utterlog 中心');
     }
   });
   app.get('/api/v1/network/feed', auth, async (c) => {
@@ -2855,7 +2855,7 @@ export function registerCompatRoutes(app: Hono) {
     const safeSiteUrl = await assertPublicHttpUrl(siteUrl);
     const url = `${safeSiteUrl}/api/v1/network/content?type=${encodeURIComponent(sp.get('type') || 'post')}${sp.get('since') ? `&since=${encodeURIComponent(sp.get('since') || '')}` : ''}`;
     const payload = await fetchJson<any>(url, 15000).catch((err) => ({ success: false, error: err instanceof Error ? err.message : '拉取内容失败' }));
-    if (payload.success === false) return c.json({ success: false, error: { code: 'PULL_FAILED', message: payload.error || '拉取内容失败' } }, 502);
+    if (payload.success === false) return fail(c, 502, 'PULL_FAILED', payload.error || '拉取内容失败');
     return ok(c, payload.data || payload);
   });
   app.post('/api/v1/network/publish-notify', auth, async (c) => {
@@ -2897,7 +2897,7 @@ export function registerCompatRoutes(app: Hono) {
       );
       return ok(c, { bound: true, utterlog_id: utterlogId, utterlog_avatar: String(data.avatar || '') });
     } catch (err) {
-      return c.json({ success: false, error: { code: 'INVALID_TOKEN', message: err instanceof Error ? err.message : 'Utterlog ID 验证失败' } }, 401);
+      return fail(c, 401, 'INVALID_TOKEN', err instanceof Error ? err.message : 'Utterlog ID 验证失败');
     }
   });
   app.post('/api/v1/network/unbind-utterlog-id', auth, async (c) => {
@@ -2924,7 +2924,7 @@ export function registerCompatRoutes(app: Hono) {
   app.get('/api/v1/network/oauth/authorize', auth, async (c) => {
     const registered = await ensureNetworkRegistered();
     if (!registered.connected || !registered.site_id) {
-      return c.json({ success: false, error: { code: 'NOT_CONNECTED', message: '无法连接 Utterlog 网络' } }, 502);
+      return fail(c, 502, 'NOT_CONNECTED', '无法连接 Utterlog 网络');
     }
     const redirectUri = `${(await publicFrontendUrl()).replace(/\/+$/, '')}/api/v1/network/oauth/callback`;
     const state = `${Date.now()}-${currentUserId(c)}`;
@@ -2972,7 +2972,7 @@ export function registerCompatRoutes(app: Hono) {
     try {
       meta = await fetchRemoteMetadata(siteUrl);
     } catch {
-      return c.json({ success: false, error: { code: 'DISCOVERY_FAILED', message: '无法连接目标站点' } }, 400);
+      return fail(c, 400, 'DISCOVERY_FAILED', '无法连接目标站点');
     }
     const userId = currentUserId(c);
     const user = await one<{ username: string; nickname: string | null; avatar: string | null }>(
@@ -3141,7 +3141,7 @@ export function registerCompatRoutes(app: Hono) {
         const site = await authSyncEnvelope(body, platform);
         return ok(c, { ok: true, platform, app: 'utterlog-bun', site_uuid: site.site_uuid, label: site.label, source_url: site.source_url, server_time: nowUnix() });
       } catch (err) {
-        return c.json({ success: false, error: { code: 'BAD_AUTH', message: err instanceof Error ? err.message : '认证失败' } }, 401);
+        return fail(c, 401, 'BAD_AUTH', err instanceof Error ? err.message : '认证失败');
       }
     });
     app.post(`/api/v1/sync/${platform}/start`, async (c) => {
@@ -3150,7 +3150,7 @@ export function registerCompatRoutes(app: Hono) {
       try {
         site = await authSyncEnvelope(body, platform);
       } catch (err) {
-        return c.json({ success: false, error: { code: 'BAD_AUTH', message: err instanceof Error ? err.message : '认证失败' } }, 401);
+        return fail(c, 401, 'BAD_AUTH', err instanceof Error ? err.message : '认证失败');
       }
       const manifest = body.manifest || {};
       if (manifest.source_url) await exec(`update ${table('sync_sites')} set source_url = $1, updated_at = $2 where site_uuid = $3`, [String(manifest.source_url), nowUnix(), site.site_uuid]).catch(() => {});
@@ -3168,7 +3168,7 @@ export function registerCompatRoutes(app: Hono) {
       try {
         site = await authSyncEnvelope(body, platform);
       } catch (err) {
-        return c.json({ success: false, error: { code: 'BAD_AUTH', message: err instanceof Error ? err.message : '认证失败' } }, 401);
+        return fail(c, 401, 'BAD_AUTH', err instanceof Error ? err.message : '认证失败');
       }
       const jobId = String(body.job_id || '');
       const resource = String(body.resource || '');
@@ -3190,7 +3190,7 @@ export function registerCompatRoutes(app: Hono) {
         return ok(c, { imported, resource, batch_no: batchNo });
       } catch (err) {
         await exec(`update ${table('sync_jobs')} set status = 'error', error_message = $1 where job_id = $2`, [err instanceof Error ? err.message : '导入失败', jobId]).catch(() => {});
-        return c.json({ success: false, error: { code: 'IMPORT_ERR', message: err instanceof Error ? err.message : '导入失败' } }, 500);
+        return fail(c, 500, 'IMPORT_ERR', err instanceof Error ? err.message : '导入失败');
       }
     });
     app.post(`/api/v1/sync/${platform}/finish`, async (c) => {
@@ -3199,7 +3199,7 @@ export function registerCompatRoutes(app: Hono) {
       try {
         site = await authSyncEnvelope(body, platform);
       } catch (err) {
-        return c.json({ success: false, error: { code: 'BAD_AUTH', message: err instanceof Error ? err.message : '认证失败' } }, 401);
+        return fail(c, 401, 'BAD_AUTH', err instanceof Error ? err.message : '认证失败');
       }
       const jobId = String(body.job_id || '');
       if (!jobId) return badRequest(c, '缺少 job_id');
@@ -3223,7 +3223,7 @@ export function registerCompatRoutes(app: Hono) {
       try {
         site = await authSyncEnvelope(body, platform);
       } catch (err) {
-        return c.json({ success: false, error: { code: 'BAD_AUTH', message: err instanceof Error ? err.message : '认证失败' } }, 401);
+        return fail(c, 401, 'BAD_AUTH', err instanceof Error ? err.message : '认证失败');
       }
       if (String(body.confirm || '') !== site.site_uuid) return badRequest(c, `confirm 字段必须等于 site_uuid (${site.site_uuid})`, 'CONFIRM_MISMATCH');
       const rowsRemoved: Record<string, number> = {};

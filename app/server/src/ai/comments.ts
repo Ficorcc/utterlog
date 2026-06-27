@@ -1,5 +1,6 @@
 import { table } from '../config';
 import { exec, intParam, nowUnix, one } from '../db/helpers';
+import { optionValue } from '../db/options';
 
 type AiAuditResult = {
   passed: boolean;
@@ -39,11 +40,6 @@ const commentReplyDefaultPrompt = `你是这个博客的博主本人，正在用
 {content}
 
 直接输出回复内容（纯文本，不加引号 / 前缀 / 署名 / 任何解释）：`;
-
-async function optionValue(name: string, fallback = '') {
-  const row = await one<{ value: string }>(`select value from ${table('options')} where name = $1`, [name]).catch(() => null);
-  return row?.value ?? fallback;
-}
 
 function boolValue(value: string, fallback = false) {
   if (value === '') return fallback;

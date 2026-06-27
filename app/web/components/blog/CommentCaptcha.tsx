@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '@/lib/api';
 
-export interface CaptchaResult {
+interface CaptchaResult {
   challenge: string;
   nonce: string;
   captcha_id?: string;

@@ -3,17 +3,17 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useMusicStore, type GlobalSong } from '@/lib/store';
 
-export interface Song {
+interface Song {
   id: string; title: string; artist: string; album?: string; cover: string; url: string;
   server: string; pic_id?: string; url_id?: string; lyric_id?: string;
 }
 
-export interface LrcLine { time: number; text: string; }
+interface LrcLine { time: number; text: string; }
 
-export type PlayMode = 'order' | 'random' | 'single';
-export type SkinType = 'fullscreen' | 'vinyl-card' | 'mini-bar' | 'floating';
+type PlayMode = 'order' | 'random' | 'single';
+type SkinType = 'fullscreen' | 'vinyl-card' | 'mini-bar' | 'floating';
 
-export interface SkinProps {
+interface SkinProps {
   playlist: Song[];
   idx: number;
   song: Song | undefined;
