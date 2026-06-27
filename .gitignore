@@ -11,7 +11,6 @@ Thumbs.db
 # Claude / local dev
 .claude/
 DEPLOY.md
-DEVELOPMENT.md
 /deploy.sh
 
 # IDE

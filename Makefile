@@ -41,6 +41,8 @@ help-advanced:
 	@echo ""
 	@echo "  \033[1m开发:\033[0m"
 	@echo "    make dev                 开发模式 (dev Dockerfile + hot reload)"
+	@echo "    make dev-local           本地 bun server"
+	@echo "    make deploy-xifeng       xifeng.net 本地构建 + SSH 部署"
 	@echo "    make schema              导出当前 DB schema 到 app/server/assets/schema.sql"
 	@echo ""
 
@@ -111,6 +113,14 @@ clean:
 .PHONY: dev
 dev:
 	docker compose up -d --build
+
+.PHONY: deploy-xifeng
+deploy-xifeng:
+	@bash scripts/deploy-xifeng.sh
+
+.PHONY: deploy-xifeng-dry
+deploy-xifeng-dry:
+	@bash scripts/deploy-xifeng.sh --dry-run
 
 .PHONY: dev-local
 dev-local:

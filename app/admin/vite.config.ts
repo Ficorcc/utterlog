@@ -46,13 +46,21 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     sourcemap: false,
-    // Aggressive minification — this is the closed-source distribution
-    minify: 'esbuild',
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks: {
-          react: ['react', 'react-dom', 'react-router-dom'],
-          vendor: ['axios', 'zustand', 'react-hot-toast'],
+        codeSplitting: {
+          groups: [
+            {
+              name: 'react',
+              test: /[\\/]node_modules[\\/](react|react-dom|react-router-dom)[\\/]/,
+              priority: 20,
+            },
+            {
+              name: 'vendor',
+              test: /[\\/]node_modules[\\/](axios|zustand|react-hot-toast)[\\/]/,
+              priority: 15,
+            },
+          ],
         },
       },
     },

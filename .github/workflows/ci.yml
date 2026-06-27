@@ -27,10 +27,6 @@ jobs:
       - name: Type check Bun server
         run: bun run server:check
 
-      - name: Install admin deps
-        working-directory: app/admin
-        run: bun install
-
       - name: Build admin SPA
         working-directory: app/admin
         run: bun run build

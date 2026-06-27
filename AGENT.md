@@ -298,7 +298,7 @@ UTTERLOG_DB_MODE=external curl -fsSL https://...install.sh | bash
 - 端口：`127.0.0.1:9261` → 容器 8080（仅 loopback，反代由 host 自行处理）
 - DB：独立 compose，`utterlog-postgres-1` (utterlog-postgres:19beta1-pgvector)，5432
 - 备份镜像：`backup-YYYYMMDDhhmmss` 形式保留在本地 registry
-- 源码版本核对：用 `git show HEAD:<path> | sha256sum` 对照容器内 raw 文件；不要用 sha256 文件大小或镜像 tag 判断
+- 源码版本核对：容器内 `cat /app/.deploy-revision` 应对齐 `git rev-parse HEAD`；部署用 `make deploy-xifeng`（见 `deploy/xifeng/README.md`）
 
 **pancn.com (3.71.15.157)** — AWS EC2 t3.xlarge 法兰克福，Debian 13
 
