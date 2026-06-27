@@ -3491,6 +3491,7 @@ export function registerContentRoutes(app: Hono) {
 	        uptime_seconds: getHostUptimeSeconds(),
 	        ip: hostIp.ip,
 	        country_code: hostIp.country_code,
+	        ip_source: hostIp.source,
 	      },
       cpu: { cores, percent: getCpuPercent() },
       memory: {

@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { networkInterfaces, platform, release } from 'node:os';
-import { lookupCurrentGeoIp } from '../geoip';
+import { lookupCurrentGeoIp, publicIpForGeo } from '../geoip';
 
 export type HostOsInfo = {
   id: string;
@@ -112,28 +112,50 @@ function firstLocalIpv4() {
   return '127.0.0.1';
 }
 
-let cachedPublicIp = '';
-let cachedCountryCode = '';
-let publicIpPromise: Promise<void> | null = null;
+const publicIpSuccessTtlMs = 30 * 60 * 1000;
+const publicIpFailureTtlMs = 60 * 1000;
+
+type CachedPublicIp = {
+  ip: string;
+  country_code: string;
+  source: 'geoip' | 'local';
+  expires_at: number;
+};
+
+let cachedPublicIp: CachedPublicIp | null = null;
+let publicIpPromise: Promise<CachedPublicIp> | null = null;
 
 export async function resolveHostPublicIp(provider: unknown) {
-  if (cachedPublicIp) {
-    return { ip: cachedPublicIp, country_code: cachedCountryCode };
+  const now = Date.now();
+  if (cachedPublicIp && cachedPublicIp.expires_at > now) {
+    return cachedPublicIp;
   }
   if (!publicIpPromise) {
     publicIpPromise = (async () => {
       const result = await lookupCurrentGeoIp(provider).catch(() => null);
-      if (result?.ip) {
-        cachedPublicIp = result.ip;
-        cachedCountryCode = result.country_code.toLowerCase();
-        return;
+      const publicIp = publicIpForGeo(result?.ip || '');
+      if (publicIp) {
+        return {
+          ip: publicIp,
+          country_code: result?.country_code.toLowerCase() || '',
+          source: 'geoip' as const,
+          expires_at: Date.now() + publicIpSuccessTtlMs,
+        };
       }
-      cachedPublicIp = firstLocalIpv4();
-      cachedCountryCode = '';
+      return {
+        ip: firstLocalIpv4(),
+        country_code: '',
+        source: 'local' as const,
+        expires_at: Date.now() + publicIpFailureTtlMs,
+      };
     })();
   }
-  await publicIpPromise;
-  return { ip: cachedPublicIp, country_code: cachedCountryCode };
+  try {
+    cachedPublicIp = await publicIpPromise;
+  } finally {
+    publicIpPromise = null;
+  }
+  return cachedPublicIp;
 }
 
 export function parsePostgresVersion(raw: string) {

@@ -119,6 +119,7 @@ export default function SystemStatusPanel({ isOpen }: { isOpen: boolean }) {
                   <img src={`https://flagcdn.io/flags/4x3/${String(data.server.country_code).toLowerCase()}.svg`} alt="" style={{ width: '14px', height: '10px' }} />
                 )}
                 {data.server?.ip || '-'}
+                {data.server?.ip_source === 'local' && <span className="text-dim">({t('admin.system.localIp', '本地')})</span>}
               </span>
             </InfoRow>
             {[
