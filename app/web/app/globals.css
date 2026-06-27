@@ -189,15 +189,55 @@ html.lightbox-active body {
   --color-primary: #0052D9;
   --color-primary-hover: #0044B8;
   --color-primary-active: #003A9E;
+  --color-secondary: #6B7280;
   --color-bg-main: #FFFFFF;
   --color-bg-card: #FFFFFF;
-  --color-bg-soft: #F5F7FA;
+  --color-bg-soft: #F8F9FA;        /* §9.1: light gray */
   --color-border: #E1E6EB;
   --color-divider: #EEF2F5;
-  --color-text-main: #0D1A2D;
-  --color-text-sub: #5A6B7F;
-  --color-text-dim: #9AA5B0;
+  --color-border-input: #D1D5DB;     /* §9.1: input border */
+  --color-text-main: #111827;        /* §9.1: main text */
+  --color-text-sub: #6B7280;         /* §9.1: secondary text */
+  --color-text-dim: #9CA3AF;         /* §9.1: tertiary text */
   --color-focus-ring: #0052D9;
+
+  /* Status (§9.1: success/warning/error) */
+  --color-success: #10B981;
+  --color-success-bg: #ECFDF5;
+  --color-success-text: #065F46;
+  --color-warning: #F59E0B;
+  --color-warning-bg: #FFFBEB;
+  --color-warning-text: #92400E;
+  --color-error: #DC2626;
+  --color-error-bg: #FEF2F2;
+  --color-error-text: #991B1B;
+
+  /* Typography scale (§9.1: 12/14/16/20/24/32 px) */
+  --text-xs:  12px;
+  --text-sm:  14px;
+  --text-base: 16px;
+  --text-lg:  20px;
+  --text-xl:  24px;
+  --text-2xl: 32px;
+
+  /* Spacing scale (§9.1: 4/8/12/16/24/32/48/64 px) */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Shadow (§9.1) */
+  --shadow-1: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-2: 0 4px 12px rgba(0,0,0,0.10);
+
+  /* Radius (§9.1: 6 / 8 px only) */
+  --radius-sm: 6px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
 }
 
 /* Steel — 已废弃，映射到 Azure 蓝色保持兼容 */

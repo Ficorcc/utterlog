@@ -695,7 +695,7 @@
 }
 [data-theme="Azure"] .azure-moment-ticker > i {
   flex-shrink: 0;
-  color: #1da1f2;
+  color: var(--color-primary);
 }
 [data-theme="Azure"] .azure-moment-text {
   flex: 1;
@@ -993,10 +993,10 @@
 [data-theme="Azure"] .azure-new-badge {
   flex-shrink: 0;
   padding: 1px 6px;
-  color: #f57c00;
+  color: var(--color-warning-text);
   font-size: 10px;
   font-weight: 600;
-  background: #fff3e0;
+  background: var(--color-warning-bg);
   border: 1px solid #ffe0b2;
 }
 [data-theme="Azure"] .azure-post-card-stats {
