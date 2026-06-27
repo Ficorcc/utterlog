@@ -203,7 +203,7 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
     const finish = () => {
       if (cancelled) return;
       const elapsed = Date.now() - start;
-      const minHold = 700; // 至少展示 700ms 的 loading 圆圈
+      const minHold = 500; // 至少展示 500ms 的 loading 圆圈
       setTimeout(() => {
         if (cancelled) return;
         setDisplaySrc(heroSrc);
@@ -329,25 +329,18 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
                 <PostLink post={heroPost} className="azure-hero-link">
                   <FadeCover key={displaySrc} src={displaySrc} alt={heroPost.title} className="azure-hero-cover" />
                   {/* Loading overlay —— 切分类时盖在旧图上，模糊 + 半透黑底
-                      + 中央旋转弧 spinner。淡出由 transition 0.4s 控制，跟新图
-                      淡入并行，整体过渡总长 ≈ 700ms（最短展示）+ 0.4s（淡出）。 */}
+                      + 中央旋转环 spinner。淡出由 transition 0.4s 控制，跟新图
+                      淡入并行，整体过渡总长 ≈ 500ms（最短展示）+ 0.4s（淡出）。 */}
                   <div
                     aria-hidden={!heroLoading}
                     className={`azure-hero-loading${heroLoading ? ' active' : ''}`}
                   >
-                    {/* 旋转弧 spinner —— 用 <animateTransform> 单一时间轴 + repeatCount="indefinite"。
-                        之前三圆点 fade 用的是 syncbase (`spinner_qYjJ.begin+0.3s`)，
-                        Chromium 在某些 hydration/SSR 边界上会冻结第一帧不启动，
-                        肉眼看起来像卡死。换成单元素旋转既符合"圆圈旋转"预期，
-                        也跟 LoadingSpinner / Captcha / AIChatBubble 等其它 spinner
-                        的写法保持一致。 */}
-                    <svg className="azure-hero-loading-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <g transform="translate(12 12)">
-                        <circle r="9" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="42 16" opacity="0.95">
-                          <animateTransform attributeName="transform" type="rotate" dur="0.9s" from="0" to="360" repeatCount="indefinite" />
-                        </circle>
-                      </g>
-                    </svg>
+                    {/* 纯 CSS 旋转环 —— 之前用 SVG + SMIL animateTransform 在 React
+                        hydration 边界仍有可能被 Chromium 冻结，肉眼看到的就是静态圆
+                        环"卡死"。换成纯 CSS 旋转环（跟 .azure-weather-loading 同款）
+                        就稳了：border-style 圆 + 单边 highlight + @keyframes rotate，
+                        不依赖任何 SMIL / SVG transform。 */}
+                    <i className="azure-hero-loading-icon" aria-hidden="true" />
                   </div>
                   {/* Title strip: same height as one left-sidebar tab
                       so the baseline lines up with the last tab. No
