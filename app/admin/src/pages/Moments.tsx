@@ -458,7 +458,7 @@ export default function MomentsPage() {
                   type="button"
                   onClick={() => setForm({ ...form, mood: form.mood === tag ? '' : tag })}
                   style={{
-                    padding: '4px 12px', borderRadius: '14px', fontSize: '12px',
+                    padding: '4px 12px', borderRadius: '0', fontSize: '12px',
                     border: `1px solid ${form.mood === tag ? 'var(--color-primary)' : 'var(--color-border)'}`,
                     color: form.mood === tag ? 'var(--color-primary)' : 'var(--color-text-sub)',
                     background: form.mood === tag ? 'rgba(var(--color-primary-rgb,0,0,0),0.06)' : 'transparent',
