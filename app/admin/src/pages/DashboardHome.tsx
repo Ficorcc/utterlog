@@ -177,9 +177,9 @@ export default function DashboardPage() {
 
       {/* Trend + Quick Actions */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px', alignItems: 'start' }}>
           {/* Trend Chart */}
-          <div className="card" style={{ padding: '24px 24px 16px' }}>
+          <div className="card" style={{ padding: '24px 24px 12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <i className="fa-sharp fa-light fa-chart-column" style={{ fontSize: '15px', color: 'var(--color-primary)' }} />
