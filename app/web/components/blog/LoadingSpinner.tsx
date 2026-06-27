@@ -10,23 +10,41 @@ interface LoadingSpinnerProps {
   title?: string;
 }
 
+/**
+ * Loading spinner — pure CSS border ring + global `spin` keyframe.
+ *
+ * 之前是 SVG + SMIL `<animateTransform>`，在 React 19 hydration 边界
+ * Chromium 可能冻结首帧，表现为导航中右上角 / 评论区 / 随机访问按钮
+ * 里的圆圈"卡住"不转。纯 CSS 旋转是 hydration-safe 的，必然跑起来。
+ *
+ * 视觉跟原来几乎一致：3/4 可见环 + 单边 transparent + 旋转。颜色用
+ * 原来的 hsl(228, 97%, 42%) 蓝色做默认，调用方不传 color 时保持原样。
+ */
 export default function LoadingSpinner({ size = 20, color = 'hsl(228, 97%, 42%)', className, style, title }: LoadingSpinnerProps) {
+  // Border width scales with size —— 12px 评论区小点 2px，28px 卡片用 3px。
+  const borderWidth = Math.max(2, Math.round(size / 10));
   return (
-    <svg
-      className={className}
-      width={size}
-      height={size}
-      fill={color}
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden={title ? undefined : true}
+    <span
+      className={['blog-spinner', className].filter(Boolean).join(' ')}
+      role={title ? 'status' : undefined}
       aria-label={title}
-      style={style}
-    >
-      <path d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" opacity=".25" />
-      <path d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z">
-        <animateTransform attributeName="transform" type="rotate" dur="0.75s" values="0 12 12;360 12 12" repeatCount="indefinite" />
-      </path>
-    </svg>
+      aria-hidden={title ? undefined : true}
+      style={{
+        display: 'inline-block',
+        width: size,
+        height: size,
+        boxSizing: 'border-box',
+        border: `${borderWidth}px solid ${color}`,
+        borderTopColor: 'transparent',
+        borderRadius: '50%',
+        opacity: 0.9,
+        verticalAlign: 'middle',
+        flexShrink: 0,
+        // Reuse globals.css @keyframes spin (line 1348). inline animation
+        // keeps the component self-contained without adding a new class.
+        animation: 'spin 0.75s linear infinite',
+        ...style,
+      }}
+    />
   );
 }
