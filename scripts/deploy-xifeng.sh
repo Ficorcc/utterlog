@@ -165,41 +165,69 @@ fi
 IMAGE_REF="${IMAGE_NAME}:${IMAGE_TAG}"
 IMAGE_SHA_REF="${IMAGE_NAME}:${GIT_SHA_SHORT}"
 
-log "构建镜像 ${IMAGE_REF} (${PLATFORM}) ..."
-docker build \
-  --platform "$PLATFORM" \
-  -f Dockerfile.bun \
-  --build-arg "GIT_SHA=${GIT_SHA}" \
-  --build-arg "GIT_BRANCH=${GIT_BRANCH}" \
-  -t "$IMAGE_REF" \
-  -t "$IMAGE_SHA_REF" \
-  .
-
-ok "镜像构建完成"
-
-log "备份服务器旧镜像 ..."
-"${SSH[@]}" "docker tag ${IMAGE_REF} ${IMAGE_NAME}:backup-\$(date +%Y%m%d%H%M%S) 2>/dev/null || true"
-
-log "上传镜像到服务器（gzip 流式传输，请稍候）..."
-docker save "$IMAGE_REF" | gzip -1 | "${SSH[@]}" 'gunzip | docker load'
-
-ok "镜像已 load 到服务器"
-
-log "同步 compose 文件 ..."
-"${SSH[@]}" "mkdir -p ${REMOTE_PATH}"
-"${SCP[@]}" \
-  deploy/xifeng/docker-compose.bun.yml \
-  deploy/xifeng/docker-compose.infra.yml \
-  "${USER}@${HOST}:${REMOTE_PATH}/"
-
-log "重启 app 容器 ..."
-"${SSH[@]}" bash -s <<EOF
+remote_compose_and_restart() {
+  "${SSH[@]}" bash -s <<EOF
 set -euo pipefail
 cd ${REMOTE_PATH}
 docker network inspect utterlog_default >/dev/null 2>&1 || docker network create utterlog_default
 docker compose -f docker-compose.infra.yml up -d
 docker compose -f docker-compose.bun.yml up -d --force-recreate --no-deps app
 EOF
+}
+
+remote_build_from_src() {
+  log "git archive 同步源码到服务器并在远端 docker build ..."
+  "${SSH[@]}" "rm -rf ${REMOTE_PATH}/src && mkdir -p ${REMOTE_PATH}/src"
+  git archive HEAD | "${SSH[@]}" "tar xf - -C ${REMOTE_PATH}/src"
+  "${SSH[@]}" bash -s <<EOF
+set -euo pipefail
+test -f ${REMOTE_PATH}/src/app/server/src/backup/zip-safety.ts
+cd ${REMOTE_PATH}
+docker tag ${IMAGE_REF} ${IMAGE_NAME}:backup-\$(date +%Y%m%d%H%M%S) 2>/dev/null || true
+cd src
+docker build \
+  --build-arg GIT_SHA=${GIT_SHA} \
+  --build-arg GIT_BRANCH=${GIT_BRANCH} \
+  -f Dockerfile.bun \
+  -t ${IMAGE_REF} \
+  -t ${IMAGE_SHA_REF} \
+  .
+cp deploy/xifeng/docker-compose.bun.yml ../docker-compose.bun.yml
+cp deploy/xifeng/docker-compose.infra.yml ../docker-compose.infra.yml
+EOF
+}
+
+log "备份服务器旧镜像 ..."
+"${SSH[@]}" "docker tag ${IMAGE_REF} ${IMAGE_NAME}:backup-\$(date +%Y%m%d%H%M%S) 2>/dev/null || true"
+
+if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+  log "本地构建镜像 ${IMAGE_REF} (${PLATFORM}) ..."
+  docker build \
+    --platform "$PLATFORM" \
+    -f Dockerfile.bun \
+    --build-arg "GIT_SHA=${GIT_SHA}" \
+    --build-arg "GIT_BRANCH=${GIT_BRANCH}" \
+    -t "$IMAGE_REF" \
+    -t "$IMAGE_SHA_REF" \
+    .
+  ok "镜像构建完成"
+  log "上传镜像到服务器（gzip 流式传输，请稍候）..."
+  docker save "$IMAGE_REF" | gzip -1 | "${SSH[@]}" 'gunzip | docker load'
+  ok "镜像已 load 到服务器"
+  log "同步 compose 文件 ..."
+  "${SSH[@]}" "mkdir -p ${REMOTE_PATH}"
+  "${SCP[@]}" \
+    deploy/xifeng/docker-compose.bun.yml \
+    deploy/xifeng/docker-compose.infra.yml \
+    "${USER}@${HOST}:${REMOTE_PATH}/"
+  log "重启 app 容器 ..."
+  remote_compose_and_restart
+else
+  warn "本地未检测到 Docker，改用 git archive + 服务器构建"
+  remote_build_from_src
+  log "重启 app 容器 ..."
+  remote_compose_and_restart
+fi
 
 log "等待健康检查 (${APP_URL}) ..."
 HEALTHY=0
