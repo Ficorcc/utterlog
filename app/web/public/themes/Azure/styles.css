@@ -13,7 +13,7 @@
   height: 100dvh;
   min-height: 100dvh;
   background: #f5f5f5;
-  color: #1a1a1a;
+  color: var(--color-text-main);
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
 }
 [data-theme="Azure"] .azure-main {
@@ -26,7 +26,7 @@
   max-width: 1400px;
   min-height: calc(100vh - 60px);
   margin: 0 auto;
-  background: #fff;
+  background: var(--color-bg-card);
   border-left: 1px solid #d9d9d9;
   border-right: 1px solid #d9d9d9;
 }
@@ -35,8 +35,8 @@
   gap: 16px;
   margin: 0 0 32px;
   padding: 24px 32px;
-  background: var(--color-bg-card, #fff);
-  border-bottom: 1px solid #e5e5e5;
+  background: var(--color-bg-card);
+  border-bottom: 1px solid var(--color-border);
 }
 [data-theme="Azure"] .blog-page-title-rail {
   position: absolute;
@@ -46,13 +46,13 @@
   width: 3px;
   height: 32px;
   transform: translateY(-50%);
-  background: var(--color-primary, #0052D9);
+  background: var(--color-primary);
 }
 [data-theme="Azure"] .blog-page-title-main {
   gap: 10px;
 }
 [data-theme="Azure"] .blog-page-title-icon {
-  color: var(--color-primary, #0052D9);
+  color: var(--color-primary);
   font-size: 24px;
   transform-origin: center;
   transition: transform 0.18s ease, color 0.18s ease;
@@ -61,7 +61,7 @@
   transform: scale(1.16);
 }
 [data-theme="Azure"] .blog-page-title-text {
-  color: var(--color-text-main, #1a1a1a);
+  color: var(--color-text-main);
   font-size: 24px;
   font-weight: 700;
   line-height: 1.2;
@@ -69,7 +69,7 @@
 }
 [data-theme="Azure"] .blog-page-title-subtitle {
   margin-top: 4px;
-  color: var(--color-text-dim, #999);
+  color: var(--color-text-dim);
   font-size: 13px;
 }
 [data-theme="Azure"] .blog-page-title-side {
@@ -80,7 +80,7 @@
   padding: 7px 14px;
   border-color: #d9d9d9;
   color: #666;
-  background: #fff;
+  background: var(--color-bg-card);
   font-size: 13px;
 }
 [data-theme="Azure"] .azure-header {
@@ -89,7 +89,7 @@
   z-index: 50;
   padding-right: 10px;
   background: rgba(255, 255, 255, 0.97);
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--color-border);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -109,7 +109,7 @@
   align-items: center;
   gap: 8px;
   min-width: 0;
-  color: var(--color-primary, #0052D9);
+  color: var(--color-primary);
   text-decoration: none;
   flex-shrink: 0;
   transform-origin: center;
@@ -132,7 +132,7 @@
 [data-theme="Azure"] .azure-brand-title {
   max-width: 220px;
   overflow: hidden;
-  color: var(--color-primary, #0052D9);
+  color: var(--color-primary);
   font-size: 20px;
   font-weight: 700;
   line-height: 1.2;
@@ -207,8 +207,8 @@
   display: none;
   min-width: 120px;
   padding: 6px 0;
-  background: #fff;
-  border: 1px solid #e5e5e5;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   transform: translateX(-50%);
 }
@@ -253,8 +253,8 @@
   width: 34px;
   height: 34px;
   padding: 0;
-  color: #999;
-  background: #fff;
+  color: var(--color-text-dim);
+  background: var(--color-bg-card);
   border: 1px solid #ddd;
   text-decoration: none;
   cursor: pointer;
@@ -265,7 +265,7 @@
 [data-theme="Azure"] .azure-header-button:focus-visible,
 [data-theme="Azure"] .azure-search.open .azure-search-button {
   color: var(--color-primary);
-  background: #fff;
+  background: var(--color-bg-card);
   border-color: var(--color-primary);
   outline: none;
 }
@@ -315,21 +315,21 @@
   align-items: center;
   width: 320px;
   height: 42px;
-  background: #fff;
+  background: var(--color-bg-card);
   border: 1px solid #d9d9d9;
   box-shadow: 0 12px 36px rgba(0,0,0,0.12);
 }
 [data-theme="Azure"] .azure-search-popover-icon {
   flex-shrink: 0;
   margin-left: 13px;
-  stroke: #999;
+  stroke: var(--color-text-dim);
 }
 [data-theme="Azure"] .azure-search-input {
   flex: 1;
   min-width: 0;
   height: 100%;
   padding: 0 10px;
-  color: #333;
+  color: var(--color-text-main);
   font-size: 13px;
   background: transparent;
   border: 0;
@@ -342,7 +342,7 @@
   color: #aaa;
   font-size: 10px;
   line-height: 16px;
-  background: #fff;
+  background: var(--color-bg-card);
   border: 1px solid #ddd;
 }
 [data-theme="Azure"] .azure-header-loading {
@@ -378,7 +378,7 @@
   align-items: center;
   width: min(560px, calc(100vw - 32px));
   height: 56px;
-  background: #fff;
+  background: var(--color-bg-card);
   border: 1px solid #d9d9d9;
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.14);
   transform: translateX(-50%);
@@ -386,14 +386,14 @@
 [data-theme="Azure"] .azure-search-modal-icon {
   flex-shrink: 0;
   margin-left: 18px;
-  stroke: #999;
+  stroke: var(--color-text-dim);
 }
 [data-theme="Azure"] .azure-search-modal-input {
   flex: 1;
   min-width: 0;
   height: 100%;
   padding: 0 14px;
-  color: #1a1a1a;
+  color: var(--color-text-main);
   font-size: 18px;
   background: transparent;
   border: 0;
@@ -407,14 +407,14 @@
   width: 44px;
   height: 44px;
   margin-right: 6px;
-  color: #999;
+  color: var(--color-text-dim);
   background: transparent;
   border: 0;
   cursor: pointer;
   transition: color 0.15s, background 0.15s;
 }
 [data-theme="Azure"] .azure-search-modal-close:hover {
-  color: #333;
+  color: var(--color-text-main);
   background: #f5f5f5;
 }
 [data-theme="Azure"] .azure-mobile-actions {
@@ -447,7 +447,7 @@
 
 /* Home */
 [data-theme="Azure"] .azure-home {
-  background: #fff;
+  background: var(--color-bg-card);
 }
 [data-theme="Azure"] .azure-grid {
   display: grid;
@@ -456,7 +456,7 @@
 [data-theme="Azure"] .azure-hero-tabs,
 [data-theme="Azure"] .azure-social-cell,
 [data-theme="Azure"] .azure-sidebar-cell {
-  border-right: 1px solid #e5e5e5;
+  border-right: 1px solid var(--color-border);
 }
 [data-theme="Azure"] .azure-hero-tabs-inner {
   display: flex;
@@ -478,7 +478,7 @@
   text-decoration: none;
   background: transparent;
   border: 0;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--color-border);
   cursor: pointer;
   transition: color 0.15s, background 0.15s;
 }
@@ -612,8 +612,8 @@
   gap: 14px;
   height: 38px;
   background: #fafafa;
-  border-top: 1px solid #e5e5e5;
-  border-bottom: 1px solid #e5e5e5;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
 }
 [data-theme="Azure"] .azure-social-link {
   display: inline-flex;
@@ -635,9 +635,9 @@
   padding: 0 16px;
   color: #555;
   font-size: 13px;
-  background: #fff;
-  border-top: 1px solid #e5e5e5;
-  border-bottom: 1px solid #e5e5e5;
+  background: var(--color-bg-card);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
 }
 [data-theme="Azure"] .azure-weather-strip > i {
   flex-shrink: 0;
@@ -663,7 +663,7 @@
 [data-theme="Azure"] .azure-weather-condition,
 [data-theme="Azure"] .azure-weather-muted {
   flex-shrink: 0;
-  color: #999;
+  color: var(--color-text-dim);
   font-size: 12px;
 }
 [data-theme="Azure"] .azure-weather-loading {
@@ -690,12 +690,12 @@
   padding: 0 20px;
   font-size: 13px;
   background: #fafafa;
-  border-top: 1px solid #e5e5e5;
-  border-bottom: 1px solid #e5e5e5;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
 }
 [data-theme="Azure"] .azure-moment-ticker > i {
   flex-shrink: 0;
-  color: #1da1f2;
+  color: var(--color-primary);
 }
 [data-theme="Azure"] .azure-moment-text {
   flex: 1;
@@ -795,7 +795,7 @@
   height: 34px;
   font-size: 20px;
   line-height: 1;
-  background: #fff;
+  background: var(--color-bg-card);
   border: 3px solid #fff;
   border-radius: 50%;
 }
@@ -887,12 +887,12 @@
   object-fit: contain;
 }
 [data-theme="Azure"] .azure-post-list-item {
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--color-border);
 }
 [data-theme="Azure"] .azure-loading,
 [data-theme="Azure"] .azure-empty {
   padding: 80px 0;
-  color: #999;
+  color: var(--color-text-dim);
   font-size: 14px;
   text-align: center;
 }
@@ -912,7 +912,7 @@
 /* Post list cards */
 [data-theme="Azure"] .azure-post-card {
   position: relative;
-  background: #fff;
+  background: var(--color-bg-card);
 }
 [data-theme="Azure"] .azure-post-card-title-row {
   display: flex;
@@ -977,7 +977,7 @@
 [data-theme="Azure"] .azure-post-card-title {
   margin: 0;
   overflow: hidden;
-  color: #1a1a1a;
+  color: var(--color-text-main);
   font-size: 28px;
   font-weight: 400;
   line-height: 1.22;
@@ -993,10 +993,10 @@
 [data-theme="Azure"] .azure-new-badge {
   flex-shrink: 0;
   padding: 1px 6px;
-  color: #f57c00;
+  color: var(--color-warning-text);
   font-size: 10px;
   font-weight: 600;
-  background: #fff3e0;
+  background: var(--color-warning-bg);
   border: 1px solid #ffe0b2;
 }
 [data-theme="Azure"] .azure-post-card-stats {
@@ -1043,7 +1043,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-primary, #0052D9);
+  color: var(--color-primary);
   background: color-mix(in srgb, var(--color-bg-soft) 72%, transparent);
   opacity: 1;
   pointer-events: none;
@@ -1073,7 +1073,7 @@
 }
 [data-theme="Azure"] .azure-post-hero {
   position: relative;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--color-border);
 }
 [data-theme="Azure"] .azure-post-hero-cover {
   width: 100%;
@@ -1112,7 +1112,7 @@
   align-items: center;
   gap: 16px;
   padding: 12px 32px;
-  color: #999;
+  color: var(--color-text-dim);
   font-size: 13px;
   border-bottom: 1px solid #eee;
 }
@@ -1153,7 +1153,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
-  color: #999;
+  color: var(--color-text-dim);
   font-size: 13px;
 }
 [data-theme="Azure"] .azure-post-author-avatar {
@@ -1172,7 +1172,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: #999;
+  color: var(--color-text-dim);
   text-decoration: none;
 }
 [data-theme="Azure"] .azure-post-tags {
@@ -1196,11 +1196,11 @@
   font-weight: 500;
 }
 [data-theme="Azure"] .azure-post-tag-name {
-  color: var(--color-text-main, #333);
+  color: var(--color-text-main);
 }
 [data-theme="Azure"] .azure-post-tag sup {
   margin-left: 1px;
-  color: var(--color-text-dim, #999);
+  color: var(--color-text-dim);
   font-size: 10px;
   font-weight: 400;
 }
@@ -1241,7 +1241,7 @@
     gap: 4px;
     height: 40px;
     padding: 0 8px;
-    color: #333;
+    color: var(--color-text-main);
     font-size: 13px;
     font-family: inherit;
     line-height: 1;
@@ -1268,8 +1268,8 @@
     max-height: calc(100vh - 56px);
     overflow-y: auto;
     padding: 6px 16px 12px;
-    background: #fff;
-    border-bottom: 1px solid #e5e5e5;
+    background: var(--color-bg-card);
+    border-bottom: 1px solid var(--color-border);
   }
   [data-theme="Azure"] .azure-mobile-menu-heading,
   [data-theme="Azure"] .azure-mobile-menu-link {
@@ -1278,12 +1278,12 @@
   }
   [data-theme="Azure"] .azure-mobile-menu-heading {
     padding: 11px 0 8px;
-    color: #999;
+    color: var(--color-text-dim);
     font-size: 13px;
   }
   [data-theme="Azure"] .azure-mobile-menu-link {
     padding: 12px 0;
-    color: #333;
+    color: var(--color-text-main);
     font-size: 15px;
     text-decoration: none;
   }
@@ -1366,8 +1366,8 @@
     width: min(320px, calc(100vw - 20px));
     max-height: min(520px, calc(100vh - 80px));
     overflow: hidden;
-    background: #fff;
-    border: 1px solid #e5e5e5;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
     box-shadow: 0 14px 36px rgba(0, 0, 0, 0.16);
     transform: translateY(-6px);
     transition: transform 0.18s ease;
@@ -1381,7 +1381,7 @@
     justify-content: space-between;
     height: 44px;
     padding: 0 10px 0 14px;
-    color: #333;
+    color: var(--color-text-main);
     font-size: 14px;
     font-weight: 600;
     border-bottom: 1px solid #eee;
@@ -1458,7 +1458,7 @@
     padding-left: 0;
   }
   [data-theme="Azure"] .azure-shell {
-    background: #fff;
+    background: var(--color-bg-card);
   }
   [data-theme="Azure"] .azure-header {
     padding-right: 0;
@@ -1592,7 +1592,7 @@
     width: 100% !important;
     flex: none !important;
     border-right: 0 !important;
-    border-bottom: 1px solid var(--color-border, #eee) !important;
+    border-bottom: 1px solid var(--color-border) !important;
   }
   [data-theme="Azure"] .azure-comment-form-field:last-child {
     border-bottom: 0 !important;
