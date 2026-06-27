@@ -48,7 +48,7 @@ export function CoverInput({ value, onChange, folder, label, placeholder = 'http
       )}
       <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
         {value && (
-          <div style={{ width: '52px', height: '52px', borderRadius: '4px', overflow: 'hidden', flexShrink: 0, background: 'var(--color-bg-soft)', border: '1px solid var(--color-border)' }}>
+          <div style={{ width: '52px', height: '52px', borderRadius: '0', overflow: 'hidden', flexShrink: 0, background: 'var(--color-bg-soft)', border: '1px solid var(--color-border)' }}>
             <img
               src={value} alt=""
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
