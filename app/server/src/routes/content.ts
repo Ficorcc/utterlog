@@ -9,7 +9,7 @@ import { config, table } from '../config';
 import { sql } from '../db/client';
 import { exec, intParam, many, nowUnix, one, pageParams } from '../db/helpers';
 import { optionValue, saveOption } from '../db/options';
-import { badRequest, notFound, ok, paginate } from '../http/response';
+import { badRequest, fail, notFound, ok, paginate } from '../http/response';
 import { nonEmptyString, parseJson } from '../http/validation';
 import { ephemeral } from '../store/ephemeral';
 import { runtimePaths } from '../paths';
@@ -2900,10 +2900,10 @@ export function registerContentRoutes(app: Hono) {
     ).catch(() => null);
     if (!row) return notFound(c, '评论不存在');
     if (!visitorId || row.visitor_id !== visitorId) {
-      return c.json({ success: false, code: 'FORBIDDEN', error: { code: 'FORBIDDEN', message: '无权编辑此评论' } }, 403);
+      return fail(c, 403, 'FORBIDDEN', '无权编辑此评论');
     }
     if (nowUnix() - Number(row.created_at || 0) > 60) {
-      return c.json({ success: false, code: 'EXPIRED', error: { code: 'EXPIRED', message: '编辑时间已过期' } }, 403);
+      return fail(c, 403, 'EXPIRED', '编辑时间已过期');
     }
     await exec(`update ${table('comments')} set content = $1, updated_at = $2 where id = $3`, [content, nowUnix(), id]);
     return ok(c, { id });

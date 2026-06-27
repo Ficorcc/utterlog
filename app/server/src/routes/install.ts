@@ -6,6 +6,7 @@ import { sql, tableExists } from '../db/client';
 import { badRequest, ok } from '../http/response';
 import { nonEmptyString, parseJson } from '../http/validation';
 import { nowUnix, one } from '../db/helpers';
+import { optionValue } from '../db/options';
 import { handleBlogRequest } from '../web/router';
 import { appVersion } from '../system/metrics';
 
@@ -31,15 +32,6 @@ async function installCompleted() {
   if (row?.value === '1') return true;
   // Go 版升级遗留库：已有管理员但缺少 install_completed 时视为已安装
   return adminExists().catch(() => false);
-}
-
-async function optionValue(name: string) {
-  if (!(await tableExists(table('options')))) return '';
-  const row = await one<{ value: string }>(
-    `select value from ${table('options')} where name = $1 limit 1`,
-    [name],
-  ).catch(() => null);
-  return row?.value || '';
 }
 
 function plainWordCount(input: string) {

@@ -16,6 +16,9 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
+    "ignoreDeprecations": "6.0",
+    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"],
+    "types": ["node", "react", "react-dom"],
     "plugins": [
       {
         "name": "next"

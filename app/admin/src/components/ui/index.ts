@@ -17,7 +17,6 @@ export {
   DialogFooter,
   EmptyPanel,
   LoadingState,
-  MediaItemCard,
   MediaItemGrid,
   MetricCard,
   MetricGrid,

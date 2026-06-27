@@ -2,6 +2,7 @@ import type { Context, Next } from 'hono';
 import { config, table } from '../config';
 import { verifyAccessToken } from '../auth/jwt';
 import { exec, nowUnix, one } from '../db/helpers';
+import { optionValue } from '../db/options';
 import { lookupGeoIp, normalizeGeoProvider } from '../geoip';
 import { fail } from './response';
 
@@ -113,11 +114,6 @@ function bumpBucket(map: Map<string, Bucket>, key: string, windowMs: number) {
   }
   bucket.count += 1;
   return bucket;
-}
-
-async function optionValue(name: string, fallback = '') {
-  const row = await one<{ value: string }>(`select value from ${table('options')} where name = $1`, [name]).catch(() => null);
-  return row?.value ?? fallback;
 }
 
 async function securitySettings() {

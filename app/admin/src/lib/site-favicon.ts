@@ -1,1 +1,1 @@
-export { siteFaviconUrl, siteHostname } from '../../../shared/site-favicon';
+export { siteFaviconUrl } from '../../../shared/site-favicon';

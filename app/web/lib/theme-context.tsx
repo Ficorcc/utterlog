@@ -15,7 +15,7 @@ export interface MenuItem {
   children?: MenuItem[];
 }
 
-export interface Category {
+interface Category {
   id: number;
   name: string;
   slug: string;
@@ -23,14 +23,14 @@ export interface Category {
   count: number;
 }
 
-export interface Tag {
+interface Tag {
   id: number;
   name: string;
   slug: string;
   count: number;
 }
 
-export interface ArchiveStats {
+interface ArchiveStats {
   post_count: number;
   comment_count: number;
   word_count: number;

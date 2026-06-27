@@ -8,19 +8,19 @@ import { getPostBySlug, getOptions, getFootprints } from './blog-api';
 import { loadHomePageData, type HomePageData } from './home-page-data';
 import { resolvePostFromPermalink } from './permalink-resolve';
 
-export type PostPageData = {
+type PostPageData = {
   kind: 'post';
   post: any;
   options: Record<string, string>;
 };
 
-export type FootprintsPageData = {
+type FootprintsPageData = {
   kind: 'footprints';
   initialRows: any[];
   options: Record<string, string>;
 };
 
-export type HomeRoutePageData = HomePageData & { kind: 'home' };
+type HomeRoutePageData = HomePageData & { kind: 'home' };
 
 export type RoutePageData = HomeRoutePageData | PostPageData | FootprintsPageData;
 

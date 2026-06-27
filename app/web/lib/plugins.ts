@@ -13,7 +13,7 @@
  * - 插件 settings 存为普通 options: plugin_{name}_{key}
  */
 
-export interface PluginSetting {
+interface PluginSetting {
   key: string;
   label: string;
   type: 'text' | 'textarea' | 'select' | 'toggle';
@@ -22,7 +22,7 @@ export interface PluginSetting {
   options?: string[];
 }
 
-export interface PluginManifest {
+interface PluginManifest {
   name: string;
   displayName: string;
   description: string;

@@ -1,8 +1,8 @@
 import { createHash, createHmac } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import { dirname, extname, join } from 'node:path';
-import { config, table } from '../config';
-import { one } from '../db/helpers';
+import { config } from '../config';
+import { optionValue } from '../db/options';
 
 export type StorageSettings = {
   driver: 'local' | 's3' | 'r2';
@@ -78,11 +78,6 @@ export const mediaMimeByExt: Record<string, string> = {
   ttf: 'font/ttf',
   otf: 'font/otf',
 };
-
-async function optionValue(name: string, fallback = '') {
-  const row = await one<{ value: string }>(`select value from ${table('options')} where name = $1`, [name]).catch(() => null);
-  return row?.value ?? fallback;
-}
 
 function hmac(key: Buffer | string, value: string) {
   return createHmac('sha256', key).update(value).digest();

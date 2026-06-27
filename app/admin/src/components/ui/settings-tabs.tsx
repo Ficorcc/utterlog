@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react';
 
-export interface SettingsTabItem {
+interface SettingsTabItem {
   id: string;
   label: ReactNode;
   icon?: string;
