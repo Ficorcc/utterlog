@@ -715,11 +715,12 @@ body {
 }
 
 .btn-danger {
-  background-color: #dc2626;
+  background-color: var(--color-error);
   color: #fff;
 }
 .btn-danger:hover {
-  background-color: #b91c1c;
+  background-color: var(--color-error);
+  filter: brightness(0.9);
 }
 
 .btn-ghost {
@@ -791,8 +792,8 @@ body {
   background: var(--color-bg-soft);
   color: var(--color-text-main);
 }
-.action-btn.danger { color: #dc2626; }
-.action-btn.danger:hover { background: #fef2f2; }
+.action-btn.danger { color: var(--color-error); }
+.action-btn.danger:hover { background: var(--color-error-bg); }
 
 /* Archive category card — background icon hover */
 .archive-cat-card { transition: box-shadow 0.3s ease; }
@@ -2436,7 +2437,7 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
 .coding-event-code.code-new {
   border-color: rgba(22, 163, 74, 0.28);
   background: rgba(22, 163, 74, 0.08);
-  color: #15803d;
+  color: var(--color-success-text);
 }
 
 .coding-event-code.code-del {
