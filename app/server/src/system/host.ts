@@ -1,5 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
+import { lookup } from 'node:dns/promises';
 import { networkInterfaces, platform, release } from 'node:os';
+import { config } from '../config';
 import { lookupCurrentGeoIp, publicIpForGeo } from '../geoip';
 
 export type HostOsInfo = {
@@ -125,6 +127,38 @@ type CachedPublicIp = {
 let cachedPublicIp: CachedPublicIp | null = null;
 let publicIpPromise: Promise<CachedPublicIp> | null = null;
 
+async function fetchText(url: string, timeoutMs = 2500) {
+  const res = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) }).catch(() => null);
+  if (!res?.ok) return '';
+  return (await res.text().catch(() => '')).trim();
+}
+
+async function lookupPublicIpFromServices() {
+  const endpoints = [
+    'https://api.ipify.org',
+    'https://checkip.amazonaws.com',
+    'https://ifconfig.me/ip',
+  ];
+  for (const endpoint of endpoints) {
+    const ip = publicIpForGeo(await fetchText(endpoint));
+    if (ip) return ip;
+  }
+  return '';
+}
+
+async function lookupPublicIpFromAppUrl() {
+  let host = '';
+  try {
+    host = new URL(config.appUrl).hostname;
+  } catch {
+    return '';
+  }
+  const directIp = publicIpForGeo(host);
+  if (directIp) return directIp;
+  const result = await lookup(host, { family: 4 }).catch(() => null);
+  return publicIpForGeo(result?.address || '');
+}
+
 export async function resolveHostPublicIp(provider: unknown) {
   const now = Date.now();
   if (cachedPublicIp && cachedPublicIp.expires_at > now) {
@@ -138,6 +172,24 @@ export async function resolveHostPublicIp(provider: unknown) {
         return {
           ip: publicIp,
           country_code: result?.country_code.toLowerCase() || '',
+          source: 'geoip' as const,
+          expires_at: Date.now() + publicIpSuccessTtlMs,
+        };
+      }
+      const serviceIp = await lookupPublicIpFromServices();
+      if (serviceIp) {
+        return {
+          ip: serviceIp,
+          country_code: '',
+          source: 'geoip' as const,
+          expires_at: Date.now() + publicIpSuccessTtlMs,
+        };
+      }
+      const appUrlIp = await lookupPublicIpFromAppUrl();
+      if (appUrlIp) {
+        return {
+          ip: appUrlIp,
+          country_code: '',
           source: 'geoip' as const,
           expires_at: Date.now() + publicIpSuccessTtlMs,
         };
