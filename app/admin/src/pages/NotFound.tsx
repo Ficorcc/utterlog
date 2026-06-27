@@ -11,7 +11,7 @@ export default function NotFound() {
     }}>
       <i className="fa-regular fa-ghost" style={{ fontSize: 48, color: 'var(--color-text-dim)', marginBottom: 16 }} />
       <h1 style={{ fontSize: 20, fontWeight: 600, margin: '0 0 8px' }}>{t('admin.notFound.title', '页面未找到')}</h1>
-      <p className="text-sub" style={{ fontSize: 13, margin: '0 0 20px' }}>{t('admin.notFound.description', '此页面正在迁移中或不存在')}</p>
+      <p className="text-sub" style={{ fontSize: 14, margin: '0 0 20px' }}>{t('admin.notFound.description', '此页面正在迁移中或不存在')}</p>
       <Link to="/" className="btn btn-secondary" style={{ textDecoration: 'none' }}>{t('admin.notFound.back', '返回概览')}</Link>
     </div>
   );

@@ -99,7 +99,7 @@ const fieldRow: CSSProperties = {
 
 const fieldLabel: CSSProperties = {
   color: 'var(--color-text-sub)',
-  fontSize: 13,
+  fontSize: 14,
   fontWeight: 600,
 };
 
@@ -388,7 +388,7 @@ export default function AboutPageEditor({ open, onClose }: { open: boolean; onCl
           <div style={{ border: '1px solid var(--color-border)', padding: 18, background: 'var(--color-bg-soft)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
               <div style={{ width: 52, height: 52, border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-primary)', background: 'var(--color-bg-card)' }}>
-                <i className="fa-regular fa-user" style={{ fontSize: 22 }} />
+                <i className="fa-regular fa-user" style={{ fontSize: 20 }} />
               </div>
               <div>
                 <div className="text-main" style={{ fontSize: 16, fontWeight: 700 }}>个人主页模板</div>
@@ -398,15 +398,15 @@ export default function AboutPageEditor({ open, onClose }: { open: boolean; onCl
               </div>
             </div>
           </div>
-          <p className="text-dim" style={{ margin: 0, fontSize: 13, lineHeight: 1.8 }}>
+          <p className="text-dim" style={{ margin: 0, fontSize: 14, lineHeight: 1.8 }}>
             这个版本先提供一个稳定模板。后续可以继续增加“极简名片”“时间线主页”“摄影作品集”等模板，数据结构保持不变。
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <Button variant="secondary" onClick={() => setConfirmResetTemplate(true)} style={aboutActionButtonStyle}>
-              <i className="fa-regular fa-rotate-left" style={{ fontSize: 13 }} /> 载入默认模板
+              <i className="fa-regular fa-rotate-left" style={{ fontSize: 14 }} /> 载入默认模板
             </Button>
             <Button variant="secondary" onClick={() => setTab('custom')} style={aboutActionButtonStyle}>
-              <i className="fa-brands fa-markdown" style={{ fontSize: 13 }} /> 编辑 Markdown
+              <i className="fa-brands fa-markdown" style={{ fontSize: 14 }} /> 编辑 Markdown
             </Button>
           </div>
         </div>
@@ -434,7 +434,7 @@ export default function AboutPageEditor({ open, onClose }: { open: boolean; onCl
           onChange={e => setMarkdownContent(e.target.value)}
           placeholder={"## 关于我\n\n写一段自定义 Markdown 介绍…\n\n> 支持引用、列表、表格、链接和图片。"}
           rows={12}
-          style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: 13, resize: 'vertical' }}
+          style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: 14, resize: 'vertical' }}
         />
       </div>
     );
@@ -465,7 +465,7 @@ export default function AboutPageEditor({ open, onClose }: { open: boolean; onCl
                   minHeight: 38,
                   padding: '0 12px',
                   color: tab === item.key ? 'var(--color-primary)' : 'var(--color-text-sub)',
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: tab === item.key ? 700 : 500,
                   textAlign: 'left',
                   background: tab === item.key ? 'rgba(0, 82, 217, 0.06)' : 'transparent',
@@ -530,7 +530,7 @@ function EditableList<T>({
               <button className="btn btn-secondary" style={squareButtonStyle} onClick={() => onMove(index, 1)} disabled={index === items.length - 1} title="下移">
                 <i className="fa-regular fa-chevron-down" />
               </button>
-              <button className="btn btn-secondary" style={{ ...squareButtonStyle, color: '#dc2626' }} onClick={() => onRemove(index)} title="删除">
+              <button className="btn btn-secondary" style={{ ...squareButtonStyle, color: 'var(--color-error)' }} onClick={() => onRemove(index)} title="删除">
                 <i className="fa-regular fa-trash" />
               </button>
             </div>
@@ -539,7 +539,7 @@ function EditableList<T>({
       ))}
       <div>
         <Button variant="secondary" onClick={onAdd}>
-          <i className="fa-regular fa-plus" style={{ fontSize: 13 }} /> {addLabel}
+          <i className="fa-regular fa-plus" style={{ fontSize: 14 }} /> {addLabel}
         </Button>
       </div>
     </div>

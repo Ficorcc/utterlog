@@ -71,7 +71,7 @@ export default function VersionBadge({ variant = 'compact' }: Props) {
         style={{
           display: 'inline-flex', alignItems: 'center', gap: 4,
           fontSize: 9, padding: '1px 5px',
-          background: hasUpdate ? '#0052D9' : 'var(--color-primary)',
+          background: hasUpdate ? 'var(--color-primary)' : 'var(--color-primary)',
           color: '#fff', fontWeight: 600, textDecoration: 'none',
           fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace",
           position: 'relative',
@@ -84,7 +84,7 @@ export default function VersionBadge({ variant = 'compact' }: Props) {
             style={{
               position: 'absolute', top: -4, right: -4,
               width: 8, height: 8, borderRadius: '50%',
-              background: '#ef4444',
+              background: 'var(--color-error)',
               border: '1.5px solid var(--color-surface, #fff)',
               boxShadow: '0 0 0 1px rgba(239,68,68,0.35)',
             }}
@@ -119,7 +119,7 @@ export default function VersionBadge({ variant = 'compact' }: Props) {
         <i className={`fa-solid ${hasUpdate ? 'fa-circle-arrow-up' : 'fa-circle-check'}`} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 600 }}>
+        <div style={{ fontSize: 14, fontWeight: 600 }}>
           版本与更新
           {hasUpdate && (
             <span style={{
@@ -133,7 +133,7 @@ export default function VersionBadge({ variant = 'compact' }: Props) {
         <div style={{ fontSize: 11, color: 'var(--color-text-dim)', marginTop: 2 }}>
           当前 <code style={{ fontFamily: "ui-monospace,monospace" }}>{current}</code>
           {hasUpdate && info?.latest && (
-            <> · 最新 <code style={{ fontFamily: "ui-monospace,monospace", color: '#0052D9' }}>{info.latest.version}</code></>
+            <> · 最新 <code style={{ fontFamily: "ui-monospace,monospace", color: 'var(--color-primary)' }}>{info.latest.version}</code></>
           )}
         </div>
       </div>

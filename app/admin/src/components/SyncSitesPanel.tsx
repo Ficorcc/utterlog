@@ -212,11 +212,11 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
 
   return (
     <div>
-      <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
         <i className={meta.icon} style={{ color: 'var(--color-primary)' }} />
         {platformLabel} 同步
       </div>
-      <p style={{ fontSize: 13, color: 'var(--color-text-dim)', lineHeight: 1.7, marginBottom: 20 }}>
+      <p style={{ fontSize: 14, color: 'var(--color-text-dim)', lineHeight: 1.7, marginBottom: 20 }}>
         授权一个 {platformLabel} 站点推送内容到 Utterlog。每个站点生成独立的 Site UUID + Token，装 <code>{meta.pluginName}</code> 插件后填入对应字段即可。Token <b>只显示一次</b>。
       </p>
 
@@ -226,7 +226,7 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
           padding: '12px 16px', borderBottom: '1px solid var(--color-border)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
-          <div style={{ fontSize: 13, fontWeight: 600 }}>
+          <div style={{ fontSize: 14, fontWeight: 600 }}>
             {t('admin.syncSites.authorizedSites', '已授权站点')} <span style={{ color: 'var(--color-text-muted)', fontWeight: 400, marginLeft: 6 }}>({sites.length})</span>
           </div>
           <Button size="sm" className="btn-square" title={t('admin.syncSites.newAuthorization', '新建授权')} onClick={() => setCreateOpen(true)}>
@@ -235,11 +235,11 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
         </div>
 
         {loading ? (
-          <div style={{ padding: '30px 16px', textAlign: 'center', color: 'var(--color-text-dim)', fontSize: 13 }}>
+          <div style={{ padding: '30px 16px', textAlign: 'center', color: 'var(--color-text-dim)', fontSize: 14 }}>
             <i className="fa-solid fa-spinner fa-spin" /> {t('admin.common.loading', '加载中…')}
           </div>
         ) : sites.length === 0 ? (
-          <div style={{ padding: '40px 16px', textAlign: 'center', color: 'var(--color-text-dim)', fontSize: 13 }}>
+          <div style={{ padding: '40px 16px', textAlign: 'center', color: 'var(--color-text-dim)', fontSize: 14 }}>
             <div style={{ fontSize: 32, color: 'var(--color-text-muted)', marginBottom: 10 }}>
               <i className={meta.icon} />
             </div>
@@ -372,7 +372,7 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
       {/* Job history */}
       {jobs.length > 0 && (
         <div style={{ border: '1px solid var(--color-border)', background: 'var(--color-surface)' }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--color-border)', fontSize: 13, fontWeight: 600 }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--color-border)', fontSize: 14, fontWeight: 600 }}>
             <i className="fa-solid fa-clock-rotate-left" style={{ marginRight: 6, color: 'var(--color-primary)' }} />
             {t('admin.syncSites.recentJobs', '最近同步任务')}
           </div>
@@ -393,7 +393,7 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
                 render: (j) => (
                   <span style={{
                     display: 'inline-block', padding: '1px 6px', fontSize: 10, fontWeight: 600,
-                    background: j.status === 'finished' ? '#16a34a' : j.status === 'failed' ? '#dc2626' : '#0052D9',
+                    background: j.status === 'finished' ? 'var(--color-success)' : j.status === 'failed' ? 'var(--color-error)' : 'var(--color-primary)',
                     color: '#fff',
                   }}>
                     {j.status}
@@ -424,7 +424,7 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
               value={createForm.label}
               onChange={(e) => setCreateForm((f) => ({ ...f, label: e.target.value }))}
               placeholder={t('admin.syncSites.siteNamePlaceholder', '例如：我的旧博客')}
-              style={{ width: '100%', height: 40, padding: '0 12px', border: '1px solid var(--color-border)', fontFamily: 'inherit', fontSize: 13 }}
+              style={{ width: '100%', height: 40, padding: '0 12px', border: '1px solid var(--color-border)', fontFamily: 'inherit', fontSize: 14 }}
             />
           </div>
           <div style={{ marginBottom: 18 }}>
@@ -434,7 +434,7 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
               value={createForm.source_url}
               onChange={(e) => setCreateForm((f) => ({ ...f, source_url: e.target.value }))}
               placeholder={platform === 'typecho' ? 'https://your-old-typecho-site.com' : 'https://your-old-wp-site.com'}
-              style={{ width: '100%', height: 40, padding: '0 12px', border: '1px solid var(--color-border)', fontFamily: 'inherit', fontSize: 13 }}
+              style={{ width: '100%', height: 40, padding: '0 12px', border: '1px solid var(--color-border)', fontFamily: 'inherit', fontSize: 14 }}
             />
             <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 6 }}>
               server 扫文章内容里的图片 URL 时会匹配这个域名下的 <code>{meta.uploadsPath}</code> 路径。
@@ -458,7 +458,7 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
 
             <div style={{ marginBottom: 14 }}>
               <div style={{ fontSize: 12, color: 'var(--color-text-dim)', marginBottom: 6 }}>{t('admin.syncSites.siteName', '站点名称')}</div>
-              <div style={{ padding: '8px 12px', background: 'var(--color-bg-soft, #fafafa)', border: '1px solid var(--color-border)', fontFamily: 'inherit', fontSize: 13 }}>
+              <div style={{ padding: '8px 12px', background: 'var(--color-bg-soft, #fafafa)', border: '1px solid var(--color-border)', fontFamily: 'inherit', fontSize: 14 }}>
                 {created.label || t('admin.common.unnamedWrapped', '(未命名)')}
               </div>
             </div>
@@ -489,7 +489,7 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
               </div>
             </div>
 
-            <div style={{ padding: '10px 14px', background: '#f0fdf4', borderLeft: '3px solid #16a34a', fontSize: 12, color: '#166534', marginBottom: 16, lineHeight: 1.6 }}>
+            <div style={{ padding: '10px 14px', background: 'var(--color-success-bg)', borderLeft: '3px solid #16a34a', fontSize: 12, color: 'var(--color-success-text)', marginBottom: 16, lineHeight: 1.6 }}>
               <b>{t('admin.syncSites.nextStep', '下一步')}</b>：在你的 {platformLabel} 后台装 <code>{meta.pluginName}</code> 插件，设置页填：
               <br />
               URL: <code>{window.location.origin}</code>

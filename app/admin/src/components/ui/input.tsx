@@ -19,12 +19,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           className="input focus-ring"
           style={{
-            borderColor: error ? '#dc2626' : undefined,
+            borderColor: error ? 'var(--color-error)' : undefined,
             ...style,
           }}
           {...props}
         />
-        {error && <p style={{ marginTop: '4px', fontSize: '13px', color: '#dc2626' }}>{error}</p>}
+        {error && <p style={{ marginTop: '4px', fontSize: '13px', color: 'var(--color-error)' }}>{error}</p>}
       </div>
     );
   }

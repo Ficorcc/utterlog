@@ -515,7 +515,7 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
             {s.count > 0 && (
               <span style={{
                 position: 'absolute', top: '-6px', right: '-6px',
-                background: s.key === 'spam' ? '#f59e0b' : '#ef4444',
+                background: s.key === 'spam' ? 'var(--color-warning)' : 'var(--color-error)',
                 color: '#fff', fontSize: '10px', fontWeight: 700,
                 minWidth: '18px', height: '18px', borderRadius: '9px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',

@@ -118,8 +118,8 @@ export default function DashboardPage() {
 
   const statCards = [
     { title: t('admin.dashboard.stats.posts', '文章'), value: stats.posts, icon: 'fa-sharp fa-light fa-file-lines', color: 'var(--color-primary)' },
-    { title: t('admin.dashboard.stats.comments', '评论'), value: stats.comments, icon: 'fa-sharp fa-light fa-comments', color: '#f59e0b' },
-    { title: t('admin.dashboard.stats.views', '浏览量'), value: stats.views, icon: 'fa-sharp fa-light fa-eye', color: '#16a34a' },
+    { title: t('admin.dashboard.stats.comments', '评论'), value: stats.comments, icon: 'fa-sharp fa-light fa-comments', color: 'var(--color-warning)' },
+    { title: t('admin.dashboard.stats.views', '浏览量'), value: stats.views, icon: 'fa-sharp fa-light fa-eye', color: 'var(--color-success)' },
     { title: t('admin.dashboard.stats.today', '今日访问'), value: stats.today, icon: 'fa-sharp fa-light fa-chart-line', color: '#8b5cf6' },
     { title: t('admin.dashboard.stats.categories', '分类'), value: stats.categories, icon: 'fa-sharp fa-light fa-folder-tree', color: '#0ea5e9' },
     { title: t('admin.dashboard.stats.tags', '标签'), value: stats.tags, icon: 'fa-sharp fa-light fa-tags', color: '#ec4899' },
@@ -422,7 +422,7 @@ export default function DashboardPage() {
             <span style={{
               padding: '2px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: 600,
               background: networkConnected ? '#dcfce7' : 'var(--color-bg-soft)',
-              color: networkConnected ? '#16a34a' : 'var(--color-text-dim)',
+              color: networkConnected ? 'var(--color-success)' : 'var(--color-text-dim)',
             }}>
               {networkConnected ? t('admin.common.connected', '已连接') : t('admin.common.disconnected', '未连接')}
             </span>

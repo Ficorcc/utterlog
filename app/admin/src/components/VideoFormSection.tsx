@@ -253,7 +253,7 @@ export default function VideoFormSection({ initialMeta, initialEpisodes, onChang
     setBulkPasteText('');
   };
 
-  const sectionTitleStyle: React.CSSProperties = { fontSize: 13, fontWeight: 600, color: 'var(--color-text-main)', marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid var(--color-border)' };
+  const sectionTitleStyle: React.CSSProperties = { fontSize: 14, fontWeight: 600, color: 'var(--color-text-main)', marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid var(--color-border)' };
   const labelStyle: React.CSSProperties = { display: 'block', fontSize: 12, color: 'var(--color-text-sub)', marginBottom: 4 };
 
   return (
@@ -311,7 +311,7 @@ export default function VideoFormSection({ initialMeta, initialEpisodes, onChang
       </h3>
 
       {episodes.length === 0 ? (
-        <div className="text-dim" style={{ padding: '40px 0', textAlign: 'center', fontSize: 13, border: '1px dashed var(--color-border)' }}>
+        <div className="text-dim" style={{ padding: '40px 0', textAlign: 'center', fontSize: 14, border: '1px dashed var(--color-border)' }}>
           暂无剧集。点上方「添加一集」或「批量粘贴」开始。
         </div>
       ) : (
@@ -320,8 +320,8 @@ export default function VideoFormSection({ initialMeta, initialEpisodes, onChang
             <div key={idx} style={{ border: '1px solid var(--color-border)', padding: 12, background: 'var(--color-bg-card)' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '60px 120px 1fr 100px 96px', gap: 8, alignItems: 'center' }}>
                 <Input value={String(ep.episode_no)} onChange={(e: any) => updateEpisode(idx, { episode_no: parseInt(e.target.value, 10) || 0 })}
-                  placeholder="集号" style={{ fontSize: 13, fontFamily: 'var(--font-mono, monospace)', textAlign: 'center' }} />
-                <Input value={ep.title} onChange={(e: any) => updateEpisode(idx, { title: e.target.value })} placeholder="第 01 集" style={{ fontSize: 13 }} />
+                  placeholder="集号" style={{ fontSize: 14, fontFamily: 'var(--font-mono, monospace)', textAlign: 'center' }} />
+                <Input value={ep.title} onChange={(e: any) => updateEpisode(idx, { title: e.target.value })} placeholder="第 01 集" style={{ fontSize: 14 }} />
                 <Input value={ep.video_url} onChange={(e: any) => updateEpisode(idx, { video_url: e.target.value })}
                   placeholder="主线视频 URL（mp4/m3u8/YouTube/Bilibili）" style={{ fontSize: 12, fontFamily: 'var(--font-mono, monospace)' }} />
                 <Input value={ep.platform} onChange={(e: any) => updateEpisode(idx, { platform: e.target.value })}
@@ -334,7 +334,7 @@ export default function VideoFormSection({ initialMeta, initialEpisodes, onChang
                     <i className="fa-regular fa-chevron-down" style={{ fontSize: 11 }} />
                   </button>
                   <button className="btn btn-secondary btn-square btn-sm" onClick={() => deleteEpisode(idx)} title="删除"
-                    style={{ color: '#dc2626' }}>
+                    style={{ color: 'var(--color-error)' }}>
                     <i className="fa-regular fa-trash" style={{ fontSize: 11 }} />
                   </button>
                 </div>
@@ -350,7 +350,7 @@ export default function VideoFormSection({ initialMeta, initialEpisodes, onChang
                     <div key={j} style={{ display: 'grid', gridTemplateColumns: '120px 1fr 32px', gap: 6 }}>
                       <Input value={a.label} onChange={(e: any) => updateAlt(idx, j, { label: e.target.value })} placeholder="备线名称" style={{ fontSize: 12 }} />
                       <Input value={a.url} onChange={(e: any) => updateAlt(idx, j, { url: e.target.value })} placeholder="备线 URL" style={{ fontSize: 11, fontFamily: 'var(--font-mono, monospace)' }} />
-                      <button className="btn btn-secondary btn-square btn-sm" onClick={() => deleteAlt(idx, j)} title="删除" style={{ color: '#dc2626' }}>
+                      <button className="btn btn-secondary btn-square btn-sm" onClick={() => deleteAlt(idx, j)} title="删除" style={{ color: 'var(--color-error)' }}>
                         <i className="fa-regular fa-xmark" style={{ fontSize: 10 }} />
                       </button>
                     </div>

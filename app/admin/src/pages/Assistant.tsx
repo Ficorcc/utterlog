@@ -239,8 +239,8 @@ export default function AiChatPage() {
           }}>
             {e.result != null ? (
               e.success !== false
-                ? <i className="fa-solid fa-check" style={{ color: '#16a34a', fontSize: '11px', width: '14px', textAlign: 'center' as const }} />
-                : <i className="fa-solid fa-xmark" style={{ color: '#dc2626', fontSize: '11px', width: '14px', textAlign: 'center' as const }} />
+                ? <i className="fa-solid fa-check" style={{ color: 'var(--color-success)', fontSize: '11px', width: '14px', textAlign: 'center' as const }} />
+                : <i className="fa-solid fa-xmark" style={{ color: 'var(--color-error)', fontSize: '11px', width: '14px', textAlign: 'center' as const }} />
             ) : (
               <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '11px', color: 'var(--color-primary)', width: '14px', textAlign: 'center' as const }} />
             )}
@@ -385,7 +385,7 @@ export default function AiChatPage() {
                     position: 'absolute', top: '-8px',
                     [msg.role === 'user' ? 'left' : 'right']: '-8px',
                     width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: savedMsgIds.has(i) ? '#16a34a' : 'var(--color-bg-card)',
+                    background: savedMsgIds.has(i) ? 'var(--color-success)' : 'var(--color-bg-card)',
                     color: savedMsgIds.has(i) ? '#fff' : 'var(--color-text-dim)',
                     border: '1px solid var(--color-border)', cursor: 'pointer',
                     fontSize: '10px', opacity: 0, transition: 'opacity 0.15s',

@@ -133,7 +133,7 @@ export default function FooterIconsEditor({
   return (
     <div className="card" style={{ padding: 20, marginTop: 24 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <h3 className="text-main" style={{ fontSize: 15, fontWeight: 600, margin: 0 }}>{title}</h3>
+        <h3 className="text-main" style={{ fontSize: 14, fontWeight: 600, margin: 0 }}>{title}</h3>
         <button className="btn btn-secondary btn-square" onClick={addRow} title="添加">
           <i className="fa-regular fa-plus" style={{ fontSize: 12 }} />
         </button>
@@ -148,7 +148,7 @@ export default function FooterIconsEditor({
       </p>
 
       {items.length === 0 ? (
-        <div className="text-dim" style={{ textAlign: 'center', padding: '32px 0', fontSize: 13, border: '1px dashed var(--color-border)' }}>
+        <div className="text-dim" style={{ textAlign: 'center', padding: '32px 0', fontSize: 14, border: '1px dashed var(--color-border)' }}>
           {emptyText}
         </div>
       ) : (
@@ -182,7 +182,7 @@ export default function FooterIconsEditor({
                 value={row.label}
                 onChange={e => updateRow(i, { label: e.target.value })}
                 placeholder="标题"
-                style={{ fontSize: 13 }}
+                style={{ fontSize: 14 }}
               />
               {/* Href */}
               <input
@@ -217,7 +217,7 @@ export default function FooterIconsEditor({
                   <i className="fa-regular fa-chevron-down" />
                 </button>
                 <button className="btn btn-secondary" onClick={() => removeRow(i)} title="删除"
-                  style={{ ...actionButtonStyle, color: '#dc2626' }}>
+                  style={{ ...actionButtonStyle, color: 'var(--color-error)' }}>
                   <i className="fa-regular fa-trash" />
                 </button>
               </div>

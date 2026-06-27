@@ -125,11 +125,11 @@ export default function SecurityPage() {
               <div style={{ fontSize: '13px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}>
                   <span>{t('admin.security.settings.ccDefense', 'CC 防御')}</span>
-                  <span style={{ color: overview.cc_enabled ? '#16a34a' : '#dc2626' }}>{overview.cc_enabled ? t('admin.common.onDot', '● 开启') : t('admin.common.offDot', '● 关闭')}</span>
+                  <span style={{ color: overview.cc_enabled ? 'var(--color-success)' : 'var(--color-error)' }}>{overview.cc_enabled ? t('admin.common.onDot', '● 开启') : t('admin.common.offDot', '● 关闭')}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}>
                   <span>{t('admin.security.settings.geoBlock', 'GeoIP 封锁')}</span>
-                  <span style={{ color: overview.geo_enabled ? '#16a34a' : '#dc2626' }}>{overview.geo_enabled ? t('admin.common.onDot', '● 开启') : t('admin.common.offDot', '● 关闭')}</span>
+                  <span style={{ color: overview.geo_enabled ? 'var(--color-success)' : 'var(--color-error)' }}>{overview.geo_enabled ? t('admin.common.onDot', '● 开启') : t('admin.common.offDot', '● 关闭')}</span>
                 </div>
               </div>
             </div>

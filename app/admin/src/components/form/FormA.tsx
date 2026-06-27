@@ -24,7 +24,7 @@ export function FormSectionA({
   return (
     <section className="card" style={{ padding: 0, marginBottom: 20 }}>
       <header style={{ padding: '20px 24px 12px', borderBottom: '1px solid var(--color-divider)' }}>
-        <h2 style={{ fontSize: 15, fontWeight: 600, margin: 0, color: 'var(--color-text-main)' }}>{title}</h2>
+        <h2 style={{ fontSize: 14, fontWeight: 600, margin: 0, color: 'var(--color-text-main)' }}>{title}</h2>
         {description && (
           <p className="text-sub" style={{ fontSize: 12, margin: '4px 0 0', lineHeight: 1.6 }}>{description}</p>
         )}
@@ -55,12 +55,12 @@ export function FormFieldA({
       gap: horizontal ? 16 : undefined,
     }}>
       <label style={{
-        display: 'block', fontSize: 13, fontWeight: 500, marginBottom: horizontal ? 0 : 6,
+        display: 'block', fontSize: 14, fontWeight: 500, marginBottom: horizontal ? 0 : 6,
         color: 'var(--color-text-main)',
         paddingTop: horizontal ? 8 : 0,
       }}>
         {label}
-        {required && <span style={{ color: '#dc2626', marginLeft: 4 }}>*</span>}
+        {required && <span style={{ color: 'var(--color-error)', marginLeft: 4 }}>*</span>}
       </label>
       <div>
         {children}
@@ -68,7 +68,7 @@ export function FormFieldA({
           <p className="text-dim" style={{ fontSize: 11, marginTop: 6, lineHeight: 1.6 }}>{hint}</p>
         )}
         {error && (
-          <p style={{ fontSize: 11, marginTop: 6, lineHeight: 1.6, color: '#dc2626' }}>{error}</p>
+          <p style={{ fontSize: 11, marginTop: 6, lineHeight: 1.6, color: 'var(--color-error)' }}>{error}</p>
         )}
       </div>
     </div>

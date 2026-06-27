@@ -111,7 +111,7 @@ export function RatingStars({ value, onChange, size = 18, gap = 4 }: RatingStars
         const icon = (
           <i
             className="fa-regular fa-star"
-            style={{ fontSize: size, color: n <= value ? '#f59e0b' : 'var(--color-text-dim)' }}
+            style={{ fontSize: size, color: n <= value ? 'var(--color-warning)' : 'var(--color-text-dim)' }}
           />
         );
         if (!onChange) return <span key={n}>{icon}</span>;

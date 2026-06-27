@@ -43,7 +43,7 @@ class ChunkErrorBoundary extends Component<{ children: ReactNode }, { failed: bo
   render() {
     if (this.state.failed) {
       return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: 'var(--color-text-dim)', fontSize: 13 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: 'var(--color-text-dim)', fontSize: 14 }}>
           页面已更新，正在刷新…
         </div>
       );

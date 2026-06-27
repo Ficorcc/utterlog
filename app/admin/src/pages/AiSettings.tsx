@@ -493,7 +493,7 @@ export default function AiSettingsPage() {
                   <Toggle label={t('admin.aiSettings.providers.setDefault', '设为默认')} checked={editing.is_default} onChange={e => setEditing({ ...editing, is_default: e.target.checked })} />
                 </div>
                 {testResult && (
-                  <div style={{ padding: '10px 14px', fontSize: '13px', background: testResult.ok ? 'rgba(76,175,115,0.1)' : 'rgba(220,53,69,0.1)', color: testResult.ok ? '#16a34a' : '#dc2626', border: `1px solid ${testResult.ok ? 'rgba(76,175,115,0.2)' : 'rgba(220,53,69,0.2)'}` }}>
+                  <div style={{ padding: '10px 14px', fontSize: '13px', background: testResult.ok ? 'rgba(76,175,115,0.1)' : 'rgba(220,53,69,0.1)', color: testResult.ok ? 'var(--color-success)' : 'var(--color-error)', border: `1px solid ${testResult.ok ? 'rgba(76,175,115,0.2)' : 'rgba(220,53,69,0.2)'}` }}>
                     {testResult.msg}
                   </div>
                 )}
@@ -614,7 +614,7 @@ export default function AiSettingsPage() {
               ].map(item => (
                 <label key={item.key} style={{
                   flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-                  padding: '16px 8px', textAlign: 'center', borderRadius: 0,
+                  padding: '16px 8px', textAlign: 'center', borderRadius: 'var(--ctrl-radius)',
                   border: `1px solid ${config[item.key] === 'true' ? 'var(--color-primary)' : 'var(--color-border)'}`,
                   background: config[item.key] === 'true' ? 'color-mix(in srgb, var(--color-primary) 5%, transparent)' : 'transparent',
                   cursor: 'pointer', transition: 'all 0.15s',
@@ -1041,7 +1041,7 @@ function BatchProgress({ job }: { job: any }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12px' }}>
         <span>
           {job.running ? t('admin.aiSettings.batch.running', '进行中…') : t('admin.aiSettings.batch.completed', '已完成')} · {t('admin.aiSettings.batch.successCount', '成功 {count}', { count: job.done })}
-          {job.failed > 0 && <span style={{ color: '#dc2626' }}> · {t('admin.aiSettings.batch.failedCount', '失败 {count}', { count: job.failed })}</span>}
+          {job.failed > 0 && <span style={{ color: 'var(--color-error)' }}> · {t('admin.aiSettings.batch.failedCount', '失败 {count}', { count: job.failed })}</span>}
         </span>
         <span className="text-dim">{job.done + job.failed} / {job.total}</span>
       </div>
@@ -1054,7 +1054,7 @@ function BatchProgress({ job }: { job: any }) {
         }} />
       </div>
       {job.last_error && (
-        <p style={{ fontSize: '11px', color: '#dc2626', margin: '6px 0 0' }}>{job.last_error}</p>
+        <p style={{ fontSize: '11px', color: 'var(--color-error)', margin: '6px 0 0' }}>{job.last_error}</p>
       )}
     </div>
   );

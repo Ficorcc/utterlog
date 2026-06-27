@@ -491,7 +491,7 @@ export default function LinksPage() {
                   // sits flush with the row's bottom border.
                   borderBottom: `2px solid ${isActive ? 'var(--color-primary)' : 'transparent'}`,
                   color: isActive ? 'var(--color-primary)' : 'var(--color-text-sub)',
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: isActive ? 700 : 500,
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
@@ -578,7 +578,7 @@ export default function LinksPage() {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 13, fontWeight: 600 }}>
+            <span style={{ fontSize: 14, fontWeight: 600 }}>
               {feedProgress?.running
                 ? t('admin.links.rssRefreshing', 'RSS 强制刷新中')
                 : t('admin.links.rssRefreshDone', 'RSS 刷新完成')}

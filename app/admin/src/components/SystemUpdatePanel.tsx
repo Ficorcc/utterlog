@@ -460,7 +460,7 @@ export default function SystemUpdatePanel() {
   // Status color: blue when an update is available, green when up-to-date,
   // amber when we couldn't actually check (GitHub rate-limit / network /
   // missing-release) so the UI doesn't look like a false positive.
-  const statusColor = checkState === 'update' ? '#0052D9' : checkState === 'unknown' ? '#d97706' : '#16a34a';
+  const statusColor = checkState === 'update' ? 'var(--color-primary)' : checkState === 'unknown' ? '#d97706' : 'var(--color-success)';
   const statusColorDark = checkState === 'update' ? '#003DA6' : checkState === 'unknown' ? '#b45309' : '#15803d';
   const statusColorSoft = checkState === 'update' ? 'rgba(0,82,217,0.08)' : checkState === 'unknown' ? 'rgba(217,119,6,0.10)' : 'rgba(22,163,74,0.08)';
 
@@ -482,7 +482,7 @@ export default function SystemUpdatePanel() {
     display: 'inline-flex', alignItems: 'center', gap: 6,
     background: 'var(--color-surface, #fff)', color: 'var(--color-text)',
     border: '1px solid var(--color-border)',
-    fontSize: 13,
+    fontSize: 14,
     cursor: loading || upgrading ? 'not-allowed' : 'pointer',
     opacity: loading || upgrading ? 0.5 : 1,
     transition: 'border-color 0.15s, color 0.15s',
@@ -584,7 +584,7 @@ export default function SystemUpdatePanel() {
         </div>
 
         {info?.error && (
-          <div style={{ marginTop: 12, padding: '8px 12px', background: '#fef2f2', borderLeft: '3px solid #dc2626', color: '#991b1b', fontSize: 12 }}>
+          <div style={{ marginTop: 12, padding: '8px 12px', background: 'var(--color-error-bg)', borderLeft: '3px solid #dc2626', color: 'var(--color-error-text)', fontSize: 12 }}>
             <i className="fa-solid fa-circle-exclamation" style={{ marginRight: 6 }} />
             {info.error}
           </div>
@@ -607,7 +607,7 @@ export default function SystemUpdatePanel() {
           </h3>
           <div
             className="changelog-body"
-            style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--color-text)' }}
+            style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--color-text)' }}
             dangerouslySetInnerHTML={{ __html: renderChangelog(info.latest.body) }}
           />
         </div>
@@ -630,7 +630,7 @@ export default function SystemUpdatePanel() {
         >
           <i
             className={`fa-solid ${upgradeStatus.running ? 'fa-spinner fa-spin' : upgradeStatus.success ? 'fa-circle-check' : 'fa-circle-xmark'}`}
-            style={{ color: upgradeStatus.running ? '#fff' : upgradeStatus.success ? '#16a34a' : '#dc2626' }}
+            style={{ color: upgradeStatus.running ? '#fff' : upgradeStatus.success ? 'var(--color-success)' : 'var(--color-error)' }}
           />
           {upgradeStatus.running ? '查看升级进度…' : upgradeStatus.success ? '查看升级日志（成功）' : '查看升级日志（失败）'}
         </button>
@@ -678,7 +678,7 @@ export default function SystemUpdatePanel() {
           }}>
             <i
               className={`fa-solid ${upgradeStatus?.running ? 'fa-spinner fa-spin' : upgradeStatus?.success ? 'fa-circle-check' : 'fa-circle-xmark'}`}
-              style={{ color: upgradeStatus?.running ? '#60a5fa' : upgradeStatus?.success ? '#4ade80' : '#f87171', fontSize: 13 }}
+              style={{ color: upgradeStatus?.running ? '#60a5fa' : upgradeStatus?.success ? '#4ade80' : '#f87171', fontSize: 14 }}
             />
             <span style={{ color: '#cbd5e1' }}>
               {upgradeStatus?.running ? '正在拉取镜像 / 重建容器…' : upgradeStatus?.success ? '完成' : '失败'}
@@ -769,7 +769,7 @@ export default function SystemUpdatePanel() {
         </div>
 
         {releasesErr && (
-          <div style={{ padding: '10px 20px', background: '#fef2f2', borderBottom: '1px solid #fca5a5', color: '#991b1b', fontSize: 12 }}>
+          <div style={{ padding: '10px 20px', background: 'var(--color-error-bg)', borderBottom: '1px solid #fca5a5', color: 'var(--color-error-text)', fontSize: 12 }}>
             <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: 6 }} />
             {releasesErr}
             {' · '}
@@ -780,12 +780,12 @@ export default function SystemUpdatePanel() {
         )}
 
         {releases === null ? (
-          <div style={{ padding: '40px 20px', textAlign: 'center', fontSize: 13, color: 'var(--color-text-dim)' }}>
+          <div style={{ padding: '40px 20px', textAlign: 'center', fontSize: 14, color: 'var(--color-text-dim)' }}>
             <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: 6 }} />
             加载更新历史…
           </div>
         ) : releases.length === 0 ? (
-          <div style={{ padding: '40px 20px', textAlign: 'center', fontSize: 13, color: 'var(--color-text-dim)' }}>
+          <div style={{ padding: '40px 20px', textAlign: 'center', fontSize: 14, color: 'var(--color-text-dim)' }}>
             还没有发布的 tag 版本。开发阶段的改动请看{' '}
             <a
               href="https://github.com/utterlog/utterlog/commits/main"
@@ -813,21 +813,21 @@ export default function SystemUpdatePanel() {
                     }}
                   >
                     <i className={`fa-solid fa-chevron-${isOpen ? 'down' : 'right'}`} style={{ fontSize: 11, color: 'var(--color-text-muted)', width: 10 }} />
-                    <span style={{ fontFamily: 'ui-monospace,monospace', fontSize: 13, fontWeight: 600, color: 'var(--color-primary)' }}>
+                    <span style={{ fontFamily: 'ui-monospace,monospace', fontSize: 14, fontWeight: 600, color: 'var(--color-primary)' }}>
                       {rel.tag_name}
                     </span>
                     {isCurrent && (
-                      <span style={{ fontSize: 10, padding: '1px 6px', background: '#16a34a', color: '#fff', fontWeight: 700 }}>
+                      <span style={{ fontSize: 10, padding: '1px 6px', background: 'var(--color-success)', color: '#fff', fontWeight: 700 }}>
                         CURRENT
                       </span>
                     )}
                     {rel.prerelease && (
-                      <span style={{ fontSize: 10, padding: '1px 6px', background: '#f59e0b', color: '#fff', fontWeight: 700 }}>
+                      <span style={{ fontSize: 10, padding: '1px 6px', background: 'var(--color-warning)', color: '#fff', fontWeight: 700 }}>
                         PRE-RELEASE
                       </span>
                     )}
                     {rel.name && rel.name !== rel.tag_name && (
-                      <span style={{ fontSize: 13, color: 'var(--color-text-dim)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <span style={{ fontSize: 14, color: 'var(--color-text-dim)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {rel.name}
                       </span>
                     )}
@@ -840,7 +840,7 @@ export default function SystemUpdatePanel() {
                     <div style={{ padding: '2px 20px 18px 42px', borderTop: '1px dashed var(--color-border)' }}>
                       <div
                         className="changelog-body"
-                        style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--color-text)' }}
+                        style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--color-text)' }}
                         dangerouslySetInnerHTML={{ __html: renderChangelog(rel.body) || '<p style="color:var(--color-text-muted);font-size:12px">（无更新说明）</p>' }}
                       />
                       <a
@@ -878,7 +878,7 @@ export default function SystemUpdatePanel() {
               <>即将重新部署 <b style={{ color: 'var(--color-primary)', fontFamily: 'ui-monospace,monospace' }}>{cur}</b></>
             )}
           </div>
-          <div style={{ fontSize: 13, color: 'var(--color-text-dim)', lineHeight: 1.7, textAlign: 'center', marginBottom: 16 }}>
+          <div style={{ fontSize: 14, color: 'var(--color-text-dim)', lineHeight: 1.7, textAlign: 'center', marginBottom: 16 }}>
             {checkState === 'update'
               ? '拉取最新镜像并重建容器，约需 30-60 秒。'
               : '重新拉取当前版本镜像并重建容器，约需 30-60 秒。'}
@@ -903,7 +903,7 @@ export default function SystemUpdatePanel() {
                 height: 38, padding: '0 18px',
                 background: 'var(--color-surface, #fff)', color: 'var(--color-text)',
                 border: '1px solid var(--color-border)',
-                fontSize: 13, cursor: 'pointer', fontFamily: 'inherit',
+                fontSize: 14, cursor: 'pointer', fontFamily: 'inherit',
               }}
             >
               取消
@@ -915,7 +915,7 @@ export default function SystemUpdatePanel() {
                 height: 38, padding: '0 18px',
                 background: 'var(--color-primary)', color: '#fff',
                 border: '1px solid var(--color-primary)',
-                fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
                 display: 'inline-flex', alignItems: 'center', gap: 6,
               }}
             >

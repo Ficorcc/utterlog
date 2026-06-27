@@ -307,7 +307,7 @@ export default function MenusPage() {
                   <i className="fa-solid fa-chevron-down" />
                 </button>
               </div>
-              <div style={{ flex: '0 0 200px', display: 'inline-flex', alignItems: 'center', gap: 8, minHeight: 36, padding: '0 12px', color: 'var(--color-text-main)', fontSize: 13, border: '1px solid var(--color-border)', background: 'var(--color-bg-card)' }}>
+              <div style={{ flex: '0 0 200px', display: 'inline-flex', alignItems: 'center', gap: 8, minHeight: 36, padding: '0 12px', color: 'var(--color-text-main)', fontSize: 14, border: '1px solid var(--color-border)', background: 'var(--color-bg-card)' }}>
                 <i className="fa-sharp fa-light fa-grid-2" style={{ color: 'var(--color-primary)' }} />
                 {t('admin.menus.all', '全部')}
               </div>
@@ -466,7 +466,7 @@ export default function MenusPage() {
                       onMouseLeave={e => (e.currentTarget.style.background = 'none')}
                     >
                       <span className="text-main" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                        <i className={c.icon || 'fa-sharp fa-light fa-folder'} style={{ fontSize: 13, color: 'var(--color-text-dim)' }} />
+                        <i className={c.icon || 'fa-sharp fa-light fa-folder'} style={{ fontSize: 14, color: 'var(--color-text-dim)' }} />
                         {c.name}
                         <span className="text-dim" style={{ fontSize: 11 }}>({c.count || 0})</span>
                       </span>

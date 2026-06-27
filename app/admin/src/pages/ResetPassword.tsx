@@ -59,10 +59,10 @@ export default function ResetPassword() {
         width: 360, padding: 32, background: 'var(--color-bg-card)',
         border: '1px solid var(--color-border)',
       }}>
-        <h1 className="font-logo" style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>
+        <h1 className="font-logo" style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>
           {t('admin.reset.title', '重置密码')}
         </h1>
-        <p className="text-dim" style={{ fontSize: 13, marginBottom: 20 }}>
+        <p className="text-dim" style={{ fontSize: 14, marginBottom: 20 }}>
           {t('admin.reset.description', '请设置新的后台登录密码。')}
         </p>
 
@@ -124,7 +124,7 @@ export default function ResetPassword() {
           </>
         ) : (
           <div style={{ textAlign: 'center', padding: '12px 0' }}>
-            <i className="fa-light fa-circle-check" style={{ fontSize: 36, color: 'var(--color-success)' }} />
+            <i className="fa-light fa-circle-check" style={{ fontSize: 32, color: 'var(--color-success)' }} />
             <p style={{ fontSize: 14, marginTop: 12 }}>{t('admin.reset.successTitle', '密码已重置成功')}</p>
             <p className="text-dim" style={{ fontSize: 12, marginTop: 4 }}>{t('admin.reset.redirecting', '3 秒后自动跳转登录页…')}</p>
           </div>

@@ -124,7 +124,7 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
               // Match the NavLink padding below so rows with an expand
               // chevron render at the same height as plain rows.
               display: 'flex', alignItems: 'center', gap: 10, width: '100%',
-              height: 40, padding: '0 14px', fontSize: 13, background: 'none', border: 'none',
+              height: 40, padding: '0 14px', fontSize: 14, background: 'none', border: 'none',
               borderLeft: '2px solid transparent',
               color: 'var(--color-text-sub)', cursor: 'pointer',
             }}
@@ -167,7 +167,7 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
         end={item.to === '/'}
         style={({ isActive }) => ({
           display: 'flex', alignItems: 'center', gap: 10,
-          height: 40, padding: '0 14px', fontSize: 13,
+          height: 40, padding: '0 14px', fontSize: 14,
           color: isActive ? 'var(--color-primary)' : 'var(--color-text-sub)',
           background: isActive ? 'var(--color-bg-soft)' : 'transparent',
           borderLeft: isActive ? '2px solid var(--color-primary)' : '2px solid transparent',
@@ -214,7 +214,7 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
         </svg>
         {!collapsed && (
           <>
-            <span style={{ fontSize: 15, fontWeight: 700, fontFamily: "'Ubuntu', -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif", letterSpacing: '-0.01em' }}>Utterlog!</span>
+            <span style={{ fontSize: 14, fontWeight: 700, fontFamily: "'Ubuntu', -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif", letterSpacing: '-0.01em' }}>Utterlog!</span>
             <VersionBadge variant="compact" />
           </>
         )}
@@ -256,7 +256,7 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
           to="/utterlog"
           style={({ isActive }) => ({
             display: 'flex', alignItems: 'center', gap: 10,
-            height: 40, padding: '0 12px', fontSize: 13,
+            height: 40, padding: '0 12px', fontSize: 14,
             color: isActive ? 'var(--color-primary)' : 'var(--color-text-sub)',
             background: isActive ? 'var(--color-bg-soft)' : 'transparent',
             borderLeft: isActive ? '2px solid var(--color-primary)' : '2px solid transparent',

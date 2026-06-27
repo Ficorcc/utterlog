@@ -33,10 +33,10 @@ interface QueueResponse {
 }
 
 const STATUS_TABS = [
-  { key: 'pending',  labelKey: 'admin.aiComments.status.pending',  fallback: '待审核', color: '#f59e0b', icon: 'fa-regular fa-clock' },
-  { key: 'approved', labelKey: 'admin.aiComments.status.approved', fallback: '已发布', color: '#10b981', icon: 'fa-regular fa-circle-check' },
+  { key: 'pending',  labelKey: 'admin.aiComments.status.pending',  fallback: '待审核', color: 'var(--color-warning)', icon: 'fa-regular fa-clock' },
+  { key: 'approved', labelKey: 'admin.aiComments.status.approved', fallback: '已发布', color: 'var(--color-success)', icon: 'fa-regular fa-circle-check' },
   { key: 'rejected', labelKey: 'admin.aiComments.status.rejected', fallback: '已拒绝', color: '#6b7280', icon: 'fa-regular fa-circle-xmark' },
-  { key: 'error',    labelKey: 'admin.aiComments.status.error',    fallback: '错误', color: '#ef4444', icon: 'fa-regular fa-triangle-exclamation' },
+  { key: 'error',    labelKey: 'admin.aiComments.status.error',    fallback: '错误', color: 'var(--color-error)', icon: 'fa-regular fa-triangle-exclamation' },
 ] as const;
 
 type StatusKey = typeof STATUS_TABS[number]['key'];
