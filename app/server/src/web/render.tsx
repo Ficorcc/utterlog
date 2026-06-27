@@ -9,6 +9,7 @@ import { SlotFooter, SlotHead } from '../../../web/lib/slots';
 import PageViewTracker from '../../../web/components/blog/PageViewTracker';
 import ImageEffects from '../../../web/components/blog/ImageEffects';
 import AIChatBubble from '../../../web/components/blog/AIChatBubble';
+import { MountPageWidgets } from '../../../blog/src/mount-page-widgets';
 import { blogThemeAccentAttr } from '../blog-themes';
 import { isValidTimeZone, localTimeZone } from '../../../web/lib/timezone';
 import { join } from 'node:path';
@@ -76,6 +77,7 @@ export async function renderBlogPage(
               lightbox={ctx.options.image_lightbox}
             />
             <div id="utterlog-page" suppressHydrationWarning dangerouslySetInnerHTML={{ __html: pageHtml }} />
+            <MountPageWidgets boot={boot} />
           </ThemeLayout>
           <AIChatBubble />
           <SlotFooter options={ctx.options} />

@@ -28,6 +28,11 @@ function safeId(id: unknown) {
   return Number.isFinite(n) && n > 0 ? Math.trunc(n) : 0;
 }
 
+function safeSessionId(id: unknown) {
+  const value = String(id || '').trim();
+  return /^[A-Za-z0-9:_-]{1,120}$/.test(value) ? value : '';
+}
+
 function cleanLongText(input: string, limit = 8000) {
   const text = input.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
   return text.length > limit ? `${text.slice(0, limit)}...` : text;
@@ -1617,7 +1622,7 @@ export function registerAiRoutes(app: Hono) {
       return c.json({ success: false, error: { code: 'GUEST_BLOCKED', message: '请先登录后再使用 AI 聊天' } }, 401);
     }
 
-    const sessionId = safeId(body.session_id || body.sessionId) || `r_${postId}_${randomUUID()}`;
+    const sessionId = safeSessionId(body.session_id || body.sessionId) || `r_${postId}_${randomUUID()}`;
     const session = await getReaderSession(sessionId);
     session.lastUsed = Date.now();
     session.messages.push({ role: 'user', content: question });

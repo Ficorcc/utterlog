@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { formatDateTimeInTimeZone, localTimeZone } from './timezone';
-import { generateSlug, toDate, truncate } from '../../../shared/string-utils';
+import { generateSlug, toDate, truncate } from '../../shared/string-utils';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

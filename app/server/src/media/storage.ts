@@ -244,7 +244,7 @@ export async function putStorageObject(settings: StorageSettings, objectKey: str
       'x-amz-content-sha256': payloadHash,
       'x-amz-date': amzDate,
     },
-    body,
+    body: new Uint8Array(body),
     signal: AbortSignal.timeout(30000),
   });
   if (!res.ok) {
