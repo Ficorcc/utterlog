@@ -49,14 +49,23 @@ export default function Header() {
     };
   }, [pathname]);
   useEffect(() => {
+    let timeoutId: number | undefined;
     const handleClick = (e: MouseEvent) => {
       const a = (e.target as HTMLElement).closest('a[href]') as HTMLAnchorElement;
       if (a && a.href && a.href.startsWith(window.location.origin) && !a.target && a.pathname !== pathname) {
         setNavigating(true);
+        // 兜底：8s 内 pathname 没变就强制 reset，避免 navigating 卡住导致
+        // 用户看到「加载圈转完一遍又重新加载」的错觉（实际上是 spinner 一直
+        // 挂在原页面）。正常情况下 pathname change 会触发另一个 effect 提前 reset。
+        if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+        timeoutId = window.setTimeout(() => setNavigating(false), 8000);
       }
     };
     document.addEventListener('click', handleClick);
-    return () => document.removeEventListener('click', handleClick);
+    return () => {
+      document.removeEventListener('click', handleClick);
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+    };
   }, [pathname]);
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
