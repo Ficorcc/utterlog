@@ -212,6 +212,10 @@ html.lightbox-active body {
   --color-error-bg: #FEF2F2;
   --color-error-text: #991B1B;
 
+  /* Code block (Atom One Dark — 跨主题统一) */
+  --color-bg-code-block: #1D1F21;
+  --color-text-code-block: #C5C8C6;
+
   /* Typography scale (§9.1: 12/14/16/20/24/32 px) */
   --text-xs:  12px;
   --text-sm:  14px;

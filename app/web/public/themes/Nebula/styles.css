@@ -2004,7 +2004,7 @@
    /  --nebula-input var(--color-bg-card) 跟 #131314 太接近，几乎看不出代码块边界） */
 [data-theme="Nebula"] .nebula-post-prose .blog-prose pre {
   margin: 1.5em 0;
-  background: #0a0d14;
+  background: var(--color-bg-code-block);
   border: 1px solid var(--color-border);
   border-radius: var(--nebula-radius-md);
   padding: 18px 20px;
@@ -4774,13 +4774,13 @@
   border: 1px solid var(--color-border);
 }
 [data-theme="Nebula"] .code-block-wrapper pre {
-  background: #0a0d14 !important;
+  background: var(--color-bg-code-block) !important;
 }
 [data-theme="Nebula"] .code-block-wrapper.collapsed::after {
-  background: linear-gradient(transparent, #0a0d14);
+  background: linear-gradient(transparent, var(--color-bg-code-block));
 }
 [data-theme="Nebula"] .code-expand-btn {
-  background: #0a0d14;
+  background: var(--color-bg-code-block);
   color: var(--color-text-sub);
   border-top-color: var(--color-border);
 }
