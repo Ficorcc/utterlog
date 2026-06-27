@@ -2,6 +2,7 @@
  * Bun SSR blog API — server-side fetch, no Next.js cache integration.
  */
 import { serverApiBase } from '@/lib/server-api';
+import { normalizeThemeName } from '@shared/blog-theme';
 
 const API_BASE = serverApiBase();
 
@@ -176,10 +177,5 @@ export async function getGames(params?: { page?: number; per_page?: number }) {
   return fetchAPI<any>(`/games${q ? `?${q}` : ''}`);
 }
 
-export const SUPPORTED_THEMES = new Set(['Azure', 'Nebula']);
-
-export function normalizeThemeName(name: string) {
-  if (/^chred$/i.test(String(name || '').trim())) return 'Azure';
-  const trimmed = String(name || '').trim();
-  return SUPPORTED_THEMES.has(trimmed) ? trimmed : 'Azure';
-}
+// normalizeThemeName — 从 @shared/blog-theme 导入（避免与 SUPPORTED_BLOG_THEMES
+// 双源真相冲突）。文件内部 getActiveTheme 已用，外部 import 直接走 @shared。

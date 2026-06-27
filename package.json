@@ -5,6 +5,7 @@
   "type": "module",
   "imports": {
     "#/*": "./app/web/*",
+    "@shared/*": "./app/shared/*",
     "next/link": "./app/blog/src/shims/link.tsx",
     "next/navigation": "./app/blog/src/shims/navigation.ts",
     "next/script": "./app/blog/src/shims/script.tsx",
