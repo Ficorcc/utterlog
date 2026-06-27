@@ -141,6 +141,7 @@ export default function DashboardPage() {
   };
 
   const maxS = Math.max(...sparkline.map(s => s.visits), 1);
+  const trendChartHeight = 96;
 
   const dateLabels = (() => {
     const result: Array<{ month: string; day: string; showMonth: boolean } | null> = [];
@@ -179,8 +180,8 @@ export default function DashboardPage() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px', alignItems: 'start' }}>
           {/* Trend Chart */}
-          <div className="card" style={{ padding: '24px 24px 12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <div className="card" style={{ padding: '20px 20px 10px', alignSelf: 'start', height: 'fit-content', minHeight: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <i className="fa-sharp fa-light fa-chart-column" style={{ fontSize: '15px', color: 'var(--color-primary)' }} />
                 <h2 className="text-main" style={{ fontSize: '15px', fontWeight: 600 }}>{t('admin.dashboard.trendTitle', '近 30 天访问趋势')}</h2>
@@ -195,9 +196,9 @@ export default function DashboardPage() {
               </div>
             </div>
             <div>
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '3px', height: '108px' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '3px', height: `${trendChartHeight}px` }}>
                 {sparkline.map((s, i) => {
-                  const totalH = Math.max(Math.round((s.visits / maxS) * 108), s.visits > 0 ? 4 : 2);
+                  const totalH = Math.max(Math.round((s.visits / maxS) * trendChartHeight), s.visits > 0 ? 4 : 2);
                   const visitorRatio = s.visits > 0 ? s.visitors / s.visits : 0;
                   const visitorH = Math.round(totalH * visitorRatio);
                   return (
