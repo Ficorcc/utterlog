@@ -17,23 +17,23 @@
 /* ============================================================ */
 /* Nebula — 暗色科技风（Code Wiki 风格）                         */
 /* 调色板：纯黑底 #000 + 浅蓝副标 #A8C7FA + 蓝边深蓝卡片          */
-/* 强调：天蓝 #7FCFFF（CTA） / 鲜蓝 #80CFFF（图标 / 边框光）       */
+/* 强调：天蓝 #7FCFFF（CTA） / 鲜蓝 var(--color-focus-ring)（图标 / 边框光）       */
 /* 字体：Google Sans（统一替换之前的 Google Sans Display / Text）     */
 /* ============================================================ */
 
 [data-theme="Nebula"] {
   /* §9.1 standard color tokens — 暗色主题 override（直接值，不再走 nebula-* 间接层） */
   --color-primary: #7FCFFF;
-  --color-primary-hover: #A0DDFF;
+  --color-primary-hover: var(--color-primary-hover);
   --color-primary-active: #5BB6FF;
-  --color-focus-ring: #80CFFF;
-  --color-text-main: #E1E7EE;
+  --color-focus-ring: var(--color-focus-ring);
+  --color-text-main: var(--color-text-main);
   --color-text-sub: #A8C7FA;
   --color-text-dim: #818181;
   --color-border: #141414;
   --color-divider: rgba(255, 255, 255, 0.06);
   --color-bg-main: #000000;
-  --color-bg-card: #121212;
+  --color-bg-card: var(--color-bg-card);
   --color-bg-soft: #0A0A0A;
 
   /* Nebula 特有 token — 装饰蓝系（blue-*）和 navy 表面，§9.1 标准 token 不覆盖 */
@@ -41,7 +41,7 @@
   --nebula-blue-sky: #C2E7FF;
   --nebula-blue-pale: #D3E3FD;
   --nebula-blue-ocean: #004A77;
-  --nebula-blue-accent: #80CFFF;       /* 装饰蓝（图标 / 边框光 / box-shadow 中直接引用） */
+  --nebula-blue-accent: var(--color-focus-ring);       /* 装饰蓝（图标 / 边框光 / box-shadow 中直接引用） */
   --nebula-navy: #0A1525;
   --nebula-navy-deep: #071226;
   --nebula-success: #0F5223;
@@ -54,9 +54,9 @@
 
   /* Surfaces 补充 */
   --nebula-surface-1: #050505;
-  --nebula-tile: #121212;
-  --nebula-tile-elevated: #121212;
-  --nebula-input: #121212;
+  --nebula-tile: var(--color-bg-card);
+  --nebula-tile-elevated: var(--color-bg-card);
+  --nebula-input: var(--color-bg-card);
 
   /* Borders */
   --nebula-border-accent: #192851;
@@ -1719,7 +1719,7 @@
 }
 
 /* ── Body：正文占满 960 内宽（TOC 不占宽度，浮在右侧空白） ──
-   阅读区独立卡片：#131314 底色 + 1px 边框，与外层 #121212 站点底色形成层次 */
+   阅读区独立卡片：#131314 底色 + 1px 边框，与外层 var(--color-bg-card) 站点底色形成层次 */
 [data-theme="Nebula"] .nebula-post-body {
   margin-top: 8px;
   background: #131314;
@@ -1947,7 +1947,7 @@
 }
 
 /* ─── 强调 / 删除 / 高亮 / 键盘键 / 缩写 / 上下标 ─── */
-/* 加粗 <strong> / <b>：正文 --nebula-white 是冷调 off-white (#E1E7EE)，
+/* 加粗 <strong> / <b>：正文 --nebula-white 是冷调 off-white (var(--color-text-main))，
    strong 用纯白 + 700 拉开 ~10% 亮度差，PingFang SC / Noto Sans SC
    下加粗才有视觉冲击。同色 700 在中文字体里几乎看不出来。 */
 [data-theme="Nebula"] .nebula-post-prose .blog-prose strong,
@@ -2001,7 +2001,7 @@
 
 /* ─── 代码块（pre 由 CodeBlock 组件封装，加 wrapper / copy / collapse）—— Google Sans Code ─── */
 /* 代码块底色 #0a0d14 —— 跟文章卡片底色 #131314 拉开层次（之前 #0f1115
-   /  --nebula-input #121212 跟 #131314 太接近，几乎看不出代码块边界） */
+   /  --nebula-input var(--color-bg-card) 跟 #131314 太接近，几乎看不出代码块边界） */
 [data-theme="Nebula"] .nebula-post-prose .blog-prose pre {
   margin: 1.5em 0;
   background: #0a0d14;
@@ -2078,7 +2078,7 @@
 }
 
 /* ─── 表格 ──
-   原版用 --nebula-tile-elevated（#121212）做表头底色 + --nebula-border-subtle
+   原版用 --nebula-tile-elevated（var(--color-bg-card)）做表头底色 + --nebula-border-subtle
    （#141414）做边框，跟卡片底色 #131314 几乎同色 → 行列不分。
    重写：
      · 外框 1px 浅白线 + 圆角 + 微弱白底（撑出"卡片"感）
@@ -2687,7 +2687,7 @@
 }
 
 /* @mention 悬浮卡片：组件默认是浅色 popup（rgba(255,255,255,0.95) 白底
-   + 主题变量 var(--color-text-main) 文字色），暗主题下变量解析成 #E1E7EE
+   + 主题变量 var(--color-text-main) 文字色），暗主题下变量解析成 var(--color-text-main)
    亮色 → 白底亮字 = 完全看不清。强制 override 成深色 popup + 亮字。 */
 [data-theme="Nebula"] .nebula-comments .reply-mention-card {
   background: rgba(15, 17, 21, 0.96) !important;
@@ -3986,7 +3986,7 @@
 }
 
 /* ─── 段落点评弹窗（BlockAnnotation）—— 默认 var(--color-bg-card) 在
-   Nebula 下被映射到 #121212，跟文章正文/底色完全一样，弹窗"消失"在
+   Nebula 下被映射到 var(--color-bg-card)，跟文章正文/底色完全一样，弹窗"消失"在
    背景里。这里用一个略浮起的深底 + 蓝细边 + 加重阴影区分层次 */
 [data-theme="Nebula"] .block-annotation-panel {
   background: #1a1d22 !important;
@@ -4006,7 +4006,7 @@
   border-top-color: rgba(128, 207, 255, 0.14) !important;
 }
 /* 输入框背景：弹窗已是 #1a1d22，输入框继续用 --color-bg-card 的话会
-   再次跟弹窗底色撞色（还是 #121212）。输入框单独翻成更深一档，加蓝边 */
+   再次跟弹窗底色撞色（还是 var(--color-bg-card)）。输入框单独翻成更深一档，加蓝边 */
 [data-theme="Nebula"] .block-annotation-input {
   background: rgba(0, 0, 0, 0.35) !important;
   border-color: rgba(128, 207, 255, 0.18) !important;
@@ -4379,7 +4379,7 @@
   position: relative;
   display: flex; flex-direction: column; gap: 10px;
   padding: 18px 20px;
-  background: #121212;
+  background: var(--color-bg-card);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 0;
   overflow: hidden;
@@ -4622,7 +4622,7 @@
    保持一致；section / grid 通过覆盖 CSS 变量 --coding-content-width 拉齐 */
 [data-theme="Nebula"] .coding-page {
   --coding-content-width: min(var(--nebula-content-max), calc(100% - (var(--nebula-content-pad) * 2)));
-  background: #121212 !important;
+  background: var(--color-bg-card) !important;
   color: var(--color-text-main);
 }
 [data-theme="Nebula"] .coding-hero {
@@ -4630,7 +4630,7 @@
   margin-inline: auto;
   padding-left: var(--nebula-content-pad);
   padding-right: var(--nebula-content-pad);
-  background-color: #121212 !important;
+  background-color: var(--color-bg-card) !important;
   background-image:
     linear-gradient(rgba(168, 199, 250, 0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(168, 199, 250, 0.04) 1px, transparent 1px);
@@ -4730,7 +4730,7 @@
 [data-theme="Nebula"] .hljs-literal,
 [data-theme="Nebula"] .hljs-doctag,
 [data-theme="Nebula"] .hljs-regexp {
-  color: #A0DDFF;
+  color: var(--color-primary-hover);
 }
 [data-theme="Nebula"] .hljs-title,
 [data-theme="Nebula"] .hljs-section,
@@ -4817,7 +4817,7 @@
   color: #FF9694;
 }
 [data-theme="Nebula"] .blog-prose pre .token.function-name {
-  color: #A0DDFF;
+  color: var(--color-primary-hover);
 }
 [data-theme="Nebula"] .blog-prose pre .token.boolean,
 [data-theme="Nebula"] .blog-prose pre .token.number,
@@ -4994,7 +4994,7 @@
 
 [data-theme="Nebula"] .links-view-toggle {
   display: inline-flex;
-  background: #121212;
+  background: var(--color-bg-card);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 4px;
   overflow: hidden;
@@ -5025,7 +5025,7 @@
   gap: 12px !important;
 }
 [data-theme="Nebula"] .friend-link-card-item {
-  background: #121212 !important;
+  background: var(--color-bg-card) !important;
   border: 1px solid rgba(255, 255, 255, 0.06) !important;
   border-radius: 4px !important;
   padding: 16px 18px !important;
@@ -5377,7 +5377,7 @@
   gap: 6px !important;
 }
 [data-theme="Nebula"] .friend-link-compact-item {
-  background: #121212 !important;
+  background: var(--color-bg-card) !important;
   border: 1px solid rgba(255, 255, 255, 0.06) !important;
   border-radius: 4px !important;
   padding: 8px 10px !important;
@@ -5403,7 +5403,7 @@
 }
 [data-theme="Nebula"] .feeds-view-toggle {
   display: inline-flex;
-  background: #121212;
+  background: var(--color-bg-card);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 4px;
   overflow: hidden;
@@ -5456,7 +5456,7 @@
 /* ── feed-card 共用基线 ── */
 [data-theme="Nebula"] .feed-card {
   position: relative;
-  background: #121212;
+  background: var(--color-bg-card);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 4px;
   text-decoration: none;
