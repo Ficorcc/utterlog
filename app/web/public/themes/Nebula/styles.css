@@ -22,39 +22,43 @@
 /* ============================================================ */
 
 [data-theme="Nebula"] {
-  /* Brand */
-  --nebula-sky: #7FCFFF;
-  --nebula-sky-hover: #A0DDFF;
-  --nebula-sky-active: #5BB6FF;
-  --nebula-blue-accent: #80CFFF;
+  /* §9.1 standard color tokens — 暗色主题 override（直接值，不再走 nebula-* 间接层） */
+  --color-primary: #7FCFFF;
+  --color-primary-hover: #A0DDFF;
+  --color-primary-active: #5BB6FF;
+  --color-focus-ring: #80CFFF;
+  --color-text-main: #E1E7EE;
+  --color-text-sub: #A8C7FA;
+  --color-text-dim: #818181;
+  --color-border: #141414;
+  --color-divider: rgba(255, 255, 255, 0.06);
+  --color-bg-main: #000000;
+  --color-bg-card: #121212;
+  --color-bg-soft: #0A0A0A;
+
+  /* Nebula 特有 token — 装饰蓝系（blue-*）和 navy 表面，§9.1 标准 token 不覆盖 */
   --nebula-blue-vivid: #0842A0;
-  --nebula-blue-light: #A8C7FA;
   --nebula-blue-sky: #C2E7FF;
   --nebula-blue-pale: #D3E3FD;
   --nebula-blue-ocean: #004A77;
+  --nebula-blue-accent: #80CFFF;       /* 装饰蓝（图标 / 边框光 / box-shadow 中直接引用） */
   --nebula-navy: #0A1525;
   --nebula-navy-deep: #071226;
   --nebula-success: #0F5223;
 
-  /* Neutrals — text 用偏冷调 off-white 而非纯白，与天蓝主题色协调 */
-  --nebula-white: #E1E7EE;
+  /* Neutrals 补充 */
   --nebula-gray-light: #E3E3E3;
-  --nebula-gray: #818181;
   --nebula-gray-dark: #444746;
   --nebula-charcoal: #303030;
   --nebula-near-black: #0A0A0A;
-  --nebula-black: #000000;
 
-  /* Surfaces */
+  /* Surfaces 补充 */
   --nebula-surface-1: #050505;
-  --nebula-surface-2: #0A0A0A;
   --nebula-tile: #121212;
   --nebula-tile-elevated: #121212;
-  --nebula-card: #121212;
   --nebula-input: #121212;
 
   /* Borders */
-  --nebula-border-subtle: #141414;
   --nebula-border-accent: #192851;
   --nebula-border-blue: rgba(128, 207, 255, 0.45);
   --nebula-border-blue-soft: rgba(128, 207, 255, 0.2);
@@ -107,20 +111,6 @@
   --nebula-radius-2xl: 24px;
   --nebula-radius-pill: 39px;
   --nebula-radius-pill-lg: 49px;
-
-  /* Map to global tokens */
-  --color-primary: var(--nebula-sky);
-  --color-primary-hover: var(--nebula-sky-hover);
-  --color-primary-active: var(--nebula-sky-active);
-  --color-text-main: var(--nebula-white);
-  --color-text-sub: var(--nebula-blue-light);
-  --color-text-dim: var(--nebula-gray);
-  --color-border: var(--nebula-border-subtle);
-  --color-divider: rgba(255, 255, 255, 0.06);
-  --color-bg-card: var(--nebula-card);
-  --color-bg-main: var(--nebula-black);
-  --color-bg-soft: var(--nebula-surface-2);
-  --color-focus-ring: var(--nebula-blue-accent);
 }
 
 /* ============================================================ */
@@ -128,14 +118,14 @@
 /* ============================================================ */
 
 [data-theme="Nebula"] body {
-  background: var(--nebula-black);
-  color: var(--nebula-white);
+  background: var(--color-bg-main);
+  color: var(--color-text-main);
   font-family: var(--nebula-font-body);
 }
 
 [data-theme="Nebula"] ::selection {
   background: rgba(128, 207, 255, 0.4);
-  color: var(--nebula-white);
+  color: var(--color-text-main);
 }
 
 [data-theme="Nebula"] .nebula-theme {
@@ -144,8 +134,8 @@
   height: 100vh;
   height: 100dvh;
   min-height: 100dvh;
-  background: var(--nebula-black);
-  color: var(--nebula-white);
+  background: var(--color-bg-main);
+  color: var(--color-text-main);
   font-family: var(--nebula-font-body);
   font-size: 16px;
   line-height: 1.5;
@@ -204,7 +194,7 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   text-decoration: none;
   /* Logo + 文字一起用 Alimama 方圆体（中文圆体），头部品牌专用 */
   font-family: var(--nebula-font-logo);
@@ -235,9 +225,9 @@
   width: 0;
   background: linear-gradient(
     90deg,
-    var(--nebula-blue-accent) 0%,
-    var(--nebula-sky-hover) 50%,
-    var(--nebula-blue-accent) 100%
+    var(--color-focus-ring) 0%,
+    var(--color-primary-hover) 50%,
+    var(--color-focus-ring) 100%
   );
   background-size: 200% 100%;
   box-shadow: 0 0 8px rgba(128, 207, 255, 0.6),
@@ -262,14 +252,14 @@
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: linear-gradient(135deg, var(--nebula-sky), var(--nebula-blue-accent));
+  background: linear-gradient(135deg, var(--color-primary), var(--color-focus-ring));
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-family: var(--nebula-font-logo);
   font-weight: 700;
   font-size: 14px;
-  color: var(--nebula-black);
+  color: var(--color-bg-main);
   transform-origin: center;
   transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -312,12 +302,12 @@
 }
 
 [data-theme="Nebula"] .nebula-nav-link:hover {
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   background: rgba(255, 255, 255, 0.04);
 }
 
 [data-theme="Nebula"] .nebula-nav-link.active {
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
 }
 
 /* 右上 actions：保留随机文章 / 自定义图标按钮 / 移动菜单 burger，
@@ -346,11 +336,11 @@
 
 [data-theme="Nebula"] .nebula-icon-button:hover {
   background: rgba(255, 255, 255, 0.06);
-  color: var(--nebula-white);
+  color: var(--color-text-main);
 }
 
 [data-theme="Nebula"] .nebula-icon-button.loading {
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
 }
 
 [data-theme="Nebula"] .nebula-action-img { width: 16px; height: 16px; border-radius: 4px; }
@@ -362,8 +352,8 @@
   flex-direction: column;
   gap: 4px;
   padding: 16px 24px 28px;
-  background: var(--nebula-black);
-  border-top: 1px solid var(--nebula-border-subtle);
+  background: var(--color-bg-main);
+  border-top: 1px solid var(--color-border);
 }
 
 [data-theme="Nebula"] .nebula-mobile-nav .nebula-nav-link { padding: 12px 16px; }
@@ -378,7 +368,7 @@
 
 [data-theme="Nebula"] .nebula-hero {
   position: relative;
-  background: var(--nebula-black);
+  background: var(--color-bg-main);
   padding: 80px 24px 96px;
   overflow: hidden;
 }
@@ -419,7 +409,7 @@
   line-height: 1;
   font-weight: 500;
   letter-spacing: -0.03em;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
 }
 
 /* 描述：radial-gradient + background-clip: text 形成中心白→边缘冷蓝灰的渐变文字。
@@ -481,7 +471,7 @@
 /* Hover：放大、提到最前、蓝边、轻微旋转 */
 [data-theme="Nebula"] .nebula-commenters-item:hover .nebula-commenters-avatar {
   transform: translateY(-6px) scale(1.18) rotate(-3deg);
-  border-color: var(--nebula-blue-accent);
+  border-color: var(--color-focus-ring);
   z-index: 10;
 }
 
@@ -535,7 +525,7 @@
   color: rgba(225, 231, 238, 0.55);
 }
 [data-theme="Nebula"] .nebula-commenters-pop-meta strong {
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   font-weight: 500;
   font-family: var(--nebula-font-display);
   font-size: 12px;
@@ -560,7 +550,7 @@
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   font-family: var(--nebula-font-mono);
   font-size: 11px;
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -570,7 +560,7 @@
 }
 [data-theme="Nebula"] .nebula-commenters-pop-post i {
   font-size: 10px;
-  color: var(--nebula-blue-accent);
+  color: var(--color-focus-ring);
   flex-shrink: 0;
 }
 
@@ -643,7 +633,7 @@
   font-family: var(--nebula-font-mono);
   font-size: 10px;
   letter-spacing: 0.2em;
-  color: var(--nebula-blue-accent);
+  color: var(--color-focus-ring);
   text-transform: uppercase;
 }
 
@@ -660,7 +650,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--nebula-blue-accent);
+  color: var(--color-focus-ring);
   font-size: 10px;
   font-family: var(--nebula-font-mono);
 }
@@ -674,16 +664,16 @@
 }
 
 [data-theme="Nebula"] .nebula-moment-bubble:hover {
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   background: rgba(128, 207, 255, 0.08);
   border-color: rgba(128, 207, 255, 0.25);
 }
 [data-theme="Nebula"] .nebula-moment-bubble:hover .nebula-moment-bubble-icon {
-  color: var(--nebula-blue-accent);
+  color: var(--color-focus-ring);
   transform: scale(1.15);
 }
 [data-theme="Nebula"] .nebula-moment-bubble:hover .nebula-moment-bubble-time {
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
 }
 
 @media (max-width: 640px) {
@@ -711,8 +701,8 @@
   text-wrap: balance;
   background: radial-gradient(
     circle at center,
-    var(--nebula-white),
-    color-mix(in srgb, var(--nebula-blue-accent) 35%, var(--nebula-gray))
+    var(--color-text-main),
+    color-mix(in srgb, var(--color-focus-ring) 35%, var(--color-text-dim))
   );
   -webkit-background-clip: text;
           background-clip: text;
@@ -728,8 +718,8 @@
   left: 0;
   right: 0;
   z-index: 50;
-  background: var(--nebula-black);
-  border-bottom: 1px solid var(--nebula-border-subtle);
+  background: var(--color-bg-main);
+  border-bottom: 1px solid var(--color-border);
   box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.5);
 }
 
@@ -749,7 +739,7 @@
   left: 48px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
   font-size: 14px;
   z-index: 2;
   pointer-events: none;
@@ -763,14 +753,14 @@
   background: var(--nebula-tile);
   border: 1px solid rgba(255, 255, 255, 0.06);
   outline: 0;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   font-family: var(--nebula-font-body);
   font-size: 14px;
   transition: border-color 0.2s ease;
 }
 
 [data-theme="Nebula"] .nebula-search-form input:focus {
-  border-color: var(--nebula-sky);
+  border-color: var(--color-primary);
 }
 
 [data-theme="Nebula"] .nebula-search-form input::placeholder {
@@ -781,7 +771,7 @@
   height: 40px;
   padding: 0 18px;
   border-radius: 999px;
-  background: var(--nebula-sky);
+  background: var(--color-primary);
   color: var(--nebula-navy-deep);
   font-family: var(--nebula-font-display);
   font-size: 14px;
@@ -792,7 +782,7 @@
 }
 
 [data-theme="Nebula"] .nebula-search-submit:hover {
-  background: var(--nebula-sky-hover);
+  background: var(--color-primary-hover);
 }
 
 /* ─── /search 搜索结果页的搜索表单 —— 跟 header 弹出搜索框保持一致样式 ───
@@ -805,7 +795,7 @@
   left: 16px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
   font-size: 14px;
   z-index: 2;
   pointer-events: none;
@@ -816,7 +806,7 @@
   border-radius: 999px !important;
   background: var(--nebula-tile) !important;
   border: 1px solid rgba(255, 255, 255, 0.06) !important;
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
   font-family: var(--nebula-font-body) !important;
   font-size: 14px !important;
   outline: none !important;
@@ -824,7 +814,7 @@
   transition: border-color 0.2s ease;
 }
 [data-theme="Nebula"] .search-page-form .search-page-input:focus {
-  border-color: var(--nebula-sky) !important;
+  border-color: var(--color-primary) !important;
 }
 [data-theme="Nebula"] .search-page-form .search-page-input::placeholder {
   color: rgba(255, 255, 255, 0.4);
@@ -833,7 +823,7 @@
   height: 44px !important;
   padding: 0 22px !important;
   border-radius: 999px !important;
-  background: var(--nebula-sky) !important;
+  background: var(--color-primary) !important;
   color: var(--nebula-navy-deep) !important;
   font-family: var(--nebula-font-display) !important;
   font-size: 14px !important;
@@ -843,11 +833,11 @@
   transition: background 0.2s ease;
 }
 [data-theme="Nebula"] .search-page-form .search-page-submit:hover {
-  background: var(--nebula-sky-hover) !important;
+  background: var(--color-primary-hover) !important;
 }
 
 [data-theme="Nebula"] .nebula-icon-button.active {
-  color: var(--nebula-sky);
+  color: var(--color-primary);
   background: rgba(127, 207, 255, 0.1);
 }
 
@@ -871,7 +861,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--nebula-blue-accent);
+  color: var(--color-focus-ring);
   font-size: 36px;
   transition: transform 0.4s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
   text-decoration: none;
@@ -923,14 +913,14 @@
   font-family: var(--nebula-font-display);
   font-size: 13px;
   letter-spacing: 0.04em;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.25s ease, transform 0.25s ease;
 }
 [data-theme="Nebula"] .nebula-tile:hover {
-  border-color: var(--nebula-blue-accent);
+  border-color: var(--color-focus-ring);
   box-shadow: 0 18px 50px -16px rgba(128, 207, 255, 0.45);
 }
 [data-theme="Nebula"] .nebula-tile:hover::after {
@@ -1005,7 +995,7 @@
   border-radius: var(--nebula-radius-lg);
   background-color: var(--nebula-tile);
   border: 1px solid var(--nebula-border-blue-soft);
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   text-decoration: none;
   transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
   min-height: 86px;
@@ -1020,16 +1010,16 @@
 
 [data-theme="Nebula"] .nebula-stat-item:hover {
   transform: translateY(-2px);
-  background-color: color-mix(in srgb, var(--nebula-blue-accent) 12%, var(--nebula-tile));
+  background-color: color-mix(in srgb, var(--color-focus-ring) 12%, var(--nebula-tile));
   border-color: var(--nebula-border-blue);
-  box-shadow: 0 34px 84px -30px color-mix(in srgb, var(--nebula-blue-accent) 35%, transparent);
+  box-shadow: 0 34px 84px -30px color-mix(in srgb, var(--color-focus-ring) 35%, transparent);
 }
 
 [data-theme="Nebula"] .nebula-stat-no {
   font-family: var(--nebula-font-mono);
   font-size: 11px;
   letter-spacing: 0.18em;
-  color: var(--nebula-blue-accent);
+  color: var(--color-focus-ring);
 }
 
 [data-theme="Nebula"] .nebula-stat-item strong {
@@ -1038,7 +1028,7 @@
   font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
 }
 
 [data-theme="Nebula"] .nebula-stat-item em {
@@ -1047,7 +1037,7 @@
   font-family: var(--nebula-font-display);
   font-size: 26px;
   font-weight: 500;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   line-height: 1.1;
   letter-spacing: 0;
   display: -webkit-box;
@@ -1083,7 +1073,7 @@
 }
 [data-theme="Nebula"] .nebula-category-strip button:hover:not(:disabled) {
   border-color: var(--nebula-border-blue);
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   transform: translateY(-1px);
 }
 [data-theme="Nebula"] .nebula-category-strip button:active:not(:disabled) {
@@ -1092,10 +1082,10 @@
 [data-theme="Nebula"] .nebula-category-strip button.active {
   background: rgba(128, 207, 255, 0.12);
   border-color: var(--nebula-border-blue);
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
 }
 [data-theme="Nebula"] .nebula-category-strip button.active i {
-  color: var(--nebula-sky);
+  color: var(--color-primary);
 }
 [data-theme="Nebula"] .nebula-category-strip button i {
   font-size: 13px;
@@ -1149,7 +1139,7 @@
   }
 }
 [data-theme="Nebula"] .nebula-post-list .nebula-empty i {
-  color: var(--nebula-sky);
+  color: var(--color-primary);
   margin-right: 8px;
 }
 
@@ -1168,7 +1158,7 @@
   font-family: var(--nebula-font-mono);
   font-size: 11px;
   letter-spacing: 0.2em;
-  color: var(--nebula-blue-accent);
+  color: var(--color-focus-ring);
   text-transform: uppercase;
   position: relative;
   z-index: 1;
@@ -1192,7 +1182,7 @@
 }
 [data-theme="Nebula"] .nebula-section-stats i {
   font-size: 11px;
-  color: var(--nebula-blue-accent);
+  color: var(--color-focus-ring);
 }
 
 /* "最新文章" / "分类文章" 标题转成右侧大号腾讯体水印 —— 跟评论区"讨论区"
@@ -1220,7 +1210,7 @@
 /* 查看全部 → 推到行尾，z-index 高于水印 */
 [data-theme="Nebula"] .nebula-section-more {
   margin-left: auto;
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
@@ -1228,7 +1218,7 @@
   z-index: 1;
 }
 
-[data-theme="Nebula"] .nebula-section-more:hover { color: var(--nebula-sky-hover); }
+[data-theme="Nebula"] .nebula-section-more:hover { color: var(--color-primary-hover); }
 
 /* ============================================================ */
 /* Post list / Post card                                          */
@@ -1247,8 +1237,8 @@
   gap: 24px;
   align-items: start;
   padding: 24px 28px;
-  background-color: var(--nebula-card);
-  border: 1px solid var(--nebula-border-subtle);
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
   border-radius: var(--nebula-radius-lg);
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
   overflow: hidden;
@@ -1256,9 +1246,9 @@
 
 [data-theme="Nebula"] .nebula-post-card:hover {
   transform: translateY(-2px);
-  background-color: color-mix(in srgb, var(--nebula-blue-accent) 8%, var(--nebula-card));
+  background-color: color-mix(in srgb, var(--color-focus-ring) 8%, var(--color-bg-card));
   border-color: var(--nebula-border-blue);
-  box-shadow: 0 34px 84px -30px color-mix(in srgb, var(--nebula-blue-accent) 35%, transparent);
+  box-shadow: 0 34px 84px -30px color-mix(in srgb, var(--color-focus-ring) 35%, transparent);
 }
 
 [data-theme="Nebula"] .nebula-card-glow { display: none; }
@@ -1269,7 +1259,7 @@
   line-height: 1;         /* 跟 kicker 同步行高 */
   font-weight: 500;
   letter-spacing: 0.12em;
-  color: var(--nebula-blue-accent);
+  color: var(--color-focus-ring);
   /* align-items: start 已经把 index 顶到 row 顶端，
      再叠 kicker 自身 line-height 的 vertical-align ≈ 同一水平线 */
   padding-top: 0;
@@ -1310,17 +1300,17 @@
 }
 
 [data-theme="Nebula"] .nebula-post-card:hover .nebula-card-kicker .nebula-card-kicker-stat i {
-  color: var(--nebula-blue-accent);
+  color: var(--color-focus-ring);
 }
 
 [data-theme="Nebula"] .nebula-card-kicker .nebula-card-category {
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
   text-decoration: none;
   font-weight: 500;
 }
 
 [data-theme="Nebula"] .nebula-card-kicker .nebula-card-category:hover {
-  color: var(--nebula-blue-accent);
+  color: var(--color-focus-ring);
 }
 
 [data-theme="Nebula"] .nebula-card-title {
@@ -1329,7 +1319,7 @@
   font-size: 22px;
   line-height: 1.3;
   font-weight: 500;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
 }
 
 [data-theme="Nebula"] .nebula-card-title a {
@@ -1338,7 +1328,7 @@
   transition: color 0.2s ease;
 }
 
-[data-theme="Nebula"] .nebula-card-title a:hover { color: var(--nebula-blue-light); }
+[data-theme="Nebula"] .nebula-card-title a:hover { color: var(--color-text-sub); }
 
 [data-theme="Nebula"] .nebula-card-excerpt {
   margin: 0;
@@ -1368,7 +1358,7 @@
   gap: 6px;
 }
 
-[data-theme="Nebula"] .nebula-card-meta i { color: var(--nebula-blue-accent); }
+[data-theme="Nebula"] .nebula-card-meta i { color: var(--color-focus-ring); }
 
 [data-theme="Nebula"] .nebula-card-arrow {
   width: 40px;
@@ -1376,7 +1366,7 @@
   border-radius: 50%;
   background: transparent;
   border: 1px solid var(--nebula-border-blue-soft);
-  color: var(--nebula-blue-accent);
+  color: var(--color-focus-ring);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1387,9 +1377,9 @@
 }
 
 [data-theme="Nebula"] .nebula-card-arrow:hover {
-  background: var(--nebula-blue-accent);
-  border-color: var(--nebula-blue-accent);
-  color: var(--nebula-black);
+  background: var(--color-focus-ring);
+  border-color: var(--color-focus-ring);
+  color: var(--color-bg-main);
   transform: scale(1.05);
 }
 
@@ -1405,10 +1395,10 @@
 [data-theme="Nebula"] .nebula-empty {
   padding: 48px 24px;
   text-align: center;
-  color: var(--nebula-gray);
-  background: var(--nebula-card);
+  color: var(--color-text-dim);
+  background: var(--color-bg-card);
   border-radius: var(--nebula-radius-lg);
-  border: 1px solid var(--nebula-border-subtle);
+  border: 1px solid var(--color-border);
 }
 
 /* ============================================================ */
@@ -1439,7 +1429,7 @@
   transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
 }
 [data-theme="Nebula"] .nebula-pagination-arrow:hover:not(:disabled) {
-  color: var(--nebula-sky);
+  color: var(--color-primary);
   border-color: rgba(128, 207, 255, 0.35);
   background: rgba(128, 207, 255, 0.08);
 }
@@ -1472,13 +1462,13 @@
   transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
 }
 [data-theme="Nebula"] .nebula-pagination-num:hover:not(:disabled):not(.active) {
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   background: rgba(255, 255, 255, 0.04);
 }
 [data-theme="Nebula"] .nebula-pagination-num.active {
-  background: var(--nebula-sky);
+  background: var(--color-primary);
   color: var(--nebula-navy-deep);
-  border-color: var(--nebula-sky);
+  border-color: var(--color-primary);
   font-weight: 600;
 }
 [data-theme="Nebula"] .nebula-pagination-num:disabled {
@@ -1534,11 +1524,11 @@
 }
 
 [data-theme="Nebula"] .nebula-post-crumb a {
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
   text-decoration: none;
 }
 
-[data-theme="Nebula"] .nebula-post-crumb a:hover { color: var(--nebula-blue-accent); }
+[data-theme="Nebula"] .nebula-post-crumb a:hover { color: var(--color-focus-ring); }
 
 /* 标题：默认（无封面回退）样式 —— banner 大标题专用快看世界体（中文圆体） */
 [data-theme="Nebula"] .nebula-post-title {
@@ -1548,7 +1538,7 @@
   line-height: 1.25;
   letter-spacing: 0;
   font-weight: 400;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
 }
 
 /* 标题叠加在封面图底部 —— 阴影 + 描边保证白字在白底也清晰 */
@@ -1617,13 +1607,13 @@
   align-items: center;
   justify-content: center;
   background: var(--nebula-tile-elevated);
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   font-size: 11px;
   font-weight: 600;
 }
 
 [data-theme="Nebula"] .nebula-post-byline-author {
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   font-weight: 500;
 }
 
@@ -1644,7 +1634,7 @@
 }
 
 [data-theme="Nebula"] .nebula-post-byline-stat:hover i {
-  color: var(--nebula-blue-accent);
+  color: var(--color-focus-ring);
 }
 
 /* 分类背景徽章：head 右上区域显示完整 icon，底部部分超出被 overflow 裁切，
@@ -1733,7 +1723,7 @@
 [data-theme="Nebula"] .nebula-post-body {
   margin-top: 8px;
   background: #131314;
-  border: 1px solid var(--nebula-border-subtle);
+  border: 1px solid var(--color-border);
   border-radius: var(--nebula-radius-lg);
   padding: 32px 36px;
 }
@@ -1768,7 +1758,7 @@
 /* 内层目录有内容时才渲染背景框 */
 [data-theme="Nebula"] .nebula-post-toc .blog-toc {
   background: var(--nebula-tile);
-  border: 1px solid var(--nebula-border-subtle);
+  border: 1px solid var(--color-border);
   border-radius: var(--nebula-radius-md);
   padding: 16px 18px;
   font-size: 13px;
@@ -1829,7 +1819,7 @@
 [data-theme="Nebula"] .nebula-post-prose .blog-prose h1 {
   font-family: var(--nebula-font-title);
   font-weight: 600;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   letter-spacing: -0.01em;
   scroll-margin-top: 88px;
 }
@@ -1842,7 +1832,7 @@
 [data-theme="Nebula"] .nebula-post-prose .blog-prose h6 {
   font-family: var(--nebula-font-prose-heading);
   font-weight: 600;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   letter-spacing: 0;
   scroll-margin-top: 88px; /* TOC 锚点跳转留出 header 空间 */
 }
@@ -1858,7 +1848,7 @@
   line-height: 1.35;
   margin: 2em 0 0.7em;
   padding-bottom: 8px;
-  border-bottom: 1px solid var(--nebula-border-subtle);
+  border-bottom: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1879,8 +1869,8 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   line-height: 1;
-  color: var(--nebula-black);
-  background: var(--nebula-blue-accent);
+  color: var(--color-bg-main);
+  background: var(--color-focus-ring);
   /* 上对齐：让徽章顶部和中文标题视觉中心对齐 */
   position: relative;
   top: 1px;
@@ -1900,7 +1890,7 @@
   flex-shrink: 0;
   width: 10px;
   height: 10px;
-  background: var(--nebula-blue-accent);
+  background: var(--color-focus-ring);
   border-radius: 2px;
 }
 
@@ -1908,7 +1898,7 @@
   font-size: 16px;
   line-height: 1.4;
   margin: 1.6em 0 0.4em;
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1920,7 +1910,7 @@
   width: 8px;
   height: 8px;
   background: transparent;
-  border: 1.5px solid var(--nebula-blue-accent);
+  border: 1.5px solid var(--color-focus-ring);
   border-radius: 2px;
 }
 
@@ -1944,7 +1934,7 @@
 
 /* ─── 链接 ─── */
 [data-theme="Nebula"] .nebula-post-prose .blog-prose a {
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
   text-decoration: underline;
   text-decoration-color: rgba(128, 207, 255, 0.4);
   text-decoration-thickness: 1px;
@@ -1952,8 +1942,8 @@
   transition: color 0.18s ease, text-decoration-color 0.18s ease;
 }
 [data-theme="Nebula"] .nebula-post-prose .blog-prose a:hover {
-  color: var(--nebula-blue-accent);
-  text-decoration-color: var(--nebula-blue-accent);
+  color: var(--color-focus-ring);
+  text-decoration-color: var(--color-focus-ring);
 }
 
 /* ─── 强调 / 删除 / 高亮 / 键盘键 / 缩写 / 上下标 ─── */
@@ -1981,11 +1971,11 @@
   padding: 1px 7px;
   font-family: var(--nebula-font-article-code);
   font-size: 0.85em;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   background: var(--nebula-tile-elevated);
-  border: 1px solid var(--nebula-border-subtle);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
-  box-shadow: 0 1px 0 var(--nebula-border-subtle);
+  box-shadow: 0 1px 0 var(--color-border);
 }
 [data-theme="Nebula"] .nebula-post-prose .blog-prose abbr[title] {
   text-decoration: underline dotted;
@@ -2005,7 +1995,7 @@
   padding: 2px 6px;
   border-radius: 4px;
   background: rgba(128, 207, 255, 0.08);
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
   border: 1px solid rgba(128, 207, 255, 0.12);
 }
 
@@ -2015,7 +2005,7 @@
 [data-theme="Nebula"] .nebula-post-prose .blog-prose pre {
   margin: 1.5em 0;
   background: #0a0d14;
-  border: 1px solid var(--nebula-border-subtle);
+  border: 1px solid var(--color-border);
   border-radius: var(--nebula-radius-md);
   padding: 18px 20px;
   overflow-x: auto;
@@ -2034,7 +2024,7 @@
   background: transparent;
   border: 0;
   padding: 0;
-  /* 注意：这里不再写 color: var(--nebula-white)。
+  /* 注意：这里不再写 color: var(--color-text-main)。
      之前用了高优先级覆盖会让 prism-tomorrow 的 token 配色全被吞掉
      （token 是 <span class="token x">；color 由 .token.x 显式声明），
      再加上 Nebula 自己的 token 调色板（见文件底部）需要让其颜色
@@ -2046,7 +2036,7 @@
 [data-theme="Nebula"] .nebula-post-prose .blog-prose blockquote {
   margin: 1.5em 0;
   padding: 14px 20px;
-  border-left: 3px solid var(--nebula-blue-accent);
+  border-left: 3px solid var(--color-focus-ring);
   background: rgba(128, 207, 255, 0.06);
   border-radius: 0 var(--nebula-radius-md) var(--nebula-radius-md) 0;
   color: rgba(225, 231, 238, 0.85);
@@ -2066,7 +2056,7 @@
   margin: 0.3em 0;
 }
 [data-theme="Nebula"] .nebula-post-prose .blog-prose li::marker {
-  color: var(--nebula-blue-accent);
+  color: var(--color-focus-ring);
 }
 [data-theme="Nebula"] .nebula-post-prose .blog-prose li > p { margin: 0 0 0.5em; }
 [data-theme="Nebula"] .nebula-post-prose .blog-prose li > p:last-child { margin-bottom: 0; }
@@ -2084,7 +2074,7 @@
 [data-theme="Nebula"] .nebula-post-prose .blog-prose input[type="checkbox"] {
   margin: 0 8px 0 0;
   vertical-align: middle;
-  accent-color: var(--nebula-blue-accent);
+  accent-color: var(--color-focus-ring);
 }
 
 /* ─── 表格 ──
@@ -2124,7 +2114,7 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   white-space: nowrap;
@@ -2177,7 +2167,7 @@
 [data-theme="Nebula"] .nebula-post-prose .blog-prose dl { margin: 1.4em 0; }
 [data-theme="Nebula"] .nebula-post-prose .blog-prose dt {
   font-weight: 600;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   margin-top: 0.6em;
 }
 [data-theme="Nebula"] .nebula-post-prose .blog-prose dd {
@@ -2189,14 +2179,14 @@
 [data-theme="Nebula"] .nebula-post-prose .blog-prose hr {
   margin: 2.5em 0;
   border: 0;
-  border-top: 1px solid var(--nebula-border-subtle);
+  border-top: 1px solid var(--color-border);
 }
 
 /* ─── <details> 折叠（[collapse] shortcode 渲染入口，覆盖 inline style） ─── */
 [data-theme="Nebula"] .nebula-post-prose .blog-prose details {
   margin: 1.5em 0 !important;
   background: var(--nebula-tile);
-  border: 1px solid var(--nebula-border-subtle) !important;
+  border: 1px solid var(--color-border) !important;
   border-radius: var(--nebula-radius-md);
   padding: 0 !important;
   overflow: hidden;
@@ -2205,7 +2195,7 @@
   padding: 12px 16px !important;
   cursor: pointer;
   font-weight: 500 !important;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   list-style: none;
   user-select: none;
 }
@@ -2216,7 +2206,7 @@
   content: '▸';
   display: inline-block;
   margin-right: 8px;
-  color: var(--nebula-blue-accent);
+  color: var(--color-focus-ring);
   transition: transform 0.18s ease;
 }
 [data-theme="Nebula"] .nebula-post-prose .blog-prose details[open] > summary::before {
@@ -2224,7 +2214,7 @@
 }
 [data-theme="Nebula"] .nebula-post-prose .blog-prose details > div {
   padding: 12px 16px !important;
-  border-top: 1px solid var(--nebula-border-subtle) !important;
+  border-top: 1px solid var(--color-border) !important;
   border-style: solid !important;
 }
 
@@ -2232,7 +2222,7 @@
 [data-theme="Nebula"] .nebula-post-prose .blog-prose .footnotes {
   margin-top: 3em;
   padding-top: 1.5em;
-  border-top: 1px solid var(--nebula-border-subtle);
+  border-top: 1px solid var(--color-border);
   font-size: 14px;
   color: rgba(255, 255, 255, 0.6);
 }
@@ -2241,14 +2231,14 @@
 }
 [data-theme="Nebula"] .nebula-post-prose .blog-prose .footnotes li { margin: 0.4em 0; }
 [data-theme="Nebula"] .nebula-post-prose .blog-prose .footnotes a {
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
 }
 
 /* ── Footer：标签 ── */
 [data-theme="Nebula"] .nebula-post-foot {
   margin-top: 48px;
   padding-top: 24px;
-  border-top: 1px solid var(--nebula-border-subtle);
+  border-top: 1px solid var(--color-border);
 }
 
 /* ── Author 卡片：唯一一处作者展示 ── */
@@ -2260,7 +2250,7 @@
   padding: 20px;
   border-radius: var(--nebula-radius-lg);
   background: var(--nebula-tile);
-  border: 1px solid var(--nebula-border-subtle);
+  border: 1px solid var(--color-border);
 }
 
 [data-theme="Nebula"] .nebula-post-author-avatar {
@@ -2276,7 +2266,7 @@
   align-items: center;
   justify-content: center;
   background: var(--nebula-tile-elevated);
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   font-size: 22px;
   font-weight: 600;
 }
@@ -2289,7 +2279,7 @@
   display: block;
   font-family: var(--nebula-font-display);
   font-size: 16px;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   font-weight: 500;
 }
 
@@ -2311,7 +2301,7 @@
   border-radius: 16px;
   background: rgba(128, 207, 255, 0.08);
   border: 1px solid var(--nebula-border-blue-soft);
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
   font-size: 12px;
   font-weight: 500;
   text-decoration: none;
@@ -2353,9 +2343,9 @@
 
 [data-theme="Nebula"] .post-prev-next-link:hover {
   transform: translateY(-2px);
-  background-color: color-mix(in srgb, var(--nebula-blue-accent) 10%, var(--nebula-tile));
+  background-color: color-mix(in srgb, var(--color-focus-ring) 10%, var(--nebula-tile));
   border-color: var(--nebula-border-blue);
-  box-shadow: 0 28px 70px -28px color-mix(in srgb, var(--nebula-blue-accent) 35%, transparent);
+  box-shadow: 0 28px 70px -28px color-mix(in srgb, var(--color-focus-ring) 35%, transparent);
 }
 
 [data-theme="Nebula"] .post-prev-next-link.next { text-align: right; }
@@ -2399,7 +2389,7 @@
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
 }
 
 [data-theme="Nebula"] .post-prev-next-link.next .post-prev-next-label { justify-content: flex-end; }
@@ -2408,7 +2398,7 @@
   font-family: var(--nebula-font-display);
   font-size: 15px;
   font-weight: 500;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2447,14 +2437,14 @@
 }
 
 [data-theme="Nebula"] .post-related-tab:hover:not(:disabled) {
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   background: rgba(255, 255, 255, 0.04);
 }
 
 [data-theme="Nebula"] .post-related-tab:disabled { opacity: 0.4; cursor: default; }
 
 [data-theme="Nebula"] .post-related-tab.active {
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
   background: rgba(128, 207, 255, 0.12);
   border-color: var(--nebula-border-blue-soft);
 }
@@ -2478,7 +2468,7 @@
 }
 
 [data-theme="Nebula"] .post-related-refresh:hover {
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   background: rgba(255, 255, 255, 0.05);
 }
 
@@ -2496,22 +2486,22 @@
   border-radius: var(--nebula-radius-lg);
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.06);
-  background-color: var(--nebula-card);
+  background-color: var(--color-bg-card);
   transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
 }
 
 [data-theme="Nebula"] .post-related-card:hover {
   transform: translateY(-2px);
-  background-color: color-mix(in srgb, var(--nebula-sky) 6%, var(--nebula-card));
+  background-color: color-mix(in srgb, var(--color-primary) 6%, var(--color-bg-card));
   border-color: rgba(255, 255, 255, 0.14);
-  box-shadow: 0 28px 70px -28px color-mix(in srgb, var(--nebula-sky) 30%, transparent);
+  box-shadow: 0 28px 70px -28px color-mix(in srgb, var(--color-primary) 30%, transparent);
 }
 
 [data-theme="Nebula"] .post-related-card-cover {
   position: relative;
   aspect-ratio: 16 / 10;
   overflow: hidden;
-  background: var(--nebula-surface-2);
+  background: var(--color-bg-soft);
 }
 
 [data-theme="Nebula"] .post-related-card-cover img {
@@ -2531,7 +2521,7 @@
   font-family: var(--nebula-font-mono);
   font-size: 10px;
   letter-spacing: 0.04em;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(6px);
 }
@@ -2549,7 +2539,7 @@
   border-radius: 999px;
   font-size: 10px;
   font-weight: 500;
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
   background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(6px);
   overflow: hidden;
@@ -2591,7 +2581,7 @@
   font-family: var(--nebula-font-display);
   font-size: 12px;
   font-weight: 500;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   line-height: 1.3;
   /* 单行 + 末尾省略号 */
   white-space: nowrap;
@@ -2619,7 +2609,7 @@
   padding: 32px 0;
   text-align: center;
   font-size: 13px;
-  color: var(--nebula-gray);
+  color: var(--color-text-dim);
 }
 
 [data-theme="Nebula"] .nebula-comments-wrap { margin-top: 48px; }
@@ -2638,7 +2628,7 @@
   font-family: var(--nebula-font-mono);
   font-size: 11px;
   letter-spacing: 0.2em;
-  color: var(--nebula-blue-accent);
+  color: var(--color-focus-ring);
   position: relative;
   z-index: 1;
 }
@@ -2672,7 +2662,7 @@
   padding: 24px;
   border-radius: var(--nebula-radius-lg);
   background: var(--nebula-tile);
-  border: 1px solid var(--nebula-border-subtle);
+  border: 1px solid var(--color-border);
 }
 
 /* 一个 thread = 一张完整卡片（主评论 + 所有回复都在里面）
@@ -2708,7 +2698,7 @@
 }
 [data-theme="Nebula"] .nebula-comments .reply-mention-card span,
 [data-theme="Nebula"] .nebula-comments .reply-mention-card div {
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
 }
 
 /* ─── 评论表单 ───
@@ -2725,7 +2715,7 @@
 
 /* 任意子级 input / textarea 聚焦 → 整个表单外框变蓝（单一 1px 边） */
 [data-theme="Nebula"] .comment-form:focus-within {
-  border-color: var(--nebula-blue-accent) !important;
+  border-color: var(--color-focus-ring) !important;
 }
 
 /* 表单内部的所有横向 / 纵向分隔线（header bar、info fields） */
@@ -2738,7 +2728,7 @@
 /* textarea 区：placeholder 提亮，文字提亮 */
 [data-theme="Nebula"] .comment-form textarea {
   color: rgba(225, 231, 238, 0.92) !important;
-  caret-color: var(--nebula-blue-accent);
+  caret-color: var(--color-focus-ring);
 }
 [data-theme="Nebula"] .comment-form textarea::placeholder {
   color: rgba(225, 231, 238, 0.35);
@@ -2757,7 +2747,7 @@
 /* 信息字段输入框（昵称/邮箱/网站）— placeholder + caret 同上 */
 [data-theme="Nebula"] .comment-form input {
   color: rgba(225, 231, 238, 0.92) !important;
-  caret-color: var(--nebula-blue-accent);
+  caret-color: var(--color-focus-ring);
 }
 [data-theme="Nebula"] .comment-form input::placeholder {
   color: rgba(225, 231, 238, 0.35);
@@ -2829,7 +2819,7 @@
   color: rgba(225, 231, 238, 0.45) !important;
 }
 [data-theme="Nebula"] .ai-reader-chat-dismiss:hover {
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
   background: rgba(255, 255, 255, 0.08) !important;
 }
 
@@ -2841,24 +2831,24 @@
 /* AI 角标：原 #0052D9 蓝底 → 用主题 sky 蓝 + 深底字（跟"提交评论"
    按钮一致的对比策略） */
 [data-theme="Nebula"] .ai-reader-chat span[style*="background: rgb(0, 82, 217)"] {
-  background: var(--nebula-blue-accent) !important;
+  background: var(--color-focus-ring) !important;
   color: var(--nebula-navy-deep) !important;
 }
 
 /* 机器人图标 #0052D9 → sky 蓝 */
 [data-theme="Nebula"] .ai-reader-chat i[style*="color: rgb(0, 82, 217)"] {
-  color: var(--nebula-blue-light) !important;
+  color: var(--color-text-sub) !important;
 }
 
 /* 用户消息气泡 #0052D9 蓝底 + 白字 → sky 蓝 + 深底字 */
 [data-theme="Nebula"] .ai-reader-chat div[style*="background: rgb(0, 82, 217)"] {
-  background: var(--nebula-blue-accent) !important;
+  background: var(--color-focus-ring) !important;
   color: var(--nebula-navy-deep) !important;
 }
 
 /* 发送按钮启用态 #0052D9 + 白字 → sky 蓝 + 深底字 */
 [data-theme="Nebula"] .ai-reader-chat button[style*="background: rgb(0, 82, 217)"] {
-  background: var(--nebula-blue-accent) !important;
+  background: var(--color-focus-ring) !important;
   color: var(--nebula-navy-deep) !important;
 }
 
@@ -2875,7 +2865,7 @@
 /* 文章标题（卡片内）+ Header 标签 #1a1a1a → 亮白 */
 [data-theme="Nebula"] .ai-reader-chat div[style*="color: rgb(26, 26, 26)"],
 [data-theme="Nebula"] .ai-reader-chat span[style*="color: rgb(26, 26, 26)"] {
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
 }
 
 /* 摘要文字 #888 → 半透白 */
@@ -2895,7 +2885,7 @@
 [data-theme="Nebula"] .ai-reader-chat button[style*="background: rgb(250, 250, 250)"]:hover {
   background: rgba(128, 207, 255, 0.12) !important;
   border-color: rgba(128, 207, 255, 0.36) !important;
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
 }
 
 /* Header 区域：#fafafa 浅底 → 深底 */
@@ -2925,7 +2915,7 @@
 [data-theme="Nebula"] .ai-reader-chat input:focus,
 [data-theme="Nebula"] .ai-reader-chat textarea:focus {
   outline: none !important;
-  border-color: var(--nebula-blue-accent) !important;
+  border-color: var(--color-focus-ring) !important;
 }
 
 /* AI 回复气泡 #f5f5f5 浅灰底 → 蓝染深底 */
@@ -2961,17 +2951,17 @@
   color: rgba(225, 231, 238, 0.92) !important;
 }
 [data-theme="Nebula"] .ai-reader-chat .ai-reader-md a {
-  color: var(--nebula-blue-light) !important;
+  color: var(--color-text-sub) !important;
 }
 [data-theme="Nebula"] .ai-reader-chat .ai-reader-md code {
   background: rgba(128, 207, 255, 0.1) !important;
-  color: var(--nebula-blue-light) !important;
+  color: var(--color-text-sub) !important;
 }
 [data-theme="Nebula"] .ai-reader-chat .ai-reader-md pre {
   background: rgba(0, 0, 0, 0.4) !important;
 }
 [data-theme="Nebula"] .ai-reader-chat .ai-reader-md blockquote {
-  border-left-color: var(--nebula-blue-accent) !important;
+  border-left-color: var(--color-focus-ring) !important;
   color: rgba(225, 231, 238, 0.7) !important;
 }
 
@@ -2982,11 +2972,11 @@
 /* 折叠态浮标按钮：底色保留品牌蓝，文字 inline 是 #fff —— 改成深色对比 */
 [data-theme="Nebula"] .ai-chat-bubble-fab {
   color: var(--nebula-navy-deep) !important;
-  background: var(--nebula-blue-accent) !important;
+  background: var(--color-focus-ring) !important;
   box-shadow: 0 4px 16px rgba(128, 207, 255, 0.32) !important;
 }
 [data-theme="Nebula"] .ai-chat-bubble-fab:hover {
-  background: var(--nebula-sky-hover) !important;
+  background: var(--color-primary-hover) !important;
 }
 
 /* 展开面板容器 */
@@ -3002,7 +2992,7 @@
   border-bottom-color: rgba(128, 207, 255, 0.16) !important;
 }
 [data-theme="Nebula"] .ai-chat-bubble-name {
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
 }
 [data-theme="Nebula"] .ai-chat-bubble-status {
   color: rgba(225, 231, 238, 0.55) !important;
@@ -3011,7 +3001,7 @@
   color: rgba(225, 231, 238, 0.5) !important;
 }
 [data-theme="Nebula"] .ai-chat-bubble-close:hover {
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
 }
 
 /* 空状态提示 */
@@ -3027,14 +3017,14 @@
 }
 [data-theme="Nebula"] .ai-chat-bubble-msg--user {
   color: var(--nebula-navy-deep) !important;
-  background: var(--nebula-blue-accent) !important;
+  background: var(--color-focus-ring) !important;
 }
 
 /* AI"打字中"动画 3 圆点 —— SVG 用 currentColor，跟随父气泡的 color。
    Nebula 暗底气泡上把点改成 sky 亮蓝（默认 hsl(228 97 42) 太深，跟
    半透蓝底融在一起看不清） */
 [data-theme="Nebula"] .ai-chat-bubble-typing {
-  color: var(--nebula-blue-accent) !important;
+  color: var(--color-focus-ring) !important;
 }
 
 /* 输入区分割线 + 输入框 */
@@ -3057,10 +3047,10 @@
 /* 发送按钮：底色保留品牌蓝，inline #fff 文字翻黑 */
 [data-theme="Nebula"] .ai-chat-bubble-send {
   color: var(--nebula-navy-deep) !important;
-  background: var(--nebula-blue-accent) !important;
+  background: var(--color-focus-ring) !important;
 }
 [data-theme="Nebula"] .ai-chat-bubble-send:hover:not(:disabled) {
-  background: var(--nebula-sky-hover) !important;
+  background: var(--color-primary-hover) !important;
 }
 
 /* 时间 / 中点分隔符 / 楼层号 在暗底上提亮 */
@@ -3079,8 +3069,8 @@
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: var(--nebula-blue-accent);
-  color: var(--nebula-black);
+  background: var(--color-focus-ring);
+  color: var(--color-bg-main);
   border: 0;
   font-size: 18px;
   cursor: pointer;
@@ -3100,8 +3090,8 @@
 
 /* ── 单行 footer：版权 / stats / 链接 横排，左右两端 ── */
 [data-theme="Nebula"] .nebula-footer {
-  border-top: 1px solid var(--nebula-border-subtle);
-  background: var(--nebula-black);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg-main);
   position: relative; /* 给 .nebula-back-to-top 做绝对定位的参照 */
   /* 默认情况（无备案号 / 单行内容）footer 高度跟 header 完全对齐：
      header 的 .nebula-header-inner 是 height: 64px，footer 用
@@ -3137,7 +3127,7 @@
   margin-left: 4px;
   font-family: var(--nebula-font-display);
   font-weight: 500;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
 }
 
 [data-theme="Nebula"] .nebula-footer-stat {
@@ -3151,11 +3141,11 @@
 [data-theme="Nebula"] .nebula-footer-stat strong {
   font-family: var(--nebula-font-display);
   font-weight: 600;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
 }
 [data-theme="Nebula"] .nebula-footer-stat i {
   font-size: 11px;
-  color: var(--nebula-sky);
+  color: var(--color-primary);
 }
 [data-theme="Nebula"] .nebula-footer-stat:not(:last-child)::after {
   content: '';
@@ -3217,7 +3207,7 @@
   transition: color 0.15s ease, background 0.15s ease;
 }
 [data-theme="Nebula"] .nebula-footer-beian:hover {
-  color: var(--nebula-sky);
+  color: var(--color-primary);
   background: rgba(128, 207, 255, 0.06);
 }
 
@@ -3249,7 +3239,7 @@
   transition: fill 0.2s ease;
 }
 [data-theme="Nebula"] .nebula-footer-beian:hover .nebula-footer-icp-icon path {
-  fill: var(--nebula-blue-accent) !important;
+  fill: var(--color-focus-ring) !important;
 }
 
 /* 链接组（右） */
@@ -3272,7 +3262,7 @@
   transition: color 0.15s ease, background 0.15s ease;
 }
 [data-theme="Nebula"] .nebula-footer-links a:hover {
-  color: var(--nebula-sky);
+  color: var(--color-primary);
   background: rgba(128, 207, 255, 0.08);
 }
 [data-theme="Nebula"] .nebula-footer-links a i {
@@ -3351,7 +3341,7 @@
 }
 [data-theme="Nebula"] .nebula-back-to-top:hover {
   transform: translateY(-50%) scale(1.12);
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   border-color: rgba(128, 207, 255, 0.4);
   background: rgba(20, 24, 30, 0.96);
 }
@@ -3390,7 +3380,7 @@
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
           backdrop-filter: blur(20px) saturate(160%);
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   animation: nebulaMiniMusicIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   /* lift 滚动避让 footer 时平滑过渡 */
   transition: transform 0.2s ease-out;
@@ -3411,7 +3401,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
   text-decoration: none;
   transition: transform 0.25s ease;
 }
@@ -3434,7 +3424,7 @@
   font-family: var(--nebula-font-display);
   font-size: 13px;
   font-weight: 500;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3471,18 +3461,18 @@
   transition: color 0.15s ease, background 0.15s ease;
 }
 [data-theme="Nebula"] .nebula-mini-music-ctrl button:hover {
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   background: rgba(255, 255, 255, 0.06);
 }
 [data-theme="Nebula"] .nebula-mini-music-play {
   width: 30px !important;
   height: 30px !important;
-  background: var(--nebula-blue-accent) !important;
+  background: var(--color-focus-ring) !important;
   color: var(--nebula-navy-deep) !important;
   font-size: 12px !important;
 }
 [data-theme="Nebula"] .nebula-mini-music-play:hover {
-  background: var(--nebula-sky-hover) !important;
+  background: var(--color-primary-hover) !important;
   color: var(--nebula-navy-deep) !important;
 }
 
@@ -3504,7 +3494,7 @@
   margin-left: 4px;
 }
 [data-theme="Nebula"] .nebula-mini-music-close:hover {
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   background: rgba(255, 255, 255, 0.06);
 }
 
@@ -3530,7 +3520,7 @@
 }
 [data-theme="Nebula"] .nebula-footer-links a[title="音乐"]:hover i,
 [data-theme="Nebula"] .nebula-footer-auth-btn:hover i {
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
 }
 [data-theme="Nebula"] .nebula-footer-tag .nebula-footer-utterlog-logo,
 [data-theme="Nebula"] .nebula-footer-music-logo {
@@ -3592,7 +3582,7 @@
 /* logo 内部 cutout 用透明而不是纯黑，避免 footer 黑底上看不到内圈线条
    currentColor 控制外圆，inner 透明让背景透出做出"双色"效果 */
 [data-theme="Nebula"] .nebula-footer-tag .nebula-footer-utterlog-logo path:nth-child(2) {
-  fill: var(--nebula-black) !important;
+  fill: var(--color-bg-main) !important;
 }
 
 /* ── 登录按钮 + 弹窗 ── */
@@ -3609,7 +3599,7 @@
   cursor: pointer;
 }
 [data-theme="Nebula"] .nebula-footer-auth-btn:hover {
-  color: var(--nebula-sky);
+  color: var(--color-primary);
 }
 
 /* 弹窗：从按钮上方弹出 */
@@ -3631,14 +3621,14 @@
   margin: 0 0 14px;
   font-size: 14px;
   font-weight: 600;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   display: flex;
   align-items: center;
   gap: 6px;
 }
 [data-theme="Nebula"] .nebula-footer-login-title i {
   font-size: 12px;
-  color: var(--nebula-sky);
+  color: var(--color-primary);
 }
 
 [data-theme="Nebula"] .nebula-footer-login-form {
@@ -3659,13 +3649,13 @@
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 4px;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   font-size: 13px;
   outline: none;
   transition: border-color 0.15s ease;
 }
 [data-theme="Nebula"] .nebula-footer-login-form input:focus {
-  border-color: var(--nebula-sky);
+  border-color: var(--color-primary);
 }
 
 [data-theme="Nebula"] .nebula-footer-totp-input {
@@ -3684,7 +3674,7 @@
 [data-theme="Nebula"] .nebula-footer-login-submit {
   width: 100%;
   padding: 9px;
-  background: var(--nebula-sky);
+  background: var(--color-primary);
   color: var(--nebula-navy-deep);
   border: 0;
   border-radius: 4px;
@@ -3694,7 +3684,7 @@
   transition: background 0.15s ease, opacity 0.15s ease;
 }
 [data-theme="Nebula"] .nebula-footer-login-submit:hover {
-  background: var(--nebula-sky-hover);
+  background: var(--color-primary-hover);
 }
 [data-theme="Nebula"] .nebula-footer-login-submit:disabled {
   opacity: 0.6;
@@ -3727,7 +3717,7 @@
   width: 100%;
   padding: 9px;
   background: transparent;
-  color: var(--nebula-sky);
+  color: var(--color-primary);
   border: 1px solid rgba(128, 207, 255, 0.35);
   border-radius: 4px;
   font-size: 12px;
@@ -3736,7 +3726,7 @@
 }
 [data-theme="Nebula"] .nebula-footer-login-passkey:hover {
   background: rgba(128, 207, 255, 0.08);
-  border-color: var(--nebula-sky);
+  border-color: var(--color-primary);
 }
 
 [data-theme="Nebula"] .nebula-footer-login-actions {
@@ -3755,7 +3745,7 @@
   transition: color 0.15s ease, border-color 0.15s ease;
 }
 [data-theme="Nebula"] .nebula-footer-login-back:hover {
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   border-color: rgba(255, 255, 255, 0.2);
 }
 [data-theme="Nebula"] .nebula-footer-login-actions .nebula-footer-login-submit {
@@ -3801,16 +3791,16 @@
   width: 16px !important;
   text-align: center !important;
   flex-shrink: 0 !important;
-  color: var(--nebula-sky) !important;
+  color: var(--color-primary) !important;
   line-height: 1 !important;
 }
 [data-theme="Nebula"] .nebula-footer-login-menu .nebula-footer-login-menu-item:hover,
 [data-theme="Nebula"] .nebula-footer-login-menu-item:hover {
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
   background: rgba(255, 255, 255, 0.04) !important;
 }
 [data-theme="Nebula"] .nebula-footer-login-logout:hover {
-  color: var(--nebula-sky) !important;
+  color: var(--color-primary) !important;
 }
 
 /* ============================================================ */
@@ -3867,7 +3857,7 @@
   border-radius: 0;
   background: transparent;
   border: 0;
-  color: var(--nebula-blue-accent);
+  color: var(--color-focus-ring);
   font-size: 22px;
 }
 
@@ -3883,11 +3873,11 @@
     'Segoe UI', sans-serif;
   font-weight: 500;
   letter-spacing: -0.01em;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
 }
 
 [data-theme="Nebula"] .blog-page-title-subtitle {
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
 }
 
 [data-theme="Nebula"] .blog-page-title-meta {
@@ -3895,11 +3885,11 @@
   border-radius: 0;
   background: transparent;
   padding: 0;
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
 }
 
 [data-theme="Nebula"] .blog-page-title-meta strong {
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   font-family: var(--nebula-font-display);
   font-weight: 500;
 }
@@ -3919,10 +3909,10 @@
 }
 [data-theme="Nebula"] .coding-title-stat {
   border-right-color: var(--nebula-border-blue-soft);
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
 }
 [data-theme="Nebula"] .coding-title-stat strong {
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   font-family: var(--nebula-font-display);
 }
 
@@ -3949,9 +3939,9 @@
 }
 [data-theme="Nebula"] .archive-cat-card:hover {
   transform: translateY(-2px);
-  background-color: color-mix(in srgb, var(--nebula-blue-accent) 10%, var(--nebula-card)) !important;
+  background-color: color-mix(in srgb, var(--color-focus-ring) 10%, var(--color-bg-card)) !important;
   border-color: var(--nebula-border-blue) !important;
-  box-shadow: 0 34px 84px -30px color-mix(in srgb, var(--nebula-blue-accent) 35%, transparent);
+  box-shadow: 0 34px 84px -30px color-mix(in srgb, var(--color-focus-ring) 35%, transparent);
 }
 
 /* ============================================================ */
@@ -3963,8 +3953,8 @@
 [data-theme="Nebula"] textarea,
 [data-theme="Nebula"] select {
   background: var(--nebula-input);
-  border: 1px solid var(--nebula-border-subtle);
-  color: var(--nebula-white);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-main);
   border-radius: var(--nebula-radius-sm);
   font-family: var(--nebula-font-body);
 }
@@ -3972,7 +3962,7 @@
 [data-theme="Nebula"] textarea:focus,
 [data-theme="Nebula"] select:focus {
   outline: none;
-  border-color: var(--nebula-blue-accent);
+  border-color: var(--color-focus-ring);
   box-shadow: 0 0 0 3px rgba(128, 207, 255, 0.18);
 }
 [data-theme="Nebula"] input::placeholder,
@@ -4020,13 +4010,13 @@
 [data-theme="Nebula"] .block-annotation-input {
   background: rgba(0, 0, 0, 0.35) !important;
   border-color: rgba(128, 207, 255, 0.18) !important;
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
 }
 [data-theme="Nebula"] .block-annotation-input::placeholder {
   color: rgba(225, 231, 238, 0.42);
 }
 [data-theme="Nebula"] .block-annotation-input:focus {
-  border-color: var(--nebula-blue-accent) !important;
+  border-color: var(--color-focus-ring) !important;
 }
 
 /* PostNavigation / Related posts 在 Nebula 容器里时给点上下间距 */
@@ -4071,7 +4061,7 @@
    原始 HTML 字符串 #1a1a1a）才白。改用类钩子后跟 React 序列化形
    态完全解耦。 */
 [data-theme="Nebula"] .moments-toolbar-title {
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
 }
 /* 兜底：保留 inline-style 属性匹配（覆盖 SSR 原始 HTML 形态 + 极
    端情况下没带 class 的旧缓存） */
@@ -4079,10 +4069,10 @@
 [data-theme="Nebula"] .moments-toolbar [style*="color: #1a1a1a" i],
 [data-theme="Nebula"] .moments-toolbar [style*="rgb(26, 26, 26)" i],
 [data-theme="Nebula"] .moments-toolbar [style*="rgb(26,26,26)" i] {
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
 }
 [data-theme="Nebula"] .moments-toolbar [style*="background:#4a9e8e"] {
-  background: var(--nebula-sky) !important;
+  background: var(--color-primary) !important;
 }
 [data-theme="Nebula"] .moments-toolbar [style*="background:#e2dfd8"] {
   background: rgba(255, 255, 255, 0.08) !important;
@@ -4122,7 +4112,7 @@
 /* popover 中"年份"大字（默认 #1a1a1a） → 白 */
 [data-theme="Nebula"] .moments-popover button[style*="font-weight:600"],
 [data-theme="Nebula"] .moments-popover button[style*="font-weight: 600"] {
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
 }
 /* 月份小 chip：light bg → 半透白底 */
 [data-theme="Nebula"] .moments-popover button[style*="font-size:11px"] {
@@ -4148,15 +4138,15 @@
   color: rgba(225, 231, 238, 0.65) !important;
 }
 [data-theme="Nebula"] .moments-month-chip.is-active {
-  background: var(--nebula-blue-accent) !important;
-  border-color: var(--nebula-blue-accent) !important;
+  background: var(--color-focus-ring) !important;
+  border-color: var(--color-focus-ring) !important;
   color: var(--nebula-navy-deep) !important;
 }
 [data-theme="Nebula"] .moments-year-btn {
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
 }
 [data-theme="Nebula"] .moments-year-btn.is-active {
-  color: var(--nebula-blue-accent) !important;
+  color: var(--color-focus-ring) !important;
 }
 /* 兼容旧的 inline-style 匹配（带空格） */
 [data-theme="Nebula"] .moments-popover button[style*="font-size: 12px"],
@@ -4185,7 +4175,7 @@
 /* badge / 发布按钮默认色（绿色 #4a9e8e）→ sky 蓝；mood 选中时保留 tag 色 */
 [data-theme="Nebula"] .moments-composer-badge.is-default,
 [data-theme="Nebula"] .moments-composer-submit.is-default {
-  background: var(--nebula-sky) !important;
+  background: var(--color-primary) !important;
   color: var(--nebula-navy-deep) !important;
   box-shadow: 0 2px 8px rgba(128, 207, 255, 0.25) !important;
 }
@@ -4210,13 +4200,13 @@
 [data-theme="Nebula"] .moments-composer button[style*="1px solid"]:not(.moments-composer-submit):hover {
   border-color: rgba(128, 207, 255, 0.5) !important;
   background: rgba(128, 207, 255, 0.1) !important;
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
 }
 /* 位置已选中（绿色系）→ 蓝色系，与 Nebula 主题统一 */
 [data-theme="Nebula"] .moments-composer [style*="rgba(74,158,142,0.08)"],
 [data-theme="Nebula"] .moments-composer [style*="rgba(74, 158, 142, 0.08)"] {
   background: rgba(128, 207, 255, 0.1) !important;
-  color: var(--nebula-blue-accent) !important;
+  color: var(--color-focus-ring) !important;
 }
 [data-theme="Nebula"] .moments-composer [style*="rgba(74,158,142,0.2)"],
 [data-theme="Nebula"] .moments-composer [style*="rgba(74, 158, 142, 0.2)"] {
@@ -4227,7 +4217,7 @@
 [data-theme="Nebula"] .moments-composer [style*="color:#2b2a28" i],
 [data-theme="Nebula"] .moments-composer [style*="color: #2b2a28" i],
 [data-theme="Nebula"] .moments-composer textarea {
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
 }
 [data-theme="Nebula"] .moments-composer textarea::placeholder {
   color: rgba(255, 255, 255, 0.35) !important;
@@ -4264,7 +4254,7 @@
 }
 /* 定位按钮激活态：青绿色 #4a9e8e → sky 蓝 */
 [data-theme="Nebula"] .moments-composer [style*="color:#4a9e8e"] {
-  color: var(--nebula-sky) !important;
+  color: var(--color-primary) !important;
 }
 [data-theme="Nebula"] .moments-composer [style*="rgba(74,158,142,0.08)"] {
   background: rgba(128, 207, 255, 0.1) !important;
@@ -4274,10 +4264,10 @@
 }
 
 /* moment-card 跟 GitHub 风卡片对齐：极深蓝黑底 + 极淡白边，
-   bg 换 var(--nebula-card) #0B1220（比 tile 更深、更纯，避开"灰蓝"），
+   bg 换 var(--color-bg-card) #0B1220（比 tile 更深、更纯，避开"灰蓝"），
    边 6% 白半透（比蓝边更通用、更克制）。其他主题保持原 polaroid 暖纸风。 */
 [data-theme="Nebula"] .moment-card {
-  background: var(--nebula-card) !important;
+  background: var(--color-bg-card) !important;
   border: 1px solid rgba(255, 255, 255, 0.06) !important;
   border-radius: 4px !important;
   overflow: hidden !important;
@@ -4290,7 +4280,7 @@
 /* 文字层级：正文亮白，日期 / meta / source 用半透白拉开层次 */
 [data-theme="Nebula"] .moment-card,
 [data-theme="Nebula"] .moment-card * {
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
 }
 /* 顶部日期（首行 span） */
 [data-theme="Nebula"] .moment-card > div > div:first-child > span {
@@ -4332,14 +4322,14 @@
   font-family: var(--nebula-font-display);
   font-size: 16px;
   font-weight: 600;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 [data-theme="Nebula"] .nebula-archive-section-head h2 i {
-  color: var(--nebula-sky);
+  color: var(--color-primary);
   font-size: 14px;
 }
 
@@ -4349,7 +4339,7 @@
 }
 
 [data-theme="Nebula"] .nebula-archive-card {
-  background: var(--nebula-card);
+  background: var(--color-bg-card);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 15px;
   padding: 20px 22px;
@@ -4398,13 +4388,13 @@
 [data-theme="Nebula"] .nebula-archive-cat-card:hover {
   transform: translateY(-2px);
   border-color: rgba(255, 255, 255, 0.14);
-  box-shadow: 0 28px 70px -28px color-mix(in srgb, var(--nebula-sky) 30%, transparent);
+  box-shadow: 0 28px 70px -28px color-mix(in srgb, var(--color-primary) 30%, transparent);
 }
 
 [data-theme="Nebula"] .nebula-archive-cat-watermark {
   position: absolute;
   right: -12px; top: 50%; transform: translateY(-50%);
-  font-size: 96px; opacity: 0.05; color: var(--nebula-white);
+  font-size: 96px; opacity: 0.05; color: var(--color-text-main);
   pointer-events: none;
   transition: transform 0.4s ease, opacity 0.4s ease;
 }
@@ -4419,13 +4409,13 @@
 }
 [data-theme="Nebula"] .nebula-archive-cat-name {
   display: flex; align-items: center; gap: 8px;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   font-family: var(--nebula-font-display);
   font-size: 15px; font-weight: 600;
   text-decoration: none;
 }
-[data-theme="Nebula"] .nebula-archive-cat-name i { color: var(--nebula-sky); font-size: 16px; }
-[data-theme="Nebula"] .nebula-archive-cat-name:hover { color: var(--nebula-sky); }
+[data-theme="Nebula"] .nebula-archive-cat-name i { color: var(--color-primary); font-size: 16px; }
+[data-theme="Nebula"] .nebula-archive-cat-name:hover { color: var(--color-primary); }
 [data-theme="Nebula"] .nebula-archive-cat-count {
   font-family: var(--nebula-font-mono); font-size: 11px; color: rgba(255, 255, 255, 0.45);
 }
@@ -4438,7 +4428,7 @@
   border-radius: 999px;
   background: rgba(128, 207, 255, 0.08);
   border: 1px solid rgba(128, 207, 255, 0.18);
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
 }
 
 [data-theme="Nebula"] .nebula-archive-cat-desc {
@@ -4456,9 +4446,9 @@
   position: relative; z-index: 1;
   transition: color 0.2s ease;
 }
-[data-theme="Nebula"] .nebula-archive-cat-latest:hover { color: var(--nebula-white); }
+[data-theme="Nebula"] .nebula-archive-cat-latest:hover { color: var(--color-text-main); }
 [data-theme="Nebula"] .nebula-archive-cat-latest > i {
-  font-size: 10px; color: var(--nebula-sky); flex-shrink: 0;
+  font-size: 10px; color: var(--color-primary); flex-shrink: 0;
 }
 [data-theme="Nebula"] .nebula-archive-cat-latest > span {
   flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -4472,7 +4462,7 @@
 [data-theme="Nebula"] .nebula-archive-tag-cloud {
   display: flex; flex-wrap: wrap; gap: 6px;
   padding: 16px 18px;
-  background: var(--nebula-card);
+  background: var(--color-bg-card);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 15px;
 }
@@ -4482,15 +4472,15 @@
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
   font-size: 12px;
   text-decoration: none;
   transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 [data-theme="Nebula"] .nebula-archive-tag:hover {
-  border-color: var(--nebula-sky);
+  border-color: var(--color-primary);
   background: rgba(128, 207, 255, 0.08);
-  color: var(--nebula-sky);
+  color: var(--color-primary);
 }
 [data-theme="Nebula"] .nebula-archive-tag em {
   font-style: normal; font-family: var(--nebula-font-mono);
@@ -4502,7 +4492,7 @@
   display: flex; flex-direction: column; gap: 16px;
 }
 [data-theme="Nebula"] .nebula-archive-year {
-  background: var(--nebula-card);
+  background: var(--color-bg-card);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 15px;
   overflow: hidden;
@@ -4515,11 +4505,11 @@
 [data-theme="Nebula"] .nebula-archive-year-head a {
   font-family: var(--nebula-font-display);
   font-size: 22px; font-weight: 700;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   text-decoration: none;
   letter-spacing: -0.01em;
 }
-[data-theme="Nebula"] .nebula-archive-year-head a:hover { color: var(--nebula-sky); }
+[data-theme="Nebula"] .nebula-archive-year-head a:hover { color: var(--color-primary); }
 [data-theme="Nebula"] .nebula-archive-year-head span {
   font-family: var(--nebula-font-mono); font-size: 11px; color: rgba(255, 255, 255, 0.45);
 }
@@ -4538,7 +4528,7 @@
 [data-theme="Nebula"] .nebula-archive-month-head span {
   font-family: var(--nebula-font-display);
   font-size: 13px; font-weight: 600;
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
 }
 [data-theme="Nebula"] .nebula-archive-month-head em {
   font-style: normal; font-family: var(--nebula-font-mono);
@@ -4563,14 +4553,14 @@
   color: rgba(255, 255, 255, 0.4);
 }
 [data-theme="Nebula"] .nebula-archive-post-icon {
-  font-size: 12px; color: var(--nebula-sky);
+  font-size: 12px; color: var(--color-primary);
 }
 [data-theme="Nebula"] .nebula-archive-post-title {
-  font-size: 13px; color: var(--nebula-white);
+  font-size: 13px; color: var(--color-text-main);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 [data-theme="Nebula"] .nebula-archive-post:hover .nebula-archive-post-title {
-  color: var(--nebula-sky);
+  color: var(--color-primary);
 }
 [data-theme="Nebula"] .nebula-archive-post-meta {
   display: flex; gap: 12px;
@@ -4604,7 +4594,7 @@
 }
 [data-theme="Nebula"] .btn-danger {
   background-color: #b3261e;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
 }
 [data-theme="Nebula"] .btn-danger:hover {
   background-color: #d44438;
@@ -4633,7 +4623,7 @@
 [data-theme="Nebula"] .coding-page {
   --coding-content-width: min(var(--nebula-content-max), calc(100% - (var(--nebula-content-pad) * 2)));
   background: #121212 !important;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
 }
 [data-theme="Nebula"] .coding-hero {
   max-width: var(--nebula-shell-max);
@@ -4644,16 +4634,16 @@
   background-image:
     linear-gradient(rgba(168, 199, 250, 0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(168, 199, 250, 0.04) 1px, transparent 1px);
-  border-bottom-color: var(--nebula-border-subtle);
+  border-bottom-color: var(--color-border);
 }
 [data-theme="Nebula"] .coding-eyebrow {
   background: rgba(128, 207, 255, 0.08);
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
   border-color: var(--nebula-border-blue-soft);
 }
 [data-theme="Nebula"] .coding-hero-title em,
 [data-theme="Nebula"] .coding-section-head h3 em {
-  color: var(--nebula-sky); /* 原 #8f2f24 burgundy → 天蓝 */
+  color: var(--color-primary); /* 原 #8f2f24 burgundy → 天蓝 */
 }
 /* "代码持续生长" 中文主标 字号 -5px */
 [data-theme="Nebula"] .coding-hero-title span {
@@ -4674,7 +4664,7 @@
 [data-theme="Nebula"] .coding-notice {
   background: var(--nebula-tile);
   border-color: var(--nebula-border-blue-soft);
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
   border-radius: 15px;
 }
 
@@ -4721,7 +4711,7 @@
 
 /* ---- highlight.js 配色（globals.css 内 .hljs-* 是 Gruvbox light）---- */
 [data-theme="Nebula"] .hljs {
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   background: var(--nebula-input);
 }
 [data-theme="Nebula"] .hljs-comment,
@@ -4732,7 +4722,7 @@
 [data-theme="Nebula"] .hljs-keyword,
 [data-theme="Nebula"] .hljs-selector-tag,
 [data-theme="Nebula"] .hljs-addition {
-  color: var(--nebula-sky);
+  color: var(--color-primary);
 }
 [data-theme="Nebula"] .hljs-number,
 [data-theme="Nebula"] .hljs-string,
@@ -4747,7 +4737,7 @@
 [data-theme="Nebula"] .hljs-name,
 [data-theme="Nebula"] .hljs-selector-id,
 [data-theme="Nebula"] .hljs-selector-class {
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
 }
 [data-theme="Nebula"] .hljs-attribute,
 [data-theme="Nebula"] .hljs-tag .hljs-attr,
@@ -4781,7 +4771,7 @@
    #131314 拉开 9 个亮度档，代码块边界肉眼可见 */
 [data-theme="Nebula"] .code-block-wrapper {
   border-radius: 15px;
-  border: 1px solid var(--nebula-border-subtle);
+  border: 1px solid var(--color-border);
 }
 [data-theme="Nebula"] .code-block-wrapper pre {
   background: #0a0d14 !important;
@@ -4791,19 +4781,19 @@
 }
 [data-theme="Nebula"] .code-expand-btn {
   background: #0a0d14;
-  color: var(--nebula-blue-light);
-  border-top-color: var(--nebula-border-subtle);
+  color: var(--color-text-sub);
+  border-top-color: var(--color-border);
 }
 [data-theme="Nebula"] .code-expand-btn:hover {
-  color: var(--nebula-white);
+  color: var(--color-text-main);
 }
 [data-theme="Nebula"] .code-copy-btn {
   background: rgba(225, 231, 238, 0.08);
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
 }
 [data-theme="Nebula"] .code-copy-btn:hover {
   background: rgba(225, 231, 238, 0.16);
-  color: var(--nebula-white);
+  color: var(--color-text-main);
 }
 
 /* ─── Prism token 配色（参考 Azure 用 prism-tomorrow，但调成 Nebula
@@ -4845,7 +4835,7 @@
 [data-theme="Nebula"] .blog-prose pre .token.atrule,
 [data-theme="Nebula"] .blog-prose pre .token.keyword,
 [data-theme="Nebula"] .blog-prose pre .token.builtin {
-  color: var(--nebula-blue-accent);
+  color: var(--color-focus-ring);
 }
 [data-theme="Nebula"] .blog-prose pre .token.string,
 [data-theme="Nebula"] .blog-prose pre .token.char,
@@ -4886,7 +4876,7 @@
 /* 高亮整行 */
 [data-theme="Nebula"] .blog-prose pre .code-line.highlight-line {
   background: rgba(128, 207, 255, 0.08);
-  border-left: 3px solid var(--nebula-blue-accent);
+  border-left: 3px solid var(--color-focus-ring);
   margin-left: -20px;
   padding-left: 17px;
 }
@@ -4894,8 +4884,8 @@
 /* ---- md-download-card：tokens 化已支持，对齐到 Nebula ---- */
 [data-theme="Nebula"] .md-download-card {
   --md-download-bg: var(--nebula-tile);
-  --md-download-accent: var(--nebula-sky);
-  --md-download-text: var(--nebula-white);
+  --md-download-accent: var(--color-primary);
+  --md-download-text: var(--color-text-main);
   border-radius: 15px;
   border: 1px solid var(--nebula-border-blue-soft);
 }
@@ -4909,10 +4899,10 @@
 }
 [data-theme="Nebula"] .footprint-card:hover {
   border-color: var(--nebula-border-blue);
-  box-shadow: 0 28px 70px -28px color-mix(in srgb, var(--nebula-sky) 35%, transparent);
+  box-shadow: 0 28px 70px -28px color-mix(in srgb, var(--color-primary) 35%, transparent);
 }
 [data-theme="Nebula"] .footprint-card.is-active {
-  box-shadow: 0 28px 70px -28px color-mix(in srgb, var(--nebula-sky) 50%, transparent);
+  box-shadow: 0 28px 70px -28px color-mix(in srgb, var(--color-primary) 50%, transparent);
 }
 [data-theme="Nebula"] .footprint-card-cover {
   background: var(--nebula-near-black);
@@ -4937,18 +4927,18 @@
 [data-theme="Nebula"] .footprint-mapbox-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip,
 [data-theme="Nebula"] .footprint-mapbox-popup.mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-tip,
 [data-theme="Nebula"] .footprint-mapbox-popup.mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {
-  border-top-color: var(--nebula-card) !important;
+  border-top-color: var(--color-bg-card) !important;
 }
 [data-theme="Nebula"] .footprint-mapbox-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-tip,
 [data-theme="Nebula"] .footprint-mapbox-popup.mapboxgl-popup-anchor-top-left .mapboxgl-popup-tip,
 [data-theme="Nebula"] .footprint-mapbox-popup.mapboxgl-popup-anchor-top-right .mapboxgl-popup-tip {
-  border-bottom-color: var(--nebula-card) !important;
+  border-bottom-color: var(--color-bg-card) !important;
 }
 [data-theme="Nebula"] .footprint-mapbox-popup.mapboxgl-popup-anchor-left .mapboxgl-popup-tip {
-  border-right-color: var(--nebula-card) !important;
+  border-right-color: var(--color-bg-card) !important;
 }
 [data-theme="Nebula"] .footprint-mapbox-popup.mapboxgl-popup-anchor-right .mapboxgl-popup-tip {
-  border-left-color: var(--nebula-card) !important;
+  border-left-color: var(--color-bg-card) !important;
 }
 /* popup 内容外层加 Nebula 蓝细边 + 阴影更深 */
 [data-theme="Nebula"] .footprint-mapbox-popup .mapboxgl-popup-content {
@@ -4957,7 +4947,7 @@
 }
 /* 卡片之间的分隔线翻深 */
 [data-theme="Nebula"] .footprint-map-popup-card {
-  border-top-color: var(--nebula-border-subtle) !important;
+  border-top-color: var(--color-border) !important;
 }
 [data-theme="Nebula"] .footprint-map-popup-card:hover {
   background: rgba(128, 207, 255, 0.06) !important;
@@ -4993,13 +4983,13 @@
   transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
 }
 [data-theme="Nebula"] .links-group-tab:hover {
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   border-color: rgba(255, 255, 255, 0.18);
 }
 [data-theme="Nebula"] .links-group-tab.active {
-  background: var(--nebula-sky);
+  background: var(--color-primary);
   color: var(--nebula-navy-deep);
-  border-color: var(--nebula-sky);
+  border-color: var(--color-primary);
 }
 
 [data-theme="Nebula"] .links-view-toggle {
@@ -5023,10 +5013,10 @@
   border-right: 1px solid rgba(255, 255, 255, 0.06);
 }
 [data-theme="Nebula"] .links-view-btn:hover {
-  color: var(--nebula-white); background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text-main); background: rgba(255, 255, 255, 0.04);
 }
 [data-theme="Nebula"] .links-view-btn.active {
-  color: var(--nebula-sky); background: rgba(128, 207, 255, 0.1);
+  color: var(--color-primary); background: rgba(128, 207, 255, 0.1);
 }
 
 /* ── card 视图 ── 大卡片，name + description + 右侧外链箭头 */
@@ -5039,14 +5029,14 @@
   border: 1px solid rgba(255, 255, 255, 0.06) !important;
   border-radius: 4px !important;
   padding: 16px 18px !important;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease !important;
 }
 [data-theme="Nebula"] .friend-link-card-item:hover {
   background: #161616 !important;
   border-color: rgba(128, 207, 255, 0.35) !important;
   transform: translateY(-1px);
-  box-shadow: 0 12px 32px -12px color-mix(in srgb, var(--nebula-sky) 30%, transparent) !important;
+  box-shadow: 0 12px 32px -12px color-mix(in srgb, var(--color-primary) 30%, transparent) !important;
 }
 [data-theme="Nebula"] .friend-link-card-item .friend-link-logo {
   width: 40px; height: 40px;
@@ -5058,7 +5048,7 @@
 [data-theme="Nebula"] .friend-link-group-title,
 [data-theme="Nebula"] [style*="color:#1a1a1a" i],
 [data-theme="Nebula"] [style*="color: #1a1a1a" i] {
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
 }
 [data-theme="Nebula"] .friend-link-group-count,
 [data-theme="Nebula"] [style*="color:#999" i],
@@ -5116,7 +5106,7 @@
   transition: color 0.15s ease, background 0.15s ease;
 }
 [data-theme="Nebula"] .dice-modal-close:hover {
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   background: rgba(255, 255, 255, 0.06);
   border-radius: 50%;
 }
@@ -5125,7 +5115,7 @@
 [data-theme="Nebula"] .dice-icon {
   font-size: 160px;
   line-height: 1;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   filter: drop-shadow(0 0 40px rgba(128, 207, 255, 0.45));
 }
 [data-theme="Nebula"] .dice-icon--rolling {
@@ -5187,7 +5177,7 @@
   font-family: var(--nebula-font-display);
   font-size: 15px;
   font-weight: 600;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
 }
 [data-theme="Nebula"] .dice-result-info p {
   margin: 0 0 6px;
@@ -5202,7 +5192,7 @@
 [data-theme="Nebula"] .dice-result-url {
   font-family: var(--nebula-font-mono);
   font-size: 11px;
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5236,17 +5226,17 @@
 [data-theme="Nebula"] .dice-btn-secondary:hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.2);
-  color: var(--nebula-white);
+  color: var(--color-text-main);
 }
 [data-theme="Nebula"] .dice-btn-primary {
-  background: var(--nebula-blue-accent);
-  border: 1px solid var(--nebula-blue-accent);
+  background: var(--color-focus-ring);
+  border: 1px solid var(--color-focus-ring);
   color: var(--nebula-navy-deep);
   font-weight: 600;
 }
 [data-theme="Nebula"] .dice-btn-primary:hover {
-  background: var(--nebula-sky-hover);
-  border-color: var(--nebula-sky-hover);
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
 }
 
 @media (max-width: 640px) {
@@ -5262,9 +5252,9 @@
   color: rgba(225, 231, 238, 0.75) !important;
 }
 [data-theme="Nebula"] .links-action-btn:hover {
-  border-color: var(--nebula-blue-accent) !important;
+  border-color: var(--color-focus-ring) !important;
   background: rgba(128, 207, 255, 0.12) !important;
-  color: var(--nebula-blue-accent) !important;
+  color: var(--color-focus-ring) !important;
 }
 
 /* ── 申请友链弹窗暗色适配 —— 用结构选择器代替 inline-style 字符串匹配
@@ -5282,14 +5272,14 @@
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   border-radius: 4px !important;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6) !important;
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
 }
 
 /* 弹窗内所有 div / p / h1-h6 / span / label —— 强制继承父级文字色 */
 [data-theme="Nebula"] .links-apply-modal h1,
 [data-theme="Nebula"] .links-apply-modal h2,
 [data-theme="Nebula"] .links-apply-modal h3 {
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
 }
 [data-theme="Nebula"] .links-apply-modal label {
   color: rgba(225, 231, 238, 0.7) !important;
@@ -5328,7 +5318,7 @@
 [data-theme="Nebula"] .links-apply-modal textarea {
   background: rgba(255, 255, 255, 0.04) !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
 }
 [data-theme="Nebula"] .links-apply-modal input::placeholder,
 [data-theme="Nebula"] .links-apply-modal textarea::placeholder {
@@ -5337,7 +5327,7 @@
 /* focus 态 —— 覆盖 onFocus 设的 var(--color-primary)（Nebula 解析成 sky） */
 [data-theme="Nebula"] .links-apply-modal input:focus,
 [data-theme="Nebula"] .links-apply-modal textarea:focus {
-  border-color: var(--nebula-blue-accent) !important;
+  border-color: var(--color-focus-ring) !important;
   outline: none !important;
   box-shadow: none !important;
 }
@@ -5352,7 +5342,7 @@
   color: rgba(225, 231, 238, 0.5) !important;
 }
 [data-theme="Nebula"] .links-apply-modal > div:first-child button:hover {
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
   background: rgba(255, 255, 255, 0.06) !important;
 }
 
@@ -5369,13 +5359,13 @@
 
 /* footer 提交申请按钮（var(--color-primary) 蓝胶囊）—— 字色加深、加粗 */
 [data-theme="Nebula"] .links-apply-modal > div:last-child button:last-child {
-  background: var(--nebula-blue-accent) !important;
+  background: var(--color-focus-ring) !important;
   border: none !important;
   color: var(--nebula-navy-deep) !important;
   font-weight: 600 !important;
 }
 [data-theme="Nebula"] .links-apply-modal > div:last-child button:last-child:hover {
-  background: var(--nebula-sky-hover) !important;
+  background: var(--color-primary-hover) !important;
 }
 
 /* 头像兜底白底已下移到 .friend-link-logo 公共规则里（line ~4592），
@@ -5391,7 +5381,7 @@
   border: 1px solid rgba(255, 255, 255, 0.06) !important;
   border-radius: 4px !important;
   padding: 8px 10px !important;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   transition: border-color 0.15s ease, background 0.15s ease !important;
 }
 [data-theme="Nebula"] .friend-link-compact-item:hover {
@@ -5432,11 +5422,11 @@
   transition: color 0.15s ease, background 0.15s ease;
 }
 [data-theme="Nebula"] .feeds-view-btn:hover:not(:disabled) {
-  color: var(--nebula-white);
+  color: var(--color-text-main);
   background: rgba(255, 255, 255, 0.04);
 }
 [data-theme="Nebula"] .feeds-view-btn.active {
-  color: var(--nebula-sky);
+  color: var(--color-primary);
   background: rgba(128, 207, 255, 0.1);
 }
 [data-theme="Nebula"] .feeds-view-btn:disabled {
@@ -5510,7 +5500,7 @@
 [data-theme="Nebula"] .feed-card-title {
   margin: 0;
   font-family: var(--nebula-font-display);
-  color: var(--nebula-white);
+  color: var(--color-text-main);
 }
 [data-theme="Nebula"] .feed-card-desc {
   margin: 0;
@@ -5525,7 +5515,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--nebula-sky);
+  color: var(--color-primary);
   font-size: 11px;
 }
 
@@ -5705,7 +5695,7 @@
   font-size: 13px;
   font-weight: 500;
   background: transparent;
-  color: var(--nebula-sky);
+  color: var(--color-primary);
   border: 1px solid rgba(128, 207, 255, 0.3);
   border-radius: 4px;
   cursor: pointer;
@@ -5713,7 +5703,7 @@
 }
 [data-theme="Nebula"] .feeds-loadmore-btn:hover {
   background: rgba(128, 207, 255, 0.08);
-  border-color: var(--nebula-sky);
+  border-color: var(--color-primary);
 }
 
 /* loading 状态 —— 三点 bounce + 文字 */
@@ -5725,14 +5715,14 @@
   background: rgba(128, 207, 255, 0.06);
   border: 1px solid rgba(128, 207, 255, 0.18);
   border-radius: 999px;
-  color: var(--nebula-sky);
+  color: var(--color-primary);
   font-size: 12px;
 }
 [data-theme="Nebula"] .feeds-loadmore-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--nebula-sky);
+  background: var(--color-primary);
   animation: feeds-loader-bounce 1.2s infinite ease-in-out both;
 }
 [data-theme="Nebula"] .feeds-loadmore-dot:nth-child(1) { animation-delay: -0.32s; }
@@ -5771,7 +5761,7 @@
           mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M0,50 C0,8.5 8.5,0 50,0 C91.5,0 100,8.5 100,50 C100,91.5 91.5,100 50,100 C8.5,100 0,91.5 0,50 Z'/></svg>") no-repeat center / contain;
 }
 [data-theme="Nebula"] .friend-link-name {
-  color: var(--nebula-white) !important;
+  color: var(--color-text-main) !important;
   font-family: var(--nebula-font-display);
   font-weight: 500;
   font-size: 13px;
@@ -5786,26 +5776,26 @@
   transition: color 0.2s ease, transform 0.2s ease;
 }
 [data-theme="Nebula"] .friend-link-card-item:hover .friend-link-external {
-  color: var(--nebula-sky) !important;
+  color: var(--color-primary) !important;
   transform: translateX(2px);
 }
 
 /* ---- moment embed (.utter-moment-embed) 默认是浅蓝白渐变，深色下显米黄 ---- */
 [data-theme="Nebula"] .utter-moment-embed,
 [data-theme="Nebula"] .blog-prose .utter-moment-embed {
-  background: var(--nebula-card) !important;
+  background: var(--color-bg-card) !important;
   border: 1px solid rgba(255, 255, 255, 0.06) !important;
-  border-left: 4px solid var(--nebula-sky) !important;
+  border-left: 4px solid var(--color-primary) !important;
   border-radius: 15px;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
 }
 
 /* ---- 通用 .card / .card-hover ---- */
 [data-theme="Nebula"] .card {
-  background: var(--nebula-card);
-  border: 1px solid var(--nebula-border-subtle);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
   border-radius: 15px;
-  color: var(--nebula-white);
+  color: var(--color-text-main);
 }
 [data-theme="Nebula"] .card-hover:hover {
   border-color: var(--nebula-border-blue);
@@ -5814,7 +5804,7 @@
 /* ---- badge：globals 默认浅色 ---- */
 [data-theme="Nebula"] .badge {
   background: rgba(128, 207, 255, 0.12);
-  color: var(--nebula-blue-light);
+  color: var(--color-text-sub);
   border-radius: 999px;
 }
 
