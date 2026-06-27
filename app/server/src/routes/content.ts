@@ -1717,6 +1717,15 @@ async function tableColumns(name: string) {
   return new Set(rows.map((row) => row.column_name));
 }
 
+function rowsChanged(result: unknown) {
+  if (result && typeof result === 'object' && 'count' in result) return Number((result as { count?: number }).count || 0);
+  return 0;
+}
+
+async function execChanged(query: string, params: unknown[] = []) {
+  return rowsChanged(await exec(query, params).catch(() => null));
+}
+
 async function genericCreate(name: string, body: Record<string, unknown>, userId = 0) {
   if (!writableTables.has(name)) throw new Error('invalid content table');
   const columns = await tableColumns(name);
@@ -1741,6 +1750,61 @@ async function genericCreate(name: string, body: Record<string, unknown>, userId
     if (columns.has('cover_url')) void syncContentMedia(name, id, data.cover_url);
   }
   return id;
+}
+
+async function mirrorLinkRssSubscription(link: Record<string, unknown>) {
+  const feedUrl = String(link.rss_url || '').trim();
+  if (!feedUrl) return { rss_subscription_synced: false };
+  const siteUrl = String(link.url || '').trim();
+  if (!siteUrl) return { rss_subscription_synced: false };
+  await exec(
+    `insert into ${table('rss_subscriptions')} (user_id, site_url, feed_url, site_name, site_avatar, last_fetched_at, created_at)
+     values (1,$1,$2,$3,$4,0,$5)
+     on conflict (user_id, feed_url) do update set
+       site_url = excluded.site_url,
+       site_name = excluded.site_name,
+       site_avatar = excluded.site_avatar`,
+    [siteUrl, feedUrl, String(link.name || siteUrl), String(link.logo || ''), nowUnix()],
+  );
+  return { rss_subscription_synced: true };
+}
+
+async function deleteUnusedLinkRssSubscription(feedUrl: unknown) {
+  const rssUrl = String(feedUrl || '').trim();
+  if (!rssUrl) return { rss_subscription_deleted: 0, feed_items_deleted: 0 };
+  const rows = await many<{ id: number }>(
+    `select rs.id
+     from ${table('rss_subscriptions')} rs
+     where rs.user_id = 1
+       and rs.feed_url = $1
+       and not exists (
+         select 1 from ${table('links')} l
+         where coalesce(l.rss_url, '') = $1
+       )
+       and not exists (
+         select 1 from ${table('followers')} f
+         where f.user_id = rs.user_id
+           and coalesce(f.source_site, '') = coalesce(rs.site_url, '')
+       )`,
+    [rssUrl],
+  ).catch(() => []);
+  const ids = rows.map((row) => Number(row.id)).filter(Boolean);
+  if (ids.length === 0) return { rss_subscription_deleted: 0, feed_items_deleted: 0 };
+  const feedItems = await execChanged(`delete from ${table('feed_items')} where subscription_id = any($1::int[])`, [ids]);
+  const subscriptions = await execChanged(`delete from ${table('rss_subscriptions')} where id = any($1::int[])`, [ids]);
+  return { rss_subscription_deleted: subscriptions, feed_items_deleted: feedItems };
+}
+
+async function syncLinkRssAfterUpdate(id: number, before: Record<string, unknown> | null, body: Record<string, unknown>) {
+  const after = await one<Record<string, unknown>>(`select * from ${table('links')} where id = $1`, [id]).catch(() => null);
+  if (!after) return { rss_subscription_synced: false, rss_subscription_deleted: 0, feed_items_deleted: 0 };
+  const sync = await mirrorLinkRssSubscription(after);
+  const oldFeed = String(before?.rss_url || '').trim();
+  const newFeed = String(after.rss_url || body.rss_url || '').trim();
+  const removed = oldFeed && oldFeed !== newFeed
+    ? await deleteUnusedLinkRssSubscription(oldFeed)
+    : { rss_subscription_deleted: 0, feed_items_deleted: 0 };
+  return { ...sync, ...removed };
 }
 
 async function genericUpdate(name: string, id: number, body: Record<string, unknown>) {
@@ -3219,16 +3283,33 @@ export function registerContentRoutes(app: Hono) {
       return row ? ok(c, row) : notFound(c, `${name} not found`);
     });
     app.post(`/api/v1/${name}`, auth, async (c) => {
-      const id = await genericCreate(name, await c.req.json().catch(() => ({})), currentUserId(c));
-      return ok(c, { id });
+      const body = await c.req.json().catch(() => ({}));
+      const id = await genericCreate(name, body, currentUserId(c));
+      const rss = name === 'links'
+        ? await mirrorLinkRssSubscription({ ...body, id })
+        : {};
+      return ok(c, { id, ...rss });
     });
     app.put(`/api/v1/${name}/:id`, auth, async (c) => {
-      const id = await genericUpdate(name, intParam(c.req.param('id')), await c.req.json().catch(() => ({})));
-      return ok(c, { id });
+      const rowId = intParam(c.req.param('id'));
+      const body = await c.req.json().catch(() => ({}));
+      const before = name === 'links'
+        ? await one<Record<string, unknown>>(`select * from ${table('links')} where id = $1`, [rowId]).catch(() => null)
+        : null;
+      const id = await genericUpdate(name, rowId, body);
+      const rss = name === 'links' ? await syncLinkRssAfterUpdate(id, before, body) : {};
+      return ok(c, { id, ...rss });
     });
     app.delete(`/api/v1/${name}/:id`, auth, async (c) => {
-      await exec(`delete from ${table(name)} where id = $1`, [c.req.param('id')]);
-      return ok(c, null);
+      const rowId = intParam(c.req.param('id'));
+      const before = name === 'links'
+        ? await one<Record<string, unknown>>(`select * from ${table('links')} where id = $1`, [rowId]).catch(() => null)
+        : null;
+      await exec(`delete from ${table(name)} where id = $1`, [rowId]);
+      const rss = name === 'links'
+        ? await deleteUnusedLinkRssSubscription(before?.rss_url)
+        : {};
+      return ok(c, name === 'links' ? rss : null);
     });
   }
 

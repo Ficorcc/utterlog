@@ -473,6 +473,61 @@ async function importWordPressWxr(xml: string, userId: number) {
   return { posts, pages, categories, tags, comments, skipped: skipped.slice(0, 20) };
 }
 
+type FeedFetchFailure = { id: number; feed_url: string; error: string };
+
+type FeedFetchProgress = {
+  running: boolean;
+  force: boolean;
+  started_at: number;
+  finished_at: number;
+  total: number;
+  done: number;
+  fetched: number;
+  new_items: number;
+  failed: number;
+  failed_urls: FeedFetchFailure[];
+  current_url: string;
+  pruned_subscriptions: number;
+  pruned_items: number;
+  refreshed_items_deleted: number;
+  message: string;
+};
+
+type FeedFetchOptions = {
+  limit?: number;
+  force?: boolean;
+  trackProgress?: boolean;
+  cleanupOrphans?: boolean;
+};
+
+const emptyFeedFetchProgress = (): FeedFetchProgress => ({
+  running: false,
+  force: false,
+  started_at: 0,
+  finished_at: 0,
+  total: 0,
+  done: 0,
+  fetched: 0,
+  new_items: 0,
+  failed: 0,
+  failed_urls: [],
+  current_url: '',
+  pruned_subscriptions: 0,
+  pruned_items: 0,
+  refreshed_items_deleted: 0,
+  message: '',
+});
+
+let feedFetchProgress: FeedFetchProgress = emptyFeedFetchProgress();
+
+function feedFetchStatus() {
+  return { ...feedFetchProgress, failed_urls: [...feedFetchProgress.failed_urls] };
+}
+
+function feedErrorMessage(err: unknown) {
+  return err instanceof Error ? err.message : String(err || '拉取失败');
+}
+
 function parseFeedDate(value: string, fallback = 0) {
   const text = value.trim();
   if (!text) return fallback;
@@ -484,9 +539,18 @@ function parseFeedDate(value: string, fallback = 0) {
 
 async function fetchRssFeed(feedUrl: string) {
   const safeFeedUrl = await assertPublicHttpUrl(feedUrl);
-  const res = await fetch(safeFeedUrl, { signal: AbortSignal.timeout(10000) });
+  const res = await fetch(safeFeedUrl, {
+    headers: {
+      'user-agent': 'Mozilla/5.0 (compatible; Utterlog RSS Fetcher/1.0)',
+      accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.8',
+    },
+    signal: AbortSignal.timeout(15000),
+  });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const contentLength = Number(res.headers.get('content-length') || 0);
+  if (contentLength > 5 * 1024 * 1024) throw new Error('RSS 响应过大');
   const xml = await res.text();
+  if (xml.length > 5 * 1024 * 1024) throw new Error('RSS 响应过大');
   const itemBlocks = [...xml.matchAll(/<item(?:\s[^>]*)?>[\s\S]*?<\/item>/gi)].map((m) => m[0]);
   const entryBlocks = itemBlocks.length ? itemBlocks : [...xml.matchAll(/<entry(?:\s[^>]*)?>[\s\S]*?<\/entry>/gi)].map((m) => m[0]);
   return entryBlocks.map((block) => {
@@ -509,35 +573,111 @@ async function mirrorLinkSubscriptions() {
      select 1, l.url, l.rss_url, l.name, coalesce(l.logo,''), 0, extract(epoch from now())::bigint
      from ${table('links')} l
      where l.rss_url is not null and l.rss_url <> ''
-     on conflict (user_id, feed_url) do nothing`,
+     on conflict (user_id, feed_url) do update set
+       site_url = excluded.site_url,
+       site_name = excluded.site_name,
+       site_avatar = excluded.site_avatar`,
   ).catch(() => {});
 }
 
-export async function runFeedFetch(limit = 0) {
+async function pruneOrphanLinkSubscriptions() {
+  const rows = await many<{ id: number }>(
+    `select rs.id
+     from ${table('rss_subscriptions')} rs
+     where rs.user_id = 1
+       and coalesce(rs.feed_url, '') != ''
+       and not exists (
+         select 1 from ${table('links')} l
+         where coalesce(l.rss_url, '') = rs.feed_url
+            or coalesce(l.url, '') = rs.site_url
+       )
+       and not exists (
+         select 1 from ${table('followers')} f
+         where f.user_id = rs.user_id
+           and coalesce(f.source_site, '') = coalesce(rs.site_url, '')
+       )`,
+  ).catch(() => []);
+  const ids = rows.map((row) => Number(row.id)).filter(Boolean);
+  if (ids.length === 0) return { pruned_subscriptions: 0, pruned_items: 0 };
+  const deletedItems = await execChanged(`delete from ${table('feed_items')} where subscription_id = any($1::int[])`, [ids]);
+  const deletedSubs = await execChanged(`delete from ${table('rss_subscriptions')} where id = any($1::int[])`, [ids]);
+  return { pruned_subscriptions: deletedSubs, pruned_items: deletedItems };
+}
+
+export async function runFeedFetch(options: number | FeedFetchOptions = 0) {
+  const opts: FeedFetchOptions = typeof options === 'number' ? { limit: options } : options;
+  const limit = Number(opts.limit || 0);
+  const force = !!opts.force;
+  const trackProgress = !!opts.trackProgress;
+  if (feedFetchProgress.running && !trackProgress) {
+    return { ...feedFetchStatus(), skipped: true };
+  }
+  let prunedSubscriptions = 0;
+  let prunedItems = 0;
   await mirrorLinkSubscriptions();
+  if (opts.cleanupOrphans) {
+    const pruned = await pruneOrphanLinkSubscriptions();
+    prunedSubscriptions = pruned.pruned_subscriptions;
+    prunedItems = pruned.pruned_items;
+  }
   const subs = await many<{ id: number; feed_url: string }>(
     `select id, feed_url from ${table('rss_subscriptions')} order by last_fetched_at asc ${limit > 0 ? `limit ${limit}` : ''}`,
   ).catch(() => []);
+  if (trackProgress) {
+    feedFetchProgress = {
+      ...emptyFeedFetchProgress(),
+      running: true,
+      force,
+      started_at: nowUnix(),
+      total: subs.length,
+      pruned_subscriptions: prunedSubscriptions,
+      pruned_items: prunedItems,
+      message: subs.length ? '正在刷新订阅' : '没有可刷新的订阅',
+    };
+  }
   let fetched = 0;
   let newItems = 0;
+  let failed = 0;
+  let refreshedItemsDeleted = 0;
+  const failures: FeedFetchFailure[] = [];
   for (const sub of subs) {
+    if (trackProgress) {
+      feedFetchProgress.current_url = sub.feed_url;
+      feedFetchProgress.message = `正在刷新 ${sub.feed_url}`;
+    }
     let items: Awaited<ReturnType<typeof fetchRssFeed>> = [];
     try {
       items = await fetchRssFeed(sub.feed_url);
-    } catch {
+    } catch (err) {
+      failed++;
+      failures.push({ id: sub.id, feed_url: sub.feed_url, error: feedErrorMessage(err) });
+      if (trackProgress) {
+        feedFetchProgress.failed = failed;
+        feedFetchProgress.failed_urls = failures.slice(-20);
+        feedFetchProgress.done++;
+      }
       continue;
     }
     fetched++;
     const now = nowUnix();
+    if (force) {
+      refreshedItemsDeleted += await execChanged(`delete from ${table('feed_items')} where subscription_id = $1`, [sub.id]);
+    }
     for (const item of items) {
       const result = await exec(
         `insert into ${table('feed_items')} (subscription_id, title, link, description, pub_date, guid, created_at)
          values ($1,$2,$3,$4,$5,$6,$7) on conflict do nothing`,
         [sub.id, item.title, item.link, item.description, item.pub_date, item.guid, now],
       ).catch(() => null);
-      if (Array.isArray(result) && (result as any).count) newItems++;
+      if (rowsChanged(result)) newItems++;
     }
     await exec(`update ${table('rss_subscriptions')} set last_fetched_at = $1 where id = $2`, [now, sub.id]).catch(() => {});
+    if (trackProgress) {
+      feedFetchProgress.done++;
+      feedFetchProgress.fetched = fetched;
+      feedFetchProgress.new_items = newItems;
+      feedFetchProgress.refreshed_items_deleted = refreshedItemsDeleted;
+    }
   }
   await exec(`delete from ${table('feed_items')} where created_at < $1`, [nowUnix() - 7 * 24 * 3600]).catch(() => {});
   if (newItems > 0) {
@@ -547,7 +687,34 @@ export async function runFeedFetch(limit = 0) {
       [`发现 ${newItems} 条新内容`, nowUnix()],
     ).catch(() => {});
   }
-  return { fetched, new_items: newItems };
+  const result = {
+    total: subs.length,
+    fetched,
+    new_items: newItems,
+    failed,
+    failed_urls: failures.slice(-20),
+    force,
+    pruned_subscriptions: prunedSubscriptions,
+    pruned_items: prunedItems,
+    refreshed_items_deleted: refreshedItemsDeleted,
+  };
+  if (trackProgress) {
+    feedFetchProgress = {
+      ...feedFetchProgress,
+      running: false,
+      finished_at: nowUnix(),
+      total: subs.length,
+      done: subs.length,
+      fetched,
+      new_items: newItems,
+      failed,
+      failed_urls: failures.slice(-20),
+      current_url: '',
+      refreshed_items_deleted: refreshedItemsDeleted,
+      message: failed > 0 ? '刷新完成，部分订阅失败' : '刷新完成',
+    };
+  }
+  return result;
 }
 
 function feedUserId(c: any) {
@@ -2296,7 +2463,38 @@ export function registerCompatRoutes(app: Hono) {
       last_fetched_at: Number(lastFetched?.last_fetched_at || 0),
     });
   });
-  app.post('/api/v1/social/fetch-feeds', auth, async (c) => ok(c, await runFeedFetch(100)));
+  app.get('/api/v1/social/fetch-feeds/status', auth, async (c) => ok(c, feedFetchStatus()));
+  app.post('/api/v1/social/fetch-feeds', auth, async (c) => {
+    const sp = new URL(c.req.url).searchParams;
+    const body = await c.req.json().catch(() => ({}));
+    const force = body.force === true || sp.get('force') === '1';
+    let started = false;
+    if (!feedFetchProgress.running) {
+      started = true;
+      feedFetchProgress = {
+        ...emptyFeedFetchProgress(),
+        running: true,
+        force,
+        started_at: nowUnix(),
+        message: '准备刷新订阅',
+      };
+      void runFeedFetch({
+        limit: force ? 0 : 100,
+        force,
+        trackProgress: true,
+        cleanupOrphans: force,
+      }).catch((err) => {
+        feedFetchProgress = {
+          ...feedFetchProgress,
+          running: false,
+          finished_at: nowUnix(),
+          current_url: '',
+          message: feedErrorMessage(err),
+        };
+      });
+    }
+    return ok(c, { started, ...feedFetchStatus() });
+  });
 
 
 

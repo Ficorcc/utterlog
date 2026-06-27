@@ -17,6 +17,21 @@ interface LinkGroupConfig {
   icon?: string;
 }
 
+interface FeedProgress {
+  running?: boolean;
+  force?: boolean;
+  total?: number;
+  done?: number;
+  fetched?: number;
+  new_items?: number;
+  failed?: number;
+  failed_urls?: Array<{ feed_url: string; error: string }>;
+  pruned_subscriptions?: number;
+  pruned_items?: number;
+  refreshed_items_deleted?: number;
+  message?: string;
+}
+
 const DEFAULT_GROUP_KEY = 'default';
 const DEFAULT_LINK_GROUPS: LinkGroupConfig[] = [
   { key: DEFAULT_GROUP_KEY, name: '默认', style: 'card' },
@@ -112,20 +127,43 @@ export default function LinksPage() {
   const [editingGroup, setEditingGroup] = useState<{ old: string; new: string } | null>(null);
   const [linkGroups, setLinkGroups] = useState<LinkGroupConfig[]>(DEFAULT_LINK_GROUPS);
   const [refreshingFeeds, setRefreshingFeeds] = useState(false);
+  const [feedProgress, setFeedProgress] = useState<FeedProgress | null>(null);
   const [busy, setBusy] = useState<'icon' | 'rss' | null>(null);
   const [confirmClearRss, setConfirmClearRss] = useState(false);
   // Incremented by 一键刷新 ico — appended to favicon URLs to bust
   // the browser's image cache without touching any DB state.
   const [iconBust, setIconBust] = useState(0);
 
+  const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+  const responseData = (r: any) => r?.data || r || {};
+
   const refreshFeeds = async () => {
     setRefreshingFeeds(true);
     try {
-      const r: any = await api.post('/social/fetch-feeds');
-      const d = r?.data || r;
+      const start: any = await api.post('/social/fetch-feeds', { force: true });
+      let d: FeedProgress = responseData(start);
+      setFeedProgress(d);
+      const startedAt = Date.now();
+      while (d?.running && Date.now() - startedAt < 5 * 60 * 1000) {
+        await sleep(1000);
+        const status: any = await api.get('/social/fetch-feeds/status');
+        d = responseData(status);
+        setFeedProgress(d);
+      }
+      if (d?.running) {
+        toast.error(t('admin.links.toast.feedsRefreshTimeout', '刷新仍在进行，请稍后查看进度'));
+        return;
+      }
       const fetched = d?.fetched ?? 0;
       const newItems = d?.new_items ?? 0;
-      toast.success(t('admin.links.toast.feedsRefreshed', '已刷新 {fetched} 个订阅，新增 {newItems} 条', { fetched, newItems }));
+      const failed = d?.failed ?? 0;
+      const removed = (d?.pruned_items ?? 0) + (d?.refreshed_items_deleted ?? 0);
+      if (failed > 0) {
+        toast.error(t('admin.links.toast.feedsRefreshedWithFailures', '已刷新 {fetched} 个订阅，失败 {failed} 个，新增 {newItems} 条', { fetched, failed, newItems }));
+      } else {
+        toast.success(t('admin.links.toast.feedsRefreshed', '已刷新 {fetched} 个订阅，新增 {newItems} 条，清理 {removed} 条旧缓存', { fetched, newItems, removed }));
+      }
     } catch {
       toast.error(t('admin.common.refreshFailed', '刷新失败'));
     } finally {
@@ -146,6 +184,7 @@ export default function LinksPage() {
       const r: any = await api.post('/admin/system/clear-rss-cache');
       const d = r?.data || r;
       toast.success(t('admin.links.toast.rssCacheCleared', '已清空 {count} 条订阅缓存', { count: d?.cleared_items ?? 0 }));
+      setFeedProgress(null);
       setConfirmClearRss(false);
     } catch (e: any) {
       toast.error(e?.response?.data?.error?.message || t('admin.common.clearFailed', '清空失败'));
@@ -378,7 +417,15 @@ export default function LinksPage() {
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    try { await linksApi.delete(deleteId); toast.success(t('admin.common.deleteSuccess', '删除成功')); fetchLinks(); }
+    try {
+      const r: any = await linksApi.delete(deleteId);
+      const d = responseData(r);
+      const removed = (d?.feed_items_deleted ?? 0) + (d?.rss_subscription_deleted ?? 0);
+      toast.success(removed > 0
+        ? t('admin.links.toast.deleteSuccessWithRss', '删除成功，已清理 {count} 条相关订阅缓存', { count: removed })
+        : t('admin.common.deleteSuccess', '删除成功'));
+      fetchLinks();
+    }
     catch { toast.error(t('admin.common.deleteFailed', '删除失败')); }
     finally { setDeleteId(null); }
   };
@@ -465,7 +512,7 @@ export default function LinksPage() {
           <i className="fa-regular fa-image" />
         </Button>
         <Button variant="secondary" className="btn-square" onClick={() => setConfirmClearRss(true)} loading={busy === 'rss'} disabled={busy !== null} title={t('admin.links.clearRss', '清空 RSS')}>
-          <i className="fa-regular fa-trash-can" />
+          <i className="fa-regular fa-eraser" />
         </Button>
         <Button variant="secondary" className="btn-square" onClick={refreshFeeds} loading={refreshingFeeds} disabled={refreshingFeeds || busy !== null} title={t('admin.links.refreshFeeds', '刷新订阅')}>
           <i className="fa-regular fa-arrows-rotate" />
@@ -510,9 +557,73 @@ export default function LinksPage() {
     </div>
   );
 
+  const progressTotal = feedProgress?.total ?? 0;
+  const progressDone = feedProgress?.done ?? 0;
+  const progressPercent = progressTotal > 0 ? Math.min(100, Math.round((progressDone / progressTotal) * 100)) : 0;
+  const showFeedProgress = !!feedProgress && (refreshingFeeds || progressTotal > 0 || !!feedProgress.message);
+
   return (
     <div>
       {tabsAndTools}
+
+      {showFeedProgress && (
+        <div
+          className="card"
+          style={{
+            padding: 12,
+            marginBottom: 16,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 13, fontWeight: 600 }}>
+              {feedProgress?.running
+                ? t('admin.links.rssRefreshing', 'RSS 强制刷新中')
+                : t('admin.links.rssRefreshDone', 'RSS 刷新完成')}
+            </span>
+            <span className="text-dim" style={{ fontSize: 12 }}>
+              {t('admin.links.rssProgressCount', '{done}/{total} · 成功 {fetched} · 新增 {newItems} · 失败 {failed}', {
+                done: progressDone,
+                total: progressTotal,
+                fetched: feedProgress?.fetched ?? 0,
+                newItems: feedProgress?.new_items ?? 0,
+                failed: feedProgress?.failed ?? 0,
+              })}
+            </span>
+          </div>
+          <div style={{ height: 6, borderRadius: 999, background: 'var(--color-bg-soft)', overflow: 'hidden' }}>
+            <div
+              style={{
+                height: '100%',
+                width: `${feedProgress?.running && progressTotal === 0 ? 12 : progressPercent}%`,
+                minWidth: feedProgress?.running ? 12 : 0,
+                background: 'var(--color-primary)',
+                transition: 'width 220ms ease',
+              }}
+            />
+          </div>
+          <div className="text-dim" style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', fontSize: 12 }}>
+            <span>{feedProgress?.message || t('admin.links.rssPreparing', '准备刷新订阅')}</span>
+            <span>
+              {t('admin.links.rssCleanupCount', '清理订阅 {subs}，清理旧缓存 {items}', {
+                subs: feedProgress?.pruned_subscriptions ?? 0,
+                items: (feedProgress?.pruned_items ?? 0) + (feedProgress?.refreshed_items_deleted ?? 0),
+              })}
+            </span>
+          </div>
+          {!!feedProgress?.failed && feedProgress.failed_urls && feedProgress.failed_urls.length > 0 && (
+            <div className="text-dim" style={{ fontSize: 12, display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {feedProgress.failed_urls.slice(0, 3).map((item, index) => (
+                <span key={`${item.feed_url}-${index}`} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {item.feed_url}: {item.error}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {links.length === 0 && !loading ? (
         <EmptyState title={t('admin.links.empty', '暂无友链')} description={t('admin.links.emptyDescription', '添加您的第一个友情链接')} actionText={t('admin.links.addLink', '添加友链')} onAction={openCreate} />
