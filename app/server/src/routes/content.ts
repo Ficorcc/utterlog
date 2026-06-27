@@ -3757,7 +3757,17 @@ export function registerContentRoutes(app: Hono) {
     const provider = normalizeGeoProvider(sp.get('provider') || await optionValue('ip_geo_provider', 'ipx'));
     const geo = await lookupGeoIp(ip, provider, 5000);
     if (!geo) {
-      return c.json({ success: false, error: { code: 'GEOIP_ERROR', message: 'GeoIP lookup failed' } }, 502);
+      return ok(c, {
+        provider,
+        ip,
+        country_code: '',
+        country: '',
+        province: '',
+        city: '',
+        latitude: 0,
+        longitude: 0,
+        unavailable: true,
+      });
     }
     return ok(c, geo);
   });
