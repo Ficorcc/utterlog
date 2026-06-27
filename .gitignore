@@ -102,7 +102,8 @@ bun.lockb
 # Misc
 # Root-anchor this so we only drop the stray copy at project root.
 /PaperMono-Regular.woff2
-backup/
+# Root-anchor: runtime backup data dir only (not app/server/src/backup source)
+/backup/
 
 # Reference materials (Typecho CommentAI plugin source for reference)
 /Comment/
