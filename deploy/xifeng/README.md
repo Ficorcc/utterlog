@@ -12,7 +12,7 @@
 | **远程 Git** | `origin/<branch>` | 脚本默认 `git push` 后比对 SHA |
 | **服务器容器** | `/app/.deploy-revision` | 部署后自动校验 |
 
-不走 GitHub Actions；镜像在**本地 Mac/Linux** 用 `Dockerfile.bun` 构建，`docker save | ssh load` 同步。
+不走 GitHub Actions。优先在本地 `docker build` + `docker save | ssh load`；**本地无 Docker 时**自动改用 `git archive` + 服务器构建（与 Mac 无 Docker Desktop 场景相同）。
 
 ## 前置条件
 
