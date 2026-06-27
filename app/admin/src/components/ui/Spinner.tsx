@@ -54,7 +54,7 @@ export default function Spinner({ inline, overlay, text, size = 14 }: SpinnerPro
         style={{ fontSize: size, color: 'var(--color-primary)', marginRight: 8 }}
         aria-hidden="true"
       />
-      <span style={{ color: 'var(--color-text-dim)', fontSize: 13 }}>{label}</span>
+      <span style={{ color: 'var(--color-text-dim)', fontSize: 14 }}>{label}</span>
     </>
   );
 

@@ -19,23 +19,23 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             style: {
               borderRadius: '1px',
               borderLeft: '4px solid #16a34a',
-              background: '#f0fdf4',
-              color: '#166534',
+              background: 'var(--color-success-bg)',
+              color: 'var(--color-success-text)',
               boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
               padding: '12px 16px',
               fontSize: '14px',
               maxWidth: '480px',
             },
             success: {
-              style: { borderRadius: '1px', borderLeft: '4px solid #16a34a', background: '#f0fdf4', color: '#166534' },
-              iconTheme: { primary: '#16a34a', secondary: '#fff' },
+              style: { borderRadius: '1px', borderLeft: '4px solid #16a34a', background: 'var(--color-success-bg)', color: 'var(--color-success-text)' },
+              iconTheme: { primary: 'var(--color-success)', secondary: '#fff' },
             },
             error: {
-              style: { borderRadius: '1px', borderLeft: '4px solid #dc2626', background: '#fef2f2', color: '#991b1b' },
-              iconTheme: { primary: '#dc2626', secondary: '#fff' },
+              style: { borderRadius: '1px', borderLeft: '4px solid #dc2626', background: 'var(--color-error-bg)', color: 'var(--color-error-text)' },
+              iconTheme: { primary: 'var(--color-error)', secondary: '#fff' },
             },
             loading: {
-              style: { borderRadius: '1px', borderLeft: '4px solid #0052D9', background: '#eff6ff', color: '#1e40af' },
+              style: { borderRadius: '1px', borderLeft: '4px solid #0052D9', background: 'var(--color-bg-soft)', color: 'var(--color-primary-hover)' },
             },
           }}
         />

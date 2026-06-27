@@ -120,7 +120,7 @@ export default function Themes() {
       <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--color-border)', marginBottom: 20 }}>
         {tabs.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)} style={{
-            padding: '10px 18px', fontSize: 13,
+            padding: '10px 18px', fontSize: 14,
             fontWeight: tab === t.key ? 600 : 400,
             color: tab === t.key ? 'var(--color-primary)' : 'var(--color-text-sub)',
             border: 'none',
@@ -128,7 +128,7 @@ export default function Themes() {
             background: 'none', cursor: 'pointer',
             display: 'inline-flex', alignItems: 'center', gap: 6,
           }}>
-            <i className={t.icon} style={{ fontSize: 13 }} />
+            <i className={t.icon} style={{ fontSize: 14 }} />
             {t.label}
           </button>
         ))}
@@ -168,7 +168,7 @@ export default function Themes() {
       {tab === 'themes' && <>
       {/* Toolbar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-        <div className="text-sub" style={{ fontSize: 13 }}>
+        <div className="text-sub" style={{ fontSize: 14 }}>
           共 {themes.length} 个主题
           {active && (
             <>
@@ -204,7 +204,7 @@ export default function Themes() {
           border: '1px solid color-mix(in srgb, #f59e0b 35%, var(--color-border))',
           fontSize: 12, lineHeight: 1.7, color: 'var(--color-text-sub)',
         }}>
-          <i className="fa-regular fa-triangle-exclamation" style={{ marginRight: 6, color: '#d97706' }} />
+          <i className="fa-regular fa-triangle-exclamation" style={{ marginRight: 6, color: 'var(--color-warning)' }} />
           数据库记录的主题为 <strong>{requestedTheme}</strong>，但 Bun 运行时已启用 Azure / Nebula，前台实际渲染 <strong>{active}</strong>。请重新启用支持的主题。
         </div>
       )}
@@ -224,7 +224,7 @@ export default function Themes() {
       ) : themes.length === 0 ? (
         <div className="card" style={{ padding: 60, textAlign: 'center' }}>
           <i className="fa-regular fa-palette" style={{ fontSize: 32, color: 'var(--color-text-dim)', marginBottom: 12 }} />
-          <p className="text-sub" style={{ fontSize: 13, margin: 0 }}>暂无主题，点「上传主题」安装第一个</p>
+          <p className="text-sub" style={{ fontSize: 14, margin: 0 }}>暂无主题，点「上传主题」安装第一个</p>
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
@@ -237,7 +237,7 @@ export default function Themes() {
                 className="card"
                 style={{
                   overflow: 'hidden', position: 'relative', padding: 0,
-                  borderRadius: 0,
+                  borderRadius: 'var(--ctrl-radius)',
                   borderColor: isActive ? 'var(--color-primary)' : 'var(--color-border)',
                   borderWidth: 1,
                   display: 'flex', flexDirection: 'column',
@@ -302,7 +302,7 @@ export default function Themes() {
                     }}>{theme.description}</p>
                   )}
                   {theme.supported === false && (
-                    <p style={{ fontSize: 11, color: '#d97706', margin: '0 0 12px' }}>
+                    <p style={{ fontSize: 11, color: 'var(--color-warning)', margin: '0 0 12px' }}>
                       Bun 运行时已启用 Azure / Nebula，此主题暂不可切换
                     </p>
                   )}
@@ -373,7 +373,7 @@ export default function Themes() {
                         className="btn btn-secondary"
                         onClick={() => setDeleteId(theme.id)}
                         title="删除"
-                        style={{ fontSize: 12, padding: '6px 10px', color: '#dc2626' }}
+                        style={{ fontSize: 12, padding: '6px 10px', color: 'var(--color-error)' }}
                       >
                         <i className="fa-regular fa-trash" style={{ fontSize: 11 }} />
                       </button>
@@ -400,8 +400,8 @@ export default function Themes() {
             className="card"
             style={{ padding: 24, maxWidth: 380, width: '90%' }}
           >
-            <h3 style={{ fontSize: 15, fontWeight: 600, margin: '0 0 8px' }}>确认删除主题？</h3>
-            <p className="text-sub" style={{ fontSize: 13, margin: '0 0 20px', lineHeight: 1.7 }}>
+            <h3 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 8px' }}>确认删除主题？</h3>
+            <p className="text-sub" style={{ fontSize: 14, margin: '0 0 20px', lineHeight: 1.7 }}>
               将永久删除主题 <strong>{themes.find((t) => t.id === deleteId)?.name}</strong>，不可撤销。
             </p>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
@@ -409,7 +409,7 @@ export default function Themes() {
               <button
                 className="btn"
                 onClick={() => handleDelete(deleteId)}
-                style={{ background: '#dc2626', borderColor: '#dc2626' }}
+                style={{ background: 'var(--color-error)', borderColor: 'var(--color-error)' }}
               >
                 删除
               </button>

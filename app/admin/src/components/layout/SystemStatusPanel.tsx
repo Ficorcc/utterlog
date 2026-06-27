@@ -79,7 +79,7 @@ export default function SystemStatusPanel({ isOpen }: { isOpen: boolean }) {
       >
         <span style={{
           width: '8px', height: '8px', borderRadius: '50%', flexShrink: 0,
-          background: ok ? '#16a34a' : '#dc2626',
+          background: ok ? 'var(--color-success)' : 'var(--color-error)',
           boxShadow: ok ? '0 0 6px rgba(22,163,106,0.5)' : '0 0 6px rgba(220,38,38,0.5)',
           animation: 'pulse-dot 2s infinite',
         }} />

@@ -6,9 +6,9 @@ interface BadgeProps {
 
 const variantStyles: Record<string, { bg: string; color: string }> = {
   default: { bg: 'var(--color-bg-soft)', color: 'var(--color-text-sub)' },
-  success: { bg: '#f0fdf4', color: '#166534' },
+  success: { bg: 'var(--color-success-bg)', color: 'var(--color-success-text)' },
   warning: { bg: '#fffbeb', color: '#92400e' },
-  error: { bg: '#fef2f2', color: '#991b1b' },
+  error: { bg: 'var(--color-error-bg)', color: 'var(--color-error-text)' },
   info: { bg: 'var(--color-bg-soft)', color: 'var(--color-primary)' },
 };
 

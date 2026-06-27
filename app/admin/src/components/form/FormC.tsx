@@ -100,7 +100,7 @@ export function FormRowC({
 
       <div className="settings-display-side">
         {value != null && (
-          <span className="text-sub" style={{ fontSize: 13 }}>{value}</span>
+          <span className="text-sub" style={{ fontSize: 14 }}>{value}</span>
         )}
         {children}
         {action === 'chevron' && (

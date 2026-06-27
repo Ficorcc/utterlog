@@ -807,7 +807,7 @@ export default function SettingsPage() {
                     ].map(d => (
                       <label key={d.value} style={{
                         flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-                        padding: '16px 12px', borderRadius: 0,
+                        padding: '16px 12px', borderRadius: 'var(--ctrl-radius)',
                         border: `1px solid ${emailProvider === d.value ? 'var(--color-primary)' : 'var(--color-border)'}`,
                         background: emailProvider === d.value ? 'color-mix(in srgb, var(--color-primary) 5%, transparent)' : 'transparent',
                         cursor: 'pointer', transition: 'all 0.15s',
@@ -1088,7 +1088,7 @@ export default function SettingsPage() {
                   只把子输入转成 FormRowInputC 保持风格一致 */}
               <FormSectionC title={t('admin.settings.comment.captcha.section', '人机验证')} icon="fa-regular fa-shield-halved">
                 <div style={{ padding: '14px 14px 10px', borderBottom: watch('comment_captcha_mode') === 'pow' ? '1px solid var(--color-divider)' : undefined }}>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-text-main)', marginBottom: 10 }}>{t('admin.settings.comment.captcha.method', '验证方式')}</div>
+                  <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--color-text-main)', marginBottom: 10 }}>{t('admin.settings.comment.captcha.method', '验证方式')}</div>
                   <div style={{ display: 'flex', gap: '10px' }}>
                     {([
                       { value: 'off', label: t('admin.common.off', '关闭'), desc: t('admin.settings.comment.captcha.offDesc', '不验证') },
@@ -1242,7 +1242,7 @@ export default function SettingsPage() {
                           </span>
                         </div>
                         <div style={{ height: '6px', background: 'var(--color-border)', overflow: 'hidden' }}>
-                          <div style={{ width: `${Math.min(localRatio * 100, 100)}%`, height: '100%', background: localRatio > 0.9 ? '#dc2626' : localRatio > 0.7 ? '#f59e0b' : 'var(--color-primary)', transition: 'width 0.3s ease' }} />
+                          <div style={{ width: `${Math.min(localRatio * 100, 100)}%`, height: '100%', background: localRatio > 0.9 ? 'var(--color-error)' : localRatio > 0.7 ? 'var(--color-warning)' : 'var(--color-primary)', transition: 'width 0.3s ease' }} />
                         </div>
                         {useDisk && (
                           <div className="text-dim" style={{ fontSize: '11px', marginTop: '4px' }}>
@@ -1262,7 +1262,7 @@ export default function SettingsPage() {
                             <span className="text-xs text-sub font-mono">{formatSize(cloud.size)}</span>
                           </div>
                           <div style={{ height: '6px', background: 'var(--color-border)', overflow: 'hidden' }}>
-                            <div style={{ width: `${Math.min(cloudRatio * 100, 100)}%`, height: '100%', background: cloudRatio > 0.9 ? '#dc2626' : cloudRatio > 0.7 ? '#f59e0b' : '#f59e0b', transition: 'width 0.3s ease' }} />
+                            <div style={{ width: `${Math.min(cloudRatio * 100, 100)}%`, height: '100%', background: cloudRatio > 0.9 ? 'var(--color-error)' : cloudRatio > 0.7 ? 'var(--color-warning)' : 'var(--color-warning)', transition: 'width 0.3s ease' }} />
                           </div>
                         </div>
                       )}
@@ -1318,7 +1318,7 @@ export default function SettingsPage() {
                     ].map(d => (
                       <label key={d.value} style={{
                         flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-                        padding: '16px 12px', borderRadius: 0,
+                        padding: '16px 12px', borderRadius: 'var(--ctrl-radius)',
                         border: `1px solid ${mediaDriver === d.value ? 'var(--color-primary)' : 'var(--color-border)'}`,
                         background: mediaDriver === d.value ? 'color-mix(in srgb, var(--color-primary) 5%, transparent)' : 'transparent',
                         cursor: 'pointer', transition: 'all 0.15s',
@@ -1503,7 +1503,7 @@ export default function SettingsPage() {
                         const val = watch('image_display_effect', 'fade');
                         return (
                           <label key={effect.value} className="cursor-pointer" style={{
-                            padding: '12px 10px', textAlign: 'center', borderRadius: 0,
+                            padding: '12px 10px', textAlign: 'center', borderRadius: 'var(--ctrl-radius)',
                             border: `1px solid ${val === effect.value ? 'var(--color-primary)' : 'var(--color-border)'}`,
                             background: val === effect.value ? 'color-mix(in srgb, var(--color-primary) 5%, transparent)' : 'transparent',
                             transition: 'all 0.15s',
@@ -1571,7 +1571,7 @@ export default function SettingsPage() {
                 <i className="fa-solid fa-cloud-arrow-down" style={{ marginRight: 8, color: 'var(--color-primary)' }} />
                 {t('admin.settings.update.section', '系统更新')}
               </div>
-              <p className="text-dim" style={{ fontSize: 13, lineHeight: 1.7, marginBottom: 20 }}>
+              <p className="text-dim" style={{ fontSize: 14, lineHeight: 1.7, marginBottom: 20 }}>
                 {t('admin.settings.update.description', 'Utterlog 通过 GitHub Releases 推送新版本。下方会实时比对你当前运行的版本和最新发布；有新版本时点「一键升级」即可。升级过程保留所有数据、配置和用户上传。')}
               </p>
               <SystemUpdatePanel />
@@ -1684,7 +1684,7 @@ function ImgEtBuilder({ register, watch, setValue }: { register: any; watch: any
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       {/* Service preset selector */}
       <div>
-        <label className="text-sub" style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 6 }}>{t('admin.settings.image.random.service', '服务')}</label>
+        <label className="text-sub" style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6 }}>{t('admin.settings.image.random.service', '服务')}</label>
         <div style={{ display: 'flex', gap: 6 }}>
           <button
             type="button"
@@ -1780,7 +1780,7 @@ function ImgEtBuilder({ register, watch, setValue }: { register: any; watch: any
 
       {/* Raw URL input + preview */}
       <div>
-        <label className="text-sub" style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 6 }}>
+        <label className="text-sub" style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6 }}>
           {t('admin.settings.image.random.finalUrl', '最终 API 地址')}
           <span className="text-dim" style={{ fontWeight: 400, marginLeft: 6, fontSize: 11 }}>
             {t('admin.settings.image.random.finalUrlHint', '（可直接编辑；改上方参数会覆盖）')}
@@ -1797,7 +1797,7 @@ function ImgEtBuilder({ register, watch, setValue }: { register: any; watch: any
       {/* Preview */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-          <label className="text-sub" style={{ fontSize: 13, fontWeight: 500 }}>{t('admin.common.preview', '预览')}</label>
+          <label className="text-sub" style={{ fontSize: 14, fontWeight: 500 }}>{t('admin.common.preview', '预览')}</label>
           <button
             type="button"
             onClick={() => setValue('random_image_api', currentUrl + (currentUrl.includes('?') ? '&' : '?') + '_=' + Date.now(), { shouldDirty: true })}

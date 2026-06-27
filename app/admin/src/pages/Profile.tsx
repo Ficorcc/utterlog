@@ -482,7 +482,7 @@ export default function ProfilePage() {
             <i className="fa-light fa-shield-keyhole" style={{ fontSize: '18px', color: 'var(--color-primary)' }} />
             <h2 className="text-main" style={{ fontSize: '15px', fontWeight: 600 }}>{t('admin.profile.twoFactor', '两步验证')}</h2>
             {totpEnabled && (
-              <span style={{ padding: '2px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: 600, background: '#dcfce7', color: '#16a34a' }}>
+              <span style={{ padding: '2px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: 600, background: 'var(--color-success-bg)', color: 'var(--color-success)' }}>
                 {t('admin.profile.enabled', '已启用')}
               </span>
             )}

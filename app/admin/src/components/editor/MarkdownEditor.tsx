@@ -421,7 +421,7 @@ function ShortcodeRenderer({ content }: { content: string }) {
           return (
             <div key={i} style={{
               margin: '16px 0', padding: '16px 20px', background: '#1a1a1a', color: '#fff',
-              display: 'flex', alignItems: 'center', gap: '16px', borderRadius: '0',
+              display: 'flex', alignItems: 'center', gap: '16px', borderRadius: 'var(--ctrl-radius)',
             }}>
               <div style={{ width: '44px', height: '44px', background: '#f5a623', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', flexShrink: 0 }}>
                 <i className="fa-solid fa-download" style={{ fontSize: '18px', color: '#1a1a1a' }} />
@@ -500,7 +500,7 @@ class PreviewErrorBoundary extends Component<{ children: ReactNode }, { error: s
   }
   render() {
     if (this.state.error) {
-      return <p style={{ color: '#dc2626', fontSize: '12px' }}>预览渲染出错：{this.state.error}</p>;
+      return <p style={{ color: 'var(--color-error)', fontSize: '12px' }}>预览渲染出错：{this.state.error}</p>;
     }
     return this.props.children;
   }
@@ -678,7 +678,7 @@ export default function MarkdownEditor({
               >
                   <p style={{ fontSize: '11px', color: 'var(--color-text-dim)', marginBottom: '8px' }}>{t('admin.editor.chooseTextColor', '选择字体颜色')}</p>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px' }}>
-                    {['#f43f5e', '#f97316', '#f59e0b', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#1a1a1a', '#6b7280'].map(color => (
+                    {['#f43f5e', '#f97316', 'var(--color-warning)', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#1a1a1a', '#6b7280'].map(color => (
                       <button key={color} type="button" onMouseDown={(ev) => ev.preventDefault()} onClick={() => {
                         if (taRef.current) {
                           wrap(taRef.current, `[color=${color}]`, '[/color]', onChange, '彩色文本');

@@ -25,9 +25,9 @@ export function ConfirmDialog({
       <div style={{ textAlign: 'center' }}>
         <div style={{
           width: '48px', height: '48px', margin: '0 auto', borderRadius: '50%',
-          backgroundColor: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          backgroundColor: 'var(--color-error-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          <i className="fa-solid fa-triangle-exclamation" style={{ fontSize: '24px', color: '#dc2626' }} />
+          <i className="fa-solid fa-triangle-exclamation" style={{ fontSize: '24px', color: 'var(--color-error)' }} />
         </div>
         <h3 className="text-main" style={{ fontSize: '16px', fontWeight: 600, marginTop: '16px' }}>{title}</h3>
         <p className="text-sub" style={{ fontSize: '14px', marginTop: '8px' }}>{message}</p>

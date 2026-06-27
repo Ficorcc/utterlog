@@ -202,7 +202,7 @@ export default function AnnotationsPage() {
         {selectedIds.size > 0 && (
           <Button variant="secondary"
             onClick={() => setBatchDeleteOpen(true)}
-            style={{ color: '#dc2626', borderColor: '#dc2626' }}>
+            style={{ color: 'var(--color-error)', borderColor: 'var(--color-error)' }}>
             <i className="fa-regular fa-trash" style={{ marginRight: '6px' }} />
             删除所选 ({selectedIds.size})
           </Button>

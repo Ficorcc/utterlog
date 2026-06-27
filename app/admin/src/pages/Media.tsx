@@ -134,7 +134,7 @@ export default function MediaPage() {
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                 <button
                   onClick={() => copyUrl(file.url, file.id)}
-                  style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: copiedId === file.id ? '#16a34a' : 'var(--color-primary, #0052D9)', color: '#fff', border: 'none', cursor: 'pointer', borderRadius: 0, transition: 'background 0.15s' }}
+                  style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: copiedId === file.id ? 'var(--color-success)' : 'var(--color-primary, #0052D9)', color: '#fff', border: 'none', cursor: 'pointer', borderRadius: 'var(--ctrl-radius)', transition: 'background 0.15s' }}
                   title={t('admin.media.copyLink', '复制链接')}
                 >
                   {copiedId === file.id ? <i className="fa-solid fa-check" style={{ fontSize: '14px' }} /> : <i className="fa-regular fa-copy" style={{ fontSize: '14px' }} />}

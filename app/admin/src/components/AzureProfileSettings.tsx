@@ -46,7 +46,7 @@ const rowStyle = {
 const labelStyle = {
   padding: '18px 16px 12px 0',
   color: 'var(--color-text-sub)',
-  fontSize: 13,
+  fontSize: 14,
   fontWeight: 600,
 } as const;
 
@@ -135,7 +135,7 @@ export default function AzureProfileSettings() {
       <div className="card" style={{ padding: 20, marginTop: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 10 }}>
           <div>
-            <h3 className="text-main" style={{ fontSize: 15, fontWeight: 600, margin: 0 }}>主题侧边栏资料卡</h3>
+            <h3 className="text-main" style={{ fontSize: 14, fontWeight: 600, margin: 0 }}>主题侧边栏资料卡</h3>
             <p className="text-dim" style={{ fontSize: 12, lineHeight: 1.7, margin: '8px 0 0' }}>
               留空时自动使用博主资料；访客填写过评论表单后，前台会读取同一份缓存显示欢迎回来。
             </p>
@@ -148,7 +148,7 @@ export default function AzureProfileSettings() {
         <div style={rowStyle}>
           <div style={labelStyle}>显示资料卡</div>
           <div style={{ ...valueStyle, display: 'flex', alignItems: 'center' }}>
-            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13 }}>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 14 }}>
               <input
                 type="checkbox"
                 checked={form.azure_sidebar_profile_enabled !== 'false'}
@@ -180,7 +180,7 @@ export default function AzureProfileSettings() {
               placeholder="留空使用博主头像，也可以填写图片 URL"
             />
             <button className="btn btn-secondary" onClick={() => fileRef.current?.click()} disabled={uploading}>
-              <i className={uploading ? 'fa-regular fa-spinner fa-spin' : 'fa-regular fa-upload'} style={{ fontSize: 13 }} />
+              <i className={uploading ? 'fa-regular fa-spinner fa-spin' : 'fa-regular fa-upload'} style={{ fontSize: 14 }} />
               {uploading ? '上传中' : '上传'}
             </button>
             <input ref={fileRef} type="file" accept="image/*" onChange={handleUpload} style={{ display: 'none' }} />
@@ -254,7 +254,7 @@ export default function AzureProfileSettings() {
       <div className="card" style={{ padding: 20, marginTop: 18 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 10 }}>
           <div>
-            <h3 className="text-main" style={{ fontSize: 15, fontWeight: 600, margin: 0 }}>主题侧边栏访客天气</h3>
+            <h3 className="text-main" style={{ fontSize: 14, fontWeight: 600, margin: 0 }}>主题侧边栏访客天气</h3>
             <p className="text-dim" style={{ fontSize: 12, lineHeight: 1.7, margin: '8px 0 0' }}>
               显示在原社交链接条位置。优先按访客 IP 获取城市天气，失败时显示默认城市天气。
             </p>
@@ -267,7 +267,7 @@ export default function AzureProfileSettings() {
         <div style={rowStyle}>
           <div style={labelStyle}>显示天气条</div>
           <div style={{ ...valueStyle, display: 'flex', alignItems: 'center' }}>
-            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13 }}>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 14 }}>
               <input
                 type="checkbox"
                 checked={form.azure_sidebar_weather_enabled !== 'false'}

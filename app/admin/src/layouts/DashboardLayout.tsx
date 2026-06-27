@@ -235,10 +235,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* Left: current page icon + title (中文 + English) */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
             {pageIcon && (
-              <i className={pageIcon} style={{ fontSize: 15, color: 'var(--color-primary)', flexShrink: 0 }} />
+              <i className={pageIcon} style={{ fontSize: 14, color: 'var(--color-primary)', flexShrink: 0 }} />
             )}
             <h1 style={{
-              fontSize: 15, fontWeight: 600, margin: 0,
+              fontSize: 14, fontWeight: 600, margin: 0,
               color: 'var(--color-text-main)',
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             }}>
@@ -297,7 +297,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 onClick={() => setMenuOpen((v) => !v)}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 8, padding: '5px 10px 5px 6px',
-                  fontSize: 13, background: menuOpen ? 'var(--color-bg-soft)' : 'transparent',
+                  fontSize: 14, background: menuOpen ? 'var(--color-bg-soft)' : 'transparent',
                   border: 'none', cursor: 'pointer', color: 'var(--color-text-main)',
                   transition: 'background 0.15s',
                 }}
@@ -333,7 +333,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   }}
                 >
                   <div style={{ padding: '8px 14px 10px', borderBottom: '1px solid var(--color-divider)' }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-main)' }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-main)' }}>
                       {user?.nickname || user?.username}
                     </div>
                     {user?.email && (
@@ -401,14 +401,14 @@ function MenuItem({
       onClick={onClick}
       style={{
         display: 'flex', alignItems: 'center', gap: 10, width: '100%',
-        padding: '9px 14px', fontSize: 13, border: 'none', background: 'none',
-        color: danger ? '#dc2626' : 'var(--color-text-main)',
+        padding: '9px 14px', fontSize: 14, border: 'none', background: 'none',
+        color: danger ? 'var(--color-error)' : 'var(--color-text-main)',
         cursor: 'pointer', textAlign: 'left', transition: 'background 0.15s',
       }}
       onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-bg-soft)'; }}
       onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
     >
-      <i className={icon} style={{ fontSize: 12, width: 14, textAlign: 'center', color: danger ? '#dc2626' : 'var(--color-text-sub)' }} />
+      <i className={icon} style={{ fontSize: 12, width: 14, textAlign: 'center', color: danger ? 'var(--color-error)' : 'var(--color-text-sub)' }} />
       <span>{label}</span>
     </button>
   );

@@ -81,7 +81,7 @@ export default function Plugins() {
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-        <div className="text-sub" style={{ fontSize: 13 }}>
+        <div className="text-sub" style={{ fontSize: 14 }}>
           共 {plugins.length} 个插件 · 启用中 <span style={{ color: 'var(--color-primary)', fontWeight: 600 }}>{active.length}</span>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -214,7 +214,7 @@ export default function Plugins() {
                         background: 'none', border: 'none', cursor: 'pointer',
                         color: 'var(--color-text-dim)', transition: 'color 0.15s',
                       }}
-                      onMouseEnter={(e) => { e.currentTarget.style.color = '#dc2626'; }}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-error)'; }}
                       onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-dim)'; }}
                     >
                       <i className="fa-regular fa-trash" style={{ fontSize: 12 }} />

@@ -66,7 +66,7 @@ export default function PostsLayout() {
                   minHeight: 40,
                   padding: '0 16px',
                   color: isActive ? 'var(--color-primary)' : 'var(--color-text-sub)',
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: isActive ? 700 : 500,
                   textDecoration: 'none',
                   borderBottom: `2px solid ${isActive ? 'var(--color-primary)' : 'transparent'}`,

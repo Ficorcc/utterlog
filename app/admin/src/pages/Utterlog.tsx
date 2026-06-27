@@ -115,8 +115,8 @@ export default function UtterlogCenterPage() {
             </div>
             <div style={{
               padding: '4px 12px', fontSize: '12px', fontWeight: 600,
-              background: networkStatus.connected ? '#dcfce7' : '#fef3c7',
-              color: networkStatus.connected ? '#16a34a' : '#d97706',
+              background: networkStatus.connected ? 'var(--color-success-bg)' : '#fef3c7',
+              color: networkStatus.connected ? 'var(--color-success)' : 'var(--color-warning)',
             }}>
               {networkStatus.connected ? '已连接' : '连接中…'}
             </div>
@@ -202,7 +202,7 @@ export default function UtterlogCenterPage() {
             <i className="fa-regular fa-globe" style={{ fontSize: '16px', color: 'var(--color-primary)' }} />
             <h2 className="text-main" style={{ fontSize: '15px', fontWeight: 600 }}>Utterlog ID</h2>
             {utterlogBound && (
-              <span style={{ padding: '2px 8px', fontSize: '10px', fontWeight: 600, background: '#dcfce7', color: '#16a34a' }}>已绑定</span>
+              <span style={{ padding: '2px 8px', fontSize: '10px', fontWeight: 600, background: 'var(--color-success-bg)', color: 'var(--color-success)' }}>已绑定</span>
             )}
           </div>
 

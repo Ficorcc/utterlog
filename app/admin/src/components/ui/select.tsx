@@ -26,7 +26,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
             <option key={opt.value} value={opt.value}>{opt.label}</option>
           )) : children}
         </select>
-        {error && <p style={{ marginTop: '4px', fontSize: '13px', color: '#dc2626' }}>{error}</p>}
+        {error && <p style={{ marginTop: '4px', fontSize: '13px', color: 'var(--color-error)' }}>{error}</p>}
       </div>
     );
   }

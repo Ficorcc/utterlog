@@ -189,8 +189,8 @@ export default function AnalyticsPage() {
         <div style={{ position: 'absolute', bottom: 12, left: 12, zIndex: 1000, display: 'flex', gap: '16px', padding: '8px 16px', background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', borderRadius: '4px' }}>
           {[
             { label: '访问次数', value: s.total_visits || 0, color: 'var(--color-primary)' },
-            { label: '独立访客', value: s.unique_ips || 0, color: '#16a34a' },
-            { label: '访问页面', value: s.unique_pages || 0, color: '#f59e0b' },
+            { label: '独立访客', value: s.unique_ips || 0, color: 'var(--color-success)' },
+            { label: '访问页面', value: s.unique_pages || 0, color: 'var(--color-warning)' },
           ].map((card, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
               <span style={{ fontSize: '20px', fontWeight: 700, color: card.color }}>{card.value.toLocaleString()}</span>

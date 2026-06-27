@@ -200,7 +200,7 @@ export default function Login() {
         className="login-form"
         style={{
           width: '100%', maxWidth: 380, background: 'var(--color-bg-card)',
-          border: '1px solid var(--color-border)', borderRadius: 0, padding: '32px 28px',
+          border: '1px solid var(--color-border)', borderRadius: 'var(--ctrl-radius)', padding: '32px 28px',
         }}
       >
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
@@ -221,7 +221,7 @@ export default function Login() {
         {!needTotp ? (
           <>
             <div style={{ marginBottom: 16 }}>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 6 }}>{t('admin.login.email', '邮箱')}</label>
+              <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6 }}>{t('admin.login.email', '邮箱')}</label>
               <input
                 type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                 className="input" placeholder="you@example.com" autoFocus
@@ -230,7 +230,7 @@ export default function Login() {
 
             <div style={{ marginBottom: 24 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                <label style={{ fontSize: 13, fontWeight: 500 }}>{t('admin.login.password', '密码')}</label>
+                <label style={{ fontSize: 14, fontWeight: 500 }}>{t('admin.login.password', '密码')}</label>
                 <button
                   type="button"
                   tabIndex={-1}
@@ -273,7 +273,7 @@ export default function Login() {
         ) : (
           <>
             <div style={{ marginBottom: 24 }}>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 6 }}>
+              <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6 }}>
                 {t('admin.login.sixDigitCode', '6 位验证码')}
                 <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--color-text-dim)', marginLeft: 6 }}>
                   {t('admin.login.authenticatorHint', '（Authenticator App 生成）')}
@@ -322,7 +322,7 @@ export default function Login() {
           <div style={{
             position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
             zIndex: 51, width: 380, maxWidth: '90vw',
-            background: 'var(--color-bg-card)', borderRadius: 0,
+            background: 'var(--color-bg-card)', borderRadius: 'var(--ctrl-radius)',
             boxShadow: '0 12px 40px rgba(0,0,0,0.15)', padding: 28,
           }}>
             <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 6 }}>{t('admin.login.forgotPassword', '找回密码')}</h2>
@@ -388,7 +388,7 @@ export default function Login() {
           <div style={{
             position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
             zIndex: 51, width: 380, maxWidth: '90vw',
-            background: 'var(--color-bg-card)', borderRadius: 0,
+            background: 'var(--color-bg-card)', borderRadius: 'var(--ctrl-radius)',
             boxShadow: '0 12px 40px rgba(0,0,0,0.15)', padding: 28,
           }}>
             <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 6 }}>{t('admin.login.resetPassword', '重置密码')}</h2>

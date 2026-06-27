@@ -273,7 +273,7 @@ export default function FootprintsPage() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, marginBottom: 18 }}>
         <div>
-          <div className="text-dim" style={{ fontSize: 13, marginBottom: 6 }}>
+          <div className="text-dim" style={{ fontSize: 14, marginBottom: 6 }}>
             {t('admin.footprints.total', '共 {count} 条足迹，{places} 个地点', { count: rows.length, places: places.length })}
           </div>
           <div className="text-sub" style={{ fontSize: 12 }}>
@@ -293,8 +293,8 @@ export default function FootprintsPage() {
 
       {!enabled && (
         <div className="card" style={{ padding: 14, marginBottom: 14, borderLeft: '3px solid #f59e0b', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <i className="fa-regular fa-circle-exclamation" style={{ color: '#d97706' }} />
-          <span className="text-sub" style={{ fontSize: 13, flex: 1 }}>
+          <i className="fa-regular fa-circle-exclamation" style={{ color: 'var(--color-warning)' }} />
+          <span className="text-sub" style={{ fontSize: 14, flex: 1 }}>
             {t('admin.footprints.disabledHint', '足迹功能未启用，前台足迹页会显示关闭提示。')}
           </span>
           {renderSettingsButton()}
@@ -304,7 +304,7 @@ export default function FootprintsPage() {
       {enabled && !hasMapboxToken && (
         <div className="card" style={{ padding: 14, marginBottom: 14, borderLeft: '3px solid var(--color-primary)', display: 'flex', alignItems: 'center', gap: 10 }}>
           <i className="fa-regular fa-map" style={{ color: 'var(--color-primary)' }} />
-          <span className="text-sub" style={{ fontSize: 13, flex: 1 }}>
+          <span className="text-sub" style={{ fontSize: 14, flex: 1 }}>
             {t('admin.footprints.noTokenHint', '尚未配置 Mapbox Token，前台地图不会渲染，只会显示足迹时间线。')}
           </span>
           {renderSettingsButton()}
@@ -493,7 +493,7 @@ export default function FootprintsPage() {
           </div>
 
           <div>
-            <label className="text-sub" style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 6 }}>
+            <label className="text-sub" style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6 }}>
               {t('admin.settings.footprint.geocoderProvider', '地理编码服务')}
             </label>
             <select

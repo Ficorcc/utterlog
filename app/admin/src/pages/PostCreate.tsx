@@ -216,7 +216,7 @@ export default function CreatePostPage() {
                   if (ex.summary && !excerpt) setExcerpt(ex.summary);
                 }}
               />
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-main)', margin: '4px 0 8px' }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-main)', margin: '4px 0 8px' }}>
                 <i className="fa-regular fa-pen-line" style={{ marginRight: 6 }} />
                 影视简介 / 剧情（Markdown）
               </div>

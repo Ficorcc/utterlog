@@ -176,7 +176,7 @@ export default function AlbumsPage() {
                 ) : (
                   <i className="fa-regular fa-image" style={{ fontSize: '32px', color: 'var(--color-text-dim)' }} />
                 )}
-                <div style={{ position: 'absolute', top: '8px', right: '8px', padding: '2px 8px', fontSize: '11px', fontWeight: 600, background: album.status === 'public' ? '#dcfce7' : 'var(--color-bg-soft)', color: album.status === 'public' ? '#16a34a' : 'var(--color-text-dim)' }}>
+                <div style={{ position: 'absolute', top: '8px', right: '8px', padding: '2px 8px', fontSize: '11px', fontWeight: 600, background: album.status === 'public' ? 'var(--color-success-bg)' : 'var(--color-bg-soft)', color: album.status === 'public' ? 'var(--color-success)' : 'var(--color-text-dim)' }}>
                   {album.status === 'public' ? '公开' : '私有'}
                 </div>
               </div>
@@ -240,7 +240,7 @@ export default function AlbumsPage() {
                   <img src={photo.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   <button onClick={() => removePhoto(photo.id)} style={{
                     position: 'absolute', top: '4px', right: '4px', width: '24px', height: '24px',
-                    background: '#dc2626', color: '#fff', border: 'none', cursor: 'pointer',
+                    background: 'var(--color-error)', color: '#fff', border: 'none', cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     opacity: 0, transition: 'opacity 0.15s',
                   }} className="group-hover:opacity-100">

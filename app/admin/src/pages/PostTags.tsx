@@ -113,7 +113,7 @@ export default function TagsPage() {
               <button
                 onClick={(e) => { e.stopPropagation(); setDeleteId(tag.id); }}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: 'var(--color-text-dim)', opacity: 0.4, transition: 'opacity 0.15s' }}
-                onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = '#dc2626'; }}
+                onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = 'var(--color-error)'; }}
                 onMouseLeave={e => { e.currentTarget.style.opacity = '0.4'; e.currentTarget.style.color = 'var(--color-text-dim)'; }}
               >
                 <i className="fa-regular fa-xmark" style={{ fontSize: '11px' }} />
