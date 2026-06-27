@@ -329,22 +329,24 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
                 <PostLink post={heroPost} className="azure-hero-link">
                   <FadeCover key={displaySrc} src={displaySrc} alt={heroPost.title} className="azure-hero-cover" />
                   {/* Loading overlay —— 切分类时盖在旧图上，模糊 + 半透黑底
-                      + 中央三点 loading。淡出由 transition 0.4s 控制，跟新图
+                      + 中央旋转弧 spinner。淡出由 transition 0.4s 控制，跟新图
                       淡入并行，整体过渡总长 ≈ 700ms（最短展示）+ 0.4s（淡出）。 */}
                   <div
                     aria-hidden={!heroLoading}
                     className={`azure-hero-loading${heroLoading ? ' active' : ''}`}
                   >
-                    <svg className="azure-hero-loading-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <circle cx="4" cy="12" r="3" opacity="1">
-                        <animate id="spinner_qYjJ" begin="0;spinner_t4KZ.end-0.25s" attributeName="opacity" dur="0.75s" values="1;.2" fill="freeze" />
-                      </circle>
-                      <circle cx="12" cy="12" r="3" opacity=".4">
-                        <animate begin="spinner_qYjJ.begin+0.15s" attributeName="opacity" dur="0.75s" values="1;.2" fill="freeze" />
-                      </circle>
-                      <circle cx="20" cy="12" r="3" opacity=".3">
-                        <animate id="spinner_t4KZ" begin="spinner_qYjJ.begin+0.3s" attributeName="opacity" dur="0.75s" values="1;.2" fill="freeze" />
-                      </circle>
+                    {/* 旋转弧 spinner —— 用 <animateTransform> 单一时间轴 + repeatCount="indefinite"。
+                        之前三圆点 fade 用的是 syncbase (`spinner_qYjJ.begin+0.3s`)，
+                        Chromium 在某些 hydration/SSR 边界上会冻结第一帧不启动，
+                        肉眼看起来像卡死。换成单元素旋转既符合"圆圈旋转"预期，
+                        也跟 LoadingSpinner / Captcha / AIChatBubble 等其它 spinner
+                        的写法保持一致。 */}
+                    <svg className="azure-hero-loading-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <g transform="translate(12 12)">
+                        <circle r="9" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="42 16" opacity="0.95">
+                          <animateTransform attributeName="transform" type="rotate" dur="0.9s" from="0" to="360" repeatCount="indefinite" />
+                        </circle>
+                      </g>
                     </svg>
                   </div>
                   {/* Title strip: same height as one left-sidebar tab
