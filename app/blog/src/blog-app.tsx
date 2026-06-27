@@ -1,6 +1,5 @@
 'use client';
 
-import { lazy, Suspense } from 'react';
 import { Providers } from '@/app/providers';
 import { ThemeProvider } from '@/lib/theme-context';
 import { getThemeComponents } from '@/lib/theme';
@@ -14,7 +13,7 @@ import { NavigationProvider } from '@/lib/navigation';
 import { MountPageWidgets } from './mount-page-widgets';
 import type { UtterlogBoot } from './types';
 
-const AIChatBubble = lazy(() => import('@/components/blog/AIChatBubble'));
+import AIChatBubble from '@/components/blog/AIChatBubble';
 
 function StaticPage({ html }: { html: string }) {
   return <div id="utterlog-page" suppressHydrationWarning dangerouslySetInnerHTML={{ __html: html }} />;
@@ -40,9 +39,7 @@ function BlogShell({ boot }: { boot: UtterlogBoot }) {
           {boot.pageHtml ? <StaticPage html={boot.pageHtml} /> : null}
           <MountPageWidgets boot={boot} />
         </ThemeLayout>
-        <Suspense fallback={null}>
-          <AIChatBubble />
-        </Suspense>
+        <AIChatBubble />
         <SlotFooter options={boot.ctx.options} />
       </ThemeProvider>
     </Providers>

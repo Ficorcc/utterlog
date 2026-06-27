@@ -104,7 +104,6 @@ function utterlogAvatarUrl(email: string) {
   return `https://id.utterlog.com/avatar/${emailHash(email)}`;
 }
 
-import { optionValue } from '../db/options';
 async function authUser(user: UserRow) {
   const source = await optionValue('avatar_source', 'gravatar');
   return {

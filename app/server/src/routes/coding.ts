@@ -253,7 +253,7 @@ async function fetchGitHubContributionCalendar(login: string) {
     collection?.totalIssueContributions,
     collection?.totalPullRequestContributions,
     collection?.totalPullRequestReviewContributions,
-  ].reduce((sum, value) => sum + Number(value || 0), 0) || yearTotal;
+  ].reduce<number>((sum, value) => sum + Number(value || 0), 0) || yearTotal;
   return { contributions, yearTotal, allTotal };
 }
 

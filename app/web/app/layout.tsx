@@ -5,6 +5,8 @@ import { serverApiBase } from '@/lib/server-api';
 
 const API_BASE = serverApiBase();
 
+const nextRevalidate = (seconds: number) => ({ next: { revalidate: seconds } }) as RequestInit;
+
 function normalizeLocale(locale?: string): string {
   const raw = (locale || '').trim();
   const s = raw.toLowerCase();
@@ -22,7 +24,7 @@ async function getRootDisplayOptions(): Promise<{ activeTheme: string; accentAtt
   try {
     const ac = new AbortController();
     const timer = setTimeout(() => ac.abort(), 2000);
-    const res = await fetch(`${API_BASE}/options`, { next: { revalidate: 60 }, signal: ac.signal });
+    const res = await fetch(`${API_BASE}/options`, { ...nextRevalidate(60), signal: ac.signal });
     clearTimeout(timer);
     if (!res.ok) return { activeTheme: 'Azure', accentAttr: '', locale: 'zh-CN', timeZone: localTimeZone() };
     const json = await res.json();
@@ -65,7 +67,7 @@ export async function generateMetadata() {
     try {
       const ac = new AbortController();
       const timer = setTimeout(() => ac.abort(), 2000);
-      const res = await fetch(`${API_BASE}/options`, { next: { revalidate: 60 }, signal: ac.signal });
+      const res = await fetch(`${API_BASE}/options`, { ...nextRevalidate(60), signal: ac.signal });
       clearTimeout(timer);
       if (res.ok) {
         const json = await res.json();

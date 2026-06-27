@@ -23,7 +23,7 @@ async function fetchAPI<T>(path: string, options?: any): Promise<T> {
     throw new Error(`API error: ${res.status} ${res.statusText}`);
   }
 
-  const json = await res.json();
+  const json = await res.json() as T;
   return json;
 }
 

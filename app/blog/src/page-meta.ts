@@ -1,4 +1,4 @@
-import type { PageMeta } from '../../../blog/src/types';
+import type { PageMeta } from './types';
 
 function pickTitle(meta: any): string | undefined {
   if (!meta) return undefined;

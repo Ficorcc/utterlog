@@ -9,9 +9,9 @@ const env: Record<string, string> = {
   DEBUG: '',
 };
 
-const g = globalThis as typeof globalThis & { process?: { env: Record<string, string> } };
+const g = globalThis as typeof globalThis & { process?: { env: Record<string, string> } } & Record<string, any>;
 if (!g.process) {
-  g.process = { env: { ...env } };
+  g.process = { env: { ...env } } as any;
 } else {
   g.process.env = { ...env, ...g.process.env };
 }

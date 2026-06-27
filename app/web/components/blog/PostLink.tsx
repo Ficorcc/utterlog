@@ -5,7 +5,7 @@ import type { ComponentProps, ReactNode } from 'react';
 import { useThemeContext } from '@/lib/theme-context';
 import { buildPermalink } from '@/lib/permalink';
 
-type LinkPropsNoHref = Omit<ComponentProps<typeof Link>, 'href'>;
+type LinkPropsNoHref = Omit<ComponentProps<typeof Link>, 'href' | 'children'>;
 
 interface PostLinkProps extends LinkPropsNoHref {
   post: {
