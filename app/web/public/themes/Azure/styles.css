@@ -1054,7 +1054,9 @@
   background: color-mix(in srgb, var(--color-bg-soft) 72%, transparent);
   opacity: 1;
   pointer-events: none;
-  transition: opacity 0.28s ease;
+  /* 0.18s 比原来 0.28s 干脆 —— 图片资源已就绪后 spinner 立刻淡出，
+     配合 PostCard 里 500ms min-display 保证用户至少看半秒 spinner。 */
+  transition: opacity 0.18s ease;
 }
 [data-theme="Azure"] .azure-post-card-cover-loader.loaded,
 [data-theme="Azure"] .azure-post-card-cover img[data-loaded="1"] + .azure-post-card-cover-loader {
