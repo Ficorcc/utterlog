@@ -2,6 +2,9 @@
 @import "mapbox-gl/dist/mapbox-gl.css";
 @import "../styles/video-post.css";
 @import "./(blog)/about/about-content.css";
+@import url("https://static.bluecdn.com/fonts/fugaz-one.css");
+@import url("https://static.bluecdn.com/fonts/ubuntu.css");
+@import url("https://static.bluecdn.com/fonts/google-sans-code.css");
 
 /* Scrollbar: reserve space, track matches background, thumb hidden until scroll */
 /* ===== Scrollbar: prevent layout shift ===== */
@@ -118,65 +121,12 @@ html.lightbox-active body {
 }
 
 /* ────────────────────────────────────────────────────────────────
-   System webfonts — served from static.utterlog.com (R2 + CF, 1y
-   immutable cache). All declared font-display: swap so the page
-   renders in fallback fonts immediately and swaps in once the
-   woff2 lands; this is the single biggest FCP win for utterlog.
-
-   Latin only here — Noto Sans SC (Chinese) still rides the Google
-   Fonts mirror in <head> because css2 returns unicode-range-sliced
-   subsets that pre-built static hosting can't replicate cheaply.
+   System webfonts — served from static.bluecdn.com (1y immutable
+   cache). Latin bundles imported at top of this file; Chinese
+   webfonts linked in layout.tsx. All declared font-display: swap.
    ──────────────────────────────────────────────────────────────── */
 
-/* Logo / display — Fugaz One */
-@font-face {
-  font-family: "Fugaz One";
-  src: url("https://static.utterlog.com/fonts/fugaz-one-400.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* UI text — Ubuntu (latin) */
-@font-face {
-  font-family: "Ubuntu";
-  src: url("https://static.utterlog.com/fonts/ubuntu-400.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Ubuntu";
-  src: url("https://static.utterlog.com/fonts/ubuntu-500.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Ubuntu";
-  src: url("https://static.utterlog.com/fonts/ubuntu-700.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* Code — Google Sans Code (replaces PaperMono) */
-@font-face {
-  font-family: "Google Sans Code";
-  src: url("https://static.utterlog.com/fonts/google-sans-code-400.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Google Sans Code";
-  src: url("https://static.utterlog.com/fonts/google-sans-code-700.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* FontAwesome Pro 7.2.0 走 layout.tsx 引入的 official all.min.css —— 不再
+/* FontAwesome Pro 7.3.0 走 layout.tsx 引入的 official all.min.css —— 不再
    在这里 @font-face 覆盖一份，避免移动端弱网下重复源解析判定的体感慢。 */
 
 /* ========================================
@@ -642,7 +592,7 @@ body {
 }
 
 /* Site title — display font for the header brand. Loads the variable
-   Alimama FangYuanTi from static.utterlog.com (linked in layout.tsx);
+   Alimama FangYuanTi from static.bluecdn.com (linked in layout.tsx);
    falls back to Noto Sans SC + system if the woff2 slice for a given
    character isn't there. Themes apply this class on their site-name
    <span>; future v1.2.4+ may expose font choice in admin settings. */
@@ -3346,43 +3296,43 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
 }
 
 /* ────────────────────────────────────────────────────────────────
-   Available Chinese webfonts — hosted on static.utterlog.com
+   Available Chinese webfonts — hosted on static.bluecdn.com
    ────────────────────────────────────────────────────────────────
    All entries below were sliced with cn-font-split (or Google's
-   unicode-range subsetting for Noto Sans SC) and uploaded to R2.
-   Only Noto Sans SC is link-loaded by default in layout.tsx —
-   it's the primary --font-sans fallback for CJK and every page
-   needs it. The rest are NOT linked at boot to keep FCP light;
+   unicode-range subsetting for Noto Sans SC) and uploaded to CDN.
+   Noto Sans SC / Alimama FangYuanTi / Luo are link-loaded in layout.tsx;
+   the rest are NOT linked at boot to keep FCP light;
    activate one by adding `<link rel="stylesheet" href="<URL>">`
    to layout.tsx (or a per-theme stylesheet) and then referencing
    the family-name below in `font-family`.
 
    Active by default:
-     • Noto Sans SC          — fonts/noto-sans-sc/result.css
+     • Noto Sans SC          — fonts/noto-sans-sc.css
                                family: 'Noto Sans SC'  (400/500/600/700)
+     • 阿里妈妈方圆体          — fonts/alimama-fangyuanti.css
+                               family: 'Alimama FangYuanTi VF'  (variable)
+     • Luo                     — fonts/luo.css
+                               family: 'Luo'  (unicode-range 中文优化)
 
    Available (link to enable):
-     • 霞鹜文楷 / Mono       — fonts/lxgwwenkai/<weight>/result.css
-                               family: 'LXGW WenKai' / 'LXGW WenKai Mono'
-                               weights: Light/Regular/Medium ×2
-     • 霞鹜文楷 Bright       — fonts/lxgwwenkaibright/<weight>/result.css
-                               family: 'LXGW Bright'  (Light/Regular/Medium + italic)
-     • 霞鹜漫黑              — fonts/lxgwmanhei/<weight>/result.css
+     • 霞鹜文楷                — fonts/lxgw-wenkai.css
+                               family: 'LXGW WenKai'
+     • 霞鹜文楷 Bright         — fonts/lxgwwenkaibright.css
+                               family: 'LXGW Bright'
+     • 霞鹜漫黑                — fonts/lxgw-marker-gothic.css
                                family: 'LXGW Marker Gothic'
-     • 霞鹜文楷屏幕阅读版    — fonts/lywkpmydb/<weight>/result.css
-                               family: 'LXGW WenKai Screen' / 'LXGW WenKai Mono Screen'
-     • 思源宋体              — fonts/syst/<weight>/result.css
+     • 霞鹜文楷屏幕阅读版      — fonts/lywkpmydb.css
+                               family: 'LXGW WenKai Screen'
+     • 思源宋体                — fonts/source-han-serif-cn.css
                                family: 'Source Han Serif CN VF'  (variable 250–900)
-     • 优设标题黑            — fonts/ysbth/<weight>/result.css
+     • 优设标题黑              — fonts/youshe-biaotihei.css
                                family: 'YouSheBiaoTiHei'
-     • 斗鱼追光体            — fonts/dyzgt/<weight>/result.css
+     • 斗鱼追光体              — fonts/douyu-zhuiguangti.css
                                family: 'DOUYU Font'
-     • 快看世界体            — fonts/kksjt/<weight>/result.css
+     • 快看世界体              — fonts/kuaikanshijieti.css
                                family: '快看世界体'
-     • TencentSans W7        — fonts/tencentsans-w7/result.css
+     • TencentSans W7          — fonts/tencentsans.css
                                family: 'TencentSans W7'
-     • Maple Mono CN         — fonts/maple-mono-cn/<weight>/result.css
+     • Maple Mono CN           — fonts/maple-mono-cn.css
                                family: 'Maple Mono CN'  (16 weights, 200–800 + italic)
-     • 阿里妈妈方圆体        — fonts/alimama-fangyuan/AlimamaFangYuanTiVF-Thin/result.css
-                               family: 'Alimama FangYuanTi VF'  (variable, Thin only)
 */

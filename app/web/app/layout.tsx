@@ -131,22 +131,24 @@ export default async function RootLayout({
             ship as cn-font-split / Google-style unicode-range slices,
             so we link their generated stylesheets directly — the browser
             only downloads the slices a given page actually uses. */}
-        <link rel="preconnect" href="https://static.utterlog.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://static.bluecdn.com" crossOrigin="anonymous" />
         {/* Font Awesome Pro 7.2.0 — 全站只引这一份。之前 layout 再
             preload 4 个 woff2 + globals.css 再 @font-face 一遍，移动
             端在弱网下被反复解析判定重复源，体感反而更慢。简化为单
             一 official CSS：浏览器从这里读 @font-face，所有图标走同
             一通道。代价：失去 font-display: swap 覆盖，icons 用默认
             block（100ms FOIT），交换的是源清晰 + 配置简单。 */}
-        <link rel="stylesheet" href="https://static.utterlog.com/libs/fontawesome/7.2.0/css/all.min.css" />
+        <link rel="stylesheet" href="https://static.bluecdn.com/libs/fontawesome/7.3.0/css/all.min.css" />
         {/* Noto Sans SC — primary Chinese sans, mirrored from Google Fonts
             to R2 (101 unicode-range slices, ~5MB total but each page
             only loads the slices it actually uses). */}
-        <link rel="stylesheet" href="https://static.utterlog.com/fonts/noto-sans-sc/result.css" />
+        <link rel="stylesheet" href="https://static.bluecdn.com/fonts/noto-sans-sc.css" />
         {/* Alimama FangYuanTi VF — site-title display font. Variable
             font split into ~110 unicode-range woff2 slices; only the
             chars in the title actually load. */}
-        <link rel="stylesheet" href="https://static.utterlog.com/fonts/AlimamaFangYuanTi/result.css" />
+        <link rel="stylesheet" href="https://static.bluecdn.com/fonts/alimama-fangyuanti.css" />
+        {/* Luo — unicode-range 中文优化，按需加载 CJK 切片 */}
+        <link rel="stylesheet" href="https://static.bluecdn.com/fonts/luo.css" />
       </head>
       <body className="font-sans antialiased bg-page text-primary">
         {/* Squircle clip-path (matches Utterlog logo shape) */}

@@ -1,18 +1,10 @@
-@import url('https://static.utterlog.com/fonts/noto-sans-sc/result.css');
-@import url('https://static.utterlog.com/fonts/google-sans/result.css');
-@import url('https://static.utterlog.com/fonts/kuaikanshijieti/result.css');
-@import url('https://static.utterlog.com/fonts/AlimamaFangYuanTi/result.css');
-@import url('https://static.utterlog.com/fonts/SourceHanSerifCN/result.css');
-@import url('https://static.utterlog.com/fonts/tencentsans-w7/result.css');
-
-/* Google Sans Code — 文章页代码块专用字体（仅给了 .woff2，自行声明 @font-face） */
-@font-face {
-  font-family: 'Google Sans Code';
-  src: url('https://static.utterlog.com/fonts/google-sans-code-400.woff2') format('woff2');
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
+@import url('https://static.bluecdn.com/fonts/noto-sans-sc.css');
+@import url('https://static.bluecdn.com/fonts/google-sans.css');
+@import url('https://static.bluecdn.com/fonts/kuaikanshijieti.css');
+@import url('https://static.bluecdn.com/fonts/alimama-fangyuanti.css');
+@import url('https://static.bluecdn.com/fonts/source-han-serif-cn.css');
+@import url('https://static.bluecdn.com/fonts/google-sans-code.css');
+@import url('https://static.bluecdn.com/fonts/tencentsans.css');
 
 /* ============================================================ */
 /* Nebula — 暗色科技风（Code Wiki 风格）                         */

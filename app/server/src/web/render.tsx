@@ -104,10 +104,11 @@ export async function renderBlogPage(
   ${meta.ogImage ? `<meta property="og:image" content="${escapeHtml(meta.ogImage)}" />` : ''}
   <meta name="twitter:card" content="${meta.ogImage ? 'summary_large_image' : 'summary'}" />
   <link rel="icon" href="${escapeHtml(favicon)}" />
-  <link rel="preconnect" href="https://static.utterlog.com" crossorigin="anonymous" />
-  <link rel="stylesheet" href="https://static.utterlog.com/libs/fontawesome/7.2.0/css/all.min.css" />
-  <link rel="stylesheet" href="https://static.utterlog.com/fonts/noto-sans-sc/result.css" />
-  <link rel="stylesheet" href="https://static.utterlog.com/fonts/AlimamaFangYuanTi/result.css" />
+  <link rel="preconnect" href="https://static.bluecdn.com" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://static.bluecdn.com/libs/fontawesome/7.3.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://static.bluecdn.com/fonts/noto-sans-sc.css" />
+  <link rel="stylesheet" href="https://static.bluecdn.com/fonts/alimama-fangyuanti.css" />
+  <link rel="stylesheet" href="https://static.bluecdn.com/fonts/luo.css" />
   <link rel="stylesheet" href="/static/globals.css" />
   <link rel="stylesheet" href="/static/client.css" />
   ${meta.jsonLd ? `<script type="application/ld+json">${JSON.stringify(meta.jsonLd)}</script>` : ''}
