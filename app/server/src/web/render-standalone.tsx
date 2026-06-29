@@ -43,8 +43,8 @@ export function renderStandalonePage(
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>${escapeHtml(title)}</title>
-  <link rel="preconnect" href="https://static.utterlog.com" crossorigin="anonymous" />
-  <link rel="stylesheet" href="https://static.utterlog.com/libs/fontawesome/7.2.0/css/all.min.css" />
+  <link rel="preconnect" href="https://static.bluecdn.com" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://static.bluecdn.com/libs/fontawesome/7.3.0/css/all.min.css" />
   <link rel="stylesheet" href="/static/globals.css" />
   <link rel="stylesheet" href="/static/client.css" />
 </head>

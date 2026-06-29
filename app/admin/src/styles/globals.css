@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import url("https://static.bluecdn.com/fonts/ubuntu.css");
+@import url("https://static.bluecdn.com/fonts/google-sans-code.css");
 
 /* Scrollbar: reserve space, track matches background, thumb hidden until scroll */
 /* ===== Scrollbar: prevent layout shift ===== */
@@ -102,53 +104,12 @@ body {
 }
 
 /* ────────────────────────────────────────────────────────────────
-   System webfonts — served from static.utterlog.com (R2 + CF, 1y
-   immutable cache). Same set as app/web/app/globals.css so admin SPA
-   inherits the utterlog typography stack with zero local hosting.
-   All declared font-display: swap so the panel renders in fallback
-   immediately and swaps once woff2 lands.
+   System webfonts — served from static.bluecdn.com. Same set as
+   app/web/app/globals.css so admin SPA inherits the utterlog
+   typography stack with zero local hosting.
    ──────────────────────────────────────────────────────────────── */
 
-/* UI text — Ubuntu (latin) */
-@font-face {
-  font-family: "Ubuntu";
-  src: url("https://static.utterlog.com/fonts/ubuntu-400.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Ubuntu";
-  src: url("https://static.utterlog.com/fonts/ubuntu-500.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Ubuntu";
-  src: url("https://static.utterlog.com/fonts/ubuntu-700.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* Code — Google Sans Code (replaces PaperMono) */
-@font-face {
-  font-family: "Google Sans Code";
-  src: url("https://static.utterlog.com/fonts/google-sans-code-400.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Google Sans Code";
-  src: url("https://static.utterlog.com/fonts/google-sans-code-700.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* FontAwesome Pro 7.2.0 走 index.html 引入的 official all.min.css —— 不再
+/* FontAwesome Pro 7.3.0 走 index.html 引入的 official all.min.css —— 不再
    在这里 @font-face 覆盖一份，与前台保持一致，避免重复源。 */
 
 /* ========================================

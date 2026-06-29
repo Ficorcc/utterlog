@@ -35,7 +35,7 @@
   --color-focus-ring: #00C767;
   --color-success: #00A355;
 
-  /* Typography — uses Ubuntu (self-hosted on static.utterlog.com,
+  /* Typography — uses Ubuntu (self-hosted on static.bluecdn.com,
      declared in app/globals.css). Ubuntu has the same blocky-sans
      character that Matter provided before its jsDelivr source went
      404; system-sans fallback chain handles offline / first paint. */
