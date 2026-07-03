@@ -9,6 +9,14 @@ import PageTitle from '@/components/blog/PageTitle';
 import Lightbox from '@/components/blog/Lightbox';
 import toast from 'react-hot-toast';
 
+const MOMENTS_CACHE_TTL = 60_000;
+
+let momentsPageCache: {
+  moments: any[];
+  tags: string[];
+  fetchedAt: number;
+} | null = null;
+
 function formatTime(ts: number, timeZone: string) {
   if (!ts) return null;
   const parts = datePartsInTimeZone(ts, timeZone);
@@ -116,8 +124,9 @@ function getMomentPositions(count: number, cols = 4) {
 
 export default function MomentsPage() {
   const { timeZone, theme } = useThemeContext();
-  const [moments, setMoments] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cachedMoments = momentsPageCache && Date.now() - momentsPageCache.fetchedAt < MOMENTS_CACHE_TTL ? momentsPageCache : null;
+  const [moments, setMoments] = useState<any[]>(cachedMoments?.moments || []);
+  const [loading, setLoading] = useState(!cachedMoments);
   const [showComposer, setShowComposer] = useState(false);
   const [content, setContent] = useState('');
   const [mood, setMood] = useState('');
@@ -127,7 +136,7 @@ export default function MomentsPage() {
   const [locating, setLocating] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const source = '网页'; // Auto-detected: 网页 for web, Telegram for bot
-  const [tags, setTags] = useState<string[]>(['随想', '技术', '生活', '阅读']);
+  const [tags, setTags] = useState<string[]>(cachedMoments?.tags?.length ? cachedMoments.tags : ['随想', '技术', '生活', '阅读']);
   const [filterTag, setFilterTag] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -165,7 +174,8 @@ export default function MomentsPage() {
   const isAdmin = isAuthenticated && user?.role === 'admin';
 
   useEffect(() => {
-    fetchMoments();
+    const hasFreshCache = momentsPageCache && Date.now() - momentsPageCache.fetchedAt < MOMENTS_CACHE_TTL;
+    fetchMoments({ silent: Boolean(hasFreshCache) });
     fetchTags();
     // Nebula 主题强制对齐 960px 内容容器，最多 3 列；其他主题按视口断点
     const isNebula = theme?.name === 'Nebula';
@@ -227,13 +237,19 @@ export default function MomentsPage() {
     return () => window.removeEventListener('keydown', handleKey);
   }, [showComposer]);
 
-  const fetchMoments = async () => {
-    setLoading(true);
+  const fetchMoments = async (opts?: { silent?: boolean }) => {
+    if (!opts?.silent) setLoading(true);
     try {
       const r: any = await momentsApi.list({ per_page: 50 });
-      setMoments(r.data || []);
+      const nextMoments = r.data || [];
+      setMoments(nextMoments);
+      momentsPageCache = {
+        moments: nextMoments,
+        tags,
+        fetchedAt: Date.now(),
+      };
     } catch {} finally {
-      setLoading(false);
+      if (!opts?.silent) setLoading(false);
     }
   };
 
@@ -242,8 +258,14 @@ export default function MomentsPage() {
     // 数据库里没说说时返回空，保留 useState 的默认值作兜底。
     try {
       const r: any = await momentsApi.recentTags(8);
-      const list = (r.data || r) as string[];
-      if (Array.isArray(list) && list.length > 0) setTags(list);
+      const rawList = (r.data || r) as any[];
+      const list = Array.isArray(rawList)
+        ? rawList.map((item) => typeof item === 'string' ? item : item?.name).filter(Boolean)
+        : [];
+      if (list.length > 0) {
+        setTags(list);
+        if (momentsPageCache) momentsPageCache = { ...momentsPageCache, tags: list };
+      }
     } catch {}
   };
 
