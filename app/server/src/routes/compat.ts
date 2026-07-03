@@ -520,6 +520,55 @@ const emptyFeedFetchProgress = (): FeedFetchProgress => ({
 
 let feedFetchProgress: FeedFetchProgress = emptyFeedFetchProgress();
 
+function feedFetchStatusPath() {
+  return process.env.FEED_FETCH_STATUS_FILE || join(config.contentDir, 'feed-fetch-status.json');
+}
+
+function normalizeFeedFetchProgress(value: unknown): FeedFetchProgress {
+  const fallback = emptyFeedFetchProgress();
+  if (!value || typeof value !== 'object') return fallback;
+  const raw = value as Partial<FeedFetchProgress>;
+  return {
+    running: false,
+    force: raw.force === true,
+    started_at: Number(raw.started_at || 0),
+    finished_at: Number(raw.finished_at || 0),
+    total: Number(raw.total || 0),
+    done: Number(raw.done || 0),
+    fetched: Number(raw.fetched || 0),
+    new_items: Number(raw.new_items || 0),
+    failed: Number(raw.failed || 0),
+    failed_urls: Array.isArray(raw.failed_urls) ? raw.failed_urls.slice(-20) as FeedFetchFailure[] : [],
+    current_url: '',
+    pruned_subscriptions: Number(raw.pruned_subscriptions || 0),
+    pruned_items: Number(raw.pruned_items || 0),
+    refreshed_items_deleted: Number(raw.refreshed_items_deleted || 0),
+    message: String(raw.message || ''),
+  };
+}
+
+function loadFeedFetchProgress() {
+  try {
+    const path = feedFetchStatusPath();
+    if (!existsSync(path)) return emptyFeedFetchProgress();
+    return normalizeFeedFetchProgress(parseJsonOption(readFileSync(path, 'utf8'), emptyFeedFetchProgress()));
+  } catch {
+    return emptyFeedFetchProgress();
+  }
+}
+
+function saveFeedFetchProgress() {
+  try {
+    const path = feedFetchStatusPath();
+    mkdirSync(dirname(path), { recursive: true });
+    writeFileSync(path, `${JSON.stringify(feedFetchStatus(), null, 2)}\n`);
+  } catch (err) {
+    console.error('failed to persist feed fetch status:', err);
+  }
+}
+
+feedFetchProgress = loadFeedFetchProgress();
+
 function feedFetchStatus() {
   return { ...feedFetchProgress, failed_urls: [...feedFetchProgress.failed_urls] };
 }
@@ -623,39 +672,36 @@ export async function runFeedFetch(options: number | FeedFetchOptions = 0) {
   const subs = await many<{ id: number; feed_url: string }>(
     `select id, feed_url from ${table('rss_subscriptions')} order by last_fetched_at asc ${limit > 0 ? `limit ${limit}` : ''}`,
   ).catch(() => []);
-  if (trackProgress) {
-    feedFetchProgress = {
-      ...emptyFeedFetchProgress(),
-      running: true,
-      force,
-      started_at: nowUnix(),
-      total: subs.length,
-      pruned_subscriptions: prunedSubscriptions,
-      pruned_items: prunedItems,
-      message: subs.length ? '正在刷新订阅' : '没有可刷新的订阅',
-    };
-  }
+  feedFetchProgress = {
+    ...emptyFeedFetchProgress(),
+    running: true,
+    force,
+    started_at: nowUnix(),
+    total: subs.length,
+    pruned_subscriptions: prunedSubscriptions,
+    pruned_items: prunedItems,
+    message: subs.length ? '正在刷新订阅' : '没有可刷新的订阅',
+  };
+  saveFeedFetchProgress();
   let fetched = 0;
   let newItems = 0;
   let failed = 0;
   let refreshedItemsDeleted = 0;
   const failures: FeedFetchFailure[] = [];
   for (const sub of subs) {
-    if (trackProgress) {
-      feedFetchProgress.current_url = sub.feed_url;
-      feedFetchProgress.message = `正在刷新 ${sub.feed_url}`;
-    }
+    feedFetchProgress.current_url = sub.feed_url;
+    feedFetchProgress.message = `正在刷新 ${sub.feed_url}`;
+    saveFeedFetchProgress();
     let items: Awaited<ReturnType<typeof fetchRssFeed>> = [];
     try {
       items = await fetchRssFeed(sub.feed_url);
     } catch (err) {
       failed++;
       failures.push({ id: sub.id, feed_url: sub.feed_url, error: feedErrorMessage(err) });
-      if (trackProgress) {
-        feedFetchProgress.failed = failed;
-        feedFetchProgress.failed_urls = failures.slice(-20);
-        feedFetchProgress.done++;
-      }
+      feedFetchProgress.failed = failed;
+      feedFetchProgress.failed_urls = failures.slice(-20);
+      feedFetchProgress.done++;
+      saveFeedFetchProgress();
       continue;
     }
     fetched++;
@@ -672,12 +718,11 @@ export async function runFeedFetch(options: number | FeedFetchOptions = 0) {
       if (rowsChanged(result)) newItems++;
     }
     await exec(`update ${table('rss_subscriptions')} set last_fetched_at = $1 where id = $2`, [now, sub.id]).catch(() => {});
-    if (trackProgress) {
-      feedFetchProgress.done++;
-      feedFetchProgress.fetched = fetched;
-      feedFetchProgress.new_items = newItems;
-      feedFetchProgress.refreshed_items_deleted = refreshedItemsDeleted;
-    }
+    feedFetchProgress.done++;
+    feedFetchProgress.fetched = fetched;
+    feedFetchProgress.new_items = newItems;
+    feedFetchProgress.refreshed_items_deleted = refreshedItemsDeleted;
+    saveFeedFetchProgress();
   }
   await exec(`delete from ${table('feed_items')} where created_at < $1`, [nowUnix() - 7 * 24 * 3600]).catch(() => {});
   if (newItems > 0) {
@@ -698,22 +743,21 @@ export async function runFeedFetch(options: number | FeedFetchOptions = 0) {
     pruned_items: prunedItems,
     refreshed_items_deleted: refreshedItemsDeleted,
   };
-  if (trackProgress) {
-    feedFetchProgress = {
-      ...feedFetchProgress,
-      running: false,
-      finished_at: nowUnix(),
-      total: subs.length,
-      done: subs.length,
-      fetched,
-      new_items: newItems,
-      failed,
-      failed_urls: failures.slice(-20),
-      current_url: '',
-      refreshed_items_deleted: refreshedItemsDeleted,
-      message: failed > 0 ? '刷新完成，部分订阅失败' : '刷新完成',
-    };
-  }
+  feedFetchProgress = {
+    ...feedFetchProgress,
+    running: false,
+    finished_at: nowUnix(),
+    total: subs.length,
+    done: subs.length,
+    fetched,
+    new_items: newItems,
+    failed,
+    failed_urls: failures.slice(-20),
+    current_url: '',
+    refreshed_items_deleted: refreshedItemsDeleted,
+    message: failed > 0 ? '刷新完成，部分订阅失败' : '刷新完成',
+  };
+  saveFeedFetchProgress();
   return result;
 }
 
