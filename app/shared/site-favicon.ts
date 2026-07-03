@@ -9,9 +9,9 @@ export function siteHostname(input: string): string {
   }
 }
 
-/** 外链站点 favicon — 使用 a.favicon.im（勿用已失效的 favicon.im）。 */
+/** 外链站点 favicon — 使用 favicon.la。 */
 export function siteFaviconUrl(input: string): string {
   const hostname = siteHostname(input);
   if (!hostname) return '';
-  return `https://a.favicon.im/${encodeURIComponent(hostname)}?larger=true`;
+  return `https://favicon.la/${encodeURIComponent(hostname)}`;
 }
