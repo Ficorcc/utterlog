@@ -31,10 +31,21 @@ export default async function PaginatedPage({ params }: PageProps) {
     themeName = data.active_theme || DEFAULT_THEME;
   } catch {}
 
-  const { posts, totalPages } = await loadHomePageData(page);
+  const { posts, totalPages, categories, archiveStats, latestMoment, latestComments } = await loadHomePageData(page);
 
   const theme = getThemeComponents(themeName);
   const ThemeHomePage = theme.HomePage;
 
-  return <ThemeHomePage posts={posts} page={page} totalPages={totalPages} perPage={perPage} />;
+  return (
+    <ThemeHomePage
+      posts={posts}
+      page={page}
+      totalPages={totalPages}
+      categories={categories}
+      archiveStats={archiveStats}
+      latestMoment={latestMoment}
+      latestComments={latestComments}
+      perPage={perPage}
+    />
+  );
 }

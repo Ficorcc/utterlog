@@ -20,6 +20,8 @@ interface HomePageProps {
   totalPages: number;
   categories?: any[];
   archiveStats?: any;
+  latestMoment?: any;
+  latestComments?: any[];
   perPage?: number;
 }
 
@@ -94,6 +96,8 @@ export default function HomePage({
   totalPages: initialTotalPages,
   categories: serverCategories = [],
   archiveStats = {},
+  latestMoment = null,
+  latestComments = [],
   // perPage 来自 server (`/app/(blog)/page.tsx` → 读 admin 选项
   // `posts_per_page`)。之前 Nebula 写死 const PER_PAGE = 10 → 客户端
   // 切分类 / 翻页 AJAX 时永远按 10 拉，跟 SSR 首屏数量 + totalPages 都
@@ -197,7 +201,7 @@ export default function HomePage({
 
   return (
     <div className="nebula-home">
-      <MomentBubble />
+      <MomentBubble initialMoment={latestMoment} />
 
       <section className="nebula-hero">
         <div className="nebula-hero-bg" aria-hidden="true">
@@ -345,7 +349,7 @@ export default function HomePage({
           </nav>
         )}
 
-        <LatestCommenters />
+      <LatestCommenters initialComments={latestComments} />
       </div>
     </div>
   );

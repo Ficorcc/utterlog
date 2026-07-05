@@ -26,7 +26,7 @@ const MODES = [
 
 let latestMomentCache: any | null = null;
 
-export default function HomePage({ posts, page, totalPages, categories: serverCategories = [], archiveStats: serverStats = {}, perPage = 8 }: { posts: any[]; page: number; totalPages: number; categories?: any[]; archiveStats?: any; perPage?: number }) {
+export default function HomePage({ posts, page, totalPages, categories: serverCategories = [], archiveStats: serverStats = {}, latestMoment: serverLatestMoment = null, latestComments: serverLatestComments = [], perPage = 8 }: { posts: any[]; page: number; totalPages: number; categories?: any[]; archiveStats?: any; latestMoment?: any; latestComments?: any[]; perPage?: number }) {
   const [categories, setCategories] = useState<any[]>(serverCategories);
   const [activeCatIdx, setActiveCatIdx] = useState(0);
   // Admin-configured sidebar menu items. When non-empty, each row
@@ -44,7 +44,7 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
   const useCustomSidebar = sidebarMenu.length > 0;
   const [modeIdx, setModeIdx] = useState(0);
   const [heroPost, setHeroPost] = useState<any>(posts[0] || null);
-  const [latestMoment, setLatestMoment] = useState<any>(latestMomentCache);
+  const [latestMoment, setLatestMoment] = useState<any>(latestMomentCache || serverLatestMoment);
   const momentLazy = useLazyVisible<HTMLDivElement>();
   const [totalPostCount, setTotalPostCount] = useState(serverStats.post_count || 0);
   const [paused, setPaused] = useState(false);
@@ -399,7 +399,7 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
       <div className="azure-grid azure-content-grid">
         <aside className="azure-sidebar-cell">
           <div className="azure-sidebar-sticky">
-            <Sidebar />
+            <Sidebar initialComments={serverLatestComments.slice(0, 5)} />
           </div>
         </aside>
         {/* Right: Post list */}

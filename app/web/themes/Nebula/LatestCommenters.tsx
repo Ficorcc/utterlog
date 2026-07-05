@@ -23,6 +23,25 @@ interface Comment {
 
 let latestCommentersCache: Comment[] | null = null;
 
+function uniqueCommenters(list: Comment[]) {
+  const seenIds = new Set<string>();
+  const seenAvatars = new Set<string>();
+  const dedup: Comment[] = [];
+  for (const c of list) {
+    const email = String(c.author_email || '').trim().toLowerCase();
+    const name = String(c.author_name || c.author || '').trim().toLowerCase();
+    const avatar = String(c.avatar_url || '').trim();
+    const idKey = email || name || `id-${c.id}`;
+    if (seenIds.has(idKey)) continue;
+    if (avatar && seenAvatars.has(avatar)) continue;
+    seenIds.add(idKey);
+    if (avatar) seenAvatars.add(avatar);
+    dedup.push(c);
+    if (dedup.length >= 20) break;
+  }
+  return dedup;
+}
+
 function relativeTime(ts: number) {
   if (!ts) return '';
   const diff = Date.now() - ts * 1000;
@@ -38,10 +57,11 @@ function relativeTime(ts: number) {
   return `${Math.floor(months / 12)} 年前`;
 }
 
-export default function LatestCommenters() {
+export default function LatestCommenters({ initialComments = [] }: { initialComments?: Comment[] }) {
   const { options } = useThemeContext();
-  const [comments, setComments] = useState<Comment[]>(latestCommentersCache || []);
-  const [loaded, setLoaded] = useState(Boolean(latestCommentersCache));
+  const initialDedup = uniqueCommenters(initialComments);
+  const [comments, setComments] = useState<Comment[]>(latestCommentersCache || initialDedup);
+  const [loaded, setLoaded] = useState(Boolean(latestCommentersCache || initialDedup.length));
   const commentersLazy = useLazyVisible<HTMLElement>();
 
   useEffect(() => {
@@ -52,26 +72,7 @@ export default function LatestCommenters() {
       .then((r) => r.json())
       .then((r) => {
         const list: Comment[] = r?.data?.comments || r?.data || [];
-        // 按"同一人"去重，保留每位最新的一条；最多 20 个头像
-        // 用 email + name + avatar_url 三个维度交叉判断，任一命中就视为同一人。
-        // 之前只按 (author_name || author || author_email || id) 单一字段
-        // 兜底：不同条目里 name 大小写 / 空白 / 空缺不一致就 dedup 失效，
-        // 同一人会出现两次。
-        const seenIds = new Set<string>();
-        const seenAvatars = new Set<string>();
-        const dedup: Comment[] = [];
-        for (const c of list) {
-          const email = String(c.author_email || '').trim().toLowerCase();
-          const name = String(c.author_name || c.author || '').trim().toLowerCase();
-          const avatar = String(c.avatar_url || '').trim();
-          const idKey = email || name || `id-${c.id}`;
-          if (seenIds.has(idKey)) continue;
-          if (avatar && seenAvatars.has(avatar)) continue;
-          seenIds.add(idKey);
-          if (avatar) seenAvatars.add(avatar);
-          dedup.push(c);
-          if (dedup.length >= 20) break;
-        }
+        const dedup = uniqueCommenters(list);
         latestCommentersCache = dedup;
         setComments(dedup);
       })

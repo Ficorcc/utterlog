@@ -47,10 +47,10 @@ function timeAgo(ts: string | number) {
   return Math.floor(diff / 86400) + ' 天前';
 }
 
-export default function Sidebar() {
+export default function Sidebar({ initialComments = [] }: { initialComments?: any[] }) {
   const [categories, setCategories] = useState<any[]>([]);
   const [tags, setTags] = useState<any[]>([]);
-  const [comments, setComments] = useState<any[]>(latestCommentsCache || []);
+  const [comments, setComments] = useState<any[]>(latestCommentsCache || initialComments);
   const commentsLazy = useLazyVisible<HTMLDivElement>();
   const [stats, setStats] = useState<any>({});
   const [activeTab, setActiveTab] = useState<'latest' | 'hot' | 'random'>('latest');
@@ -72,13 +72,13 @@ export default function Sidebar() {
   }, []);
 
   useEffect(() => {
-    if (!commentsLazy.visible || latestCommentsCache) return;
+    if (!commentsLazy.visible || latestCommentsCache || comments.length > 0) return;
     fetch(`${API}/comments?per_page=5&status=approved&exclude_admin=1`).then(r => r.json()).then(r => {
       const all = r.data?.comments || r.data || [];
       latestCommentsCache = all;
       setComments(all);
     }).catch(() => {});
-  }, [commentsLazy.visible]);
+  }, [comments.length, commentsLazy.visible]);
 
   const fetchTabPosts = (tab: string) => {
     let url = `${API}/posts?per_page=5&status=publish`;

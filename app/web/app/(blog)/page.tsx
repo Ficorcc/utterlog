@@ -8,7 +8,7 @@ interface HomePageProps {
 export default async function HomePage({ searchParams }: HomePageProps) {
   const params = await searchParams;
   const page = Number(params.page) || 1;
-  const { posts, totalPages, categories, archiveStats, perPage } = await loadHomePageData(page);
+  const { posts, totalPages, categories, archiveStats, latestMoment, latestComments, perPage } = await loadHomePageData(page);
 
   let themeName = DEFAULT_THEME;
   try {
@@ -21,5 +21,16 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const theme = getThemeComponents(themeName);
   const ThemeHomePage = theme.HomePage;
 
-  return <ThemeHomePage posts={posts} page={page} totalPages={totalPages} categories={categories} archiveStats={archiveStats} perPage={perPage} />;
+  return (
+    <ThemeHomePage
+      posts={posts}
+      page={page}
+      totalPages={totalPages}
+      categories={categories}
+      archiveStats={archiveStats}
+      latestMoment={latestMoment}
+      latestComments={latestComments}
+      perPage={perPage}
+    />
+  );
 }

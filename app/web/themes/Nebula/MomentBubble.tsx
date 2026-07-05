@@ -45,10 +45,10 @@ function stripText(s: string) {
     .trim();
 }
 
-export default function MomentBubble() {
+export default function MomentBubble({ initialMoment = null }: { initialMoment?: any | null }) {
   const { owner, site } = useThemeContext();
-  const [moment, setMoment] = useState<any | null>(momentBubbleCache);
-  const [loaded, setLoaded] = useState(Boolean(momentBubbleCache));
+  const [moment, setMoment] = useState<any | null>(momentBubbleCache || initialMoment);
+  const [loaded, setLoaded] = useState(Boolean(momentBubbleCache || initialMoment));
   const bubbleLazy = useLazyVisible<HTMLDivElement>();
 
   useEffect(() => {

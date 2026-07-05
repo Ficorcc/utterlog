@@ -90,6 +90,16 @@ export async function getPostComments(postId: number) {
   return fetchAPI<any>(`/posts/${postId}/comments`);
 }
 
+export async function getComments(params?: { page?: number; per_page?: number; status?: string; exclude_admin?: string | number | boolean }) {
+  const sp = new URLSearchParams();
+  if (params?.page) sp.set('page', String(params.page));
+  if (params?.per_page) sp.set('per_page', String(params.per_page));
+  if (params?.status) sp.set('status', params.status);
+  if (params?.exclude_admin !== undefined) sp.set('exclude_admin', String(params.exclude_admin));
+  const q = sp.toString();
+  return fetchAPI<any>(`/comments${q ? `?${q}` : ''}`);
+}
+
 // 分类列表
 export async function getCategories() {
   return fetchAPI<any>('/categories', { next: { revalidate: 300 } });
