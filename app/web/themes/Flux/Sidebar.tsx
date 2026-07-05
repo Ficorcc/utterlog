@@ -3,8 +3,11 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import PostLink from '@/components/blog/PostLink';
+import { useLazyVisible } from '@/lib/use-lazy-visible';
 
 const API = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+
+let latestCommentsCache: any[] | null = null;
 
 // Simple MD5 for gravatar hash
 function md5(s: string): string {
@@ -47,7 +50,8 @@ function timeAgo(ts: string | number) {
 export default function Sidebar() {
   const [categories, setCategories] = useState<any[]>([]);
   const [tags, setTags] = useState<any[]>([]);
-  const [comments, setComments] = useState<any[]>([]);
+  const [comments, setComments] = useState<any[]>(latestCommentsCache || []);
+  const commentsLazy = useLazyVisible<HTMLDivElement>();
   const [stats, setStats] = useState<any>({});
   const [activeTab, setActiveTab] = useState<'latest' | 'hot' | 'random'>('latest');
   const [tabPosts, setTabPosts] = useState<any[]>([]);
@@ -61,15 +65,20 @@ export default function Sidebar() {
       const t = (r.data || []).sort((a: any, b: any) => (b.count || 0) - (a.count || 0));
       setTags(t.slice(0, 20));
     }).catch(() => {});
-    fetch(`${API}/comments?per_page=5&status=approved&exclude_admin=1`).then(r => r.json()).then(r => {
-      const all = r.data?.comments || r.data || [];
-      setComments(all);
-    }).catch(() => {});
     fetch(`${API}/archive/stats`).then(r => r.json()).then(r => setStats(r.data || {})).catch(() => {});
     fetch(`${API}/options`).then(r => r.json()).then(r => setSiteOptions(r.data || {})).catch(() => {});
     fetch(`${API}/owner`).then(r => r.json()).then(r => { if (r.data) setAuthor(r.data); }).catch(() => {});
     fetchTabPosts('latest');
   }, []);
+
+  useEffect(() => {
+    if (!commentsLazy.visible || latestCommentsCache) return;
+    fetch(`${API}/comments?per_page=5&status=approved&exclude_admin=1`).then(r => r.json()).then(r => {
+      const all = r.data?.comments || r.data || [];
+      latestCommentsCache = all;
+      setComments(all);
+    }).catch(() => {});
+  }, [commentsLazy.visible]);
 
   const fetchTabPosts = (tab: string) => {
     let url = `${API}/posts?per_page=5&status=publish`;
@@ -151,7 +160,7 @@ export default function Sidebar() {
       </div>
 
       {/* Post tabs */}
-      <div style={{ borderBottom: '1px solid #e5e5e5' }}>
+      <div ref={commentsLazy.ref} style={{ borderBottom: '1px solid #e5e5e5' }}>
         <div style={{ display: 'flex' }}>
           {[
             { key: 'latest' as const, icon: 'fa-regular fa-clock', label: '最新日志' },

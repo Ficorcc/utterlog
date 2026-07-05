@@ -4,9 +4,12 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import PostLink from '@/components/blog/PostLink';
 import { useThemeContext } from '@/lib/theme-context';
+import { useLazyVisible } from '@/lib/use-lazy-visible';
 import AzureProfileCard from './ProfileCard';
 
 const API = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+
+let latestCommentsCache: any[] | null = null;
 
 // Simple MD5 for gravatar hash
 function md5(s: string): string {
@@ -57,7 +60,8 @@ export default function Sidebar() {
 
   const [categories, setCategories] = useState<any[]>(categoriesCtx);
   const [tags, setTags] = useState<any[]>(tagsCtx);
-  const [comments, setComments] = useState<any[]>([]);
+  const [comments, setComments] = useState<any[]>(latestCommentsCache || []);
+  const commentsLazy = useLazyVisible<HTMLDivElement>();
   const [activeTab, setActiveTab] = useState<'latest' | 'hot' | 'random'>('latest');
   const [tabPosts, setTabPosts] = useState<any[]>([]);
   const [archiveOpen, setArchiveOpen] = useState<string | null>(null);
@@ -65,12 +69,17 @@ export default function Sidebar() {
   useEffect(() => {
     setCategories(categoriesCtx);
     setTags(tagsCtx);
-    fetch(`${API}/comments?per_page=5&status=approved&exclude_admin=1`).then(r => r.json()).then(r => {
-      const all = r.data?.comments || r.data || [];
-      setComments(all);
-    }).catch(() => {});
     fetchTabPosts('latest');
   }, []);
+
+  useEffect(() => {
+    if (!commentsLazy.visible || latestCommentsCache) return;
+    fetch(`${API}/comments?per_page=5&status=approved&exclude_admin=1`).then(r => r.json()).then(r => {
+      const all = r.data?.comments || r.data || [];
+      latestCommentsCache = all;
+      setComments(all);
+    }).catch(() => {});
+  }, [commentsLazy.visible]);
 
   const fetchTabPosts = (tab: string) => {
     let url = `${API}/posts?per_page=5&status=publish`;
@@ -100,7 +109,7 @@ export default function Sidebar() {
           the admin's permalink config (so /posts/<slug>, /<year>/<slug>,
           etc. all work) and the #comment-<id> hash matches the
           CommentList item id used in the article body. */}
-      <div style={{ borderBottom: '1px solid #e5e5e5' }}>
+      <div ref={commentsLazy.ref} style={{ borderBottom: '1px solid #e5e5e5' }}>
         {sectionTitle('fa-regular fa-comments', '最新评论')}
         {comments.map((c: any, idx: number) => (
           <PostLink
