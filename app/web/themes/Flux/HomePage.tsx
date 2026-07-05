@@ -24,12 +24,12 @@ const MODES = [
 
 let latestMomentCache: any | null = null;
 
-export default function HomePage({ posts, page, totalPages, categories: serverCategories = [], archiveStats: serverStats = {}, perPage = 8 }: { posts: any[]; page: number; totalPages: number; categories?: any[]; archiveStats?: any; perPage?: number }) {
+export default function HomePage({ posts, page, totalPages, categories: serverCategories = [], archiveStats: serverStats = {}, latestMoment: serverLatestMoment = null, latestComments: serverLatestComments = [], perPage = 8 }: { posts: any[]; page: number; totalPages: number; categories?: any[]; archiveStats?: any; latestMoment?: any; latestComments?: any[]; perPage?: number }) {
   const [categories, setCategories] = useState<any[]>(serverCategories);
   const [activeCatIdx, setActiveCatIdx] = useState(0);
   const [modeIdx, setModeIdx] = useState(0);
   const [heroPost, setHeroPost] = useState<any>(posts[0] || null);
-  const [latestMoment, setLatestMoment] = useState<any>(latestMomentCache);
+  const [latestMoment, setLatestMoment] = useState<any>(latestMomentCache || serverLatestMoment);
   const momentLazy = useLazyVisible<HTMLDivElement>();
   const [totalPostCount, setTotalPostCount] = useState(serverStats.post_count || 0);
   const [paused, setPaused] = useState(false);
@@ -251,7 +251,7 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
       <div style={{ display: 'grid', gridTemplateColumns: '280px minmax(0, 1fr)' }} className="lg:grid">
         <div style={{ borderRight: '1px solid #e5e5e5' }} className="hidden lg:block">
           <div style={{ position: 'sticky', top: 0 }}>
-            <Sidebar />
+            <Sidebar initialComments={serverLatestComments.slice(0, 5)} />
           </div>
         </div>
         {/* Right: Post list */}
