@@ -10,6 +10,7 @@ import Lightbox from '@/components/blog/Lightbox';
 import toast from 'react-hot-toast';
 
 const MOMENTS_CACHE_TTL = 60_000;
+const DEFAULT_TAGS = ['随想', '技术', '生活', '阅读'];
 
 let momentsPageCache: {
   moments: any[];
@@ -122,11 +123,27 @@ function getMomentPositions(count: number, cols = 4) {
   return positions;
 }
 
-export default function MomentsPage() {
+type MomentsPageProps = {
+  boot?: unknown;
+  initialLoaded?: boolean;
+  initialMoments?: any[];
+  initialTags?: string[];
+  initialFetchedAt?: number;
+};
+
+export default function MomentsPage({
+  boot: _boot,
+  initialLoaded = false,
+  initialMoments = [],
+  initialTags = [],
+  initialFetchedAt = 0,
+}: MomentsPageProps) {
   const { timeZone, theme } = useThemeContext();
   const cachedMoments = momentsPageCache && Date.now() - momentsPageCache.fetchedAt < MOMENTS_CACHE_TTL ? momentsPageCache : null;
-  const [moments, setMoments] = useState<any[]>(cachedMoments?.moments || []);
-  const [loading, setLoading] = useState(!cachedMoments);
+  const seededMoments = cachedMoments?.moments || initialMoments;
+  const seededTags = cachedMoments?.tags?.length ? cachedMoments.tags : (initialTags.length ? initialTags : DEFAULT_TAGS);
+  const [moments, setMoments] = useState<any[]>(seededMoments);
+  const [loading, setLoading] = useState(!cachedMoments && !initialLoaded);
   const [showComposer, setShowComposer] = useState(false);
   const [content, setContent] = useState('');
   const [mood, setMood] = useState('');
@@ -136,7 +153,7 @@ export default function MomentsPage() {
   const [locating, setLocating] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const source = '网页'; // Auto-detected: 网页 for web, Telegram for bot
-  const [tags, setTags] = useState<string[]>(cachedMoments?.tags?.length ? cachedMoments.tags : ['随想', '技术', '生活', '阅读']);
+  const [tags, setTags] = useState<string[]>(seededTags);
   const [filterTag, setFilterTag] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -174,8 +191,15 @@ export default function MomentsPage() {
   const isAdmin = isAuthenticated && user?.role === 'admin';
 
   useEffect(() => {
+    if (!momentsPageCache && initialLoaded) {
+      momentsPageCache = {
+        moments: initialMoments,
+        tags: initialTags.length ? initialTags : tags,
+        fetchedAt: initialFetchedAt || Date.now(),
+      };
+    }
     const hasFreshCache = momentsPageCache && Date.now() - momentsPageCache.fetchedAt < MOMENTS_CACHE_TTL;
-    fetchMoments({ silent: Boolean(hasFreshCache) });
+    fetchMoments({ silent: Boolean(hasFreshCache || initialLoaded) });
     fetchTags();
     // Nebula 主题强制对齐 960px 内容容器，最多 3 列；其他主题按视口断点
     const isNebula = theme?.name === 'Nebula';
