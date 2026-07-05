@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { momentsApi } from '@/lib/api';
 import { useThemeContext } from '@/lib/theme-context';
+import { useLazyVisible } from '@/lib/use-lazy-visible';
+
+let momentBubbleCache: any | null = null;
 
 function relativeTime(ts: number) {
   if (!ts) return '';
@@ -44,20 +47,24 @@ function stripText(s: string) {
 
 export default function MomentBubble() {
   const { owner, site } = useThemeContext();
-  const [moment, setMoment] = useState<any | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const [moment, setMoment] = useState<any | null>(momentBubbleCache);
+  const [loaded, setLoaded] = useState(Boolean(momentBubbleCache));
+  const bubbleLazy = useLazyVisible<HTMLDivElement>();
 
   useEffect(() => {
+    if (!bubbleLazy.visible || loaded) return;
     momentsApi.list({ per_page: 1 })
       .then((r: any) => {
         const list = r?.data?.data || r?.data || [];
-        setMoment(list[0] || null);
+        const next = list[0] || null;
+        momentBubbleCache = next;
+        setMoment(next);
       })
       .catch(() => setMoment(null))
       .finally(() => setLoaded(true));
-  }, []);
+  }, [bubbleLazy.visible, loaded]);
 
-  if (!loaded || !moment) return null;
+  if (!loaded || !moment) return <div ref={bubbleLazy.ref} className="nebula-moment-bubble" aria-hidden="true" />;
 
   const author = owner?.nickname || site?.title || 'Utterlog';
   const avatar = owner?.avatar;

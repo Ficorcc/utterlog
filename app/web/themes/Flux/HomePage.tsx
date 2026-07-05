@@ -10,6 +10,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { getCategoryIcon } from './constants';
 import PostLink from '@/components/blog/PostLink';
+import { useLazyVisible } from '@/lib/use-lazy-visible';
 
 const API = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
 const ACCENT = '#0052D9';
@@ -21,12 +22,15 @@ const MODES = [
   { key: 'random', label: '随机文章', color: '#43a047', param: '&order_by=random' },
 ] as const;
 
+let latestMomentCache: any | null = null;
+
 export default function HomePage({ posts, page, totalPages, categories: serverCategories = [], archiveStats: serverStats = {}, perPage = 8 }: { posts: any[]; page: number; totalPages: number; categories?: any[]; archiveStats?: any; perPage?: number }) {
   const [categories, setCategories] = useState<any[]>(serverCategories);
   const [activeCatIdx, setActiveCatIdx] = useState(0);
   const [modeIdx, setModeIdx] = useState(0);
   const [heroPost, setHeroPost] = useState<any>(posts[0] || null);
-  const [latestMoment, setLatestMoment] = useState<any>(null);
+  const [latestMoment, setLatestMoment] = useState<any>(latestMomentCache);
+  const momentLazy = useLazyVisible<HTMLDivElement>();
   const [totalPostCount, setTotalPostCount] = useState(serverStats.post_count || 0);
   const [paused, setPaused] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -50,11 +54,18 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
       setCategories(r.data || []);
     }).catch(() => {});
     fetch(`${API}/archive/stats`).then(r => r.json()).then(r => setTotalPostCount(r.data?.post_count || 0)).catch(() => {});
+  }, [serverCategories, serverStats.post_count]);
+
+  useEffect(() => {
+    if (!momentLazy.visible || latestMoment) return;
     fetch(`${API}/moments?per_page=1`).then(r => r.json()).then(r => {
       const items = r.data?.moments || r.data || [];
-      if (items.length > 0) setLatestMoment(items[0]);
+      if (items.length > 0) {
+        latestMomentCache = items[0];
+        setLatestMoment(items[0]);
+      }
     }).catch(() => {});
-  }, [serverCategories, serverStats.post_count]);
+  }, [latestMoment, momentLazy.visible]);
 
 
   // Lazy-fetch hero on combo change; cache result so revisits are instant.
@@ -149,7 +160,7 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
     <div>
       {/* ===== Hero area: tabs + image — single unit, scrolls together ===== */}
       {(
-        <div style={{ display: 'grid', gridTemplateColumns: '280px minmax(0, 1fr)' }} className="lg:grid">
+        <div ref={momentLazy.ref} style={{ display: 'grid', gridTemplateColumns: '280px minmax(0, 1fr)' }} className="lg:grid">
           {/* Left: Category tabs */}
           <div style={{ borderRight: '1px solid #e5e5e5' }} className="hidden lg:block">
             <div style={{ height: heroHeight, display: 'flex', flexDirection: 'column' }}>

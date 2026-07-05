@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { buildPermalink } from '@/lib/permalink';
 import { useThemeContext } from '@/lib/theme-context';
+import { useLazyVisible } from '@/lib/use-lazy-visible';
 
 const API = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
 
@@ -19,6 +20,8 @@ interface Comment {
   post_title?: string;
   post_categories?: any[];
 }
+
+let latestCommentersCache: Comment[] | null = null;
 
 function relativeTime(ts: number) {
   if (!ts) return '';
@@ -37,9 +40,12 @@ function relativeTime(ts: number) {
 
 export default function LatestCommenters() {
   const { options } = useThemeContext();
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [comments, setComments] = useState<Comment[]>(latestCommentersCache || []);
+  const [loaded, setLoaded] = useState(Boolean(latestCommentersCache));
+  const commentersLazy = useLazyVisible<HTMLElement>();
 
   useEffect(() => {
+    if (!commentersLazy.visible || loaded) return;
     // exclude_admin=1：博主自己的评论不进头像墙（用户要求只展示访客社区氛围）。
     // per_page 提到 60：dedup 后还要保证有 20 个去重的访客可选，留足缓冲。
     fetch(`${API}/comments?per_page=60&status=approved&exclude_admin=1`)
@@ -66,12 +72,16 @@ export default function LatestCommenters() {
           dedup.push(c);
           if (dedup.length >= 20) break;
         }
+        latestCommentersCache = dedup;
         setComments(dedup);
       })
-      .catch(() => setComments([]));
-  }, []);
+      .catch(() => setComments([]))
+      .finally(() => setLoaded(true));
+  }, [commentersLazy.visible, loaded]);
 
-  if (comments.length === 0) return null;
+  if (!loaded || comments.length === 0) {
+    return <section ref={commentersLazy.ref} className="nebula-commenters" aria-label="最新评论" />;
+  }
 
   return (
     <section className="nebula-commenters" aria-label="最新评论">

@@ -13,6 +13,7 @@ import { useThemeContext } from '@/lib/theme-context';
 import { randomCoverUrl } from '@/lib/blog-image';
 import PostLink from '@/components/blog/PostLink';
 import LoadingSpinner from '@/components/blog/LoadingSpinner';
+import { useLazyVisible } from '@/lib/use-lazy-visible';
 
 const API = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
 
@@ -22,6 +23,8 @@ const MODES = [
   { key: 'comments', label: '热评文章', color: '#f57c00', param: '&order_by=comment_count&order=desc' },
   { key: 'random', label: '随机文章', color: '#43a047', param: '&order_by=random' },
 ] as const;
+
+let latestMomentCache: any | null = null;
 
 export default function HomePage({ posts, page, totalPages, categories: serverCategories = [], archiveStats: serverStats = {}, perPage = 8 }: { posts: any[]; page: number; totalPages: number; categories?: any[]; archiveStats?: any; perPage?: number }) {
   const [categories, setCategories] = useState<any[]>(serverCategories);
@@ -41,7 +44,8 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
   const useCustomSidebar = sidebarMenu.length > 0;
   const [modeIdx, setModeIdx] = useState(0);
   const [heroPost, setHeroPost] = useState<any>(posts[0] || null);
-  const [latestMoment, setLatestMoment] = useState<any>(null);
+  const [latestMoment, setLatestMoment] = useState<any>(latestMomentCache);
+  const momentLazy = useLazyVisible<HTMLDivElement>();
   const [totalPostCount, setTotalPostCount] = useState(serverStats.post_count || 0);
   const [paused, setPaused] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -96,11 +100,18 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
       setCategories(r.data || []);
     }).catch(() => {});
     fetch(`${API}/archive/stats`).then(r => r.json()).then(r => setTotalPostCount(r.data?.post_count || 0)).catch(() => {});
+  }, [serverCategories, serverStats.post_count]);
+
+  useEffect(() => {
+    if (!momentLazy.visible || latestMoment) return;
     fetch(`${API}/moments?per_page=1`).then(r => r.json()).then(r => {
       const items = r.data?.moments || r.data || [];
-      if (items.length > 0) setLatestMoment(items[0]);
+      if (items.length > 0) {
+        latestMomentCache = items[0];
+        setLatestMoment(items[0]);
+      }
     }).catch(() => {});
-  }, [serverCategories, serverStats.post_count]);
+  }, [latestMoment, momentLazy.visible]);
 
 
   // Lazy: fetch hero only when the active (category, mode) combo changes.
@@ -365,7 +376,7 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
           Left side shows visitor weather; right side keeps the moment
           ticker aligned with the main content grid. */}
       {(
-        <div className="azure-grid azure-strip">
+        <div ref={momentLazy.ref} className="azure-grid azure-strip">
           <aside className="azure-social-cell">
             <VisitorWeather />
           </aside>
