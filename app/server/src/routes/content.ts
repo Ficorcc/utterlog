@@ -2873,12 +2873,16 @@ export function registerContentRoutes(app: Hono) {
     const before = await one<{ post_id: number; status: string }>(`select post_id, status from ${table('comments')} where id = $1`, [id]);
     if (!before) return notFound(c, 'comment not found');
     const body = await c.req.json().catch(() => ({}));
-    const patch = {
-      ...body,
-      author_name: body.author_name ?? body.author ?? body.name,
-      author_email: body.author_email ?? body.email,
-      author_url: body.author_url ?? body.url,
-    };
+    const patch: Record<string, unknown> = { ...body };
+    if (body.author_name !== undefined || body.author !== undefined || body.name !== undefined) {
+      patch.author_name = body.author_name ?? body.author ?? body.name;
+    }
+    if (body.author_email !== undefined || body.email !== undefined) {
+      patch.author_email = body.author_email ?? body.email;
+    }
+    if (body.author_url !== undefined || body.url !== undefined) {
+      patch.author_url = body.author_url ?? body.url;
+    }
     const updated = await genericUpdate('comments', id, patch);
     const nextStatus = String(patch.status ?? before.status);
     if (before.status !== 'approved' && nextStatus === 'approved') {
