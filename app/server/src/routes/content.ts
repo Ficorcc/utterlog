@@ -262,6 +262,35 @@ function parseNaiveWallClock(text: string, timeZone: string): Date | null {
   return new Date(ts);
 }
 
+// Normalize an inbound published_at value to a UTC ISO string before it is
+// written to the `timestamp without time zone` column. The column has no zone
+// of its own, so the wire value must always be a UTC wall-clock — otherwise
+// naive strings submitted by the admin datetime-local input (rendered in
+// site_timezone) get stored as-is and silently shift by the site offset.
+//
+// - Values already carrying zone info (Z / numeric offset), Unix numbers, or
+//   JS Dates are passed through (their UTC wall-clock is what we want).
+// - Naive "YYYY-MM-DDTHH:MM" strings are interpreted as site_timezone wall
+//   clock and converted to UTC, mirroring parsePostPublishedDate on read.
+async function normalizePublishedAtForWrite(value: unknown): Promise<string | null> {
+  if (value === null || value === undefined || value === '') return null;
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value.toISOString();
+  if (typeof value === 'number') {
+    const n = value;
+    const date = new Date(n > 1e9 && n < 1e10 ? n * 1000 : n);
+    return Number.isNaN(date.getTime()) ? null : date.toISOString();
+  }
+  const text = String(value).trim();
+  if (!text) return null;
+  if (/[zZ]|[+-]\d{2}:\d{2}$/.test(text)) {
+    const date = new Date(text);
+    return Number.isNaN(date.getTime()) ? null : date.toISOString();
+  }
+  const timeZone = await optionValue('site_timezone', 'UTC');
+  const naive = parseNaiveWallClock(text, timeZone || 'UTC');
+  return naive && !Number.isNaN(naive.getTime()) ? naive.toISOString() : null;
+}
+
 function parsePostPublishedDate(
   post: { published_at?: unknown; created_at?: unknown },
   timeZone = 'UTC',
@@ -1853,7 +1882,7 @@ async function genericUpdate(name: string, id: number, body: Record<string, unkn
   return id;
 }
 
-function normalizePostBody(body: Record<string, unknown>, forCreate = false) {
+async function normalizePostBody(body: Record<string, unknown>, forCreate = false) {
   const next = { ...body };
   if (forCreate && !next.type) next.type = 'post';
   if (!next.slug && next.title) next.slug = simpleSlug(next.title);
@@ -1863,6 +1892,9 @@ function normalizePostBody(body: Record<string, unknown>, forCreate = false) {
   }
   if (String(next.excerpt || '').trim()) next.ai_summary = String(next.excerpt || '').trim();
   if (Object.prototype.hasOwnProperty.call(next, 'meta')) next.meta = normalizeJsonbValue(next.meta);
+  if (next.published_at !== undefined && next.published_at !== null && next.published_at !== '') {
+    next.published_at = await normalizePublishedAtForWrite(next.published_at);
+  }
   if (forCreate && next.status === 'publish' && !next.published_at) {
     next.published_at = new Date().toISOString();
   }
@@ -2659,7 +2691,7 @@ export function registerContentRoutes(app: Hono) {
     return ok(c, { prev, next });
   });
   app.post('/api/v1/posts', auth, async (c) => {
-    const body = normalizePostBody(await c.req.json().catch(() => ({})), true);
+    const body = await normalizePostBody(await c.req.json().catch(() => ({})), true);
     const id = await createPostRecord(body, currentUserId(c));
     if (id) await savePostExtras(id, body);
     if (id) await sendPublishNotificationIfNeeded(id, false);
@@ -2668,7 +2700,7 @@ export function registerContentRoutes(app: Hono) {
   app.put('/api/v1/posts/:id', auth, async (c) => {
     const postId = intParam(c.req.param('id'));
     const before = await one<{ status: string }>(`select status from ${table('posts')} where id = $1`, [postId]).catch(() => null);
-    const body = normalizePostBody(await c.req.json().catch(() => ({})));
+    const body = await normalizePostBody(await c.req.json().catch(() => ({})));
     const id = await updatePostRecord(postId, body);
     await savePostExtras(id, body);
     await sendPublishNotificationIfNeeded(id, before?.status === 'publish');
