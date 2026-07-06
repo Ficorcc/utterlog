@@ -29,7 +29,7 @@ export function normalizeGeoProvider(provider: unknown): GeoProvider {
 }
 
 export function publicIpForGeo(ip: string) {
-  const value = ip.trim();
+  const value = ip.trim().replace(/\/\d+$/, '');
   if (!value || value === '127.0.0.1' || value === '::1' || value === 'localhost' || value === 'unknown') return '';
   if (/^(10|127)\./.test(value)) return '';
   if (/^192\.168\./.test(value)) return '';

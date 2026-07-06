@@ -971,6 +971,36 @@ function geoHeaders(c: any) {
   };
 }
 
+function commentGeoPayload(geo: Awaited<ReturnType<typeof lookupGeoIp>>) {
+  if (!geo?.country_code) return null;
+  return {
+    country_code: geo.country_code.toLowerCase(),
+    country: geo.country,
+    province: geo.province,
+    city: geo.city,
+  };
+}
+
+function commentGeoFromRow(value: unknown) {
+  if (!value) return null;
+  if (typeof value === 'object') return value;
+  if (typeof value !== 'string') return null;
+  try {
+    return JSON.parse(value) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+async function resolveCommentGeo(ip: string) {
+  try {
+    const provider = await optionValue('ip_geo_provider', 'ipx');
+    return commentGeoPayload(await lookupGeoIp(ip, provider, 2500));
+  } catch {
+    return null;
+  }
+}
+
 async function enrichAccessGeo(logId: number, ip: string) {
   if (!logId) return;
   try {
@@ -2604,7 +2634,7 @@ export function registerContentRoutes(app: Hono) {
       `select * from ${table('comments')} where post_id = $1 and status = 'approved' order by created_at asc, id asc`,
       [intParam(c.req.param('id'))],
     );
-    return ok(c, rows);
+    return ok(c, rows.map((row) => ({ ...row, geo: commentGeoFromRow(row.geo) })));
   });
   app.get('/api/v1/posts/:id/navigation', async (c) => {
     const id = intParam(c.req.param('id'));
@@ -2738,6 +2768,7 @@ export function registerContentRoutes(app: Hono) {
       const parentContent = String(row.parent_content || '');
       return {
         ...row,
+        geo: commentGeoFromRow(row.geo),
         author: row.author_name,
         email: row.author_email,
         url: row.author_url,
@@ -2808,6 +2839,7 @@ export function registerContentRoutes(app: Hono) {
       if (failAction === 'reject') status = 'spam';
       if (failAction === 'pending') status = 'pending';
     }
+    const geo = await resolveCommentGeo(ip);
     const id = await genericCreate('comments', {
       ...body,
       post_id: postId,
@@ -2820,6 +2852,7 @@ export function registerContentRoutes(app: Hono) {
       author_ip: ip,
       author_agent: c.req.header('user-agent') || '',
       user_id: userId,
+      geo: geo ? JSON.stringify(geo) : undefined,
     });
     if (status === 'approved') {
       await exec(`update ${table('posts')} set comment_count = comment_count + 1 where id = $1`, [postId]).catch(() => {});
