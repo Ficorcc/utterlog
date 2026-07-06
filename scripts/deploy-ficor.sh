@@ -196,14 +196,23 @@ EOF
 ok "镜像构建完成: ${IMAGE_NAME}:local, ${IMAGE_NAME}:${GIT_SHA_SHORT}"
 
 # -------- 重启 app 容器（不动 postgres） --------
-log "重启 app 容器 ..."
+# compose 默认用 ghcr.io 镜像 + pull_policy:always，会拉公共镜像而不是本地 build 的。
+# 写一个 override 文件强制用 utterlog-app:local + pull_policy:never，叠加到 -f 之后。
+log "配置 compose override（用本地镜像）+ 重启 app ..."
 "${SSH[@]}" bash -s <<EOF
 set -euo pipefail
 cd ${REMOTE_PATH}
+cat > docker-compose.local.yml << 'YAML'
+# 本地构建镜像 override —— 部署脚本自动生成，让 compose 用 utterlog-app:local
+services:
+  app:
+    image: utterlog-app:local
+    pull_policy: never
+YAML
 # 仅 force-recreate app，依赖的 postgres 不重启
-docker compose -f docker-compose.bun.yml up -d --force-recreate --no-deps app
+docker compose -f docker-compose.bun.yml -f docker-compose.local.yml up -d --force-recreate --no-deps app
 EOF
-ok "app 容器已重启"
+ok "app 容器已重启（使用 utterlog-app:local）"
 
 # -------- 健康检查 --------
 log "健康检查 ..."
