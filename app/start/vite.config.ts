@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import viteReact from '@vitejs/plugin-react';
+import { resolve } from 'node:path';
 
 export default defineConfig({
   server: {
@@ -8,7 +9,11 @@ export default defineConfig({
     host: '127.0.0.1',
   },
   resolve: {
-    tsconfigPaths: true,
+    alias: {
+      '@': resolve(import.meta.dirname, '../web'),
+      '@shared': resolve(import.meta.dirname, '../shared'),
+      '@start': resolve(import.meta.dirname, 'src'),
+    },
   },
   plugins: [
     tanstackStart(),

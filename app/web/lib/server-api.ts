@@ -5,7 +5,7 @@ export function serverApiBase() {
     if (/^https?:\/\//i.test(publicUrl)) return publicUrl.replace(/\/+$/, '');
     return '/api/v1';
   }
-  const internal = process.env.INTERNAL_API_URL || '';
+  const internal = process.env.UTTERLOG_START_API_URL || process.env.INTERNAL_API_URL || '';
   if (/^https?:\/\//i.test(internal)) return internal.replace(/\/+$/, '');
   const publicUrl = process.env.NEXT_PUBLIC_API_URL || '';
   if (publicUrl.startsWith('/')) return publicUrl.replace(/\/+$/, '');
