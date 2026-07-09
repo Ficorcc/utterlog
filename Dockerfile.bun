@@ -53,6 +53,7 @@ ENV INTERNAL_API_URL=http://127.0.0.1:8080/api/v1
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/app/web/node_modules ./app/web/node_modules
+COPY --from=deps /app/app/start/node_modules ./app/start/node_modules
 COPY package.json bun.lock bunfig.toml tsconfig.json ./
 COPY app/server ./app/server
 COPY app/web ./app/web
