@@ -16,9 +16,8 @@
     "ignoreDeprecations": "6.0",
     "typeRoots": ["./node_modules/@types", "../../node_modules/@types"],
     "types": ["node", "react", "react-dom"],
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src"]

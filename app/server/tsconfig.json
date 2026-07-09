@@ -15,10 +15,9 @@
     "resolveJsonModule": true,
     "jsx": "react-jsx",
     "allowImportingTsExtensions": true,
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["../web/*"],
-      "@shared/*": ["../shared/*"]
+      "@/*": ["./../web/*"],
+      "@shared/*": ["./../shared/*"]
     },
     "noEmit": true
   },
