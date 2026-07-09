@@ -17,14 +17,28 @@ type HomeResponse = {
   ctx: ThemeContextData | null;
 };
 
+async function safe<T>(promise: Promise<T>, fallback: T, ms = 1500): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise.catch(() => fallback),
+      new Promise<T>((resolve) => {
+        timer = setTimeout(() => resolve(fallback), ms);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 export const loadStartHome = createServerFn({ method: 'GET' }).handler(async (): Promise<HomeResponse> => {
   const [themeCtx, homeData, optionsRes, postsRes, categoriesRes, commentsRes] = await Promise.all([
-    getThemeContextData().catch(() => null),
-    loadHomePageData(1).catch(() => null),
-    fetchJson('/options').catch(() => ({ data: {} })),
-    fetchJson('/posts?page=1&per_page=8&status=publish').catch(() => ({ data: [] })),
-    fetchJson('/categories').catch(() => ({ data: [] })),
-    fetchJson('/comments?per_page=8&status=approved&exclude_admin=1').catch(() => ({ data: [] })),
+    safe(getThemeContextData(), null),
+    safe(loadHomePageData(1), null),
+    safe(fetchJson('/options'), { data: {} }),
+    safe(fetchJson('/posts?page=1&per_page=8&status=publish'), { data: [] }),
+    safe(fetchJson('/categories'), { data: [] }),
+    safe(fetchJson('/comments?per_page=8&status=approved&exclude_admin=1'), { data: [] }),
   ]);
 
   return {
