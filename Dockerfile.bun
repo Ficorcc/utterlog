@@ -13,6 +13,7 @@ COPY package.json bun.lock bunfig.toml tsconfig.json ./
 COPY app/web/package.json ./app/web/package.json
 COPY app/admin/package.json ./app/admin/package.json
 COPY app/blog/package.json ./app/blog/package.json
+COPY app/start/package.json ./app/start/package.json
 COPY app/next-shim ./app/next-shim
 RUN bun install \
   && ln -sf ../app/next-shim node_modules/next \
@@ -25,6 +26,15 @@ WORKDIR /app
 COPY app/shared ./app/shared
 COPY app/admin/ ./app/admin/
 WORKDIR /app/app/admin
+RUN bun run build
+
+FROM deps AS start-builder
+WORKDIR /app
+COPY app/shared ./app/shared
+COPY app/web ./app/web
+COPY app/blog ./app/blog
+COPY app/start ./app/start
+WORKDIR /app/app/start
 RUN bun run build
 
 FROM --platform=linux/amd64 oven/bun:canary@sha256:33c46b90ba25ef164d79580c34ccaa6c6ff3ed1cb53e9d43c8a50a07e0a38492 AS runtime
@@ -47,9 +57,11 @@ COPY package.json bun.lock bunfig.toml tsconfig.json ./
 COPY app/server ./app/server
 COPY app/web ./app/web
 COPY app/blog ./app/blog
+COPY app/start ./app/start
 COPY app/shared ./app/shared
 COPY app/next-shim ./app/next-shim
 COPY --from=admin-builder /app/app/admin/dist ./app/admin/dist
+COPY --from=start-builder /app/app/start/dist ./app/start/dist
 COPY content ./content
 
 RUN test -L node_modules/next || ln -sf ../app/next-shim node_modules/next \

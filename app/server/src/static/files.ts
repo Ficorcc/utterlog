@@ -202,6 +202,30 @@ export function serveStaticFiles(app: Hono) {
     });
   });
 
+  app.get('/assets/*', async (c) => {
+    const rest = c.req.path.replace(/^\/assets\/?/, '');
+    if (!rest) return c.notFound();
+    const acceptEncoding = c.req.header('accept-encoding') || '';
+    const response = await fileResponse(safeJoin(runtimePaths.startClientAssetsDir, rest), acceptEncoding);
+    if (!response) return c.notFound();
+    const headers = new Headers(response.headers);
+    if (/-[A-Za-z0-9_-]+\.(js|css)$/.test(rest)) {
+      headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+    return new Response(response.body, { status: response.status, headers });
+  });
+  app.on('HEAD', '/assets/*', async (c) => {
+    const rest = c.req.path.replace(/^\/assets\/?/, '');
+    if (!rest) return c.notFound();
+    const response = await fileResponse(safeJoin(runtimePaths.startClientAssetsDir, rest), c.req.header('accept-encoding') || '');
+    if (!response) return c.notFound();
+    const headers = new Headers(response.headers);
+    if (/-[A-Za-z0-9_-]+\.(js|css)$/.test(rest)) {
+      headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+    return new Response(null, { status: response.status, headers });
+  });
+
   app.get('/static/*', async (c) => {
     const rest = c.req.path.replace(/^\/static\/?/, '');
     if (!rest || rest === 'globals.css' || rest === 'client.js' || rest === 'client.css') return c.notFound();

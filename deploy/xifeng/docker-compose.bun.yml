@@ -19,6 +19,7 @@ services:
       - APP_URL=${APP_URL}
       - STORAGE_DRIVER=${STORAGE_DRIVER:-local}
       - WEB_RENDERER=bun
+      - UTTERLOG_FRONTEND=start
       - NEXT_PUBLIC_API_URL=/api/v1
       - INTERNAL_API_URL=http://127.0.0.1:8080/api/v1
       - UPLOAD_DIR=uploads
