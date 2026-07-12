@@ -16,8 +16,7 @@ import { runtimePaths } from '../paths';
 import { normalizeBlogTheme, resolveBlogTheme } from '../blog-themes';
 import { resolveThemePreviewUrl } from '../theme-assets';
 import { sendConfiguredEmail } from '../email';
-import { aiAuditFailAction, auditCommentContent, enqueueAiCommentReply } from '../ai/comments';
-import { sendCommentModerationTelegram, sendPostPublishedTelegram } from '../telegram';
+import { sendPostPublishedTelegram } from '../telegram';
 import { assertPublicHttpUrl } from '../http/public-url';
 import { lookupGeoIp, normalizeGeoProvider } from '../geoip';
 import { appVersion, getCpuPercent, getHostUptimeLabel, getHostUptimeSeconds } from '../system/metrics';
@@ -48,6 +47,14 @@ import {
   updateAdminComment,
 } from '../services/comments';
 import { readOptionMap } from '../services/options';
+import {
+  commentCaptchaDifficulty,
+  commentCaptchaMode,
+  commentCaptchaSvgDataUrl,
+  randomCommentCaptchaCode,
+} from '../services/comment-captcha';
+import { createPublicComment } from '../services/public-comments';
+import { PublicWriteError } from '../services/public-write';
 
 const contentTables = new Set(['moments', 'music', 'movies', 'books', 'games', 'videos', 'goods', 'links', 'playlists']);
 const writableTables = new Set([...contentTables, 'posts', 'comments', 'media', 'albums', 'notifications']);
@@ -445,95 +452,6 @@ const aiBotUserAgents = [
   'Diffbot',
 ];
 
-async function captchaMode() {
-  const mode = (await optionValue('comment_captcha_mode', '')).trim();
-  if (mode === 'pow' || mode === 'image' || mode === 'off') return mode;
-  const legacy = (await optionValue('comment_captcha_enabled', '1')).trim().toLowerCase();
-  return legacy === '0' || legacy === 'false' ? 'off' : 'pow';
-}
-
-async function captchaDifficulty() {
-  const raw = Number.parseInt(await optionValue('comment_captcha_difficulty', '4'), 10);
-  if (!Number.isFinite(raw)) return 4;
-  return Math.min(6, Math.max(1, raw));
-}
-
-function randomCaptchaCode(length = 4) {
-  const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-  let code = '';
-  for (let i = 0; i < length; i++) code += chars[Math.floor(Math.random() * chars.length)];
-  return code;
-}
-
-function svgEscape(value: string) {
-  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-function captchaSvgDataUrl(code: string) {
-  const dots = Array.from({ length: 70 }, () => {
-    const x = Math.floor(Math.random() * 120);
-    const y = Math.floor(Math.random() * 40);
-    const opacity = (0.12 + Math.random() * 0.28).toFixed(2);
-    return `<circle cx="${x}" cy="${y}" r="1" fill="#334155" opacity="${opacity}" />`;
-  }).join('');
-  const lines = Array.from({ length: 3 }, () => {
-    const x1 = Math.floor(Math.random() * 120);
-    const y1 = Math.floor(Math.random() * 40);
-    const x2 = Math.floor(Math.random() * 120);
-    const y2 = Math.floor(Math.random() * 40);
-    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#94a3b8" stroke-width="1" opacity="0.55" />`;
-  }).join('');
-  const letters = code.split('').map((ch, idx) => {
-    const x = 12 + idx * 26 + Math.floor(Math.random() * 4);
-    const y = 28 + Math.floor(Math.random() * 5);
-    const rotate = -12 + Math.floor(Math.random() * 25);
-    return `<text x="${x}" y="${y}" transform="rotate(${rotate} ${x} ${y})">${svgEscape(ch)}</text>`;
-  }).join('');
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="40" viewBox="0 0 120 40">
-    <rect width="120" height="40" fill="#f8fafc"/>
-    ${dots}${lines}
-    <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24" font-weight="700" fill="#323278">${letters}</g>
-  </svg>`;
-  return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
-}
-
-async function verifyPowCaptcha(challenge: unknown, nonce: unknown) {
-  const id = String(challenge || '').trim();
-  const value = String(nonce || '').trim();
-  if (!id || !value) return false;
-  const stored = await ephemeral.get(`captcha:${id}`);
-  if (!stored) return false;
-  const [difficultyText, expiresText] = stored.split(':');
-  const difficulty = Number.parseInt(difficultyText || '', 10);
-  const expires = Number.parseInt(expiresText || '', 10);
-  if (!Number.isFinite(difficulty) || !Number.isFinite(expires) || nowUnix() > expires) {
-    await ephemeral.del(`captcha:${id}`);
-    return false;
-  }
-  const hash = createHash('sha256').update(id + value).digest('hex');
-  const valid = hash.startsWith('0'.repeat(difficulty));
-  if (valid) await ephemeral.del(`captcha:${id}`);
-  return valid;
-}
-
-async function verifyImageCaptcha(id: unknown, code: unknown) {
-  const key = String(id || '').trim();
-  const input = String(code || '').trim().toLowerCase();
-  if (!key || !input) return false;
-  const expected = await ephemeral.get(`captcha:img:${key}`);
-  if (!expected) return false;
-  const valid = input === expected;
-  if (valid) await ephemeral.del(`captcha:img:${key}`);
-  return valid;
-}
-
-async function verifyCommentCaptcha(body: Record<string, unknown>) {
-  const mode = await captchaMode();
-  if (mode === 'off') return true;
-  if (mode === 'image') return verifyImageCaptcha(body.captcha_id, body.captcha_code);
-  return verifyPowCaptcha(body.captcha_challenge, body.captcha_nonce);
-}
-
 let activeUploads = 0;
 const maxConcurrentUploads = 5;
 
@@ -869,41 +787,6 @@ function maskIp(ip: string) {
   return ip;
 }
 
-async function validPassportToken(token: string) {
-  const value = token.trim();
-  if (!value) return false;
-  const res = await fetch('https://id.utterlog.com/api/v1/passport/verify', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ token: value }),
-    signal: AbortSignal.timeout(5000),
-  }).catch(() => null);
-  if (!res?.ok) return false;
-  const payload = await res.json().catch(() => ({})) as Record<string, any>;
-  return Boolean(payload?.success && payload?.data?.valid && payload?.data?.utterlog_id);
-}
-
-async function isSpamComment(content: string, email: string, url: string, ip: string) {
-  const lower = content.toLowerCase();
-  const linkCount = (lower.match(/https?:\/\//g) || []).length;
-  if (linkCount > 2) return true;
-  const spamWords = [
-    'casino', 'poker', 'viagra', 'cialis', 'lottery', 'free money',
-    'buy now', 'click here', 'subscribe', 'earn money', 'make money',
-    'adult', 'xxx', 'porn', 'sex', '药', '赌博', '彩票', '代开发票',
-    '刷单', '兼职日赚', '加微信', '加qq', '代孕',
-  ];
-  if (spamWords.some((word) => lower.includes(word))) return true;
-  const emailLower = email.toLowerCase();
-  if (['tempmail.', 'guerrillamail.', 'throwaway.', 'yopmail.', 'sharklasers.'].some((domain) => emailLower.includes(domain))) return true;
-  if (/(.)\1{9,}/u.test(content)) return true;
-  const recent = await one<{ count: string }>(
-    `select count(*)::text as count from ${table('comments')} where author_ip = $1 and created_at > $2`,
-    [ip, nowUnix() - 600],
-  ).catch(() => null);
-  return Number(recent?.count || 0) >= 5;
-}
-
 function parseUa(ua: string) {
   const lower = ua.toLowerCase();
   const device = /mobile|iphone|android/.test(lower) ? 'Mobile' : /ipad|tablet/.test(lower) ? 'Tablet' : 'Desktop';
@@ -938,31 +821,12 @@ function geoHeaders(c: any) {
   };
 }
 
-function commentGeoPayload(geo: Awaited<ReturnType<typeof lookupGeoIp>>) {
-  if (!geo?.country_code) return null;
-  return {
-    country_code: geo.country_code.toLowerCase(),
-    country: geo.country,
-    province: geo.province,
-    city: geo.city,
-  };
-}
-
 function commentGeoFromRow(value: unknown) {
   if (!value) return null;
   if (typeof value === 'object') return value;
   if (typeof value !== 'string') return null;
   try {
     return JSON.parse(value) as Record<string, unknown>;
-  } catch {
-    return null;
-  }
-}
-
-async function resolveCommentGeo(ip: string) {
-  try {
-    const provider = await optionValue('ip_geo_provider', 'ipx');
-    return commentGeoPayload(await lookupGeoIp(ip, provider, 2500));
   } catch {
     return null;
   }
@@ -2718,116 +2582,17 @@ export function registerContentRoutes(app: Hono) {
   });
   app.post('/api/v1/comments', optionalAuth, async (c) => {
     const body = await c.req.json().catch(() => ({}));
-    const content = String(body.content || '').trim();
-    if (content.length < 5) return badRequest(c, '评论内容至少 5 个字');
-    if ((await optionValue('allow_comments', 'true')) === 'false') return badRequest(c, '站点已关闭评论');
-    const authorEmail = String(body.author_email || body.email || '').trim();
-    const authorUrl = String(body.author_url || body.url || '').trim();
-    if ((await optionValue('comment_require_email', 'true')) !== 'false' && !authorEmail) {
-      return badRequest(c, '请填写邮箱');
+    try {
+      return ok(c, await createPublicComment(body, {
+        ip: clientIp(c),
+        userAgent: c.req.header('user-agent') || '',
+        passportToken: c.req.header('x-utterlog-passport') || '',
+        userId: currentUserId(c),
+      }));
+    } catch (err) {
+      if (err instanceof PublicWriteError) return fail(c, err.status, err.code, err.message);
+      throw err;
     }
-    const postId = intParam(String(body.post_id || body.postId || ''));
-    const post = await one<{ id: number; title: string; slug: string | null; allow_comment: boolean | null }>(
-      `select id, title, slug, allow_comment from ${table('posts')} where id = $1 and status = 'publish' limit 1`,
-      [postId],
-    );
-    if (!post) return notFound(c, '文章');
-    if (post.allow_comment === false) return badRequest(c, '该文章已关闭评论');
-    const parentId = intParam(String(body.parent_id || body.parentId || ''));
-    if (parentId > 0) {
-      const parent = await one<{ post_id: number }>(
-        `select post_id from ${table('comments')} where id = $1 and status = 'approved' limit 1`,
-        [parentId],
-      );
-      if (!parent || Number(parent.post_id) !== postId) return badRequest(c, '回复的评论不存在或未通过审核');
-    }
-    const ip = clientIp(c);
-    const userId = currentUserId(c);
-    const role = userId > 0
-      ? await one<{ role: string }>(`select role from ${table('users')} where id = $1`, [currentUserId(c)]).catch(() => null)
-      : null;
-    let status = role?.role === 'admin' ? 'approved' : 'pending';
-    if (status === 'pending' && await validPassportToken(c.req.header('x-utterlog-passport') || '')) status = 'approved';
-    if (status === 'pending' && !(await verifyCommentCaptcha(body))) {
-      return badRequest(c, '验证码错误或已过期', 'CAPTCHA_INVALID');
-    }
-    if (status === 'pending' && await isSpamComment(content, authorEmail, authorUrl, ip)) status = 'spam';
-    if (status === 'pending' && (await optionValue('comment_trust_returning', 'true')) !== 'false') {
-      const prev = await one<{ count: string }>(
-        `select count(*)::text as count from ${table('comments')}
-         where status = 'approved' and (author_email = $1 or (visitor_id = $2 and visitor_id != ''))`,
-        [authorEmail, String(body.visitor_id || '')],
-      ).catch(() => null);
-      if (Number(prev?.count || 0) > 0) status = 'approved';
-    }
-    if (status === 'pending' && (await optionValue('comment_moderation', 'false')) !== 'true') status = 'approved';
-    const aiAudit = status === 'pending' && userId === 0 ? await auditCommentContent(content).catch(() => null) : null;
-    if (aiAudit && !aiAudit.passed) {
-      const failAction = await aiAuditFailAction();
-      if (failAction === 'reject') status = 'spam';
-      if (failAction === 'pending') status = 'pending';
-    }
-    const geo = await resolveCommentGeo(ip);
-    const id = await genericCreate('comments', {
-      ...body,
-      post_id: postId,
-      parent_id: parentId > 0 ? parentId : 0,
-      author_name: body.author_name || body.author || body.name,
-      author_email: authorEmail,
-      author_url: authorUrl,
-      content,
-      status,
-      author_ip: ip,
-      author_agent: c.req.header('user-agent') || '',
-      user_id: userId,
-      geo: geo ? JSON.stringify(geo) : undefined,
-    });
-    if (status === 'approved') {
-      await exec(`update ${table('posts')} set comment_count = comment_count + 1 where id = $1`, [postId]).catch(() => {});
-    }
-    if (currentUserId(c) === 0 || status === 'pending') {
-      await exec(
-        `insert into ${table('notifications')} (user_id, type, title, content, is_read, created_at)
-         values (1, 'comment', $1, $2, false, $3)`,
-        [
-          `${String(body.author_name || body.author || body.name || '访客')} 发表了新评论`,
-          `状态: ${status} | ${content.slice(0, 100)}`,
-          nowUnix(),
-        ],
-      ).catch(() => {});
-    }
-    if (status === 'pending') {
-      void sendCommentModerationTelegram({
-        commentId: id,
-        postTitle: post.title,
-        author: String(body.author_name || body.author || body.name || '访客'),
-        email: String(body.author_email || body.email || ''),
-        url: authorUrl,
-        ip: ip || '',
-        content,
-      });
-    }
-    if ((await optionValue('comment_notify_admin', 'true')) !== 'false' && currentUserId(c) === 0) {
-      const admin = await one<{ email: string }>(`select email from ${table('users')} where role = 'admin' order by id asc limit 1`).catch(() => null);
-      const siteTitle = await optionValue('site_title', 'Utterlog');
-      const siteUrl = (await optionValue('site_url', config.appUrl)).replace(/\/+$/, '');
-      if (admin?.email) {
-        await sendConfiguredEmail(
-          admin.email,
-          `新评论 - ${post.title}`,
-          `<div style="font:14px/1.7 -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;color:#0d1a2d">
-            <p>${htmlEscape(String(body.author_name || body.author || body.name || '访客'))} 在《${htmlEscape(post.title)}》发表了新评论。</p>
-            <p>状态：${htmlEscape(status)}</p>
-            <blockquote style="margin:12px 0;padding:10px 14px;background:#f5f7fa;border-left:3px solid #cdd5df;color:#5a6b7f">${htmlEscape(content.slice(0, 500))}</blockquote>
-            <p><a href="${htmlEscape(`${siteUrl}/admin/comments`)}">进入 ${htmlEscape(siteTitle)} 后台审核</a></p>
-          </div>`,
-        ).catch(() => {});
-      }
-    }
-    if (status === 'approved' && userId === 0) {
-      void enqueueAiCommentReply({ commentId: id, postId, parentId: parentId > 0 ? parentId : 0, content, audit: aiAudit }).catch(() => {});
-    }
-    return ok(c, { id, status });
   });
   app.put('/api/v1/comments/:id', auth, async (c) => {
     const id = intParam(c.req.param('id'));
@@ -3815,21 +3580,21 @@ export function registerContentRoutes(app: Hono) {
   });
 
   app.get('/api/v1/captcha/challenge', async (c) => {
-    const mode = await captchaMode();
+    const mode = await commentCaptchaMode();
     if (mode === 'off') return ok(c, { enabled: false, mode: 'off' });
     if (mode === 'image') return ok(c, { enabled: true, mode: 'image' });
     const challenge = crypto.randomUUID().replaceAll('-', '');
-    const difficulty = await captchaDifficulty();
+    const difficulty = await commentCaptchaDifficulty();
     const expires = nowUnix() + 120;
     await ephemeral.set(`captcha:${challenge}`, `${difficulty}:${expires}`, 120);
     return ok(c, { enabled: true, mode: 'pow', challenge, difficulty, expires });
   });
   app.get('/api/v1/captcha/image', async (c) => {
-    if (await captchaMode() !== 'image') return badRequest(c, '图片验证码未启用', 'WRONG_MODE');
-    const code = randomCaptchaCode();
+    if (await commentCaptchaMode() !== 'image') return badRequest(c, '图片验证码未启用', 'WRONG_MODE');
+    const code = randomCommentCaptchaCode();
     const id = createHash('md5').update(`${Date.now()}-${clientIp(c)}-${code}-${Math.random()}`).digest('hex');
     await ephemeral.set(`captcha:img:${id}`, code.toLowerCase(), 300);
-    return ok(c, { id, image: captchaSvgDataUrl(code) });
+    return ok(c, { id, image: commentCaptchaSvgDataUrl(code) });
   });
 
   app.post('/api/v1/track', async (c) => {

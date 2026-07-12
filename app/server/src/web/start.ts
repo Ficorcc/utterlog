@@ -60,6 +60,7 @@ export function isStartNativeApiRequest(request: Request) {
   if (/^\/api\/v1\/passkeys\/[^/]+$/.test(url.pathname)) return method === 'DELETE';
   if (url.pathname === '/api/v1/visitor/weather') return method === 'GET';
   if (anonymousGet && ['/api/v1/options', '/api/v1/categories', '/api/v1/tags', '/api/v1/posts', '/api/v1/comments', '/api/v1/moments'].includes(url.pathname)) return true;
+  if (url.pathname === '/api/v1/comments' && method === 'POST') return true;
   if (anonymousGet && /^\/api\/v1\/(books|games|goods|links|movies|music|playlists)$/.test(url.pathname)) return true;
   if (anonymousGet && ['/api/v1/owner', '/api/v1/archive/stats', '/api/v1/footprints', '/api/v1/moments/recent-tags', '/api/v1/public/albums'].includes(url.pathname)) return true;
   if (anonymousGet && /^\/api\/v1\/public\/albums\/[^/]+$/.test(url.pathname)) return true;

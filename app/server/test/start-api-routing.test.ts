@@ -78,8 +78,8 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/comments/7/edit', 'GET'))).toBe(false);
   });
 
-  test('keeps public creation and authenticated reads on the compatibility API', () => {
-    expect(isStartNativeApiRequest(request('/api/v1/comments', 'POST'))).toBe(false);
+  test('routes public comment creation while keeping authenticated reads on the compatibility API', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/comments', 'POST'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/comments/42', 'GET'))).toBe(false);
   });
 });
