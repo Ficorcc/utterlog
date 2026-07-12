@@ -54,6 +54,10 @@ export async function handleBlogRequest(request: Request): Promise<Response | nu
 
   try {
     if (pathname === '/install' || pathname.startsWith('/install/')) {
+      if (startFrontendEnabled()) {
+        const response = await handleStartRequest(request);
+        if (response) return response;
+      }
       const html = renderStandalonePage(createElement(InstallPage), 'Utterlog 安装', 'install');
       return htmlResponse(html, 200, method);
     }

@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as InstallRouteImport } from './routes/install'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostsSlugRouteImport } from './routes/posts/$slug'
@@ -61,6 +62,11 @@ import { Route as ApiV1AuthPasskeyFlowActionRouteImport } from './routes/api/v1/
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InstallRoute = InstallRouteImport.update({
+  id: '/install',
+  path: '/install',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SplatRoute = SplatRouteImport.update({
@@ -306,6 +312,7 @@ const ApiV1AuthPasskeyFlowActionRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/install': typeof InstallRoute
   '/login': typeof LoginRoute
   '/admin/$': typeof AdminSplatRoute
   '/posts/$slug': typeof PostsSlugRoute
@@ -356,6 +363,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/install': typeof InstallRoute
   '/login': typeof LoginRoute
   '/admin/$': typeof AdminSplatRoute
   '/posts/$slug': typeof PostsSlugRoute
@@ -407,6 +415,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/install': typeof InstallRoute
   '/login': typeof LoginRoute
   '/admin/$': typeof AdminSplatRoute
   '/posts/$slug': typeof PostsSlugRoute
@@ -459,6 +468,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$'
+    | '/install'
     | '/login'
     | '/admin/$'
     | '/posts/$slug'
@@ -509,6 +519,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$'
+    | '/install'
     | '/login'
     | '/admin/$'
     | '/posts/$slug'
@@ -559,6 +570,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$'
+    | '/install'
     | '/login'
     | '/admin/$'
     | '/posts/$slug'
@@ -610,6 +622,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
+  InstallRoute: typeof InstallRoute
   LoginRoute: typeof LoginRoute
   AdminSplatRoute: typeof AdminSplatRoute
   PostsSlugRoute: typeof PostsSlugRoute
@@ -656,6 +669,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/install': {
+      id: '/install'
+      path: '/install'
+      fullPath: '/install'
+      preLoaderRoute: typeof InstallRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$': {
@@ -1041,6 +1061,7 @@ const ApiV1CommentsIdRouteWithChildren = ApiV1CommentsIdRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
+  InstallRoute: InstallRoute,
   LoginRoute: LoginRoute,
   AdminSplatRoute: AdminSplatRoute,
   PostsSlugRoute: PostsSlugRoute,
