@@ -103,7 +103,7 @@ describe('TanStack Start native API routing', () => {
       const authenticated = isStartNativeApiRequest(new Request(`https://example.test${path}`, {
         headers: { authorization: 'Bearer admin-token' },
       }));
-      expect(authenticated).toBe(['/api/v1/options', '/api/v1/categories', '/api/v1/tags', '/api/v1/posts', '/api/v1/moments'].includes(path));
+      expect(authenticated).toBe(true);
     }
     expect(isStartNativeApiRequest(request('/api/v1/comments', 'GET'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/posts', 'POST'))).toBe(true);
@@ -111,6 +111,16 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/posts/12', 'DELETE'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/options', 'PUT'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/options', 'POST'))).toBe(true);
+  });
+
+  test('routes generic content management to Start', () => {
+    for (const resource of ['albums', 'books', 'games', 'goods', 'links', 'movies', 'music', 'playlists', 'videos']) {
+      expect(isStartNativeApiRequest(request(`/api/v1/${resource}`, 'GET'))).toBe(true);
+      expect(isStartNativeApiRequest(request(`/api/v1/${resource}`, 'POST'))).toBe(true);
+      expect(isStartNativeApiRequest(request(`/api/v1/${resource}/7`, 'GET'))).toBe(true);
+      expect(isStartNativeApiRequest(request(`/api/v1/${resource}/7`, 'PUT'))).toBe(true);
+      expect(isStartNativeApiRequest(request(`/api/v1/${resource}/7`, 'DELETE'))).toBe(true);
+    }
   });
 
   test('routes authenticated comment list reads to Start for admin filtering', () => {

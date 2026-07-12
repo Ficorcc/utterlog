@@ -57,6 +57,7 @@ import { Route as ApiV1AuthLogoutRouteImport } from './routes/api/v1/auth/logout
 import { Route as ApiV1AuthLoginRouteImport } from './routes/api/v1/auth/login'
 import { Route as ApiV1AuthForgotPasswordRouteImport } from './routes/api/v1/auth/forgot-password'
 import { Route as ApiV1ArchiveStatsRouteImport } from './routes/api/v1/archive/stats'
+import { Route as ApiV1ResourceIdRouteImport } from './routes/api/v1/$resource/$id'
 import { Route as ApiV1PublicAlbumsIndexRouteImport } from './routes/api/v1/public/albums/index'
 import { Route as ApiV1PublicAlbumsIdRouteImport } from './routes/api/v1/public/albums/$id'
 import { Route as ApiV1PostsSlugSlugRouteImport } from './routes/api/v1/posts/slug/$slug'
@@ -314,6 +315,11 @@ const ApiV1ArchiveStatsRoute = ApiV1ArchiveStatsRouteImport.update({
   path: '/api/v1/archive/stats',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1ResourceIdRoute = ApiV1ResourceIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiV1ResourceRoute,
+} as any)
 const ApiV1PublicAlbumsIndexRoute = ApiV1PublicAlbumsIndexRouteImport.update({
   id: '/api/v1/public/albums/',
   path: '/api/v1/public/albums/',
@@ -390,7 +396,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/admin/$': typeof AdminSplatRoute
   '/posts/$slug': typeof PostsSlugRoute
-  '/api/v1/$resource': typeof ApiV1ResourceRoute
+  '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
   '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
   '/api/v1/coding': typeof ApiV1CodingRoute
   '/api/v1/footprints': typeof ApiV1FootprintsRoute
@@ -398,6 +404,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/owner': typeof ApiV1OwnerRoute
   '/api/v1/posts': typeof ApiV1PostsRouteWithChildren
   '/api/v1/tags': typeof ApiV1TagsRouteWithChildren
+  '/api/v1/$resource/$id': typeof ApiV1ResourceIdRoute
   '/api/v1/archive/stats': typeof ApiV1ArchiveStatsRoute
   '/api/v1/auth/forgot-password': typeof ApiV1AuthForgotPasswordRoute
   '/api/v1/auth/login': typeof ApiV1AuthLoginRoute
@@ -453,7 +460,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/admin/$': typeof AdminSplatRoute
   '/posts/$slug': typeof PostsSlugRoute
-  '/api/v1/$resource': typeof ApiV1ResourceRoute
+  '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
   '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
   '/api/v1/coding': typeof ApiV1CodingRoute
   '/api/v1/footprints': typeof ApiV1FootprintsRoute
@@ -461,6 +468,7 @@ export interface FileRoutesByTo {
   '/api/v1/owner': typeof ApiV1OwnerRoute
   '/api/v1/posts': typeof ApiV1PostsRouteWithChildren
   '/api/v1/tags': typeof ApiV1TagsRouteWithChildren
+  '/api/v1/$resource/$id': typeof ApiV1ResourceIdRoute
   '/api/v1/archive/stats': typeof ApiV1ArchiveStatsRoute
   '/api/v1/auth/forgot-password': typeof ApiV1AuthForgotPasswordRoute
   '/api/v1/auth/login': typeof ApiV1AuthLoginRoute
@@ -517,7 +525,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/admin/$': typeof AdminSplatRoute
   '/posts/$slug': typeof PostsSlugRoute
-  '/api/v1/$resource': typeof ApiV1ResourceRoute
+  '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
   '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
   '/api/v1/coding': typeof ApiV1CodingRoute
   '/api/v1/footprints': typeof ApiV1FootprintsRoute
@@ -525,6 +533,7 @@ export interface FileRoutesById {
   '/api/v1/owner': typeof ApiV1OwnerRoute
   '/api/v1/posts': typeof ApiV1PostsRouteWithChildren
   '/api/v1/tags': typeof ApiV1TagsRouteWithChildren
+  '/api/v1/$resource/$id': typeof ApiV1ResourceIdRoute
   '/api/v1/archive/stats': typeof ApiV1ArchiveStatsRoute
   '/api/v1/auth/forgot-password': typeof ApiV1AuthForgotPasswordRoute
   '/api/v1/auth/login': typeof ApiV1AuthLoginRoute
@@ -590,6 +599,7 @@ export interface FileRouteTypes {
     | '/api/v1/owner'
     | '/api/v1/posts'
     | '/api/v1/tags'
+    | '/api/v1/$resource/$id'
     | '/api/v1/archive/stats'
     | '/api/v1/auth/forgot-password'
     | '/api/v1/auth/login'
@@ -653,6 +663,7 @@ export interface FileRouteTypes {
     | '/api/v1/owner'
     | '/api/v1/posts'
     | '/api/v1/tags'
+    | '/api/v1/$resource/$id'
     | '/api/v1/archive/stats'
     | '/api/v1/auth/forgot-password'
     | '/api/v1/auth/login'
@@ -716,6 +727,7 @@ export interface FileRouteTypes {
     | '/api/v1/owner'
     | '/api/v1/posts'
     | '/api/v1/tags'
+    | '/api/v1/$resource/$id'
     | '/api/v1/archive/stats'
     | '/api/v1/auth/forgot-password'
     | '/api/v1/auth/login'
@@ -772,7 +784,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   AdminSplatRoute: typeof AdminSplatRoute
   PostsSlugRoute: typeof PostsSlugRoute
-  ApiV1ResourceRoute: typeof ApiV1ResourceRoute
+  ApiV1ResourceRoute: typeof ApiV1ResourceRouteWithChildren
   ApiV1CategoriesRoute: typeof ApiV1CategoriesRouteWithChildren
   ApiV1CodingRoute: typeof ApiV1CodingRoute
   ApiV1FootprintsRoute: typeof ApiV1FootprintsRoute
@@ -1156,6 +1168,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1ArchiveStatsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/$resource/$id': {
+      id: '/api/v1/$resource/$id'
+      path: '/$id'
+      fullPath: '/api/v1/$resource/$id'
+      preLoaderRoute: typeof ApiV1ResourceIdRouteImport
+      parentRoute: typeof ApiV1ResourceRoute
+    }
     '/api/v1/public/albums/': {
       id: '/api/v1/public/albums/'
       path: '/api/v1/public/albums'
@@ -1250,6 +1269,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ApiV1ResourceRouteChildren {
+  ApiV1ResourceIdRoute: typeof ApiV1ResourceIdRoute
+}
+
+const ApiV1ResourceRouteChildren: ApiV1ResourceRouteChildren = {
+  ApiV1ResourceIdRoute: ApiV1ResourceIdRoute,
+}
+
+const ApiV1ResourceRouteWithChildren = ApiV1ResourceRoute._addFileChildren(
+  ApiV1ResourceRouteChildren,
+)
+
 interface ApiV1CategoriesRouteChildren {
   ApiV1CategoriesIdRoute: typeof ApiV1CategoriesIdRoute
 }
@@ -1329,7 +1360,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   AdminSplatRoute: AdminSplatRoute,
   PostsSlugRoute: PostsSlugRoute,
-  ApiV1ResourceRoute: ApiV1ResourceRoute,
+  ApiV1ResourceRoute: ApiV1ResourceRouteWithChildren,
   ApiV1CategoriesRoute: ApiV1CategoriesRouteWithChildren,
   ApiV1CodingRoute: ApiV1CodingRoute,
   ApiV1FootprintsRoute: ApiV1FootprintsRoute,

@@ -1,16 +1,36 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { listPublicContent } from '../../../../../server/src/public-read';
-import { apiFail, apiPaginated } from '../../../server/http';
-
-const resources = new Set(['books', 'games', 'goods', 'links', 'movies', 'music', 'playlists']);
+import { authenticateRequest } from '../../../../../server/src/auth/session';
+import { asContentResource, ContentRecordError, createContentRecord, listContentRecords } from '../../../../../server/src/services/content-records';
+import { apiFail, apiOk, apiPaginated, withAdmin } from '../../../server/http';
 
 export const Route = createFileRoute('/api/v1/$resource')({
-  server: { handlers: { GET: async ({ request, params }) => {
-    if (!resources.has(params.resource)) return apiFail(404, 'NOT_FOUND', 'api route not found');
-    const query = new URL(request.url).searchParams;
-    const page = Math.max(1, Number(query.get('page') || 1) || 1);
-    const perPage = Math.min(500, Math.max(1, Number(query.get('per_page') || 20) || 20));
-    const result = await listPublicContent(params.resource as 'books' | 'games' | 'goods' | 'links' | 'movies' | 'music' | 'playlists', { page, perPage });
-    return apiPaginated(result.data, result.meta);
-  } } },
+  server: { handlers: {
+    GET: async ({ request, params }) => {
+      try {
+        const resource = asContentResource(params.resource);
+        const query = new URL(request.url).searchParams;
+        const session = await authenticateRequest(request).catch(() => null);
+        const result = await listContentRecords(resource, {
+          page: Number(query.get('page') || 1),
+          perPage: Number(query.get('per_page') || query.get('limit') || 20),
+          status: query.get('status') || '',
+          authed: Boolean(session),
+        });
+        return apiPaginated(result.rows, result.meta);
+      } catch (error) {
+        if (error instanceof ContentRecordError) return apiFail(error.status, error.code, error.message);
+        throw error;
+      }
+    },
+    POST: ({ request, params }) => withAdmin(request, async (session) => {
+      try {
+        const resource = asContentResource(params.resource);
+        const body = await request.json().catch(() => ({})) as Record<string, unknown>;
+        return apiOk(await createContentRecord(resource, body, session.userId));
+      } catch (error) {
+        if (error instanceof ContentRecordError) return apiFail(error.status, error.code, error.message);
+        throw error;
+      }
+    }),
+  } },
 });
