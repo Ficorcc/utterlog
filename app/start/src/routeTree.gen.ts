@@ -63,6 +63,7 @@ import { Route as ApiV1PostsIdRouteImport } from './routes/api/v1/posts/$id'
 import { Route as ApiV1PluginsUploadRouteImport } from './routes/api/v1/plugins/upload'
 import { Route as ApiV1PluginsIdRouteImport } from './routes/api/v1/plugins/$id'
 import { Route as ApiV1PlaylistsImportRouteImport } from './routes/api/v1/playlists/import'
+import { Route as ApiV1PassportIdentifyRouteImport } from './routes/api/v1/passport/identify'
 import { Route as ApiV1PasskeysIdRouteImport } from './routes/api/v1/passkeys/$id'
 import { Route as ApiV1OptionsTestEmailRouteImport } from './routes/api/v1/options/test-email'
 import { Route as ApiV1NotificationsUnreadCountRouteImport } from './routes/api/v1/notifications/unread-count'
@@ -89,7 +90,13 @@ import { Route as ApiV1InstallCreateAdminRouteImport } from './routes/api/v1/ins
 import { Route as ApiV1I18nLocalesRouteImport } from './routes/api/v1/i18n/locales'
 import { Route as ApiV1I18nCurrentRouteImport } from './routes/api/v1/i18n/current'
 import { Route as ApiV1I18nLocaleRouteImport } from './routes/api/v1/i18n/$locale'
+import { Route as ApiV1FederationWebhookRouteImport } from './routes/api/v1/federation/webhook'
+import { Route as ApiV1FederationVerifyRouteImport } from './routes/api/v1/federation/verify'
+import { Route as ApiV1FederationTokenRouteImport } from './routes/api/v1/federation/token'
+import { Route as ApiV1FederationMetadataRouteImport } from './routes/api/v1/federation/metadata'
+import { Route as ApiV1FederationFollowRouteImport } from './routes/api/v1/federation/follow'
 import { Route as ApiV1CommentsPendingCountRouteImport } from './routes/api/v1/comments/pending-count'
+import { Route as ApiV1CommentsFederatedRouteImport } from './routes/api/v1/comments/federated'
 import { Route as ApiV1CommentsBatchRouteImport } from './routes/api/v1/comments/batch'
 import { Route as ApiV1CommentsIdRouteImport } from './routes/api/v1/comments/$id'
 import { Route as ApiV1CategoriesIdRouteImport } from './routes/api/v1/categories/$id'
@@ -412,6 +419,11 @@ const ApiV1PlaylistsImportRoute = ApiV1PlaylistsImportRouteImport.update({
   path: '/api/v1/playlists/import',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1PassportIdentifyRoute = ApiV1PassportIdentifyRouteImport.update({
+  id: '/api/v1/passport/identify',
+  path: '/api/v1/passport/identify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1PasskeysIdRoute = ApiV1PasskeysIdRouteImport.update({
   id: '/api/v1/passkeys/$id',
   path: '/api/v1/passkeys/$id',
@@ -547,12 +559,42 @@ const ApiV1I18nLocaleRoute = ApiV1I18nLocaleRouteImport.update({
   path: '/api/v1/i18n/$locale',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1FederationWebhookRoute = ApiV1FederationWebhookRouteImport.update({
+  id: '/api/v1/federation/webhook',
+  path: '/api/v1/federation/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1FederationVerifyRoute = ApiV1FederationVerifyRouteImport.update({
+  id: '/api/v1/federation/verify',
+  path: '/api/v1/federation/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1FederationTokenRoute = ApiV1FederationTokenRouteImport.update({
+  id: '/api/v1/federation/token',
+  path: '/api/v1/federation/token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1FederationMetadataRoute = ApiV1FederationMetadataRouteImport.update({
+  id: '/api/v1/federation/metadata',
+  path: '/api/v1/federation/metadata',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1FederationFollowRoute = ApiV1FederationFollowRouteImport.update({
+  id: '/api/v1/federation/follow',
+  path: '/api/v1/federation/follow',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1CommentsPendingCountRoute =
   ApiV1CommentsPendingCountRouteImport.update({
     id: '/api/v1/comments/pending-count',
     path: '/api/v1/comments/pending-count',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiV1CommentsFederatedRoute = ApiV1CommentsFederatedRouteImport.update({
+  id: '/api/v1/comments/federated',
+  path: '/api/v1/comments/federated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1CommentsBatchRoute = ApiV1CommentsBatchRouteImport.update({
   id: '/api/v1/comments/batch',
   path: '/api/v1/comments/batch',
@@ -857,7 +899,13 @@ export interface FileRoutesByFullPath {
   '/api/v1/categories/$id': typeof ApiV1CategoriesIdRoute
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRouteWithChildren
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
+  '/api/v1/comments/federated': typeof ApiV1CommentsFederatedRoute
   '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
+  '/api/v1/federation/follow': typeof ApiV1FederationFollowRoute
+  '/api/v1/federation/metadata': typeof ApiV1FederationMetadataRoute
+  '/api/v1/federation/token': typeof ApiV1FederationTokenRoute
+  '/api/v1/federation/verify': typeof ApiV1FederationVerifyRoute
+  '/api/v1/federation/webhook': typeof ApiV1FederationWebhookRoute
   '/api/v1/i18n/$locale': typeof ApiV1I18nLocaleRoute
   '/api/v1/i18n/current': typeof ApiV1I18nCurrentRoute
   '/api/v1/i18n/locales': typeof ApiV1I18nLocalesRoute
@@ -884,6 +932,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/notifications/unread-count': typeof ApiV1NotificationsUnreadCountRoute
   '/api/v1/options/test-email': typeof ApiV1OptionsTestEmailRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
+  '/api/v1/passport/identify': typeof ApiV1PassportIdentifyRoute
   '/api/v1/playlists/import': typeof ApiV1PlaylistsImportRoute
   '/api/v1/plugins/$id': typeof ApiV1PluginsIdRouteWithChildren
   '/api/v1/plugins/upload': typeof ApiV1PluginsUploadRoute
@@ -990,7 +1039,13 @@ export interface FileRoutesByTo {
   '/api/v1/categories/$id': typeof ApiV1CategoriesIdRoute
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRouteWithChildren
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
+  '/api/v1/comments/federated': typeof ApiV1CommentsFederatedRoute
   '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
+  '/api/v1/federation/follow': typeof ApiV1FederationFollowRoute
+  '/api/v1/federation/metadata': typeof ApiV1FederationMetadataRoute
+  '/api/v1/federation/token': typeof ApiV1FederationTokenRoute
+  '/api/v1/federation/verify': typeof ApiV1FederationVerifyRoute
+  '/api/v1/federation/webhook': typeof ApiV1FederationWebhookRoute
   '/api/v1/i18n/$locale': typeof ApiV1I18nLocaleRoute
   '/api/v1/i18n/current': typeof ApiV1I18nCurrentRoute
   '/api/v1/i18n/locales': typeof ApiV1I18nLocalesRoute
@@ -1017,6 +1072,7 @@ export interface FileRoutesByTo {
   '/api/v1/notifications/unread-count': typeof ApiV1NotificationsUnreadCountRoute
   '/api/v1/options/test-email': typeof ApiV1OptionsTestEmailRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
+  '/api/v1/passport/identify': typeof ApiV1PassportIdentifyRoute
   '/api/v1/playlists/import': typeof ApiV1PlaylistsImportRoute
   '/api/v1/plugins/$id': typeof ApiV1PluginsIdRouteWithChildren
   '/api/v1/plugins/upload': typeof ApiV1PluginsUploadRoute
@@ -1124,7 +1180,13 @@ export interface FileRoutesById {
   '/api/v1/categories/$id': typeof ApiV1CategoriesIdRoute
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRouteWithChildren
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
+  '/api/v1/comments/federated': typeof ApiV1CommentsFederatedRoute
   '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
+  '/api/v1/federation/follow': typeof ApiV1FederationFollowRoute
+  '/api/v1/federation/metadata': typeof ApiV1FederationMetadataRoute
+  '/api/v1/federation/token': typeof ApiV1FederationTokenRoute
+  '/api/v1/federation/verify': typeof ApiV1FederationVerifyRoute
+  '/api/v1/federation/webhook': typeof ApiV1FederationWebhookRoute
   '/api/v1/i18n/$locale': typeof ApiV1I18nLocaleRoute
   '/api/v1/i18n/current': typeof ApiV1I18nCurrentRoute
   '/api/v1/i18n/locales': typeof ApiV1I18nLocalesRoute
@@ -1151,6 +1213,7 @@ export interface FileRoutesById {
   '/api/v1/notifications/unread-count': typeof ApiV1NotificationsUnreadCountRoute
   '/api/v1/options/test-email': typeof ApiV1OptionsTestEmailRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
+  '/api/v1/passport/identify': typeof ApiV1PassportIdentifyRoute
   '/api/v1/playlists/import': typeof ApiV1PlaylistsImportRoute
   '/api/v1/plugins/$id': typeof ApiV1PluginsIdRouteWithChildren
   '/api/v1/plugins/upload': typeof ApiV1PluginsUploadRoute
@@ -1259,7 +1322,13 @@ export interface FileRouteTypes {
     | '/api/v1/categories/$id'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
+    | '/api/v1/comments/federated'
     | '/api/v1/comments/pending-count'
+    | '/api/v1/federation/follow'
+    | '/api/v1/federation/metadata'
+    | '/api/v1/federation/token'
+    | '/api/v1/federation/verify'
+    | '/api/v1/federation/webhook'
     | '/api/v1/i18n/$locale'
     | '/api/v1/i18n/current'
     | '/api/v1/i18n/locales'
@@ -1286,6 +1355,7 @@ export interface FileRouteTypes {
     | '/api/v1/notifications/unread-count'
     | '/api/v1/options/test-email'
     | '/api/v1/passkeys/$id'
+    | '/api/v1/passport/identify'
     | '/api/v1/playlists/import'
     | '/api/v1/plugins/$id'
     | '/api/v1/plugins/upload'
@@ -1392,7 +1462,13 @@ export interface FileRouteTypes {
     | '/api/v1/categories/$id'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
+    | '/api/v1/comments/federated'
     | '/api/v1/comments/pending-count'
+    | '/api/v1/federation/follow'
+    | '/api/v1/federation/metadata'
+    | '/api/v1/federation/token'
+    | '/api/v1/federation/verify'
+    | '/api/v1/federation/webhook'
     | '/api/v1/i18n/$locale'
     | '/api/v1/i18n/current'
     | '/api/v1/i18n/locales'
@@ -1419,6 +1495,7 @@ export interface FileRouteTypes {
     | '/api/v1/notifications/unread-count'
     | '/api/v1/options/test-email'
     | '/api/v1/passkeys/$id'
+    | '/api/v1/passport/identify'
     | '/api/v1/playlists/import'
     | '/api/v1/plugins/$id'
     | '/api/v1/plugins/upload'
@@ -1525,7 +1602,13 @@ export interface FileRouteTypes {
     | '/api/v1/categories/$id'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
+    | '/api/v1/comments/federated'
     | '/api/v1/comments/pending-count'
+    | '/api/v1/federation/follow'
+    | '/api/v1/federation/metadata'
+    | '/api/v1/federation/token'
+    | '/api/v1/federation/verify'
+    | '/api/v1/federation/webhook'
     | '/api/v1/i18n/$locale'
     | '/api/v1/i18n/current'
     | '/api/v1/i18n/locales'
@@ -1552,6 +1635,7 @@ export interface FileRouteTypes {
     | '/api/v1/notifications/unread-count'
     | '/api/v1/options/test-email'
     | '/api/v1/passkeys/$id'
+    | '/api/v1/passport/identify'
     | '/api/v1/playlists/import'
     | '/api/v1/plugins/$id'
     | '/api/v1/plugins/upload'
@@ -1657,7 +1741,13 @@ export interface RootRouteChildren {
   ApiV1CaptchaImageRoute: typeof ApiV1CaptchaImageRoute
   ApiV1CommentsIdRoute: typeof ApiV1CommentsIdRouteWithChildren
   ApiV1CommentsBatchRoute: typeof ApiV1CommentsBatchRoute
+  ApiV1CommentsFederatedRoute: typeof ApiV1CommentsFederatedRoute
   ApiV1CommentsPendingCountRoute: typeof ApiV1CommentsPendingCountRoute
+  ApiV1FederationFollowRoute: typeof ApiV1FederationFollowRoute
+  ApiV1FederationMetadataRoute: typeof ApiV1FederationMetadataRoute
+  ApiV1FederationTokenRoute: typeof ApiV1FederationTokenRoute
+  ApiV1FederationVerifyRoute: typeof ApiV1FederationVerifyRoute
+  ApiV1FederationWebhookRoute: typeof ApiV1FederationWebhookRoute
   ApiV1I18nLocaleRoute: typeof ApiV1I18nLocaleRoute
   ApiV1I18nCurrentRoute: typeof ApiV1I18nCurrentRoute
   ApiV1I18nLocalesRoute: typeof ApiV1I18nLocalesRoute
@@ -1683,6 +1773,7 @@ export interface RootRouteChildren {
   ApiV1NotificationsStreamRoute: typeof ApiV1NotificationsStreamRoute
   ApiV1NotificationsUnreadCountRoute: typeof ApiV1NotificationsUnreadCountRoute
   ApiV1PasskeysIdRoute: typeof ApiV1PasskeysIdRoute
+  ApiV1PassportIdentifyRoute: typeof ApiV1PassportIdentifyRoute
   ApiV1PlaylistsImportRoute: typeof ApiV1PlaylistsImportRoute
   ApiV1PluginsIdRoute: typeof ApiV1PluginsIdRouteWithChildren
   ApiV1PluginsUploadRoute: typeof ApiV1PluginsUploadRoute
@@ -2117,6 +2208,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1PlaylistsImportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/passport/identify': {
+      id: '/api/v1/passport/identify'
+      path: '/api/v1/passport/identify'
+      fullPath: '/api/v1/passport/identify'
+      preLoaderRoute: typeof ApiV1PassportIdentifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/passkeys/$id': {
       id: '/api/v1/passkeys/$id'
       path: '/api/v1/passkeys/$id'
@@ -2299,11 +2397,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1I18nLocaleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/federation/webhook': {
+      id: '/api/v1/federation/webhook'
+      path: '/api/v1/federation/webhook'
+      fullPath: '/api/v1/federation/webhook'
+      preLoaderRoute: typeof ApiV1FederationWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/federation/verify': {
+      id: '/api/v1/federation/verify'
+      path: '/api/v1/federation/verify'
+      fullPath: '/api/v1/federation/verify'
+      preLoaderRoute: typeof ApiV1FederationVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/federation/token': {
+      id: '/api/v1/federation/token'
+      path: '/api/v1/federation/token'
+      fullPath: '/api/v1/federation/token'
+      preLoaderRoute: typeof ApiV1FederationTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/federation/metadata': {
+      id: '/api/v1/federation/metadata'
+      path: '/api/v1/federation/metadata'
+      fullPath: '/api/v1/federation/metadata'
+      preLoaderRoute: typeof ApiV1FederationMetadataRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/federation/follow': {
+      id: '/api/v1/federation/follow'
+      path: '/api/v1/federation/follow'
+      fullPath: '/api/v1/federation/follow'
+      preLoaderRoute: typeof ApiV1FederationFollowRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/comments/pending-count': {
       id: '/api/v1/comments/pending-count'
       path: '/api/v1/comments/pending-count'
       fullPath: '/api/v1/comments/pending-count'
       preLoaderRoute: typeof ApiV1CommentsPendingCountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/comments/federated': {
+      id: '/api/v1/comments/federated'
+      path: '/api/v1/comments/federated'
+      fullPath: '/api/v1/comments/federated'
+      preLoaderRoute: typeof ApiV1CommentsFederatedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/comments/batch': {
@@ -2861,7 +3001,13 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1CaptchaImageRoute: ApiV1CaptchaImageRoute,
   ApiV1CommentsIdRoute: ApiV1CommentsIdRouteWithChildren,
   ApiV1CommentsBatchRoute: ApiV1CommentsBatchRoute,
+  ApiV1CommentsFederatedRoute: ApiV1CommentsFederatedRoute,
   ApiV1CommentsPendingCountRoute: ApiV1CommentsPendingCountRoute,
+  ApiV1FederationFollowRoute: ApiV1FederationFollowRoute,
+  ApiV1FederationMetadataRoute: ApiV1FederationMetadataRoute,
+  ApiV1FederationTokenRoute: ApiV1FederationTokenRoute,
+  ApiV1FederationVerifyRoute: ApiV1FederationVerifyRoute,
+  ApiV1FederationWebhookRoute: ApiV1FederationWebhookRoute,
   ApiV1I18nLocaleRoute: ApiV1I18nLocaleRoute,
   ApiV1I18nCurrentRoute: ApiV1I18nCurrentRoute,
   ApiV1I18nLocalesRoute: ApiV1I18nLocalesRoute,
@@ -2887,6 +3033,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1NotificationsStreamRoute: ApiV1NotificationsStreamRoute,
   ApiV1NotificationsUnreadCountRoute: ApiV1NotificationsUnreadCountRoute,
   ApiV1PasskeysIdRoute: ApiV1PasskeysIdRoute,
+  ApiV1PassportIdentifyRoute: ApiV1PassportIdentifyRoute,
   ApiV1PlaylistsImportRoute: ApiV1PlaylistsImportRoute,
   ApiV1PluginsIdRoute: ApiV1PluginsIdRouteWithChildren,
   ApiV1PluginsUploadRoute: ApiV1PluginsUploadRoute,

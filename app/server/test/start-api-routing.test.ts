@@ -36,6 +36,15 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/social/fetch-feeds/status', 'GET'))).toBe(true);
   });
 
+  test('routes federation and Passport protocols to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/federation/metadata', 'GET'))).toBe(true);
+    for (const action of ['follow', 'verify', 'webhook', 'token']) {
+      expect(isStartNativeApiRequest(request(`/api/v1/federation/${action}`, 'POST'))).toBe(true);
+    }
+    expect(isStartNativeApiRequest(request('/api/v1/comments/federated', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/passport/identify', 'POST'))).toBe(true);
+  });
+
   test('routes setup and installation APIs to Start', () => {
     expect(isStartNativeApiRequest(request('/api/v1/setup/status', 'GET'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/setup/test-db', 'POST'))).toBe(true);

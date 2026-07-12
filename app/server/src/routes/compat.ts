@@ -1137,7 +1137,7 @@ async function parseMediaUrl(url: string) {
   return result;
 }
 
-async function siteMetadata() {
+export async function siteMetadata() {
   const [title, description, logo, logoDark, favicon] = await Promise.all([
     optionValue('site_title', 'Utterlog!'),
     optionValue('site_description', ''),
@@ -2232,6 +2232,126 @@ export function startSocialFeedFetch(force: boolean) {
     });
   }
   return { started, ...feedFetchStatus() };
+}
+
+export class FederationServiceError extends Error {
+  constructor(public status: number, public code: string, message: string) {
+    super(message);
+  }
+}
+
+export async function acceptFederationFollow(input: Record<string, unknown>) {
+  const followerSite = normalizedSiteUrl(input.follower_site || input.site_url || input.follower_url);
+  if (!followerSite) throw new FederationServiceError(400, 'VALIDATION_ERROR', 'follower_site 不能为空');
+  const now = nowUnix();
+  await exec(
+    `insert into ${table('followers')} (user_id, following_id, source_site, status, mutual, created_at, updated_at)
+     values (0,1,$1,'active',false,$2,$2) on conflict do nothing`, [followerSite, now],
+  ).catch(() => {});
+  await exec(
+    `insert into ${table('notifications')} (user_id, type, title, content, created_at) values (1,'follow',$1,$2,$3)`,
+    [`${String(input.follower_name || followerSite)} 关注了你`, `来自 ${followerSite}`, now],
+  ).catch(() => {});
+  const already = await one<{ count: string }>(
+    `select count(*)::text as count from ${table('followers')} where user_id = 1 and source_site = $1`, [followerSite],
+  ).catch(() => null);
+  const mutual = Number(already?.count || 0) > 0;
+  if (mutual) {
+    await exec(`update ${table('followers')} set mutual = true where source_site = $1`, [followerSite]).catch(() => {});
+    await exec(
+      `insert into ${table('links')} (name, url, description, status, order_num, created_at, updated_at)
+       values ($1,$2,'互关好友',1,0,$3,$3) on conflict do nothing`,
+      [String(input.follower_name || followerSite), followerSite, now],
+    ).catch(() => {});
+  }
+  void sendFollowTelegram({ name: String(input.follower_name || ''), site: followerSite });
+  return { accepted: true, mutual };
+}
+
+export async function verifyFederationToken(input: Record<string, unknown>) {
+  const token = String(input.token || '').trim();
+  if (!token) throw new FederationServiceError(400, 'VALIDATION_ERROR', 'token 不能为空');
+  try {
+    const payload = await verifyFederationTokenLocal(token);
+    return { valid: true, user: { id: payload.sub, username: payload.username || '', nickname: payload.nickname || '',
+      email: payload.email || '', avatar: payload.avatar || '', site: payload.site || config.appUrl } };
+  } catch {
+    throw new FederationServiceError(401, 'INVALID_TOKEN', 'Token 无效或已过期');
+  }
+}
+
+export async function createFederatedComment(input: Record<string, unknown>) {
+  const postId = intParam(String(input.post_id || ''));
+  const content = String(input.content || '').trim();
+  if (!postId || !content) throw new FederationServiceError(400, 'VALIDATION_ERROR', 'post_id 和 content 不能为空');
+  let author = '匿名';
+  let email = '';
+  let url = '';
+  let verified = false;
+  const token = String(input.federation_token || input.token || '').trim();
+  if (token) {
+    try {
+      const payload = decodeJwt(token) as Record<string, any>;
+      if (payload.iss && payload.iss !== config.appUrl) {
+        const issuer = await assertPublicHttpUrl(String(payload.iss));
+        const response = await fetch(`${issuer}/api/v1/federation/verify`, {
+          method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token }),
+          signal: AbortSignal.timeout(5000),
+        }).catch(() => null);
+        const remote = response?.ok ? await response.json().catch(() => null) as any : null;
+        verified = Boolean(remote?.success && remote?.data?.valid);
+      } else {
+        await verifyFederationTokenLocal(token);
+        verified = true;
+      }
+      author = String(payload.nickname || payload.username || author);
+      email = String(payload.email || '');
+      url = String(payload.site || payload.iss || '');
+    } catch {
+      verified = false;
+    }
+  }
+  const row = await one<{ id: number }>(
+    `insert into ${table('comments')} (post_id, author_name, author_email, author_url, content, status, source, created_at, updated_at)
+     values ($1,$2,$3,$4,$5,$6,'federated',$7,$7) returning id`,
+    [postId, author, email, url, content, verified ? 'approved' : 'pending', nowUnix()],
+  );
+  if (verified) await exec(`update ${table('posts')} set comment_count = comment_count + 1 where id = $1`, [postId]).catch(() => {});
+  return { id: row?.id || 0, author, verified };
+}
+
+export async function receiveFederationWebhook(input: Record<string, unknown>, providedSecret = '') {
+  const secret = (await optionValue('federation_webhook_secret', '')).trim();
+  if (secret && providedSecret !== secret) throw new FederationServiceError(403, 'FORBIDDEN', 'Invalid federation webhook secret');
+  await exec(
+    `insert into ${table('notifications')} (user_id, type, title, content, created_at) values (1,'federation',$1,$2,$3)`,
+    [String(input.title || input.type || '联邦通知'), JSON.stringify(input).slice(0, 1000), nowUnix()],
+  ).catch(() => {});
+  return { received: true };
+}
+
+export async function issueFederationToken(userId: number) {
+  const user = await one<{ id: number; username: string; email: string; nickname: string | null; avatar: string | null }>(
+    `select id, username, email, nickname, avatar from ${table('users')} where id = $1`, [userId],
+  );
+  if (!user) throw new FederationServiceError(404, 'NOT_FOUND', '用户不存在');
+  return { token: await signFederationToken(user), user: { id: user.id, username: user.username,
+    nickname: user.nickname || user.username, email: user.email, avatar: user.avatar || '', site: config.appUrl } };
+}
+
+export async function identifyPassport(input: Record<string, unknown>) {
+  const token = String(input.token || '').trim();
+  if (!token) throw new FederationServiceError(400, 'VALIDATION_ERROR', '缺少 token');
+  const verify = await fetch('https://id.utterlog.com/api/v1/passport/verify', {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token }),
+    signal: AbortSignal.timeout(5000),
+  }).catch(() => null);
+  if (!verify?.ok) throw new FederationServiceError(401, 'INVALID_PASSPORT', '身份验证失败');
+  const payload: any = await verify.json().catch(() => ({}));
+  const data: any = payload?.data || {};
+  if (!payload.success || !data.valid) throw new FederationServiceError(401, 'INVALID_PASSPORT', '身份验证失败');
+  return { identified: true, utterlog_id: data.utterlog_id || '', nickname: data.nickname || '', avatar: data.avatar || '',
+    email: data.email || '', email_hash: data.email_hash || '', site_url: data.site_url || '', follow_status: '', is_friend_link: false };
 }
 
 export function registerCompatRoutes(app: Hono) {

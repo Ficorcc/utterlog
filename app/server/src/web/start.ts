@@ -73,6 +73,9 @@ export function isStartNativeApiRequest(request: Request) {
   if (url.pathname === '/api/v1/social/fetch-feeds') return method === 'POST';
   if (url.pathname === '/api/v1/social/fetch-feeds/status') return method === 'GET';
   if (/^\/api\/v1\/telegram\/(webhook|test|get-chat-id|setup-webhook)$/.test(url.pathname)) return method === 'POST';
+  if (url.pathname === '/api/v1/federation/metadata') return method === 'GET';
+  if (/^\/api\/v1\/federation\/(follow|verify|webhook|token)$/.test(url.pathname)) return method === 'POST';
+  if (url.pathname === '/api/v1/comments/federated' || url.pathname === '/api/v1/passport/identify') return method === 'POST';
   if (url.pathname === '/api/v1/setup/status' || url.pathname === '/api/v1/install/status') return method === 'GET';
   if (url.pathname === '/api/v1/setup/test-db' || url.pathname === '/api/v1/setup/save') return method === 'POST';
   if (url.pathname === '/api/v1/install/create-admin' || url.pathname === '/api/v1/install/finish') return method === 'POST';
