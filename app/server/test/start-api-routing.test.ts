@@ -72,6 +72,13 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/admin/stats', 'GET'))).toBe(true);
   });
 
+  test('routes analytics reads to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/analytics?period=7d', 'GET'))).toBe(true);
+    for (const action of ['online', 'visitors', 'logs', 'geoip', 'map', 'breakdown']) {
+      expect(isStartNativeApiRequest(request(`/api/v1/analytics/${action}`, 'GET'))).toBe(true);
+    }
+  });
+
   test('routes visitor weather to Start', () => {
     expect(isStartNativeApiRequest(request('/api/v1/visitor/weather', 'GET'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/visitor/weather', 'POST'))).toBe(false);
