@@ -1,8 +1,10 @@
-export const SUPPORTED_BLOG_THEMES = new Set(['Azure', 'Nebula']);
+export const BLOG_THEME_NAMES = ['Azure', 'Flux', 'Nebula', 'Renascent', 'Utterlog'] as const;
+
+export const SUPPORTED_BLOG_THEMES = new Set<string>(BLOG_THEME_NAMES);
 
 export const DEFAULT_BLOG_THEME = 'Azure';
 
-export type BlogThemeName = 'Azure' | 'Nebula';
+export type BlogThemeName = (typeof BLOG_THEME_NAMES)[number];
 export type BlogThemeAccent = 'blue' | 'red';
 
 export function normalizeBlogTheme(name: string): BlogThemeName {

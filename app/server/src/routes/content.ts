@@ -13,7 +13,7 @@ import { badRequest, fail, notFound, ok, paginate } from '../http/response';
 import { nonEmptyString, parseJson } from '../http/validation';
 import { ephemeral } from '../store/ephemeral';
 import { runtimePaths } from '../paths';
-import { normalizeBlogTheme, resolveBlogTheme } from '../blog-themes';
+import { SUPPORTED_BLOG_THEMES, normalizeBlogTheme, resolveBlogTheme } from '../blog-themes';
 import { resolveThemePreviewUrl } from '../theme-assets';
 import { sendConfiguredEmail } from '../email';
 import { sendPostPublishedTelegram } from '../telegram';
@@ -3467,7 +3467,7 @@ export function registerContentRoutes(app: Hono) {
           id,
           kind: 'theme',
           builtin: dirIndex === 0,
-          supported: id === 'Azure' || id === 'Nebula',
+          supported: SUPPORTED_BLOG_THEMES.has(id),
           preview,
           enabled: id === activeTheme,
         };

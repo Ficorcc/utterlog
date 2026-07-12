@@ -56,6 +56,7 @@ Routes:
 ## Cutover
 
 1. Run Start in a parallel preview container against a restored database snapshot.
+   Set `UTTERLOG_THEME_OVERRIDE` in preview to exercise a built-in theme without changing the database option.
 2. Complete the visual matrix and API contract suite.
 3. Switch `UTTERLOG_FRONTEND=start` only after all gates pass.
 4. Keep the Bun renderer available for one observation release.

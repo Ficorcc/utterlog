@@ -33,7 +33,7 @@ export interface ThemeManifest {
   features?: string[];
 }
 
-// Bun blog theme registry — Azure + Nebula only.
+// Built-in blog themes shared by the legacy renderer and TanStack Start.
 import type { ComponentType, ReactNode } from 'react';
 import {
   DEFAULT_BLOG_THEME,
@@ -43,9 +43,15 @@ import {
   type BlogThemeAccent,
 } from '@shared/blog-theme';
 import * as Azure from '@/themes/Azure';
+import * as Flux from '@/themes/Flux';
 import * as Nebula from '@/themes/Nebula';
+import * as Renascent from '@/themes/Renascent';
+import * as Utterlog from '@/themes/Utterlog';
 import AzureManifest from '@/themes/Azure/theme.json';
+import FluxManifest from '@/themes/Flux/theme.json';
 import NebulaManifest from '@/themes/Nebula/theme.json';
+import RenascentManifest from '@/themes/Renascent/theme.json';
+import UtterlogManifest from '@/themes/Utterlog/theme.json';
 
 export interface ThemeComponents {
   Header: ComponentType<any>;
@@ -63,16 +69,20 @@ export interface ThemeComponents {
   NotFoundPage?: ComponentType<any>;
 }
 
-const SUPPORTED = new Set(['Azure', 'Nebula']);
-
 const themeRegistry: Record<string, ThemeComponents> = {
   Azure: Azure as unknown as ThemeComponents,
+  Flux: Flux as unknown as ThemeComponents,
   Nebula: Nebula as unknown as ThemeComponents,
+  Renascent: Renascent as unknown as ThemeComponents,
+  Utterlog: Utterlog as unknown as ThemeComponents,
 };
 
 const manifestRegistry: Record<string, ThemeManifest> = {
   Azure: AzureManifest as ThemeManifest,
+  Flux: FluxManifest as ThemeManifest,
   Nebula: NebulaManifest as ThemeManifest,
+  Renascent: RenascentManifest as ThemeManifest,
+  Utterlog: UtterlogManifest as ThemeManifest,
 };
 
 export { DEFAULT_BLOG_THEME, blogThemeAccentAttr, normalizeThemeName, resolveBlogTheme, type BlogThemeAccent };

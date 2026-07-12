@@ -205,7 +205,7 @@ export default function Themes() {
           fontSize: 12, lineHeight: 1.7, color: 'var(--color-text-sub)',
         }}>
           <i className="fa-regular fa-triangle-exclamation" style={{ marginRight: 6, color: 'var(--color-warning)' }} />
-          数据库记录的主题为 <strong>{requestedTheme}</strong>，但 Bun 运行时已启用 Azure / Nebula，前台实际渲染 <strong>{active}</strong>。请重新启用支持的主题。
+          数据库记录的主题为 <strong>{requestedTheme}</strong>，但当前运行时不支持，前台实际渲染 <strong>{active}</strong>。请重新启用内置主题。
         </div>
       )}
       <div style={{
@@ -303,7 +303,7 @@ export default function Themes() {
                   )}
                   {theme.supported === false && (
                     <p style={{ fontSize: 11, color: 'var(--color-warning)', margin: '0 0 12px' }}>
-                      Bun 运行时已启用 Azure / Nebula，此主题暂不可切换
+                      当前运行时不支持此主题，暂不可切换
                     </p>
                   )}
                   {theme.id === 'Azure' && isActive && (

@@ -1,12 +1,15 @@
-/**
- * Bun blog theme registry — Azure + Nebula only.
- * Incomplete themes (Utterlog, Flux, Chred, Renascent) fall back to Azure.
- */
+/** Built-in blog themes used during client hydration. */
 import type { ComponentType, ReactNode } from 'react';
 import * as Azure from '@/themes/Azure';
+import * as Flux from '@/themes/Flux';
 import * as Nebula from '@/themes/Nebula';
+import * as Renascent from '@/themes/Renascent';
+import * as Utterlog from '@/themes/Utterlog';
 import AzureManifest from '@/themes/Azure/theme.json';
+import FluxManifest from '@/themes/Flux/theme.json';
 import NebulaManifest from '@/themes/Nebula/theme.json';
+import RenascentManifest from '@/themes/Renascent/theme.json';
+import UtterlogManifest from '@/themes/Utterlog/theme.json';
 import { normalizeThemeName } from '@shared/blog-theme';
 
 export interface MenuPosition {
@@ -45,12 +48,18 @@ export interface ThemeComponents {
 
 const themeRegistry: Record<string, ThemeComponents> = {
   Azure: Azure as unknown as ThemeComponents,
+  Flux: Flux as unknown as ThemeComponents,
   Nebula: Nebula as unknown as ThemeComponents,
+  Renascent: Renascent as unknown as ThemeComponents,
+  Utterlog: Utterlog as unknown as ThemeComponents,
 };
 
 const manifestRegistry: Record<string, ThemeManifest> = {
   Azure: AzureManifest as ThemeManifest,
+  Flux: FluxManifest as ThemeManifest,
   Nebula: NebulaManifest as ThemeManifest,
+  Renascent: RenascentManifest as ThemeManifest,
+  Utterlog: UtterlogManifest as ThemeManifest,
 };
 
 export const DEFAULT_THEME = 'Azure';

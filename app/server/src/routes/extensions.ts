@@ -110,7 +110,7 @@ export function registerExtensionRoutes(app: Hono) {
     if (!id) return badRequest(c, '主题 ID 无效');
     if (!extensionExists('theme', id)) return notFound(c, '主题');
     if (!SUPPORTED_BLOG_THEMES.has(id)) {
-      return badRequest(c, '当前 Bun 运行时已启用 Azure / Nebula 主题，请切换至其中之一');
+      return badRequest(c, '当前运行时不支持此主题，请切换至内置主题');
     }
     await saveOption('active_theme', id);
     if (id === 'Azure') {

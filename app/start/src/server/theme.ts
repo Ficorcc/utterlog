@@ -72,7 +72,8 @@ export async function loadStartThemeContextDirect(): Promise<ThemeContextData> {
     if (key.startsWith('social_') && key !== 'social_links' && opts[key]) socials[key.replace('social_', '')] = opts[key];
   }
 
-  const resolved = resolveBlogTheme(opts.active_theme || DEFAULT_THEME, opts.azure_accent || '');
+  const themeOverride = String(process.env.UTTERLOG_THEME_OVERRIDE || '').trim();
+  const resolved = resolveBlogTheme(themeOverride || opts.active_theme || DEFAULT_THEME, opts.azure_accent || '');
   const themeName = resolved.theme;
   const owner = ownerData as Record<string, any>;
   const avatarSource = opts.avatar_source || 'auto';
