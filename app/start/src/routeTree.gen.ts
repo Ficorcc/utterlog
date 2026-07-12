@@ -19,6 +19,7 @@ import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostsSlugRouteImport } from './routes/posts/$slug'
 import { Route as ApiRevalidateRouteImport } from './routes/api/revalidate'
+import { Route as ApiSplatRouteImport } from './routes/api/$'
 import { Route as AdminSplatRouteImport } from './routes/admin/$'
 import { Route as ApiV1TrackRouteImport } from './routes/api/v1/track'
 import { Route as ApiV1TagsRouteImport } from './routes/api/v1/tags'
@@ -219,6 +220,11 @@ const PostsSlugRoute = PostsSlugRouteImport.update({
 const ApiRevalidateRoute = ApiRevalidateRouteImport.update({
   id: '/api/revalidate',
   path: '/api/revalidate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSplatRoute = ApiSplatRouteImport.update({
+  id: '/api/$',
+  path: '/api/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSplatRoute = AdminSplatRouteImport.update({
@@ -1017,6 +1023,7 @@ export interface FileRoutesByFullPath {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/$': typeof AdminSplatRoute
+  '/api/$': typeof ApiSplatRoute
   '/api/revalidate': typeof ApiRevalidateRoute
   '/posts/$slug': typeof PostsSlugRoute
   '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
@@ -1180,6 +1187,7 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/$': typeof AdminSplatRoute
+  '/api/$': typeof ApiSplatRoute
   '/api/revalidate': typeof ApiRevalidateRoute
   '/posts/$slug': typeof PostsSlugRoute
   '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
@@ -1344,6 +1352,7 @@ export interface FileRoutesById {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/$': typeof AdminSplatRoute
+  '/api/$': typeof ApiSplatRoute
   '/api/revalidate': typeof ApiRevalidateRoute
   '/posts/$slug': typeof PostsSlugRoute
   '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
@@ -1509,6 +1518,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/admin/$'
+    | '/api/$'
     | '/api/revalidate'
     | '/posts/$slug'
     | '/api/v1/$resource'
@@ -1672,6 +1682,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/admin/$'
+    | '/api/$'
     | '/api/revalidate'
     | '/posts/$slug'
     | '/api/v1/$resource'
@@ -1835,6 +1846,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/admin/$'
+    | '/api/$'
     | '/api/revalidate'
     | '/posts/$slug'
     | '/api/v1/$resource'
@@ -1999,6 +2011,7 @@ export interface RootRouteChildren {
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AdminSplatRoute: typeof AdminSplatRoute
+  ApiSplatRoute: typeof ApiSplatRoute
   ApiRevalidateRoute: typeof ApiRevalidateRoute
   PostsSlugRoute: typeof PostsSlugRoute
   ApiV1ResourceRoute: typeof ApiV1ResourceRouteWithChildren
@@ -2200,6 +2213,13 @@ declare module '@tanstack/react-router' {
       path: '/api/revalidate'
       fullPath: '/api/revalidate'
       preLoaderRoute: typeof ApiRevalidateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/$': {
+      id: '/api/$'
+      path: '/api/$'
+      fullPath: '/api/$'
+      preLoaderRoute: typeof ApiSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/$': {
@@ -3490,6 +3510,7 @@ const rootRouteChildren: RootRouteChildren = {
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   AdminSplatRoute: AdminSplatRoute,
+  ApiSplatRoute: ApiSplatRoute,
   ApiRevalidateRoute: ApiRevalidateRoute,
   PostsSlugRoute: PostsSlugRoute,
   ApiV1ResourceRoute: ApiV1ResourceRouteWithChildren,

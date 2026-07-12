@@ -2,12 +2,12 @@
 # Utterlog Bun app — single application container
 # ------------------------------------------------------------
 # Runtime responsibilities:
-#   - Bun TypeScript API/gateway on :8080
+#   - Bun 1.4 security/static gateway on :8080
 #   - Admin SPA served from app/admin/dist
-#   - Blog SSR (React) — no Next.js subprocess
+#   - TanStack Start SSR and Server Routes
 # ============================================================
 
-FROM --platform=linux/amd64 oven/bun:canary@sha256:33c46b90ba25ef164d79580c34ccaa6c6ff3ed1cb53e9d43c8a50a07e0a38492 AS deps
+FROM --platform=linux/amd64 oven/bun:canary@sha256:f2c7cd1cc7909c1fd57cc4b2fba4af0b24df7eb9709810dbfdae5adf52f34fab AS deps
 WORKDIR /app
 COPY package.json bun.lock bunfig.toml tsconfig.json ./
 COPY app/web/package.json ./app/web/package.json
@@ -38,7 +38,7 @@ COPY app/start ./app/start
 WORKDIR /app/app/start
 RUN bun run build
 
-FROM --platform=linux/amd64 oven/bun:canary@sha256:33c46b90ba25ef164d79580c34ccaa6c6ff3ed1cb53e9d43c8a50a07e0a38492 AS runtime
+FROM --platform=linux/amd64 oven/bun:canary@sha256:f2c7cd1cc7909c1fd57cc4b2fba4af0b24df7eb9709810dbfdae5adf52f34fab AS runtime
 WORKDIR /app
 ARG GIT_SHA=unknown
 ARG GIT_BRANCH=unknown
@@ -51,6 +51,8 @@ ENV NODE_ENV=production
 ENV PORT=8080
 ENV NEXT_PUBLIC_API_URL=/api/v1
 ENV INTERNAL_API_URL=http://127.0.0.1:8080/api/v1
+ENV WEB_RENDERER=start
+ENV UTTERLOG_FRONTEND=start
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/app/web/node_modules ./app/web/node_modules

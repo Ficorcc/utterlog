@@ -6,6 +6,7 @@ import { createApp } from './routes';
 import { startFeedFetchCron } from './social/feed-cron';
 import { startCpuMonitor } from './system/metrics';
 import { startTelegramDailyReport } from './telegram';
+import { startBackupScheduler } from './routes/backup';
 import { preloadStartServer, warmStartFrontend } from './web/start';
 
 startCpuMonitor();
@@ -19,6 +20,7 @@ if (ready) {
   startAnalyticsRollup();
   startTelegramDailyReport();
   startFeedFetchCron();
+  startBackupScheduler();
 }
 await preloadStartServer().catch((err) => {
   console.error('TanStack Start preload failed:', err);

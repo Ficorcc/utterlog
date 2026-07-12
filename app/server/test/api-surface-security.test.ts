@@ -15,14 +15,3 @@ test('cors origin honors explicit allow list without granting other domains', as
   expect(mod.matchCorsOrigin('https://blog.example.com', allowList, 'https://blog.example.com')).toBeUndefined();
   expect(mod.matchCorsOrigin('https://evil.example.com', allowList, 'https://blog.example.com')).toBeUndefined();
 });
-
-test('admin mutation classifier protects write-heavy API surfaces', async () => {
-  const mod = await import(`../src/routes/index.ts?case=admin-surface-${Date.now()}`);
-  expect(mod.adminMutation('/api/v1/posts')).toBe(true);
-  expect(mod.adminMutation('/api/v1/options')).toBe(true);
-  expect(mod.adminMutation('/api/v1/backup/run')).toBe(true);
-  expect(mod.adminMutation('/api/v1/comments/123/reply')).toBe(true);
-  expect(mod.adminMutation('/api/v1/comments')).toBe(false);
-  expect(mod.adminMutation('/api/v1/links/apply')).toBe(false);
-  expect(mod.adminMutation('/api/v1/telegram/webhook')).toBe(false);
-});

@@ -19,21 +19,35 @@ export const Route = createFileRoute('/api/v1/$resource/$id')({ server: { handle
       return serviceError(error);
     }
   },
-  PUT: ({ request, params }) => withAdmin(request, async () => {
+  PUT: async ({ request, params }) => {
+    let resource;
     try {
-      const resource = asContentResource(params.resource);
-      const body = await request.json().catch(() => ({})) as Record<string, unknown>;
-      return apiOk(await updateContentRecord(resource, Number(params.id), body));
+      resource = asContentResource(params.resource);
     } catch (error) {
       return serviceError(error);
     }
-  }),
-  DELETE: ({ request, params }) => withAdmin(request, async () => {
+    return withAdmin(request, async () => {
+      try {
+        const body = await request.json().catch(() => ({})) as Record<string, unknown>;
+        return apiOk(await updateContentRecord(resource, Number(params.id), body));
+      } catch (error) {
+        return serviceError(error);
+      }
+    });
+  },
+  DELETE: async ({ request, params }) => {
+    let resource;
     try {
-      const resource = asContentResource(params.resource);
-      return apiOk(await deleteContentRecord(resource, Number(params.id)));
+      resource = asContentResource(params.resource);
     } catch (error) {
       return serviceError(error);
     }
-  }),
+    return withAdmin(request, async () => {
+      try {
+        return apiOk(await deleteContentRecord(resource, Number(params.id)));
+      } catch (error) {
+        return serviceError(error);
+      }
+    });
+  },
 } } });

@@ -22,15 +22,23 @@ export const Route = createFileRoute('/api/v1/$resource')({
         throw error;
       }
     },
-    POST: ({ request, params }) => withAdmin(request, async (session) => {
+    POST: async ({ request, params }) => {
+      let resource;
       try {
-        const resource = asContentResource(params.resource);
-        const body = await request.json().catch(() => ({})) as Record<string, unknown>;
-        return apiOk(await createContentRecord(resource, body, session.userId));
+        resource = asContentResource(params.resource);
       } catch (error) {
         if (error instanceof ContentRecordError) return apiFail(error.status, error.code, error.message);
         throw error;
       }
-    }),
+      return withAdmin(request, async (session) => {
+        try {
+          const body = await request.json().catch(() => ({})) as Record<string, unknown>;
+          return apiOk(await createContentRecord(resource, body, session.userId));
+        } catch (error) {
+          if (error instanceof ContentRecordError) return apiFail(error.status, error.code, error.message);
+          throw error;
+        }
+      });
+    },
   } },
 });

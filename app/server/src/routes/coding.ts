@@ -1,8 +1,5 @@
-import type { Context, Hono } from 'hono';
-import { currentUserId, optionalAuth } from '../auth/middleware';
 import { nowUnix } from '../db/helpers';
 import { optionValue } from '../db/options';
-import { ok } from '../http/response';
 import { ephemeral } from '../store/ephemeral';
 
 const githubOwnerPattern = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$/;
@@ -537,11 +534,4 @@ export async function codingPayload(includeRepos = false) {
   };
   await ephemeral.set(cacheKey, JSON.stringify(payload), firstError ? 300 : 3600);
   return payload;
-}
-
-export function registerCodingRoutes(app: Hono) {
-  app.get('/api/v1/coding', optionalAuth, async (c) => {
-    const includeRepos = new URL(c.req.url).searchParams.get('include_repos') === 'true' && currentUserId(c) > 0;
-    return ok(c, await codingPayload(includeRepos));
-  });
 }

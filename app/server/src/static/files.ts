@@ -71,6 +71,8 @@ export function serveStaticFiles(app: Hono) {
     const candidate = safeJoin(config.adminDistDir, rest);
     const acceptEncoding = c.req.header('accept-encoding') || '';
     const direct = await fileResponse(candidate, acceptEncoding);
+    const isStaticAsset = rest !== 'index.html' && /\.[a-z0-9]+(?:\.(?:br|gz))?$/i.test(rest);
+    if (startFrontendEnabled() && !isStaticAsset) return next();
     if (!direct && startFrontendEnabled()) return next();
     const response = direct || (await fileResponse(join(config.adminDistDir, 'index.html'), acceptEncoding));
     if (!response) return c.text('Admin build not found', 503);

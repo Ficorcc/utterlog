@@ -1,13 +1,10 @@
-import type { Hono } from 'hono';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { cp, mkdir, rm } from 'node:fs/promises';
 import { basename, dirname, join } from 'node:path';
-import { auth } from '../auth/middleware';
 import { validateBackupZipEntries } from '../backup/zip-safety';
 import { config } from '../config';
 import { nowUnix, one } from '../db/helpers';
 import { optionValue, saveOption } from '../db/options';
-import { badRequest, fail, notFound, ok } from '../http/response';
 import { publicStorageUrl, putStorageObject, storageSettings } from '../media/storage';
 
 const backupDir = process.env.BACKUP_DIR || 'backups';
@@ -355,105 +352,4 @@ export async function deleteBackupFile(filename: string) {
   const path = safeBackupPath(filename);
   if (!path) throw new BackupServiceError(400, 'BAD_REQUEST', '无效的文件名');
   await rm(path, { force: true }).catch(() => {});
-}
-
-export function registerBackupRoutes(app: Hono) {
-  app.get('/api/v1/backup/stats', auth, async (c) => {
-    mkdirSync(backupDir, { recursive: true });
-    const dbSize = await one<{ size: string }>(`select pg_size_pretty(pg_database_size($1)) as size`, [config.dbName]).catch(() => null);
-    const backups = readdirSync(backupDir).filter((name) => name.endsWith('.zip'));
-    return ok(c, {
-      db_size: dbSize?.size || '',
-      uploads_size: formatBytes(dirSize(config.uploadDir)),
-      uploads_bytes: dirSize(config.uploadDir),
-      content_size: formatBytes(dirSize(config.contentDir)),
-      content_bytes: dirSize(config.contentDir),
-      backup_count: backups.length,
-    });
-  });
-  app.get('/api/v1/backup/list', auth, (c) => {
-    mkdirSync(backupDir, { recursive: true });
-    const items = readdirSync(backupDir)
-      .filter((name) => name.endsWith('.zip'))
-      .map((name) => {
-        const path = join(backupDir, name);
-        const stat = statSync(path);
-        return {
-          filename: name,
-          size: stat.size,
-          created: stat.mtime.toISOString().replace('T', ' ').slice(0, 19),
-          url: `${config.appUrl.replace(/\/$/, '')}/api/v1/backup/download/${encodeURIComponent(name)}`,
-        };
-      })
-      .sort((a, b) => b.created.localeCompare(a.created));
-    return ok(c, items);
-  });
-  app.post('/api/v1/backup/create', auth, async (c) => {
-    try {
-      const backup = await createConfiguredBackup();
-      const keep = await backupKeepLimit();
-      const deleted = cleanupOldBackups(keep);
-      await saveOption('backup_last_status', `ok: ${backup.filename}, destination=${backup.destination}, deleted=${deleted}`);
-      return ok(c, { ...backup, deleted_old_backups: deleted });
-    } catch (err) {
-      return fail(c, 500, 'DUMP_ERROR', err instanceof Error ? err.message : '数据库导出失败');
-    }
-  });
-  app.post('/api/v1/backup/import', auth, async (c) => {
-    mkdirSync(backupDir, { recursive: true });
-    const form = await c.req.formData().catch(() => null);
-    const uploaded = form?.get('file');
-    if (!(uploaded instanceof File)) return badRequest(c, '请上传备份文件');
-    const tmpPath = join(backupDir, `import-${Date.now()}-${basename(uploaded.name || 'backup.zip')}`);
-    const extractDir = join(backupDir, `import-tmp-${Date.now()}`);
-    await mkdir(dirname(tmpPath), { recursive: true });
-    const uploadedBytes = Buffer.from(await uploaded.arrayBuffer());
-    try {
-      validateBackupZipEntries(uploadedBytes);
-    } catch (err) {
-      return fail(c, 400, 'ZIP_UNSAFE', err instanceof Error ? err.message : '备份文件不安全');
-    }
-    writeFileSync(tmpPath, uploadedBytes);
-    await mkdir(extractDir, { recursive: true });
-    const unzip = await runCommand(['unzip', '-q', tmpPath, '-d', extractDir]);
-    if (unzip.code !== 0) {
-      await rm(tmpPath, { force: true }).catch(() => {});
-      await rm(extractDir, { recursive: true, force: true }).catch(() => {});
-      return fail(c, 400, 'ZIP_ERROR', unzip.stderr || '无效的备份文件');
-    }
-    const dbPath = join(extractDir, 'database.sql');
-    await restoreExtractedFiles(extractDir);
-    let dbRestored = false;
-    if (existsSync(dbPath)) {
-      const restore = await runCommand([
-        'psql', '-h', config.dbHost, '-p', String(config.dbPort), '-U', config.dbUser, '-d', config.dbName, '-f', dbPath,
-      ]);
-      if (restore.code !== 0) {
-        await rm(tmpPath, { force: true }).catch(() => {});
-        await rm(extractDir, { recursive: true, force: true }).catch(() => {});
-        return fail(c, 500, 'RESTORE_ERROR', restore.stderr || '数据库恢复失败');
-      }
-      dbRestored = true;
-    }
-    const restoredFiles = fileCount(extractDir);
-    await rm(tmpPath, { force: true }).catch(() => {});
-    await rm(extractDir, { recursive: true, force: true }).catch(() => {});
-    return ok(c, { restored: true, db_restored: dbRestored, files: restoredFiles });
-  });
-  app.get('/api/v1/backup/download/:filename', auth, (c) => {
-    const path = safeBackupPath(c.req.param('filename'));
-    if (!path || !existsSync(path)) return notFound(c, '备份文件');
-    return new Response(Bun.file(path), {
-      headers: {
-        'content-type': 'application/zip',
-        'content-disposition': `attachment; filename="${basename(path)}"`,
-      },
-    });
-  });
-  app.delete('/api/v1/backup/:filename', auth, async (c) => {
-    const path = safeBackupPath(c.req.param('filename'));
-    if (!path) return badRequest(c, '无效的文件名');
-    await rm(path, { force: true }).catch(() => {});
-    return ok(c, null);
-  });
 }

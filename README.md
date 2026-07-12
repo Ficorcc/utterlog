@@ -38,7 +38,7 @@ Utterlog 面向独立作者和个人站长，统一管理文章、说说、评�
 | 样式 | Tailwind CSS 4 |
 | 部署 | Docker Compose、Nginx 或 Caddy |
 
-项目正在把原有 API 逐步迁移到 TanStack Start Server Routes。`main` 已使用 TanStack Start 渲染前台与后台，并暂时保留 Hono 兼容层承接尚未迁移的后台接口。
+前台、后台入口和全部 API 已迁移到 TanStack Start Server Routes。Hono 只保留为 Bun 进程内的安全头、限流、CORS 与静态文件外壳，不再注册或回退到旧业务 API。
 
 ## 快速开始
 
