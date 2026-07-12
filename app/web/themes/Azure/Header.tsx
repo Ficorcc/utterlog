@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import { usePathname } from '@/lib/navigation';
 import { useState, useEffect, useRef, type MouseEvent as ReactMouseEvent } from 'react';
 import toast from 'react-hot-toast';
@@ -8,7 +8,7 @@ import { useThemeContext } from '@/lib/theme-context';
 import { buildPermalink } from '@/lib/permalink';
 import LoadingSpinner from '@/components/blog/LoadingSpinner';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+const API_BASE = '/api/v1';
 
 interface HeaderButton {
   icon: string;

@@ -7,7 +7,7 @@ import Pagination from './Pagination';
 import FadeCover from '@/components/blog/FadeCover';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { CSSProperties } from 'react';
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import { getCategoryIcon } from './constants';
 import { useThemeContext } from '@/lib/theme-context';
 import { randomCoverUrl } from '@/lib/blog-image';
@@ -15,7 +15,7 @@ import PostLink from '@/components/blog/PostLink';
 import LoadingSpinner from '@/components/blog/LoadingSpinner';
 import { useLazyVisible } from '@/lib/use-lazy-visible';
 
-const API = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+const API = '/api/v1';
 
 const MODES = [
   { key: 'latest', label: '最新文章', color: '#0052D9', param: '&order_by=published_at&order=desc' },

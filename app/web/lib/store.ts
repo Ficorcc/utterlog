@@ -207,7 +207,7 @@ interface ThemeState {
 // Color themes for the admin/dashboard color tokens. The active value
 // is written to <html data-color="..."> — separate from data-theme
 // which holds the blog theme name (Utterlog/Azure/Chred/Flux) and is
-// server-rendered by app/layout.tsx. Two attributes, two concerns.
+// server-rendered by the TanStack Start root route. Two attributes, two concerns.
 
 export const useThemeStore = create<ThemeState>()(
   persist(
@@ -222,6 +222,7 @@ export const useThemeStore = create<ThemeState>()(
     }),
     {
       name: 'utterlog-theme',
+      skipHydration: true,
       onRehydrateStorage: () => (state) => {
         if (state?.theme && typeof document !== 'undefined') {
           document.documentElement.dataset.color = state.theme;

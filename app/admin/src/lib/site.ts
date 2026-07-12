@@ -3,7 +3,7 @@
  *
  * Problem: admin SPA can be served from a different local port than the
  * blog frontend, which defaults to :9260 in Utterlog development.
- * (Next.js) in dev, or a different domain in prod. Hard-coding relative paths like
+ * (TanStack Start) in dev, or a different domain in prod. Hard-coding relative paths like
  * `/posts/my-slug` resolves against the admin's own host → wrong port.
  *
  * Solution: read `site_url` from options once at load, expose a helper that

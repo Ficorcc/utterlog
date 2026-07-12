@@ -7,7 +7,7 @@
  * └── [assets]     — 可选静态资源
  *
  * 工作方式：
- * - 静态导入 plugin.json（同主题，Next.js SSR 限制）
+ * - 静态导入 plugin.json（与主题组件一起进入 Start SSR 构建）
  * - active_plugins 选项存储启用的插件列表 (JSON 数组)
  * - 活跃插件的 hooks 合并到 Slot 注册表
  * - 插件 settings 存为普通 options: plugin_{name}_{key}

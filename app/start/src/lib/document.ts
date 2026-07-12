@@ -14,8 +14,6 @@ export function startDocumentLinks(ctx: ThemeContextData | null | undefined): Do
     { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/noto-sans-sc.css' },
     { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/alimama-fangyuanti.css' },
     { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/luo.css' },
-    { rel: 'stylesheet', href: '/static/globals.css' },
-    { rel: 'stylesheet', href: '/static/client.css' },
     ...(ctx ? [{ rel: 'stylesheet', href: `/themes/${ctx.theme.name}/styles.css?v=${ctx.theme.manifest?.version || '0'}` }] : []),
   ];
 }

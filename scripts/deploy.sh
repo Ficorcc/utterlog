@@ -83,7 +83,7 @@ for arg in "$@"; do
 done
 
 # Auto-detect deployment strategy based on available RAM.
-# Building images locally needs ~2GB RAM (Bun + Next.js build).
+# Building images locally needs about 2GB RAM (Bun + TanStack Start build).
 # Below that, pulling pre-built images from GHCR is faster and safer.
 if [ "$PULL_MODE" -eq -1 ]; then
   if [ -r /proc/meminfo ]; then

@@ -1,0 +1,9 @@
+import { createFileRoute } from '@tanstack/react-router';
+import { publicFeedResponse } from '../../../server/src/routes/content';
+
+export const Route = createFileRoute('/rss.xml')({
+  server: { handlers: {
+    GET: ({ request }) => publicFeedResponse(request),
+    HEAD: ({ request }) => publicFeedResponse(request),
+  } },
+});

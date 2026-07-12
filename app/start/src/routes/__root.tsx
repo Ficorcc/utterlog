@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import '@/styles/globals.css';
 import {
   HeadContent,
   Link,
@@ -61,6 +62,7 @@ function RootDocument({ children, ctx }: Readonly<{ children: ReactNode; ctx: Th
   const accent = blogThemeAccentAttr(ctx?.theme.accent || 'blue');
   return (
     <html
+      suppressHydrationWarning
       lang={ctx?.locale || 'zh-CN'}
       data-theme={ctx?.theme.name}
       data-accent={accent || undefined}

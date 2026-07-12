@@ -21,5 +21,5 @@
     },
     "noEmit": true
   },
-  "include": ["src/**/*.ts", "../web/**/*.ts", "../web/**/*.tsx", "../blog/src/**/*.ts", "../blog/src/**/*.tsx"]
+  "include": ["src/**/*.ts", "../web/**/*.ts", "../web/**/*.tsx"]
 }

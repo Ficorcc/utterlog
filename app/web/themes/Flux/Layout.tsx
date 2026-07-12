@@ -2,7 +2,7 @@ import Header from './Header';
 import Footer from './Footer';
 
 // data-theme="Flux" stamping is now handled centrally by
-// app/(blog)/layout.tsx so it runs before paint (server-injected
+// the TanStack Start root route so it runs before paint (server-injected
 // inline script). Layout can stay a server component.
 
 export default function Layout({ children }: { children: React.ReactNode }) {

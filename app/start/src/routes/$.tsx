@@ -1,36 +1,20 @@
 import { createFileRoute, notFound } from '@tanstack/react-router';
-import { StartLegacyPage } from '../components/StartLegacyPage';
-import { startRouteMeta } from '../lib/route-meta';
-import { loadStartLegacyRoute } from '../server/legacy';
+import { PublicPage } from '../components/PublicPage';
+import { loadStartPublicPage } from '../server/public-pages';
+import { publicPageHead } from '../lib/public-route';
 
 export const Route = createFileRoute('/$')({
-  validateSearch: (search: Record<string, unknown>) => {
-    const out: Record<string, string> = {};
-    for (const [key, value] of Object.entries(search)) {
-      if (typeof value === 'string') out[key] = value;
-      else if (value != null) out[key] = String(value);
-    }
-    return out;
-  },
-  loaderDeps: ({ search }) => search,
-  loader: async ({ params, deps }) => {
+  loader: async ({ params }) => {
     const splat = String(params._splat || '');
-    const data = await loadStartLegacyRoute({ data: { pathname: `/${splat}`, search: deps } });
+    const data = await loadStartPublicPage({ data: { kind: 'permalink', pathname: `/${splat}` } });
     if (data.kind === 'not-found') throw notFound();
     return data;
   },
-  head: ({ loaderData }) => {
-    if (!loaderData) return {};
-    const meta = startRouteMeta(loaderData);
-    return { meta: [
-      { title: meta.title },
-      ...(meta.description ? [{ name: 'description', content: meta.description }] : []),
-    ] };
-  },
-  component: StartCatchAll,
+  head: ({ loaderData }) => publicPageHead(loaderData),
+  component: StartPermalink,
 });
 
-function StartCatchAll() {
+function StartPermalink() {
   const data = Route.useLoaderData();
-  return <StartLegacyPage data={data} />;
+  return <PublicPage data={data} />;
 }

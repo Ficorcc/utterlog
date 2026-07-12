@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync, readdirSync, rmSync, statfsSync } from 'node:fs';
+import { existsSync, readdirSync, rmSync, statfsSync } from 'node:fs';
 import { cpus, freemem, loadavg, totalmem } from 'node:os';
 import { join, resolve } from 'node:path';
 import { z } from 'zod';
@@ -635,41 +635,6 @@ function diskStats(path = '/') {
   } catch {
     return { total: 0, free: 0, used: 0, percent: 0, path };
   }
-}
-
-function packageVersion(pkg: string) {
-  const envKey = `${pkg.replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase()}_VERSION`;
-  const envVersion = process.env[envKey];
-  if (envVersion) return envVersion;
-  for (const base of [process.cwd(), join(process.cwd(), 'app', 'web')]) {
-    try {
-      const resolved = Bun.resolveSync(`${pkg}/package.json`, base);
-      const parsed = JSON.parse(readFileSync(resolved, 'utf8'));
-      if (parsed.name === pkg && parsed.version) return String(parsed.version);
-    } catch {
-      // Try path candidates.
-    }
-  }
-  const candidates = [
-    join('node_modules', pkg, 'package.json'),
-    join('node_modules', '.bun', `${pkg}@`, 'node_modules', pkg, 'package.json'),
-    join('app', 'web', 'node_modules', pkg, 'package.json'),
-    join('app', 'web', '.next', 'diagnostics', 'framework.json'),
-    join('app', 'web', 'package.json'),
-  ];
-  for (const candidate of candidates) {
-    try {
-      if (candidate.includes(`${pkg}@`)) continue;
-      const parsed = JSON.parse(readFileSync(candidate, 'utf8'));
-      if (pkg === 'next' && parsed.name === 'Next.js' && parsed.version) return String(parsed.version);
-      if (candidate.endsWith('package.json') && pkg === 'next' && parsed.name && parsed.name !== 'utterlog-web' && parsed.name !== 'next') continue;
-      if (pkg === 'next' && parsed.name === 'utterlog-web') continue;
-      return String(parsed.version || '');
-    } catch {
-      // Try next candidate.
-    }
-  }
-  return '';
 }
 
 function removeLocalUpload(relativePath: string) {

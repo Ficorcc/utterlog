@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useReaderChatStore } from '@/lib/store';
 
-const API = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+const API = '/api/v1';
 
 export default function Footer() {
   const [siteOptions, setSiteOptions] = useState<any>({});

@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import PageTitle from '@/components/blog/PageTitle';
 
 function getCatIcon(name: string, icon?: string) {

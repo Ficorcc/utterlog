@@ -1,6 +1,6 @@
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import PostLink from '../PostLink';
-import Heatmap from '@/app/(blog)/archives/Heatmap';
+import Heatmap from '@/components/blog/Heatmap';
 import PageTitle from '@/components/blog/PageTitle';
 import { datePartsInTimeZone, formatMonthDayInTimeZone } from '@/lib/timezone';
 import { postDateInput } from '@/lib/post-date';

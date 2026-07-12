@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import type { ComponentProps, ReactNode } from 'react';
 import { useThemeContext } from '@/lib/theme-context';
 import { buildPermalink } from '@/lib/permalink';
@@ -22,7 +22,7 @@ interface PostLinkProps extends LinkPropsNoHref {
 }
 
 /**
- * Renders a Next.js Link whose href is built from the admin-configured
+ * Renders an application link whose href is built from the admin-configured
  * permalink structure (read from ThemeContext). Swap any
  * `<Link href={`/posts/${slug}`}>` with `<PostLink post={post}>` and
  * the URL updates automatically when the site owner changes their

@@ -1,49 +1,43 @@
-# app/web/ — Utterlog 博客前端
+# `app/web` - Utterlog 前台 UI
 
-React 19 + TypeScript 博客页面与主题源码。**不是独立进程** — 由根目录 Bun app（`app/server`）在同一容器内做 SSR 与静态资源分发。
+这里保存 React 19 页面组件、主题、样式和浏览器端数据工具，由 `app/start` 直接导入并通过 TanStack Start 完成 SSR 与 hydration。它不是独立应用，也没有单独的开发服务器或构建产物。
 
-> 项目整体介绍、部署、特性，看根目录 [README.md](../../README.md)。本文档只讲 app/web 子模块。
+## 请求链
 
-## 角色
-
-```
+```text
 浏览器
-  ↓
-Bun app (:8080)       ← 唯一对外端口（生产 9260）
-  ├─ /admin/*    嵌入后台 SPA
-  ├─ /api/*      TypeScript handlers
-  ├─ /themes/*   主题 CSS/资源
-  ├─ /static/*   客户端 hydration bundle
-  └─ /*          Bun React SSR（app/server/src/web/router.ts）
+  -> Bun + Hono 安全/限流/静态网关
+  -> TanStack Start
+     -> TanStack Router 页面与 Server Routes
+     -> app/web React 组件和主题
+     -> PostgreSQL 数据服务
 ```
 
-SSR 走 `INTERNAL_API_URL=http://127.0.0.1:8080/api/v1`，客户端 fetch 走 `NEXT_PUBLIC_API_URL=/api/v1`（同源相对路径，无 CORS）。
+浏览器 API 固定使用同源 `/api/v1`。服务端页面 loader 直接调用 `app/server` 的共享服务，不再通过内部 HTTP 请求重复读取数据。
 
-## 目录关键点
+## 目录
 
 | 路径 | 内容 |
-|------|------|
-| [app/(blog)/](app/(blog)) | 博客所有公开页（首页 / 文章 / 归档 / 标签 / 链接 / 音乐 / 说说） |
-| [app/install/](app/install) | 首次安装向导（三步） |
-| [themes/](themes) | 内置主题（Utterlog / Azure / Renascent / Flux / Chred / Nebula） |
-| [components/blog/](components/blog) | 共享博客组件（主题内重复文件已改为 re-export） |
-| [lib/api.ts](lib/api.ts) | 客户端 API 封装（带 token 刷新） |
-| [lib/blog-api.ts](lib/blog-api.ts) | SSR 调用，走 INTERNAL_API_URL |
+|---|---|
+| `components/pages/` | 关于、相册、Coding、订阅、足迹、友链、说说、音乐、安装和登录页面 |
+| `components/blog/` | 文章、评论、导航、媒体和公共页面组件 |
+| `themes/` | 内置主题及其 React 组件 |
+| `styles/globals.css` | Tailwind CSS 4 入口和全局样式 |
+| `lib/api.ts` | 浏览器端同源 API 客户端 |
+| `lib/navigation.ts` | 主题组件使用的路由上下文 |
 
-安装门控与 `/feed` 代理在 `app/server/src/web/install-gate.ts`，不在本目录。
+所有公开 URL 的文件路由位于 `app/start/src/routes/`，服务端页面数据位于 `app/start/src/server/public-pages.ts`。
 
 ## 开发
 
-根目录一键启动：
-
 ```bash
-make dev
-# 或
-bun run server:dev
+bun run start:dev
+bun run start:check
+bun run start:build
 ```
 
-主题样式同步：
+修改主题样式后同步公开主题资源：
 
 ```bash
-cd app/web && bun run sync:themes
+bun run build:web
 ```

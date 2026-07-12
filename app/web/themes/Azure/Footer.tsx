@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import { usePathname } from '@/lib/navigation';
 import { useAuthStore, useMusicStore, useReaderChatStore } from '@/lib/store';
 import { authApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 
-const API = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+const API = '/api/v1';
 
 export default function Footer() {
   const pathname = usePathname();

@@ -9,18 +9,45 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TagsRouteImport } from './routes/tags'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
+import { Route as RssRouteImport } from './routes/rss'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as MusicRouteImport } from './routes/music'
+import { Route as MoviesRouteImport } from './routes/movies'
+import { Route as MomentsRouteImport } from './routes/moments'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as LlmsFullDottxtRouteImport } from './routes/llms-full[.]txt'
+import { Route as LinksRouteImport } from './routes/links'
 import { Route as InstallRouteImport } from './routes/install'
+import { Route as GoodsRouteImport } from './routes/goods'
+import { Route as GamesRouteImport } from './routes/games'
+import { Route as FootprintsRouteImport } from './routes/footprints'
+import { Route as FilmsRouteImport } from './routes/films'
+import { Route as FeedsRouteImport } from './routes/feeds'
+import { Route as FeedRouteImport } from './routes/feed'
+import { Route as CodingRouteImport } from './routes/coding'
+import { Route as CategoriesRouteImport } from './routes/categories'
+import { Route as BooksRouteImport } from './routes/books'
+import { Route as AtomDotxmlRouteImport } from './routes/atom[.]xml'
+import { Route as ArchivesRouteImport } from './routes/archives'
+import { Route as AlbumsRouteImport } from './routes/albums'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TagsSlugRouteImport } from './routes/tags/$slug'
 import { Route as PostsSlugRouteImport } from './routes/posts/$slug'
+import { Route as PageNumRouteImport } from './routes/page/$num'
+import { Route as FilmsSlugRouteImport } from './routes/films/$slug'
+import { Route as DateYearRouteImport } from './routes/date/$year'
+import { Route as CategoriesSlugRouteImport } from './routes/categories/$slug'
 import { Route as ApiRevalidateRouteImport } from './routes/api/revalidate'
 import { Route as ApiSplatRouteImport } from './routes/api/$'
 import { Route as AdminSplatRouteImport } from './routes/admin/$'
+import { Route as DateYearMonthRouteImport } from './routes/date/$year/$month'
 import { Route as ApiV1TrackRouteImport } from './routes/api/v1/track'
 import { Route as ApiV1TagsRouteImport } from './routes/api/v1/tags'
 import { Route as ApiV1SearchRouteImport } from './routes/api/v1/search'
@@ -44,6 +71,7 @@ import { Route as ApiV1MediaIndexRouteImport } from './routes/api/v1/media/index
 import { Route as ApiV1CommentsIndexRouteImport } from './routes/api/v1/comments/index'
 import { Route as ApiV1AnnotationsIndexRouteImport } from './routes/api/v1/annotations/index'
 import { Route as ApiV1AnalyticsIndexRouteImport } from './routes/api/v1/analytics/index'
+import { Route as DateYearMonthDayRouteImport } from './routes/date/$year/$month/$day'
 import { Route as ApiV1VisitorWeatherRouteImport } from './routes/api/v1/visitor/weather'
 import { Route as ApiV1VisitorGeoRouteImport } from './routes/api/v1/visitor/geo'
 import { Route as ApiV1UnsubscribeCommentReplyRouteImport } from './routes/api/v1/unsubscribe/comment-reply'
@@ -172,14 +200,49 @@ import { Route as ApiV1SyncPlatformJobIdStatusRouteImport } from './routes/api/v
 import { Route as ApiV1AdminSyncPlatformSitesUuidRouteImport } from './routes/api/v1/admin/sync/$platform/sites/$uuid'
 import { Route as ApiV1MusicProxyPlatformSongsIdAssetRouteImport } from './routes/api/v1/music/proxy/$platform/songs/$id/$asset'
 
+const TagsRoute = TagsRouteImport.update({
+  id: '/tags',
+  path: '/tags',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RssDotxmlRoute = RssDotxmlRouteImport.update({
+  id: '/rss.xml',
+  path: '/rss.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RssRoute = RssRouteImport.update({
+  id: '/rss',
+  path: '/rss',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
   id: '/robots.txt',
   path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MusicRoute = MusicRouteImport.update({
+  id: '/music',
+  path: '/music',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoviesRoute = MoviesRouteImport.update({
+  id: '/movies',
+  path: '/movies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MomentsRoute = MomentsRouteImport.update({
+  id: '/moments',
+  path: '/moments',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -197,9 +260,79 @@ const LlmsFullDottxtRoute = LlmsFullDottxtRouteImport.update({
   path: '/llms-full.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LinksRoute = LinksRouteImport.update({
+  id: '/links',
+  path: '/links',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InstallRoute = InstallRouteImport.update({
   id: '/install',
   path: '/install',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GoodsRoute = GoodsRouteImport.update({
+  id: '/goods',
+  path: '/goods',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesRoute = GamesRouteImport.update({
+  id: '/games',
+  path: '/games',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FootprintsRoute = FootprintsRouteImport.update({
+  id: '/footprints',
+  path: '/footprints',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FilmsRoute = FilmsRouteImport.update({
+  id: '/films',
+  path: '/films',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedsRoute = FeedsRouteImport.update({
+  id: '/feeds',
+  path: '/feeds',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedRoute = FeedRouteImport.update({
+  id: '/feed',
+  path: '/feed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CodingRoute = CodingRouteImport.update({
+  id: '/coding',
+  path: '/coding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriesRoute = CategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BooksRoute = BooksRouteImport.update({
+  id: '/books',
+  path: '/books',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtomDotxmlRoute = AtomDotxmlRouteImport.update({
+  id: '/atom.xml',
+  path: '/atom.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArchivesRoute = ArchivesRouteImport.update({
+  id: '/archives',
+  path: '/archives',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AlbumsRoute = AlbumsRouteImport.update({
+  id: '/albums',
+  path: '/albums',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SplatRoute = SplatRouteImport.update({
@@ -212,10 +345,35 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TagsSlugRoute = TagsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => TagsRoute,
+} as any)
 const PostsSlugRoute = PostsSlugRouteImport.update({
   id: '/posts/$slug',
   path: '/posts/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PageNumRoute = PageNumRouteImport.update({
+  id: '/page/$num',
+  path: '/page/$num',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FilmsSlugRoute = FilmsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => FilmsRoute,
+} as any)
+const DateYearRoute = DateYearRouteImport.update({
+  id: '/date/$year',
+  path: '/date/$year',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriesSlugRoute = CategoriesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => CategoriesRoute,
 } as any)
 const ApiRevalidateRoute = ApiRevalidateRouteImport.update({
   id: '/api/revalidate',
@@ -231,6 +389,11 @@ const AdminSplatRoute = AdminSplatRouteImport.update({
   id: '/admin/$',
   path: '/admin/$',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DateYearMonthRoute = DateYearMonthRouteImport.update({
+  id: '/$month',
+  path: '/$month',
+  getParentRoute: () => DateYearRoute,
 } as any)
 const ApiV1TrackRoute = ApiV1TrackRouteImport.update({
   id: '/api/v1/track',
@@ -346,6 +509,11 @@ const ApiV1AnalyticsIndexRoute = ApiV1AnalyticsIndexRouteImport.update({
   id: '/api/v1/analytics/',
   path: '/api/v1/analytics/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DateYearMonthDayRoute = DateYearMonthDayRouteImport.update({
+  id: '/$day',
+  path: '/$day',
+  getParentRoute: () => DateYearMonthRoute,
 } as any)
 const ApiV1VisitorWeatherRoute = ApiV1VisitorWeatherRouteImport.update({
   id: '/api/v1/visitor/weather',
@@ -1016,16 +1184,42 @@ const ApiV1MusicProxyPlatformSongsIdAssetRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/about': typeof AboutRoute
+  '/albums': typeof AlbumsRoute
+  '/archives': typeof ArchivesRoute
+  '/atom.xml': typeof AtomDotxmlRoute
+  '/books': typeof BooksRoute
+  '/categories': typeof CategoriesRouteWithChildren
+  '/coding': typeof CodingRoute
+  '/feed': typeof FeedRoute
+  '/feeds': typeof FeedsRoute
+  '/films': typeof FilmsRouteWithChildren
+  '/footprints': typeof FootprintsRoute
+  '/games': typeof GamesRoute
+  '/goods': typeof GoodsRoute
   '/install': typeof InstallRoute
+  '/links': typeof LinksRoute
   '/llms-full.txt': typeof LlmsFullDottxtRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
+  '/moments': typeof MomentsRoute
+  '/movies': typeof MoviesRoute
+  '/music': typeof MusicRoute
   '/robots.txt': typeof RobotsDottxtRoute
+  '/rss': typeof RssRoute
+  '/rss.xml': typeof RssDotxmlRoute
+  '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/tags': typeof TagsRouteWithChildren
   '/admin/$': typeof AdminSplatRoute
   '/api/$': typeof ApiSplatRoute
   '/api/revalidate': typeof ApiRevalidateRoute
+  '/categories/$slug': typeof CategoriesSlugRoute
+  '/date/$year': typeof DateYearRouteWithChildren
+  '/films/$slug': typeof FilmsSlugRoute
+  '/page/$num': typeof PageNumRoute
   '/posts/$slug': typeof PostsSlugRoute
+  '/tags/$slug': typeof TagsSlugRoute
   '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
   '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
   '/api/v1/coding': typeof ApiV1CodingRoute
@@ -1039,6 +1233,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/search': typeof ApiV1SearchRouteWithChildren
   '/api/v1/tags': typeof ApiV1TagsRouteWithChildren
   '/api/v1/track': typeof ApiV1TrackRouteWithChildren
+  '/date/$year/$month': typeof DateYearMonthRouteWithChildren
   '/api/v1/$resource/$id': typeof ApiV1ResourceIdRoute
   '/api/v1/admin/stats': typeof ApiV1AdminStatsRoute
   '/api/v1/ai/$action': typeof ApiV1AiActionRoute
@@ -1122,6 +1317,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/unsubscribe/comment-reply': typeof ApiV1UnsubscribeCommentReplyRoute
   '/api/v1/visitor/geo': typeof ApiV1VisitorGeoRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
+  '/date/$year/$month/$day': typeof DateYearMonthDayRoute
   '/api/v1/analytics/': typeof ApiV1AnalyticsIndexRoute
   '/api/v1/annotations/': typeof ApiV1AnnotationsIndexRoute
   '/api/v1/comments/': typeof ApiV1CommentsIndexRoute
@@ -1180,16 +1376,42 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/about': typeof AboutRoute
+  '/albums': typeof AlbumsRoute
+  '/archives': typeof ArchivesRoute
+  '/atom.xml': typeof AtomDotxmlRoute
+  '/books': typeof BooksRoute
+  '/categories': typeof CategoriesRouteWithChildren
+  '/coding': typeof CodingRoute
+  '/feed': typeof FeedRoute
+  '/feeds': typeof FeedsRoute
+  '/films': typeof FilmsRouteWithChildren
+  '/footprints': typeof FootprintsRoute
+  '/games': typeof GamesRoute
+  '/goods': typeof GoodsRoute
   '/install': typeof InstallRoute
+  '/links': typeof LinksRoute
   '/llms-full.txt': typeof LlmsFullDottxtRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
+  '/moments': typeof MomentsRoute
+  '/movies': typeof MoviesRoute
+  '/music': typeof MusicRoute
   '/robots.txt': typeof RobotsDottxtRoute
+  '/rss': typeof RssRoute
+  '/rss.xml': typeof RssDotxmlRoute
+  '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/tags': typeof TagsRouteWithChildren
   '/admin/$': typeof AdminSplatRoute
   '/api/$': typeof ApiSplatRoute
   '/api/revalidate': typeof ApiRevalidateRoute
+  '/categories/$slug': typeof CategoriesSlugRoute
+  '/date/$year': typeof DateYearRouteWithChildren
+  '/films/$slug': typeof FilmsSlugRoute
+  '/page/$num': typeof PageNumRoute
   '/posts/$slug': typeof PostsSlugRoute
+  '/tags/$slug': typeof TagsSlugRoute
   '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
   '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
   '/api/v1/coding': typeof ApiV1CodingRoute
@@ -1203,6 +1425,7 @@ export interface FileRoutesByTo {
   '/api/v1/search': typeof ApiV1SearchRouteWithChildren
   '/api/v1/tags': typeof ApiV1TagsRouteWithChildren
   '/api/v1/track': typeof ApiV1TrackRouteWithChildren
+  '/date/$year/$month': typeof DateYearMonthRouteWithChildren
   '/api/v1/$resource/$id': typeof ApiV1ResourceIdRoute
   '/api/v1/admin/stats': typeof ApiV1AdminStatsRoute
   '/api/v1/ai/$action': typeof ApiV1AiActionRoute
@@ -1286,6 +1509,7 @@ export interface FileRoutesByTo {
   '/api/v1/unsubscribe/comment-reply': typeof ApiV1UnsubscribeCommentReplyRoute
   '/api/v1/visitor/geo': typeof ApiV1VisitorGeoRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
+  '/date/$year/$month/$day': typeof DateYearMonthDayRoute
   '/api/v1/analytics': typeof ApiV1AnalyticsIndexRoute
   '/api/v1/annotations': typeof ApiV1AnnotationsIndexRoute
   '/api/v1/comments': typeof ApiV1CommentsIndexRoute
@@ -1345,16 +1569,42 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/about': typeof AboutRoute
+  '/albums': typeof AlbumsRoute
+  '/archives': typeof ArchivesRoute
+  '/atom.xml': typeof AtomDotxmlRoute
+  '/books': typeof BooksRoute
+  '/categories': typeof CategoriesRouteWithChildren
+  '/coding': typeof CodingRoute
+  '/feed': typeof FeedRoute
+  '/feeds': typeof FeedsRoute
+  '/films': typeof FilmsRouteWithChildren
+  '/footprints': typeof FootprintsRoute
+  '/games': typeof GamesRoute
+  '/goods': typeof GoodsRoute
   '/install': typeof InstallRoute
+  '/links': typeof LinksRoute
   '/llms-full.txt': typeof LlmsFullDottxtRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
+  '/moments': typeof MomentsRoute
+  '/movies': typeof MoviesRoute
+  '/music': typeof MusicRoute
   '/robots.txt': typeof RobotsDottxtRoute
+  '/rss': typeof RssRoute
+  '/rss.xml': typeof RssDotxmlRoute
+  '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/tags': typeof TagsRouteWithChildren
   '/admin/$': typeof AdminSplatRoute
   '/api/$': typeof ApiSplatRoute
   '/api/revalidate': typeof ApiRevalidateRoute
+  '/categories/$slug': typeof CategoriesSlugRoute
+  '/date/$year': typeof DateYearRouteWithChildren
+  '/films/$slug': typeof FilmsSlugRoute
+  '/page/$num': typeof PageNumRoute
   '/posts/$slug': typeof PostsSlugRoute
+  '/tags/$slug': typeof TagsSlugRoute
   '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
   '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
   '/api/v1/coding': typeof ApiV1CodingRoute
@@ -1368,6 +1618,7 @@ export interface FileRoutesById {
   '/api/v1/search': typeof ApiV1SearchRouteWithChildren
   '/api/v1/tags': typeof ApiV1TagsRouteWithChildren
   '/api/v1/track': typeof ApiV1TrackRouteWithChildren
+  '/date/$year/$month': typeof DateYearMonthRouteWithChildren
   '/api/v1/$resource/$id': typeof ApiV1ResourceIdRoute
   '/api/v1/admin/stats': typeof ApiV1AdminStatsRoute
   '/api/v1/ai/$action': typeof ApiV1AiActionRoute
@@ -1451,6 +1702,7 @@ export interface FileRoutesById {
   '/api/v1/unsubscribe/comment-reply': typeof ApiV1UnsubscribeCommentReplyRoute
   '/api/v1/visitor/geo': typeof ApiV1VisitorGeoRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
+  '/date/$year/$month/$day': typeof DateYearMonthDayRoute
   '/api/v1/analytics/': typeof ApiV1AnalyticsIndexRoute
   '/api/v1/annotations/': typeof ApiV1AnnotationsIndexRoute
   '/api/v1/comments/': typeof ApiV1CommentsIndexRoute
@@ -1511,16 +1763,42 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$'
+    | '/about'
+    | '/albums'
+    | '/archives'
+    | '/atom.xml'
+    | '/books'
+    | '/categories'
+    | '/coding'
+    | '/feed'
+    | '/feeds'
+    | '/films'
+    | '/footprints'
+    | '/games'
+    | '/goods'
     | '/install'
+    | '/links'
     | '/llms-full.txt'
     | '/llms.txt'
     | '/login'
+    | '/moments'
+    | '/movies'
+    | '/music'
     | '/robots.txt'
+    | '/rss'
+    | '/rss.xml'
+    | '/search'
     | '/sitemap.xml'
+    | '/tags'
     | '/admin/$'
     | '/api/$'
     | '/api/revalidate'
+    | '/categories/$slug'
+    | '/date/$year'
+    | '/films/$slug'
+    | '/page/$num'
     | '/posts/$slug'
+    | '/tags/$slug'
     | '/api/v1/$resource'
     | '/api/v1/categories'
     | '/api/v1/coding'
@@ -1534,6 +1812,7 @@ export interface FileRouteTypes {
     | '/api/v1/search'
     | '/api/v1/tags'
     | '/api/v1/track'
+    | '/date/$year/$month'
     | '/api/v1/$resource/$id'
     | '/api/v1/admin/stats'
     | '/api/v1/ai/$action'
@@ -1617,6 +1896,7 @@ export interface FileRouteTypes {
     | '/api/v1/unsubscribe/comment-reply'
     | '/api/v1/visitor/geo'
     | '/api/v1/visitor/weather'
+    | '/date/$year/$month/$day'
     | '/api/v1/analytics/'
     | '/api/v1/annotations/'
     | '/api/v1/comments/'
@@ -1675,16 +1955,42 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$'
+    | '/about'
+    | '/albums'
+    | '/archives'
+    | '/atom.xml'
+    | '/books'
+    | '/categories'
+    | '/coding'
+    | '/feed'
+    | '/feeds'
+    | '/films'
+    | '/footprints'
+    | '/games'
+    | '/goods'
     | '/install'
+    | '/links'
     | '/llms-full.txt'
     | '/llms.txt'
     | '/login'
+    | '/moments'
+    | '/movies'
+    | '/music'
     | '/robots.txt'
+    | '/rss'
+    | '/rss.xml'
+    | '/search'
     | '/sitemap.xml'
+    | '/tags'
     | '/admin/$'
     | '/api/$'
     | '/api/revalidate'
+    | '/categories/$slug'
+    | '/date/$year'
+    | '/films/$slug'
+    | '/page/$num'
     | '/posts/$slug'
+    | '/tags/$slug'
     | '/api/v1/$resource'
     | '/api/v1/categories'
     | '/api/v1/coding'
@@ -1698,6 +2004,7 @@ export interface FileRouteTypes {
     | '/api/v1/search'
     | '/api/v1/tags'
     | '/api/v1/track'
+    | '/date/$year/$month'
     | '/api/v1/$resource/$id'
     | '/api/v1/admin/stats'
     | '/api/v1/ai/$action'
@@ -1781,6 +2088,7 @@ export interface FileRouteTypes {
     | '/api/v1/unsubscribe/comment-reply'
     | '/api/v1/visitor/geo'
     | '/api/v1/visitor/weather'
+    | '/date/$year/$month/$day'
     | '/api/v1/analytics'
     | '/api/v1/annotations'
     | '/api/v1/comments'
@@ -1839,16 +2147,42 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$'
+    | '/about'
+    | '/albums'
+    | '/archives'
+    | '/atom.xml'
+    | '/books'
+    | '/categories'
+    | '/coding'
+    | '/feed'
+    | '/feeds'
+    | '/films'
+    | '/footprints'
+    | '/games'
+    | '/goods'
     | '/install'
+    | '/links'
     | '/llms-full.txt'
     | '/llms.txt'
     | '/login'
+    | '/moments'
+    | '/movies'
+    | '/music'
     | '/robots.txt'
+    | '/rss'
+    | '/rss.xml'
+    | '/search'
     | '/sitemap.xml'
+    | '/tags'
     | '/admin/$'
     | '/api/$'
     | '/api/revalidate'
+    | '/categories/$slug'
+    | '/date/$year'
+    | '/films/$slug'
+    | '/page/$num'
     | '/posts/$slug'
+    | '/tags/$slug'
     | '/api/v1/$resource'
     | '/api/v1/categories'
     | '/api/v1/coding'
@@ -1862,6 +2196,7 @@ export interface FileRouteTypes {
     | '/api/v1/search'
     | '/api/v1/tags'
     | '/api/v1/track'
+    | '/date/$year/$month'
     | '/api/v1/$resource/$id'
     | '/api/v1/admin/stats'
     | '/api/v1/ai/$action'
@@ -1945,6 +2280,7 @@ export interface FileRouteTypes {
     | '/api/v1/unsubscribe/comment-reply'
     | '/api/v1/visitor/geo'
     | '/api/v1/visitor/weather'
+    | '/date/$year/$month/$day'
     | '/api/v1/analytics/'
     | '/api/v1/annotations/'
     | '/api/v1/comments/'
@@ -2004,15 +2340,38 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
+  AboutRoute: typeof AboutRoute
+  AlbumsRoute: typeof AlbumsRoute
+  ArchivesRoute: typeof ArchivesRoute
+  AtomDotxmlRoute: typeof AtomDotxmlRoute
+  BooksRoute: typeof BooksRoute
+  CategoriesRoute: typeof CategoriesRouteWithChildren
+  CodingRoute: typeof CodingRoute
+  FeedRoute: typeof FeedRoute
+  FeedsRoute: typeof FeedsRoute
+  FilmsRoute: typeof FilmsRouteWithChildren
+  FootprintsRoute: typeof FootprintsRoute
+  GamesRoute: typeof GamesRoute
+  GoodsRoute: typeof GoodsRoute
   InstallRoute: typeof InstallRoute
+  LinksRoute: typeof LinksRoute
   LlmsFullDottxtRoute: typeof LlmsFullDottxtRoute
   LlmsDottxtRoute: typeof LlmsDottxtRoute
   LoginRoute: typeof LoginRoute
+  MomentsRoute: typeof MomentsRoute
+  MoviesRoute: typeof MoviesRoute
+  MusicRoute: typeof MusicRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
+  RssRoute: typeof RssRoute
+  RssDotxmlRoute: typeof RssDotxmlRoute
+  SearchRoute: typeof SearchRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TagsRoute: typeof TagsRouteWithChildren
   AdminSplatRoute: typeof AdminSplatRoute
   ApiSplatRoute: typeof ApiSplatRoute
   ApiRevalidateRoute: typeof ApiRevalidateRoute
+  DateYearRoute: typeof DateYearRouteWithChildren
+  PageNumRoute: typeof PageNumRoute
   PostsSlugRoute: typeof PostsSlugRoute
   ApiV1ResourceRoute: typeof ApiV1ResourceRouteWithChildren
   ApiV1CategoriesRoute: typeof ApiV1CategoriesRouteWithChildren
@@ -2145,6 +2504,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tags': {
+      id: '/tags'
+      path: '/tags'
+      fullPath: '/tags'
+      preLoaderRoute: typeof TagsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -2152,11 +2518,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rss.xml': {
+      id: '/rss.xml'
+      path: '/rss.xml'
+      fullPath: '/rss.xml'
+      preLoaderRoute: typeof RssDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rss': {
+      id: '/rss'
+      path: '/rss'
+      fullPath: '/rss'
+      preLoaderRoute: typeof RssRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/robots.txt': {
       id: '/robots.txt'
       path: '/robots.txt'
       fullPath: '/robots.txt'
       preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/music': {
+      id: '/music'
+      path: '/music'
+      fullPath: '/music'
+      preLoaderRoute: typeof MusicRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/movies': {
+      id: '/movies'
+      path: '/movies'
+      fullPath: '/movies'
+      preLoaderRoute: typeof MoviesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/moments': {
+      id: '/moments'
+      path: '/moments'
+      fullPath: '/moments'
+      preLoaderRoute: typeof MomentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -2180,11 +2588,109 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LlmsFullDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/links': {
+      id: '/links'
+      path: '/links'
+      fullPath: '/links'
+      preLoaderRoute: typeof LinksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/install': {
       id: '/install'
       path: '/install'
       fullPath: '/install'
       preLoaderRoute: typeof InstallRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/goods': {
+      id: '/goods'
+      path: '/goods'
+      fullPath: '/goods'
+      preLoaderRoute: typeof GoodsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games': {
+      id: '/games'
+      path: '/games'
+      fullPath: '/games'
+      preLoaderRoute: typeof GamesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/footprints': {
+      id: '/footprints'
+      path: '/footprints'
+      fullPath: '/footprints'
+      preLoaderRoute: typeof FootprintsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/films': {
+      id: '/films'
+      path: '/films'
+      fullPath: '/films'
+      preLoaderRoute: typeof FilmsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feeds': {
+      id: '/feeds'
+      path: '/feeds'
+      fullPath: '/feeds'
+      preLoaderRoute: typeof FeedsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feed': {
+      id: '/feed'
+      path: '/feed'
+      fullPath: '/feed'
+      preLoaderRoute: typeof FeedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coding': {
+      id: '/coding'
+      path: '/coding'
+      fullPath: '/coding'
+      preLoaderRoute: typeof CodingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categories': {
+      id: '/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof CategoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/books': {
+      id: '/books'
+      path: '/books'
+      fullPath: '/books'
+      preLoaderRoute: typeof BooksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atom.xml': {
+      id: '/atom.xml'
+      path: '/atom.xml'
+      fullPath: '/atom.xml'
+      preLoaderRoute: typeof AtomDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/archives': {
+      id: '/archives'
+      path: '/archives'
+      fullPath: '/archives'
+      preLoaderRoute: typeof ArchivesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/albums': {
+      id: '/albums'
+      path: '/albums'
+      fullPath: '/albums'
+      preLoaderRoute: typeof AlbumsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$': {
@@ -2201,12 +2707,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tags/$slug': {
+      id: '/tags/$slug'
+      path: '/$slug'
+      fullPath: '/tags/$slug'
+      preLoaderRoute: typeof TagsSlugRouteImport
+      parentRoute: typeof TagsRoute
+    }
     '/posts/$slug': {
       id: '/posts/$slug'
       path: '/posts/$slug'
       fullPath: '/posts/$slug'
       preLoaderRoute: typeof PostsSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/page/$num': {
+      id: '/page/$num'
+      path: '/page/$num'
+      fullPath: '/page/$num'
+      preLoaderRoute: typeof PageNumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/films/$slug': {
+      id: '/films/$slug'
+      path: '/$slug'
+      fullPath: '/films/$slug'
+      preLoaderRoute: typeof FilmsSlugRouteImport
+      parentRoute: typeof FilmsRoute
+    }
+    '/date/$year': {
+      id: '/date/$year'
+      path: '/date/$year'
+      fullPath: '/date/$year'
+      preLoaderRoute: typeof DateYearRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categories/$slug': {
+      id: '/categories/$slug'
+      path: '/$slug'
+      fullPath: '/categories/$slug'
+      preLoaderRoute: typeof CategoriesSlugRouteImport
+      parentRoute: typeof CategoriesRoute
     }
     '/api/revalidate': {
       id: '/api/revalidate'
@@ -2228,6 +2769,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/$'
       preLoaderRoute: typeof AdminSplatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/date/$year/$month': {
+      id: '/date/$year/$month'
+      path: '/$month'
+      fullPath: '/date/$year/$month'
+      preLoaderRoute: typeof DateYearMonthRouteImport
+      parentRoute: typeof DateYearRoute
     }
     '/api/v1/track': {
       id: '/api/v1/track'
@@ -2389,6 +2937,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/v1/analytics/'
       preLoaderRoute: typeof ApiV1AnalyticsIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/date/$year/$month/$day': {
+      id: '/date/$year/$month/$day'
+      path: '/$day'
+      fullPath: '/date/$year/$month/$day'
+      preLoaderRoute: typeof DateYearMonthDayRouteImport
+      parentRoute: typeof DateYearMonthRoute
     }
     '/api/v1/visitor/weather': {
       id: '/api/v1/visitor/weather'
@@ -3282,6 +3837,62 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface CategoriesRouteChildren {
+  CategoriesSlugRoute: typeof CategoriesSlugRoute
+}
+
+const CategoriesRouteChildren: CategoriesRouteChildren = {
+  CategoriesSlugRoute: CategoriesSlugRoute,
+}
+
+const CategoriesRouteWithChildren = CategoriesRoute._addFileChildren(
+  CategoriesRouteChildren,
+)
+
+interface FilmsRouteChildren {
+  FilmsSlugRoute: typeof FilmsSlugRoute
+}
+
+const FilmsRouteChildren: FilmsRouteChildren = {
+  FilmsSlugRoute: FilmsSlugRoute,
+}
+
+const FilmsRouteWithChildren = FilmsRoute._addFileChildren(FilmsRouteChildren)
+
+interface TagsRouteChildren {
+  TagsSlugRoute: typeof TagsSlugRoute
+}
+
+const TagsRouteChildren: TagsRouteChildren = {
+  TagsSlugRoute: TagsSlugRoute,
+}
+
+const TagsRouteWithChildren = TagsRoute._addFileChildren(TagsRouteChildren)
+
+interface DateYearMonthRouteChildren {
+  DateYearMonthDayRoute: typeof DateYearMonthDayRoute
+}
+
+const DateYearMonthRouteChildren: DateYearMonthRouteChildren = {
+  DateYearMonthDayRoute: DateYearMonthDayRoute,
+}
+
+const DateYearMonthRouteWithChildren = DateYearMonthRoute._addFileChildren(
+  DateYearMonthRouteChildren,
+)
+
+interface DateYearRouteChildren {
+  DateYearMonthRoute: typeof DateYearMonthRouteWithChildren
+}
+
+const DateYearRouteChildren: DateYearRouteChildren = {
+  DateYearMonthRoute: DateYearMonthRouteWithChildren,
+}
+
+const DateYearRouteWithChildren = DateYearRoute._addFileChildren(
+  DateYearRouteChildren,
+)
+
 interface ApiV1ResourceRouteChildren {
   ApiV1ResourceIdRoute: typeof ApiV1ResourceIdRoute
 }
@@ -3503,15 +4114,38 @@ const ApiV1AdminSyncPlatformSitesRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
+  AboutRoute: AboutRoute,
+  AlbumsRoute: AlbumsRoute,
+  ArchivesRoute: ArchivesRoute,
+  AtomDotxmlRoute: AtomDotxmlRoute,
+  BooksRoute: BooksRoute,
+  CategoriesRoute: CategoriesRouteWithChildren,
+  CodingRoute: CodingRoute,
+  FeedRoute: FeedRoute,
+  FeedsRoute: FeedsRoute,
+  FilmsRoute: FilmsRouteWithChildren,
+  FootprintsRoute: FootprintsRoute,
+  GamesRoute: GamesRoute,
+  GoodsRoute: GoodsRoute,
   InstallRoute: InstallRoute,
+  LinksRoute: LinksRoute,
   LlmsFullDottxtRoute: LlmsFullDottxtRoute,
   LlmsDottxtRoute: LlmsDottxtRoute,
   LoginRoute: LoginRoute,
+  MomentsRoute: MomentsRoute,
+  MoviesRoute: MoviesRoute,
+  MusicRoute: MusicRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
+  RssRoute: RssRoute,
+  RssDotxmlRoute: RssDotxmlRoute,
+  SearchRoute: SearchRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TagsRoute: TagsRouteWithChildren,
   AdminSplatRoute: AdminSplatRoute,
   ApiSplatRoute: ApiSplatRoute,
   ApiRevalidateRoute: ApiRevalidateRoute,
+  DateYearRoute: DateYearRouteWithChildren,
+  PageNumRoute: PageNumRoute,
   PostsSlugRoute: PostsSlugRoute,
   ApiV1ResourceRoute: ApiV1ResourceRouteWithChildren,
   ApiV1CategoriesRoute: ApiV1CategoriesRouteWithChildren,

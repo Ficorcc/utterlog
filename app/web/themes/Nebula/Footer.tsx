@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/lib/store';
@@ -9,7 +9,7 @@ import { useThemeContext } from '@/lib/theme-context';
 import { useMiniMusic } from '@/lib/use-mini-music';
 import BackToTop from './BackToTop';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+const API_BASE = '/api/v1';
 
 function formatViews(n: number): string {
   if (n >= 10000) return `${(n / 10000).toFixed(1)}万`;

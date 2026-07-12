@@ -14,8 +14,8 @@ function context(): ThemeContextData {
   };
 }
 
-describe('TanStack Start document parity', () => {
-  test('loads legacy assets in their required order', () => {
+describe('TanStack Start document assets', () => {
+  test('loads shared fonts before the active theme stylesheet', () => {
     expect(startDocumentLinks(context()).map((link) => link.href)).toEqual([
       '/site.ico',
       'https://static.bluecdn.com',
@@ -23,15 +23,13 @@ describe('TanStack Start document parity', () => {
       'https://static.bluecdn.com/fonts/noto-sans-sc.css',
       'https://static.bluecdn.com/fonts/alimama-fangyuanti.css',
       'https://static.bluecdn.com/fonts/luo.css',
-      '/static/globals.css',
-      '/static/client.css',
       '/themes/Azure/styles.css?v=2.0.5',
     ]);
   });
 
   test('does not inject theme-specific CSS without server context', () => {
     const links = startDocumentLinks(null).map((link) => link.href);
-    expect(links).toContain('/static/globals.css');
+    expect(links).toContain('https://static.bluecdn.com/fonts/noto-sans-sc.css');
     expect(links.some((href) => href.startsWith('/themes/'))).toBe(false);
   });
 });

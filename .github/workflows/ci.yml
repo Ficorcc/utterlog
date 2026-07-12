@@ -43,8 +43,3 @@ jobs:
       - name: Sync theme styles
         working-directory: app/web
         run: bun run sync:themes
-
-      - name: Build blog client bundle
-        run: bun run build:blog-client
-        env:
-          NEXT_PUBLIC_API_URL: /api/v1

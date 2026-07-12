@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useThemeContext } from '@/lib/theme-context';
 
-const API = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+const API = '/api/v1';
 
 type VisitorWeatherData = {
   city?: string;

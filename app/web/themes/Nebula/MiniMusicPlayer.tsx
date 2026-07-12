@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import { useMiniMusic } from '@/lib/use-mini-music';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+const API_BASE = '/api/v1';
 
 function musicProxy(server: string, id: string, asset: 'cover' | 'stream') {
   return `${API_BASE}/music/proxy/${encodeURIComponent(server)}/songs/${encodeURIComponent(id)}/${asset}`;

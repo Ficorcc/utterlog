@@ -21,7 +21,7 @@ import { usePathname } from '@/lib/navigation';
 import { useThemeContext } from '@/lib/theme-context';
 import { parsePermalink } from '@/lib/permalink';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+const API_BASE = '/api/v1';
 
 interface Message {
   role: 'user' | 'assistant';

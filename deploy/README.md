@@ -1,50 +1,34 @@
 # 反向代理配置
 
-Utterlog 默认绑 `127.0.0.1:9260`（或自动检测到的端口），不占 80/443。按你的情况选：
+Utterlog 默认绑定 `127.0.0.1:9260`。按部署环境选择 [1Panel](1panel.md)、[Nginx](nginx.conf.example) 或 [Caddy](Caddyfile.example) 配置；也可以使用内置 Caddy：
 
-## 有 1Panel / 宝塔 / AAPanel → [1panel.md](1panel.md)
-GUI 填两栏，自动 SSL。最省事。
-
-## 有自己的 nginx → [nginx.conf.example](nginx.conf.example)
-复制片段，改域名和端口，reload。
-
-## 有自己的 Caddy → [Caddyfile.example](Caddyfile.example)
-追加到 Caddyfile，reload。自动 TLS。
-
-## 啥都没有 → 用内置 Caddy（零配置 TLS）
 ```bash
-DOMAIN=blog.yoursite.com make deploy-tls
-```
-见根目录 `INSTALL.md` 场景 C。
-
----
-
-## 单端口架构说明
-
-Bun app 是唯一外部入口，内部分发：
-- `/admin/*` → 嵌入的 Vite SPA
-- `/api/v1/*` → TypeScript handlers
-- `/uploads/*` → 本地文件
-- `/themes/*` → 用户主题资源与内置主题资源
-- `/static/*` → 博客客户端 bundle
-- 其他 → Bun 内置 React SSR（`app/server/src/web/router.ts`）
-
-反代配置只需指向一个端口（`127.0.0.1:9260`），无需分路径处理。
-
-### 必需的 HTTP 头传递
-
-```
-X-Real-IP         → 访客真实 IP（地理位置统计、防刷）
-X-Forwarded-For   → 多层代理链
-X-Forwarded-Proto → http/https（生成绝对链接用）
-X-Forwarded-Host  → 原始域名
-Upgrade/Connection → WebSocket / SSE（AI 流式输出必需）
+DOMAIN=blog.example.com make deploy-tls
 ```
 
-各样例文件都配好了，直接用即可。
+## 单端口架构
 
-### 可缓存资源（长期）
+Bun app 是唯一入口：
 
-- `/static/*`、`/admin/assets/*` — hash 化或带版本号的静态资源
+- `/admin/*`：管理后台入口和静态资源
+- `/api/*`：TanStack Start Server Routes
+- `/assets/*`：TanStack Start 客户端 chunk
+- `/uploads/*`：用户上传文件
+- `/themes/*`：内置及用户主题资源
+- 其他地址：TanStack Start SSR
 
-这两个路径都是 content-addressed，可以 `max-age=31536000, immutable`。
+反向代理只需转发到 `127.0.0.1:9260`，不需要单独代理前端或 API 进程。
+
+## 请求头
+
+请透传 `X-Real-IP`、`X-Forwarded-For`、`X-Forwarded-Proto` 和 `X-Forwarded-Host`。AI 流式输出还需要关闭代理缓冲并提高读取超时。
+
+## 缓存
+
+`/assets/*` 与 `/admin/assets/*` 是带 hash 的构建资源，可以配置：
+
+```text
+Cache-Control: public, max-age=31536000, immutable
+```
+
+`/themes/*` 通过主题版本参数更新，不要在反向代理层永久固定无版本 URL。

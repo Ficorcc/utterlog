@@ -1,7 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router';
-import LoginPage from '@/app/login/page';
+import { Providers } from '@/components/AppProviders';
+import LoginPage from '@/components/pages/login/LoginPage';
 
 export const Route = createFileRoute('/login')({
   head: () => ({ meta: [{ title: '登录 - Utterlog' }] }),
-  component: LoginPage,
+  component: LoginRoute,
 });
+
+function LoginRoute() {
+  return <Providers><LoginPage /></Providers>;
+}

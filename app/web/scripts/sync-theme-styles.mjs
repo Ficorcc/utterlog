@@ -3,7 +3,7 @@
  * 把 app/web/themes/<T>/{styles.css,theme.json} 同步到 app/web/public/themes/<T>/
  *
  * 为什么要这个 script：
- *   1. Next.js 主题 CSS 通过 `<link rel="stylesheet" href="/themes/<T>/styles.css">`
+ *   1. TanStack Start 通过 `<link rel="stylesheet" href="/themes/<T>/styles.css">`
  *      加载，URL 必须落在 public/ 下才能由 Next 静态服务命中。
  *   2. 主题 source（开发者编辑入口）放在 app/web/themes/<T>/{styles.css,theme.json}。
  *   3. 之前用过 symlink 让 public 那份指向 source —— dev 完美但生产 docker

@@ -21,21 +21,9 @@ type CommentSectionProps = {
   authorAvatar?: string;
 };
 
-/** SSR 占位：静态 HTML 不含交互组件，避免 loading 转圈冻住在页面上。 */
+/** Keep the initial server and client trees identical for hydration. */
 export function CommentSection(props: CommentSectionProps) {
-  if (typeof window !== 'undefined') {
-    return <CommentSectionLive {...props} />;
-  }
-  const { postId, title, excerpt, authorAvatar } = props;
-  return (
-    <div
-      data-utterlog-mount="comments"
-      data-post-id={postId}
-      data-title={title || ''}
-      data-excerpt={excerpt || ''}
-      data-author-avatar={authorAvatar || ''}
-    />
-  );
+  return <CommentSectionLive {...props} />;
 }
 
 /** 客户端挂载后渲染的真实评论区。 */

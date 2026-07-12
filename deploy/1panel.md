@@ -112,11 +112,10 @@ proxy_read_timeout 300s;
 ```
 
 ### /admin 后台能打开但博客 404
-说明 Bun app 的 `WEB_PROXY_TARGET` 没生效（没反代到 Next.js）。
-检查：
+说明 TanStack Start 服务端构建没有成功加载。检查：
 ```bash
-docker compose -f docker-compose.prod.yml logs app | grep "Bun app"
-# 应看到 Bun app 启动日志；WEB_PROXY_TARGET 默认为 http://127.0.0.1:3000
+docker compose -f docker-compose.prod.yml logs app | grep "TanStack Start"
+# 正常应看到 TanStack Start frontend warmed
 ```
 
 重启 app：

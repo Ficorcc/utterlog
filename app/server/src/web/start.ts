@@ -10,10 +10,6 @@ type StartServer = {
 
 let startServerPromise: Promise<StartServer> | null = null;
 
-export function startFrontendEnabled() {
-  return true;
-}
-
 async function startServer() {
   if (!existsSync(runtimePaths.startServerEntry)) return null;
   startServerPromise ||= import(pathToFileURL(runtimePaths.startServerEntry).href) as Promise<StartServer>;
@@ -22,12 +18,10 @@ async function startServer() {
 }
 
 export async function preloadStartServer() {
-  if (!startFrontendEnabled()) return false;
   return Boolean(await startServer());
 }
 
 export async function warmStartFrontend(origin: string) {
-  if (!startFrontendEnabled()) return false;
   const response = await fetch(new URL('/', origin), {
     headers: { 'x-utterlog-warmup': '1' },
     signal: AbortSignal.timeout(15_000),
@@ -37,7 +31,6 @@ export async function warmStartFrontend(origin: string) {
 }
 
 export async function handleStartRequest(request: Request): Promise<Response | null> {
-  if (!startFrontendEnabled()) return null;
   const method = request.method.toUpperCase();
   const server = await startServer();
   if (!server) return null;

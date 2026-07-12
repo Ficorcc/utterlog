@@ -22,7 +22,7 @@ interface AIReaderChatProps {
 const stripEmoji = (text: string) => text.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '');
 
 const API_BASE = typeof window !== 'undefined'
-  ? (process.env.NEXT_PUBLIC_API_URL || '/api/v1')
+  ? ('/api/v1')
   : '';
 
 export default function AIReaderChat({ postId, title, excerpt, authorAvatar }: AIReaderChatProps) {

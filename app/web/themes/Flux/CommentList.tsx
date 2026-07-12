@@ -410,19 +410,19 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
               {relativeTime(comment.created_at)}
             </span>
 
-            {/* 地理 / 系统 / 浏览器 — 仅 hover 时显示，无 tooltip */}
+            {/* 地理位置常驻显示，系统 / 浏览器信息在 hover 时展开 */}
+            {comment.geo?.country_code && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#aaa' }}>
+                <img
+                  src={`https://flagcdn.io/flags/1x1/${comment.geo.country_code.toLowerCase()}.svg`}
+                  alt="" style={{ width: '14px', height: '14px', objectFit: 'cover' }}
+                  onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+                {comment.geo.city || comment.geo.province || comment.geo.country || ''}
+              </span>
+            )}
             {hovered && (
               <>
-                {comment.geo?.country_code && (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#aaa' }}>
-                    <img
-                      src={`https://flagcdn.io/flags/1x1/${comment.geo.country_code.toLowerCase()}.svg`}
-                      alt="" style={{ width: '14px', height: '14px', objectFit: 'cover' }}
-                      onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                    />
-                    {comment.geo.city || comment.geo.province || ''}
-                  </span>
-                )}
                 {os && (
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#aaa' }}>
                     <OSIcon name={os} size={14} /> {os}

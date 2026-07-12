@@ -12,21 +12,12 @@
     "resolveJsonModule": true,
     "noEmit": true,
     "paths": {
-      "@/lib/blog-api": ["./app/blog/src/lib/blog-api.ts"],
-      "@/lib/theme": ["./app/blog/src/lib/theme.ts"],
       "@/*": ["./app/web/*"],
-      "@shared/*": ["./app/shared/*"],
-      "next/link": ["./app/blog/src/shims/link.tsx"],
-      "next/navigation": ["./app/next-shim/navigation.ts"],
-      "next/script": ["./app/blog/src/shims/script.tsx"],
-      "next/cache": ["./app/blog/src/shims/cache.ts"],
-      "next/headers": ["./app/blog/src/shims/headers.ts"]
+      "@shared/*": ["./app/shared/*"]
     }
   },
   "include": [
     "app/server/src/**/*.ts",
-    "app/server/src/**/*.tsx",
-    "app/blog/src/**/*.ts",
-    "app/blog/src/**/*.tsx"
+    "app/server/src/**/*.tsx"
   ]
 }

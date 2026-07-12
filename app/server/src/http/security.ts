@@ -71,7 +71,6 @@ function frontPageRequest(c: Context) {
     path.startsWith('/install') ||
     path.startsWith('/login') ||
     path.startsWith('/uploads/') ||
-    path.startsWith('/_next') ||
     path === '/feed' ||
     /\.(?:ico|png|jpg|jpeg|svg|webp|avif|gif|css|js|woff2?|ttf|map|xml)$/i.test(path)
   ) {

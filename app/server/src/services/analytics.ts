@@ -222,7 +222,7 @@ export async function analyticsVisitors(options: { page?: number; perPage?: numb
   const offset = (page - 1) * perPage;
   const cutoff = nowUnix() - 7 * 86400;
   const pageFilter = `path <> '' and path like '/%' and path not like '/api/%' and path not like '/admin%'
-    and path not like '/uploads/%' and path not like '/_next/%' and path not like '/themes/%' and path not like '/static/%'
+    and path not like '/uploads/%' and path not like '/assets/%' and path not like '/themes/%' and path not like '/static/%'
     and path not like '/.well-known/%' and path not like '/wp-%'
     and path not in ('/feed','/feed/','/rss','/rss/','/rss.xml','/atom.xml','/xmlrpc.php','/favicon.ico','/robots.txt','/sitemap.xml','/manifest.json','/ads.txt')
     and path !~ '\\.[A-Za-z0-9]{1,8}$' and created_at >= $1`;

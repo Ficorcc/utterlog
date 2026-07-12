@@ -13,13 +13,13 @@
 	encode gzip zstd
 
 	# Hash-immutable static assets — cache aggressively
-	@static path /_next/static/* /admin/assets/*
+	@static path /assets/* /admin/assets/*
 	handle @static {
 		header Cache-Control "public, max-age=31536000, immutable"
 		reverse_proxy app:8080
 	}
 
-	# Everything else → Utterlog Bun app, which proxies to Next.js internally
+	# Everything else -> the Bun gateway and TanStack Start application
 	handle {
 		reverse_proxy app:8080 {
 			header_up X-Real-IP {remote_host}

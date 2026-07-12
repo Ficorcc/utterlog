@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import AISummary from '@/components/blog/AISummary';
 import FootprintFlags from '@/components/blog/FootprintFlags';
 import PostContent from '@/components/blog/PostContent';

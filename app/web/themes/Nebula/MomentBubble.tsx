@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import { useEffect, useState } from 'react';
 import { momentsApi } from '@/lib/api';
 import { useThemeContext } from '@/lib/theme-context';

@@ -16,7 +16,7 @@ export const runtimePaths = {
   builtinPluginsDir: pathEnv('BUILTIN_PLUGINS_DIR', 'app/web/plugins'),
   builtinPublicThemesDir: pathEnv('BUILTIN_PUBLIC_THEMES_DIR', 'app/web/public/themes'),
   webAppDir: pathEnv('WEB_APP_DIR', 'app/web'),
-  legacyPublicDir: pathEnv('LEGACY_PUBLIC_DIR', 'app/server/assets/public'),
+  serverPublicDir: pathEnv('SERVER_PUBLIC_DIR', 'app/server/assets/public'),
   adminDistDir: pathEnv('ADMIN_DIST_DIR', 'app/admin/dist'),
   startClientAssetsDir: pathEnv('START_CLIENT_ASSETS_DIR', 'app/start/dist/client/assets'),
   startServerEntry: pathEnv('START_SERVER_ENTRY', 'app/start/dist/server/server.js'),

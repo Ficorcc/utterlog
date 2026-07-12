@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import PostContent from './PostContent';
 import TableOfContents from './TableOfContents';
 import AISummary from './AISummary';
@@ -17,7 +17,7 @@ function formatDate(ts: string | number, timeZone: string) {
 }
 
 export default function PostPage({ post, options }: { post: any; options?: Record<string, string> }) {
-  // Caller (app/(blog)/posts/[slug]/page.tsx and [...permalink]) now
+  // Both explicit post routes and custom permalink routes now
   // server-fetches options and threads them in, so PostPage's banner
   // fallback uses the same admin-configured random_image_api as the
   // home cards / hero — no more "首页有图、内页一张默认 img.et" mismatch.

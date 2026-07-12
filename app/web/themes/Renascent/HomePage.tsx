@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import PostLink from '@/components/blog/PostLink';
 import { formatDateInTimeZone } from '@/lib/timezone';
 import { useThemeContext } from '@/lib/theme-context';

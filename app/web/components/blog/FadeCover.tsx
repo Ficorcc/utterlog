@@ -35,7 +35,7 @@ interface FadeCoverProps {
 
 export default function FadeCover({ src, alt, style, className, priority = true, imgClassName }: FadeCoverProps) {
   // Guard: empty src (random_image_enabled=false, hero post still
-  // loading, etc.) would emit a Next.js warning and trigger a
+  // loading, etc.) would emit a React warning and trigger a
   // wasted re-fetch of the page URL. Render the sized placeholder
   // wrapper without an <img> so layout space stays reserved.
   const hasSrc = !!src && src.trim() !== '';

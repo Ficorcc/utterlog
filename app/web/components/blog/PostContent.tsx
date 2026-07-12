@@ -97,7 +97,7 @@ function CodeBlock({ children, className, ...props }: React.HTMLAttributes<HTMLP
 // External link with icon + mshots preview bubble tooltip
 function ExternalLink({ href, children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
   const [hover, setHover] = useState(false);
-  const siteHost = process.env.NEXT_PUBLIC_SITE_URL?.replace(/^https?:\/\//, '') || '';
+  const siteHost = typeof window === 'undefined' ? '' : window.location.host;
   const isExternal = href && (href.startsWith('http://') || href.startsWith('https://')) && (!siteHost || !href.includes(siteHost));
 
   if (!isExternal) {
@@ -349,7 +349,7 @@ export default function PostContent({ content, postId }: PostContentProps) {
         return raw && absolute && raw !== absolute ? [raw, absolute] : [raw || absolute];
       }).filter(Boolean);
       if (urls.length === 0) return;
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+      const apiBase = '/api/v1';
       fetch(`${apiBase}/media/exif?urls=${urls.map(encodeURIComponent).join(',')}`)
         .then(r => r.json())
         .then(r => { if (r.data) setExifMap(r.data); })

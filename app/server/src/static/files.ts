@@ -5,7 +5,6 @@ import { config } from '../config';
 import { brandingExts } from '../media/storage';
 import { runtimePaths } from '../paths';
 import { resolveThemeAssetPath } from '../theme-assets';
-import { startFrontendEnabled } from '../web/start';
 
 const contentTypes: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -72,10 +71,8 @@ export function serveStaticFiles(app: Hono) {
     const acceptEncoding = c.req.header('accept-encoding') || '';
     const direct = await fileResponse(candidate, acceptEncoding);
     const isStaticAsset = rest !== 'index.html' && /\.[a-z0-9]+(?:\.(?:br|gz))?$/i.test(rest);
-    if (startFrontendEnabled() && !isStaticAsset) return next();
-    if (!direct && startFrontendEnabled()) return next();
-    const response = direct || (await fileResponse(join(config.adminDistDir, 'index.html'), acceptEncoding));
-    if (!response) return c.text('Admin build not found', 503);
+    if (!isStaticAsset || !direct) return next();
+    const response = direct;
     const isHashedAsset = /\/assets\/[^/]+-[A-Za-z0-9_-]+\.(js|css)$/.test(c.req.path);
     const headers = new Headers(response.headers);
     if (isHashedAsset) {
@@ -123,14 +120,14 @@ export function serveStaticFiles(app: Hono) {
     const ext = brandingExt(c.req.path, asset);
     if (!ext) return c.notFound();
     const branding = join(config.uploadDir, 'branding', `${asset}.${ext}`);
-    const legacy = join(runtimePaths.legacyPublicDir, `${asset}.${ext}`);
+    const fallback = join(runtimePaths.serverPublicDir, `${asset}.${ext}`);
     const acceptEncoding = c.req.header('accept-encoding') || '';
-    const direct = (await fileResponse(branding, acceptEncoding)) || (await fileResponse(legacy, acceptEncoding));
+    const direct = (await fileResponse(branding, acceptEncoding)) || (await fileResponse(fallback, acceptEncoding));
     if (direct) return direct;
     if (asset === 'favicon' && ext !== 'ico') {
       const ico = join(config.uploadDir, 'branding', 'favicon.ico');
-      const legacyIco = join(runtimePaths.legacyPublicDir, 'favicon.ico');
-      return (await fileResponse(ico, acceptEncoding)) || (await fileResponse(legacyIco, acceptEncoding)) || c.notFound();
+      const fallbackIco = join(runtimePaths.serverPublicDir, 'favicon.ico');
+      return (await fileResponse(ico, acceptEncoding)) || (await fileResponse(fallbackIco, acceptEncoding)) || c.notFound();
     }
     return c.notFound();
   };
@@ -161,51 +158,6 @@ export function serveStaticFiles(app: Hono) {
     }
   }
 
-  app.get('/static/globals.css', async (c) => {
-    const bundled = Bun.file(join('app/blog/dist', 'globals.css'));
-    if (await bundled.exists()) {
-      return new Response(bundled, {
-        headers: {
-          'content-type': 'text/css; charset=utf-8',
-          'cache-control': 'no-cache, no-store, must-revalidate',
-          pragma: 'no-cache',
-          expires: '0',
-        },
-      });
-    }
-    const file = Bun.file(join(runtimePaths.webAppDir, 'app', 'globals.css'));
-    if (!(await file.exists())) return c.notFound();
-    return new Response(file, { headers: { 'content-type': 'text/css; charset=utf-8' } });
-  });
-
-  app.get('/static/client.js', async (c) => {
-    const file = Bun.file(join('app/blog/dist', 'client.js'));
-    if (!(await file.exists())) {
-      return new Response('export {};', { headers: { 'content-type': 'application/javascript; charset=utf-8' } });
-    }
-    return new Response(file, {
-      headers: {
-        'content-type': 'application/javascript; charset=utf-8',
-        'cache-control': 'no-cache, no-store, must-revalidate',
-        pragma: 'no-cache',
-        expires: '0',
-      },
-    });
-  });
-
-  app.get('/static/client.css', async (c) => {
-    const file = Bun.file(join('app/blog/dist', 'client.css'));
-    if (!(await file.exists())) return c.notFound();
-    return new Response(file, {
-      headers: {
-        'content-type': 'text/css; charset=utf-8',
-        'cache-control': 'no-cache, no-store, must-revalidate',
-        pragma: 'no-cache',
-        expires: '0',
-      },
-    });
-  });
-
   app.get('/assets/*', async (c) => {
     const rest = c.req.path.replace(/^\/assets\/?/, '');
     if (!rest) return c.notFound();
@@ -232,21 +184,15 @@ export function serveStaticFiles(app: Hono) {
 
   app.get('/static/*', async (c) => {
     const rest = c.req.path.replace(/^\/static\/?/, '');
-    if (!rest || rest === 'globals.css' || rest === 'client.js' || rest === 'client.css') return c.notFound();
+    if (!rest) return c.notFound();
     const acceptEncoding = c.req.header('accept-encoding') || '';
-    const blogPath = safeJoin('app/blog/dist', rest);
-    const blogHit = await fileResponse(blogPath, acceptEncoding);
-    if (blogHit) return blogHit;
     const publicPath = safeJoin(join(runtimePaths.webAppDir, 'public', 'static'), rest);
     return (await fileResponse(publicPath, acceptEncoding)) || c.notFound();
   });
   app.on('HEAD', '/static/*', async (c) => {
     const rest = c.req.path.replace(/^\/static\/?/, '');
-    if (!rest || rest === 'globals.css' || rest === 'client.js' || rest === 'client.css') return c.notFound();
+    if (!rest) return c.notFound();
     const acceptEncoding = c.req.header('accept-encoding') || '';
-    const blogPath = safeJoin('app/blog/dist', rest);
-    const blogHit = await fileResponse(blogPath, acceptEncoding);
-    if (blogHit) return blogHit;
     const publicPath = safeJoin(join(runtimePaths.webAppDir, 'public', 'static'), rest);
     return (await fileResponse(publicPath, acceptEncoding)) || c.notFound();
   });

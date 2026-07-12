@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import PostContent from './PostContent';
 import TableOfContents from './TableOfContents';
 import AISummary from './AISummary';

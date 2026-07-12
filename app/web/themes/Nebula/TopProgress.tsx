@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname } from '@/lib/navigation';
 
 /**
- * Nebula 全局顶部进度条 —— 给 Next.js App Router 的 client-side 路由
+ * Nebula 全局顶部进度条 - 跟随 TanStack Router 的客户端导航
  * 加一个 GitHub / YouTube 式的细蓝条 loading。
  *
  * 触发：

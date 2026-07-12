@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import PostLink from '@/components/blog/PostLink';
 import { useThemeContext } from '@/lib/theme-context';
 import { useLazyVisible } from '@/lib/use-lazy-visible';
 import AzureProfileCard from './ProfileCard';
 
-const API = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+const API = '/api/v1';
 
 let latestCommentsCache: any[] | null = null;
 

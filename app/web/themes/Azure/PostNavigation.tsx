@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import PostLink from '@/components/blog/PostLink';
 import SharedFadeCover from '@/components/blog/FadeCover';
 import LoadingSpinner from '@/components/blog/LoadingSpinner';
@@ -117,7 +117,7 @@ interface NavigationData {
   feeds: FeedItem[];
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+const API_BASE = '/api/v1';
 
 export default function PostNavigation({ postId, coverUrl, pageSize }: { postId: number; coverUrl?: string; pageSize?: number }) {
   const { options, timeZone } = useThemeContext();

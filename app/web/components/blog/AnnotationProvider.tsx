@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { useAuthStore } from '@/lib/store';
 
 const API_BASE = typeof window !== 'undefined'
-  ? (process.env.NEXT_PUBLIC_API_URL || '/api/v1')
+  ? ('/api/v1')
   : '';
 
 export interface Annotation {

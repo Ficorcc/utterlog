@@ -5,7 +5,7 @@ import { usePathname } from '@/lib/navigation';
 import { getVisitorId, getFingerprint } from '@/lib/fingerprint';
 import { useAuthStore } from '@/lib/store';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+const API_URL = '/api/v1';
 
 type PersistHydrationApi = {
   hasHydrated?: () => boolean;

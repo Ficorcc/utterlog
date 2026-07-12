@@ -2,7 +2,7 @@
  * Theme System — Dynamic theme loading and management
  *
  * Built-in theme source lives in app/web/themes/{ThemeName}/ and is statically
- * imported for Next.js SSR. Runtime-uploaded theme packages live in the API
+ * imported for TanStack Start SSR. Runtime-uploaded theme packages live in the API
  * container under content/themes/{ThemeName}/; their public assets are served
  * from /themes/{ThemeName}/...
  *
@@ -33,7 +33,7 @@ export interface ThemeManifest {
   features?: string[];
 }
 
-// Built-in blog themes shared by the legacy renderer and TanStack Start.
+// Built-in blog themes rendered by TanStack Start.
 import type { ComponentType, ReactNode } from 'react';
 import {
   DEFAULT_BLOG_THEME,

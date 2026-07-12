@@ -14,7 +14,7 @@ blog.example.com {
     encode gzip zstd
 
     # Long-cache immutable chunks
-    @static path /_next/static/* /admin/assets/*
+    @static path /assets/* /admin/assets/*
     handle @static {
         header Cache-Control "public, max-age=31536000, immutable"
         reverse_proxy 127.0.0.1:9260

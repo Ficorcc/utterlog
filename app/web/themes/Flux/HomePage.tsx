@@ -7,12 +7,12 @@ import FadeCover from '@/components/blog/FadeCover';
 import { randomCoverUrl } from '@/lib/blog-image';
 import { useThemeContext } from '@/lib/theme-context';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import { getCategoryIcon } from './constants';
 import PostLink from '@/components/blog/PostLink';
 import { useLazyVisible } from '@/lib/use-lazy-visible';
 
-const API = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+const API = '/api/v1';
 const ACCENT = '#0052D9';
 
 const MODES = [

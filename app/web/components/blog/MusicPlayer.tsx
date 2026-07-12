@@ -24,7 +24,7 @@ function parseLrc(lrc: string): LrcLine[] {
 
 const ACCENT = '#0052D9';
 const H = 160;
-const MUSIC_API = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+const MUSIC_API = '/api/v1';
 
 export default function MusicPlayer({ title, artist, cover, url, platform = 'netease', id }: MusicPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);

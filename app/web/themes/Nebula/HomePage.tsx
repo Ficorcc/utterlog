@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import { useState } from 'react';
 import PostLink from '@/components/blog/PostLink';
 import { getPosts } from '@/lib/blog-api';
@@ -98,7 +98,7 @@ export default function HomePage({
   archiveStats = {},
   latestMoment = null,
   latestComments = [],
-  // perPage 来自 server (`/app/(blog)/page.tsx` → 读 admin 选项
+  // perPage 来自 Start server loader，读取 admin 选项
   // `posts_per_page`)。之前 Nebula 写死 const PER_PAGE = 10 → 客户端
   // 切分类 / 翻页 AJAX 时永远按 10 拉，跟 SSR 首屏数量 + totalPages 都
   // 对不上。fallback 10 跟 server 的 fallback 保持一致。

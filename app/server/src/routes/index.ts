@@ -3,8 +3,8 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { config } from '../config';
 import { bodySizeLimit, rateLimit, securityDefense, securityHeaders } from '../http/security';
+import { installRedirect } from '../http/install-redirect';
 import { serveStaticFiles } from '../static/files';
-import { handleBlogRequest } from '../web/router';
 import { handleStartApiRequest, handleStartRequest } from '../web/start';
 
 export function matchCorsOrigin(origin: string | undefined, corsOrigin: string, appUrl: string) {
@@ -45,7 +45,7 @@ async function startApiResponse(c: Context) {
   }, 503);
 }
 
-export function createApp(_dbReady: boolean) {
+export function createApp(dbReady: boolean) {
   const app = new Hono();
 
   app.onError((error, c) => {
@@ -82,9 +82,10 @@ export function createApp(_dbReady: boolean) {
     if (c.req.path.startsWith('/api/')) {
       return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'api route not found' } }, 404);
     }
-    const response = await handleBlogRequest(c.req.raw);
-    if (response) return response;
-    return c.html('<!doctype html><html><body><h1>404</h1></body></html>', 404);
+    const redirect = await installRedirect(c.req.raw, dbReady);
+    if (redirect) return redirect;
+    const response = await handleStartRequest(c.req.raw);
+    return response || c.text('TanStack Start service unavailable', 503);
   });
 
   return app;

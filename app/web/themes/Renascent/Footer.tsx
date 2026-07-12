@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import { useReaderChatStore } from '@/lib/store';
 import { useThemeContext } from '@/lib/theme-context';
 

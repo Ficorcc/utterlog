@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import PostLink from '@/components/blog/PostLink';
 import { useLazyVisible } from '@/lib/use-lazy-visible';
 
-const API = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+const API = '/api/v1';
 
 let latestCommentsCache: any[] | null = null;
 

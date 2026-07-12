@@ -1,13 +1,13 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/AppLink';
 import { usePathname } from '@/lib/navigation';
 import { FormEvent, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
 import toast from 'react-hot-toast';
 import { buildPermalink } from '@/lib/permalink';
 import { useThemeContext, type MenuItem } from '@/lib/theme-context';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+const API_BASE = '/api/v1';
 
 interface HeaderButton {
   icon: string;
