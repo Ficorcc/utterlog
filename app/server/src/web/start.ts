@@ -48,6 +48,10 @@ export function isStartNativeApiRequest(request: Request) {
     return method === 'POST';
   }
   if (url.pathname === '/api/v1/auth/me') return method === 'GET';
+  if (url.pathname === '/api/v1/profile') return method === 'GET' || method === 'PUT';
+  if (url.pathname === '/api/v1/profile/send-code') return method === 'POST';
+  if (url.pathname === '/api/v1/auth/password') return method === 'PUT';
+  if (url.pathname === '/api/v1/auth/forgot-password' || url.pathname === '/api/v1/auth/reset-password') return method === 'POST';
   if (url.pathname === '/api/v1/comments/batch') return method === 'POST';
   if (/^\/api\/v1\/comments\/\d+$/.test(url.pathname)) {
     return method === 'PUT' || method === 'PATCH' || method === 'DELETE';

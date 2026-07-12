@@ -12,12 +12,17 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostsSlugRouteImport } from './routes/posts/$slug'
+import { Route as ApiV1ProfileIndexRouteImport } from './routes/api/v1/profile/index'
+import { Route as ApiV1ProfileSendCodeRouteImport } from './routes/api/v1/profile/send-code'
 import { Route as ApiV1CommentsBatchRouteImport } from './routes/api/v1/comments/batch'
 import { Route as ApiV1CommentsIdRouteImport } from './routes/api/v1/comments/$id'
+import { Route as ApiV1AuthResetPasswordRouteImport } from './routes/api/v1/auth/reset-password'
 import { Route as ApiV1AuthRefreshRouteImport } from './routes/api/v1/auth/refresh'
+import { Route as ApiV1AuthPasswordRouteImport } from './routes/api/v1/auth/password'
 import { Route as ApiV1AuthMeRouteImport } from './routes/api/v1/auth/me'
 import { Route as ApiV1AuthLogoutRouteImport } from './routes/api/v1/auth/logout'
 import { Route as ApiV1AuthLoginRouteImport } from './routes/api/v1/auth/login'
+import { Route as ApiV1AuthForgotPasswordRouteImport } from './routes/api/v1/auth/forgot-password'
 
 const SplatRoute = SplatRouteImport.update({
   id: '/$',
@@ -34,6 +39,16 @@ const PostsSlugRoute = PostsSlugRouteImport.update({
   path: '/posts/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1ProfileIndexRoute = ApiV1ProfileIndexRouteImport.update({
+  id: '/api/v1/profile/',
+  path: '/api/v1/profile/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1ProfileSendCodeRoute = ApiV1ProfileSendCodeRouteImport.update({
+  id: '/api/v1/profile/send-code',
+  path: '/api/v1/profile/send-code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1CommentsBatchRoute = ApiV1CommentsBatchRouteImport.update({
   id: '/api/v1/comments/batch',
   path: '/api/v1/comments/batch',
@@ -44,9 +59,19 @@ const ApiV1CommentsIdRoute = ApiV1CommentsIdRouteImport.update({
   path: '/api/v1/comments/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1AuthResetPasswordRoute = ApiV1AuthResetPasswordRouteImport.update({
+  id: '/api/v1/auth/reset-password',
+  path: '/api/v1/auth/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1AuthRefreshRoute = ApiV1AuthRefreshRouteImport.update({
   id: '/api/v1/auth/refresh',
   path: '/api/v1/auth/refresh',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1AuthPasswordRoute = ApiV1AuthPasswordRouteImport.update({
+  id: '/api/v1/auth/password',
+  path: '/api/v1/auth/password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1AuthMeRoute = ApiV1AuthMeRouteImport.update({
@@ -64,40 +89,60 @@ const ApiV1AuthLoginRoute = ApiV1AuthLoginRouteImport.update({
   path: '/api/v1/auth/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1AuthForgotPasswordRoute = ApiV1AuthForgotPasswordRouteImport.update({
+  id: '/api/v1/auth/forgot-password',
+  path: '/api/v1/auth/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/posts/$slug': typeof PostsSlugRoute
+  '/api/v1/auth/forgot-password': typeof ApiV1AuthForgotPasswordRoute
   '/api/v1/auth/login': typeof ApiV1AuthLoginRoute
   '/api/v1/auth/logout': typeof ApiV1AuthLogoutRoute
   '/api/v1/auth/me': typeof ApiV1AuthMeRoute
+  '/api/v1/auth/password': typeof ApiV1AuthPasswordRoute
   '/api/v1/auth/refresh': typeof ApiV1AuthRefreshRoute
+  '/api/v1/auth/reset-password': typeof ApiV1AuthResetPasswordRoute
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRoute
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
+  '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
+  '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/posts/$slug': typeof PostsSlugRoute
+  '/api/v1/auth/forgot-password': typeof ApiV1AuthForgotPasswordRoute
   '/api/v1/auth/login': typeof ApiV1AuthLoginRoute
   '/api/v1/auth/logout': typeof ApiV1AuthLogoutRoute
   '/api/v1/auth/me': typeof ApiV1AuthMeRoute
+  '/api/v1/auth/password': typeof ApiV1AuthPasswordRoute
   '/api/v1/auth/refresh': typeof ApiV1AuthRefreshRoute
+  '/api/v1/auth/reset-password': typeof ApiV1AuthResetPasswordRoute
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRoute
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
+  '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
+  '/api/v1/profile': typeof ApiV1ProfileIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/posts/$slug': typeof PostsSlugRoute
+  '/api/v1/auth/forgot-password': typeof ApiV1AuthForgotPasswordRoute
   '/api/v1/auth/login': typeof ApiV1AuthLoginRoute
   '/api/v1/auth/logout': typeof ApiV1AuthLogoutRoute
   '/api/v1/auth/me': typeof ApiV1AuthMeRoute
+  '/api/v1/auth/password': typeof ApiV1AuthPasswordRoute
   '/api/v1/auth/refresh': typeof ApiV1AuthRefreshRoute
+  '/api/v1/auth/reset-password': typeof ApiV1AuthResetPasswordRoute
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRoute
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
+  '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
+  '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -105,46 +150,66 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/posts/$slug'
+    | '/api/v1/auth/forgot-password'
     | '/api/v1/auth/login'
     | '/api/v1/auth/logout'
     | '/api/v1/auth/me'
+    | '/api/v1/auth/password'
     | '/api/v1/auth/refresh'
+    | '/api/v1/auth/reset-password'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
+    | '/api/v1/profile/send-code'
+    | '/api/v1/profile/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/$'
     | '/posts/$slug'
+    | '/api/v1/auth/forgot-password'
     | '/api/v1/auth/login'
     | '/api/v1/auth/logout'
     | '/api/v1/auth/me'
+    | '/api/v1/auth/password'
     | '/api/v1/auth/refresh'
+    | '/api/v1/auth/reset-password'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
+    | '/api/v1/profile/send-code'
+    | '/api/v1/profile'
   id:
     | '__root__'
     | '/'
     | '/$'
     | '/posts/$slug'
+    | '/api/v1/auth/forgot-password'
     | '/api/v1/auth/login'
     | '/api/v1/auth/logout'
     | '/api/v1/auth/me'
+    | '/api/v1/auth/password'
     | '/api/v1/auth/refresh'
+    | '/api/v1/auth/reset-password'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
+    | '/api/v1/profile/send-code'
+    | '/api/v1/profile/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
   PostsSlugRoute: typeof PostsSlugRoute
+  ApiV1AuthForgotPasswordRoute: typeof ApiV1AuthForgotPasswordRoute
   ApiV1AuthLoginRoute: typeof ApiV1AuthLoginRoute
   ApiV1AuthLogoutRoute: typeof ApiV1AuthLogoutRoute
   ApiV1AuthMeRoute: typeof ApiV1AuthMeRoute
+  ApiV1AuthPasswordRoute: typeof ApiV1AuthPasswordRoute
   ApiV1AuthRefreshRoute: typeof ApiV1AuthRefreshRoute
+  ApiV1AuthResetPasswordRoute: typeof ApiV1AuthResetPasswordRoute
   ApiV1CommentsIdRoute: typeof ApiV1CommentsIdRoute
   ApiV1CommentsBatchRoute: typeof ApiV1CommentsBatchRoute
+  ApiV1ProfileSendCodeRoute: typeof ApiV1ProfileSendCodeRoute
+  ApiV1ProfileIndexRoute: typeof ApiV1ProfileIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -170,6 +235,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/profile/': {
+      id: '/api/v1/profile/'
+      path: '/api/v1/profile'
+      fullPath: '/api/v1/profile/'
+      preLoaderRoute: typeof ApiV1ProfileIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/profile/send-code': {
+      id: '/api/v1/profile/send-code'
+      path: '/api/v1/profile/send-code'
+      fullPath: '/api/v1/profile/send-code'
+      preLoaderRoute: typeof ApiV1ProfileSendCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/comments/batch': {
       id: '/api/v1/comments/batch'
       path: '/api/v1/comments/batch'
@@ -184,11 +263,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1CommentsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/auth/reset-password': {
+      id: '/api/v1/auth/reset-password'
+      path: '/api/v1/auth/reset-password'
+      fullPath: '/api/v1/auth/reset-password'
+      preLoaderRoute: typeof ApiV1AuthResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/auth/refresh': {
       id: '/api/v1/auth/refresh'
       path: '/api/v1/auth/refresh'
       fullPath: '/api/v1/auth/refresh'
       preLoaderRoute: typeof ApiV1AuthRefreshRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/auth/password': {
+      id: '/api/v1/auth/password'
+      path: '/api/v1/auth/password'
+      fullPath: '/api/v1/auth/password'
+      preLoaderRoute: typeof ApiV1AuthPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/auth/me': {
@@ -212,6 +305,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/auth/forgot-password': {
+      id: '/api/v1/auth/forgot-password'
+      path: '/api/v1/auth/forgot-password'
+      fullPath: '/api/v1/auth/forgot-password'
+      preLoaderRoute: typeof ApiV1AuthForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -219,12 +319,17 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
   PostsSlugRoute: PostsSlugRoute,
+  ApiV1AuthForgotPasswordRoute: ApiV1AuthForgotPasswordRoute,
   ApiV1AuthLoginRoute: ApiV1AuthLoginRoute,
   ApiV1AuthLogoutRoute: ApiV1AuthLogoutRoute,
   ApiV1AuthMeRoute: ApiV1AuthMeRoute,
+  ApiV1AuthPasswordRoute: ApiV1AuthPasswordRoute,
   ApiV1AuthRefreshRoute: ApiV1AuthRefreshRoute,
+  ApiV1AuthResetPasswordRoute: ApiV1AuthResetPasswordRoute,
   ApiV1CommentsIdRoute: ApiV1CommentsIdRoute,
   ApiV1CommentsBatchRoute: ApiV1CommentsBatchRoute,
+  ApiV1ProfileSendCodeRoute: ApiV1ProfileSendCodeRoute,
+  ApiV1ProfileIndexRoute: ApiV1ProfileIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
