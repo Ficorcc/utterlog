@@ -58,6 +58,7 @@ import { Route as ApiV1CommentsIdRouteImport } from './routes/api/v1/comments/$i
 import { Route as ApiV1CategoriesIdRouteImport } from './routes/api/v1/categories/$id'
 import { Route as ApiV1CaptchaImageRouteImport } from './routes/api/v1/captcha/image'
 import { Route as ApiV1CaptchaChallengeRouteImport } from './routes/api/v1/captcha/challenge'
+import { Route as ApiV1BackupActionRouteImport } from './routes/api/v1/backup/$action'
 import { Route as ApiV1AuthResetPasswordRouteImport } from './routes/api/v1/auth/reset-password'
 import { Route as ApiV1AuthRefreshRouteImport } from './routes/api/v1/auth/refresh'
 import { Route as ApiV1AuthPasswordRouteImport } from './routes/api/v1/auth/password'
@@ -81,6 +82,7 @@ import { Route as ApiV1NotificationsIdReadRouteImport } from './routes/api/v1/no
 import { Route as ApiV1CommentsIdReplyRouteImport } from './routes/api/v1/comments/$id/reply'
 import { Route as ApiV1CommentsIdEditRouteImport } from './routes/api/v1/comments/$id/edit'
 import { Route as ApiV1CommentsIdApproveRouteImport } from './routes/api/v1/comments/$id/approve'
+import { Route as ApiV1BackupDownloadFilenameRouteImport } from './routes/api/v1/backup/download/$filename'
 import { Route as ApiV1AuthTotpActionRouteImport } from './routes/api/v1/auth/totp/$action'
 import { Route as ApiV1AuthPasskeyAvailableRouteImport } from './routes/api/v1/auth/passkey/available'
 import { Route as ApiV1AlbumsIdPhotosRouteImport } from './routes/api/v1/albums/$id/photos'
@@ -338,6 +340,11 @@ const ApiV1CaptchaChallengeRoute = ApiV1CaptchaChallengeRouteImport.update({
   path: '/api/v1/captcha/challenge',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1BackupActionRoute = ApiV1BackupActionRouteImport.update({
+  id: '/api/v1/backup/$action',
+  path: '/api/v1/backup/$action',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1AuthResetPasswordRoute = ApiV1AuthResetPasswordRouteImport.update({
   id: '/api/v1/auth/reset-password',
   path: '/api/v1/auth/reset-password',
@@ -455,6 +462,12 @@ const ApiV1CommentsIdApproveRoute = ApiV1CommentsIdApproveRouteImport.update({
   path: '/approve',
   getParentRoute: () => ApiV1CommentsIdRoute,
 } as any)
+const ApiV1BackupDownloadFilenameRoute =
+  ApiV1BackupDownloadFilenameRouteImport.update({
+    id: '/api/v1/backup/download/$filename',
+    path: '/api/v1/backup/download/$filename',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiV1AuthTotpActionRoute = ApiV1AuthTotpActionRouteImport.update({
   id: '/api/v1/auth/totp/$action',
   path: '/api/v1/auth/totp/$action',
@@ -510,6 +523,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/auth/password': typeof ApiV1AuthPasswordRoute
   '/api/v1/auth/refresh': typeof ApiV1AuthRefreshRoute
   '/api/v1/auth/reset-password': typeof ApiV1AuthResetPasswordRoute
+  '/api/v1/backup/$action': typeof ApiV1BackupActionRoute
   '/api/v1/captcha/challenge': typeof ApiV1CaptchaChallengeRoute
   '/api/v1/captcha/image': typeof ApiV1CaptchaImageRoute
   '/api/v1/categories/$id': typeof ApiV1CategoriesIdRoute
@@ -548,6 +562,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/albums/$id/photos': typeof ApiV1AlbumsIdPhotosRouteWithChildren
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
   '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
+  '/api/v1/backup/download/$filename': typeof ApiV1BackupDownloadFilenameRoute
   '/api/v1/comments/$id/approve': typeof ApiV1CommentsIdApproveRoute
   '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
   '/api/v1/comments/$id/reply': typeof ApiV1CommentsIdReplyRoute
@@ -589,6 +604,7 @@ export interface FileRoutesByTo {
   '/api/v1/auth/password': typeof ApiV1AuthPasswordRoute
   '/api/v1/auth/refresh': typeof ApiV1AuthRefreshRoute
   '/api/v1/auth/reset-password': typeof ApiV1AuthResetPasswordRoute
+  '/api/v1/backup/$action': typeof ApiV1BackupActionRoute
   '/api/v1/captcha/challenge': typeof ApiV1CaptchaChallengeRoute
   '/api/v1/captcha/image': typeof ApiV1CaptchaImageRoute
   '/api/v1/categories/$id': typeof ApiV1CategoriesIdRoute
@@ -627,6 +643,7 @@ export interface FileRoutesByTo {
   '/api/v1/albums/$id/photos': typeof ApiV1AlbumsIdPhotosRouteWithChildren
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
   '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
+  '/api/v1/backup/download/$filename': typeof ApiV1BackupDownloadFilenameRoute
   '/api/v1/comments/$id/approve': typeof ApiV1CommentsIdApproveRoute
   '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
   '/api/v1/comments/$id/reply': typeof ApiV1CommentsIdReplyRoute
@@ -669,6 +686,7 @@ export interface FileRoutesById {
   '/api/v1/auth/password': typeof ApiV1AuthPasswordRoute
   '/api/v1/auth/refresh': typeof ApiV1AuthRefreshRoute
   '/api/v1/auth/reset-password': typeof ApiV1AuthResetPasswordRoute
+  '/api/v1/backup/$action': typeof ApiV1BackupActionRoute
   '/api/v1/captcha/challenge': typeof ApiV1CaptchaChallengeRoute
   '/api/v1/captcha/image': typeof ApiV1CaptchaImageRoute
   '/api/v1/categories/$id': typeof ApiV1CategoriesIdRoute
@@ -707,6 +725,7 @@ export interface FileRoutesById {
   '/api/v1/albums/$id/photos': typeof ApiV1AlbumsIdPhotosRouteWithChildren
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
   '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
+  '/api/v1/backup/download/$filename': typeof ApiV1BackupDownloadFilenameRoute
   '/api/v1/comments/$id/approve': typeof ApiV1CommentsIdApproveRoute
   '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
   '/api/v1/comments/$id/reply': typeof ApiV1CommentsIdReplyRoute
@@ -750,6 +769,7 @@ export interface FileRouteTypes {
     | '/api/v1/auth/password'
     | '/api/v1/auth/refresh'
     | '/api/v1/auth/reset-password'
+    | '/api/v1/backup/$action'
     | '/api/v1/captcha/challenge'
     | '/api/v1/captcha/image'
     | '/api/v1/categories/$id'
@@ -788,6 +808,7 @@ export interface FileRouteTypes {
     | '/api/v1/albums/$id/photos'
     | '/api/v1/auth/passkey/available'
     | '/api/v1/auth/totp/$action'
+    | '/api/v1/backup/download/$filename'
     | '/api/v1/comments/$id/approve'
     | '/api/v1/comments/$id/edit'
     | '/api/v1/comments/$id/reply'
@@ -829,6 +850,7 @@ export interface FileRouteTypes {
     | '/api/v1/auth/password'
     | '/api/v1/auth/refresh'
     | '/api/v1/auth/reset-password'
+    | '/api/v1/backup/$action'
     | '/api/v1/captcha/challenge'
     | '/api/v1/captcha/image'
     | '/api/v1/categories/$id'
@@ -867,6 +889,7 @@ export interface FileRouteTypes {
     | '/api/v1/albums/$id/photos'
     | '/api/v1/auth/passkey/available'
     | '/api/v1/auth/totp/$action'
+    | '/api/v1/backup/download/$filename'
     | '/api/v1/comments/$id/approve'
     | '/api/v1/comments/$id/edit'
     | '/api/v1/comments/$id/reply'
@@ -908,6 +931,7 @@ export interface FileRouteTypes {
     | '/api/v1/auth/password'
     | '/api/v1/auth/refresh'
     | '/api/v1/auth/reset-password'
+    | '/api/v1/backup/$action'
     | '/api/v1/captcha/challenge'
     | '/api/v1/captcha/image'
     | '/api/v1/categories/$id'
@@ -946,6 +970,7 @@ export interface FileRouteTypes {
     | '/api/v1/albums/$id/photos'
     | '/api/v1/auth/passkey/available'
     | '/api/v1/auth/totp/$action'
+    | '/api/v1/backup/download/$filename'
     | '/api/v1/comments/$id/approve'
     | '/api/v1/comments/$id/edit'
     | '/api/v1/comments/$id/reply'
@@ -987,6 +1012,7 @@ export interface RootRouteChildren {
   ApiV1AuthPasswordRoute: typeof ApiV1AuthPasswordRoute
   ApiV1AuthRefreshRoute: typeof ApiV1AuthRefreshRoute
   ApiV1AuthResetPasswordRoute: typeof ApiV1AuthResetPasswordRoute
+  ApiV1BackupActionRoute: typeof ApiV1BackupActionRoute
   ApiV1CaptchaChallengeRoute: typeof ApiV1CaptchaChallengeRoute
   ApiV1CaptchaImageRoute: typeof ApiV1CaptchaImageRoute
   ApiV1CommentsIdRoute: typeof ApiV1CommentsIdRouteWithChildren
@@ -1022,6 +1048,7 @@ export interface RootRouteChildren {
   ApiV1AlbumsIdPhotosRoute: typeof ApiV1AlbumsIdPhotosRouteWithChildren
   ApiV1AuthPasskeyAvailableRoute: typeof ApiV1AuthPasskeyAvailableRoute
   ApiV1AuthTotpActionRoute: typeof ApiV1AuthTotpActionRoute
+  ApiV1BackupDownloadFilenameRoute: typeof ApiV1BackupDownloadFilenameRoute
   ApiV1PlaylistsIdSongsRoute: typeof ApiV1PlaylistsIdSongsRoute
   ApiV1PublicAlbumsIdRoute: typeof ApiV1PublicAlbumsIdRoute
   ApiV1PublicAlbumsIndexRoute: typeof ApiV1PublicAlbumsIndexRoute
@@ -1373,6 +1400,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1CaptchaChallengeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/backup/$action': {
+      id: '/api/v1/backup/$action'
+      path: '/api/v1/backup/$action'
+      fullPath: '/api/v1/backup/$action'
+      preLoaderRoute: typeof ApiV1BackupActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/auth/reset-password': {
       id: '/api/v1/auth/reset-password'
       path: '/api/v1/auth/reset-password'
@@ -1533,6 +1567,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/v1/comments/$id/approve'
       preLoaderRoute: typeof ApiV1CommentsIdApproveRouteImport
       parentRoute: typeof ApiV1CommentsIdRoute
+    }
+    '/api/v1/backup/download/$filename': {
+      id: '/api/v1/backup/download/$filename'
+      path: '/api/v1/backup/download/$filename'
+      fullPath: '/api/v1/backup/download/$filename'
+      preLoaderRoute: typeof ApiV1BackupDownloadFilenameRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/v1/auth/totp/$action': {
       id: '/api/v1/auth/totp/$action'
@@ -1703,6 +1744,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1AuthPasswordRoute: ApiV1AuthPasswordRoute,
   ApiV1AuthRefreshRoute: ApiV1AuthRefreshRoute,
   ApiV1AuthResetPasswordRoute: ApiV1AuthResetPasswordRoute,
+  ApiV1BackupActionRoute: ApiV1BackupActionRoute,
   ApiV1CaptchaChallengeRoute: ApiV1CaptchaChallengeRoute,
   ApiV1CaptchaImageRoute: ApiV1CaptchaImageRoute,
   ApiV1CommentsIdRoute: ApiV1CommentsIdRouteWithChildren,
@@ -1738,6 +1780,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1AlbumsIdPhotosRoute: ApiV1AlbumsIdPhotosRouteWithChildren,
   ApiV1AuthPasskeyAvailableRoute: ApiV1AuthPasskeyAvailableRoute,
   ApiV1AuthTotpActionRoute: ApiV1AuthTotpActionRoute,
+  ApiV1BackupDownloadFilenameRoute: ApiV1BackupDownloadFilenameRoute,
   ApiV1PlaylistsIdSongsRoute: ApiV1PlaylistsIdSongsRoute,
   ApiV1PublicAlbumsIdRoute: ApiV1PublicAlbumsIdRoute,
   ApiV1PublicAlbumsIndexRoute: ApiV1PublicAlbumsIndexRoute,

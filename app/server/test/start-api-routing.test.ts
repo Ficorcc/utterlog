@@ -79,6 +79,15 @@ describe('TanStack Start native API routing', () => {
     }
   });
 
+  test('routes backup management to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/backup/stats', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/backup/list', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/backup/create', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/backup/import', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/backup/download/utterlog-backup.zip', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/backup/utterlog-backup.zip', 'DELETE'))).toBe(true);
+  });
+
   test('routes visitor weather to Start', () => {
     expect(isStartNativeApiRequest(request('/api/v1/visitor/weather', 'GET'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/visitor/weather', 'POST'))).toBe(false);

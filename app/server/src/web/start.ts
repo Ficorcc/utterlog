@@ -88,6 +88,10 @@ export function isStartNativeApiRequest(request: Request) {
   if (/^\/api\/v1\/security\/(ban|unban)$/.test(url.pathname)) return method === 'POST';
   if (url.pathname === '/api/v1/system/status' || url.pathname === '/api/v1/admin/stats') return method === 'GET';
   if (url.pathname === '/api/v1/analytics' || /^\/api\/v1\/analytics\/(online|visitors|logs|geoip|map|breakdown)$/.test(url.pathname)) return method === 'GET';
+  if (/^\/api\/v1\/backup\/(stats|list)$/.test(url.pathname)) return method === 'GET';
+  if (/^\/api\/v1\/backup\/(create|import)$/.test(url.pathname)) return method === 'POST';
+  if (/^\/api\/v1\/backup\/download\/[^/]+\.zip$/.test(url.pathname)) return method === 'GET';
+  if (/^\/api\/v1\/backup\/[^/]+\.zip$/.test(url.pathname)) return method === 'DELETE';
   if (url.pathname === '/api/v1/visitor/weather') return method === 'GET';
   if (url.pathname === '/api/v1/coding') return method === 'GET';
   if (url.pathname === '/api/v1/media/upload-branding') return method === 'POST';
