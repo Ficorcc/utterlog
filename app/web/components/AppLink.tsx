@@ -7,12 +7,13 @@ type AppLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> & {
   prefetch?: boolean;
 };
 
-function isExternalHref(href: string) {
-  return /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(href);
+export function isDocumentHref(href: string) {
+  return /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(href)
+    || /^\/admin(?:\/|[?#]|$)/.test(href);
 }
 
 export default function AppLink({ href, children, prefetch = true, ...rest }: AppLinkProps) {
-  if (isExternalHref(href)) {
+  if (isDocumentHref(href)) {
     return <a href={href} {...rest}>{children}</a>;
   }
 
