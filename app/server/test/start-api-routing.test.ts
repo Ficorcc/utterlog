@@ -64,6 +64,16 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/media/upload-branding', 'GET'))).toBe(false);
   });
 
+  test('routes category and tag management to Start', () => {
+    for (const resource of ['categories', 'tags']) {
+      expect(isStartNativeApiRequest(request(`/api/v1/${resource}`, 'GET'))).toBe(true);
+      expect(isStartNativeApiRequest(request(`/api/v1/${resource}`, 'POST'))).toBe(true);
+      expect(isStartNativeApiRequest(request(`/api/v1/${resource}/7`, 'GET'))).toBe(true);
+      expect(isStartNativeApiRequest(request(`/api/v1/${resource}/7`, 'PUT'))).toBe(true);
+      expect(isStartNativeApiRequest(request(`/api/v1/${resource}/7`, 'DELETE'))).toBe(true);
+    }
+  });
+
   test('routes comment captcha generation to Start', () => {
     expect(isStartNativeApiRequest(request('/api/v1/captcha/challenge', 'GET'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/captcha/image', 'GET'))).toBe(true);
@@ -76,7 +86,7 @@ describe('TanStack Start native API routing', () => {
       const authenticated = isStartNativeApiRequest(new Request(`https://example.test${path}`, {
         headers: { authorization: 'Bearer admin-token' },
       }));
-      expect(authenticated).toBe(path === '/api/v1/options');
+      expect(authenticated).toBe(['/api/v1/options', '/api/v1/categories', '/api/v1/tags'].includes(path));
     }
     expect(isStartNativeApiRequest(request('/api/v1/comments', 'GET'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/posts', 'POST'))).toBe(false);

@@ -1,16 +1,23 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { listMetas } from '../../../../../server/src/public-read';
-import { apiOk, apiPaginated } from '../../../server/http';
+import { listMetaRecords, saveMetaRecord } from '../../../../../server/src/services/metas';
+import { apiOk, apiPaginated, withAdmin } from '../../../server/http';
 
 export const Route = createFileRoute('/api/v1/categories')({
-  server: { handlers: { GET: async ({ request }) => {
-    const query = new URL(request.url).searchParams;
-    const rows = await listMetas('category', true);
-    if (!query.has('page') && !query.has('per_page')) return apiOk(rows);
-    const page = Math.max(1, Number(query.get('page') || 1) || 1);
-    const perPage = Math.min(500, Math.max(1, Number(query.get('per_page') || 20) || 20));
-    return apiPaginated(rows.slice((page - 1) * perPage, page * perPage), {
-      total: rows.length, page, per_page: perPage, total_pages: Math.max(1, Math.ceil(rows.length / perPage)),
-    });
-  } } },
+  server: { handlers: {
+    GET: async ({ request }) => {
+      const query = new URL(request.url).searchParams;
+      const paginated = ['page', 'per_page', 'limit', 'search', 'q'].some((key) => query.has(key));
+      const result = await listMetaRecords('category', {
+        includeEmpty: true,
+        page: Number(query.get('page') || 1),
+        perPage: Number(query.get('per_page') || query.get('limit') || (paginated ? 20 : 500)),
+        search: query.get('search') || query.get('q') || '',
+      });
+      return paginated ? apiPaginated(result.rows, result.meta) : apiOk(result.rows);
+    },
+    POST: ({ request }) => withAdmin(request, async () => {
+      const id = await saveMetaRecord('category', await request.json().catch(() => ({})));
+      return apiOk({ id });
+    }),
+  } },
 });

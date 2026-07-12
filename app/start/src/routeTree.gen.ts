@@ -28,6 +28,7 @@ import { Route as ApiV1PasskeysIndexRouteImport } from './routes/api/v1/passkeys
 import { Route as ApiV1MomentsIndexRouteImport } from './routes/api/v1/moments/index'
 import { Route as ApiV1CommentsIndexRouteImport } from './routes/api/v1/comments/index'
 import { Route as ApiV1VisitorWeatherRouteImport } from './routes/api/v1/visitor/weather'
+import { Route as ApiV1TagsIdRouteImport } from './routes/api/v1/tags/$id'
 import { Route as ApiV1ProfileSendCodeRouteImport } from './routes/api/v1/profile/send-code'
 import { Route as ApiV1PostsIdRouteImport } from './routes/api/v1/posts/$id'
 import { Route as ApiV1PasskeysIdRouteImport } from './routes/api/v1/passkeys/$id'
@@ -37,6 +38,7 @@ import { Route as ApiV1LinksApplyRouteImport } from './routes/api/v1/links/apply
 import { Route as ApiV1CommentsPendingCountRouteImport } from './routes/api/v1/comments/pending-count'
 import { Route as ApiV1CommentsBatchRouteImport } from './routes/api/v1/comments/batch'
 import { Route as ApiV1CommentsIdRouteImport } from './routes/api/v1/comments/$id'
+import { Route as ApiV1CategoriesIdRouteImport } from './routes/api/v1/categories/$id'
 import { Route as ApiV1CaptchaImageRouteImport } from './routes/api/v1/captcha/image'
 import { Route as ApiV1CaptchaChallengeRouteImport } from './routes/api/v1/captcha/challenge'
 import { Route as ApiV1AuthResetPasswordRouteImport } from './routes/api/v1/auth/reset-password'
@@ -156,6 +158,11 @@ const ApiV1VisitorWeatherRoute = ApiV1VisitorWeatherRouteImport.update({
   path: '/api/v1/visitor/weather',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1TagsIdRoute = ApiV1TagsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiV1TagsRoute,
+} as any)
 const ApiV1ProfileSendCodeRoute = ApiV1ProfileSendCodeRouteImport.update({
   id: '/api/v1/profile/send-code',
   path: '/api/v1/profile/send-code',
@@ -202,6 +209,11 @@ const ApiV1CommentsIdRoute = ApiV1CommentsIdRouteImport.update({
   id: '/api/v1/comments/$id',
   path: '/api/v1/comments/$id',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1CategoriesIdRoute = ApiV1CategoriesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiV1CategoriesRoute,
 } as any)
 const ApiV1CaptchaImageRoute = ApiV1CaptchaImageRouteImport.update({
   id: '/api/v1/captcha/image',
@@ -330,13 +342,13 @@ export interface FileRoutesByFullPath {
   '/admin/$': typeof AdminSplatRoute
   '/posts/$slug': typeof PostsSlugRoute
   '/api/v1/$resource': typeof ApiV1ResourceRoute
-  '/api/v1/categories': typeof ApiV1CategoriesRoute
+  '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
   '/api/v1/coding': typeof ApiV1CodingRoute
   '/api/v1/footprints': typeof ApiV1FootprintsRoute
   '/api/v1/options': typeof ApiV1OptionsRoute
   '/api/v1/owner': typeof ApiV1OwnerRoute
   '/api/v1/posts': typeof ApiV1PostsRouteWithChildren
-  '/api/v1/tags': typeof ApiV1TagsRoute
+  '/api/v1/tags': typeof ApiV1TagsRouteWithChildren
   '/api/v1/archive/stats': typeof ApiV1ArchiveStatsRoute
   '/api/v1/auth/forgot-password': typeof ApiV1AuthForgotPasswordRoute
   '/api/v1/auth/login': typeof ApiV1AuthLoginRoute
@@ -347,6 +359,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/auth/reset-password': typeof ApiV1AuthResetPasswordRoute
   '/api/v1/captcha/challenge': typeof ApiV1CaptchaChallengeRoute
   '/api/v1/captcha/image': typeof ApiV1CaptchaImageRoute
+  '/api/v1/categories/$id': typeof ApiV1CategoriesIdRoute
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRouteWithChildren
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
   '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
@@ -356,6 +369,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
+  '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
   '/api/v1/comments/': typeof ApiV1CommentsIndexRoute
   '/api/v1/moments/': typeof ApiV1MomentsIndexRoute
@@ -383,13 +397,13 @@ export interface FileRoutesByTo {
   '/admin/$': typeof AdminSplatRoute
   '/posts/$slug': typeof PostsSlugRoute
   '/api/v1/$resource': typeof ApiV1ResourceRoute
-  '/api/v1/categories': typeof ApiV1CategoriesRoute
+  '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
   '/api/v1/coding': typeof ApiV1CodingRoute
   '/api/v1/footprints': typeof ApiV1FootprintsRoute
   '/api/v1/options': typeof ApiV1OptionsRoute
   '/api/v1/owner': typeof ApiV1OwnerRoute
   '/api/v1/posts': typeof ApiV1PostsRouteWithChildren
-  '/api/v1/tags': typeof ApiV1TagsRoute
+  '/api/v1/tags': typeof ApiV1TagsRouteWithChildren
   '/api/v1/archive/stats': typeof ApiV1ArchiveStatsRoute
   '/api/v1/auth/forgot-password': typeof ApiV1AuthForgotPasswordRoute
   '/api/v1/auth/login': typeof ApiV1AuthLoginRoute
@@ -400,6 +414,7 @@ export interface FileRoutesByTo {
   '/api/v1/auth/reset-password': typeof ApiV1AuthResetPasswordRoute
   '/api/v1/captcha/challenge': typeof ApiV1CaptchaChallengeRoute
   '/api/v1/captcha/image': typeof ApiV1CaptchaImageRoute
+  '/api/v1/categories/$id': typeof ApiV1CategoriesIdRoute
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRouteWithChildren
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
   '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
@@ -409,6 +424,7 @@ export interface FileRoutesByTo {
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
+  '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
   '/api/v1/comments': typeof ApiV1CommentsIndexRoute
   '/api/v1/moments': typeof ApiV1MomentsIndexRoute
@@ -437,13 +453,13 @@ export interface FileRoutesById {
   '/admin/$': typeof AdminSplatRoute
   '/posts/$slug': typeof PostsSlugRoute
   '/api/v1/$resource': typeof ApiV1ResourceRoute
-  '/api/v1/categories': typeof ApiV1CategoriesRoute
+  '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
   '/api/v1/coding': typeof ApiV1CodingRoute
   '/api/v1/footprints': typeof ApiV1FootprintsRoute
   '/api/v1/options': typeof ApiV1OptionsRoute
   '/api/v1/owner': typeof ApiV1OwnerRoute
   '/api/v1/posts': typeof ApiV1PostsRouteWithChildren
-  '/api/v1/tags': typeof ApiV1TagsRoute
+  '/api/v1/tags': typeof ApiV1TagsRouteWithChildren
   '/api/v1/archive/stats': typeof ApiV1ArchiveStatsRoute
   '/api/v1/auth/forgot-password': typeof ApiV1AuthForgotPasswordRoute
   '/api/v1/auth/login': typeof ApiV1AuthLoginRoute
@@ -454,6 +470,7 @@ export interface FileRoutesById {
   '/api/v1/auth/reset-password': typeof ApiV1AuthResetPasswordRoute
   '/api/v1/captcha/challenge': typeof ApiV1CaptchaChallengeRoute
   '/api/v1/captcha/image': typeof ApiV1CaptchaImageRoute
+  '/api/v1/categories/$id': typeof ApiV1CategoriesIdRoute
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRouteWithChildren
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
   '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
@@ -463,6 +480,7 @@ export interface FileRoutesById {
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
+  '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
   '/api/v1/comments/': typeof ApiV1CommentsIndexRoute
   '/api/v1/moments/': typeof ApiV1MomentsIndexRoute
@@ -509,6 +527,7 @@ export interface FileRouteTypes {
     | '/api/v1/auth/reset-password'
     | '/api/v1/captcha/challenge'
     | '/api/v1/captcha/image'
+    | '/api/v1/categories/$id'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
     | '/api/v1/comments/pending-count'
@@ -518,6 +537,7 @@ export interface FileRouteTypes {
     | '/api/v1/passkeys/$id'
     | '/api/v1/posts/$id'
     | '/api/v1/profile/send-code'
+    | '/api/v1/tags/$id'
     | '/api/v1/visitor/weather'
     | '/api/v1/comments/'
     | '/api/v1/moments/'
@@ -562,6 +582,7 @@ export interface FileRouteTypes {
     | '/api/v1/auth/reset-password'
     | '/api/v1/captcha/challenge'
     | '/api/v1/captcha/image'
+    | '/api/v1/categories/$id'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
     | '/api/v1/comments/pending-count'
@@ -571,6 +592,7 @@ export interface FileRouteTypes {
     | '/api/v1/passkeys/$id'
     | '/api/v1/posts/$id'
     | '/api/v1/profile/send-code'
+    | '/api/v1/tags/$id'
     | '/api/v1/visitor/weather'
     | '/api/v1/comments'
     | '/api/v1/moments'
@@ -615,6 +637,7 @@ export interface FileRouteTypes {
     | '/api/v1/auth/reset-password'
     | '/api/v1/captcha/challenge'
     | '/api/v1/captcha/image'
+    | '/api/v1/categories/$id'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
     | '/api/v1/comments/pending-count'
@@ -624,6 +647,7 @@ export interface FileRouteTypes {
     | '/api/v1/passkeys/$id'
     | '/api/v1/posts/$id'
     | '/api/v1/profile/send-code'
+    | '/api/v1/tags/$id'
     | '/api/v1/visitor/weather'
     | '/api/v1/comments/'
     | '/api/v1/moments/'
@@ -652,13 +676,13 @@ export interface RootRouteChildren {
   AdminSplatRoute: typeof AdminSplatRoute
   PostsSlugRoute: typeof PostsSlugRoute
   ApiV1ResourceRoute: typeof ApiV1ResourceRoute
-  ApiV1CategoriesRoute: typeof ApiV1CategoriesRoute
+  ApiV1CategoriesRoute: typeof ApiV1CategoriesRouteWithChildren
   ApiV1CodingRoute: typeof ApiV1CodingRoute
   ApiV1FootprintsRoute: typeof ApiV1FootprintsRoute
   ApiV1OptionsRoute: typeof ApiV1OptionsRoute
   ApiV1OwnerRoute: typeof ApiV1OwnerRoute
   ApiV1PostsRoute: typeof ApiV1PostsRouteWithChildren
-  ApiV1TagsRoute: typeof ApiV1TagsRoute
+  ApiV1TagsRoute: typeof ApiV1TagsRouteWithChildren
   ApiV1ArchiveStatsRoute: typeof ApiV1ArchiveStatsRoute
   ApiV1AuthForgotPasswordRoute: typeof ApiV1AuthForgotPasswordRoute
   ApiV1AuthLoginRoute: typeof ApiV1AuthLoginRoute
@@ -824,6 +848,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1VisitorWeatherRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/tags/$id': {
+      id: '/api/v1/tags/$id'
+      path: '/$id'
+      fullPath: '/api/v1/tags/$id'
+      preLoaderRoute: typeof ApiV1TagsIdRouteImport
+      parentRoute: typeof ApiV1TagsRoute
+    }
     '/api/v1/profile/send-code': {
       id: '/api/v1/profile/send-code'
       path: '/api/v1/profile/send-code'
@@ -886,6 +917,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/v1/comments/$id'
       preLoaderRoute: typeof ApiV1CommentsIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/categories/$id': {
+      id: '/api/v1/categories/$id'
+      path: '/$id'
+      fullPath: '/api/v1/categories/$id'
+      preLoaderRoute: typeof ApiV1CategoriesIdRouteImport
+      parentRoute: typeof ApiV1CategoriesRoute
     }
     '/api/v1/captcha/image': {
       id: '/api/v1/captcha/image'
@@ -1051,6 +1089,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ApiV1CategoriesRouteChildren {
+  ApiV1CategoriesIdRoute: typeof ApiV1CategoriesIdRoute
+}
+
+const ApiV1CategoriesRouteChildren: ApiV1CategoriesRouteChildren = {
+  ApiV1CategoriesIdRoute: ApiV1CategoriesIdRoute,
+}
+
+const ApiV1CategoriesRouteWithChildren = ApiV1CategoriesRoute._addFileChildren(
+  ApiV1CategoriesRouteChildren,
+)
+
 interface ApiV1PostsIdRouteChildren {
   ApiV1PostsIdCommentsRoute: typeof ApiV1PostsIdCommentsRoute
   ApiV1PostsIdEpisodesRoute: typeof ApiV1PostsIdEpisodesRoute
@@ -1083,6 +1133,18 @@ const ApiV1PostsRouteWithChildren = ApiV1PostsRoute._addFileChildren(
   ApiV1PostsRouteChildren,
 )
 
+interface ApiV1TagsRouteChildren {
+  ApiV1TagsIdRoute: typeof ApiV1TagsIdRoute
+}
+
+const ApiV1TagsRouteChildren: ApiV1TagsRouteChildren = {
+  ApiV1TagsIdRoute: ApiV1TagsIdRoute,
+}
+
+const ApiV1TagsRouteWithChildren = ApiV1TagsRoute._addFileChildren(
+  ApiV1TagsRouteChildren,
+)
+
 interface ApiV1CommentsIdRouteChildren {
   ApiV1CommentsIdApproveRoute: typeof ApiV1CommentsIdApproveRoute
   ApiV1CommentsIdEditRoute: typeof ApiV1CommentsIdEditRoute
@@ -1107,13 +1169,13 @@ const rootRouteChildren: RootRouteChildren = {
   AdminSplatRoute: AdminSplatRoute,
   PostsSlugRoute: PostsSlugRoute,
   ApiV1ResourceRoute: ApiV1ResourceRoute,
-  ApiV1CategoriesRoute: ApiV1CategoriesRoute,
+  ApiV1CategoriesRoute: ApiV1CategoriesRouteWithChildren,
   ApiV1CodingRoute: ApiV1CodingRoute,
   ApiV1FootprintsRoute: ApiV1FootprintsRoute,
   ApiV1OptionsRoute: ApiV1OptionsRoute,
   ApiV1OwnerRoute: ApiV1OwnerRoute,
   ApiV1PostsRoute: ApiV1PostsRouteWithChildren,
-  ApiV1TagsRoute: ApiV1TagsRoute,
+  ApiV1TagsRoute: ApiV1TagsRouteWithChildren,
   ApiV1ArchiveStatsRoute: ApiV1ArchiveStatsRoute,
   ApiV1AuthForgotPasswordRoute: ApiV1AuthForgotPasswordRoute,
   ApiV1AuthLoginRoute: ApiV1AuthLoginRoute,

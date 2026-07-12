@@ -36,6 +36,7 @@ import {
   validUploadFolders,
 } from '../media/storage';
 import { BrandingUploadError, storeBrandingUpload } from '../services/branding';
+import { deleteMetaRecord, saveMetaRecord } from '../services/metas';
 import { parsePermalinkPath } from '../services/permalink';
 import {
   adminCommentPendingCounts,
@@ -1423,33 +1424,6 @@ function wantsMetaPagination(sp: URLSearchParams) {
   return sp.has('page') || sp.has('per_page') || sp.has('limit') || sp.has('search') || sp.has('q');
 }
 
-async function saveMeta(type: 'category' | 'tag', body: Record<string, unknown>, id?: number) {
-  const name = String(body.name || '').trim();
-  const slug = String(body.slug || name).trim();
-  const now = nowUnix();
-  if (!id) {
-    const rows = await many<{ id: number }>(
-      `insert into ${table('metas')} (name, slug, type, icon, description, parent_id, count, seo_keywords, created_at, updated_at)
-       values ($1,$2,$3,$4,$5,$6,0,$7,$8,$8) returning id`,
-      [name, slug, type, body.icon || '', body.description || '', body.parent_id || 0, body.seo_keywords || '', now],
-    );
-    return rows[0]?.id;
-  }
-  await exec(
-    `update ${table('metas')} set
-      name = coalesce(nullif($1,''), name),
-      slug = coalesce(nullif($2,''), slug),
-      icon = $3,
-      description = $4,
-      parent_id = $5,
-      seo_keywords = $6,
-      updated_at = $7
-     where id = $8 and type = $9`,
-    [name, slug, body.icon || '', body.description || '', body.parent_id || 0, body.seo_keywords || '', now, id, type],
-  );
-  return id;
-}
-
 async function genericList(name: string, sp: URLSearchParams, authed = false) {
   if (!readableTables.has(name)) throw new Error('invalid content table');
   const { page, perPage, offset } = pageParams(sp);
@@ -2278,10 +2252,10 @@ export function registerContentRoutes(app: Hono) {
     const row = await one<Record<string, unknown>>(`select * from ${table('metas')} where id = $1 and type = 'category'`, [c.req.param('id')]);
     return row ? ok(c, row) : notFound(c, '分类 not found');
   });
-  app.post('/api/v1/categories', auth, async (c) => ok(c, { id: await saveMeta('category', await c.req.json().catch(() => ({}))) }));
-  app.put('/api/v1/categories/:id', auth, async (c) => ok(c, { id: await saveMeta('category', await c.req.json().catch(() => ({})), intParam(c.req.param('id'))) }));
+  app.post('/api/v1/categories', auth, async (c) => ok(c, { id: await saveMetaRecord('category', await c.req.json().catch(() => ({}))) }));
+  app.put('/api/v1/categories/:id', auth, async (c) => ok(c, { id: await saveMetaRecord('category', await c.req.json().catch(() => ({})), intParam(c.req.param('id'))) }));
   app.delete('/api/v1/categories/:id', auth, async (c) => {
-    await exec(`delete from ${table('metas')} where id = $1 and type = 'category'`, [c.req.param('id')]);
+    await deleteMetaRecord('category', intParam(c.req.param('id')));
     return ok(c, null);
   });
 
@@ -2296,10 +2270,10 @@ export function registerContentRoutes(app: Hono) {
     const row = await one<Record<string, unknown>>(`select * from ${table('metas')} where id = $1 and type = 'tag'`, [c.req.param('id')]);
     return row ? ok(c, row) : notFound(c, '标签 not found');
   });
-  app.post('/api/v1/tags', auth, async (c) => ok(c, { id: await saveMeta('tag', await c.req.json().catch(() => ({}))) }));
-  app.put('/api/v1/tags/:id', auth, async (c) => ok(c, { id: await saveMeta('tag', await c.req.json().catch(() => ({})), intParam(c.req.param('id'))) }));
+  app.post('/api/v1/tags', auth, async (c) => ok(c, { id: await saveMetaRecord('tag', await c.req.json().catch(() => ({}))) }));
+  app.put('/api/v1/tags/:id', auth, async (c) => ok(c, { id: await saveMetaRecord('tag', await c.req.json().catch(() => ({})), intParam(c.req.param('id'))) }));
   app.delete('/api/v1/tags/:id', auth, async (c) => {
-    await exec(`delete from ${table('metas')} where id = $1 and type = 'tag'`, [c.req.param('id')]);
+    await deleteMetaRecord('tag', intParam(c.req.param('id')));
     return ok(c, null);
   });
 
