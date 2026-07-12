@@ -61,6 +61,14 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/posts', 'POST'))).toBe(false);
   });
 
+  test('routes public detail and supplemental reads to Start', () => {
+    for (const path of ['/api/v1/owner', '/api/v1/archive/stats', '/api/v1/footprints', '/api/v1/moments/recent-tags',
+      '/api/v1/public/albums', '/api/v1/public/albums/summer', '/api/v1/posts/12', '/api/v1/posts/slug/hello',
+      '/api/v1/posts/by-display-id/7', '/api/v1/posts/12/comments', '/api/v1/posts/12/episodes', '/api/v1/posts/12/navigation']) {
+      expect(isStartNativeApiRequest(request(path, 'GET'))).toBe(true);
+    }
+  });
+
   test('keeps public creation, replies, and reads on the compatibility API', () => {
     expect(isStartNativeApiRequest(request('/api/v1/comments', 'POST'))).toBe(false);
     expect(isStartNativeApiRequest(request('/api/v1/comments/42/reply', 'POST'))).toBe(false);

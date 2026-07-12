@@ -61,6 +61,10 @@ export function isStartNativeApiRequest(request: Request) {
   if (url.pathname === '/api/v1/visitor/weather') return method === 'GET';
   if (anonymousGet && ['/api/v1/options', '/api/v1/categories', '/api/v1/tags', '/api/v1/posts', '/api/v1/comments', '/api/v1/moments'].includes(url.pathname)) return true;
   if (anonymousGet && /^\/api\/v1\/(books|games|goods|links|movies|music|playlists)$/.test(url.pathname)) return true;
+  if (anonymousGet && ['/api/v1/owner', '/api/v1/archive/stats', '/api/v1/footprints', '/api/v1/moments/recent-tags', '/api/v1/public/albums'].includes(url.pathname)) return true;
+  if (anonymousGet && /^\/api\/v1\/public\/albums\/[^/]+$/.test(url.pathname)) return true;
+  if (anonymousGet && /^\/api\/v1\/posts\/(slug\/[^/]+|by-display-id\/\d+|\d+)$/.test(url.pathname)) return true;
+  if (anonymousGet && /^\/api\/v1\/posts\/\d+\/(comments|episodes|navigation)$/.test(url.pathname)) return true;
   if (url.pathname === '/api/v1/comments/batch') return method === 'POST';
   if (/^\/api\/v1\/comments\/\d+$/.test(url.pathname)) {
     return method === 'PUT' || method === 'PATCH' || method === 'DELETE';

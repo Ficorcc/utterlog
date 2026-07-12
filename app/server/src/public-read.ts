@@ -378,6 +378,44 @@ export async function getPostBySlug(slug: string, track = false) {
   return getPublishedPostBy('slug', slug, track);
 }
 
+export async function getPostById(id: number, track = false) {
+  return getPublishedPostBy('id', id, track);
+}
+
+export async function getPostByDisplayId(displayId: number, track = false) {
+  return getPublishedPostBy('display_id', displayId, track, true);
+}
+
+export async function listPostEpisodes(postId: number) {
+  const post = await one<{ status: string }>(`select status from ${table('posts')} where id = $1`, [postId]).catch(() => null);
+  if (!post || post.status !== 'publish') return null;
+  const episodes = await many<Record<string, unknown>>(
+    `select * from ${table('post_episodes')} where post_id = $1 order by sort_order asc, episode_no asc, id asc`, [postId],
+  ).catch(() => []);
+  return { episodes, total: episodes.length };
+}
+
+export async function getPostNavigation(postId: number) {
+  const current = await one<Record<string, unknown>>(
+    `select id, published_at, created_at from ${table('posts')} where id = $1 and status = 'publish'`, [postId],
+  ).catch(() => null);
+  if (!current) return { prev: null, next: null };
+  const pivot = current.published_at || new Date(Number(current.created_at || 0) * 1000);
+  const [prev, next] = await Promise.all([
+    one<Record<string, unknown>>(
+      `select id, title, slug, cover_url, published_at from ${table('posts')}
+       where status = 'publish' and type = 'post' and id <> $1 and coalesce(published_at, to_timestamp(created_at)::timestamp) < $2
+       order by coalesce(published_at, to_timestamp(created_at)::timestamp) desc, id desc limit 1`, [postId, pivot],
+    ).catch(() => null),
+    one<Record<string, unknown>>(
+      `select id, title, slug, cover_url, published_at from ${table('posts')}
+       where status = 'publish' and type = 'post' and id <> $1 and coalesce(published_at, to_timestamp(created_at)::timestamp) > $2
+       order by coalesce(published_at, to_timestamp(created_at)::timestamp) asc, id asc limit 1`, [postId, pivot],
+    ).catch(() => null),
+  ]);
+  return { prev, next };
+}
+
 export async function resolvePublicPostPath(pathname: string, track = false) {
   const structure = await optionValue('permalink_structure', '/posts/%postname%');
   if (!structure || structure === '/posts/%postname%') return null;
@@ -482,6 +520,38 @@ export async function listMoments(params: { page?: number; perPage?: number } = 
     meta: { total: count, page, per_page: perPage, total_pages: Math.max(1, Math.ceil(count / perPage)) },
     pagination: { total: count, page, per_page: perPage, total_pages: Math.max(1, Math.ceil(count / perPage)) },
   };
+}
+
+export async function recentMomentTags(limit = 8) {
+  const rows = await many<{ content: string }>(
+    `select content from ${table('moments')} where visibility = 'public' order by created_at desc limit 200`,
+  ).catch(() => []);
+  const counts = new Map<string, number>();
+  for (const row of rows) {
+    for (const match of String(row.content || '').matchAll(/#([\p{Letter}\p{Number}_-]{1,40})/gu)) {
+      counts.set(match[1], (counts.get(match[1]) || 0) + 1);
+    }
+  }
+  return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, Math.min(20, Math.max(1, limit)))
+    .map(([name, count]) => ({ name, count }));
+}
+
+export async function getPublicAlbum(idOrSlug: string, page = 1, perPage = 20) {
+  const album = await one<Record<string, unknown>>(
+    `select * from ${table('albums')} where (id::text = $1 or slug = $1) and status = 'public'`, [idOrSlug],
+  ).catch(() => null);
+  if (!album) return null;
+  const safePage = Math.max(1, page);
+  const safePerPage = Math.min(500, Math.max(1, perPage));
+  const [photos, total] = await Promise.all([
+    many<Record<string, unknown>>(
+      `select * from ${table('media')} where album_id = $1 and category = 'image' order by created_at desc limit $2 offset $3`,
+      [album.id, safePerPage, (safePage - 1) * safePerPage],
+    ).catch(() => []),
+    one<{ count: string }>(`select count(*)::text as count from ${table('media')} where album_id = $1 and category = 'image'`, [album.id])
+      .catch(() => null),
+  ]);
+  return { ...album, album, photos, total: Number(total?.count || 0), page: safePage };
 }
 
 export async function listComments(params: {
