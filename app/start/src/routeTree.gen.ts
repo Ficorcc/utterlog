@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostsSlugRouteImport } from './routes/posts/$slug'
+import { Route as AdminSplatRouteImport } from './routes/admin/$'
 import { Route as ApiV1TagsRouteImport } from './routes/api/v1/tags'
 import { Route as ApiV1PostsRouteImport } from './routes/api/v1/posts'
 import { Route as ApiV1OwnerRouteImport } from './routes/api/v1/owner'
@@ -69,6 +70,11 @@ const IndexRoute = IndexRouteImport.update({
 const PostsSlugRoute = PostsSlugRouteImport.update({
   id: '/posts/$slug',
   path: '/posts/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSplatRoute = AdminSplatRouteImport.update({
+  id: '/admin/$',
+  path: '/admin/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1TagsRoute = ApiV1TagsRouteImport.update({
@@ -294,6 +300,7 @@ const ApiV1AuthPasskeyFlowActionRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/admin/$': typeof AdminSplatRoute
   '/posts/$slug': typeof PostsSlugRoute
   '/api/v1/$resource': typeof ApiV1ResourceRoute
   '/api/v1/categories': typeof ApiV1CategoriesRoute
@@ -342,6 +349,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/admin/$': typeof AdminSplatRoute
   '/posts/$slug': typeof PostsSlugRoute
   '/api/v1/$resource': typeof ApiV1ResourceRoute
   '/api/v1/categories': typeof ApiV1CategoriesRoute
@@ -391,6 +399,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/admin/$': typeof AdminSplatRoute
   '/posts/$slug': typeof PostsSlugRoute
   '/api/v1/$resource': typeof ApiV1ResourceRoute
   '/api/v1/categories': typeof ApiV1CategoriesRoute
@@ -441,6 +450,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$'
+    | '/admin/$'
     | '/posts/$slug'
     | '/api/v1/$resource'
     | '/api/v1/categories'
@@ -489,6 +499,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$'
+    | '/admin/$'
     | '/posts/$slug'
     | '/api/v1/$resource'
     | '/api/v1/categories'
@@ -537,6 +548,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$'
+    | '/admin/$'
     | '/posts/$slug'
     | '/api/v1/$resource'
     | '/api/v1/categories'
@@ -586,6 +598,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
+  AdminSplatRoute: typeof AdminSplatRoute
   PostsSlugRoute: typeof PostsSlugRoute
   ApiV1ResourceRoute: typeof ApiV1ResourceRoute
   ApiV1CategoriesRoute: typeof ApiV1CategoriesRoute
@@ -644,6 +657,13 @@ declare module '@tanstack/react-router' {
       path: '/posts/$slug'
       fullPath: '/posts/$slug'
       preLoaderRoute: typeof PostsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/$': {
+      id: '/admin/$'
+      path: '/admin/$'
+      fullPath: '/admin/$'
+      preLoaderRoute: typeof AdminSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/tags': {
@@ -1001,6 +1021,7 @@ const ApiV1CommentsIdRouteWithChildren = ApiV1CommentsIdRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
+  AdminSplatRoute: AdminSplatRoute,
   PostsSlugRoute: PostsSlugRoute,
   ApiV1ResourceRoute: ApiV1ResourceRoute,
   ApiV1CategoriesRoute: ApiV1CategoriesRoute,

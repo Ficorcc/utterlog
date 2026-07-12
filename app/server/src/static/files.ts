@@ -5,6 +5,7 @@ import { config } from '../config';
 import { brandingExts } from '../media/storage';
 import { runtimePaths } from '../paths';
 import { resolveThemeAssetPath } from '../theme-assets';
+import { startFrontendEnabled } from '../web/start';
 
 const contentTypes: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -65,12 +66,13 @@ async function fileResponse(path: string, acceptEncoding = '') {
 
 export function serveStaticFiles(app: Hono) {
   app.get('/admin', (c) => c.redirect('/admin/', 301));
-  app.get('/admin/*', async (c) => {
+  app.get('/admin/*', async (c, next) => {
     const rest = c.req.path.replace(/^\/admin\/?/, '') || 'index.html';
     const candidate = safeJoin(config.adminDistDir, rest);
     const acceptEncoding = c.req.header('accept-encoding') || '';
-    const response = (await fileResponse(candidate, acceptEncoding))
-      || (await fileResponse(join(config.adminDistDir, 'index.html'), acceptEncoding));
+    const direct = await fileResponse(candidate, acceptEncoding);
+    if (!direct && startFrontendEnabled()) return next();
+    const response = direct || (await fileResponse(join(config.adminDistDir, 'index.html'), acceptEncoding));
     if (!response) return c.text('Admin build not found', 503);
     const isHashedAsset = /\/assets\/[^/]+-[A-Za-z0-9_-]+\.(js|css)$/.test(c.req.path);
     const headers = new Headers(response.headers);

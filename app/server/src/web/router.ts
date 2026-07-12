@@ -9,7 +9,7 @@ import { resolvePageMeta } from '../../../blog/src/page-meta';
 import { loadRoutePageData } from '../../../web/lib/route-page-data';
 import InstallPage from '../../../web/app/install/page';
 import LoginPage from '../../../web/app/login/page';
-import { handleStartRequest } from './start';
+import { handleStartRequest, startFrontendEnabled } from './start';
 
 async function renderBlog(
   pathname: string,
@@ -39,6 +39,9 @@ export async function handleBlogRequest(request: Request): Promise<Response | nu
   const { pathname } = url;
   const method = request.method.toUpperCase();
   if (method !== 'GET' && method !== 'HEAD') return null;
+  if (startFrontendEnabled() && (pathname === '/admin' || pathname.startsWith('/admin/'))) {
+    return handleStartRequest(request);
+  }
   if (isAssetPath(pathname)) return null;
 
   const feed = await proxyFeed(request);

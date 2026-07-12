@@ -10,7 +10,7 @@ type StartServer = {
 
 let startServerPromise: Promise<StartServer> | null = null;
 
-function startFrontendEnabled() {
+export function startFrontendEnabled() {
   const value = String(process.env.UTTERLOG_FRONTEND || process.env.WEB_RENDERER || '').trim().toLowerCase();
   return value === 'start' || value === 'tanstack-start';
 }
