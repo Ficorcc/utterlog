@@ -36,7 +36,12 @@ import { Route as ApiV1PasskeysIdRouteImport } from './routes/api/v1/passkeys/$i
 import { Route as ApiV1MomentsRecentTagsRouteImport } from './routes/api/v1/moments/recent-tags'
 import { Route as ApiV1MomentsIdRouteImport } from './routes/api/v1/moments/$id'
 import { Route as ApiV1MediaUploadBrandingRouteImport } from './routes/api/v1/media/upload-branding'
+import { Route as ApiV1MediaUploadRouteImport } from './routes/api/v1/media/upload'
+import { Route as ApiV1MediaTestConnectionRouteImport } from './routes/api/v1/media/test-connection'
 import { Route as ApiV1MediaStatsRouteImport } from './routes/api/v1/media/stats'
+import { Route as ApiV1MediaExifRouteImport } from './routes/api/v1/media/exif'
+import { Route as ApiV1MediaDownloadUrlRouteImport } from './routes/api/v1/media/download-url'
+import { Route as ApiV1MediaIdRouteImport } from './routes/api/v1/media/$id'
 import { Route as ApiV1LinksApplyRouteImport } from './routes/api/v1/links/apply'
 import { Route as ApiV1CommentsPendingCountRouteImport } from './routes/api/v1/comments/pending-count'
 import { Route as ApiV1CommentsBatchRouteImport } from './routes/api/v1/comments/batch'
@@ -202,9 +207,35 @@ const ApiV1MediaUploadBrandingRoute =
     path: '/api/v1/media/upload-branding',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiV1MediaUploadRoute = ApiV1MediaUploadRouteImport.update({
+  id: '/api/v1/media/upload',
+  path: '/api/v1/media/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1MediaTestConnectionRoute =
+  ApiV1MediaTestConnectionRouteImport.update({
+    id: '/api/v1/media/test-connection',
+    path: '/api/v1/media/test-connection',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiV1MediaStatsRoute = ApiV1MediaStatsRouteImport.update({
   id: '/api/v1/media/stats',
   path: '/api/v1/media/stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1MediaExifRoute = ApiV1MediaExifRouteImport.update({
+  id: '/api/v1/media/exif',
+  path: '/api/v1/media/exif',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1MediaDownloadUrlRoute = ApiV1MediaDownloadUrlRouteImport.update({
+  id: '/api/v1/media/download-url',
+  path: '/api/v1/media/download-url',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1MediaIdRoute = ApiV1MediaIdRouteImport.update({
+  id: '/api/v1/media/$id',
+  path: '/api/v1/media/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1LinksApplyRoute = ApiV1LinksApplyRouteImport.update({
@@ -382,7 +413,12 @@ export interface FileRoutesByFullPath {
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
   '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
+  '/api/v1/media/$id': typeof ApiV1MediaIdRoute
+  '/api/v1/media/download-url': typeof ApiV1MediaDownloadUrlRoute
+  '/api/v1/media/exif': typeof ApiV1MediaExifRoute
   '/api/v1/media/stats': typeof ApiV1MediaStatsRoute
+  '/api/v1/media/test-connection': typeof ApiV1MediaTestConnectionRoute
+  '/api/v1/media/upload': typeof ApiV1MediaUploadRoute
   '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
   '/api/v1/moments/$id': typeof ApiV1MomentsIdRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
@@ -440,7 +476,12 @@ export interface FileRoutesByTo {
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
   '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
+  '/api/v1/media/$id': typeof ApiV1MediaIdRoute
+  '/api/v1/media/download-url': typeof ApiV1MediaDownloadUrlRoute
+  '/api/v1/media/exif': typeof ApiV1MediaExifRoute
   '/api/v1/media/stats': typeof ApiV1MediaStatsRoute
+  '/api/v1/media/test-connection': typeof ApiV1MediaTestConnectionRoute
+  '/api/v1/media/upload': typeof ApiV1MediaUploadRoute
   '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
   '/api/v1/moments/$id': typeof ApiV1MomentsIdRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
@@ -499,7 +540,12 @@ export interface FileRoutesById {
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
   '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
+  '/api/v1/media/$id': typeof ApiV1MediaIdRoute
+  '/api/v1/media/download-url': typeof ApiV1MediaDownloadUrlRoute
+  '/api/v1/media/exif': typeof ApiV1MediaExifRoute
   '/api/v1/media/stats': typeof ApiV1MediaStatsRoute
+  '/api/v1/media/test-connection': typeof ApiV1MediaTestConnectionRoute
+  '/api/v1/media/upload': typeof ApiV1MediaUploadRoute
   '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
   '/api/v1/moments/$id': typeof ApiV1MomentsIdRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
@@ -559,7 +605,12 @@ export interface FileRouteTypes {
     | '/api/v1/comments/batch'
     | '/api/v1/comments/pending-count'
     | '/api/v1/links/apply'
+    | '/api/v1/media/$id'
+    | '/api/v1/media/download-url'
+    | '/api/v1/media/exif'
     | '/api/v1/media/stats'
+    | '/api/v1/media/test-connection'
+    | '/api/v1/media/upload'
     | '/api/v1/media/upload-branding'
     | '/api/v1/moments/$id'
     | '/api/v1/moments/recent-tags'
@@ -617,7 +668,12 @@ export interface FileRouteTypes {
     | '/api/v1/comments/batch'
     | '/api/v1/comments/pending-count'
     | '/api/v1/links/apply'
+    | '/api/v1/media/$id'
+    | '/api/v1/media/download-url'
+    | '/api/v1/media/exif'
     | '/api/v1/media/stats'
+    | '/api/v1/media/test-connection'
+    | '/api/v1/media/upload'
     | '/api/v1/media/upload-branding'
     | '/api/v1/moments/$id'
     | '/api/v1/moments/recent-tags'
@@ -675,7 +731,12 @@ export interface FileRouteTypes {
     | '/api/v1/comments/batch'
     | '/api/v1/comments/pending-count'
     | '/api/v1/links/apply'
+    | '/api/v1/media/$id'
+    | '/api/v1/media/download-url'
+    | '/api/v1/media/exif'
     | '/api/v1/media/stats'
+    | '/api/v1/media/test-connection'
+    | '/api/v1/media/upload'
     | '/api/v1/media/upload-branding'
     | '/api/v1/moments/$id'
     | '/api/v1/moments/recent-tags'
@@ -733,7 +794,12 @@ export interface RootRouteChildren {
   ApiV1CommentsBatchRoute: typeof ApiV1CommentsBatchRoute
   ApiV1CommentsPendingCountRoute: typeof ApiV1CommentsPendingCountRoute
   ApiV1LinksApplyRoute: typeof ApiV1LinksApplyRoute
+  ApiV1MediaIdRoute: typeof ApiV1MediaIdRoute
+  ApiV1MediaDownloadUrlRoute: typeof ApiV1MediaDownloadUrlRoute
+  ApiV1MediaExifRoute: typeof ApiV1MediaExifRoute
   ApiV1MediaStatsRoute: typeof ApiV1MediaStatsRoute
+  ApiV1MediaTestConnectionRoute: typeof ApiV1MediaTestConnectionRoute
+  ApiV1MediaUploadRoute: typeof ApiV1MediaUploadRoute
   ApiV1MediaUploadBrandingRoute: typeof ApiV1MediaUploadBrandingRoute
   ApiV1MomentsIdRoute: typeof ApiV1MomentsIdRoute
   ApiV1MomentsRecentTagsRoute: typeof ApiV1MomentsRecentTagsRoute
@@ -943,11 +1009,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1MediaUploadBrandingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/media/upload': {
+      id: '/api/v1/media/upload'
+      path: '/api/v1/media/upload'
+      fullPath: '/api/v1/media/upload'
+      preLoaderRoute: typeof ApiV1MediaUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/media/test-connection': {
+      id: '/api/v1/media/test-connection'
+      path: '/api/v1/media/test-connection'
+      fullPath: '/api/v1/media/test-connection'
+      preLoaderRoute: typeof ApiV1MediaTestConnectionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/media/stats': {
       id: '/api/v1/media/stats'
       path: '/api/v1/media/stats'
       fullPath: '/api/v1/media/stats'
       preLoaderRoute: typeof ApiV1MediaStatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/media/exif': {
+      id: '/api/v1/media/exif'
+      path: '/api/v1/media/exif'
+      fullPath: '/api/v1/media/exif'
+      preLoaderRoute: typeof ApiV1MediaExifRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/media/download-url': {
+      id: '/api/v1/media/download-url'
+      path: '/api/v1/media/download-url'
+      fullPath: '/api/v1/media/download-url'
+      preLoaderRoute: typeof ApiV1MediaDownloadUrlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/media/$id': {
+      id: '/api/v1/media/$id'
+      path: '/api/v1/media/$id'
+      fullPath: '/api/v1/media/$id'
+      preLoaderRoute: typeof ApiV1MediaIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/links/apply': {
@@ -1250,7 +1351,12 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1CommentsBatchRoute: ApiV1CommentsBatchRoute,
   ApiV1CommentsPendingCountRoute: ApiV1CommentsPendingCountRoute,
   ApiV1LinksApplyRoute: ApiV1LinksApplyRoute,
+  ApiV1MediaIdRoute: ApiV1MediaIdRoute,
+  ApiV1MediaDownloadUrlRoute: ApiV1MediaDownloadUrlRoute,
+  ApiV1MediaExifRoute: ApiV1MediaExifRoute,
   ApiV1MediaStatsRoute: ApiV1MediaStatsRoute,
+  ApiV1MediaTestConnectionRoute: ApiV1MediaTestConnectionRoute,
+  ApiV1MediaUploadRoute: ApiV1MediaUploadRoute,
   ApiV1MediaUploadBrandingRoute: ApiV1MediaUploadBrandingRoute,
   ApiV1MomentsIdRoute: ApiV1MomentsIdRoute,
   ApiV1MomentsRecentTagsRoute: ApiV1MomentsRecentTagsRoute,

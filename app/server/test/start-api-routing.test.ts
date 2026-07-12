@@ -67,7 +67,11 @@ describe('TanStack Start native API routing', () => {
   test('routes authenticated media reads to Start', () => {
     expect(isStartNativeApiRequest(request('/api/v1/media', 'GET'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/media/stats', 'GET'))).toBe(true);
-    expect(isStartNativeApiRequest(request('/api/v1/media', 'POST'))).toBe(false);
+    expect(isStartNativeApiRequest(request('/api/v1/media/upload', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/media/download-url', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/media/test-connection', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/media/exif?urls=/uploads/a.jpg', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/media/12', 'DELETE'))).toBe(true);
   });
 
   test('routes moment detail and mutations to Start', () => {
