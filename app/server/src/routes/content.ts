@@ -59,6 +59,7 @@ import { localeFiles, readLocale } from '../services/i18n';
 import { searchPosts } from '../services/search';
 import { visitorGeo } from '../services/analytics';
 import { MusicProxyError, proxyMusicAsset, searchMusic } from '../services/music-proxy';
+import { publicOnlineVisitors, trackDuration, trackPageView } from '../services/tracking';
 
 const contentTables = new Set(['moments', 'music', 'movies', 'books', 'games', 'videos', 'goods', 'links', 'playlists']);
 const writableTables = new Set([...contentTables, 'posts', 'comments', 'media', 'albums', 'notifications']);
@@ -3245,120 +3246,12 @@ export function registerContentRoutes(app: Hono) {
   });
 
   app.post('/api/v1/track', async (c) => {
-    const body = await c.req.json().catch(() => ({}));
-    const path = String(body.path || '/').slice(0, 500);
-    const ip = clientIp(c);
-    const visitor = String(body.visitor_id || body.fingerprint || ip);
-    const ua = c.req.header('user-agent') || '';
-    if (isBotUa(ua)) return ok(c, { tracked: false, reason: 'bot' });
-    const parsed = parseUa(ua);
-    const referer = String(body.referer || c.req.header('referer') || '').slice(0, 500);
-    let refererHost = '';
-    try { refererHost = referer ? new URL(referer).host : ''; } catch { refererHost = ''; }
-    const geo = geoHeaders(c);
-    const now = nowUnix();
-    const today = await siteDate(new Date(now * 1000));
-    const dailyDimensions: Array<[string, string, string]> = [
-      ['browser', parsed.browser || 'Unknown', ''],
-      ['os', parsed.os || 'Unknown', ''],
-      ['device', parsed.device || 'Unknown', ''],
-    ];
-    if (geo.countryName || geo.country) dailyDimensions.push(['country', geo.countryName || geo.country, geo.country || '']);
-    const trackedPostId = Number(body.post_id || await postIdFromTrackedPath(path) || 0);
-    let accessLogId = 0;
-    try {
-      await sql.begin(async (tx) => {
-        const siteVisitorRows = await tx.unsafe<{ inserted: boolean }[]>(
-          `insert into ${table('stats_visitor_dates')} (visitor_id, date) values ($1, $2::date)
-           on conflict (visitor_id, date) do update set visitor_id = excluded.visitor_id
-           returning (xmax = 0) as inserted`,
-          [visitor, today],
-        );
-        const uniqueInc = siteVisitorRows[0]?.inserted ? 1 : 0;
-        const accessRows = await tx.unsafe<{ id: number }[]>(
-          `insert into ${table('access_logs')}
-           (ip, ip_masked, path, method, referer, referer_host, user_agent, device_type, browser, os,
-            country, country_name, region, city, latitude, longitude, created_at, visitor_id, fingerprint)
-           values ($1,$2,$3,'GET',$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
-           returning id`,
-          [
-            ip, maskIp(ip), path, referer, refererHost, ua, parsed.device, parsed.browser, parsed.os,
-            geo.country, geo.countryName, geo.region, geo.city, geo.latitude, geo.longitude,
-            now, String(body.visitor_id || ''), String(body.fingerprint || ''),
-          ],
-        );
-        accessLogId = Number(accessRows[0]?.id || 0);
-        await tx.unsafe(
-          `update ${table('stats_global')} set total_views = total_views + 1,
-           total_uniques = total_uniques + $2,
-           first_event_at = case when first_event_at = 0 then $1 else first_event_at end,
-           updated_at = $1 where id = 1`,
-          [now, uniqueInc],
-        );
-        await tx.unsafe(
-          `insert into ${table('stats_daily')} (date, dimension, dim_value, visits, unique_visitors)
-           values ($1::date, '_total', '', 1, $2)
-           on conflict (date, dimension, dim_value, dim_extra) do update set
-             visits = ${table('stats_daily')}.visits + 1,
-             unique_visitors = ${table('stats_daily')}.unique_visitors + excluded.unique_visitors`,
-          [today, uniqueInc],
-        );
-        for (const [dimension, value, extra] of dailyDimensions) {
-          await tx.unsafe(
-            `insert into ${table('stats_daily')} (date, dimension, dim_value, dim_extra, visits, unique_visitors)
-             values ($1::date, $2, $3, $4, 1, $5)
-             on conflict (date, dimension, dim_value, dim_extra) do update set
-               visits = ${table('stats_daily')}.visits + 1,
-               unique_visitors = ${table('stats_daily')}.unique_visitors + excluded.unique_visitors`,
-            [today, dimension, value, extra, uniqueInc],
-          );
-        }
-        if (trackedPostId > 0) {
-          const postVisitorRows = await tx.unsafe<{ inserted: boolean }[]>(
-            `insert into ${table('stats_visitor_post_dates')} (visitor_id, post_id, date) values ($1, $2, $3::date)
-             on conflict (visitor_id, post_id, date) do update set visitor_id = excluded.visitor_id
-             returning (xmax = 0) as inserted`,
-            [visitor, trackedPostId, today],
-          );
-          const postUniqueInc = postVisitorRows[0]?.inserted ? 1 : 0;
-          await tx.unsafe(
-            `insert into ${table('stats_post_daily')} (post_id, date, views, unique_visitors)
-             values ($1, $2::date, 0, $3)
-             on conflict (post_id, date) do update set
-               unique_visitors = ${table('stats_post_daily')}.unique_visitors + excluded.unique_visitors`,
-            [trackedPostId, today, postUniqueInc],
-          );
-        }
-      });
-    } catch (err) {
-      console.error('[analytics] track write failed', err);
-      return ok(c, { tracked: false, reason: 'write_failed' });
-    }
-    if (accessLogId && (!geo.country || !geo.latitude || !geo.longitude)) {
-      void enrichAccessGeo(accessLogId, ip);
-    }
-    if (visitor) await ephemeral.set(`online:${visitor}`, JSON.stringify({ visitor_id: visitor, ip, path, ts: now, country_code: geo.country, city: geo.city }), 300);
-    return ok(c, { tracked: true });
+    return ok(c, await trackPageView(c.req.raw, await c.req.json().catch(() => ({}))));
   });
   app.post('/api/v1/track/duration', async (c) => {
-    const body = await c.req.json().catch(() => ({}));
-    const duration = Math.max(0, Math.min(86400, Number(body.duration || 0)));
-    const path = String(body.path || '').slice(0, 500);
-    if (duration > 0 && path) {
-      await exec(
-        `update ${table('access_logs')} set duration = greatest(coalesce(duration,0), $1)
-         where id = (
-           select id from ${table('access_logs')} where ip = $2 and path = $3 order by created_at desc, id desc limit 1
-         )`,
-        [duration, clientIp(c), path],
-      ).catch(() => {});
-    }
-    return ok(c, null);
+    return ok(c, await trackDuration(c.req.raw, await c.req.json().catch(() => ({}))));
   });
   app.get('/api/v1/online', async (c) => {
-    const showOnline = (await optionValue('show_online_visitors', '1')).toLowerCase();
-    if (showOnline === '0' || showOnline === 'false') return ok(c, { count: 0, online: [], enabled: false });
-    const online = await enrichOnlineUsers(true);
-    return ok(c, { count: online.length, online, enabled: true });
+    return ok(c, await publicOnlineVisitors());
   });
 }

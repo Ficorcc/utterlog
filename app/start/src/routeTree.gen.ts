@@ -15,11 +15,13 @@ import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostsSlugRouteImport } from './routes/posts/$slug'
 import { Route as AdminSplatRouteImport } from './routes/admin/$'
+import { Route as ApiV1TrackRouteImport } from './routes/api/v1/track'
 import { Route as ApiV1TagsRouteImport } from './routes/api/v1/tags'
 import { Route as ApiV1SearchRouteImport } from './routes/api/v1/search'
 import { Route as ApiV1PostsRouteImport } from './routes/api/v1/posts'
 import { Route as ApiV1OwnerRouteImport } from './routes/api/v1/owner'
 import { Route as ApiV1OptionsRouteImport } from './routes/api/v1/options'
+import { Route as ApiV1OnlineRouteImport } from './routes/api/v1/online'
 import { Route as ApiV1HealthRouteImport } from './routes/api/v1/health'
 import { Route as ApiV1FootprintsRouteImport } from './routes/api/v1/footprints'
 import { Route as ApiV1CodingRouteImport } from './routes/api/v1/coding'
@@ -37,6 +39,7 @@ import { Route as ApiV1AnnotationsIndexRouteImport } from './routes/api/v1/annot
 import { Route as ApiV1AnalyticsIndexRouteImport } from './routes/api/v1/analytics/index'
 import { Route as ApiV1VisitorWeatherRouteImport } from './routes/api/v1/visitor/weather'
 import { Route as ApiV1VisitorGeoRouteImport } from './routes/api/v1/visitor/geo'
+import { Route as ApiV1TrackDurationRouteImport } from './routes/api/v1/track/duration'
 import { Route as ApiV1ThemesUploadRouteImport } from './routes/api/v1/themes/upload'
 import { Route as ApiV1ThemesIdRouteImport } from './routes/api/v1/themes/$id'
 import { Route as ApiV1TagsIdRouteImport } from './routes/api/v1/tags/$id'
@@ -159,6 +162,11 @@ const AdminSplatRoute = AdminSplatRouteImport.update({
   path: '/admin/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1TrackRoute = ApiV1TrackRouteImport.update({
+  id: '/api/v1/track',
+  path: '/api/v1/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1TagsRoute = ApiV1TagsRouteImport.update({
   id: '/api/v1/tags',
   path: '/api/v1/tags',
@@ -182,6 +190,11 @@ const ApiV1OwnerRoute = ApiV1OwnerRouteImport.update({
 const ApiV1OptionsRoute = ApiV1OptionsRouteImport.update({
   id: '/api/v1/options',
   path: '/api/v1/options',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1OnlineRoute = ApiV1OnlineRouteImport.update({
+  id: '/api/v1/online',
+  path: '/api/v1/online',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1HealthRoute = ApiV1HealthRouteImport.update({
@@ -268,6 +281,11 @@ const ApiV1VisitorGeoRoute = ApiV1VisitorGeoRouteImport.update({
   id: '/api/v1/visitor/geo',
   path: '/api/v1/visitor/geo',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1TrackDurationRoute = ApiV1TrackDurationRouteImport.update({
+  id: '/duration',
+  path: '/duration',
+  getParentRoute: () => ApiV1TrackRoute,
 } as any)
 const ApiV1ThemesUploadRoute = ApiV1ThemesUploadRouteImport.update({
   id: '/api/v1/themes/upload',
@@ -758,11 +776,13 @@ export interface FileRoutesByFullPath {
   '/api/v1/coding': typeof ApiV1CodingRoute
   '/api/v1/footprints': typeof ApiV1FootprintsRoute
   '/api/v1/health': typeof ApiV1HealthRoute
+  '/api/v1/online': typeof ApiV1OnlineRoute
   '/api/v1/options': typeof ApiV1OptionsRouteWithChildren
   '/api/v1/owner': typeof ApiV1OwnerRoute
   '/api/v1/posts': typeof ApiV1PostsRouteWithChildren
   '/api/v1/search': typeof ApiV1SearchRoute
   '/api/v1/tags': typeof ApiV1TagsRouteWithChildren
+  '/api/v1/track': typeof ApiV1TrackRouteWithChildren
   '/api/v1/$resource/$id': typeof ApiV1ResourceIdRoute
   '/api/v1/admin/stats': typeof ApiV1AdminStatsRoute
   '/api/v1/analytics/$action': typeof ApiV1AnalyticsActionRoute
@@ -822,6 +842,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
   '/api/v1/themes/$id': typeof ApiV1ThemesIdRouteWithChildren
   '/api/v1/themes/upload': typeof ApiV1ThemesUploadRoute
+  '/api/v1/track/duration': typeof ApiV1TrackDurationRoute
   '/api/v1/visitor/geo': typeof ApiV1VisitorGeoRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
   '/api/v1/analytics/': typeof ApiV1AnalyticsIndexRoute
@@ -879,11 +900,13 @@ export interface FileRoutesByTo {
   '/api/v1/coding': typeof ApiV1CodingRoute
   '/api/v1/footprints': typeof ApiV1FootprintsRoute
   '/api/v1/health': typeof ApiV1HealthRoute
+  '/api/v1/online': typeof ApiV1OnlineRoute
   '/api/v1/options': typeof ApiV1OptionsRouteWithChildren
   '/api/v1/owner': typeof ApiV1OwnerRoute
   '/api/v1/posts': typeof ApiV1PostsRouteWithChildren
   '/api/v1/search': typeof ApiV1SearchRoute
   '/api/v1/tags': typeof ApiV1TagsRouteWithChildren
+  '/api/v1/track': typeof ApiV1TrackRouteWithChildren
   '/api/v1/$resource/$id': typeof ApiV1ResourceIdRoute
   '/api/v1/admin/stats': typeof ApiV1AdminStatsRoute
   '/api/v1/analytics/$action': typeof ApiV1AnalyticsActionRoute
@@ -943,6 +966,7 @@ export interface FileRoutesByTo {
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
   '/api/v1/themes/$id': typeof ApiV1ThemesIdRouteWithChildren
   '/api/v1/themes/upload': typeof ApiV1ThemesUploadRoute
+  '/api/v1/track/duration': typeof ApiV1TrackDurationRoute
   '/api/v1/visitor/geo': typeof ApiV1VisitorGeoRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
   '/api/v1/analytics': typeof ApiV1AnalyticsIndexRoute
@@ -1001,11 +1025,13 @@ export interface FileRoutesById {
   '/api/v1/coding': typeof ApiV1CodingRoute
   '/api/v1/footprints': typeof ApiV1FootprintsRoute
   '/api/v1/health': typeof ApiV1HealthRoute
+  '/api/v1/online': typeof ApiV1OnlineRoute
   '/api/v1/options': typeof ApiV1OptionsRouteWithChildren
   '/api/v1/owner': typeof ApiV1OwnerRoute
   '/api/v1/posts': typeof ApiV1PostsRouteWithChildren
   '/api/v1/search': typeof ApiV1SearchRoute
   '/api/v1/tags': typeof ApiV1TagsRouteWithChildren
+  '/api/v1/track': typeof ApiV1TrackRouteWithChildren
   '/api/v1/$resource/$id': typeof ApiV1ResourceIdRoute
   '/api/v1/admin/stats': typeof ApiV1AdminStatsRoute
   '/api/v1/analytics/$action': typeof ApiV1AnalyticsActionRoute
@@ -1065,6 +1091,7 @@ export interface FileRoutesById {
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
   '/api/v1/themes/$id': typeof ApiV1ThemesIdRouteWithChildren
   '/api/v1/themes/upload': typeof ApiV1ThemesUploadRoute
+  '/api/v1/track/duration': typeof ApiV1TrackDurationRoute
   '/api/v1/visitor/geo': typeof ApiV1VisitorGeoRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
   '/api/v1/analytics/': typeof ApiV1AnalyticsIndexRoute
@@ -1124,11 +1151,13 @@ export interface FileRouteTypes {
     | '/api/v1/coding'
     | '/api/v1/footprints'
     | '/api/v1/health'
+    | '/api/v1/online'
     | '/api/v1/options'
     | '/api/v1/owner'
     | '/api/v1/posts'
     | '/api/v1/search'
     | '/api/v1/tags'
+    | '/api/v1/track'
     | '/api/v1/$resource/$id'
     | '/api/v1/admin/stats'
     | '/api/v1/analytics/$action'
@@ -1188,6 +1217,7 @@ export interface FileRouteTypes {
     | '/api/v1/tags/$id'
     | '/api/v1/themes/$id'
     | '/api/v1/themes/upload'
+    | '/api/v1/track/duration'
     | '/api/v1/visitor/geo'
     | '/api/v1/visitor/weather'
     | '/api/v1/analytics/'
@@ -1245,11 +1275,13 @@ export interface FileRouteTypes {
     | '/api/v1/coding'
     | '/api/v1/footprints'
     | '/api/v1/health'
+    | '/api/v1/online'
     | '/api/v1/options'
     | '/api/v1/owner'
     | '/api/v1/posts'
     | '/api/v1/search'
     | '/api/v1/tags'
+    | '/api/v1/track'
     | '/api/v1/$resource/$id'
     | '/api/v1/admin/stats'
     | '/api/v1/analytics/$action'
@@ -1309,6 +1341,7 @@ export interface FileRouteTypes {
     | '/api/v1/tags/$id'
     | '/api/v1/themes/$id'
     | '/api/v1/themes/upload'
+    | '/api/v1/track/duration'
     | '/api/v1/visitor/geo'
     | '/api/v1/visitor/weather'
     | '/api/v1/analytics'
@@ -1366,11 +1399,13 @@ export interface FileRouteTypes {
     | '/api/v1/coding'
     | '/api/v1/footprints'
     | '/api/v1/health'
+    | '/api/v1/online'
     | '/api/v1/options'
     | '/api/v1/owner'
     | '/api/v1/posts'
     | '/api/v1/search'
     | '/api/v1/tags'
+    | '/api/v1/track'
     | '/api/v1/$resource/$id'
     | '/api/v1/admin/stats'
     | '/api/v1/analytics/$action'
@@ -1430,6 +1465,7 @@ export interface FileRouteTypes {
     | '/api/v1/tags/$id'
     | '/api/v1/themes/$id'
     | '/api/v1/themes/upload'
+    | '/api/v1/track/duration'
     | '/api/v1/visitor/geo'
     | '/api/v1/visitor/weather'
     | '/api/v1/analytics/'
@@ -1488,11 +1524,13 @@ export interface RootRouteChildren {
   ApiV1CodingRoute: typeof ApiV1CodingRoute
   ApiV1FootprintsRoute: typeof ApiV1FootprintsRoute
   ApiV1HealthRoute: typeof ApiV1HealthRoute
+  ApiV1OnlineRoute: typeof ApiV1OnlineRoute
   ApiV1OptionsRoute: typeof ApiV1OptionsRouteWithChildren
   ApiV1OwnerRoute: typeof ApiV1OwnerRoute
   ApiV1PostsRoute: typeof ApiV1PostsRouteWithChildren
   ApiV1SearchRoute: typeof ApiV1SearchRoute
   ApiV1TagsRoute: typeof ApiV1TagsRouteWithChildren
+  ApiV1TrackRoute: typeof ApiV1TrackRouteWithChildren
   ApiV1AdminStatsRoute: typeof ApiV1AdminStatsRoute
   ApiV1AnalyticsActionRoute: typeof ApiV1AnalyticsActionRoute
   ApiV1ArchiveStatsRoute: typeof ApiV1ArchiveStatsRoute
@@ -1625,6 +1663,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/track': {
+      id: '/api/v1/track'
+      path: '/api/v1/track'
+      fullPath: '/api/v1/track'
+      preLoaderRoute: typeof ApiV1TrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/tags': {
       id: '/api/v1/tags'
       path: '/api/v1/tags'
@@ -1658,6 +1703,13 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/options'
       fullPath: '/api/v1/options'
       preLoaderRoute: typeof ApiV1OptionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/online': {
+      id: '/api/v1/online'
+      path: '/api/v1/online'
+      fullPath: '/api/v1/online'
+      preLoaderRoute: typeof ApiV1OnlineRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/health': {
@@ -1778,6 +1830,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/v1/visitor/geo'
       preLoaderRoute: typeof ApiV1VisitorGeoRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/track/duration': {
+      id: '/api/v1/track/duration'
+      path: '/duration'
+      fullPath: '/api/v1/track/duration'
+      preLoaderRoute: typeof ApiV1TrackDurationRouteImport
+      parentRoute: typeof ApiV1TrackRoute
     }
     '/api/v1/themes/upload': {
       id: '/api/v1/themes/upload'
@@ -2499,6 +2558,18 @@ const ApiV1TagsRouteWithChildren = ApiV1TagsRoute._addFileChildren(
   ApiV1TagsRouteChildren,
 )
 
+interface ApiV1TrackRouteChildren {
+  ApiV1TrackDurationRoute: typeof ApiV1TrackDurationRoute
+}
+
+const ApiV1TrackRouteChildren: ApiV1TrackRouteChildren = {
+  ApiV1TrackDurationRoute: ApiV1TrackDurationRoute,
+}
+
+const ApiV1TrackRouteWithChildren = ApiV1TrackRoute._addFileChildren(
+  ApiV1TrackRouteChildren,
+)
+
 interface ApiV1CommentsIdRouteChildren {
   ApiV1CommentsIdApproveRoute: typeof ApiV1CommentsIdApproveRoute
   ApiV1CommentsIdEditRoute: typeof ApiV1CommentsIdEditRoute
@@ -2573,11 +2644,13 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1CodingRoute: ApiV1CodingRoute,
   ApiV1FootprintsRoute: ApiV1FootprintsRoute,
   ApiV1HealthRoute: ApiV1HealthRoute,
+  ApiV1OnlineRoute: ApiV1OnlineRoute,
   ApiV1OptionsRoute: ApiV1OptionsRouteWithChildren,
   ApiV1OwnerRoute: ApiV1OwnerRoute,
   ApiV1PostsRoute: ApiV1PostsRouteWithChildren,
   ApiV1SearchRoute: ApiV1SearchRoute,
   ApiV1TagsRoute: ApiV1TagsRouteWithChildren,
+  ApiV1TrackRoute: ApiV1TrackRouteWithChildren,
   ApiV1AdminStatsRoute: ApiV1AdminStatsRoute,
   ApiV1AnalyticsActionRoute: ApiV1AnalyticsActionRoute,
   ApiV1ArchiveStatsRoute: ApiV1ArchiveStatsRoute,

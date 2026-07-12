@@ -16,6 +16,12 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/options/test-email', 'POST'))).toBe(true);
   });
 
+  test('routes tracking and public online status to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/track', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/track/duration', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/online', 'GET'))).toBe(true);
+  });
+
   test('routes setup and installation APIs to Start', () => {
     expect(isStartNativeApiRequest(request('/api/v1/setup/status', 'GET'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/setup/test-db', 'POST'))).toBe(true);
