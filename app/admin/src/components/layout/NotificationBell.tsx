@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router';
 import api from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
 import { formatWithAdminTimeZone } from '@/lib/timezone';

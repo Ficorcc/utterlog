@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@/lib/router';
 import toast from 'react-hot-toast';
 import api, { optionsApi } from '@/lib/api';
 import { Button, EmptyState, Input, LoadingState, Modal, Table, Toggle } from '@/components/ui';

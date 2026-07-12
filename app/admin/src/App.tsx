@@ -1,5 +1,6 @@
 import { useEffect, useState, lazy, Suspense, Component, type ErrorInfo, type ReactNode } from 'react';
-import { Routes, Route, useNavigate, Outlet, Navigate } from 'react-router-dom';
+import { createRootRoute, createRoute, createRouter, RouterProvider } from '@tanstack/react-router';
+import { useNavigate, Outlet, Navigate } from '@/lib/router';
 import { useAuthStore } from '@/lib/store';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import { Spinner } from '@/components/ui';
@@ -173,78 +174,76 @@ function RouteLoading() {
 }
 
 export default function App() {
-  return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
+  return <RouterProvider router={router} />;
+}
 
-      <Route element={<AuthGate />}>
-        <Route path="/" element={<DashboardHome />} />
+const rootRoute = createRootRoute({ component: Outlet, notFoundComponent: NotFound });
+const loginRoute = createRoute({ getParentRoute: () => rootRoute, path: '/login', component: Login });
+const resetRoute = createRoute({ getParentRoute: () => rootRoute, path: '/reset-password', component: ResetPassword });
+const authRoute = createRoute({ getParentRoute: () => rootRoute, id: 'authenticated', component: AuthGate });
 
-        {/* Posts with nested tab layout */}
-        <Route path="/posts" element={<PostsLayout />}>
-          <Route index element={<Posts />} />
-          <Route path="categories" element={<PostCategories />} />
-          <Route path="tags" element={<PostTags />} />
-        </Route>
-        <Route path="/posts/create" element={<PostCreate />} />
-        <Route path="/posts/edit/:id" element={<PostEdit />} />
+const protectedRoute = (path: string, component: React.ComponentType<any>) => createRoute({
+  getParentRoute: () => authRoute,
+  path: path as any,
+  component: component as any,
+}) as any;
 
-        <Route path="/pages" element={<Pages />} />
-        {/* /menus merged into /themes → 菜单 tab; keep redirect for old bookmarks */}
-        <Route path="/menus" element={<Navigate to="/themes" replace />} />
-        <Route path="/pages/create" element={<PageCreate />} />
-        <Route path="/pages/edit/:id" element={<PageEdit />} />
+const postsRoute: any = protectedRoute('/posts', PostsLayout);
+const postsIndexRoute = createRoute({ getParentRoute: () => postsRoute, path: '/', component: Posts });
+const postCategoriesRoute = createRoute({ getParentRoute: () => postsRoute, path: 'categories', component: PostCategories });
+const postTagsRoute = createRoute({ getParentRoute: () => postsRoute, path: 'tags', component: PostTags });
 
-        {/* v2.4.2 影视管理 —— 内部仍走 PostCreate/PostEdit（type=video
-            预设）；/films 列表页用 Posts.tsx 的精简变体专门 list
-            type=video 的 posts。 */}
-        <Route path="/films" element={<Films />} />
-        <Route path="/films/create" element={<PostCreate />} />
-        <Route path="/films/edit/:id" element={<PostEdit />} />
+const protectedRoutes: any[] = [
+  protectedRoute('/', DashboardHome),
+  postsRoute.addChildren([postsIndexRoute, postCategoriesRoute, postTagsRoute]),
+  protectedRoute('/posts/create', PostCreate),
+  protectedRoute('/posts/edit/$id', PostEdit),
+  protectedRoute('/pages', Pages),
+  protectedRoute('/menus', () => <Navigate to="/themes" replace />),
+  protectedRoute('/pages/create', PageCreate),
+  protectedRoute('/pages/edit/$id', PageEdit),
+  protectedRoute('/films', Films),
+  protectedRoute('/films/create', PostCreate),
+  protectedRoute('/films/edit/$id', PostEdit),
+  protectedRoute('/moments', Moments),
+  protectedRoute('/footprints', Footprints),
+  protectedRoute('/comments', Comments),
+  protectedRoute('/comments/annotations', Annotations),
+  protectedRoute('/comments/ai', AICommentsQueue),
+  protectedRoute('/comments/$status', CommentsByStatus),
+  protectedRoute('/follows', Follows),
+  protectedRoute('/links', Links),
+  protectedRoute('/media', Media),
+  protectedRoute('/albums', Albums),
+  protectedRoute('/music', Music),
+  protectedRoute('/music/playlists', MusicPlaylists),
+  protectedRoute('/playlists', Playlists),
+  protectedRoute('/movies', Movies),
+  protectedRoute('/videos', Videos),
+  protectedRoute('/books', Books),
+  protectedRoute('/games', Games),
+  protectedRoute('/goods', Goods),
+  protectedRoute('/analytics', Analytics),
+  protectedRoute('/security', Security),
+  protectedRoute('/themes', Themes),
+  protectedRoute('/plugins', Plugins),
+  protectedRoute('/tools', Tools),
+  protectedRoute('/system/update', () => <Navigate to="/settings#update" replace />),
+  protectedRoute('/backup', Backup),
+  protectedRoute('/settings', Settings),
+  protectedRoute('/profile', Profile),
+  protectedRoute('/utterlog', Utterlog),
+  protectedRoute('/form-demo', FormDemo),
+  protectedRoute('/ai', Assistant),
+  protectedRoute('/ai/logs', AiLogs),
+  protectedRoute('/ai-settings', AiSettings),
+];
 
-        <Route path="/moments" element={<Moments />} />
-        <Route path="/footprints" element={<Footprints />} />
-        <Route path="/comments" element={<Comments />} />
-        <Route path="/comments/annotations" element={<Annotations />} />
-        <Route path="/comments/ai" element={<AICommentsQueue />} />
-        <Route path="/comments/:status" element={<CommentsByStatus />} />
-        <Route path="/follows" element={<Follows />} />
-        <Route path="/links" element={<Links />} />
+const routeTree = rootRoute.addChildren([loginRoute, resetRoute, authRoute.addChildren(protectedRoutes as any)] as any);
+const router = createRouter({ routeTree, basepath: '/admin', defaultPreload: 'intent' });
 
-        <Route path="/media" element={<Media />} />
-        <Route path="/albums" element={<Albums />} />
-
-        <Route path="/music" element={<Music />} />
-        <Route path="/music/playlists" element={<MusicPlaylists />} />
-        <Route path="/playlists" element={<Playlists />} />
-        <Route path="/movies" element={<Movies />} />
-        <Route path="/videos" element={<Videos />} />
-        <Route path="/books" element={<Books />} />
-        <Route path="/games" element={<Games />} />
-        <Route path="/goods" element={<Goods />} />
-
-        <Route path="/analytics" element={<Analytics />} />
-        <Route path="/security" element={<Security />} />
-        <Route path="/themes" element={<Themes />} />
-        <Route path="/plugins" element={<Plugins />} />
-        <Route path="/tools" element={<Tools />} />
-        {/* /system/update was removed in favor of Settings → 系统更新 tab.
-            Keep a 301-style redirect for bookmarks / deep links from the
-            sidebar version badge. */}
-        <Route path="/system/update" element={<Navigate to="/settings#update" replace />} />
-        <Route path="/backup" element={<Backup />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/utterlog" element={<Utterlog />} />
-        <Route path="/form-demo" element={<FormDemo />} />
-
-        <Route path="/ai" element={<Assistant />} />
-        <Route path="/ai/logs" element={<AiLogs />} />
-        <Route path="/ai-settings" element={<AiSettings />} />
-
-        <Route path="*" element={<NotFound />} />
-      </Route>
-    </Routes>
-  );
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router;
+  }
 }

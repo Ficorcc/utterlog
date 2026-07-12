@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@/lib/router';
 import toast from 'react-hot-toast';
 import { annotationsApi } from '@/lib/api';
 import { Button, Table, Pagination, ConfirmDialog } from '@/components/ui';

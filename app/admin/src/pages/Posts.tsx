@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@/lib/router';
 import { postsApi, optionsApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Button, Input, SaveButton, Table, Pagination, Badge, ConfirmDialog, Modal } from '@/components/ui';

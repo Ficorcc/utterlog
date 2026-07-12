@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
+    "@tanstack/react-router": "^1.170.17",
     "axios": "^1.18.1",
     "clsx": "^2.1.1",
     "mapbox-gl": "^3.25.0",
@@ -18,7 +19,6 @@
     "react-hook-form": "^7.80.0",
     "react-hot-toast": "^2.6.0",
     "react-markdown": "^10.1.0",
-    "react-router-dom": "^7.18.0",
     "rehype-highlight": "^7.0.0",
     "rehype-raw": "^7.0.0",
     "rehype-sanitize": "^6.0.0",

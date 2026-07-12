@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams } from '@/lib/router';
 import CommentsPage from './Comments';
 
 // /admin/comments/:status → status="pending" | "spam" | "trash" | "mine"

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, createContext, useContext, useMemo, type ReactNode } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from '@/lib/router';
 import Sidebar from '@/components/layout/Sidebar';
 import NotificationBell from '@/components/layout/NotificationBell';
 import { useAuthStore } from '@/lib/store';

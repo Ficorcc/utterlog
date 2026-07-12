@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from '@/lib/router';
 import { postsApi, categoriesApi, tagsApi, mediaApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui';

@@ -1,6 +1,6 @@
-@import "tailwindcss";
 @import url("https://static.bluecdn.com/fonts/ubuntu.css");
 @import url("https://static.bluecdn.com/fonts/google-sans-code.css");
+@import "tailwindcss";
 
 /* Scrollbar: reserve space, track matches background, thumb hidden until scroll */
 /* ===== Scrollbar: prevent layout shift ===== */

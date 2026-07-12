@@ -10,7 +10,7 @@
  * Token comes via the URL ?token= query param; we never store it.
  */
 import { useState } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useSearchParams, useNavigate, Link } from '@/lib/router';
 import { authApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useI18n } from '@/lib/i18n';

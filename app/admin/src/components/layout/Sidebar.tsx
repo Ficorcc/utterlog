@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink } from '@/lib/router';
 import SystemStatusPanel from './SystemStatusPanel';
 import VersionBadge from '@/components/VersionBadge';
 import { useI18n } from '@/lib/i18n';

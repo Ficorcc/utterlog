@@ -52,7 +52,7 @@ export default defineConfig({
           groups: [
             {
               name: 'react',
-              test: /[\\/]node_modules[\\/](react|react-dom|react-router-dom)[\\/]/,
+              test: /[\\/]node_modules[\\/](react|react-dom|@tanstack[\\/]react-router)[\\/]/,
               priority: 20,
             },
             {

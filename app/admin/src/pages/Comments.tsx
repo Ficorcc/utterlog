@@ -1,6 +1,6 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@/lib/router';
 import { commentsApi } from '@/lib/api';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
