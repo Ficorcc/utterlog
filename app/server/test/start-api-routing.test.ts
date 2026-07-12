@@ -58,6 +58,15 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/notifications/7', 'DELETE'))).toBe(true);
   });
 
+  test('routes security management to Start', () => {
+    for (const action of ['overview', 'settings', 'bans', 'timeline']) {
+      expect(isStartNativeApiRequest(request(`/api/v1/security/${action}`, 'GET'))).toBe(true);
+    }
+    expect(isStartNativeApiRequest(request('/api/v1/security/settings', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/security/ban', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/security/unban', 'POST'))).toBe(true);
+  });
+
   test('routes visitor weather to Start', () => {
     expect(isStartNativeApiRequest(request('/api/v1/visitor/weather', 'GET'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/visitor/weather', 'POST'))).toBe(false);

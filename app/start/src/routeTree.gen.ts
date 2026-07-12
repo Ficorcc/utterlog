@@ -31,6 +31,7 @@ import { Route as ApiV1MediaIndexRouteImport } from './routes/api/v1/media/index
 import { Route as ApiV1CommentsIndexRouteImport } from './routes/api/v1/comments/index'
 import { Route as ApiV1VisitorWeatherRouteImport } from './routes/api/v1/visitor/weather'
 import { Route as ApiV1TagsIdRouteImport } from './routes/api/v1/tags/$id'
+import { Route as ApiV1SecurityActionRouteImport } from './routes/api/v1/security/$action'
 import { Route as ApiV1ProfileSendCodeRouteImport } from './routes/api/v1/profile/send-code'
 import { Route as ApiV1PostsIdRouteImport } from './routes/api/v1/posts/$id'
 import { Route as ApiV1PlaylistsImportRouteImport } from './routes/api/v1/playlists/import'
@@ -191,6 +192,11 @@ const ApiV1TagsIdRoute = ApiV1TagsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => ApiV1TagsRoute,
+} as any)
+const ApiV1SecurityActionRoute = ApiV1SecurityActionRouteImport.update({
+  id: '/api/v1/security/$action',
+  path: '/api/v1/security/$action',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1ProfileSendCodeRoute = ApiV1ProfileSendCodeRouteImport.update({
   id: '/api/v1/profile/send-code',
@@ -502,6 +508,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/playlists/import': typeof ApiV1PlaylistsImportRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
+  '/api/v1/security/$action': typeof ApiV1SecurityActionRoute
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
   '/api/v1/comments/': typeof ApiV1CommentsIndexRoute
@@ -576,6 +583,7 @@ export interface FileRoutesByTo {
   '/api/v1/playlists/import': typeof ApiV1PlaylistsImportRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
+  '/api/v1/security/$action': typeof ApiV1SecurityActionRoute
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
   '/api/v1/comments': typeof ApiV1CommentsIndexRoute
@@ -651,6 +659,7 @@ export interface FileRoutesById {
   '/api/v1/playlists/import': typeof ApiV1PlaylistsImportRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
+  '/api/v1/security/$action': typeof ApiV1SecurityActionRoute
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
   '/api/v1/comments/': typeof ApiV1CommentsIndexRoute
@@ -727,6 +736,7 @@ export interface FileRouteTypes {
     | '/api/v1/playlists/import'
     | '/api/v1/posts/$id'
     | '/api/v1/profile/send-code'
+    | '/api/v1/security/$action'
     | '/api/v1/tags/$id'
     | '/api/v1/visitor/weather'
     | '/api/v1/comments/'
@@ -801,6 +811,7 @@ export interface FileRouteTypes {
     | '/api/v1/playlists/import'
     | '/api/v1/posts/$id'
     | '/api/v1/profile/send-code'
+    | '/api/v1/security/$action'
     | '/api/v1/tags/$id'
     | '/api/v1/visitor/weather'
     | '/api/v1/comments'
@@ -875,6 +886,7 @@ export interface FileRouteTypes {
     | '/api/v1/playlists/import'
     | '/api/v1/posts/$id'
     | '/api/v1/profile/send-code'
+    | '/api/v1/security/$action'
     | '/api/v1/tags/$id'
     | '/api/v1/visitor/weather'
     | '/api/v1/comments/'
@@ -947,6 +959,7 @@ export interface RootRouteChildren {
   ApiV1PasskeysIdRoute: typeof ApiV1PasskeysIdRoute
   ApiV1PlaylistsImportRoute: typeof ApiV1PlaylistsImportRoute
   ApiV1ProfileSendCodeRoute: typeof ApiV1ProfileSendCodeRoute
+  ApiV1SecurityActionRoute: typeof ApiV1SecurityActionRoute
   ApiV1VisitorWeatherRoute: typeof ApiV1VisitorWeatherRoute
   ApiV1CommentsIndexRoute: typeof ApiV1CommentsIndexRoute
   ApiV1MediaIndexRoute: typeof ApiV1MediaIndexRoute
@@ -1118,6 +1131,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/v1/tags/$id'
       preLoaderRoute: typeof ApiV1TagsIdRouteImport
       parentRoute: typeof ApiV1TagsRoute
+    }
+    '/api/v1/security/$action': {
+      id: '/api/v1/security/$action'
+      path: '/api/v1/security/$action'
+      fullPath: '/api/v1/security/$action'
+      preLoaderRoute: typeof ApiV1SecurityActionRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/v1/profile/send-code': {
       id: '/api/v1/profile/send-code'
@@ -1623,6 +1643,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1PasskeysIdRoute: ApiV1PasskeysIdRoute,
   ApiV1PlaylistsImportRoute: ApiV1PlaylistsImportRoute,
   ApiV1ProfileSendCodeRoute: ApiV1ProfileSendCodeRoute,
+  ApiV1SecurityActionRoute: ApiV1SecurityActionRoute,
   ApiV1VisitorWeatherRoute: ApiV1VisitorWeatherRoute,
   ApiV1CommentsIndexRoute: ApiV1CommentsIndexRoute,
   ApiV1MediaIndexRoute: ApiV1MediaIndexRoute,
