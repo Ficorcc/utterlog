@@ -64,6 +64,12 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/media/upload-branding', 'GET'))).toBe(false);
   });
 
+  test('routes authenticated media reads to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/media', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/media/stats', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/media', 'POST'))).toBe(false);
+  });
+
   test('routes category and tag management to Start', () => {
     for (const resource of ['categories', 'tags']) {
       expect(isStartNativeApiRequest(request(`/api/v1/${resource}`, 'GET'))).toBe(true);

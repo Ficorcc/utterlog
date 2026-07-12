@@ -82,6 +82,7 @@ export function isStartNativeApiRequest(request: Request) {
   if (url.pathname === '/api/v1/visitor/weather') return method === 'GET';
   if (url.pathname === '/api/v1/coding') return method === 'GET';
   if (url.pathname === '/api/v1/media/upload-branding') return method === 'POST';
+  if (url.pathname === '/api/v1/media' || url.pathname === '/api/v1/media/stats') return method === 'GET';
   if (url.pathname === '/api/v1/captcha/challenge' || url.pathname === '/api/v1/captcha/image') return method === 'GET';
   if (method === 'GET' && url.pathname === '/api/v1/comments') return true;
   if (url.pathname === '/api/v1/options') return method === 'GET' || method === 'PUT' || method === 'POST';

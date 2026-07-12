@@ -26,6 +26,7 @@ import { Route as ApiV1ResourceRouteImport } from './routes/api/v1/$resource'
 import { Route as ApiV1ProfileIndexRouteImport } from './routes/api/v1/profile/index'
 import { Route as ApiV1PasskeysIndexRouteImport } from './routes/api/v1/passkeys/index'
 import { Route as ApiV1MomentsIndexRouteImport } from './routes/api/v1/moments/index'
+import { Route as ApiV1MediaIndexRouteImport } from './routes/api/v1/media/index'
 import { Route as ApiV1CommentsIndexRouteImport } from './routes/api/v1/comments/index'
 import { Route as ApiV1VisitorWeatherRouteImport } from './routes/api/v1/visitor/weather'
 import { Route as ApiV1TagsIdRouteImport } from './routes/api/v1/tags/$id'
@@ -34,6 +35,7 @@ import { Route as ApiV1PostsIdRouteImport } from './routes/api/v1/posts/$id'
 import { Route as ApiV1PasskeysIdRouteImport } from './routes/api/v1/passkeys/$id'
 import { Route as ApiV1MomentsRecentTagsRouteImport } from './routes/api/v1/moments/recent-tags'
 import { Route as ApiV1MediaUploadBrandingRouteImport } from './routes/api/v1/media/upload-branding'
+import { Route as ApiV1MediaStatsRouteImport } from './routes/api/v1/media/stats'
 import { Route as ApiV1LinksApplyRouteImport } from './routes/api/v1/links/apply'
 import { Route as ApiV1CommentsPendingCountRouteImport } from './routes/api/v1/comments/pending-count'
 import { Route as ApiV1CommentsBatchRouteImport } from './routes/api/v1/comments/batch'
@@ -148,6 +150,11 @@ const ApiV1MomentsIndexRoute = ApiV1MomentsIndexRouteImport.update({
   path: '/api/v1/moments/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1MediaIndexRoute = ApiV1MediaIndexRouteImport.update({
+  id: '/api/v1/media/',
+  path: '/api/v1/media/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1CommentsIndexRoute = ApiV1CommentsIndexRouteImport.update({
   id: '/api/v1/comments/',
   path: '/api/v1/comments/',
@@ -189,6 +196,11 @@ const ApiV1MediaUploadBrandingRoute =
     path: '/api/v1/media/upload-branding',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiV1MediaStatsRoute = ApiV1MediaStatsRouteImport.update({
+  id: '/api/v1/media/stats',
+  path: '/api/v1/media/stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1LinksApplyRoute = ApiV1LinksApplyRouteImport.update({
   id: '/api/v1/links/apply',
   path: '/api/v1/links/apply',
@@ -364,6 +376,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
   '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
+  '/api/v1/media/stats': typeof ApiV1MediaStatsRoute
   '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
@@ -372,6 +385,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
   '/api/v1/comments/': typeof ApiV1CommentsIndexRoute
+  '/api/v1/media/': typeof ApiV1MediaIndexRoute
   '/api/v1/moments/': typeof ApiV1MomentsIndexRoute
   '/api/v1/passkeys/': typeof ApiV1PasskeysIndexRoute
   '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
@@ -419,6 +433,7 @@ export interface FileRoutesByTo {
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
   '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
+  '/api/v1/media/stats': typeof ApiV1MediaStatsRoute
   '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
@@ -427,6 +442,7 @@ export interface FileRoutesByTo {
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
   '/api/v1/comments': typeof ApiV1CommentsIndexRoute
+  '/api/v1/media': typeof ApiV1MediaIndexRoute
   '/api/v1/moments': typeof ApiV1MomentsIndexRoute
   '/api/v1/passkeys': typeof ApiV1PasskeysIndexRoute
   '/api/v1/profile': typeof ApiV1ProfileIndexRoute
@@ -475,6 +491,7 @@ export interface FileRoutesById {
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
   '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
+  '/api/v1/media/stats': typeof ApiV1MediaStatsRoute
   '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
@@ -483,6 +500,7 @@ export interface FileRoutesById {
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
   '/api/v1/comments/': typeof ApiV1CommentsIndexRoute
+  '/api/v1/media/': typeof ApiV1MediaIndexRoute
   '/api/v1/moments/': typeof ApiV1MomentsIndexRoute
   '/api/v1/passkeys/': typeof ApiV1PasskeysIndexRoute
   '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
@@ -532,6 +550,7 @@ export interface FileRouteTypes {
     | '/api/v1/comments/batch'
     | '/api/v1/comments/pending-count'
     | '/api/v1/links/apply'
+    | '/api/v1/media/stats'
     | '/api/v1/media/upload-branding'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/passkeys/$id'
@@ -540,6 +559,7 @@ export interface FileRouteTypes {
     | '/api/v1/tags/$id'
     | '/api/v1/visitor/weather'
     | '/api/v1/comments/'
+    | '/api/v1/media/'
     | '/api/v1/moments/'
     | '/api/v1/passkeys/'
     | '/api/v1/profile/'
@@ -587,6 +607,7 @@ export interface FileRouteTypes {
     | '/api/v1/comments/batch'
     | '/api/v1/comments/pending-count'
     | '/api/v1/links/apply'
+    | '/api/v1/media/stats'
     | '/api/v1/media/upload-branding'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/passkeys/$id'
@@ -595,6 +616,7 @@ export interface FileRouteTypes {
     | '/api/v1/tags/$id'
     | '/api/v1/visitor/weather'
     | '/api/v1/comments'
+    | '/api/v1/media'
     | '/api/v1/moments'
     | '/api/v1/passkeys'
     | '/api/v1/profile'
@@ -642,6 +664,7 @@ export interface FileRouteTypes {
     | '/api/v1/comments/batch'
     | '/api/v1/comments/pending-count'
     | '/api/v1/links/apply'
+    | '/api/v1/media/stats'
     | '/api/v1/media/upload-branding'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/passkeys/$id'
@@ -650,6 +673,7 @@ export interface FileRouteTypes {
     | '/api/v1/tags/$id'
     | '/api/v1/visitor/weather'
     | '/api/v1/comments/'
+    | '/api/v1/media/'
     | '/api/v1/moments/'
     | '/api/v1/passkeys/'
     | '/api/v1/profile/'
@@ -697,12 +721,14 @@ export interface RootRouteChildren {
   ApiV1CommentsBatchRoute: typeof ApiV1CommentsBatchRoute
   ApiV1CommentsPendingCountRoute: typeof ApiV1CommentsPendingCountRoute
   ApiV1LinksApplyRoute: typeof ApiV1LinksApplyRoute
+  ApiV1MediaStatsRoute: typeof ApiV1MediaStatsRoute
   ApiV1MediaUploadBrandingRoute: typeof ApiV1MediaUploadBrandingRoute
   ApiV1MomentsRecentTagsRoute: typeof ApiV1MomentsRecentTagsRoute
   ApiV1PasskeysIdRoute: typeof ApiV1PasskeysIdRoute
   ApiV1ProfileSendCodeRoute: typeof ApiV1ProfileSendCodeRoute
   ApiV1VisitorWeatherRoute: typeof ApiV1VisitorWeatherRoute
   ApiV1CommentsIndexRoute: typeof ApiV1CommentsIndexRoute
+  ApiV1MediaIndexRoute: typeof ApiV1MediaIndexRoute
   ApiV1MomentsIndexRoute: typeof ApiV1MomentsIndexRoute
   ApiV1PasskeysIndexRoute: typeof ApiV1PasskeysIndexRoute
   ApiV1ProfileIndexRoute: typeof ApiV1ProfileIndexRoute
@@ -834,6 +860,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1MomentsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/media/': {
+      id: '/api/v1/media/'
+      path: '/api/v1/media'
+      fullPath: '/api/v1/media/'
+      preLoaderRoute: typeof ApiV1MediaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/comments/': {
       id: '/api/v1/comments/'
       path: '/api/v1/comments'
@@ -888,6 +921,13 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/media/upload-branding'
       fullPath: '/api/v1/media/upload-branding'
       preLoaderRoute: typeof ApiV1MediaUploadBrandingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/media/stats': {
+      id: '/api/v1/media/stats'
+      path: '/api/v1/media/stats'
+      fullPath: '/api/v1/media/stats'
+      preLoaderRoute: typeof ApiV1MediaStatsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/links/apply': {
@@ -1190,12 +1230,14 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1CommentsBatchRoute: ApiV1CommentsBatchRoute,
   ApiV1CommentsPendingCountRoute: ApiV1CommentsPendingCountRoute,
   ApiV1LinksApplyRoute: ApiV1LinksApplyRoute,
+  ApiV1MediaStatsRoute: ApiV1MediaStatsRoute,
   ApiV1MediaUploadBrandingRoute: ApiV1MediaUploadBrandingRoute,
   ApiV1MomentsRecentTagsRoute: ApiV1MomentsRecentTagsRoute,
   ApiV1PasskeysIdRoute: ApiV1PasskeysIdRoute,
   ApiV1ProfileSendCodeRoute: ApiV1ProfileSendCodeRoute,
   ApiV1VisitorWeatherRoute: ApiV1VisitorWeatherRoute,
   ApiV1CommentsIndexRoute: ApiV1CommentsIndexRoute,
+  ApiV1MediaIndexRoute: ApiV1MediaIndexRoute,
   ApiV1MomentsIndexRoute: ApiV1MomentsIndexRoute,
   ApiV1PasskeysIndexRoute: ApiV1PasskeysIndexRoute,
   ApiV1ProfileIndexRoute: ApiV1ProfileIndexRoute,

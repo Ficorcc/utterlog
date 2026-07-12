@@ -37,6 +37,7 @@ import {
 } from '../media/storage';
 import { BrandingUploadError, storeBrandingUpload } from '../services/branding';
 import { deleteMetaRecord, saveMetaRecord } from '../services/metas';
+import { listMediaRecords, mediaStorageStats } from '../services/media';
 import { parsePermalinkPath } from '../services/permalink';
 import {
   adminCommentPendingCounts,
@@ -2529,49 +2530,16 @@ export function registerContentRoutes(app: Hono) {
 
   app.get('/api/v1/media', auth, async (c) => {
     const sp = searchParams(c);
-    const { page, perPage, offset } = pageParams(sp);
-    const where: string[] = [];
-    const params: unknown[] = [];
-    const category = sp.get('category');
-    if (category) {
-      params.push(category);
-      where.push(`category = $${params.length}`);
-    }
-    const excludeCategory = sp.get('exclude_category');
-    if (excludeCategory) {
-      params.push(excludeCategory);
-      where.push(`category != $${params.length}`);
-    }
-    const whereSql = where.length ? `where ${where.join(' and ')}` : '';
-    const total = await one<{ count: string }>(`select count(*)::text as count from ${table('media')} ${whereSql}`, params);
-    const rows = await many<Record<string, unknown>>(
-      `select * from ${table('media')} ${whereSql} order by created_at desc, id desc limit $${params.length + 1} offset $${params.length + 2}`,
-      [...params, perPage, offset],
-    );
-    return paginate(c, rows, Number(total?.count || 0), page, perPage);
+    const result = await listMediaRecords({
+      page: Number(sp.get('page') || 1),
+      perPage: Number(sp.get('per_page') || 20),
+      category: sp.get('category') || '',
+      excludeCategory: sp.get('exclude_category') || '',
+    });
+    return paginate(c, result.rows, result.meta.total, result.meta.page, result.meta.per_page);
   });
   app.get('/api/v1/media/stats', auth, async (c) => {
-    const rows = await many<{ driver: string; files: number; size: string }>(
-      `select coalesce(nullif(driver,''),'local') as driver, count(*)::int as files, coalesce(sum(size),0)::text as size
-       from ${table('media')} group by driver`,
-    ).catch(() => []);
-    const drivers: Record<string, { files: number; size: number }> = {};
-    let files = 0;
-    let size = 0;
-    for (const row of rows) {
-      const stat = { files: Number(row.files || 0), size: Number(row.size || 0) };
-      drivers[row.driver || 'local'] = stat;
-      files += stat.files;
-      size += stat.size;
-    }
-    return ok(c, {
-      files,
-      size,
-      drivers,
-      disk: diskStats(existsSync(config.uploadDir) ? config.uploadDir : '.'),
-      total: files,
-      total_size: size,
-    });
+    return ok(c, await mediaStorageStats());
   });
   app.post('/api/v1/media/upload', auth, async (c) => {
     const release = acquireUploadSlot();
