@@ -55,13 +55,20 @@ describe('TanStack Start native API routing', () => {
   });
 
   test('routes anonymous public reads to Start while retaining authenticated admin reads', () => {
-    for (const path of ['/api/v1/options', '/api/v1/categories', '/api/v1/tags', '/api/v1/posts', '/api/v1/comments', '/api/v1/moments', '/api/v1/links']) {
+    for (const path of ['/api/v1/options', '/api/v1/categories', '/api/v1/tags', '/api/v1/posts', '/api/v1/moments', '/api/v1/links']) {
       expect(isStartNativeApiRequest(request(path, 'GET'))).toBe(true);
       expect(isStartNativeApiRequest(new Request(`https://example.test${path}`, {
         headers: { authorization: 'Bearer admin-token' },
       }))).toBe(false);
     }
+    expect(isStartNativeApiRequest(request('/api/v1/comments', 'GET'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/posts', 'POST'))).toBe(false);
+  });
+
+  test('routes authenticated comment list reads to Start for admin filtering', () => {
+    expect(isStartNativeApiRequest(new Request('https://example.test/api/v1/comments?status=pending', {
+      headers: { authorization: 'Bearer admin-token' },
+    }))).toBe(true);
   });
 
   test('routes public detail and supplemental reads to Start', () => {
@@ -78,7 +85,7 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/comments/7/edit', 'GET'))).toBe(false);
   });
 
-  test('routes public comment creation while keeping authenticated reads on the compatibility API', () => {
+  test('routes public comment creation while retaining unknown detail reads in compatibility', () => {
     expect(isStartNativeApiRequest(request('/api/v1/comments', 'POST'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/comments/42', 'GET'))).toBe(false);
   });

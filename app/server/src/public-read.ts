@@ -562,6 +562,8 @@ export async function listComments(params: {
   postId?: number;
   topLevel?: boolean;
   order?: string;
+  userId?: number;
+  search?: string;
 } = {}) {
   const page = Math.max(1, params.page || 1);
   const perPage = Math.min(500, Math.max(1, params.perPage || 20));
@@ -570,14 +572,31 @@ export async function listComments(params: {
   const queryParams: unknown[] = [];
   const status = params.status || 'approved';
   if (status) {
-    queryParams.push(status);
-    where.push(`c.status = $${queryParams.length}`);
+    const statuses = status.split(',').map((part) => part.trim()).filter(Boolean);
+    if (statuses.length > 1) {
+      const placeholders = statuses.map((part) => {
+        queryParams.push(part);
+        return `$${queryParams.length}`;
+      });
+      where.push(`c.status in (${placeholders.join(',')})`);
+    } else {
+      queryParams.push(statuses[0] || 'approved');
+      where.push(`c.status = $${queryParams.length}`);
+    }
   }
   if (params.postId && params.postId > 0) {
     queryParams.push(params.postId);
     where.push(`c.post_id = $${queryParams.length}`);
   }
   if (params.topLevel) where.push(`(c.parent_id is null or c.parent_id = 0)`);
+  if (params.userId && params.userId > 0) {
+    queryParams.push(params.userId);
+    where.push(`c.user_id = $${queryParams.length}`);
+  }
+  if (params.search?.trim()) {
+    queryParams.push(`%${params.search.trim()}%`);
+    where.push(`(c.content ilike $${queryParams.length} or c.author_name ilike $${queryParams.length} or c.author_email ilike $${queryParams.length})`);
+  }
   if (params.excludeAdmin) {
     where.push(`coalesce(u.role, '') != 'admin'`);
     const adminEmails = await many<{ email: string }>(`select lower(trim(email)) as email from ${table('users')} where role = 'admin'`).catch(() => []);

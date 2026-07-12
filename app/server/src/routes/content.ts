@@ -55,6 +55,7 @@ import {
 } from '../services/comment-captcha';
 import { createPublicComment } from '../services/public-comments';
 import { PublicWriteError } from '../services/public-write';
+import { listComments as listCommentsDirect } from '../public-read';
 
 const contentTables = new Set(['moments', 'music', 'movies', 'books', 'games', 'videos', 'goods', 'links', 'playlists']);
 const writableTables = new Set([...contentTables, 'posts', 'comments', 'media', 'albums', 'notifications']);
@@ -2484,101 +2485,19 @@ export function registerContentRoutes(app: Hono) {
 
   app.get('/api/v1/comments', optionalAuth, async (c) => {
     const sp = searchParams(c);
-    const { page, perPage, offset } = pageParams(sp);
-    const where: string[] = [];
-    const params: unknown[] = [];
     const authed = currentUserId(c) > 0;
-    const status = authed ? sp.get('status') : 'approved';
-    if (status) {
-      const parts = status.split(',').map((part) => part.trim()).filter(Boolean);
-      if (parts.length > 1) {
-        const placeholders = parts.map((part) => {
-          params.push(part);
-          return `$${params.length}`;
-        });
-        where.push(`c.status in (${placeholders.join(',')})`);
-      } else {
-        params.push(parts[0] || 'approved');
-        where.push(`c.status = $${params.length}`);
-      }
-    }
-    const postId = sp.get('post_id');
-    if (postId) {
-      params.push(intParam(postId));
-      where.push(`c.post_id = $${params.length}`);
-    }
-    const userId = intParam(sp.get('user_id') || undefined);
-    if (userId > 0 && authed) {
-      params.push(userId);
-      where.push(`c.user_id = $${params.length}`);
-    }
-    const search = sp.get('search')?.trim();
-    if (search && authed) {
-      params.push(`%${search}%`);
-      where.push(`(c.content ilike $${params.length} or c.author_name ilike $${params.length} or c.author_email ilike $${params.length})`);
-    }
-    if (sp.get('top_level') === 'true') {
-      where.push(`(c.parent_id is null or c.parent_id = 0)`);
-    }
-    const excludeAdmin = sp.get('exclude_admin') === '1' || sp.get('exclude_admin') === 'true';
-    if (excludeAdmin) {
-      where.push(`coalesce(u.role, '') != 'admin'`);
-      const adminEmails = await many<{ email: string }>(`select lower(trim(email)) as email from ${table('users')} where role = 'admin'`).catch(() => []);
-      const emails = adminEmails.map((row) => row.email).filter(Boolean);
-      if (emails.length) {
-        params.push(emails);
-        where.push(`lower(trim(coalesce(c.author_email,''))) != all($${params.length}::text[])`);
-      }
-    }
-    const whereSql = where.length ? `where ${where.join(' and ')}` : '';
-    const total = await one<{ count: string }>(
-      `select count(*)::text as count
-       from ${table('comments')} c
-       left join ${table('users')} u on u.id = c.user_id
-       ${whereSql}`,
-      params,
-    );
-    const direction = normalizeDirection(sp.get('order'));
-    const rows = await many<Record<string, unknown>>(
-      `select c.*,
-              p.title as post_title, p.slug as post_slug, p.display_id as post_display_id,
-              p.created_at as post_created_at, p.published_at as post_published_at,
-              p.comment_count as post_comment_count,
-              coalesce(u.role,'') as user_role,
-              pc.author_name as parent_author, pc.content as parent_content, pc.created_at as parent_created_at
-       from ${table('comments')} c
-       left join ${table('posts')} p on p.id = c.post_id
-       left join ${table('users')} u on u.id = c.user_id
-       left join ${table('comments')} pc on pc.id = c.parent_id
-       ${whereSql}
-       order by c.created_at ${direction}, c.id ${direction}
-       limit $${params.length + 1} offset $${params.length + 2}`,
-      [...params, perPage, offset],
-    );
-    return paginate(c, rows.map((row) => {
-      const isAdmin = row.user_role === 'admin';
-      const parentContent = String(row.parent_content || '');
-      return {
-        ...row,
-        geo: commentGeoFromRow(row.geo),
-        author: row.author_name,
-        email: row.author_email,
-        url: row.author_url,
-        ip: row.author_ip,
-        user_agent: row.author_agent,
-        avatar_url: gravatarUrlForEmail(String(row.author_email || ''), 64),
-        author_avatar: gravatarUrlForEmail(String(row.author_email || ''), 48),
-        is_admin: isAdmin,
-        comment_count: 1,
-        level: 1,
-        parent: row.parent_id ? {
-          id: row.parent_id,
-          author: row.parent_author,
-          content: [...parentContent].length > 100 ? `${[...parentContent].slice(0, 100).join('')}...` : parentContent,
-          created_at: row.parent_created_at,
-        } : undefined,
-      };
-    }), Number(total?.count || 0), page, perPage);
+    const result = await listCommentsDirect({
+      page: Math.max(1, intParam(sp.get('page') || undefined, 1)),
+      perPage: Math.min(500, Math.max(1, intParam(sp.get('per_page') || undefined, 20))),
+      status: authed ? sp.get('status') || 'approved' : 'approved',
+      postId: intParam(sp.get('post_id') || undefined),
+      userId: authed ? intParam(sp.get('user_id') || undefined) : 0,
+      search: authed ? sp.get('search') || '' : '',
+      topLevel: sp.get('top_level') === 'true',
+      excludeAdmin: sp.get('exclude_admin') === '1' || sp.get('exclude_admin') === 'true',
+      order: sp.get('order') || 'desc',
+    });
+    return paginate(c, result.data, result.meta.total, result.meta.page, result.meta.per_page);
   });
   app.post('/api/v1/comments', optionalAuth, async (c) => {
     const body = await c.req.json().catch(() => ({}));
