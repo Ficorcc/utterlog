@@ -96,6 +96,10 @@ export function isStartNativeApiRequest(request: Request) {
   if (/^\/api\/v1\/moments\/\d+$/.test(url.pathname)) return method === 'GET' || method === 'PUT' || method === 'DELETE';
   if (url.pathname === '/api/v1/comments' && method === 'POST') return true;
   if (url.pathname === '/api/v1/links/apply') return method === 'POST';
+  if (url.pathname === '/api/v1/playlists/import') return method === 'POST';
+  if (/^\/api\/v1\/playlists\/\d+\/songs$/.test(url.pathname)) return method === 'POST' || method === 'DELETE';
+  if (/^\/api\/v1\/albums\/\d+\/photos$/.test(url.pathname)) return method === 'GET' || method === 'POST';
+  if (/^\/api\/v1\/albums\/\d+\/photos\/\d+$/.test(url.pathname)) return method === 'DELETE';
   if (/^\/api\/v1\/(albums|books|games|goods|links|movies|music|playlists|videos)$/.test(url.pathname)) {
     return method === 'GET' || method === 'POST';
   }

@@ -32,6 +32,7 @@ import { Route as ApiV1VisitorWeatherRouteImport } from './routes/api/v1/visitor
 import { Route as ApiV1TagsIdRouteImport } from './routes/api/v1/tags/$id'
 import { Route as ApiV1ProfileSendCodeRouteImport } from './routes/api/v1/profile/send-code'
 import { Route as ApiV1PostsIdRouteImport } from './routes/api/v1/posts/$id'
+import { Route as ApiV1PlaylistsImportRouteImport } from './routes/api/v1/playlists/import'
 import { Route as ApiV1PasskeysIdRouteImport } from './routes/api/v1/passkeys/$id'
 import { Route as ApiV1MomentsRecentTagsRouteImport } from './routes/api/v1/moments/recent-tags'
 import { Route as ApiV1MomentsIdRouteImport } from './routes/api/v1/moments/$id'
@@ -65,12 +66,15 @@ import { Route as ApiV1PostsByDisplayIdDisplayIdRouteImport } from './routes/api
 import { Route as ApiV1PostsIdNavigationRouteImport } from './routes/api/v1/posts/$id/navigation'
 import { Route as ApiV1PostsIdEpisodesRouteImport } from './routes/api/v1/posts/$id/episodes'
 import { Route as ApiV1PostsIdCommentsRouteImport } from './routes/api/v1/posts/$id/comments'
+import { Route as ApiV1PlaylistsIdSongsRouteImport } from './routes/api/v1/playlists/$id/songs'
 import { Route as ApiV1CommentsIdReplyRouteImport } from './routes/api/v1/comments/$id/reply'
 import { Route as ApiV1CommentsIdEditRouteImport } from './routes/api/v1/comments/$id/edit'
 import { Route as ApiV1CommentsIdApproveRouteImport } from './routes/api/v1/comments/$id/approve'
 import { Route as ApiV1AuthTotpActionRouteImport } from './routes/api/v1/auth/totp/$action'
 import { Route as ApiV1AuthPasskeyAvailableRouteImport } from './routes/api/v1/auth/passkey/available'
+import { Route as ApiV1AlbumsIdPhotosRouteImport } from './routes/api/v1/albums/$id/photos'
 import { Route as ApiV1AuthPasskeyFlowActionRouteImport } from './routes/api/v1/auth/passkey/$flow/$action'
+import { Route as ApiV1AlbumsIdPhotosMediaIdRouteImport } from './routes/api/v1/albums/$id/photos/$mediaId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -186,6 +190,11 @@ const ApiV1PostsIdRoute = ApiV1PostsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => ApiV1PostsRoute,
+} as any)
+const ApiV1PlaylistsImportRoute = ApiV1PlaylistsImportRouteImport.update({
+  id: '/api/v1/playlists/import',
+  path: '/api/v1/playlists/import',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1PasskeysIdRoute = ApiV1PasskeysIdRouteImport.update({
   id: '/api/v1/passkeys/$id',
@@ -356,6 +365,11 @@ const ApiV1PostsIdCommentsRoute = ApiV1PostsIdCommentsRouteImport.update({
   path: '/comments',
   getParentRoute: () => ApiV1PostsIdRoute,
 } as any)
+const ApiV1PlaylistsIdSongsRoute = ApiV1PlaylistsIdSongsRouteImport.update({
+  id: '/api/v1/playlists/$id/songs',
+  path: '/api/v1/playlists/$id/songs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1CommentsIdReplyRoute = ApiV1CommentsIdReplyRouteImport.update({
   id: '/reply',
   path: '/reply',
@@ -382,11 +396,22 @@ const ApiV1AuthPasskeyAvailableRoute =
     path: '/api/v1/auth/passkey/available',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiV1AlbumsIdPhotosRoute = ApiV1AlbumsIdPhotosRouteImport.update({
+  id: '/api/v1/albums/$id/photos',
+  path: '/api/v1/albums/$id/photos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1AuthPasskeyFlowActionRoute =
   ApiV1AuthPasskeyFlowActionRouteImport.update({
     id: '/api/v1/auth/passkey/$flow/$action',
     path: '/api/v1/auth/passkey/$flow/$action',
     getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1AlbumsIdPhotosMediaIdRoute =
+  ApiV1AlbumsIdPhotosMediaIdRouteImport.update({
+    id: '/$mediaId',
+    path: '/$mediaId',
+    getParentRoute: () => ApiV1AlbumsIdPhotosRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -430,6 +455,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/moments/$id': typeof ApiV1MomentsIdRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
+  '/api/v1/playlists/import': typeof ApiV1PlaylistsImportRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
@@ -439,11 +465,13 @@ export interface FileRoutesByFullPath {
   '/api/v1/moments/': typeof ApiV1MomentsIndexRoute
   '/api/v1/passkeys/': typeof ApiV1PasskeysIndexRoute
   '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
+  '/api/v1/albums/$id/photos': typeof ApiV1AlbumsIdPhotosRouteWithChildren
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
   '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
   '/api/v1/comments/$id/approve': typeof ApiV1CommentsIdApproveRoute
   '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
   '/api/v1/comments/$id/reply': typeof ApiV1CommentsIdReplyRoute
+  '/api/v1/playlists/$id/songs': typeof ApiV1PlaylistsIdSongsRoute
   '/api/v1/posts/$id/comments': typeof ApiV1PostsIdCommentsRoute
   '/api/v1/posts/$id/episodes': typeof ApiV1PostsIdEpisodesRoute
   '/api/v1/posts/$id/navigation': typeof ApiV1PostsIdNavigationRoute
@@ -451,6 +479,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/posts/slug/$slug': typeof ApiV1PostsSlugSlugRoute
   '/api/v1/public/albums/$id': typeof ApiV1PublicAlbumsIdRoute
   '/api/v1/public/albums/': typeof ApiV1PublicAlbumsIndexRoute
+  '/api/v1/albums/$id/photos/$mediaId': typeof ApiV1AlbumsIdPhotosMediaIdRoute
   '/api/v1/auth/passkey/$flow/$action': typeof ApiV1AuthPasskeyFlowActionRoute
 }
 export interface FileRoutesByTo {
@@ -494,6 +523,7 @@ export interface FileRoutesByTo {
   '/api/v1/moments/$id': typeof ApiV1MomentsIdRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
+  '/api/v1/playlists/import': typeof ApiV1PlaylistsImportRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
@@ -503,11 +533,13 @@ export interface FileRoutesByTo {
   '/api/v1/moments': typeof ApiV1MomentsIndexRoute
   '/api/v1/passkeys': typeof ApiV1PasskeysIndexRoute
   '/api/v1/profile': typeof ApiV1ProfileIndexRoute
+  '/api/v1/albums/$id/photos': typeof ApiV1AlbumsIdPhotosRouteWithChildren
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
   '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
   '/api/v1/comments/$id/approve': typeof ApiV1CommentsIdApproveRoute
   '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
   '/api/v1/comments/$id/reply': typeof ApiV1CommentsIdReplyRoute
+  '/api/v1/playlists/$id/songs': typeof ApiV1PlaylistsIdSongsRoute
   '/api/v1/posts/$id/comments': typeof ApiV1PostsIdCommentsRoute
   '/api/v1/posts/$id/episodes': typeof ApiV1PostsIdEpisodesRoute
   '/api/v1/posts/$id/navigation': typeof ApiV1PostsIdNavigationRoute
@@ -515,6 +547,7 @@ export interface FileRoutesByTo {
   '/api/v1/posts/slug/$slug': typeof ApiV1PostsSlugSlugRoute
   '/api/v1/public/albums/$id': typeof ApiV1PublicAlbumsIdRoute
   '/api/v1/public/albums': typeof ApiV1PublicAlbumsIndexRoute
+  '/api/v1/albums/$id/photos/$mediaId': typeof ApiV1AlbumsIdPhotosMediaIdRoute
   '/api/v1/auth/passkey/$flow/$action': typeof ApiV1AuthPasskeyFlowActionRoute
 }
 export interface FileRoutesById {
@@ -559,6 +592,7 @@ export interface FileRoutesById {
   '/api/v1/moments/$id': typeof ApiV1MomentsIdRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
+  '/api/v1/playlists/import': typeof ApiV1PlaylistsImportRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
@@ -568,11 +602,13 @@ export interface FileRoutesById {
   '/api/v1/moments/': typeof ApiV1MomentsIndexRoute
   '/api/v1/passkeys/': typeof ApiV1PasskeysIndexRoute
   '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
+  '/api/v1/albums/$id/photos': typeof ApiV1AlbumsIdPhotosRouteWithChildren
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
   '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
   '/api/v1/comments/$id/approve': typeof ApiV1CommentsIdApproveRoute
   '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
   '/api/v1/comments/$id/reply': typeof ApiV1CommentsIdReplyRoute
+  '/api/v1/playlists/$id/songs': typeof ApiV1PlaylistsIdSongsRoute
   '/api/v1/posts/$id/comments': typeof ApiV1PostsIdCommentsRoute
   '/api/v1/posts/$id/episodes': typeof ApiV1PostsIdEpisodesRoute
   '/api/v1/posts/$id/navigation': typeof ApiV1PostsIdNavigationRoute
@@ -580,6 +616,7 @@ export interface FileRoutesById {
   '/api/v1/posts/slug/$slug': typeof ApiV1PostsSlugSlugRoute
   '/api/v1/public/albums/$id': typeof ApiV1PublicAlbumsIdRoute
   '/api/v1/public/albums/': typeof ApiV1PublicAlbumsIndexRoute
+  '/api/v1/albums/$id/photos/$mediaId': typeof ApiV1AlbumsIdPhotosMediaIdRoute
   '/api/v1/auth/passkey/$flow/$action': typeof ApiV1AuthPasskeyFlowActionRoute
 }
 export interface FileRouteTypes {
@@ -625,6 +662,7 @@ export interface FileRouteTypes {
     | '/api/v1/moments/$id'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/passkeys/$id'
+    | '/api/v1/playlists/import'
     | '/api/v1/posts/$id'
     | '/api/v1/profile/send-code'
     | '/api/v1/tags/$id'
@@ -634,11 +672,13 @@ export interface FileRouteTypes {
     | '/api/v1/moments/'
     | '/api/v1/passkeys/'
     | '/api/v1/profile/'
+    | '/api/v1/albums/$id/photos'
     | '/api/v1/auth/passkey/available'
     | '/api/v1/auth/totp/$action'
     | '/api/v1/comments/$id/approve'
     | '/api/v1/comments/$id/edit'
     | '/api/v1/comments/$id/reply'
+    | '/api/v1/playlists/$id/songs'
     | '/api/v1/posts/$id/comments'
     | '/api/v1/posts/$id/episodes'
     | '/api/v1/posts/$id/navigation'
@@ -646,6 +686,7 @@ export interface FileRouteTypes {
     | '/api/v1/posts/slug/$slug'
     | '/api/v1/public/albums/$id'
     | '/api/v1/public/albums/'
+    | '/api/v1/albums/$id/photos/$mediaId'
     | '/api/v1/auth/passkey/$flow/$action'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -689,6 +730,7 @@ export interface FileRouteTypes {
     | '/api/v1/moments/$id'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/passkeys/$id'
+    | '/api/v1/playlists/import'
     | '/api/v1/posts/$id'
     | '/api/v1/profile/send-code'
     | '/api/v1/tags/$id'
@@ -698,11 +740,13 @@ export interface FileRouteTypes {
     | '/api/v1/moments'
     | '/api/v1/passkeys'
     | '/api/v1/profile'
+    | '/api/v1/albums/$id/photos'
     | '/api/v1/auth/passkey/available'
     | '/api/v1/auth/totp/$action'
     | '/api/v1/comments/$id/approve'
     | '/api/v1/comments/$id/edit'
     | '/api/v1/comments/$id/reply'
+    | '/api/v1/playlists/$id/songs'
     | '/api/v1/posts/$id/comments'
     | '/api/v1/posts/$id/episodes'
     | '/api/v1/posts/$id/navigation'
@@ -710,6 +754,7 @@ export interface FileRouteTypes {
     | '/api/v1/posts/slug/$slug'
     | '/api/v1/public/albums/$id'
     | '/api/v1/public/albums'
+    | '/api/v1/albums/$id/photos/$mediaId'
     | '/api/v1/auth/passkey/$flow/$action'
   id:
     | '__root__'
@@ -753,6 +798,7 @@ export interface FileRouteTypes {
     | '/api/v1/moments/$id'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/passkeys/$id'
+    | '/api/v1/playlists/import'
     | '/api/v1/posts/$id'
     | '/api/v1/profile/send-code'
     | '/api/v1/tags/$id'
@@ -762,11 +808,13 @@ export interface FileRouteTypes {
     | '/api/v1/moments/'
     | '/api/v1/passkeys/'
     | '/api/v1/profile/'
+    | '/api/v1/albums/$id/photos'
     | '/api/v1/auth/passkey/available'
     | '/api/v1/auth/totp/$action'
     | '/api/v1/comments/$id/approve'
     | '/api/v1/comments/$id/edit'
     | '/api/v1/comments/$id/reply'
+    | '/api/v1/playlists/$id/songs'
     | '/api/v1/posts/$id/comments'
     | '/api/v1/posts/$id/episodes'
     | '/api/v1/posts/$id/navigation'
@@ -774,6 +822,7 @@ export interface FileRouteTypes {
     | '/api/v1/posts/slug/$slug'
     | '/api/v1/public/albums/$id'
     | '/api/v1/public/albums/'
+    | '/api/v1/albums/$id/photos/$mediaId'
     | '/api/v1/auth/passkey/$flow/$action'
   fileRoutesById: FileRoutesById
 }
@@ -816,6 +865,7 @@ export interface RootRouteChildren {
   ApiV1MomentsIdRoute: typeof ApiV1MomentsIdRoute
   ApiV1MomentsRecentTagsRoute: typeof ApiV1MomentsRecentTagsRoute
   ApiV1PasskeysIdRoute: typeof ApiV1PasskeysIdRoute
+  ApiV1PlaylistsImportRoute: typeof ApiV1PlaylistsImportRoute
   ApiV1ProfileSendCodeRoute: typeof ApiV1ProfileSendCodeRoute
   ApiV1VisitorWeatherRoute: typeof ApiV1VisitorWeatherRoute
   ApiV1CommentsIndexRoute: typeof ApiV1CommentsIndexRoute
@@ -823,8 +873,10 @@ export interface RootRouteChildren {
   ApiV1MomentsIndexRoute: typeof ApiV1MomentsIndexRoute
   ApiV1PasskeysIndexRoute: typeof ApiV1PasskeysIndexRoute
   ApiV1ProfileIndexRoute: typeof ApiV1ProfileIndexRoute
+  ApiV1AlbumsIdPhotosRoute: typeof ApiV1AlbumsIdPhotosRouteWithChildren
   ApiV1AuthPasskeyAvailableRoute: typeof ApiV1AuthPasskeyAvailableRoute
   ApiV1AuthTotpActionRoute: typeof ApiV1AuthTotpActionRoute
+  ApiV1PlaylistsIdSongsRoute: typeof ApiV1PlaylistsIdSongsRoute
   ApiV1PublicAlbumsIdRoute: typeof ApiV1PublicAlbumsIdRoute
   ApiV1PublicAlbumsIndexRoute: typeof ApiV1PublicAlbumsIndexRoute
   ApiV1AuthPasskeyFlowActionRoute: typeof ApiV1AuthPasskeyFlowActionRoute
@@ -992,6 +1044,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/v1/posts/$id'
       preLoaderRoute: typeof ApiV1PostsIdRouteImport
       parentRoute: typeof ApiV1PostsRoute
+    }
+    '/api/v1/playlists/import': {
+      id: '/api/v1/playlists/import'
+      path: '/api/v1/playlists/import'
+      fullPath: '/api/v1/playlists/import'
+      preLoaderRoute: typeof ApiV1PlaylistsImportRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/v1/passkeys/$id': {
       id: '/api/v1/passkeys/$id'
@@ -1224,6 +1283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1PostsIdCommentsRouteImport
       parentRoute: typeof ApiV1PostsIdRoute
     }
+    '/api/v1/playlists/$id/songs': {
+      id: '/api/v1/playlists/$id/songs'
+      path: '/api/v1/playlists/$id/songs'
+      fullPath: '/api/v1/playlists/$id/songs'
+      preLoaderRoute: typeof ApiV1PlaylistsIdSongsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/comments/$id/reply': {
       id: '/api/v1/comments/$id/reply'
       path: '/reply'
@@ -1259,12 +1325,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1AuthPasskeyAvailableRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/albums/$id/photos': {
+      id: '/api/v1/albums/$id/photos'
+      path: '/api/v1/albums/$id/photos'
+      fullPath: '/api/v1/albums/$id/photos'
+      preLoaderRoute: typeof ApiV1AlbumsIdPhotosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/auth/passkey/$flow/$action': {
       id: '/api/v1/auth/passkey/$flow/$action'
       path: '/api/v1/auth/passkey/$flow/$action'
       fullPath: '/api/v1/auth/passkey/$flow/$action'
       preLoaderRoute: typeof ApiV1AuthPasskeyFlowActionRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/albums/$id/photos/$mediaId': {
+      id: '/api/v1/albums/$id/photos/$mediaId'
+      path: '/$mediaId'
+      fullPath: '/api/v1/albums/$id/photos/$mediaId'
+      preLoaderRoute: typeof ApiV1AlbumsIdPhotosMediaIdRouteImport
+      parentRoute: typeof ApiV1AlbumsIdPhotosRoute
     }
   }
 }
@@ -1353,6 +1433,17 @@ const ApiV1CommentsIdRouteWithChildren = ApiV1CommentsIdRoute._addFileChildren(
   ApiV1CommentsIdRouteChildren,
 )
 
+interface ApiV1AlbumsIdPhotosRouteChildren {
+  ApiV1AlbumsIdPhotosMediaIdRoute: typeof ApiV1AlbumsIdPhotosMediaIdRoute
+}
+
+const ApiV1AlbumsIdPhotosRouteChildren: ApiV1AlbumsIdPhotosRouteChildren = {
+  ApiV1AlbumsIdPhotosMediaIdRoute: ApiV1AlbumsIdPhotosMediaIdRoute,
+}
+
+const ApiV1AlbumsIdPhotosRouteWithChildren =
+  ApiV1AlbumsIdPhotosRoute._addFileChildren(ApiV1AlbumsIdPhotosRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
@@ -1392,6 +1483,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1MomentsIdRoute: ApiV1MomentsIdRoute,
   ApiV1MomentsRecentTagsRoute: ApiV1MomentsRecentTagsRoute,
   ApiV1PasskeysIdRoute: ApiV1PasskeysIdRoute,
+  ApiV1PlaylistsImportRoute: ApiV1PlaylistsImportRoute,
   ApiV1ProfileSendCodeRoute: ApiV1ProfileSendCodeRoute,
   ApiV1VisitorWeatherRoute: ApiV1VisitorWeatherRoute,
   ApiV1CommentsIndexRoute: ApiV1CommentsIndexRoute,
@@ -1399,8 +1491,10 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1MomentsIndexRoute: ApiV1MomentsIndexRoute,
   ApiV1PasskeysIndexRoute: ApiV1PasskeysIndexRoute,
   ApiV1ProfileIndexRoute: ApiV1ProfileIndexRoute,
+  ApiV1AlbumsIdPhotosRoute: ApiV1AlbumsIdPhotosRouteWithChildren,
   ApiV1AuthPasskeyAvailableRoute: ApiV1AuthPasskeyAvailableRoute,
   ApiV1AuthTotpActionRoute: ApiV1AuthTotpActionRoute,
+  ApiV1PlaylistsIdSongsRoute: ApiV1PlaylistsIdSongsRoute,
   ApiV1PublicAlbumsIdRoute: ApiV1PublicAlbumsIdRoute,
   ApiV1PublicAlbumsIndexRoute: ApiV1PublicAlbumsIndexRoute,
   ApiV1AuthPasskeyFlowActionRoute: ApiV1AuthPasskeyFlowActionRoute,

@@ -121,6 +121,12 @@ describe('TanStack Start native API routing', () => {
       expect(isStartNativeApiRequest(request(`/api/v1/${resource}/7`, 'PUT'))).toBe(true);
       expect(isStartNativeApiRequest(request(`/api/v1/${resource}/7`, 'DELETE'))).toBe(true);
     }
+    expect(isStartNativeApiRequest(request('/api/v1/playlists/import', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/playlists/7/songs', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/playlists/7/songs', 'DELETE'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/albums/7/photos', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/albums/7/photos', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/albums/7/photos/9', 'DELETE'))).toBe(true);
   });
 
   test('routes authenticated comment list reads to Start for admin filtering', () => {

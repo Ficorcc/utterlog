@@ -197,5 +197,123 @@ export async function deleteContentRecord(resource: ContentResource, id: number)
   const before = await one<Record<string, unknown>>(`select * from ${table(resource)} where id = $1`, [id]);
   if (!before) throw new ContentRecordError(404, 'NOT_FOUND', '内容不存在');
   await exec(`delete from ${table(resource)} where id = $1`, [id]);
+  if (resource === 'albums') await exec(`update ${table('media')} set album_id = 0 where album_id = $1`, [id]).catch(() => {});
   return resource === 'links' ? deleteUnusedLinkRssSubscription(before.rss_url) : null;
+}
+
+function positiveId(value: unknown, label: string) {
+  const id = Number(value);
+  if (!Number.isInteger(id) || id <= 0) throw new ContentRecordError(400, 'BAD_REQUEST', `${label} 无效`);
+  return id;
+}
+
+async function ensureRecord(resource: ContentResource, id: number) {
+  const row = await one<{ id: number }>(`select id from ${table(resource)} where id = $1`, [id]);
+  if (!row) throw new ContentRecordError(404, 'NOT_FOUND', '内容不存在');
+}
+
+export async function addPlaylistSong(playlistValue: unknown, musicValue: unknown) {
+  const playlistId = positiveId(playlistValue, '播放列表 ID');
+  const musicId = positiveId(musicValue, '音乐 ID');
+  await ensureRecord('playlists', playlistId);
+  await ensureRecord('music', musicId);
+  const maxOrder = await one<{ max: number }>(
+    `select coalesce(max(sort_order), 0)::int as max from ${table('playlist_songs')} where playlist_id = $1`, [playlistId],
+  );
+  await exec(
+    `insert into ${table('playlist_songs')} (playlist_id, music_id, sort_order, created_at)
+     values ($1,$2,$3,$4) on conflict (playlist_id, music_id) do nothing`,
+    [playlistId, musicId, Number(maxOrder?.max || 0) + 1, nowUnix()],
+  );
+  await exec(
+    `update ${table('playlists')} set song_count = (select count(*) from ${table('playlist_songs')} where playlist_id = $1),
+     updated_at = $2 where id = $1`, [playlistId, nowUnix()],
+  );
+}
+
+export async function removePlaylistSong(playlistValue: unknown, musicValue: unknown) {
+  const playlistId = positiveId(playlistValue, '播放列表 ID');
+  const musicId = positiveId(musicValue, '音乐 ID');
+  await ensureRecord('playlists', playlistId);
+  await exec(`delete from ${table('playlist_songs')} where playlist_id = $1 and music_id = $2`, [playlistId, musicId]);
+  await exec(
+    `update ${table('playlists')} set song_count = (select count(*) from ${table('playlist_songs')} where playlist_id = $1),
+     updated_at = $2 where id = $1`, [playlistId, nowUnix()],
+  );
+}
+
+export async function importPlaylist(body: Record<string, any>, userId: number) {
+  const playlistId = await insertRecord('playlists', {
+    title: body.title || `${body.server || 'remote'} playlist ${body.playlist_id || ''}`.trim(),
+    description: body.playlist_id ? `Imported playlist id: ${body.playlist_id}` : '',
+    status: 'publish',
+  }, userId);
+  let imported = 0;
+  if (Array.isArray(body.songs)) {
+    for (const song of body.songs) {
+      if (!song || typeof song !== 'object') continue;
+      const musicId = await insertRecord('music', {
+        title: song.title || song.name || '',
+        artist: song.artist || '',
+        album: song.album || '',
+        cover_url: song.cover_url || song.cover || '',
+        url: song.url || '',
+        status: 'publish',
+      }, userId).catch(() => 0);
+      if (!musicId) continue;
+      imported += 1;
+      await exec(
+        `insert into ${table('playlist_songs')} (playlist_id, music_id, sort_order, created_at)
+         values ($1,$2,$3,$4) on conflict (playlist_id, music_id) do nothing`,
+        [playlistId, musicId, imported, nowUnix()],
+      ).catch(() => {});
+    }
+    await exec(`update ${table('playlists')} set song_count = $1, updated_at = $2 where id = $3`, [imported, nowUnix(), playlistId]);
+  }
+  return { id: playlistId, imported };
+}
+
+export async function listAlbumPhotos(albumValue: unknown, options: { page?: number; perPage?: number } = {}) {
+  const albumId = positiveId(albumValue, '相册 ID');
+  await ensureRecord('albums', albumId);
+  const page = Math.max(1, Math.floor(options.page || 1));
+  const perPage = Math.min(500, Math.max(1, Math.floor(options.perPage || 20)));
+  const totalRow = await one<{ count: string }>(
+    `select count(*)::text as count from ${table('media')} where album_id = $1 and category = 'image'`, [albumId],
+  );
+  const rows = await many<Record<string, unknown>>(
+    `select * from ${table('media')} where album_id = $1 and category = 'image'
+     order by created_at desc limit $2 offset $3`, [albumId, perPage, (page - 1) * perPage],
+  );
+  const total = Number(totalRow?.count || 0);
+  return { rows, meta: { total, page, per_page: perPage, total_pages: Math.max(1, Math.ceil(total / perPage)) } };
+}
+
+async function refreshAlbumPhotoCount(albumId: number) {
+  const count = await one<{ count: string }>(
+    `select count(*)::text as count from ${table('media')} where album_id = $1 and category = 'image'`, [albumId],
+  );
+  const photoCount = Number(count?.count || 0);
+  await exec(`update ${table('albums')} set photo_count = $1, updated_at = $2 where id = $3`, [photoCount, nowUnix(), albumId]);
+  return photoCount;
+}
+
+export async function addAlbumPhotos(albumValue: unknown, mediaValues: unknown) {
+  const albumId = positiveId(albumValue, '相册 ID');
+  await ensureRecord('albums', albumId);
+  const mediaIds = Array.isArray(mediaValues)
+    ? mediaValues.map((value) => Number(value)).filter((id) => Number.isInteger(id) && id > 0)
+    : [];
+  for (const mediaId of mediaIds) {
+    await exec(`update ${table('media')} set album_id = $1 where id = $2 and category = 'image'`, [albumId, mediaId]);
+  }
+  return { added: mediaIds.length, photo_count: await refreshAlbumPhotoCount(albumId) };
+}
+
+export async function removeAlbumPhoto(albumValue: unknown, mediaValue: unknown) {
+  const albumId = positiveId(albumValue, '相册 ID');
+  const mediaId = positiveId(mediaValue, '媒体 ID');
+  await ensureRecord('albums', albumId);
+  await exec(`update ${table('media')} set album_id = 0 where id = $1 and album_id = $2`, [mediaId, albumId]);
+  return { removed: true, photo_count: await refreshAlbumPhotoCount(albumId) };
 }
