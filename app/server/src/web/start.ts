@@ -89,7 +89,8 @@ export function isStartNativeApiRequest(request: Request) {
   if (url.pathname === '/api/v1/categories' || url.pathname === '/api/v1/tags') return method === 'GET' || method === 'POST';
   if (/^\/api\/v1\/(categories|tags)\/\d+$/.test(url.pathname)) return method === 'GET' || method === 'PUT' || method === 'DELETE';
   if (url.pathname === '/api/v1/posts') return method === 'GET';
-  if (url.pathname === '/api/v1/moments') return method === 'GET';
+  if (url.pathname === '/api/v1/moments') return method === 'GET' || method === 'POST';
+  if (/^\/api\/v1\/moments\/\d+$/.test(url.pathname)) return method === 'GET' || method === 'PUT' || method === 'DELETE';
   if (url.pathname === '/api/v1/comments' && method === 'POST') return true;
   if (anonymousGet && /^\/api\/v1\/(books|games|goods|links|movies|music|playlists)$/.test(url.pathname)) return true;
   if (anonymousGet && ['/api/v1/owner', '/api/v1/archive/stats', '/api/v1/footprints', '/api/v1/moments/recent-tags', '/api/v1/public/albums'].includes(url.pathname)) return true;

@@ -34,6 +34,7 @@ import { Route as ApiV1ProfileSendCodeRouteImport } from './routes/api/v1/profil
 import { Route as ApiV1PostsIdRouteImport } from './routes/api/v1/posts/$id'
 import { Route as ApiV1PasskeysIdRouteImport } from './routes/api/v1/passkeys/$id'
 import { Route as ApiV1MomentsRecentTagsRouteImport } from './routes/api/v1/moments/recent-tags'
+import { Route as ApiV1MomentsIdRouteImport } from './routes/api/v1/moments/$id'
 import { Route as ApiV1MediaUploadBrandingRouteImport } from './routes/api/v1/media/upload-branding'
 import { Route as ApiV1MediaStatsRouteImport } from './routes/api/v1/media/stats'
 import { Route as ApiV1LinksApplyRouteImport } from './routes/api/v1/links/apply'
@@ -188,6 +189,11 @@ const ApiV1PasskeysIdRoute = ApiV1PasskeysIdRouteImport.update({
 const ApiV1MomentsRecentTagsRoute = ApiV1MomentsRecentTagsRouteImport.update({
   id: '/api/v1/moments/recent-tags',
   path: '/api/v1/moments/recent-tags',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1MomentsIdRoute = ApiV1MomentsIdRouteImport.update({
+  id: '/api/v1/moments/$id',
+  path: '/api/v1/moments/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1MediaUploadBrandingRoute =
@@ -378,6 +384,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
   '/api/v1/media/stats': typeof ApiV1MediaStatsRoute
   '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
+  '/api/v1/moments/$id': typeof ApiV1MomentsIdRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
@@ -435,6 +442,7 @@ export interface FileRoutesByTo {
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
   '/api/v1/media/stats': typeof ApiV1MediaStatsRoute
   '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
+  '/api/v1/moments/$id': typeof ApiV1MomentsIdRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
@@ -493,6 +501,7 @@ export interface FileRoutesById {
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
   '/api/v1/media/stats': typeof ApiV1MediaStatsRoute
   '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
+  '/api/v1/moments/$id': typeof ApiV1MomentsIdRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
@@ -552,6 +561,7 @@ export interface FileRouteTypes {
     | '/api/v1/links/apply'
     | '/api/v1/media/stats'
     | '/api/v1/media/upload-branding'
+    | '/api/v1/moments/$id'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/passkeys/$id'
     | '/api/v1/posts/$id'
@@ -609,6 +619,7 @@ export interface FileRouteTypes {
     | '/api/v1/links/apply'
     | '/api/v1/media/stats'
     | '/api/v1/media/upload-branding'
+    | '/api/v1/moments/$id'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/passkeys/$id'
     | '/api/v1/posts/$id'
@@ -666,6 +677,7 @@ export interface FileRouteTypes {
     | '/api/v1/links/apply'
     | '/api/v1/media/stats'
     | '/api/v1/media/upload-branding'
+    | '/api/v1/moments/$id'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/passkeys/$id'
     | '/api/v1/posts/$id'
@@ -723,6 +735,7 @@ export interface RootRouteChildren {
   ApiV1LinksApplyRoute: typeof ApiV1LinksApplyRoute
   ApiV1MediaStatsRoute: typeof ApiV1MediaStatsRoute
   ApiV1MediaUploadBrandingRoute: typeof ApiV1MediaUploadBrandingRoute
+  ApiV1MomentsIdRoute: typeof ApiV1MomentsIdRoute
   ApiV1MomentsRecentTagsRoute: typeof ApiV1MomentsRecentTagsRoute
   ApiV1PasskeysIdRoute: typeof ApiV1PasskeysIdRoute
   ApiV1ProfileSendCodeRoute: typeof ApiV1ProfileSendCodeRoute
@@ -914,6 +927,13 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/moments/recent-tags'
       fullPath: '/api/v1/moments/recent-tags'
       preLoaderRoute: typeof ApiV1MomentsRecentTagsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/moments/$id': {
+      id: '/api/v1/moments/$id'
+      path: '/api/v1/moments/$id'
+      fullPath: '/api/v1/moments/$id'
+      preLoaderRoute: typeof ApiV1MomentsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/media/upload-branding': {
@@ -1232,6 +1252,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1LinksApplyRoute: ApiV1LinksApplyRoute,
   ApiV1MediaStatsRoute: ApiV1MediaStatsRoute,
   ApiV1MediaUploadBrandingRoute: ApiV1MediaUploadBrandingRoute,
+  ApiV1MomentsIdRoute: ApiV1MomentsIdRoute,
   ApiV1MomentsRecentTagsRoute: ApiV1MomentsRecentTagsRoute,
   ApiV1PasskeysIdRoute: ApiV1PasskeysIdRoute,
   ApiV1ProfileSendCodeRoute: ApiV1ProfileSendCodeRoute,

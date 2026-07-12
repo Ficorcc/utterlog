@@ -70,6 +70,13 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/media', 'POST'))).toBe(false);
   });
 
+  test('routes moment detail and mutations to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/moments', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/moments/12', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/moments/12', 'PUT'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/moments/12', 'DELETE'))).toBe(true);
+  });
+
   test('routes category and tag management to Start', () => {
     for (const resource of ['categories', 'tags']) {
       expect(isStartNativeApiRequest(request(`/api/v1/${resource}`, 'GET'))).toBe(true);
