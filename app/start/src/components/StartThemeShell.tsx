@@ -6,6 +6,9 @@ import { SlotFooter, SlotHead } from '@/lib/slots';
 import PageViewTracker from '@/components/blog/PageViewTracker';
 import ImageEffects from '@/components/blog/ImageEffects';
 import AIChatBubble from '@/components/blog/AIChatBubble';
+import Script from '../../../blog/src/shims/script';
+import { NavigationProvider } from '@/lib/navigation';
+import { useRouterState } from '@tanstack/react-router';
 
 export function StartThemeShell({
   ctx,
@@ -16,13 +19,15 @@ export function StartThemeShell({
 }) {
   const theme = getThemeComponents(ctx.theme.name);
   const ThemeLayout = theme.Layout;
+  const location = useRouterState({ select: (state) => state.location });
+  const searchParams = Object.fromEntries(new URLSearchParams(location.searchStr));
 
   return (
-    <Providers>
-      <ThemeProvider value={ctx}>
-        <div data-theme={ctx.theme.name} data-accent={ctx.theme.accent || undefined}>
-          <link rel="stylesheet" href={`/themes/${ctx.theme.name}/styles.css?v=${ctx.theme.manifest?.version || '0'}`} />
+    <NavigationProvider pathname={location.pathname} searchParams={searchParams}>
+      <Providers>
+        <ThemeProvider value={ctx}>
           <SlotHead options={ctx.options} />
+          <Script src="https://id.utterlog.com/static/passport.js" strategy="lazyOnload" />
           <ThemeLayout>
             <PageViewTracker />
             <ImageEffects
@@ -35,8 +40,8 @@ export function StartThemeShell({
           </ThemeLayout>
           <AIChatBubble />
           <SlotFooter options={ctx.options} />
-        </div>
-      </ThemeProvider>
-    </Providers>
+        </ThemeProvider>
+      </Providers>
+    </NavigationProvider>
   );
 }
