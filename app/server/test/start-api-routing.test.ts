@@ -171,6 +171,15 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/media/test-connection', 'POST'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/media/exif?urls=/uploads/a.jpg', 'GET'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/media/12', 'DELETE'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/media/parse', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/media/douban-import', 'POST'))).toBe(true);
+  });
+
+  test('routes RSS and music integrations to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/rss/parse?url=https%3A%2F%2Fexample.com%2Ffeed', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/music/search?q=test', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/music/proxy/netease/songs/123/cover', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/music/proxy/netease/songs/123/unknown', 'GET'))).toBe(false);
   });
 
   test('routes moment detail and mutations to Start', () => {

@@ -46,6 +46,7 @@ import { Route as ApiV1SetupTestDbRouteImport } from './routes/api/v1/setup/test
 import { Route as ApiV1SetupStatusRouteImport } from './routes/api/v1/setup/status'
 import { Route as ApiV1SetupSaveRouteImport } from './routes/api/v1/setup/save'
 import { Route as ApiV1SecurityActionRouteImport } from './routes/api/v1/security/$action'
+import { Route as ApiV1RssParseRouteImport } from './routes/api/v1/rss/parse'
 import { Route as ApiV1ProfileSendCodeRouteImport } from './routes/api/v1/profile/send-code'
 import { Route as ApiV1PostsIdRouteImport } from './routes/api/v1/posts/$id'
 import { Route as ApiV1PluginsUploadRouteImport } from './routes/api/v1/plugins/upload'
@@ -57,14 +58,17 @@ import { Route as ApiV1NotificationsUnreadCountRouteImport } from './routes/api/
 import { Route as ApiV1NotificationsStreamRouteImport } from './routes/api/v1/notifications/stream'
 import { Route as ApiV1NotificationsReadAllRouteImport } from './routes/api/v1/notifications/read-all'
 import { Route as ApiV1NotificationsIdRouteImport } from './routes/api/v1/notifications/$id'
+import { Route as ApiV1MusicSearchRouteImport } from './routes/api/v1/music/search'
 import { Route as ApiV1MomentsRecentTagsRouteImport } from './routes/api/v1/moments/recent-tags'
 import { Route as ApiV1MomentsIdRouteImport } from './routes/api/v1/moments/$id'
 import { Route as ApiV1MediaUploadBrandingRouteImport } from './routes/api/v1/media/upload-branding'
 import { Route as ApiV1MediaUploadRouteImport } from './routes/api/v1/media/upload'
 import { Route as ApiV1MediaTestConnectionRouteImport } from './routes/api/v1/media/test-connection'
 import { Route as ApiV1MediaStatsRouteImport } from './routes/api/v1/media/stats'
+import { Route as ApiV1MediaParseRouteImport } from './routes/api/v1/media/parse'
 import { Route as ApiV1MediaExifRouteImport } from './routes/api/v1/media/exif'
 import { Route as ApiV1MediaDownloadUrlRouteImport } from './routes/api/v1/media/download-url'
+import { Route as ApiV1MediaDoubanImportRouteImport } from './routes/api/v1/media/douban-import'
 import { Route as ApiV1MediaIdRouteImport } from './routes/api/v1/media/$id'
 import { Route as ApiV1LocationReverseRouteImport } from './routes/api/v1/location/reverse'
 import { Route as ApiV1LinksApplyRouteImport } from './routes/api/v1/links/apply'
@@ -123,6 +127,7 @@ import { Route as ApiV1AdminAnalyticsPurgeRouteImport } from './routes/api/v1/ad
 import { Route as ApiV1AuthPasskeyFlowActionRouteImport } from './routes/api/v1/auth/passkey/$flow/$action'
 import { Route as ApiV1AlbumsIdPhotosMediaIdRouteImport } from './routes/api/v1/albums/$id/photos/$mediaId'
 import { Route as ApiV1AdminSystemUpgradeStatusRouteImport } from './routes/api/v1/admin/system/upgrade/status'
+import { Route as ApiV1MusicProxyPlatformSongsIdAssetRouteImport } from './routes/api/v1/music/proxy/$platform/songs/$id/$asset'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -309,6 +314,11 @@ const ApiV1SecurityActionRoute = ApiV1SecurityActionRouteImport.update({
   path: '/api/v1/security/$action',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1RssParseRoute = ApiV1RssParseRouteImport.update({
+  id: '/api/v1/rss/parse',
+  path: '/api/v1/rss/parse',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1ProfileSendCodeRoute = ApiV1ProfileSendCodeRouteImport.update({
   id: '/api/v1/profile/send-code',
   path: '/api/v1/profile/send-code',
@@ -367,6 +377,11 @@ const ApiV1NotificationsIdRoute = ApiV1NotificationsIdRouteImport.update({
   path: '/api/v1/notifications/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1MusicSearchRoute = ApiV1MusicSearchRouteImport.update({
+  id: '/api/v1/music/search',
+  path: '/api/v1/music/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1MomentsRecentTagsRoute = ApiV1MomentsRecentTagsRouteImport.update({
   id: '/api/v1/moments/recent-tags',
   path: '/api/v1/moments/recent-tags',
@@ -399,6 +414,11 @@ const ApiV1MediaStatsRoute = ApiV1MediaStatsRouteImport.update({
   path: '/api/v1/media/stats',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1MediaParseRoute = ApiV1MediaParseRouteImport.update({
+  id: '/api/v1/media/parse',
+  path: '/api/v1/media/parse',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1MediaExifRoute = ApiV1MediaExifRouteImport.update({
   id: '/api/v1/media/exif',
   path: '/api/v1/media/exif',
@@ -407,6 +427,11 @@ const ApiV1MediaExifRoute = ApiV1MediaExifRouteImport.update({
 const ApiV1MediaDownloadUrlRoute = ApiV1MediaDownloadUrlRouteImport.update({
   id: '/api/v1/media/download-url',
   path: '/api/v1/media/download-url',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1MediaDoubanImportRoute = ApiV1MediaDoubanImportRouteImport.update({
+  id: '/api/v1/media/douban-import',
+  path: '/api/v1/media/douban-import',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1MediaIdRoute = ApiV1MediaIdRouteImport.update({
@@ -714,6 +739,12 @@ const ApiV1AdminSystemUpgradeStatusRoute =
     path: '/api/v1/admin/system/upgrade/status',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiV1MusicProxyPlatformSongsIdAssetRoute =
+  ApiV1MusicProxyPlatformSongsIdAssetRouteImport.update({
+    id: '/api/v1/music/proxy/$platform/songs/$id/$asset',
+    path: '/api/v1/music/proxy/$platform/songs/$id/$asset',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -759,14 +790,17 @@ export interface FileRoutesByFullPath {
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
   '/api/v1/location/reverse': typeof ApiV1LocationReverseRoute
   '/api/v1/media/$id': typeof ApiV1MediaIdRoute
+  '/api/v1/media/douban-import': typeof ApiV1MediaDoubanImportRoute
   '/api/v1/media/download-url': typeof ApiV1MediaDownloadUrlRoute
   '/api/v1/media/exif': typeof ApiV1MediaExifRoute
+  '/api/v1/media/parse': typeof ApiV1MediaParseRoute
   '/api/v1/media/stats': typeof ApiV1MediaStatsRoute
   '/api/v1/media/test-connection': typeof ApiV1MediaTestConnectionRoute
   '/api/v1/media/upload': typeof ApiV1MediaUploadRoute
   '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
   '/api/v1/moments/$id': typeof ApiV1MomentsIdRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
+  '/api/v1/music/search': typeof ApiV1MusicSearchRoute
   '/api/v1/notifications/$id': typeof ApiV1NotificationsIdRouteWithChildren
   '/api/v1/notifications/read-all': typeof ApiV1NotificationsReadAllRoute
   '/api/v1/notifications/stream': typeof ApiV1NotificationsStreamRoute
@@ -778,6 +812,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/plugins/upload': typeof ApiV1PluginsUploadRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
+  '/api/v1/rss/parse': typeof ApiV1RssParseRoute
   '/api/v1/security/$action': typeof ApiV1SecurityActionRoute
   '/api/v1/setup/save': typeof ApiV1SetupSaveRoute
   '/api/v1/setup/status': typeof ApiV1SetupStatusRoute
@@ -830,6 +865,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/admin/system/upgrade/status': typeof ApiV1AdminSystemUpgradeStatusRoute
   '/api/v1/albums/$id/photos/$mediaId': typeof ApiV1AlbumsIdPhotosMediaIdRoute
   '/api/v1/auth/passkey/$flow/$action': typeof ApiV1AuthPasskeyFlowActionRoute
+  '/api/v1/music/proxy/$platform/songs/$id/$asset': typeof ApiV1MusicProxyPlatformSongsIdAssetRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -875,14 +911,17 @@ export interface FileRoutesByTo {
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
   '/api/v1/location/reverse': typeof ApiV1LocationReverseRoute
   '/api/v1/media/$id': typeof ApiV1MediaIdRoute
+  '/api/v1/media/douban-import': typeof ApiV1MediaDoubanImportRoute
   '/api/v1/media/download-url': typeof ApiV1MediaDownloadUrlRoute
   '/api/v1/media/exif': typeof ApiV1MediaExifRoute
+  '/api/v1/media/parse': typeof ApiV1MediaParseRoute
   '/api/v1/media/stats': typeof ApiV1MediaStatsRoute
   '/api/v1/media/test-connection': typeof ApiV1MediaTestConnectionRoute
   '/api/v1/media/upload': typeof ApiV1MediaUploadRoute
   '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
   '/api/v1/moments/$id': typeof ApiV1MomentsIdRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
+  '/api/v1/music/search': typeof ApiV1MusicSearchRoute
   '/api/v1/notifications/$id': typeof ApiV1NotificationsIdRouteWithChildren
   '/api/v1/notifications/read-all': typeof ApiV1NotificationsReadAllRoute
   '/api/v1/notifications/stream': typeof ApiV1NotificationsStreamRoute
@@ -894,6 +933,7 @@ export interface FileRoutesByTo {
   '/api/v1/plugins/upload': typeof ApiV1PluginsUploadRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
+  '/api/v1/rss/parse': typeof ApiV1RssParseRoute
   '/api/v1/security/$action': typeof ApiV1SecurityActionRoute
   '/api/v1/setup/save': typeof ApiV1SetupSaveRoute
   '/api/v1/setup/status': typeof ApiV1SetupStatusRoute
@@ -946,6 +986,7 @@ export interface FileRoutesByTo {
   '/api/v1/admin/system/upgrade/status': typeof ApiV1AdminSystemUpgradeStatusRoute
   '/api/v1/albums/$id/photos/$mediaId': typeof ApiV1AlbumsIdPhotosMediaIdRoute
   '/api/v1/auth/passkey/$flow/$action': typeof ApiV1AuthPasskeyFlowActionRoute
+  '/api/v1/music/proxy/$platform/songs/$id/$asset': typeof ApiV1MusicProxyPlatformSongsIdAssetRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -992,14 +1033,17 @@ export interface FileRoutesById {
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
   '/api/v1/location/reverse': typeof ApiV1LocationReverseRoute
   '/api/v1/media/$id': typeof ApiV1MediaIdRoute
+  '/api/v1/media/douban-import': typeof ApiV1MediaDoubanImportRoute
   '/api/v1/media/download-url': typeof ApiV1MediaDownloadUrlRoute
   '/api/v1/media/exif': typeof ApiV1MediaExifRoute
+  '/api/v1/media/parse': typeof ApiV1MediaParseRoute
   '/api/v1/media/stats': typeof ApiV1MediaStatsRoute
   '/api/v1/media/test-connection': typeof ApiV1MediaTestConnectionRoute
   '/api/v1/media/upload': typeof ApiV1MediaUploadRoute
   '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
   '/api/v1/moments/$id': typeof ApiV1MomentsIdRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
+  '/api/v1/music/search': typeof ApiV1MusicSearchRoute
   '/api/v1/notifications/$id': typeof ApiV1NotificationsIdRouteWithChildren
   '/api/v1/notifications/read-all': typeof ApiV1NotificationsReadAllRoute
   '/api/v1/notifications/stream': typeof ApiV1NotificationsStreamRoute
@@ -1011,6 +1055,7 @@ export interface FileRoutesById {
   '/api/v1/plugins/upload': typeof ApiV1PluginsUploadRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
+  '/api/v1/rss/parse': typeof ApiV1RssParseRoute
   '/api/v1/security/$action': typeof ApiV1SecurityActionRoute
   '/api/v1/setup/save': typeof ApiV1SetupSaveRoute
   '/api/v1/setup/status': typeof ApiV1SetupStatusRoute
@@ -1063,6 +1108,7 @@ export interface FileRoutesById {
   '/api/v1/admin/system/upgrade/status': typeof ApiV1AdminSystemUpgradeStatusRoute
   '/api/v1/albums/$id/photos/$mediaId': typeof ApiV1AlbumsIdPhotosMediaIdRoute
   '/api/v1/auth/passkey/$flow/$action': typeof ApiV1AuthPasskeyFlowActionRoute
+  '/api/v1/music/proxy/$platform/songs/$id/$asset': typeof ApiV1MusicProxyPlatformSongsIdAssetRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1110,14 +1156,17 @@ export interface FileRouteTypes {
     | '/api/v1/links/apply'
     | '/api/v1/location/reverse'
     | '/api/v1/media/$id'
+    | '/api/v1/media/douban-import'
     | '/api/v1/media/download-url'
     | '/api/v1/media/exif'
+    | '/api/v1/media/parse'
     | '/api/v1/media/stats'
     | '/api/v1/media/test-connection'
     | '/api/v1/media/upload'
     | '/api/v1/media/upload-branding'
     | '/api/v1/moments/$id'
     | '/api/v1/moments/recent-tags'
+    | '/api/v1/music/search'
     | '/api/v1/notifications/$id'
     | '/api/v1/notifications/read-all'
     | '/api/v1/notifications/stream'
@@ -1129,6 +1178,7 @@ export interface FileRouteTypes {
     | '/api/v1/plugins/upload'
     | '/api/v1/posts/$id'
     | '/api/v1/profile/send-code'
+    | '/api/v1/rss/parse'
     | '/api/v1/security/$action'
     | '/api/v1/setup/save'
     | '/api/v1/setup/status'
@@ -1181,6 +1231,7 @@ export interface FileRouteTypes {
     | '/api/v1/admin/system/upgrade/status'
     | '/api/v1/albums/$id/photos/$mediaId'
     | '/api/v1/auth/passkey/$flow/$action'
+    | '/api/v1/music/proxy/$platform/songs/$id/$asset'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1226,14 +1277,17 @@ export interface FileRouteTypes {
     | '/api/v1/links/apply'
     | '/api/v1/location/reverse'
     | '/api/v1/media/$id'
+    | '/api/v1/media/douban-import'
     | '/api/v1/media/download-url'
     | '/api/v1/media/exif'
+    | '/api/v1/media/parse'
     | '/api/v1/media/stats'
     | '/api/v1/media/test-connection'
     | '/api/v1/media/upload'
     | '/api/v1/media/upload-branding'
     | '/api/v1/moments/$id'
     | '/api/v1/moments/recent-tags'
+    | '/api/v1/music/search'
     | '/api/v1/notifications/$id'
     | '/api/v1/notifications/read-all'
     | '/api/v1/notifications/stream'
@@ -1245,6 +1299,7 @@ export interface FileRouteTypes {
     | '/api/v1/plugins/upload'
     | '/api/v1/posts/$id'
     | '/api/v1/profile/send-code'
+    | '/api/v1/rss/parse'
     | '/api/v1/security/$action'
     | '/api/v1/setup/save'
     | '/api/v1/setup/status'
@@ -1297,6 +1352,7 @@ export interface FileRouteTypes {
     | '/api/v1/admin/system/upgrade/status'
     | '/api/v1/albums/$id/photos/$mediaId'
     | '/api/v1/auth/passkey/$flow/$action'
+    | '/api/v1/music/proxy/$platform/songs/$id/$asset'
   id:
     | '__root__'
     | '/'
@@ -1342,14 +1398,17 @@ export interface FileRouteTypes {
     | '/api/v1/links/apply'
     | '/api/v1/location/reverse'
     | '/api/v1/media/$id'
+    | '/api/v1/media/douban-import'
     | '/api/v1/media/download-url'
     | '/api/v1/media/exif'
+    | '/api/v1/media/parse'
     | '/api/v1/media/stats'
     | '/api/v1/media/test-connection'
     | '/api/v1/media/upload'
     | '/api/v1/media/upload-branding'
     | '/api/v1/moments/$id'
     | '/api/v1/moments/recent-tags'
+    | '/api/v1/music/search'
     | '/api/v1/notifications/$id'
     | '/api/v1/notifications/read-all'
     | '/api/v1/notifications/stream'
@@ -1361,6 +1420,7 @@ export interface FileRouteTypes {
     | '/api/v1/plugins/upload'
     | '/api/v1/posts/$id'
     | '/api/v1/profile/send-code'
+    | '/api/v1/rss/parse'
     | '/api/v1/security/$action'
     | '/api/v1/setup/save'
     | '/api/v1/setup/status'
@@ -1413,6 +1473,7 @@ export interface FileRouteTypes {
     | '/api/v1/admin/system/upgrade/status'
     | '/api/v1/albums/$id/photos/$mediaId'
     | '/api/v1/auth/passkey/$flow/$action'
+    | '/api/v1/music/proxy/$platform/songs/$id/$asset'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1457,14 +1518,17 @@ export interface RootRouteChildren {
   ApiV1LinksApplyRoute: typeof ApiV1LinksApplyRoute
   ApiV1LocationReverseRoute: typeof ApiV1LocationReverseRoute
   ApiV1MediaIdRoute: typeof ApiV1MediaIdRoute
+  ApiV1MediaDoubanImportRoute: typeof ApiV1MediaDoubanImportRoute
   ApiV1MediaDownloadUrlRoute: typeof ApiV1MediaDownloadUrlRoute
   ApiV1MediaExifRoute: typeof ApiV1MediaExifRoute
+  ApiV1MediaParseRoute: typeof ApiV1MediaParseRoute
   ApiV1MediaStatsRoute: typeof ApiV1MediaStatsRoute
   ApiV1MediaTestConnectionRoute: typeof ApiV1MediaTestConnectionRoute
   ApiV1MediaUploadRoute: typeof ApiV1MediaUploadRoute
   ApiV1MediaUploadBrandingRoute: typeof ApiV1MediaUploadBrandingRoute
   ApiV1MomentsIdRoute: typeof ApiV1MomentsIdRoute
   ApiV1MomentsRecentTagsRoute: typeof ApiV1MomentsRecentTagsRoute
+  ApiV1MusicSearchRoute: typeof ApiV1MusicSearchRoute
   ApiV1NotificationsIdRoute: typeof ApiV1NotificationsIdRouteWithChildren
   ApiV1NotificationsReadAllRoute: typeof ApiV1NotificationsReadAllRoute
   ApiV1NotificationsStreamRoute: typeof ApiV1NotificationsStreamRoute
@@ -1474,6 +1538,7 @@ export interface RootRouteChildren {
   ApiV1PluginsIdRoute: typeof ApiV1PluginsIdRouteWithChildren
   ApiV1PluginsUploadRoute: typeof ApiV1PluginsUploadRoute
   ApiV1ProfileSendCodeRoute: typeof ApiV1ProfileSendCodeRoute
+  ApiV1RssParseRoute: typeof ApiV1RssParseRoute
   ApiV1SecurityActionRoute: typeof ApiV1SecurityActionRoute
   ApiV1SetupSaveRoute: typeof ApiV1SetupSaveRoute
   ApiV1SetupStatusRoute: typeof ApiV1SetupStatusRoute
@@ -1513,6 +1578,7 @@ export interface RootRouteChildren {
   ApiV1PublicAlbumsIndexRoute: typeof ApiV1PublicAlbumsIndexRoute
   ApiV1AdminSystemUpgradeStatusRoute: typeof ApiV1AdminSystemUpgradeStatusRoute
   ApiV1AuthPasskeyFlowActionRoute: typeof ApiV1AuthPasskeyFlowActionRoute
+  ApiV1MusicProxyPlatformSongsIdAssetRoute: typeof ApiV1MusicProxyPlatformSongsIdAssetRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1776,6 +1842,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1SecurityActionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/rss/parse': {
+      id: '/api/v1/rss/parse'
+      path: '/api/v1/rss/parse'
+      fullPath: '/api/v1/rss/parse'
+      preLoaderRoute: typeof ApiV1RssParseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/profile/send-code': {
       id: '/api/v1/profile/send-code'
       path: '/api/v1/profile/send-code'
@@ -1853,6 +1926,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1NotificationsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/music/search': {
+      id: '/api/v1/music/search'
+      path: '/api/v1/music/search'
+      fullPath: '/api/v1/music/search'
+      preLoaderRoute: typeof ApiV1MusicSearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/moments/recent-tags': {
       id: '/api/v1/moments/recent-tags'
       path: '/api/v1/moments/recent-tags'
@@ -1895,6 +1975,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1MediaStatsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/media/parse': {
+      id: '/api/v1/media/parse'
+      path: '/api/v1/media/parse'
+      fullPath: '/api/v1/media/parse'
+      preLoaderRoute: typeof ApiV1MediaParseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/media/exif': {
       id: '/api/v1/media/exif'
       path: '/api/v1/media/exif'
@@ -1907,6 +1994,13 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/media/download-url'
       fullPath: '/api/v1/media/download-url'
       preLoaderRoute: typeof ApiV1MediaDownloadUrlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/media/douban-import': {
+      id: '/api/v1/media/douban-import'
+      path: '/api/v1/media/douban-import'
+      fullPath: '/api/v1/media/douban-import'
+      preLoaderRoute: typeof ApiV1MediaDoubanImportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/media/$id': {
@@ -2315,6 +2409,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1AdminSystemUpgradeStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/music/proxy/$platform/songs/$id/$asset': {
+      id: '/api/v1/music/proxy/$platform/songs/$id/$asset'
+      path: '/api/v1/music/proxy/$platform/songs/$id/$asset'
+      fullPath: '/api/v1/music/proxy/$platform/songs/$id/$asset'
+      preLoaderRoute: typeof ApiV1MusicProxyPlatformSongsIdAssetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -2502,14 +2603,17 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1LinksApplyRoute: ApiV1LinksApplyRoute,
   ApiV1LocationReverseRoute: ApiV1LocationReverseRoute,
   ApiV1MediaIdRoute: ApiV1MediaIdRoute,
+  ApiV1MediaDoubanImportRoute: ApiV1MediaDoubanImportRoute,
   ApiV1MediaDownloadUrlRoute: ApiV1MediaDownloadUrlRoute,
   ApiV1MediaExifRoute: ApiV1MediaExifRoute,
+  ApiV1MediaParseRoute: ApiV1MediaParseRoute,
   ApiV1MediaStatsRoute: ApiV1MediaStatsRoute,
   ApiV1MediaTestConnectionRoute: ApiV1MediaTestConnectionRoute,
   ApiV1MediaUploadRoute: ApiV1MediaUploadRoute,
   ApiV1MediaUploadBrandingRoute: ApiV1MediaUploadBrandingRoute,
   ApiV1MomentsIdRoute: ApiV1MomentsIdRoute,
   ApiV1MomentsRecentTagsRoute: ApiV1MomentsRecentTagsRoute,
+  ApiV1MusicSearchRoute: ApiV1MusicSearchRoute,
   ApiV1NotificationsIdRoute: ApiV1NotificationsIdRouteWithChildren,
   ApiV1NotificationsReadAllRoute: ApiV1NotificationsReadAllRoute,
   ApiV1NotificationsStreamRoute: ApiV1NotificationsStreamRoute,
@@ -2519,6 +2623,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1PluginsIdRoute: ApiV1PluginsIdRouteWithChildren,
   ApiV1PluginsUploadRoute: ApiV1PluginsUploadRoute,
   ApiV1ProfileSendCodeRoute: ApiV1ProfileSendCodeRoute,
+  ApiV1RssParseRoute: ApiV1RssParseRoute,
   ApiV1SecurityActionRoute: ApiV1SecurityActionRoute,
   ApiV1SetupSaveRoute: ApiV1SetupSaveRoute,
   ApiV1SetupStatusRoute: ApiV1SetupStatusRoute,
@@ -2558,6 +2663,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1PublicAlbumsIndexRoute: ApiV1PublicAlbumsIndexRoute,
   ApiV1AdminSystemUpgradeStatusRoute: ApiV1AdminSystemUpgradeStatusRoute,
   ApiV1AuthPasskeyFlowActionRoute: ApiV1AuthPasskeyFlowActionRoute,
+  ApiV1MusicProxyPlatformSongsIdAssetRoute:
+    ApiV1MusicProxyPlatformSongsIdAssetRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

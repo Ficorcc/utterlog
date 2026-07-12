@@ -2144,6 +2144,42 @@ export async function purgeAnalytics(query: URLSearchParams) {
   return result;
 }
 
+export class ExternalContentServiceError extends Error {
+  constructor(public status: number, public code: string, message: string) {
+    super(message);
+  }
+}
+
+export async function parseRssUrl(rawUrl: unknown) {
+  const url = String(rawUrl || '').trim();
+  if (!url) throw new ExternalContentServiceError(400, 'VALIDATION_ERROR', 'url 参数不能为空');
+  try {
+    return { url, items: await fetchRssFeed(url) };
+  } catch (error) {
+    throw new ExternalContentServiceError(502, 'RSS_PARSE_FAILED', error instanceof Error ? error.message : 'RSS 解析失败');
+  }
+}
+
+export async function parseMediaLink(input: Record<string, unknown>) {
+  const url = String(input.url || '').trim();
+  if (!url) throw new ExternalContentServiceError(400, 'VALIDATION_ERROR', 'URL 不能为空');
+  try {
+    return await parseMediaUrl(url);
+  } catch (error) {
+    throw new ExternalContentServiceError(400, 'PARSE_ERROR', error instanceof Error ? error.message : '无法解析此链接');
+  }
+}
+
+export async function doubanImportPayload(input: Record<string, unknown>) {
+  const doubanId = String(input.douban_id || '').trim();
+  if (!doubanId) throw new ExternalContentServiceError(400, 'VALIDATION_ERROR', '豆瓣 ID 不能为空');
+  const type = ['movie', 'book', 'music'].includes(String(input.type || '')) ? String(input.type) : 'movie';
+  const url = `https://${type}.douban.com/people/${encodeURIComponent(doubanId)}/collect`;
+  const profile = await parseMediaUrl(url).catch(() => null);
+  return { message: '豆瓣导入功能需要豆瓣 API 或 RSS 支持，建议使用 NeoDB 导入', douban_url: url, profile,
+    tip: '推荐使用 NeoDB (neodb.social) 绑定豆瓣账号后，通过 NeoDB API 批量导入' };
+}
+
 export function registerCompatRoutes(app: Hono) {
   startBackupScheduler();
   registerCodingRoutes(app);
@@ -2508,12 +2544,11 @@ export function registerCompatRoutes(app: Hono) {
     return ok(c, data);
   });
   app.get('/api/v1/rss/parse', async (c) => {
-    const feedUrl = String(new URL(c.req.url).searchParams.get('url') || '').trim();
-    if (!feedUrl) return badRequest(c, 'url 参数不能为空');
     try {
-      return ok(c, { url: feedUrl, items: await fetchRssFeed(feedUrl) });
-    } catch (err) {
-      return fail(c, 502, 'RSS_PARSE_FAILED', err instanceof Error ? err.message : 'RSS 解析失败');
+      return ok(c, await parseRssUrl(new URL(c.req.url).searchParams.get('url')));
+    } catch (error) {
+      if (error instanceof ExternalContentServiceError) return fail(c, error.status, error.code, error.message);
+      throw error;
     }
   });
   app.get('/api/v1/social/feed-timeline', optionalAuth, async (c) => {
@@ -2614,33 +2649,20 @@ export function registerCompatRoutes(app: Hono) {
   app.post('/api/v1/admin/analytics/purge', auth, async (c) => ok(c, await purgeAnalytics(new URL(c.req.url).searchParams)));
 
   app.post('/api/v1/media/parse', auth, async (c) => {
-    const body = await c.req.json().catch(() => ({}));
-    const url = String(body.url || '').trim();
-    if (!url) return badRequest(c, 'URL 不能为空');
     try {
-      return ok(c, await parseMediaUrl(url));
-    } catch (err) {
-      return fail(c, 400, 'PARSE_ERROR', err instanceof Error ? err.message : '无法解析此链接');
+      return ok(c, await parseMediaLink(await c.req.json().catch(() => ({}))));
+    } catch (error) {
+      if (error instanceof ExternalContentServiceError) return fail(c, error.status, error.code, error.message);
+      throw error;
     }
   });
   app.post('/api/v1/media/douban-import', auth, async (c) => {
-    const body = await c.req.json().catch(() => ({}));
-    const doubanId = String(body.douban_id || '').trim();
-    if (!doubanId) return badRequest(c, '豆瓣 ID 不能为空');
-    const type = ['movie', 'book', 'music'].includes(String(body.type || '')) ? String(body.type) : 'movie';
-    const url = `https://${type}.douban.com/people/${encodeURIComponent(doubanId)}/collect`;
-    let profile = null;
     try {
-      profile = await parseMediaUrl(url);
-    } catch {
-      profile = null;
+      return ok(c, await doubanImportPayload(await c.req.json().catch(() => ({}))));
+    } catch (error) {
+      if (error instanceof ExternalContentServiceError) return fail(c, error.status, error.code, error.message);
+      throw error;
     }
-    return ok(c, {
-      message: '豆瓣导入功能需要豆瓣 API 或 RSS 支持，建议使用 NeoDB 导入',
-      douban_url: url,
-      profile,
-      tip: '推荐使用 NeoDB (neodb.social) 绑定豆瓣账号后，通过 NeoDB API 批量导入',
-    });
   });
 
   app.get('/api/v1/federation/metadata', async (c) => ok(c, await siteMetadata()));

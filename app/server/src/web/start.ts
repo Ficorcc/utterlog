@@ -124,7 +124,10 @@ export function isStartNativeApiRequest(request: Request) {
   if (url.pathname === '/api/v1/media' || url.pathname === '/api/v1/media/stats') return method === 'GET';
   if (['/api/v1/media/upload', '/api/v1/media/download-url', '/api/v1/media/test-connection'].includes(url.pathname)) return method === 'POST';
   if (url.pathname === '/api/v1/media/exif') return method === 'GET';
+  if (url.pathname === '/api/v1/media/parse' || url.pathname === '/api/v1/media/douban-import') return method === 'POST';
   if (/^\/api\/v1\/media\/\d+$/.test(url.pathname)) return method === 'DELETE';
+  if (url.pathname === '/api/v1/rss/parse' || url.pathname === '/api/v1/music/search') return method === 'GET';
+  if (/^\/api\/v1\/music\/proxy\/[^/]+\/songs\/[^/]+\/(cover|stream|lyric)$/.test(url.pathname)) return method === 'GET';
   if (url.pathname === '/api/v1/captcha/challenge' || url.pathname === '/api/v1/captcha/image') return method === 'GET';
   if (method === 'GET' && url.pathname === '/api/v1/comments') return true;
   if (url.pathname === '/api/v1/options') return method === 'GET' || method === 'PUT' || method === 'POST';

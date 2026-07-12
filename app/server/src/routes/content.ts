@@ -58,6 +58,7 @@ import { listComments as listCommentsDirect } from '../public-read';
 import { localeFiles, readLocale } from '../services/i18n';
 import { searchPosts } from '../services/search';
 import { visitorGeo } from '../services/analytics';
+import { MusicProxyError, proxyMusicAsset, searchMusic } from '../services/music-proxy';
 
 const contentTables = new Set(['moments', 'music', 'movies', 'books', 'games', 'videos', 'goods', 'links', 'playlists']);
 const writableTables = new Set([...contentTables, 'posts', 'comments', 'media', 'albums', 'notifications']);
@@ -1969,31 +1970,6 @@ async function sendPublishNotificationIfNeeded(postId: number, wasPublished: boo
   void sendPostPublishedTelegram({ title: String(post.title || '未命名文章'), url });
 }
 
-const musicPlatforms = new Set(['netease', 'tencent', 'kugou', 'kuwo']);
-const musicAssets = new Set(['cover', 'stream', 'lyric']);
-
-function musicPlatform(value: string) {
-  const platform = value.trim().toLowerCase();
-  if (platform === 'qq') return 'tencent';
-  return musicPlatforms.has(platform) ? platform : '';
-}
-
-function musicId(value: string) {
-  const id = value.trim();
-  return /^[a-zA-Z0-9_-]{1,100}$/.test(id) ? id : '';
-}
-
-async function metingFetch(platform: string, path: string, init: RequestInit = {}) {
-  return fetch(`https://meting.yite.net/api/v1/${platform}${path}`, {
-    ...init,
-    signal: AbortSignal.timeout(15000),
-    headers: {
-      'User-Agent': 'Utterlog-Bun/1.0',
-      ...(init.headers || {}),
-    },
-  });
-}
-
 export function registerContentRoutes(app: Hono) {
   app.get('/robots.txt', async (c) => {
     const opts: Record<string, string> = await optionMap(false).catch(() => ({}));
@@ -2633,38 +2609,23 @@ export function registerContentRoutes(app: Hono) {
 
   app.get('/api/v1/music/search', async (c) => {
     const sp = searchParams(c);
-    const platform = musicPlatform(sp.get('platform') || sp.get('server') || 'netease');
-    const q = String(sp.get('q') || '').trim();
-    const page = Math.max(1, Number(sp.get('page') || 1) || 1);
-    const limit = Math.min(50, Math.max(1, Number(sp.get('limit') || 20) || 20));
-    if (!platform) return badRequest(c, '不支持的音乐平台');
-    if (!q) return badRequest(c, 'q parameter required');
-    const upstream = await metingFetch(platform, `/search?q=${encodeURIComponent(q)}&page=${page}&limit=${limit}`).catch(() => null);
-    if (!upstream?.ok) return badRequest(c, '音乐搜索失败', 'MUSIC_SEARCH_FAILED');
-    const payload = await upstream.json().catch(() => ({}));
-    return ok(c, payload);
+    try {
+      return ok(c, await searchMusic({ platform: sp.get('platform') || '', server: sp.get('server') || '', q: sp.get('q') || '',
+        page: Number(sp.get('page') || 1), limit: Number(sp.get('limit') || 20) }));
+    } catch (error) {
+      if (error instanceof MusicProxyError) return fail(c, error.status, error.code, error.message);
+      throw error;
+    }
   });
 
   app.get('/api/v1/music/proxy/:platform/songs/:id/:asset', async (c) => {
-    const platform = musicPlatform(c.req.param('platform'));
-    const id = musicId(c.req.param('id'));
-    const asset = c.req.param('asset');
-    if (!platform || !id || !musicAssets.has(asset)) return badRequest(c, 'invalid music proxy request');
-
-    const headers: Record<string, string> = {};
-    const range = c.req.header('range');
-    if (range) headers.Range = range;
-    const upstream = await metingFetch(platform, `/songs/${encodeURIComponent(id)}/${asset}`, { headers }).catch(() => null);
-    if (!upstream?.ok && upstream?.status !== 206) return new Response('', { status: upstream?.status || 502 });
-
-    const responseHeaders = new Headers();
-    for (const name of ['content-type', 'content-length', 'content-range', 'accept-ranges', 'cache-control', 'etag', 'last-modified']) {
-      const value = upstream.headers.get(name);
-      if (value) responseHeaders.set(name, value);
+    try {
+      return await proxyMusicAsset({ platform: c.req.param('platform'), id: c.req.param('id'), asset: c.req.param('asset'),
+        range: c.req.header('range') || '' });
+    } catch (error) {
+      if (error instanceof MusicProxyError) return fail(c, error.status, error.code, error.message);
+      throw error;
     }
-    if (!responseHeaders.has('cache-control')) responseHeaders.set('cache-control', asset === 'stream' ? 'private, max-age=3600' : 'public, max-age=86400');
-    if (asset === 'lyric' && !responseHeaders.has('content-type')) responseHeaders.set('content-type', 'text/plain; charset=utf-8');
-    return new Response(upstream.body, { status: upstream.status, headers: responseHeaders });
   });
 
   for (const name of contentTables) {
