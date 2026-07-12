@@ -1,8 +1,7 @@
 import { createServerFn } from '@tanstack/react-start';
-import { loadHomePageData } from '@/lib/home-page-data';
-import { getThemeContextData } from '@/lib/theme-data';
 import type { ThemeContextData } from '@/lib/theme-context';
-import { dataOf, fetchJson } from './api';
+import { loadHomePageDataDirect } from '../../../server/src/public-read';
+import { loadStartThemeContextDirect } from './theme';
 
 type HomeResponse = {
   posts: any[];
@@ -32,25 +31,21 @@ async function safe<T>(promise: Promise<T>, fallback: T, ms = 1500): Promise<T> 
 }
 
 export const loadStartHome = createServerFn({ method: 'GET' }).handler(async (): Promise<HomeResponse> => {
-  const [themeCtx, homeData, optionsRes, postsRes, categoriesRes, commentsRes] = await Promise.all([
-    safe(getThemeContextData(), null),
-    safe(loadHomePageData(1), null),
-    safe(fetchJson('/options'), { data: {} }),
-    safe(fetchJson('/posts?page=1&per_page=8&status=publish'), { data: [] }),
-    safe(fetchJson('/categories'), { data: [] }),
-    safe(fetchJson('/comments?per_page=8&status=approved&exclude_admin=1'), { data: [] }),
+  const [themeCtx, homeData] = await Promise.all([
+    safe(loadStartThemeContextDirect(), null),
+    safe(loadHomePageDataDirect(1), null),
   ]);
 
   return {
-    options: dataOf<Record<string, string>>(optionsRes, {}),
-    posts: homeData?.posts || dataOf<any[]>(postsRes, []),
+    options: homeData?.options || themeCtx?.options || {},
+    posts: homeData?.posts || [],
     page: homeData?.page || 1,
     totalPages: homeData?.totalPages || 1,
-    categories: homeData?.categories || dataOf<any[]>(categoriesRes, []),
-    archiveStats: homeData?.archiveStats || {},
+    categories: homeData?.categories || themeCtx?.categories || [],
+    archiveStats: homeData?.archiveStats || themeCtx?.archiveStats || {},
     latestMoment: homeData?.latestMoment || null,
-    latestComments: homeData?.latestComments || dataOf<any[]>(commentsRes, []),
-    perPage: homeData?.perPage || 8,
+    latestComments: homeData?.latestComments || [],
+    perPage: homeData?.perPage || 10,
     ctx: themeCtx,
   };
 });

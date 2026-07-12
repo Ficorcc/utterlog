@@ -1,23 +1,19 @@
 import { createServerFn } from '@tanstack/react-start';
-import {
-  getBooks,
-  getFootprints,
-  getGames,
-  getGoods,
-  getMoments,
-  getMovies,
-  getMusicList,
-  getOptions,
-  getPosts,
-  searchPosts,
-} from '@/lib/blog-api';
-import { loadHomePageData } from '@/lib/home-page-data';
-import { resolvePostFromPermalink } from '@/lib/permalink-resolve';
-import { getThemeContextData } from '@/lib/theme-data';
 import type { ThemeContextData } from '@/lib/theme-context';
 import { datePartsInTimeZone, resolveSiteTimeZone } from '@/lib/timezone';
 import { postDateInput } from '@/lib/post-date';
-import { dataOf, fetchJson } from './api';
+import {
+  getPostBySlug,
+  getOptionsMap,
+  listMoments,
+  listPosts,
+  listPublicContent,
+  listPublicFootprints,
+  loadHomePageDataDirect,
+  resolvePublicPostPath,
+  searchPublicPosts,
+} from '../../../server/src/public-read';
+import { loadStartThemeContextDirect } from './theme';
 
 type LegacyInput = {
   pathname: string;
@@ -25,6 +21,12 @@ type LegacyInput = {
 };
 
 const API_WAIT_MS = 1500;
+
+function dataOf<T>(response: unknown, fallback: T): T {
+  if (!response || typeof response !== 'object') return fallback;
+  const value = (response as { data?: unknown }).data;
+  return value === undefined ? response as T : value as T;
+}
 
 export type StartLegacyRouteData =
   | { kind: 'not-found'; ctx: ThemeContextData | null; pathname: string }
@@ -92,22 +94,44 @@ function pageNumber(search?: Record<string, string | undefined>) {
   return Math.max(1, parseInt(String(search?.page || '1'), 10) || 1);
 }
 
+function emptyPostList(page = 1, perPage = 20) {
+  return {
+    data: [] as any[],
+    meta: { total: 0, page, per_page: perPage, total_pages: 1 },
+    pagination: { total: 0, page, per_page: perPage, total_pages: 1 },
+  };
+}
+
+function emptyMomentList(page = 1, perPage = 20) {
+  return {
+    data: { moments: [] as any[], total: 0 },
+    meta: { total: 0, page, per_page: perPage, total_pages: 1 },
+    pagination: { total: 0, page, per_page: perPage, total_pages: 1 },
+  };
+}
+
+function emptyContentList(page = 1, perPage = 20) {
+  return {
+    data: [] as Record<string, unknown>[],
+    meta: { total: 0, page, per_page: perPage, total_pages: 1 },
+    pagination: { total: 0, page, per_page: perPage, total_pages: 1 },
+  };
+}
+
 async function themeCtx() {
-  return safe(getThemeContextData(), null);
+  return safe(loadStartThemeContextDirect(), null);
 }
 
 async function optionsFallback() {
-  const res = await safe(getOptions(), { data: {} });
-  return dataOf<Record<string, string>>(res, {});
+  return safe(getOptionsMap(), {});
 }
 
 async function postBySlug(slug: string) {
-  const res = await safe(fetchJson(`/posts/slug/${encodeURIComponent(slug)}?track=1`), { data: null });
-  return dataOf<any | null>(res, null);
+  return safe(getPostBySlug(slug, true), null);
 }
 
 async function homeRoute(ctx: ThemeContextData | null, page: number): Promise<StartLegacyRouteData> {
-  const home = await safe(loadHomePageData(page), null);
+  const home = await safe(loadHomePageDataDirect(page), null);
   return {
     kind: 'home',
     ctx,
@@ -125,7 +149,7 @@ async function homeRoute(ctx: ThemeContextData | null, page: number): Promise<St
 async function dateRoute(ctx: ThemeContextData | null, year: number, month?: number, day?: number): Promise<StartLegacyRouteData> {
   const options = ctx?.options || await optionsFallback();
   const timeZone = ctx?.timeZone || resolveSiteTimeZone(options);
-  const res = await safe(getPosts({ per_page: 500, status: 'publish' }), { data: [] });
+  const res = await safe(listPosts({ perPage: 500, status: 'publish' }), emptyPostList(1, 500));
   const posts = dataOf<any[]>(res, []).filter((post) => {
     const parts = datePartsInTimeZone(postDateInput(post), timeZone);
     return parts.year === year && (month == null || parts.month === month) && (day == null || parts.day === day);
@@ -161,7 +185,7 @@ export const loadStartLegacyRoute = createServerFn({ method: 'GET' })
 
     if (pathname === '/archives') {
       if (!ctx) return { kind: 'not-found', ctx, pathname };
-      const res = await safe(getPosts({ per_page: 500, status: 'publish' }), { data: [] });
+      const res = await safe(listPosts({ perPage: 500, status: 'publish' }), emptyPostList(1, 500));
       return { kind: 'archives', ctx, posts: dataOf<any[]>(res, []) };
     }
 
@@ -174,7 +198,7 @@ export const loadStartLegacyRoute = createServerFn({ method: 'GET' })
       if (!ctx) return { kind: 'not-found', ctx, pathname };
       const category = matchBySlugOrName(ctx.categories, match[1]);
       if (!category) return { kind: 'not-found', ctx, pathname };
-      const res = await safe(getPosts({ per_page: 500, category_id: category.id, status: 'publish' }), { data: [] });
+      const res = await safe(listPosts({ perPage: 500, categoryId: category.id, status: 'publish' }), emptyPostList(1, 500));
       return { kind: 'category', ctx, category, posts: dataOf<any[]>(res, []) };
     }
 
@@ -187,7 +211,7 @@ export const loadStartLegacyRoute = createServerFn({ method: 'GET' })
       if (!ctx) return { kind: 'not-found', ctx, pathname };
       const tag = matchBySlugOrName(ctx.tags, match[1], true);
       if (!tag) return { kind: 'not-found', ctx, pathname };
-      const res = await safe(getPosts({ per_page: 500, tag_id: tag.id, status: 'publish' }), { data: [] });
+      const res = await safe(listPosts({ perPage: 500, tagId: tag.id, status: 'publish' }), emptyPostList(1, 500));
       return { kind: 'tag', ctx, tag, posts: dataOf<any[]>(res, []) };
     }
 
@@ -196,8 +220,7 @@ export const loadStartLegacyRoute = createServerFn({ method: 'GET' })
       const options = ctx?.options || await optionsFallback();
       const timeZone = ctx?.timeZone || resolveSiteTimeZone(options);
       if (!query) return { kind: 'search', ctx, query, results: [], mode: '', total: 0, timeZone };
-      const res = await safe(searchPosts(query, 20), { data: { results: [] } });
-      const body = dataOf<any>(res, {});
+      const body = await safe(searchPublicPosts(query, 20), { results: [] as any[], total: 0, mode: 'keyword' });
       const results = body.results || [];
       return { kind: 'search', ctx, query, results, mode: body.mode || '', total: body.total || results.length, timeZone };
     }
@@ -205,40 +228,46 @@ export const loadStartLegacyRoute = createServerFn({ method: 'GET' })
     if (pathname === '/footprints') {
       const [options, footprints] = await Promise.all([
         optionsFallback(),
-        safe(getFootprints(), { data: [] }),
+        safe(listPublicFootprints(), []),
       ]);
-      return { kind: 'footprints', ctx, rows: dataOf<any[]>(footprints, []), options };
+      return { kind: 'footprints', ctx, rows: footprints, options };
     }
 
     if (pathname === '/moments') {
-      const res = await safe(getMoments({ per_page: 50 }), { data: [] });
+      const res = await safe(listMoments({ perPage: 50 }), emptyMomentList(1, 50));
       const body = dataOf<any>(res, []);
       const moments = Array.isArray(body) ? body : body.moments || [];
       return { kind: 'moments', ctx, moments, tags: momentTags(moments), fetchedAt: Date.now() };
     }
 
-    if (pathname === '/links') return { kind: 'client', ctx, page: 'links' };
+    if (pathname === '/links') {
+      const res = await safe(listPublicContent('links', { perPage: 500 }), emptyContentList(1, 500));
+      return { kind: 'client', ctx, page: 'links', items: dataOf<any[]>(res, []) };
+    }
     if (pathname === '/feeds') return { kind: 'client', ctx, page: 'feeds' };
-    if (pathname === '/albums') return { kind: 'client', ctx, page: 'albums' };
+    if (pathname === '/albums') {
+      const res = await safe(listPublicContent('albums', { perPage: 500 }), emptyContentList(1, 500));
+      return { kind: 'client', ctx, page: 'albums', items: dataOf<any[]>(res, []) };
+    }
     if (pathname === '/music') {
-      const res = await safe(getMusicList({ per_page: 100 }), { data: [] });
+      const res = await safe(listPublicContent('music', { perPage: 100 }), emptyContentList(1, 100));
       return { kind: 'client', ctx, page: 'music', items: dataOf<any[]>(res, []) };
     }
 
     if (pathname === '/movies') {
-      const res = await safe(getMovies({ per_page: 60 }), { data: [] });
+      const res = await safe(listPublicContent('movies', { perPage: 60 }), emptyContentList(1, 60));
       return { kind: 'shelf', ctx, shelf: 'movies', items: dataOf<any[]>(res, []) };
     }
     if (pathname === '/books') {
-      const res = await safe(getBooks({ per_page: 60 }), { data: [] });
+      const res = await safe(listPublicContent('books', { perPage: 60 }), emptyContentList(1, 60));
       return { kind: 'shelf', ctx, shelf: 'books', items: dataOf<any[]>(res, []) };
     }
     if (pathname === '/games') {
-      const res = await safe(getGames({ per_page: 60 }), { data: [] });
+      const res = await safe(listPublicContent('games', { perPage: 60 }), emptyContentList(1, 60));
       return { kind: 'shelf', ctx, shelf: 'games', items: dataOf<any[]>(res, []) };
     }
     if (pathname === '/goods') {
-      const res = await safe(getGoods({ per_page: 60 }), { data: [] });
+      const res = await safe(listPublicContent('goods', { perPage: 60 }), emptyContentList(1, 60));
       return { kind: 'shelf', ctx, shelf: 'goods', items: dataOf<any[]>(res, []) };
     }
 
@@ -250,14 +279,14 @@ export const loadStartLegacyRoute = createServerFn({ method: 'GET' })
         year: String(search.year || ''),
         region: String(search.region || ''),
       };
-      const res = await safe(getPosts({
+      const res = await safe(listPosts({
         type: 'video',
         page,
-        per_page: perPage,
-        video_type: filters.video_type || undefined,
+        perPage,
+        videoType: filters.video_type || undefined,
         year: filters.year || undefined,
         region: filters.region || undefined,
-      }), { data: [] });
+      }), emptyPostList(page, perPage));
       const items = dataOf<any[]>(res, []);
       const total = (res as any)?.pagination?.total ?? (res as any)?.total ?? items.length;
       return { kind: 'films', ctx, items, total, page, perPage, totalPages: Math.max(1, Math.ceil(total / perPage)), filters };
@@ -270,7 +299,7 @@ export const loadStartLegacyRoute = createServerFn({ method: 'GET' })
 
     const segments = pathname.split('/').filter(Boolean).map((item) => decodeURIComponent(item));
     if (segments.length > 0) {
-      const post = await safe(resolvePostFromPermalink(segments, true), null);
+      const post = await safe(resolvePublicPostPath(`/${segments.map((item) => encodeURIComponent(item)).join('/')}`, true), null);
       if (post) return { kind: 'post', ctx, post, options: ctx?.options || await optionsFallback() };
     }
 

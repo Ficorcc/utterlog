@@ -81,10 +81,11 @@ function getFavicon(url: string) {
   return siteFaviconUrl(url);
 }
 
-export default function NebulaLinksView() {
-  const [links, setLinks] = useState<Link[]>([]);
-  const [linkGroups, setLinkGroups] = useState<LinkGroupConfig[]>([{ key: DEFAULT_GROUP_KEY, name: '默认', style: 'card', icon: '' }]);
-  const [loading, setLoading] = useState(true);
+export default function NebulaLinksView({ initialLinks, initialOptions }: { initialLinks?: Link[]; initialOptions?: Record<string, string> } = {}) {
+  const hasInitialData = initialLinks !== undefined;
+  const [links, setLinks] = useState<Link[]>(initialLinks || []);
+  const [linkGroups, setLinkGroups] = useState<LinkGroupConfig[]>(parseLinkGroups(initialOptions?.link_groups));
+  const [loading, setLoading] = useState(!hasInitialData);
   const [activeGroup, setActiveGroup] = useState('all');
   const [showApply, setShowApply] = useState(false);
   const [applying, setApplying] = useState(false);
@@ -98,7 +99,7 @@ export default function NebulaLinksView() {
   const [autoCountdown, setAutoCountdown] = useState<number | null>(null);
 
   useEffect(() => {
-    fetchLinks();
+    if (!hasInitialData) fetchLinks();
     // 持久化用户视图选择
     if (typeof window !== 'undefined') {
       const saved = window.localStorage.getItem('links-view-mode');

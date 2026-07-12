@@ -20,16 +20,18 @@ interface Photo {
   created_at: number;
 }
 
-export default function AlbumsPage() {
-  const [albums, setAlbums] = useState<Album[]>([]);
+export default function AlbumsPage({ initialAlbums }: { boot?: unknown; initialAlbums?: Album[] } = {}) {
+  const hasInitialData = initialAlbums !== undefined;
+  const [albums, setAlbums] = useState<Album[]>(initialAlbums || []);
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [lightbox, setLightbox] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!hasInitialData);
 
   const apiBase = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
 
   useEffect(() => {
+    if (hasInitialData) return;
     fetch(`${apiBase}/public/albums?per_page=500`)
       .then(r => r.json())
       .then(r => {

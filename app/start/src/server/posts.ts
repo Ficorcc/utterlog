@@ -1,6 +1,12 @@
 import { createServerFn } from '@tanstack/react-start';
-import { getThemeContextData } from '@/lib/theme-data';
-import { dataOf, fetchJson } from './api';
+import { getPostBySlug, listPostComments } from '../../../server/src/public-read';
+import { loadStartThemeContextDirect } from './theme';
+
+type StartPostResponse = {
+  ctx: Awaited<ReturnType<typeof loadStartThemeContextDirect>> | null;
+  post: any | null;
+  comments: any[];
+};
 
 async function safe<T>(promise: Promise<T>, fallback: T, ms = 1500): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -18,19 +24,16 @@ async function safe<T>(promise: Promise<T>, fallback: T, ms = 1500): Promise<T> 
 
 export const loadStartPost = createServerFn({ method: 'GET' })
   .validator((input: { slug: string }) => input)
-  .handler(async ({ data }) => {
-    const [ctx, postRes] = await Promise.all([
-      safe(getThemeContextData(), null),
-      safe(fetchJson(`/posts/slug/${encodeURIComponent(data.slug)}?track=1`), { data: null }),
+  .handler(async ({ data }): Promise<StartPostResponse> => {
+    const [ctx, post] = await Promise.all([
+      safe(loadStartThemeContextDirect(), null),
+      safe(getPostBySlug(data.slug, true), null),
     ]);
-    const post = dataOf<any | null>(postRes, null);
-    const commentsRes = post?.id
-      ? await safe(fetchJson(`/posts/${post.id}/comments`), { data: [] })
-      : { data: [] };
+    const comments = post?.id ? await safe(listPostComments(Number(post.id)), []) : [];
 
     return {
       ctx,
       post,
-      comments: dataOf<any[]>(commentsRes, []),
+      comments,
     };
   });

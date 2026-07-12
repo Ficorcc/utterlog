@@ -79,17 +79,18 @@ function getFavicon(url: string) {
   return siteFaviconUrl(url);
 }
 
-export default function LegacyLinksView() {
-  const [links, setLinks] = useState<Link[]>([]);
-  const [linkGroups, setLinkGroups] = useState<LinkGroupConfig[]>([{ key: DEFAULT_GROUP_KEY, name: '默认', style: 'card', icon: '' }]);
-  const [loading, setLoading] = useState(true);
+export default function LegacyLinksView({ initialLinks, initialOptions }: { initialLinks?: Link[]; initialOptions?: Record<string, string> } = {}) {
+  const hasInitialData = initialLinks !== undefined;
+  const [links, setLinks] = useState<Link[]>(initialLinks || []);
+  const [linkGroups, setLinkGroups] = useState<LinkGroupConfig[]>(parseLinkGroups(initialOptions?.link_groups));
+  const [loading, setLoading] = useState(!hasInitialData);
   const [activeGroup, setActiveGroup] = useState('all');
   const [showApply, setShowApply] = useState(false);
   const [applying, setApplying] = useState(false);
   const [form, setForm] = useState({ name: '', url: '', description: '', logo: '', avatar: '', rss_url: '', email: '' });
 
   useEffect(() => {
-    fetchLinks();
+    if (!hasInitialData) fetchLinks();
   }, []);
 
   useEffect(() => {

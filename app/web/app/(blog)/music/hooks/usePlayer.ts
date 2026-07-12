@@ -83,15 +83,35 @@ function musicProxy(server: string, id: string, asset: 'cover' | 'stream' | 'lyr
   return `${API_BASE}/music/proxy/${encodeURIComponent(server)}/songs/${encodeURIComponent(id)}/${asset}`;
 }
 
-export function usePlayer(): SkinProps {
-  const [playlist, setPlaylist] = useState<Song[]>([]);
+function mapDatabaseSongs(items: any[]): Song[] {
+  return items.map((item: any) => {
+    const server = item.platform || 'netease';
+    const id = item.platform_id || String(item.id);
+    return {
+      id,
+      title: item.title,
+      artist: item.artist || '',
+      album: item.album || '',
+      cover: item.cover_url || musicProxy(server, id, 'cover'),
+      url: item.play_url || musicProxy(server, id, 'stream'),
+      server,
+      pic_id: id,
+      url_id: id,
+      lyric_id: id,
+    };
+  });
+}
+
+export function usePlayer(initialItems?: any[]): SkinProps {
+  const hasInitialData = initialItems !== undefined;
+  const [playlist, setPlaylist] = useState<Song[]>(() => mapDatabaseSongs(initialItems || []));
   const [idx, setIdx] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
   const [dur, setDur] = useState(0);
   const [lrc, setLrc] = useState<LrcLine[]>([]);
   const [lrcIdx, setLrcIdx] = useState(-1);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!hasInitialData);
   const [showSearch, setShowSearch] = useState(false);
   const [keyword, setKeyword] = useState('');
   const [results, setResults] = useState<any[]>([]);
@@ -104,7 +124,7 @@ export function usePlayer(): SkinProps {
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const lrcBoxRef = useRef<HTMLDivElement>(null);
-  const dbSongIds = useRef<Set<string>>(new Set());
+  const dbSongIds = useRef<Set<string>>(new Set(mapDatabaseSongs(initialItems || []).map((song) => song.id)));
   const [pendingPlay, setPendingPlay] = useState<number | null>(null);
   const pendingPlayRef = useRef<boolean>(false);
 
@@ -125,7 +145,22 @@ export function usePlayer(): SkinProps {
   }, []);
 
   // Load playlists + music on mount
-  useEffect(() => { loadPlaylists(); loadMusic(); }, []);
+  useEffect(() => {
+    loadPlaylists();
+    if (!hasInitialData) {
+      loadMusic();
+      return;
+    }
+    try {
+      const saved = localStorage.getItem(LOCAL_KEY);
+      if (!saved) return;
+      const userSongs: Song[] = JSON.parse(saved);
+      setPlaylist((current) => {
+        const ids = new Set(current.map((song) => song.id));
+        return [...current, ...userSongs.filter((song) => !ids.has(song.id))];
+      });
+    } catch {}
+  }, []);
 
   const loadPlaylists = async () => {
     try {
@@ -162,16 +197,7 @@ export function usePlayer(): SkinProps {
     try {
       const r = await fetch(`${API}?per_page=500`).then(r => r.json());
       if (r.success && r.data?.length) {
-        allSongs.push(...r.data.map((s: any) => {
-          const server = s.platform || 'netease';
-          const pid = s.platform_id || String(s.id);
-          return {
-            id: pid, title: s.title, artist: s.artist || '', album: s.album || '',
-            cover: s.cover_url || musicProxy(server, pid, 'cover'),
-            url: s.play_url || musicProxy(server, pid, 'stream'),
-            server, pic_id: pid, url_id: pid, lyric_id: pid,
-          };
-        }));
+        allSongs.push(...mapDatabaseSongs(r.data));
       }
     } catch {}
     try {

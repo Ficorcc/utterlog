@@ -31,6 +31,7 @@ RUN bun run build
 FROM deps AS start-builder
 WORKDIR /app
 COPY app/shared ./app/shared
+COPY app/server ./app/server
 COPY app/web ./app/web
 COPY app/blog ./app/blog
 COPY app/start ./app/start

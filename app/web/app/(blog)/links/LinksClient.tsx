@@ -17,8 +17,16 @@ import { useThemeContext } from '@/lib/theme-context';
 import NebulaLinksView from './NebulaLinksView';
 import LegacyLinksView from './LegacyLinksView';
 
-export default function LinksClient() {
+export default function LinksClient({
+  initialLinks,
+  initialOptions,
+}: {
+  boot?: unknown;
+  initialLinks?: any[];
+  initialOptions?: Record<string, string>;
+} = {}) {
   const { theme } = useThemeContext();
   const isNebula = theme?.name === 'Nebula';
-  return isNebula ? <NebulaLinksView /> : <LegacyLinksView />;
+  const props = { initialLinks, initialOptions };
+  return isNebula ? <NebulaLinksView {...props} /> : <LegacyLinksView {...props} />;
 }

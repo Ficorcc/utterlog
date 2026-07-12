@@ -116,8 +116,8 @@ const D_LRC_H = 192;
 const M_LINE_H = 40;
 const D_LINE_H = 48;
 
-export default function MusicPage() {
-  const p = usePlayer();
+export default function MusicPage({ initialItems }: { boot?: unknown; initialItems?: any[] } = {}) {
+  const p = usePlayer(initialItems);
   const [isDragging, setIsDragging] = useState(false);
   const [winW, setWinW] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const [showPlaylist, setShowPlaylist] = useState(false);

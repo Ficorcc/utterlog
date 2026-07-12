@@ -237,10 +237,10 @@ export function StartLegacyPage({ data }: { data: StartLegacyRouteData }) {
         }
         if (data.kind === 'footprints') return <FootprintsClient initialRows={data.rows} options={data.options} />;
         if (data.kind === 'moments') return <MomentsClient initialLoaded initialMoments={data.moments} initialTags={data.tags} initialFetchedAt={data.fetchedAt} />;
-        if (data.kind === 'client' && data.page === 'links') return <LinksClient />;
+        if (data.kind === 'client' && data.page === 'links') return <LinksClient initialLinks={data.items || []} initialOptions={data.ctx?.options || {}} />;
         if (data.kind === 'client' && data.page === 'feeds') return <FeedsClient />;
-        if (data.kind === 'client' && data.page === 'albums') return <AlbumsClient />;
-        if (data.kind === 'client' && data.page === 'music') return <MusicClient />;
+        if (data.kind === 'client' && data.page === 'albums') return <AlbumsClient initialAlbums={data.items || []} />;
+        if (data.kind === 'client' && data.page === 'music') return <MusicClient initialItems={data.items || []} />;
         if (data.kind === 'shelf') return <MediaGrid data={data} />;
         if (data.kind === 'search') return <SearchPage data={data} />;
         if (data.kind === 'films') return <FilmsPage data={data} />;
