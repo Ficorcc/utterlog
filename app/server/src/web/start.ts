@@ -95,8 +95,8 @@ export function isStartNativeApiRequest(request: Request) {
   if (anonymousGet && /^\/api\/v1\/(books|games|goods|links|movies|music|playlists)$/.test(url.pathname)) return true;
   if (anonymousGet && ['/api/v1/owner', '/api/v1/archive/stats', '/api/v1/footprints', '/api/v1/moments/recent-tags', '/api/v1/public/albums'].includes(url.pathname)) return true;
   if (anonymousGet && /^\/api\/v1\/public\/albums\/[^/]+$/.test(url.pathname)) return true;
-  if (anonymousGet && /^\/api\/v1\/posts\/(slug\/[^/]+|by-display-id\/\d+|\d+)$/.test(url.pathname)) return true;
-  if (anonymousGet && /^\/api\/v1\/posts\/\d+\/(comments|episodes|navigation)$/.test(url.pathname)) return true;
+  if (method === 'GET' && /^\/api\/v1\/posts\/(slug\/[^/]+|by-display-id\/\d+|-?\d+)$/.test(url.pathname)) return true;
+  if (method === 'GET' && /^\/api\/v1\/posts\/-?\d+\/(comments|episodes|navigation)$/.test(url.pathname)) return true;
   if (url.pathname === '/api/v1/links/apply') return method === 'POST';
   if (/^\/api\/v1\/comments\/\d+\/edit$/.test(url.pathname)) return method === 'PUT';
   if (/^\/api\/v1\/comments\/\d+\/approve$/.test(url.pathname)) return method === 'PATCH';

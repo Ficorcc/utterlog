@@ -101,8 +101,31 @@ function sanitizePostForResponse(row: Record<string, unknown>, detail: boolean) 
   return next;
 }
 
+async function siteDate(value = new Date()) {
+  const timeZone = (await optionValue('site_timezone', 'UTC')).trim() || 'UTC';
+  try {
+    const parts = new Intl.DateTimeFormat('en', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(value);
+    const get = (type: string) => parts.find((part) => part.type === type)?.value || '';
+    return `${get('year')}-${get('month')}-${get('day')}`;
+  } catch {
+    return value.toISOString().slice(0, 10);
+  }
+}
+
 async function bumpPostView(postId: number) {
+  const today = await siteDate();
   await exec(`update ${table('posts')} set view_count = coalesce(view_count, 0) + 1 where id = $1`, [postId]).catch(() => {});
+  await exec(
+    `insert into ${table('stats_post_daily')} (post_id, date, views, unique_visitors)
+     values ($1, $2::date, 1, 0)
+     on conflict (post_id, date) do update set views = ${table('stats_post_daily')}.views + 1`,
+    [postId, today],
+  ).catch(() => {});
 }
 
 async function ownerPublicPayload(user: Record<string, unknown> | null) {
@@ -339,13 +362,70 @@ export async function listPosts(params: PublicPostListParams = {}) {
   };
 }
 
-async function getPublishedPostBy(column: 'id' | 'display_id' | 'slug', value: string | number, track = false, postOnly = false) {
+async function postFootprints(postId: number) {
+  const rows = await many<Record<string, unknown>>(
+    `select pf.id, pf.post_id, coalesce(pf.place_id,0) as place_id, pf.route_id, pf.visited_at, pf.route_order,
+            coalesce(pf.keywords,'') as keywords, coalesce(pf.note,'') as note,
+            pf.created_at, pf.updated_at,
+            coalesce(fp.country_name,'') as country_name, coalesce(fp.country_code,'') as country_code,
+            coalesce(fp.city_name,'') as city_name, fp.latitude, fp.longitude,
+            coalesce(fp.cover_url,'') as cover_url, coalesce(fp.visit_count,0) as visit_count,
+            coalesce(fr.name,'') as route_name, coalesce(fr.slug,'') as route_slug
+     from ${table('post_footprints')} pf
+     left join ${table('footprint_places')} fp on fp.id = pf.place_id
+     left join ${table('footprint_routes')} fr on fr.id = pf.route_id
+     where pf.post_id = $1
+     order by coalesce(nullif(pf.route_order, 0), 2147483647), pf.visited_at desc, pf.id asc`,
+    [postId],
+  ).catch(() => []);
+  return rows.map((row) => ({
+    id: row.id,
+    post_id: row.post_id,
+    place_id: row.place_id,
+    route_id: row.route_id,
+    visited_at: row.visited_at,
+    route_order: row.route_order,
+    keywords: row.keywords,
+    note: row.note,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+    place: Number(row.place_id || 0) > 0 ? {
+      id: row.place_id,
+      country_name: row.country_name,
+      country_code: row.country_code,
+      city_name: row.city_name,
+      latitude: row.latitude,
+      longitude: row.longitude,
+      cover_url: row.cover_url,
+      visit_count: row.visit_count,
+    } : undefined,
+    route: Number(row.route_id || 0) > 0 ? { id: row.route_id, name: row.route_name, slug: row.route_slug } : undefined,
+  }));
+}
+
+function footprintCountriesFrom(footprints: Record<string, any>[]) {
+  const seen = new Set<string>();
+  const countries: { code: string; name: string }[] = [];
+  for (const footprint of footprints) {
+    const place = footprint.place || {};
+    const code = String(place.country_code || '').trim().toUpperCase();
+    const name = String(place.country_name || '').trim();
+    const key = code || name.toLowerCase();
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    countries.push({ code, name });
+  }
+  return countries;
+}
+
+async function getPostBy(column: 'id' | 'display_id' | 'slug', value: string | number, track = false, postOnly = false, authed = false) {
   const typeSql = postOnly ? ` and type = 'post'` : '';
+  const statusSql = authed ? '' : ` and status = 'publish'`;
   const post = await one<Record<string, unknown>>(
-    `select * from ${table('posts')} where ${column} = $1 and status = 'publish'${typeSql} limit 1`,
+    `select * from ${table('posts')} where ${column} = $1${statusSql}${typeSql} limit 1`,
     [value],
   ).catch(() => null);
-  if (!post || post.status !== 'publish') return null;
+  if (!post || (!authed && post.status !== 'publish')) return null;
   if (track && typeof post.id === 'number') {
     await bumpPostView(post.id);
     post.view_count = Number(post.view_count || 0) + 1;
@@ -358,6 +438,7 @@ async function getPublishedPostBy(column: 'id' | 'display_id' | 'slug', value: s
     `select * from ${table('post_episodes')} where post_id = $1 order by sort_order asc, episode_no asc, id asc`,
     [post.id],
   ).catch(() => []);
+  const footprints = await postFootprints(Number(post.id));
   const authorUser = post.author_id
     ? await one<Record<string, unknown>>(
       `select id, username, email, nickname, avatar, bio, url, role, utterlog_avatar from ${table('users')} where id = $1`,
@@ -369,26 +450,28 @@ async function getPublishedPostBy(column: 'id' | 'display_id' | 'slug', value: s
     meta: post.meta || {},
     categories: metas.filter((m) => m.type === 'category'),
     tags: metas.filter((m) => m.type === 'tag'),
+    footprints,
+    footprint_countries: footprintCountriesFrom(footprints),
     episodes,
     author: authorUser ? await ownerPublicPayload(authorUser) : null,
   }, true);
 }
 
-export async function getPostBySlug(slug: string, track = false) {
-  return getPublishedPostBy('slug', slug, track);
+export async function getPostBySlug(slug: string, track = false, authed = false) {
+  return getPostBy('slug', slug, track, false, authed);
 }
 
-export async function getPostById(id: number, track = false) {
-  return getPublishedPostBy('id', id, track);
+export async function getPostById(id: number, track = false, authed = false) {
+  return getPostBy('id', id, track, false, authed);
 }
 
-export async function getPostByDisplayId(displayId: number, track = false) {
-  return getPublishedPostBy('display_id', displayId, track, true);
+export async function getPostByDisplayId(displayId: number, track = false, authed = false) {
+  return getPostBy('display_id', displayId, track, true, authed);
 }
 
-export async function listPostEpisodes(postId: number) {
+export async function listPostEpisodes(postId: number, authed = false) {
   const post = await one<{ status: string }>(`select status from ${table('posts')} where id = $1`, [postId]).catch(() => null);
-  if (!post || post.status !== 'publish') return null;
+  if (!post || (!authed && post.status !== 'publish')) return null;
   const episodes = await many<Record<string, unknown>>(
     `select * from ${table('post_episodes')} where post_id = $1 order by sort_order asc, episode_no asc, id asc`, [postId],
   ).catch(() => []);
@@ -421,9 +504,9 @@ export async function resolvePublicPostPath(pathname: string, track = false) {
   if (!structure || structure === '/posts/%postname%') return null;
   const target = parsePermalinkPath(pathname, structure);
   if (!target) return null;
-  if (target.displayId) return getPublishedPostBy('display_id', target.displayId, track, true);
-  if (target.id) return getPublishedPostBy('id', target.id, track, true);
-  if (target.slug) return getPublishedPostBy('slug', target.slug, track, true);
+  if (target.displayId) return getPostBy('display_id', target.displayId, track, true);
+  if (target.id) return getPostBy('id', target.id, track, true);
+  if (target.slug) return getPostBy('slug', target.slug, track, true);
   return null;
 }
 

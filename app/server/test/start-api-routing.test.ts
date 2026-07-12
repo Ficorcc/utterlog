@@ -119,6 +119,12 @@ describe('TanStack Start native API routing', () => {
       '/api/v1/posts/by-display-id/7', '/api/v1/posts/12/comments', '/api/v1/posts/12/episodes', '/api/v1/posts/12/navigation']) {
       expect(isStartNativeApiRequest(request(path, 'GET'))).toBe(true);
     }
+    expect(isStartNativeApiRequest(new Request('https://example.test/api/v1/posts/-3', {
+      headers: { authorization: 'Bearer admin-token' },
+    }))).toBe(true);
+    expect(isStartNativeApiRequest(new Request('https://example.test/api/v1/posts/12', {
+      headers: { authorization: 'Bearer admin-token' },
+    }))).toBe(true);
   });
 
   test('routes link applications and visitor comment edits to Start', () => {
