@@ -58,6 +58,11 @@ export async function handleBlogRequest(request: Request): Promise<Response | nu
       return htmlResponse(html, 200, method);
     }
 
+    if (startFrontendEnabled() && (pathname === '/login' || pathname.startsWith('/login/'))) {
+      const response = await handleStartRequest(request);
+      if (response) return response;
+    }
+
     if (pathname === '/login' || pathname.startsWith('/login/')) {
       const html = renderStandalonePage(createElement(LoginPage), '登录', 'login');
       return htmlResponse(html, 200, method);
