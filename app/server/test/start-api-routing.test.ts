@@ -88,6 +88,18 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/backup/utterlog-backup.zip', 'DELETE'))).toBe(true);
   });
 
+  test('routes extension management to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/themes', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/themes/upload', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/themes/Azure/activate', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/themes/custom', 'DELETE'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/plugins', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/plugins/upload', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/plugins/demo/activate', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/plugins/demo/deactivate', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/plugins/demo', 'DELETE'))).toBe(true);
+  });
+
   test('routes visitor weather to Start', () => {
     expect(isStartNativeApiRequest(request('/api/v1/visitor/weather', 'GET'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/visitor/weather', 'POST'))).toBe(false);

@@ -92,6 +92,11 @@ export function isStartNativeApiRequest(request: Request) {
   if (/^\/api\/v1\/backup\/(create|import)$/.test(url.pathname)) return method === 'POST';
   if (/^\/api\/v1\/backup\/download\/[^/]+\.zip$/.test(url.pathname)) return method === 'GET';
   if (/^\/api\/v1\/backup\/[^/]+\.zip$/.test(url.pathname)) return method === 'DELETE';
+  if (url.pathname === '/api/v1/themes' || url.pathname === '/api/v1/plugins') return method === 'GET';
+  if (url.pathname === '/api/v1/themes/upload' || url.pathname === '/api/v1/plugins/upload') return method === 'POST';
+  if (/^\/api\/v1\/themes\/[^/]+\/activate$/.test(url.pathname)) return method === 'POST';
+  if (/^\/api\/v1\/plugins\/[^/]+\/(activate|deactivate)$/.test(url.pathname)) return method === 'POST';
+  if (/^\/api\/v1\/(themes|plugins)\/[^/]+$/.test(url.pathname)) return method === 'DELETE';
   if (url.pathname === '/api/v1/visitor/weather') return method === 'GET';
   if (url.pathname === '/api/v1/coding') return method === 'GET';
   if (url.pathname === '/api/v1/media/upload-branding') return method === 'POST';
