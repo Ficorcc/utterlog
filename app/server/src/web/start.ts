@@ -67,6 +67,9 @@ export function isStartNativeApiRequest(request: Request) {
   const method = request.method.toUpperCase();
   const anonymousGet = method === 'GET' && !request.headers.get('authorization');
   if (url.pathname === '/api/v1/health') return method === 'GET';
+  if (url.pathname === '/api/v1/setup/status' || url.pathname === '/api/v1/install/status') return method === 'GET';
+  if (url.pathname === '/api/v1/setup/test-db' || url.pathname === '/api/v1/setup/save') return method === 'POST';
+  if (url.pathname === '/api/v1/install/create-admin' || url.pathname === '/api/v1/install/finish') return method === 'POST';
   if (url.pathname === '/api/v1/auth/login' || url.pathname === '/api/v1/auth/refresh' || url.pathname === '/api/v1/auth/logout') {
     return method === 'POST';
   }

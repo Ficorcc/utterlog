@@ -40,6 +40,9 @@ import { Route as ApiV1ThemesUploadRouteImport } from './routes/api/v1/themes/up
 import { Route as ApiV1ThemesIdRouteImport } from './routes/api/v1/themes/$id'
 import { Route as ApiV1TagsIdRouteImport } from './routes/api/v1/tags/$id'
 import { Route as ApiV1SystemStatusRouteImport } from './routes/api/v1/system/status'
+import { Route as ApiV1SetupTestDbRouteImport } from './routes/api/v1/setup/test-db'
+import { Route as ApiV1SetupStatusRouteImport } from './routes/api/v1/setup/status'
+import { Route as ApiV1SetupSaveRouteImport } from './routes/api/v1/setup/save'
 import { Route as ApiV1SecurityActionRouteImport } from './routes/api/v1/security/$action'
 import { Route as ApiV1ProfileSendCodeRouteImport } from './routes/api/v1/profile/send-code'
 import { Route as ApiV1PostsIdRouteImport } from './routes/api/v1/posts/$id'
@@ -63,6 +66,9 @@ import { Route as ApiV1MediaDownloadUrlRouteImport } from './routes/api/v1/media
 import { Route as ApiV1MediaIdRouteImport } from './routes/api/v1/media/$id'
 import { Route as ApiV1LocationReverseRouteImport } from './routes/api/v1/location/reverse'
 import { Route as ApiV1LinksApplyRouteImport } from './routes/api/v1/links/apply'
+import { Route as ApiV1InstallStatusRouteImport } from './routes/api/v1/install/status'
+import { Route as ApiV1InstallFinishRouteImport } from './routes/api/v1/install/finish'
+import { Route as ApiV1InstallCreateAdminRouteImport } from './routes/api/v1/install/create-admin'
 import { Route as ApiV1I18nLocalesRouteImport } from './routes/api/v1/i18n/locales'
 import { Route as ApiV1I18nCurrentRouteImport } from './routes/api/v1/i18n/current'
 import { Route as ApiV1I18nLocaleRouteImport } from './routes/api/v1/i18n/$locale'
@@ -264,6 +270,21 @@ const ApiV1SystemStatusRoute = ApiV1SystemStatusRouteImport.update({
   path: '/api/v1/system/status',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1SetupTestDbRoute = ApiV1SetupTestDbRouteImport.update({
+  id: '/api/v1/setup/test-db',
+  path: '/api/v1/setup/test-db',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1SetupStatusRoute = ApiV1SetupStatusRouteImport.update({
+  id: '/api/v1/setup/status',
+  path: '/api/v1/setup/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1SetupSaveRoute = ApiV1SetupSaveRouteImport.update({
+  id: '/api/v1/setup/save',
+  path: '/api/v1/setup/save',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1SecurityActionRoute = ApiV1SecurityActionRouteImport.update({
   id: '/api/v1/security/$action',
   path: '/api/v1/security/$action',
@@ -382,6 +403,21 @@ const ApiV1LocationReverseRoute = ApiV1LocationReverseRouteImport.update({
 const ApiV1LinksApplyRoute = ApiV1LinksApplyRouteImport.update({
   id: '/api/v1/links/apply',
   path: '/api/v1/links/apply',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1InstallStatusRoute = ApiV1InstallStatusRouteImport.update({
+  id: '/api/v1/install/status',
+  path: '/api/v1/install/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1InstallFinishRoute = ApiV1InstallFinishRouteImport.update({
+  id: '/api/v1/install/finish',
+  path: '/api/v1/install/finish',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1InstallCreateAdminRoute = ApiV1InstallCreateAdminRouteImport.update({
+  id: '/api/v1/install/create-admin',
+  path: '/api/v1/install/create-admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1I18nLocalesRoute = ApiV1I18nLocalesRouteImport.update({
@@ -658,6 +694,9 @@ export interface FileRoutesByFullPath {
   '/api/v1/i18n/$locale': typeof ApiV1I18nLocaleRoute
   '/api/v1/i18n/current': typeof ApiV1I18nCurrentRoute
   '/api/v1/i18n/locales': typeof ApiV1I18nLocalesRoute
+  '/api/v1/install/create-admin': typeof ApiV1InstallCreateAdminRoute
+  '/api/v1/install/finish': typeof ApiV1InstallFinishRoute
+  '/api/v1/install/status': typeof ApiV1InstallStatusRoute
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
   '/api/v1/location/reverse': typeof ApiV1LocationReverseRoute
   '/api/v1/media/$id': typeof ApiV1MediaIdRoute
@@ -681,6 +720,9 @@ export interface FileRoutesByFullPath {
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
   '/api/v1/security/$action': typeof ApiV1SecurityActionRoute
+  '/api/v1/setup/save': typeof ApiV1SetupSaveRoute
+  '/api/v1/setup/status': typeof ApiV1SetupStatusRoute
+  '/api/v1/setup/test-db': typeof ApiV1SetupTestDbRoute
   '/api/v1/system/status': typeof ApiV1SystemStatusRoute
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
   '/api/v1/themes/$id': typeof ApiV1ThemesIdRouteWithChildren
@@ -759,6 +801,9 @@ export interface FileRoutesByTo {
   '/api/v1/i18n/$locale': typeof ApiV1I18nLocaleRoute
   '/api/v1/i18n/current': typeof ApiV1I18nCurrentRoute
   '/api/v1/i18n/locales': typeof ApiV1I18nLocalesRoute
+  '/api/v1/install/create-admin': typeof ApiV1InstallCreateAdminRoute
+  '/api/v1/install/finish': typeof ApiV1InstallFinishRoute
+  '/api/v1/install/status': typeof ApiV1InstallStatusRoute
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
   '/api/v1/location/reverse': typeof ApiV1LocationReverseRoute
   '/api/v1/media/$id': typeof ApiV1MediaIdRoute
@@ -782,6 +827,9 @@ export interface FileRoutesByTo {
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
   '/api/v1/security/$action': typeof ApiV1SecurityActionRoute
+  '/api/v1/setup/save': typeof ApiV1SetupSaveRoute
+  '/api/v1/setup/status': typeof ApiV1SetupStatusRoute
+  '/api/v1/setup/test-db': typeof ApiV1SetupTestDbRoute
   '/api/v1/system/status': typeof ApiV1SystemStatusRoute
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
   '/api/v1/themes/$id': typeof ApiV1ThemesIdRouteWithChildren
@@ -861,6 +909,9 @@ export interface FileRoutesById {
   '/api/v1/i18n/$locale': typeof ApiV1I18nLocaleRoute
   '/api/v1/i18n/current': typeof ApiV1I18nCurrentRoute
   '/api/v1/i18n/locales': typeof ApiV1I18nLocalesRoute
+  '/api/v1/install/create-admin': typeof ApiV1InstallCreateAdminRoute
+  '/api/v1/install/finish': typeof ApiV1InstallFinishRoute
+  '/api/v1/install/status': typeof ApiV1InstallStatusRoute
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
   '/api/v1/location/reverse': typeof ApiV1LocationReverseRoute
   '/api/v1/media/$id': typeof ApiV1MediaIdRoute
@@ -884,6 +935,9 @@ export interface FileRoutesById {
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
   '/api/v1/security/$action': typeof ApiV1SecurityActionRoute
+  '/api/v1/setup/save': typeof ApiV1SetupSaveRoute
+  '/api/v1/setup/status': typeof ApiV1SetupStatusRoute
+  '/api/v1/setup/test-db': typeof ApiV1SetupTestDbRoute
   '/api/v1/system/status': typeof ApiV1SystemStatusRoute
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
   '/api/v1/themes/$id': typeof ApiV1ThemesIdRouteWithChildren
@@ -964,6 +1018,9 @@ export interface FileRouteTypes {
     | '/api/v1/i18n/$locale'
     | '/api/v1/i18n/current'
     | '/api/v1/i18n/locales'
+    | '/api/v1/install/create-admin'
+    | '/api/v1/install/finish'
+    | '/api/v1/install/status'
     | '/api/v1/links/apply'
     | '/api/v1/location/reverse'
     | '/api/v1/media/$id'
@@ -987,6 +1044,9 @@ export interface FileRouteTypes {
     | '/api/v1/posts/$id'
     | '/api/v1/profile/send-code'
     | '/api/v1/security/$action'
+    | '/api/v1/setup/save'
+    | '/api/v1/setup/status'
+    | '/api/v1/setup/test-db'
     | '/api/v1/system/status'
     | '/api/v1/tags/$id'
     | '/api/v1/themes/$id'
@@ -1065,6 +1125,9 @@ export interface FileRouteTypes {
     | '/api/v1/i18n/$locale'
     | '/api/v1/i18n/current'
     | '/api/v1/i18n/locales'
+    | '/api/v1/install/create-admin'
+    | '/api/v1/install/finish'
+    | '/api/v1/install/status'
     | '/api/v1/links/apply'
     | '/api/v1/location/reverse'
     | '/api/v1/media/$id'
@@ -1088,6 +1151,9 @@ export interface FileRouteTypes {
     | '/api/v1/posts/$id'
     | '/api/v1/profile/send-code'
     | '/api/v1/security/$action'
+    | '/api/v1/setup/save'
+    | '/api/v1/setup/status'
+    | '/api/v1/setup/test-db'
     | '/api/v1/system/status'
     | '/api/v1/tags/$id'
     | '/api/v1/themes/$id'
@@ -1166,6 +1232,9 @@ export interface FileRouteTypes {
     | '/api/v1/i18n/$locale'
     | '/api/v1/i18n/current'
     | '/api/v1/i18n/locales'
+    | '/api/v1/install/create-admin'
+    | '/api/v1/install/finish'
+    | '/api/v1/install/status'
     | '/api/v1/links/apply'
     | '/api/v1/location/reverse'
     | '/api/v1/media/$id'
@@ -1189,6 +1258,9 @@ export interface FileRouteTypes {
     | '/api/v1/posts/$id'
     | '/api/v1/profile/send-code'
     | '/api/v1/security/$action'
+    | '/api/v1/setup/save'
+    | '/api/v1/setup/status'
+    | '/api/v1/setup/test-db'
     | '/api/v1/system/status'
     | '/api/v1/tags/$id'
     | '/api/v1/themes/$id'
@@ -1266,6 +1338,9 @@ export interface RootRouteChildren {
   ApiV1I18nLocaleRoute: typeof ApiV1I18nLocaleRoute
   ApiV1I18nCurrentRoute: typeof ApiV1I18nCurrentRoute
   ApiV1I18nLocalesRoute: typeof ApiV1I18nLocalesRoute
+  ApiV1InstallCreateAdminRoute: typeof ApiV1InstallCreateAdminRoute
+  ApiV1InstallFinishRoute: typeof ApiV1InstallFinishRoute
+  ApiV1InstallStatusRoute: typeof ApiV1InstallStatusRoute
   ApiV1LinksApplyRoute: typeof ApiV1LinksApplyRoute
   ApiV1LocationReverseRoute: typeof ApiV1LocationReverseRoute
   ApiV1MediaIdRoute: typeof ApiV1MediaIdRoute
@@ -1287,6 +1362,9 @@ export interface RootRouteChildren {
   ApiV1PluginsUploadRoute: typeof ApiV1PluginsUploadRoute
   ApiV1ProfileSendCodeRoute: typeof ApiV1ProfileSendCodeRoute
   ApiV1SecurityActionRoute: typeof ApiV1SecurityActionRoute
+  ApiV1SetupSaveRoute: typeof ApiV1SetupSaveRoute
+  ApiV1SetupStatusRoute: typeof ApiV1SetupStatusRoute
+  ApiV1SetupTestDbRoute: typeof ApiV1SetupTestDbRoute
   ApiV1SystemStatusRoute: typeof ApiV1SystemStatusRoute
   ApiV1ThemesIdRoute: typeof ApiV1ThemesIdRouteWithChildren
   ApiV1ThemesUploadRoute: typeof ApiV1ThemesUploadRoute
@@ -1534,6 +1612,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1SystemStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/setup/test-db': {
+      id: '/api/v1/setup/test-db'
+      path: '/api/v1/setup/test-db'
+      fullPath: '/api/v1/setup/test-db'
+      preLoaderRoute: typeof ApiV1SetupTestDbRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/setup/status': {
+      id: '/api/v1/setup/status'
+      path: '/api/v1/setup/status'
+      fullPath: '/api/v1/setup/status'
+      preLoaderRoute: typeof ApiV1SetupStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/setup/save': {
+      id: '/api/v1/setup/save'
+      path: '/api/v1/setup/save'
+      fullPath: '/api/v1/setup/save'
+      preLoaderRoute: typeof ApiV1SetupSaveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/security/$action': {
       id: '/api/v1/security/$action'
       path: '/api/v1/security/$action'
@@ -1693,6 +1792,27 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/links/apply'
       fullPath: '/api/v1/links/apply'
       preLoaderRoute: typeof ApiV1LinksApplyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/install/status': {
+      id: '/api/v1/install/status'
+      path: '/api/v1/install/status'
+      fullPath: '/api/v1/install/status'
+      preLoaderRoute: typeof ApiV1InstallStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/install/finish': {
+      id: '/api/v1/install/finish'
+      path: '/api/v1/install/finish'
+      fullPath: '/api/v1/install/finish'
+      preLoaderRoute: typeof ApiV1InstallFinishRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/install/create-admin': {
+      id: '/api/v1/install/create-admin'
+      path: '/api/v1/install/create-admin'
+      fullPath: '/api/v1/install/create-admin'
+      preLoaderRoute: typeof ApiV1InstallCreateAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/i18n/locales': {
@@ -2191,6 +2311,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1I18nLocaleRoute: ApiV1I18nLocaleRoute,
   ApiV1I18nCurrentRoute: ApiV1I18nCurrentRoute,
   ApiV1I18nLocalesRoute: ApiV1I18nLocalesRoute,
+  ApiV1InstallCreateAdminRoute: ApiV1InstallCreateAdminRoute,
+  ApiV1InstallFinishRoute: ApiV1InstallFinishRoute,
+  ApiV1InstallStatusRoute: ApiV1InstallStatusRoute,
   ApiV1LinksApplyRoute: ApiV1LinksApplyRoute,
   ApiV1LocationReverseRoute: ApiV1LocationReverseRoute,
   ApiV1MediaIdRoute: ApiV1MediaIdRoute,
@@ -2212,6 +2335,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1PluginsUploadRoute: ApiV1PluginsUploadRoute,
   ApiV1ProfileSendCodeRoute: ApiV1ProfileSendCodeRoute,
   ApiV1SecurityActionRoute: ApiV1SecurityActionRoute,
+  ApiV1SetupSaveRoute: ApiV1SetupSaveRoute,
+  ApiV1SetupStatusRoute: ApiV1SetupStatusRoute,
+  ApiV1SetupTestDbRoute: ApiV1SetupTestDbRoute,
   ApiV1SystemStatusRoute: ApiV1SystemStatusRoute,
   ApiV1ThemesIdRoute: ApiV1ThemesIdRouteWithChildren,
   ApiV1ThemesUploadRoute: ApiV1ThemesUploadRoute,

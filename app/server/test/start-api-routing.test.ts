@@ -16,6 +16,15 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/options/test-email', 'POST'))).toBe(true);
   });
 
+  test('routes setup and installation APIs to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/setup/status', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/setup/test-db', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/setup/save', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/install/status', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/install/create-admin', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/install/finish', 'POST'))).toBe(true);
+  });
+
   test('routes footprint management and reverse geocoding to Start', () => {
     expect(isStartNativeApiRequest(request('/api/v1/admin/footprints', 'GET'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/admin/footprints/places', 'GET'))).toBe(true);
