@@ -8,6 +8,9 @@ import {
 } from '@tanstack/react-router';
 import { blogThemeAccentAttr } from '@shared/blog-theme';
 import type { ThemeContextData } from '@/lib/theme-context';
+import { getThemeComponents } from '@/lib/theme';
+import { DefaultNotFoundPage } from '@/components/blog/defaults';
+import { StartThemeShell } from '../components/StartThemeShell';
 import { loadStartDocument } from '../server/document';
 import { startDocumentLinks } from '../lib/document';
 
@@ -26,14 +29,24 @@ export const Route = createRootRoute({
     links: startDocumentLinks(loaderData),
   }),
   component: RootComponent,
-  notFoundComponent: () => (
+  notFoundComponent: StartNotFound,
+});
+
+function StartNotFound() {
+  const ctx = Route.useLoaderData();
+  if (ctx) {
+    const theme = getThemeComponents(ctx.theme.name);
+    const NotFoundPage = theme.NotFoundPage || DefaultNotFoundPage;
+    return <StartThemeShell ctx={ctx}><NotFoundPage /></StartThemeShell>;
+  }
+  return (
     <main className="start-shell">
       <p className="eyebrow">404</p>
       <h1>页面不存在</h1>
       <Link to="/" className="text-link">返回首页</Link>
     </main>
-  ),
-});
+  );
+}
 
 function RootComponent() {
   const ctx = Route.useLoaderData();

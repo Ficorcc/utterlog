@@ -1,5 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, notFound } from '@tanstack/react-router';
 import { StartLegacyPage } from '../components/StartLegacyPage';
+import { startRouteMeta } from '../lib/route-meta';
 import { loadStartLegacyRoute } from '../server/legacy';
 
 export const Route = createFileRoute('/$')({
@@ -12,9 +13,19 @@ export const Route = createFileRoute('/$')({
     return out;
   },
   loaderDeps: ({ search }) => search,
-  loader: ({ params, deps }) => {
+  loader: async ({ params, deps }) => {
     const splat = String(params._splat || '');
-    return loadStartLegacyRoute({ data: { pathname: `/${splat}`, search: deps } });
+    const data = await loadStartLegacyRoute({ data: { pathname: `/${splat}`, search: deps } });
+    if (data.kind === 'not-found') throw notFound();
+    return data;
+  },
+  head: ({ loaderData }) => {
+    if (!loaderData) return {};
+    const meta = startRouteMeta(loaderData);
+    return { meta: [
+      { title: meta.title },
+      ...(meta.description ? [{ name: 'description', content: meta.description }] : []),
+    ] };
   },
   component: StartCatchAll,
 });

@@ -1,6 +1,7 @@
 import { Link, createFileRoute, notFound } from '@tanstack/react-router';
 import { getThemeComponents } from '@/lib/theme';
 import { StartThemeShell } from '../../components/StartThemeShell';
+import { startRouteMeta } from '../../lib/route-meta';
 import { loadStartPost } from '../../server/posts';
 
 export const Route = createFileRoute('/posts/$slug')({
@@ -8,6 +9,14 @@ export const Route = createFileRoute('/posts/$slug')({
     const data = await loadStartPost({ data: { slug: params.slug } });
     if (!data.post) throw notFound();
     return data;
+  },
+  head: ({ loaderData }) => {
+    if (!loaderData?.post) return {};
+    const meta = startRouteMeta({ kind: 'post', ctx: loaderData.ctx, post: loaderData.post, options: loaderData.ctx?.options || {} });
+    return { meta: [
+      { title: meta.title },
+      ...(meta.description ? [{ name: 'description', content: meta.description }] : []),
+    ] };
   },
   component: StartPostPage,
 });

@@ -1,11 +1,6 @@
+import { lazy, Suspense } from 'react';
 import { Link } from '@tanstack/react-router';
 import { getThemeComponents } from '@/lib/theme';
-import FootprintsClient from '@/app/(blog)/footprints/FootprintsClient';
-import MomentsClient from '@/app/(blog)/moments/MomentsClient';
-import LinksClient from '@/app/(blog)/links/LinksClient';
-import FeedsClient from '@/app/(blog)/feeds/FeedsClient';
-import AlbumsClient from '@/app/(blog)/albums/AlbumsClient';
-import MusicClient from '@/app/(blog)/music/MusicClient';
 import PageTitle from '@/components/blog/PageTitle';
 import PostLink from '@/components/blog/PostLink';
 import {
@@ -20,6 +15,13 @@ import { datePartsInTimeZone, formatMonthDayInTimeZone } from '@/lib/timezone';
 import { postDateInput } from '@/lib/post-date';
 import type { StartLegacyRouteData } from '../server/legacy';
 import { StartThemeShell } from './StartThemeShell';
+
+const FootprintsClient = lazy(() => import('@/app/(blog)/footprints/FootprintsClient'));
+const MomentsClient = lazy(() => import('@/app/(blog)/moments/MomentsClient'));
+const LinksClient = lazy(() => import('@/app/(blog)/links/LinksClient'));
+const FeedsClient = lazy(() => import('@/app/(blog)/feeds/FeedsClient'));
+const AlbumsClient = lazy(() => import('@/app/(blog)/albums/AlbumsClient'));
+const MusicClient = lazy(() => import('@/app/(blog)/music/MusicClient'));
 
 const shelfMeta = {
   movies: { title: '电影', subtitle: '我看过的', icon: 'fa-sharp fa-light fa-film', unit: '部电影', imageRatio: '2/3' },
@@ -38,8 +40,9 @@ const filmTabs = [
 ];
 
 function Shell({ data, children }: { data: StartLegacyRouteData; children: React.ReactNode }) {
-  if ('ctx' in data && data.ctx) return <StartThemeShell ctx={data.ctx}>{children}</StartThemeShell>;
-  return <main className="start-shell">{children}</main>;
+  const content = <Suspense fallback={<div style={{ minHeight: '60vh' }} aria-hidden="true" />}>{children}</Suspense>;
+  if ('ctx' in data && data.ctx) return <StartThemeShell ctx={data.ctx}>{content}</StartThemeShell>;
+  return <main className="start-shell">{content}</main>;
 }
 
 function formatSearchDate(post: any, timeZone: string) {
