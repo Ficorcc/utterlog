@@ -61,6 +61,7 @@ import { Route as ApiV1MediaStatsRouteImport } from './routes/api/v1/media/stats
 import { Route as ApiV1MediaExifRouteImport } from './routes/api/v1/media/exif'
 import { Route as ApiV1MediaDownloadUrlRouteImport } from './routes/api/v1/media/download-url'
 import { Route as ApiV1MediaIdRouteImport } from './routes/api/v1/media/$id'
+import { Route as ApiV1LocationReverseRouteImport } from './routes/api/v1/location/reverse'
 import { Route as ApiV1LinksApplyRouteImport } from './routes/api/v1/links/apply'
 import { Route as ApiV1I18nLocalesRouteImport } from './routes/api/v1/i18n/locales'
 import { Route as ApiV1I18nCurrentRouteImport } from './routes/api/v1/i18n/current'
@@ -84,6 +85,7 @@ import { Route as ApiV1AnalyticsActionRouteImport } from './routes/api/v1/analyt
 import { Route as ApiV1AdminStatsRouteImport } from './routes/api/v1/admin/stats'
 import { Route as ApiV1ResourceIdRouteImport } from './routes/api/v1/$resource/$id'
 import { Route as ApiV1PublicAlbumsIndexRouteImport } from './routes/api/v1/public/albums/index'
+import { Route as ApiV1AdminFootprintsIndexRouteImport } from './routes/api/v1/admin/footprints/index'
 import { Route as ApiV1ThemesIdActivateRouteImport } from './routes/api/v1/themes/$id/activate'
 import { Route as ApiV1PublicAlbumsIdRouteImport } from './routes/api/v1/public/albums/$id'
 import { Route as ApiV1PostsSlugSlugRouteImport } from './routes/api/v1/posts/slug/$slug'
@@ -101,6 +103,9 @@ import { Route as ApiV1BackupDownloadFilenameRouteImport } from './routes/api/v1
 import { Route as ApiV1AuthTotpActionRouteImport } from './routes/api/v1/auth/totp/$action'
 import { Route as ApiV1AuthPasskeyAvailableRouteImport } from './routes/api/v1/auth/passkey/available'
 import { Route as ApiV1AlbumsIdPhotosRouteImport } from './routes/api/v1/albums/$id/photos'
+import { Route as ApiV1AdminFootprintsPlacesRouteImport } from './routes/api/v1/admin/footprints/places'
+import { Route as ApiV1AdminFootprintsGeocodeRouteImport } from './routes/api/v1/admin/footprints/geocode'
+import { Route as ApiV1AdminFootprintsIdRouteImport } from './routes/api/v1/admin/footprints/$id'
 import { Route as ApiV1AuthPasskeyFlowActionRouteImport } from './routes/api/v1/auth/passkey/$flow/$action'
 import { Route as ApiV1AlbumsIdPhotosMediaIdRouteImport } from './routes/api/v1/albums/$id/photos/$mediaId'
 
@@ -369,6 +374,11 @@ const ApiV1MediaIdRoute = ApiV1MediaIdRouteImport.update({
   path: '/api/v1/media/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1LocationReverseRoute = ApiV1LocationReverseRouteImport.update({
+  id: '/api/v1/location/reverse',
+  path: '/api/v1/location/reverse',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1LinksApplyRoute = ApiV1LinksApplyRouteImport.update({
   id: '/api/v1/links/apply',
   path: '/api/v1/links/apply',
@@ -485,6 +495,12 @@ const ApiV1PublicAlbumsIndexRoute = ApiV1PublicAlbumsIndexRouteImport.update({
   path: '/api/v1/public/albums/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1AdminFootprintsIndexRoute =
+  ApiV1AdminFootprintsIndexRouteImport.update({
+    id: '/api/v1/admin/footprints/',
+    path: '/api/v1/admin/footprints/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiV1ThemesIdActivateRoute = ApiV1ThemesIdActivateRouteImport.update({
   id: '/activate',
   path: '/activate',
@@ -574,6 +590,23 @@ const ApiV1AlbumsIdPhotosRoute = ApiV1AlbumsIdPhotosRouteImport.update({
   path: '/api/v1/albums/$id/photos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1AdminFootprintsPlacesRoute =
+  ApiV1AdminFootprintsPlacesRouteImport.update({
+    id: '/api/v1/admin/footprints/places',
+    path: '/api/v1/admin/footprints/places',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1AdminFootprintsGeocodeRoute =
+  ApiV1AdminFootprintsGeocodeRouteImport.update({
+    id: '/api/v1/admin/footprints/geocode',
+    path: '/api/v1/admin/footprints/geocode',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1AdminFootprintsIdRoute = ApiV1AdminFootprintsIdRouteImport.update({
+  id: '/api/v1/admin/footprints/$id',
+  path: '/api/v1/admin/footprints/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1AuthPasskeyFlowActionRoute =
   ApiV1AuthPasskeyFlowActionRouteImport.update({
     id: '/api/v1/auth/passkey/$flow/$action',
@@ -626,6 +659,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/i18n/current': typeof ApiV1I18nCurrentRoute
   '/api/v1/i18n/locales': typeof ApiV1I18nLocalesRoute
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
+  '/api/v1/location/reverse': typeof ApiV1LocationReverseRoute
   '/api/v1/media/$id': typeof ApiV1MediaIdRoute
   '/api/v1/media/download-url': typeof ApiV1MediaDownloadUrlRoute
   '/api/v1/media/exif': typeof ApiV1MediaExifRoute
@@ -662,6 +696,9 @@ export interface FileRoutesByFullPath {
   '/api/v1/plugins/': typeof ApiV1PluginsIndexRoute
   '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
   '/api/v1/themes/': typeof ApiV1ThemesIndexRoute
+  '/api/v1/admin/footprints/$id': typeof ApiV1AdminFootprintsIdRoute
+  '/api/v1/admin/footprints/geocode': typeof ApiV1AdminFootprintsGeocodeRoute
+  '/api/v1/admin/footprints/places': typeof ApiV1AdminFootprintsPlacesRoute
   '/api/v1/albums/$id/photos': typeof ApiV1AlbumsIdPhotosRouteWithChildren
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
   '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
@@ -679,6 +716,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/posts/slug/$slug': typeof ApiV1PostsSlugSlugRoute
   '/api/v1/public/albums/$id': typeof ApiV1PublicAlbumsIdRoute
   '/api/v1/themes/$id/activate': typeof ApiV1ThemesIdActivateRoute
+  '/api/v1/admin/footprints/': typeof ApiV1AdminFootprintsIndexRoute
   '/api/v1/public/albums/': typeof ApiV1PublicAlbumsIndexRoute
   '/api/v1/albums/$id/photos/$mediaId': typeof ApiV1AlbumsIdPhotosMediaIdRoute
   '/api/v1/auth/passkey/$flow/$action': typeof ApiV1AuthPasskeyFlowActionRoute
@@ -722,6 +760,7 @@ export interface FileRoutesByTo {
   '/api/v1/i18n/current': typeof ApiV1I18nCurrentRoute
   '/api/v1/i18n/locales': typeof ApiV1I18nLocalesRoute
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
+  '/api/v1/location/reverse': typeof ApiV1LocationReverseRoute
   '/api/v1/media/$id': typeof ApiV1MediaIdRoute
   '/api/v1/media/download-url': typeof ApiV1MediaDownloadUrlRoute
   '/api/v1/media/exif': typeof ApiV1MediaExifRoute
@@ -758,6 +797,9 @@ export interface FileRoutesByTo {
   '/api/v1/plugins': typeof ApiV1PluginsIndexRoute
   '/api/v1/profile': typeof ApiV1ProfileIndexRoute
   '/api/v1/themes': typeof ApiV1ThemesIndexRoute
+  '/api/v1/admin/footprints/$id': typeof ApiV1AdminFootprintsIdRoute
+  '/api/v1/admin/footprints/geocode': typeof ApiV1AdminFootprintsGeocodeRoute
+  '/api/v1/admin/footprints/places': typeof ApiV1AdminFootprintsPlacesRoute
   '/api/v1/albums/$id/photos': typeof ApiV1AlbumsIdPhotosRouteWithChildren
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
   '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
@@ -775,6 +817,7 @@ export interface FileRoutesByTo {
   '/api/v1/posts/slug/$slug': typeof ApiV1PostsSlugSlugRoute
   '/api/v1/public/albums/$id': typeof ApiV1PublicAlbumsIdRoute
   '/api/v1/themes/$id/activate': typeof ApiV1ThemesIdActivateRoute
+  '/api/v1/admin/footprints': typeof ApiV1AdminFootprintsIndexRoute
   '/api/v1/public/albums': typeof ApiV1PublicAlbumsIndexRoute
   '/api/v1/albums/$id/photos/$mediaId': typeof ApiV1AlbumsIdPhotosMediaIdRoute
   '/api/v1/auth/passkey/$flow/$action': typeof ApiV1AuthPasskeyFlowActionRoute
@@ -819,6 +862,7 @@ export interface FileRoutesById {
   '/api/v1/i18n/current': typeof ApiV1I18nCurrentRoute
   '/api/v1/i18n/locales': typeof ApiV1I18nLocalesRoute
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
+  '/api/v1/location/reverse': typeof ApiV1LocationReverseRoute
   '/api/v1/media/$id': typeof ApiV1MediaIdRoute
   '/api/v1/media/download-url': typeof ApiV1MediaDownloadUrlRoute
   '/api/v1/media/exif': typeof ApiV1MediaExifRoute
@@ -855,6 +899,9 @@ export interface FileRoutesById {
   '/api/v1/plugins/': typeof ApiV1PluginsIndexRoute
   '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
   '/api/v1/themes/': typeof ApiV1ThemesIndexRoute
+  '/api/v1/admin/footprints/$id': typeof ApiV1AdminFootprintsIdRoute
+  '/api/v1/admin/footprints/geocode': typeof ApiV1AdminFootprintsGeocodeRoute
+  '/api/v1/admin/footprints/places': typeof ApiV1AdminFootprintsPlacesRoute
   '/api/v1/albums/$id/photos': typeof ApiV1AlbumsIdPhotosRouteWithChildren
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
   '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
@@ -872,6 +919,7 @@ export interface FileRoutesById {
   '/api/v1/posts/slug/$slug': typeof ApiV1PostsSlugSlugRoute
   '/api/v1/public/albums/$id': typeof ApiV1PublicAlbumsIdRoute
   '/api/v1/themes/$id/activate': typeof ApiV1ThemesIdActivateRoute
+  '/api/v1/admin/footprints/': typeof ApiV1AdminFootprintsIndexRoute
   '/api/v1/public/albums/': typeof ApiV1PublicAlbumsIndexRoute
   '/api/v1/albums/$id/photos/$mediaId': typeof ApiV1AlbumsIdPhotosMediaIdRoute
   '/api/v1/auth/passkey/$flow/$action': typeof ApiV1AuthPasskeyFlowActionRoute
@@ -917,6 +965,7 @@ export interface FileRouteTypes {
     | '/api/v1/i18n/current'
     | '/api/v1/i18n/locales'
     | '/api/v1/links/apply'
+    | '/api/v1/location/reverse'
     | '/api/v1/media/$id'
     | '/api/v1/media/download-url'
     | '/api/v1/media/exif'
@@ -953,6 +1002,9 @@ export interface FileRouteTypes {
     | '/api/v1/plugins/'
     | '/api/v1/profile/'
     | '/api/v1/themes/'
+    | '/api/v1/admin/footprints/$id'
+    | '/api/v1/admin/footprints/geocode'
+    | '/api/v1/admin/footprints/places'
     | '/api/v1/albums/$id/photos'
     | '/api/v1/auth/passkey/available'
     | '/api/v1/auth/totp/$action'
@@ -970,6 +1022,7 @@ export interface FileRouteTypes {
     | '/api/v1/posts/slug/$slug'
     | '/api/v1/public/albums/$id'
     | '/api/v1/themes/$id/activate'
+    | '/api/v1/admin/footprints/'
     | '/api/v1/public/albums/'
     | '/api/v1/albums/$id/photos/$mediaId'
     | '/api/v1/auth/passkey/$flow/$action'
@@ -1013,6 +1066,7 @@ export interface FileRouteTypes {
     | '/api/v1/i18n/current'
     | '/api/v1/i18n/locales'
     | '/api/v1/links/apply'
+    | '/api/v1/location/reverse'
     | '/api/v1/media/$id'
     | '/api/v1/media/download-url'
     | '/api/v1/media/exif'
@@ -1049,6 +1103,9 @@ export interface FileRouteTypes {
     | '/api/v1/plugins'
     | '/api/v1/profile'
     | '/api/v1/themes'
+    | '/api/v1/admin/footprints/$id'
+    | '/api/v1/admin/footprints/geocode'
+    | '/api/v1/admin/footprints/places'
     | '/api/v1/albums/$id/photos'
     | '/api/v1/auth/passkey/available'
     | '/api/v1/auth/totp/$action'
@@ -1066,6 +1123,7 @@ export interface FileRouteTypes {
     | '/api/v1/posts/slug/$slug'
     | '/api/v1/public/albums/$id'
     | '/api/v1/themes/$id/activate'
+    | '/api/v1/admin/footprints'
     | '/api/v1/public/albums'
     | '/api/v1/albums/$id/photos/$mediaId'
     | '/api/v1/auth/passkey/$flow/$action'
@@ -1109,6 +1167,7 @@ export interface FileRouteTypes {
     | '/api/v1/i18n/current'
     | '/api/v1/i18n/locales'
     | '/api/v1/links/apply'
+    | '/api/v1/location/reverse'
     | '/api/v1/media/$id'
     | '/api/v1/media/download-url'
     | '/api/v1/media/exif'
@@ -1145,6 +1204,9 @@ export interface FileRouteTypes {
     | '/api/v1/plugins/'
     | '/api/v1/profile/'
     | '/api/v1/themes/'
+    | '/api/v1/admin/footprints/$id'
+    | '/api/v1/admin/footprints/geocode'
+    | '/api/v1/admin/footprints/places'
     | '/api/v1/albums/$id/photos'
     | '/api/v1/auth/passkey/available'
     | '/api/v1/auth/totp/$action'
@@ -1162,6 +1224,7 @@ export interface FileRouteTypes {
     | '/api/v1/posts/slug/$slug'
     | '/api/v1/public/albums/$id'
     | '/api/v1/themes/$id/activate'
+    | '/api/v1/admin/footprints/'
     | '/api/v1/public/albums/'
     | '/api/v1/albums/$id/photos/$mediaId'
     | '/api/v1/auth/passkey/$flow/$action'
@@ -1204,6 +1267,7 @@ export interface RootRouteChildren {
   ApiV1I18nCurrentRoute: typeof ApiV1I18nCurrentRoute
   ApiV1I18nLocalesRoute: typeof ApiV1I18nLocalesRoute
   ApiV1LinksApplyRoute: typeof ApiV1LinksApplyRoute
+  ApiV1LocationReverseRoute: typeof ApiV1LocationReverseRoute
   ApiV1MediaIdRoute: typeof ApiV1MediaIdRoute
   ApiV1MediaDownloadUrlRoute: typeof ApiV1MediaDownloadUrlRoute
   ApiV1MediaExifRoute: typeof ApiV1MediaExifRoute
@@ -1237,12 +1301,16 @@ export interface RootRouteChildren {
   ApiV1PluginsIndexRoute: typeof ApiV1PluginsIndexRoute
   ApiV1ProfileIndexRoute: typeof ApiV1ProfileIndexRoute
   ApiV1ThemesIndexRoute: typeof ApiV1ThemesIndexRoute
+  ApiV1AdminFootprintsIdRoute: typeof ApiV1AdminFootprintsIdRoute
+  ApiV1AdminFootprintsGeocodeRoute: typeof ApiV1AdminFootprintsGeocodeRoute
+  ApiV1AdminFootprintsPlacesRoute: typeof ApiV1AdminFootprintsPlacesRoute
   ApiV1AlbumsIdPhotosRoute: typeof ApiV1AlbumsIdPhotosRouteWithChildren
   ApiV1AuthPasskeyAvailableRoute: typeof ApiV1AuthPasskeyAvailableRoute
   ApiV1AuthTotpActionRoute: typeof ApiV1AuthTotpActionRoute
   ApiV1BackupDownloadFilenameRoute: typeof ApiV1BackupDownloadFilenameRoute
   ApiV1PlaylistsIdSongsRoute: typeof ApiV1PlaylistsIdSongsRoute
   ApiV1PublicAlbumsIdRoute: typeof ApiV1PublicAlbumsIdRoute
+  ApiV1AdminFootprintsIndexRoute: typeof ApiV1AdminFootprintsIndexRoute
   ApiV1PublicAlbumsIndexRoute: typeof ApiV1PublicAlbumsIndexRoute
   ApiV1AuthPasskeyFlowActionRoute: typeof ApiV1AuthPasskeyFlowActionRoute
 }
@@ -1613,6 +1681,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1MediaIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/location/reverse': {
+      id: '/api/v1/location/reverse'
+      path: '/api/v1/location/reverse'
+      fullPath: '/api/v1/location/reverse'
+      preLoaderRoute: typeof ApiV1LocationReverseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/links/apply': {
       id: '/api/v1/links/apply'
       path: '/api/v1/links/apply'
@@ -1774,6 +1849,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1PublicAlbumsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/admin/footprints/': {
+      id: '/api/v1/admin/footprints/'
+      path: '/api/v1/admin/footprints'
+      fullPath: '/api/v1/admin/footprints/'
+      preLoaderRoute: typeof ApiV1AdminFootprintsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/themes/$id/activate': {
       id: '/api/v1/themes/$id/activate'
       path: '/activate'
@@ -1891,6 +1973,27 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/albums/$id/photos'
       fullPath: '/api/v1/albums/$id/photos'
       preLoaderRoute: typeof ApiV1AlbumsIdPhotosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/admin/footprints/places': {
+      id: '/api/v1/admin/footprints/places'
+      path: '/api/v1/admin/footprints/places'
+      fullPath: '/api/v1/admin/footprints/places'
+      preLoaderRoute: typeof ApiV1AdminFootprintsPlacesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/admin/footprints/geocode': {
+      id: '/api/v1/admin/footprints/geocode'
+      path: '/api/v1/admin/footprints/geocode'
+      fullPath: '/api/v1/admin/footprints/geocode'
+      preLoaderRoute: typeof ApiV1AdminFootprintsGeocodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/admin/footprints/$id': {
+      id: '/api/v1/admin/footprints/$id'
+      path: '/api/v1/admin/footprints/$id'
+      fullPath: '/api/v1/admin/footprints/$id'
+      preLoaderRoute: typeof ApiV1AdminFootprintsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/auth/passkey/$flow/$action': {
@@ -2089,6 +2192,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1I18nCurrentRoute: ApiV1I18nCurrentRoute,
   ApiV1I18nLocalesRoute: ApiV1I18nLocalesRoute,
   ApiV1LinksApplyRoute: ApiV1LinksApplyRoute,
+  ApiV1LocationReverseRoute: ApiV1LocationReverseRoute,
   ApiV1MediaIdRoute: ApiV1MediaIdRoute,
   ApiV1MediaDownloadUrlRoute: ApiV1MediaDownloadUrlRoute,
   ApiV1MediaExifRoute: ApiV1MediaExifRoute,
@@ -2122,12 +2226,16 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1PluginsIndexRoute: ApiV1PluginsIndexRoute,
   ApiV1ProfileIndexRoute: ApiV1ProfileIndexRoute,
   ApiV1ThemesIndexRoute: ApiV1ThemesIndexRoute,
+  ApiV1AdminFootprintsIdRoute: ApiV1AdminFootprintsIdRoute,
+  ApiV1AdminFootprintsGeocodeRoute: ApiV1AdminFootprintsGeocodeRoute,
+  ApiV1AdminFootprintsPlacesRoute: ApiV1AdminFootprintsPlacesRoute,
   ApiV1AlbumsIdPhotosRoute: ApiV1AlbumsIdPhotosRouteWithChildren,
   ApiV1AuthPasskeyAvailableRoute: ApiV1AuthPasskeyAvailableRoute,
   ApiV1AuthTotpActionRoute: ApiV1AuthTotpActionRoute,
   ApiV1BackupDownloadFilenameRoute: ApiV1BackupDownloadFilenameRoute,
   ApiV1PlaylistsIdSongsRoute: ApiV1PlaylistsIdSongsRoute,
   ApiV1PublicAlbumsIdRoute: ApiV1PublicAlbumsIdRoute,
+  ApiV1AdminFootprintsIndexRoute: ApiV1AdminFootprintsIndexRoute,
   ApiV1PublicAlbumsIndexRoute: ApiV1PublicAlbumsIndexRoute,
   ApiV1AuthPasskeyFlowActionRoute: ApiV1AuthPasskeyFlowActionRoute,
 }

@@ -16,6 +16,14 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/options/test-email', 'POST'))).toBe(true);
   });
 
+  test('routes footprint management and reverse geocoding to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/admin/footprints', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/admin/footprints/places', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/admin/footprints/geocode', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/admin/footprints/12', 'PUT'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/location/reverse?lat=1&lng=2', 'GET'))).toBe(true);
+  });
+
   test('routes migrated comment mutations to Start', () => {
     expect(isStartNativeApiRequest(request('/api/v1/comments/batch', 'POST'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/comments/42', 'PUT'))).toBe(true);

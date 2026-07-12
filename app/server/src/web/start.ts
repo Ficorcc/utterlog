@@ -100,6 +100,10 @@ export function isStartNativeApiRequest(request: Request) {
   if (/^\/api\/v1\/(themes|plugins)\/[^/]+$/.test(url.pathname)) return method === 'DELETE';
   if (url.pathname === '/api/v1/visitor/weather') return method === 'GET';
   if (url.pathname === '/api/v1/visitor/geo' || url.pathname === '/api/v1/search') return method === 'GET';
+  if (url.pathname === '/api/v1/location/reverse') return method === 'GET';
+  if (url.pathname === '/api/v1/admin/footprints' || url.pathname === '/api/v1/admin/footprints/places') return method === 'GET';
+  if (url.pathname === '/api/v1/admin/footprints/geocode') return method === 'POST';
+  if (/^\/api\/v1\/admin\/footprints\/\d+$/.test(url.pathname)) return method === 'PUT';
   if (url.pathname === '/api/v1/i18n/locales' || url.pathname === '/api/v1/i18n/current') return method === 'GET';
   if (/^\/api\/v1\/i18n\/[^/]+$/.test(url.pathname)) return method === 'GET';
   if (url.pathname === '/api/v1/options/test-email') return method === 'POST';
