@@ -65,6 +65,8 @@ export function isStartNativeApiRequest(request: Request) {
   if (anonymousGet && /^\/api\/v1\/public\/albums\/[^/]+$/.test(url.pathname)) return true;
   if (anonymousGet && /^\/api\/v1\/posts\/(slug\/[^/]+|by-display-id\/\d+|\d+)$/.test(url.pathname)) return true;
   if (anonymousGet && /^\/api\/v1\/posts\/\d+\/(comments|episodes|navigation)$/.test(url.pathname)) return true;
+  if (url.pathname === '/api/v1/links/apply') return method === 'POST';
+  if (/^\/api\/v1\/comments\/\d+\/edit$/.test(url.pathname)) return method === 'PUT';
   if (url.pathname === '/api/v1/comments/batch') return method === 'POST';
   if (/^\/api\/v1\/comments\/\d+$/.test(url.pathname)) {
     return method === 'PUT' || method === 'PATCH' || method === 'DELETE';

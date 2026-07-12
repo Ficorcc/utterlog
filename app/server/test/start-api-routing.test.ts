@@ -69,6 +69,12 @@ describe('TanStack Start native API routing', () => {
     }
   });
 
+  test('routes link applications and visitor comment edits to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/links/apply', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/comments/7/edit', 'PUT'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/comments/7/edit', 'GET'))).toBe(false);
+  });
+
   test('keeps public creation, replies, and reads on the compatibility API', () => {
     expect(isStartNativeApiRequest(request('/api/v1/comments', 'POST'))).toBe(false);
     expect(isStartNativeApiRequest(request('/api/v1/comments/42/reply', 'POST'))).toBe(false);

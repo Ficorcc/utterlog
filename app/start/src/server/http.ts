@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { AuthRequestError, requireAdminRequest } from '../../../server/src/auth/session';
 import { AuthServiceError } from '../../../server/src/services/auth';
+import { PublicWriteError } from '../../../server/src/services/public-write';
 
 function meta() {
   return { request_id: randomUUID(), timestamp: new Date().toISOString() };
@@ -41,6 +42,16 @@ export async function withAuthService(handler: () => Promise<Response>) {
   } catch (err) {
     if (err instanceof AuthServiceError) return apiFail(err.status, err.code, err.message);
     console.error('TanStack Start auth error:', err);
+    return apiFail(500, 'INTERNAL_ERROR', '服务器内部错误');
+  }
+}
+
+export async function withPublicWrite(handler: () => Promise<Response>) {
+  try {
+    return await handler();
+  } catch (err) {
+    if (err instanceof PublicWriteError) return apiFail(err.status, err.code, err.message);
+    console.error('TanStack Start public write error:', err);
     return apiFail(500, 'INTERNAL_ERROR', '服务器内部错误');
   }
 }

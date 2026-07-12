@@ -28,6 +28,7 @@ import { Route as ApiV1ProfileSendCodeRouteImport } from './routes/api/v1/profil
 import { Route as ApiV1PostsIdRouteImport } from './routes/api/v1/posts/$id'
 import { Route as ApiV1PasskeysIdRouteImport } from './routes/api/v1/passkeys/$id'
 import { Route as ApiV1MomentsRecentTagsRouteImport } from './routes/api/v1/moments/recent-tags'
+import { Route as ApiV1LinksApplyRouteImport } from './routes/api/v1/links/apply'
 import { Route as ApiV1CommentsBatchRouteImport } from './routes/api/v1/comments/batch'
 import { Route as ApiV1CommentsIdRouteImport } from './routes/api/v1/comments/$id'
 import { Route as ApiV1AuthResetPasswordRouteImport } from './routes/api/v1/auth/reset-password'
@@ -45,6 +46,7 @@ import { Route as ApiV1PostsByDisplayIdDisplayIdRouteImport } from './routes/api
 import { Route as ApiV1PostsIdNavigationRouteImport } from './routes/api/v1/posts/$id/navigation'
 import { Route as ApiV1PostsIdEpisodesRouteImport } from './routes/api/v1/posts/$id/episodes'
 import { Route as ApiV1PostsIdCommentsRouteImport } from './routes/api/v1/posts/$id/comments'
+import { Route as ApiV1CommentsIdEditRouteImport } from './routes/api/v1/comments/$id/edit'
 import { Route as ApiV1AuthTotpActionRouteImport } from './routes/api/v1/auth/totp/$action'
 import { Route as ApiV1AuthPasskeyAvailableRouteImport } from './routes/api/v1/auth/passkey/available'
 import { Route as ApiV1AuthPasskeyFlowActionRouteImport } from './routes/api/v1/auth/passkey/$flow/$action'
@@ -144,6 +146,11 @@ const ApiV1MomentsRecentTagsRoute = ApiV1MomentsRecentTagsRouteImport.update({
   path: '/api/v1/moments/recent-tags',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1LinksApplyRoute = ApiV1LinksApplyRouteImport.update({
+  id: '/api/v1/links/apply',
+  path: '/api/v1/links/apply',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1CommentsBatchRoute = ApiV1CommentsBatchRouteImport.update({
   id: '/api/v1/comments/batch',
   path: '/api/v1/comments/batch',
@@ -230,6 +237,11 @@ const ApiV1PostsIdCommentsRoute = ApiV1PostsIdCommentsRouteImport.update({
   path: '/comments',
   getParentRoute: () => ApiV1PostsIdRoute,
 } as any)
+const ApiV1CommentsIdEditRoute = ApiV1CommentsIdEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => ApiV1CommentsIdRoute,
+} as any)
 const ApiV1AuthTotpActionRoute = ApiV1AuthTotpActionRouteImport.update({
   id: '/api/v1/auth/totp/$action',
   path: '/api/v1/auth/totp/$action',
@@ -267,8 +279,9 @@ export interface FileRoutesByFullPath {
   '/api/v1/auth/password': typeof ApiV1AuthPasswordRoute
   '/api/v1/auth/refresh': typeof ApiV1AuthRefreshRoute
   '/api/v1/auth/reset-password': typeof ApiV1AuthResetPasswordRoute
-  '/api/v1/comments/$id': typeof ApiV1CommentsIdRoute
+  '/api/v1/comments/$id': typeof ApiV1CommentsIdRouteWithChildren
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
+  '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
@@ -280,6 +293,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
   '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
+  '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
   '/api/v1/posts/$id/comments': typeof ApiV1PostsIdCommentsRoute
   '/api/v1/posts/$id/episodes': typeof ApiV1PostsIdEpisodesRoute
   '/api/v1/posts/$id/navigation': typeof ApiV1PostsIdNavigationRoute
@@ -308,8 +322,9 @@ export interface FileRoutesByTo {
   '/api/v1/auth/password': typeof ApiV1AuthPasswordRoute
   '/api/v1/auth/refresh': typeof ApiV1AuthRefreshRoute
   '/api/v1/auth/reset-password': typeof ApiV1AuthResetPasswordRoute
-  '/api/v1/comments/$id': typeof ApiV1CommentsIdRoute
+  '/api/v1/comments/$id': typeof ApiV1CommentsIdRouteWithChildren
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
+  '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
@@ -321,6 +336,7 @@ export interface FileRoutesByTo {
   '/api/v1/profile': typeof ApiV1ProfileIndexRoute
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
   '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
+  '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
   '/api/v1/posts/$id/comments': typeof ApiV1PostsIdCommentsRoute
   '/api/v1/posts/$id/episodes': typeof ApiV1PostsIdEpisodesRoute
   '/api/v1/posts/$id/navigation': typeof ApiV1PostsIdNavigationRoute
@@ -350,8 +366,9 @@ export interface FileRoutesById {
   '/api/v1/auth/password': typeof ApiV1AuthPasswordRoute
   '/api/v1/auth/refresh': typeof ApiV1AuthRefreshRoute
   '/api/v1/auth/reset-password': typeof ApiV1AuthResetPasswordRoute
-  '/api/v1/comments/$id': typeof ApiV1CommentsIdRoute
+  '/api/v1/comments/$id': typeof ApiV1CommentsIdRouteWithChildren
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
+  '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
@@ -363,6 +380,7 @@ export interface FileRoutesById {
   '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
   '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
+  '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
   '/api/v1/posts/$id/comments': typeof ApiV1PostsIdCommentsRoute
   '/api/v1/posts/$id/episodes': typeof ApiV1PostsIdEpisodesRoute
   '/api/v1/posts/$id/navigation': typeof ApiV1PostsIdNavigationRoute
@@ -395,6 +413,7 @@ export interface FileRouteTypes {
     | '/api/v1/auth/reset-password'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
+    | '/api/v1/links/apply'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/passkeys/$id'
     | '/api/v1/posts/$id'
@@ -406,6 +425,7 @@ export interface FileRouteTypes {
     | '/api/v1/profile/'
     | '/api/v1/auth/passkey/available'
     | '/api/v1/auth/totp/$action'
+    | '/api/v1/comments/$id/edit'
     | '/api/v1/posts/$id/comments'
     | '/api/v1/posts/$id/episodes'
     | '/api/v1/posts/$id/navigation'
@@ -436,6 +456,7 @@ export interface FileRouteTypes {
     | '/api/v1/auth/reset-password'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
+    | '/api/v1/links/apply'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/passkeys/$id'
     | '/api/v1/posts/$id'
@@ -447,6 +468,7 @@ export interface FileRouteTypes {
     | '/api/v1/profile'
     | '/api/v1/auth/passkey/available'
     | '/api/v1/auth/totp/$action'
+    | '/api/v1/comments/$id/edit'
     | '/api/v1/posts/$id/comments'
     | '/api/v1/posts/$id/episodes'
     | '/api/v1/posts/$id/navigation'
@@ -477,6 +499,7 @@ export interface FileRouteTypes {
     | '/api/v1/auth/reset-password'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
+    | '/api/v1/links/apply'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/passkeys/$id'
     | '/api/v1/posts/$id'
@@ -488,6 +511,7 @@ export interface FileRouteTypes {
     | '/api/v1/profile/'
     | '/api/v1/auth/passkey/available'
     | '/api/v1/auth/totp/$action'
+    | '/api/v1/comments/$id/edit'
     | '/api/v1/posts/$id/comments'
     | '/api/v1/posts/$id/episodes'
     | '/api/v1/posts/$id/navigation'
@@ -517,8 +541,9 @@ export interface RootRouteChildren {
   ApiV1AuthPasswordRoute: typeof ApiV1AuthPasswordRoute
   ApiV1AuthRefreshRoute: typeof ApiV1AuthRefreshRoute
   ApiV1AuthResetPasswordRoute: typeof ApiV1AuthResetPasswordRoute
-  ApiV1CommentsIdRoute: typeof ApiV1CommentsIdRoute
+  ApiV1CommentsIdRoute: typeof ApiV1CommentsIdRouteWithChildren
   ApiV1CommentsBatchRoute: typeof ApiV1CommentsBatchRoute
+  ApiV1LinksApplyRoute: typeof ApiV1LinksApplyRoute
   ApiV1MomentsRecentTagsRoute: typeof ApiV1MomentsRecentTagsRoute
   ApiV1PasskeysIdRoute: typeof ApiV1PasskeysIdRoute
   ApiV1ProfileSendCodeRoute: typeof ApiV1ProfileSendCodeRoute
@@ -669,6 +694,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1MomentsRecentTagsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/links/apply': {
+      id: '/api/v1/links/apply'
+      path: '/api/v1/links/apply'
+      fullPath: '/api/v1/links/apply'
+      preLoaderRoute: typeof ApiV1LinksApplyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/comments/batch': {
       id: '/api/v1/comments/batch'
       path: '/api/v1/comments/batch'
@@ -788,6 +820,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1PostsIdCommentsRouteImport
       parentRoute: typeof ApiV1PostsIdRoute
     }
+    '/api/v1/comments/$id/edit': {
+      id: '/api/v1/comments/$id/edit'
+      path: '/edit'
+      fullPath: '/api/v1/comments/$id/edit'
+      preLoaderRoute: typeof ApiV1CommentsIdEditRouteImport
+      parentRoute: typeof ApiV1CommentsIdRoute
+    }
     '/api/v1/auth/totp/$action': {
       id: '/api/v1/auth/totp/$action'
       path: '/api/v1/auth/totp/$action'
@@ -844,6 +883,18 @@ const ApiV1PostsRouteWithChildren = ApiV1PostsRoute._addFileChildren(
   ApiV1PostsRouteChildren,
 )
 
+interface ApiV1CommentsIdRouteChildren {
+  ApiV1CommentsIdEditRoute: typeof ApiV1CommentsIdEditRoute
+}
+
+const ApiV1CommentsIdRouteChildren: ApiV1CommentsIdRouteChildren = {
+  ApiV1CommentsIdEditRoute: ApiV1CommentsIdEditRoute,
+}
+
+const ApiV1CommentsIdRouteWithChildren = ApiV1CommentsIdRoute._addFileChildren(
+  ApiV1CommentsIdRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
@@ -863,8 +914,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1AuthPasswordRoute: ApiV1AuthPasswordRoute,
   ApiV1AuthRefreshRoute: ApiV1AuthRefreshRoute,
   ApiV1AuthResetPasswordRoute: ApiV1AuthResetPasswordRoute,
-  ApiV1CommentsIdRoute: ApiV1CommentsIdRoute,
+  ApiV1CommentsIdRoute: ApiV1CommentsIdRouteWithChildren,
   ApiV1CommentsBatchRoute: ApiV1CommentsBatchRoute,
+  ApiV1LinksApplyRoute: ApiV1LinksApplyRoute,
   ApiV1MomentsRecentTagsRoute: ApiV1MomentsRecentTagsRoute,
   ApiV1PasskeysIdRoute: ApiV1PasskeysIdRoute,
   ApiV1ProfileSendCodeRoute: ApiV1ProfileSendCodeRoute,
