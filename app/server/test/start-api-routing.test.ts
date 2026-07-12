@@ -22,6 +22,12 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/online', 'GET'))).toBe(true);
   });
 
+  test('routes Telegram webhook and management to Start', () => {
+    for (const action of ['webhook', 'test', 'get-chat-id', 'setup-webhook']) {
+      expect(isStartNativeApiRequest(request(`/api/v1/telegram/${action}`, 'POST'))).toBe(true);
+    }
+  });
+
   test('routes setup and installation APIs to Start', () => {
     expect(isStartNativeApiRequest(request('/api/v1/setup/status', 'GET'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/setup/test-db', 'POST'))).toBe(true);

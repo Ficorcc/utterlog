@@ -42,6 +42,10 @@ import { Route as ApiV1VisitorGeoRouteImport } from './routes/api/v1/visitor/geo
 import { Route as ApiV1TrackDurationRouteImport } from './routes/api/v1/track/duration'
 import { Route as ApiV1ThemesUploadRouteImport } from './routes/api/v1/themes/upload'
 import { Route as ApiV1ThemesIdRouteImport } from './routes/api/v1/themes/$id'
+import { Route as ApiV1TelegramWebhookRouteImport } from './routes/api/v1/telegram/webhook'
+import { Route as ApiV1TelegramTestRouteImport } from './routes/api/v1/telegram/test'
+import { Route as ApiV1TelegramSetupWebhookRouteImport } from './routes/api/v1/telegram/setup-webhook'
+import { Route as ApiV1TelegramGetChatIdRouteImport } from './routes/api/v1/telegram/get-chat-id'
 import { Route as ApiV1TagsIdRouteImport } from './routes/api/v1/tags/$id'
 import { Route as ApiV1SystemUpdateCheckRouteImport } from './routes/api/v1/system/update-check'
 import { Route as ApiV1SystemStatusRouteImport } from './routes/api/v1/system/status'
@@ -295,6 +299,27 @@ const ApiV1ThemesUploadRoute = ApiV1ThemesUploadRouteImport.update({
 const ApiV1ThemesIdRoute = ApiV1ThemesIdRouteImport.update({
   id: '/api/v1/themes/$id',
   path: '/api/v1/themes/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1TelegramWebhookRoute = ApiV1TelegramWebhookRouteImport.update({
+  id: '/api/v1/telegram/webhook',
+  path: '/api/v1/telegram/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1TelegramTestRoute = ApiV1TelegramTestRouteImport.update({
+  id: '/api/v1/telegram/test',
+  path: '/api/v1/telegram/test',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1TelegramSetupWebhookRoute =
+  ApiV1TelegramSetupWebhookRouteImport.update({
+    id: '/api/v1/telegram/setup-webhook',
+    path: '/api/v1/telegram/setup-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1TelegramGetChatIdRoute = ApiV1TelegramGetChatIdRouteImport.update({
+  id: '/api/v1/telegram/get-chat-id',
+  path: '/api/v1/telegram/get-chat-id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1TagsIdRoute = ApiV1TagsIdRouteImport.update({
@@ -840,6 +865,10 @@ export interface FileRoutesByFullPath {
   '/api/v1/system/status': typeof ApiV1SystemStatusRoute
   '/api/v1/system/update-check': typeof ApiV1SystemUpdateCheckRoute
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
+  '/api/v1/telegram/get-chat-id': typeof ApiV1TelegramGetChatIdRoute
+  '/api/v1/telegram/setup-webhook': typeof ApiV1TelegramSetupWebhookRoute
+  '/api/v1/telegram/test': typeof ApiV1TelegramTestRoute
+  '/api/v1/telegram/webhook': typeof ApiV1TelegramWebhookRoute
   '/api/v1/themes/$id': typeof ApiV1ThemesIdRouteWithChildren
   '/api/v1/themes/upload': typeof ApiV1ThemesUploadRoute
   '/api/v1/track/duration': typeof ApiV1TrackDurationRoute
@@ -964,6 +993,10 @@ export interface FileRoutesByTo {
   '/api/v1/system/status': typeof ApiV1SystemStatusRoute
   '/api/v1/system/update-check': typeof ApiV1SystemUpdateCheckRoute
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
+  '/api/v1/telegram/get-chat-id': typeof ApiV1TelegramGetChatIdRoute
+  '/api/v1/telegram/setup-webhook': typeof ApiV1TelegramSetupWebhookRoute
+  '/api/v1/telegram/test': typeof ApiV1TelegramTestRoute
+  '/api/v1/telegram/webhook': typeof ApiV1TelegramWebhookRoute
   '/api/v1/themes/$id': typeof ApiV1ThemesIdRouteWithChildren
   '/api/v1/themes/upload': typeof ApiV1ThemesUploadRoute
   '/api/v1/track/duration': typeof ApiV1TrackDurationRoute
@@ -1089,6 +1122,10 @@ export interface FileRoutesById {
   '/api/v1/system/status': typeof ApiV1SystemStatusRoute
   '/api/v1/system/update-check': typeof ApiV1SystemUpdateCheckRoute
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
+  '/api/v1/telegram/get-chat-id': typeof ApiV1TelegramGetChatIdRoute
+  '/api/v1/telegram/setup-webhook': typeof ApiV1TelegramSetupWebhookRoute
+  '/api/v1/telegram/test': typeof ApiV1TelegramTestRoute
+  '/api/v1/telegram/webhook': typeof ApiV1TelegramWebhookRoute
   '/api/v1/themes/$id': typeof ApiV1ThemesIdRouteWithChildren
   '/api/v1/themes/upload': typeof ApiV1ThemesUploadRoute
   '/api/v1/track/duration': typeof ApiV1TrackDurationRoute
@@ -1215,6 +1252,10 @@ export interface FileRouteTypes {
     | '/api/v1/system/status'
     | '/api/v1/system/update-check'
     | '/api/v1/tags/$id'
+    | '/api/v1/telegram/get-chat-id'
+    | '/api/v1/telegram/setup-webhook'
+    | '/api/v1/telegram/test'
+    | '/api/v1/telegram/webhook'
     | '/api/v1/themes/$id'
     | '/api/v1/themes/upload'
     | '/api/v1/track/duration'
@@ -1339,6 +1380,10 @@ export interface FileRouteTypes {
     | '/api/v1/system/status'
     | '/api/v1/system/update-check'
     | '/api/v1/tags/$id'
+    | '/api/v1/telegram/get-chat-id'
+    | '/api/v1/telegram/setup-webhook'
+    | '/api/v1/telegram/test'
+    | '/api/v1/telegram/webhook'
     | '/api/v1/themes/$id'
     | '/api/v1/themes/upload'
     | '/api/v1/track/duration'
@@ -1463,6 +1508,10 @@ export interface FileRouteTypes {
     | '/api/v1/system/status'
     | '/api/v1/system/update-check'
     | '/api/v1/tags/$id'
+    | '/api/v1/telegram/get-chat-id'
+    | '/api/v1/telegram/setup-webhook'
+    | '/api/v1/telegram/test'
+    | '/api/v1/telegram/webhook'
     | '/api/v1/themes/$id'
     | '/api/v1/themes/upload'
     | '/api/v1/track/duration'
@@ -1583,6 +1632,10 @@ export interface RootRouteChildren {
   ApiV1SetupTestDbRoute: typeof ApiV1SetupTestDbRoute
   ApiV1SystemStatusRoute: typeof ApiV1SystemStatusRoute
   ApiV1SystemUpdateCheckRoute: typeof ApiV1SystemUpdateCheckRoute
+  ApiV1TelegramGetChatIdRoute: typeof ApiV1TelegramGetChatIdRoute
+  ApiV1TelegramSetupWebhookRoute: typeof ApiV1TelegramSetupWebhookRoute
+  ApiV1TelegramTestRoute: typeof ApiV1TelegramTestRoute
+  ApiV1TelegramWebhookRoute: typeof ApiV1TelegramWebhookRoute
   ApiV1ThemesIdRoute: typeof ApiV1ThemesIdRouteWithChildren
   ApiV1ThemesUploadRoute: typeof ApiV1ThemesUploadRoute
   ApiV1VisitorGeoRoute: typeof ApiV1VisitorGeoRoute
@@ -1850,6 +1903,34 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/themes/$id'
       fullPath: '/api/v1/themes/$id'
       preLoaderRoute: typeof ApiV1ThemesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/telegram/webhook': {
+      id: '/api/v1/telegram/webhook'
+      path: '/api/v1/telegram/webhook'
+      fullPath: '/api/v1/telegram/webhook'
+      preLoaderRoute: typeof ApiV1TelegramWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/telegram/test': {
+      id: '/api/v1/telegram/test'
+      path: '/api/v1/telegram/test'
+      fullPath: '/api/v1/telegram/test'
+      preLoaderRoute: typeof ApiV1TelegramTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/telegram/setup-webhook': {
+      id: '/api/v1/telegram/setup-webhook'
+      path: '/api/v1/telegram/setup-webhook'
+      fullPath: '/api/v1/telegram/setup-webhook'
+      preLoaderRoute: typeof ApiV1TelegramSetupWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/telegram/get-chat-id': {
+      id: '/api/v1/telegram/get-chat-id'
+      path: '/api/v1/telegram/get-chat-id'
+      fullPath: '/api/v1/telegram/get-chat-id'
+      preLoaderRoute: typeof ApiV1TelegramGetChatIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/tags/$id': {
@@ -2703,6 +2784,10 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1SetupTestDbRoute: ApiV1SetupTestDbRoute,
   ApiV1SystemStatusRoute: ApiV1SystemStatusRoute,
   ApiV1SystemUpdateCheckRoute: ApiV1SystemUpdateCheckRoute,
+  ApiV1TelegramGetChatIdRoute: ApiV1TelegramGetChatIdRoute,
+  ApiV1TelegramSetupWebhookRoute: ApiV1TelegramSetupWebhookRoute,
+  ApiV1TelegramTestRoute: ApiV1TelegramTestRoute,
+  ApiV1TelegramWebhookRoute: ApiV1TelegramWebhookRoute,
   ApiV1ThemesIdRoute: ApiV1ThemesIdRouteWithChildren,
   ApiV1ThemesUploadRoute: ApiV1ThemesUploadRoute,
   ApiV1VisitorGeoRoute: ApiV1VisitorGeoRoute,

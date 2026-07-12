@@ -69,6 +69,7 @@ export function isStartNativeApiRequest(request: Request) {
   if (url.pathname === '/api/v1/health') return method === 'GET';
   if (url.pathname === '/api/v1/track' || url.pathname === '/api/v1/track/duration') return method === 'POST';
   if (url.pathname === '/api/v1/online') return method === 'GET';
+  if (/^\/api\/v1\/telegram\/(webhook|test|get-chat-id|setup-webhook)$/.test(url.pathname)) return method === 'POST';
   if (url.pathname === '/api/v1/setup/status' || url.pathname === '/api/v1/install/status') return method === 'GET';
   if (url.pathname === '/api/v1/setup/test-db' || url.pathname === '/api/v1/setup/save') return method === 'POST';
   if (url.pathname === '/api/v1/install/create-admin' || url.pathname === '/api/v1/install/finish') return method === 'POST';

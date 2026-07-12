@@ -149,6 +149,163 @@ async function publishTelegramCommentReply(commentId: number, content: string) {
   return inserted?.id || 0;
 }
 
+export class TelegramServiceError extends Error {
+  constructor(public status: number, public code: string, message: string) {
+    super(message);
+  }
+}
+
+export async function processTelegramWebhookRequest(request: Request) {
+  const secret = (await optionValue('telegram_webhook_secret', '')).trim();
+  if (secret && request.headers.get('x-telegram-bot-api-secret-token') !== secret) {
+    throw new TelegramServiceError(403, 'FORBIDDEN', 'Invalid Telegram webhook secret');
+  }
+  const botToken = (await optionValue('telegram_bot_token', '')).trim();
+  const configuredChatID = (await optionValue('telegram_chat_id', '')).trim();
+  const update: any = await request.json().catch(() => ({}));
+  const chat = update?.message?.chat || update?.callback_query?.message?.chat;
+  if (chat?.id) {
+    const current = parseJsonOption<Record<string, unknown>[]>(await optionValue('telegram_discovered_chats', '[]'), []);
+    const next = [{ id: chat.id, title: chat.title || chat.username || chat.first_name || String(chat.id), type: chat.type || 'private' },
+      ...current.filter((item) => String(item.id) !== String(chat.id))].slice(0, 20);
+    await saveOption('telegram_discovered_chats', JSON.stringify(next));
+  }
+
+  const callback = update?.callback_query;
+  if (callback) {
+    const chatId = String(callback.message?.chat?.id || '');
+    if (!botToken || !configuredChatID || chatId !== configuredChatID) return null;
+    if ((await optionValue('tg_comment_approve', 'true')) === 'false') return null;
+    const [action, commentIDRaw] = String(callback.data || '').split(':', 2);
+    const commentID = intParam(commentIDRaw);
+    if (!commentID || !['approve', 'reject'].includes(action)) return null;
+    const before = await one<{ post_id: number; status: string }>(
+      `select post_id, status from ${table('comments')} where id = $1`, [commentID],
+    ).catch(() => null);
+    let result = '';
+    if (action === 'approve') {
+      await exec(`update ${table('comments')} set status = 'approved', updated_at = $1 where id = $2`, [nowUnix(), commentID]);
+      if (before && before.status !== 'approved') {
+        await exec(`update ${table('posts')} set comment_count = comment_count + 1 where id = $1`, [before.post_id]).catch(() => {});
+      }
+      result = '评论已通过审核';
+    } else {
+      await exec(`update ${table('comments')} set status = 'trash', updated_at = $1 where id = $2`, [nowUnix(), commentID]);
+      if (before?.status === 'approved') {
+        await exec(`update ${table('posts')} set comment_count = greatest(comment_count - 1, 0) where id = $1`, [before.post_id]).catch(() => {});
+      }
+      result = '评论已拒绝';
+    }
+    await telegramApi('answerCallbackQuery', botToken, { callback_query_id: callback.id, text: result }).catch(() => {});
+    await telegramApi('editMessageText', botToken, { chat_id: chatId, message_id: callback.message?.message_id,
+      text: `${String(callback.message?.text || '')}\n\n${result}` }).catch(() => {});
+    return null;
+  }
+
+  const message = update?.message;
+  if (!message) return null;
+  const chatId = String(message.chat?.id || '');
+  const text = String(message.text || message.caption || '').trim();
+  if (!botToken || !configuredChatID || chatId !== configuredChatID) return null;
+  const replyCommentId = telegramReplyCommentId(message.reply_to_message);
+  if (replyCommentId && text) {
+    if ((await optionValue('tg_comment_reply', 'false')) !== 'true') {
+      await telegramApi('sendMessage', botToken, { chat_id: chatId, text: '评论回复功能未启用' }).catch(() => {});
+      return null;
+    }
+    try {
+      const replyId = await publishTelegramCommentReply(replyCommentId, text);
+      await telegramApi('sendMessage', botToken, { chat_id: chatId, text: `评论回复已发布${replyId ? ` #${replyId}` : ''}` }).catch(() => {});
+    } catch (error) {
+      await telegramApi('sendMessage', botToken, { chat_id: chatId,
+        text: `评论回复失败：${error instanceof Error ? error.message : '未知错误'}` }).catch(() => {});
+    }
+    return null;
+  }
+  if (text === '/help' || text === '/start') {
+    await telegramApi('sendMessage', botToken, { chat_id: chatId,
+      text: 'Utterlog Bot\n\n/ai <消息> - AI 聊天\n/stats - 数据报告\n/help - 帮助\n\n直接发送文字可发布说说。' }).catch(() => {});
+    return null;
+  }
+  if (text === '/stats' || text === '/report') {
+    const [posts, comments, views] = await Promise.all([
+      one<{ count: string }>(`select count(*)::text as count from ${table('posts')} where type='post' and deleted_at = 0`).catch(() => null),
+      one<{ count: string }>(`select count(*)::text as count from ${table('comments')} where status='approved'`).catch(() => null),
+      one<{ count: string }>(`select coalesce(sum(view_count),0)::text as count from ${table('posts')} where deleted_at = 0`).catch(() => null),
+    ]);
+    await telegramApi('sendMessage', botToken, { chat_id: chatId,
+      text: `数据报告\n\n文章: ${posts?.count || 0}\n评论: ${comments?.count || 0}\n浏览: ${views?.count || 0}` }).catch(() => {});
+    return null;
+  }
+  if (text.startsWith('/ai ')) {
+    if ((await optionValue('tg_ai_chat', 'true')) === 'false') return null;
+    const prompt = text.slice(4).trim();
+    if (prompt) {
+      const answer = await callAiText([{ role: 'user', content: prompt }], 'chat', 0)
+        .then((result) => result.content).catch((error) => `AI 服务暂时不可用：${error instanceof Error ? error.message : '未知错误'}`);
+      await telegramApi('sendMessage', botToken, { chat_id: chatId, text: answer.slice(0, 4000) }).catch(() => {});
+    }
+    return null;
+  }
+  const photos = Array.isArray(message.photo) ? message.photo : [];
+  if (photos.length > 0) {
+    if ((await optionValue('tg_auto_upload_image', 'true')) === 'false') return null;
+    try {
+      await saveTelegramPhotoMoment(botToken, chatId, photos[photos.length - 1], text,
+        (await optionValue('tg_publish_moment', 'true')) !== 'false');
+    } catch (error) {
+      await telegramApi('sendMessage', botToken, { chat_id: chatId,
+        text: `图片处理失败：${error instanceof Error ? error.message : '未知错误'}` }).catch(() => {});
+    }
+    return null;
+  }
+  if (text && (await optionValue('tg_publish_moment', 'true')) !== 'false') {
+    await exec(
+      `insert into ${table('moments')} (content, images, source, author_id, visibility, created_at, updated_at)
+       values ($1, '{}'::text[], 'telegram', 1, 'public', $2, $2)`, [text, nowUnix()],
+    ).catch(() => {});
+    await telegramApi('sendMessage', botToken, { chat_id: chatId, text: `说说已发布\n\n${text}` }).catch(() => {});
+  }
+  return null;
+}
+
+export async function testTelegramConnection(input: Record<string, unknown>) {
+  const token = String(input.bot_token || await optionValue('telegram_bot_token', '')).trim();
+  const chatId = String(input.chat_id || await optionValue('telegram_chat_id', '')).trim();
+  if (!token || !chatId) throw new TelegramServiceError(400, 'VALIDATION_ERROR', 'Telegram Bot Token 和 Chat ID 不能为空');
+  await telegramApi('sendMessage', token, { chat_id: chatId, text: 'Utterlog Telegram test message' });
+  return { sent: true };
+}
+
+export async function discoverTelegramChats(input: Record<string, unknown>) {
+  const token = String(input.bot_token || await optionValue('telegram_bot_token', '')).trim();
+  if (!token) throw new TelegramServiceError(400, 'VALIDATION_ERROR', 'Telegram Bot Token 不能为空');
+  const discovered = parseJsonOption<Record<string, unknown>[]>(await optionValue('telegram_discovered_chats', '[]'), []);
+  const chats = [...discovered];
+  const webhookURL = `${config.appUrl.replace(/\/+$/, '')}/api/v1/telegram/webhook`;
+  const secret = (await optionValue('telegram_webhook_secret', '')).trim();
+  await telegramApi('deleteWebhook', token, { drop_pending_updates: false }).catch(() => {});
+  const updates = await telegramApi('getUpdates', token, { limit: 20, timeout: 0 }).catch(() => ({ result: [] }));
+  void telegramApi('setWebhook', token, { url: webhookURL, ...(secret ? { secret_token: secret } : {}) }).catch(() => {});
+  for (const item of updates.result || []) {
+    const chat = item?.message?.chat || item?.callback_query?.message?.chat;
+    if (chat?.id && !chats.some((existing) => String(existing.id) === String(chat.id))) {
+      chats.push({ id: chat.id, title: chat.title || chat.username || chat.first_name || String(chat.id), type: chat.type || 'private' });
+    }
+  }
+  await saveOption('telegram_discovered_chats', JSON.stringify(chats.slice(0, 20)));
+  return { chats: chats.slice(0, 20), hint: chats.length ? '' : '请先向 Bot 发送一条消息' };
+}
+
+export async function setupTelegramWebhook() {
+  const token = (await optionValue('telegram_bot_token', '')).trim();
+  if (!token) throw new TelegramServiceError(400, 'VALIDATION_ERROR', '请先保存 Telegram Bot Token');
+  const url = `${config.appUrl.replace(/\/+$/, '')}/api/v1/telegram/webhook`;
+  const secret = (await optionValue('telegram_webhook_secret', '')).trim();
+  await telegramApi('setWebhook', token, { url, ...(secret ? { secret_token: secret } : {}) });
+  return { ok: true, message: 'Webhook 设置成功', url };
+}
+
 export function registerTelegramRoutes(app: Hono) {
   app.post('/api/v1/telegram/webhook', async (c) => {
     const secret = (await optionValue('telegram_webhook_secret', '')).trim();
