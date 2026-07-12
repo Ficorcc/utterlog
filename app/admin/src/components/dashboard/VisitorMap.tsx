@@ -57,95 +57,112 @@ export default function VisitorMap({ period }: { period: string }) {
     // 没配 Mapbox token 就不初始化，避免 "An API access token is required" 异常
     // 冒泡到 React 导致整个 Analytics 页白屏
     if (!mapboxToken) return;
-    mapboxgl.accessToken = mapboxToken;
-    (mapboxgl as any).config.API_URL = mapboxApiUrl || 'https://api.mapbox.com';
-    // 清理旧实例（HMR 热更新时）
-    if (mapObjRef.current) {
-      mapObjRef.current.remove();
-      mapObjRef.current = null;
-    }
 
-    const map = new mapboxgl.Map({
-      container: mapRef.current,
-      style: 'mapbox://styles/mapbox/light-v11',
-      center: [105, 20],
-      zoom: 1.2,
-      minZoom: 1,
-      maxZoom: 10,
-      attributionControl: false,
-      logoPosition: 'bottom-left',
-      projection: 'mercator',
-      renderWorldCopies: true,
-      dragPan: true,
-      scrollZoom: true,
-      touchZoomRotate: true,
-    });
-
-    map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right');
-    map.dragPan.enable();
-    map.touchZoomRotate.enable();
-    mapObjRef.current = map;
-
-    map.on('load', () => {
-      try {
-        map.resize();
-        // 国家填充层（用 Mapbox 内置的 country boundaries）
-        // addSource / addLayer 在 style 加载失败 / token 无效时会抛错，
-        // 这里整块包 try/catch —— 高亮国家只是锦上添花，不能因为它
-        // 抛错把整个地图（进而整个统计页）搞挂。
-        if (!map.getSource('country-boundaries')) {
-          map.addSource('country-boundaries', {
-            type: 'vector',
-            url: 'mapbox://mapbox.country-boundaries-v1',
-          });
-        }
-        // beforeId 'country-label' 仅在该 layer 存在时才传，否则 mapbox-gl
-        // 会抛 "Layer with id "country-label" does not exist on this map"。
-        const beforeId = map.getLayer('country-label') ? 'country-label' : undefined;
-        if (!map.getLayer('country-fills')) {
-          map.addLayer({
-            id: 'country-fills',
-            type: 'fill',
-            source: 'country-boundaries',
-            'source-layer': 'country_boundaries',
-            paint: {
-              'fill-color': '#22c55e',
-              'fill-opacity': 0,
-            },
-          }, beforeId as any);
-        }
-      } catch (e) {
-        console.warn('[VisitorMap] 初始化国家填充层失败:', e);
+    // 整个初始化包 try/catch：token 无效 / 网络不通 / WebGL 不可用时，
+    // mapbox-gl 的 new Map() 或后续同步操作会抛错。这些都是渲染期同步
+    // 错误，会冒泡成 React 渲染异常。失败就静默退化，地图只是装饰。
+    try {
+      mapboxgl.accessToken = mapboxToken;
+      (mapboxgl as any).config.API_URL = mapboxApiUrl || 'https://api.mapbox.com';
+      // 清理旧实例（HMR 热更新时）
+      if (mapObjRef.current) {
+        mapObjRef.current.remove();
+        mapObjRef.current = null;
       }
-    });
 
-    // SPA 切到 /admin/analytics 时，容器布局往往还没稳定（侧栏过渡 /
-    // 卡片高度变化 / 异步加载子组件等），地图会用一个早期的不正确
-    // 宽高初始化 canvas，之后再也不刷新 —— 表现就是"打开页面地图空
-    // 白，强制刷新才能正常渲染"。监听容器尺寸变化主动调 resize。
-    let ro: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== 'undefined' && mapRef.current) {
-      ro = new ResizeObserver(() => {
-        // requestAnimationFrame 合并多次回调，避免拖窗口时高频触发
-        requestAnimationFrame(() => {
-          if (mapObjRef.current) mapObjRef.current.resize();
-        });
+      const map = new mapboxgl.Map({
+        container: mapRef.current,
+        style: 'mapbox://styles/mapbox/light-v11',
+        center: [105, 20],
+        zoom: 1.2,
+        minZoom: 1,
+        maxZoom: 10,
+        attributionControl: false,
+        logoPosition: 'bottom-left',
+        projection: 'mercator',
+        renderWorldCopies: true,
+        dragPan: true,
+        scrollZoom: true,
+        touchZoomRotate: true,
       });
-      ro.observe(mapRef.current);
+
+      // 接管 mapbox-gl 的 error 事件 —— style/token/源加载失败时
+      // mapbox 会触发 'error' 事件，默认行为是把错误打印到 console
+      // 并可能 rethrow。这里主动拦截，阻止错误冒泡到 React。
+      map.on('error', (e: any) => {
+        console.warn('[VisitorMap] mapbox error:', e?.error?.message || e);
+      });
+
+      map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right');
+      map.dragPan.enable();
+      map.touchZoomRotate.enable();
+      mapObjRef.current = map;
+
+      map.on('load', () => {
+        try {
+          map.resize();
+          // 国家填充层（用 Mapbox 内置的 country boundaries）
+          // addSource / addLayer 在 style 加载失败 / token 无效时会抛错，
+          // 这里整块包 try/catch —— 高亮国家只是锦上添花，不能因为它
+          // 抛错把整个地图（进而整个统计页）搞挂。
+          if (!map.getSource('country-boundaries')) {
+            map.addSource('country-boundaries', {
+              type: 'vector',
+              url: 'mapbox://mapbox.country-boundaries-v1',
+            });
+          }
+          // beforeId 'country-label' 仅在该 layer 存在时才传，否则 mapbox-gl
+          // 会抛 "Layer with id "country-label" does not exist on this map"。
+          const beforeId = map.getLayer('country-label') ? 'country-label' : undefined;
+          if (!map.getLayer('country-fills')) {
+            map.addLayer({
+              id: 'country-fills',
+              type: 'fill',
+              source: 'country-boundaries',
+              'source-layer': 'country_boundaries',
+              paint: {
+                'fill-color': '#22c55e',
+                'fill-opacity': 0,
+              },
+            }, beforeId as any);
+          }
+        } catch (e) {
+          console.warn('[VisitorMap] 初始化国家填充层失败:', e);
+        }
+      });
+
+      // SPA 切到 /admin/analytics 时，容器布局往往还没稳定（侧栏过渡 /
+      // 卡片高度变化 / 异步加载子组件等），地图会用一个早期的不正确
+      // 宽高初始化 canvas，之后再也不刷新 —— 表现就是"打开页面地图空
+      // 白，强制刷新才能正常渲染"。监听容器尺寸变化主动调 resize。
+      let ro: ResizeObserver | null = null;
+      if (typeof ResizeObserver !== 'undefined' && mapRef.current) {
+        ro = new ResizeObserver(() => {
+          // requestAnimationFrame 合并多次回调，避免拖窗口时高频触发
+          requestAnimationFrame(() => {
+            mapObjRef.current?.resize();
+          });
+        });
+        ro.observe(mapRef.current);
+      }
+
+      // 兜底：mount 后下一帧 + 200ms 各 resize 一次，处理一些极端情况
+      // 下 ResizeObserver 不会触发的初始布局抖动
+      const raf = requestAnimationFrame(() => mapObjRef.current?.resize());
+      const t = window.setTimeout(() => mapObjRef.current?.resize(), 200);
+
+      return () => {
+        cancelAnimationFrame(raf);
+        window.clearTimeout(t);
+        if (ro) ro.disconnect();
+        map.remove();
+        mapObjRef.current = null;
+      };
+    } catch (e) {
+      // mapbox 初始化彻底失败 —— 记录但不抛，地图区域会保持空白容器，
+      // 统计页的其它图表/列表照常工作。
+      console.error('[VisitorMap] 地图初始化失败，已降级:', e);
     }
-
-    // 兜底：mount 后下一帧 + 200ms 各 resize 一次，处理一些极端情况
-    // 下 ResizeObserver 不会触发的初始布局抖动
-    const raf = requestAnimationFrame(() => mapObjRef.current?.resize());
-    const t = window.setTimeout(() => mapObjRef.current?.resize(), 200);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      window.clearTimeout(t);
-      if (ro) ro.disconnect();
-      map.remove();
-      mapObjRef.current = null;
-    };
   }, [mapboxToken, mapboxApiUrl]);
 
   // 数据变化时更新标记

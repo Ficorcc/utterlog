@@ -51,28 +51,48 @@ class ErrorBoundaryInner extends Component<ErrorBoundaryProps & { locationKey: s
     const { error } = this.state;
     if (!error) return this.props.children;
 
-    // 截取错误信息：堆栈里第一行通常就是原因，太长反而难读。
+    // 完整错误文本（message + stack），用于诊断根因。
     const message = error.message || String(error);
-    const brief = message.split('\n')[0].slice(0, 300);
+    const stack = error.stack || '';
+    // 提取错误名（如 "TypeError"），通常在 stack 第一行或 message 里。
+    const errorName = error.name || (stack.split('\n')[0].split(':')[0]) || 'Error';
+    const fullText = stack && !stack.startsWith(message) ? `${message}\n${stack}` : (stack || message);
+
+    const copyError = () => {
+      const text = `[${new Date().toISOString()}] ${fullText}`;
+      try { navigator.clipboard?.writeText(text); } catch {}
+    };
 
     return (
       <div style={{
         display: 'flex', flexDirection: 'column', alignItems: 'center',
-        justifyContent: 'center', padding: '64px 20px', textAlign: 'center',
+        justifyContent: 'center', padding: '48px 20px', textAlign: 'center',
       }}>
-        <i className="fa-regular fa-triangle-exclamation" style={{ fontSize: 44, color: 'var(--color-error, #dc2626)', marginBottom: 16 }} />
-        <h1 style={{ fontSize: 18, fontWeight: 600, margin: '0 0 8px' }}>页面渲染出错</h1>
-        <p className="text-sub" style={{ fontSize: 13, margin: '0 0 6px' }}>
+        <i className="fa-regular fa-triangle-exclamation" style={{ fontSize: 40, color: 'var(--color-error, #dc2626)', marginBottom: 14 }} />
+        <h1 style={{ fontSize: 18, fontWeight: 600, margin: '0 0 6px' }}>页面渲染出错</h1>
+        <p className="text-sub" style={{ fontSize: 13, margin: '0 0 4px' }}>
           这个模块加载时遇到了问题，其它功能不受影响。
         </p>
-        <code className="text-dim" style={{
-          fontSize: 12, maxWidth: 640, wordBreak: 'break-word',
-          background: 'var(--color-bg-soft)', padding: '8px 12px',
-          border: '1px solid var(--color-border)', margin: '8px 0 20px',
-          fontFamily: 'ui-monospace, monospace', whiteSpace: 'pre-wrap',
+        <div style={{
+          fontSize: 12, maxWidth: 720, width: '100%', textAlign: 'left',
+          background: 'var(--color-bg-soft)', padding: '10px 12px',
+          border: '1px solid var(--color-border)', margin: '12px 0 16px',
+          borderRadius: '2px',
         }}>
-          {brief}
-        </code>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+            <span style={{ fontWeight: 600, color: 'var(--color-error, #dc2626)', fontFamily: 'ui-monospace, monospace' }}>{errorName}</span>
+            <button onClick={copyError} className="text-dim" style={{ background: 'none', border: '1px solid var(--color-border)', padding: '2px 8px', fontSize: 11, cursor: 'pointer' }}>
+              <i className="fa-regular fa-copy" style={{ marginRight: 4 }} />复制错误
+            </button>
+          </div>
+          <pre className="text-dim" style={{
+            margin: 0, fontSize: 11, lineHeight: 1.5, whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word', maxHeight: '240px', overflowY: 'auto',
+            fontFamily: 'ui-monospace, monospace',
+          }}>
+            {fullText}
+          </pre>
+        </div>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button onClick={this.reset} className="btn btn-primary" style={{ fontSize: 13 }}>
             <i className="fa-regular fa-rotate-right" style={{ marginRight: 6 }} />
