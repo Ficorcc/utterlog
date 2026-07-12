@@ -44,6 +44,21 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/social/management', 'GET'))).toBe(true);
   });
 
+  test('routes legacy imports and synchronization protocols to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/import/wordpress', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/import/typecho', 'POST'))).toBe(true);
+    for (const platform of ['wordpress', 'typecho']) {
+      for (const action of ['ping', 'start', 'batch', 'finish', 'rollback']) {
+        expect(isStartNativeApiRequest(request(`/api/v1/sync/${platform}/${action}`, 'POST'))).toBe(true);
+      }
+      expect(isStartNativeApiRequest(request(`/api/v1/sync/${platform}/job/job_missing/status`, 'GET'))).toBe(true);
+      expect(isStartNativeApiRequest(request(`/api/v1/admin/sync/${platform}/sites`, 'GET'))).toBe(true);
+      expect(isStartNativeApiRequest(request(`/api/v1/admin/sync/${platform}/sites`, 'POST'))).toBe(true);
+      expect(isStartNativeApiRequest(request(`/api/v1/admin/sync/${platform}/sites/site-id`, 'DELETE'))).toBe(true);
+      expect(isStartNativeApiRequest(request(`/api/v1/admin/sync/${platform}/jobs`, 'GET'))).toBe(true);
+    }
+  });
+
   test('routes federation and Passport protocols to Start', () => {
     expect(isStartNativeApiRequest(request('/api/v1/federation/metadata', 'GET'))).toBe(true);
     for (const action of ['follow', 'verify', 'webhook', 'token']) {

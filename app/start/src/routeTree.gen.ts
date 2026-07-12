@@ -89,6 +89,7 @@ import { Route as ApiV1LinksApplyRouteImport } from './routes/api/v1/links/apply
 import { Route as ApiV1InstallStatusRouteImport } from './routes/api/v1/install/status'
 import { Route as ApiV1InstallFinishRouteImport } from './routes/api/v1/install/finish'
 import { Route as ApiV1InstallCreateAdminRouteImport } from './routes/api/v1/install/create-admin'
+import { Route as ApiV1ImportPlatformRouteImport } from './routes/api/v1/import/$platform'
 import { Route as ApiV1I18nLocalesRouteImport } from './routes/api/v1/i18n/locales'
 import { Route as ApiV1I18nCurrentRouteImport } from './routes/api/v1/i18n/current'
 import { Route as ApiV1I18nLocaleRouteImport } from './routes/api/v1/i18n/$locale'
@@ -120,6 +121,7 @@ import { Route as ApiV1PublicAlbumsIndexRouteImport } from './routes/api/v1/publ
 import { Route as ApiV1AdminFootprintsIndexRouteImport } from './routes/api/v1/admin/footprints/index'
 import { Route as ApiV1AdminAnnotationsIndexRouteImport } from './routes/api/v1/admin/annotations/index'
 import { Route as ApiV1ThemesIdActivateRouteImport } from './routes/api/v1/themes/$id/activate'
+import { Route as ApiV1SyncPlatformActionRouteImport } from './routes/api/v1/sync/$platform/$action'
 import { Route as ApiV1SocialFetchFeedsStatusRouteImport } from './routes/api/v1/social/fetch-feeds/status'
 import { Route as ApiV1PublicAlbumsIdRouteImport } from './routes/api/v1/public/albums/$id'
 import { Route as ApiV1PostsSlugSlugRouteImport } from './routes/api/v1/posts/slug/$slug'
@@ -149,6 +151,10 @@ import { Route as ApiV1AdminAnalyticsPurgeRouteImport } from './routes/api/v1/ad
 import { Route as ApiV1AuthPasskeyFlowActionRouteImport } from './routes/api/v1/auth/passkey/$flow/$action'
 import { Route as ApiV1AlbumsIdPhotosMediaIdRouteImport } from './routes/api/v1/albums/$id/photos/$mediaId'
 import { Route as ApiV1AdminSystemUpgradeStatusRouteImport } from './routes/api/v1/admin/system/upgrade/status'
+import { Route as ApiV1AdminSyncPlatformSitesRouteImport } from './routes/api/v1/admin/sync/$platform/sites'
+import { Route as ApiV1AdminSyncPlatformJobsRouteImport } from './routes/api/v1/admin/sync/$platform/jobs'
+import { Route as ApiV1SyncPlatformJobIdStatusRouteImport } from './routes/api/v1/sync/$platform/job/$id/status'
+import { Route as ApiV1AdminSyncPlatformSitesUuidRouteImport } from './routes/api/v1/admin/sync/$platform/sites/$uuid'
 import { Route as ApiV1MusicProxyPlatformSongsIdAssetRouteImport } from './routes/api/v1/music/proxy/$platform/songs/$id/$asset'
 
 const LoginRoute = LoginRouteImport.update({
@@ -557,6 +563,11 @@ const ApiV1InstallCreateAdminRoute = ApiV1InstallCreateAdminRouteImport.update({
   path: '/api/v1/install/create-admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1ImportPlatformRoute = ApiV1ImportPlatformRouteImport.update({
+  id: '/api/v1/import/$platform',
+  path: '/api/v1/import/$platform',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1I18nLocalesRoute = ApiV1I18nLocalesRouteImport.update({
   id: '/api/v1/i18n/locales',
   path: '/api/v1/i18n/locales',
@@ -714,6 +725,11 @@ const ApiV1ThemesIdActivateRoute = ApiV1ThemesIdActivateRouteImport.update({
   id: '/activate',
   path: '/activate',
   getParentRoute: () => ApiV1ThemesIdRoute,
+} as any)
+const ApiV1SyncPlatformActionRoute = ApiV1SyncPlatformActionRouteImport.update({
+  id: '/api/v1/sync/$platform/$action',
+  path: '/api/v1/sync/$platform/$action',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1SocialFetchFeedsStatusRoute =
   ApiV1SocialFetchFeedsStatusRouteImport.update({
@@ -873,6 +889,30 @@ const ApiV1AdminSystemUpgradeStatusRoute =
     path: '/api/v1/admin/system/upgrade/status',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiV1AdminSyncPlatformSitesRoute =
+  ApiV1AdminSyncPlatformSitesRouteImport.update({
+    id: '/api/v1/admin/sync/$platform/sites',
+    path: '/api/v1/admin/sync/$platform/sites',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1AdminSyncPlatformJobsRoute =
+  ApiV1AdminSyncPlatformJobsRouteImport.update({
+    id: '/api/v1/admin/sync/$platform/jobs',
+    path: '/api/v1/admin/sync/$platform/jobs',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1SyncPlatformJobIdStatusRoute =
+  ApiV1SyncPlatformJobIdStatusRouteImport.update({
+    id: '/api/v1/sync/$platform/job/$id/status',
+    path: '/api/v1/sync/$platform/job/$id/status',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1AdminSyncPlatformSitesUuidRoute =
+  ApiV1AdminSyncPlatformSitesUuidRouteImport.update({
+    id: '/$uuid',
+    path: '/$uuid',
+    getParentRoute: () => ApiV1AdminSyncPlatformSitesRoute,
+  } as any)
 const ApiV1MusicProxyPlatformSongsIdAssetRoute =
   ApiV1MusicProxyPlatformSongsIdAssetRouteImport.update({
     id: '/api/v1/music/proxy/$platform/songs/$id/$asset',
@@ -927,6 +967,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/i18n/$locale': typeof ApiV1I18nLocaleRoute
   '/api/v1/i18n/current': typeof ApiV1I18nCurrentRoute
   '/api/v1/i18n/locales': typeof ApiV1I18nLocalesRoute
+  '/api/v1/import/$platform': typeof ApiV1ImportPlatformRoute
   '/api/v1/install/create-admin': typeof ApiV1InstallCreateAdminRoute
   '/api/v1/install/finish': typeof ApiV1InstallFinishRoute
   '/api/v1/install/status': typeof ApiV1InstallStatusRoute
@@ -1014,13 +1055,18 @@ export interface FileRoutesByFullPath {
   '/api/v1/posts/slug/$slug': typeof ApiV1PostsSlugSlugRoute
   '/api/v1/public/albums/$id': typeof ApiV1PublicAlbumsIdRoute
   '/api/v1/social/fetch-feeds/status': typeof ApiV1SocialFetchFeedsStatusRoute
+  '/api/v1/sync/$platform/$action': typeof ApiV1SyncPlatformActionRoute
   '/api/v1/themes/$id/activate': typeof ApiV1ThemesIdActivateRoute
   '/api/v1/admin/annotations/': typeof ApiV1AdminAnnotationsIndexRoute
   '/api/v1/admin/footprints/': typeof ApiV1AdminFootprintsIndexRoute
   '/api/v1/public/albums/': typeof ApiV1PublicAlbumsIndexRoute
+  '/api/v1/admin/sync/$platform/jobs': typeof ApiV1AdminSyncPlatformJobsRoute
+  '/api/v1/admin/sync/$platform/sites': typeof ApiV1AdminSyncPlatformSitesRouteWithChildren
   '/api/v1/admin/system/upgrade/status': typeof ApiV1AdminSystemUpgradeStatusRoute
   '/api/v1/albums/$id/photos/$mediaId': typeof ApiV1AlbumsIdPhotosMediaIdRoute
   '/api/v1/auth/passkey/$flow/$action': typeof ApiV1AuthPasskeyFlowActionRoute
+  '/api/v1/admin/sync/$platform/sites/$uuid': typeof ApiV1AdminSyncPlatformSitesUuidRoute
+  '/api/v1/sync/$platform/job/$id/status': typeof ApiV1SyncPlatformJobIdStatusRoute
   '/api/v1/music/proxy/$platform/songs/$id/$asset': typeof ApiV1MusicProxyPlatformSongsIdAssetRoute
 }
 export interface FileRoutesByTo {
@@ -1070,6 +1116,7 @@ export interface FileRoutesByTo {
   '/api/v1/i18n/$locale': typeof ApiV1I18nLocaleRoute
   '/api/v1/i18n/current': typeof ApiV1I18nCurrentRoute
   '/api/v1/i18n/locales': typeof ApiV1I18nLocalesRoute
+  '/api/v1/import/$platform': typeof ApiV1ImportPlatformRoute
   '/api/v1/install/create-admin': typeof ApiV1InstallCreateAdminRoute
   '/api/v1/install/finish': typeof ApiV1InstallFinishRoute
   '/api/v1/install/status': typeof ApiV1InstallStatusRoute
@@ -1157,13 +1204,18 @@ export interface FileRoutesByTo {
   '/api/v1/posts/slug/$slug': typeof ApiV1PostsSlugSlugRoute
   '/api/v1/public/albums/$id': typeof ApiV1PublicAlbumsIdRoute
   '/api/v1/social/fetch-feeds/status': typeof ApiV1SocialFetchFeedsStatusRoute
+  '/api/v1/sync/$platform/$action': typeof ApiV1SyncPlatformActionRoute
   '/api/v1/themes/$id/activate': typeof ApiV1ThemesIdActivateRoute
   '/api/v1/admin/annotations': typeof ApiV1AdminAnnotationsIndexRoute
   '/api/v1/admin/footprints': typeof ApiV1AdminFootprintsIndexRoute
   '/api/v1/public/albums': typeof ApiV1PublicAlbumsIndexRoute
+  '/api/v1/admin/sync/$platform/jobs': typeof ApiV1AdminSyncPlatformJobsRoute
+  '/api/v1/admin/sync/$platform/sites': typeof ApiV1AdminSyncPlatformSitesRouteWithChildren
   '/api/v1/admin/system/upgrade/status': typeof ApiV1AdminSystemUpgradeStatusRoute
   '/api/v1/albums/$id/photos/$mediaId': typeof ApiV1AlbumsIdPhotosMediaIdRoute
   '/api/v1/auth/passkey/$flow/$action': typeof ApiV1AuthPasskeyFlowActionRoute
+  '/api/v1/admin/sync/$platform/sites/$uuid': typeof ApiV1AdminSyncPlatformSitesUuidRoute
+  '/api/v1/sync/$platform/job/$id/status': typeof ApiV1SyncPlatformJobIdStatusRoute
   '/api/v1/music/proxy/$platform/songs/$id/$asset': typeof ApiV1MusicProxyPlatformSongsIdAssetRoute
 }
 export interface FileRoutesById {
@@ -1214,6 +1266,7 @@ export interface FileRoutesById {
   '/api/v1/i18n/$locale': typeof ApiV1I18nLocaleRoute
   '/api/v1/i18n/current': typeof ApiV1I18nCurrentRoute
   '/api/v1/i18n/locales': typeof ApiV1I18nLocalesRoute
+  '/api/v1/import/$platform': typeof ApiV1ImportPlatformRoute
   '/api/v1/install/create-admin': typeof ApiV1InstallCreateAdminRoute
   '/api/v1/install/finish': typeof ApiV1InstallFinishRoute
   '/api/v1/install/status': typeof ApiV1InstallStatusRoute
@@ -1301,13 +1354,18 @@ export interface FileRoutesById {
   '/api/v1/posts/slug/$slug': typeof ApiV1PostsSlugSlugRoute
   '/api/v1/public/albums/$id': typeof ApiV1PublicAlbumsIdRoute
   '/api/v1/social/fetch-feeds/status': typeof ApiV1SocialFetchFeedsStatusRoute
+  '/api/v1/sync/$platform/$action': typeof ApiV1SyncPlatformActionRoute
   '/api/v1/themes/$id/activate': typeof ApiV1ThemesIdActivateRoute
   '/api/v1/admin/annotations/': typeof ApiV1AdminAnnotationsIndexRoute
   '/api/v1/admin/footprints/': typeof ApiV1AdminFootprintsIndexRoute
   '/api/v1/public/albums/': typeof ApiV1PublicAlbumsIndexRoute
+  '/api/v1/admin/sync/$platform/jobs': typeof ApiV1AdminSyncPlatformJobsRoute
+  '/api/v1/admin/sync/$platform/sites': typeof ApiV1AdminSyncPlatformSitesRouteWithChildren
   '/api/v1/admin/system/upgrade/status': typeof ApiV1AdminSystemUpgradeStatusRoute
   '/api/v1/albums/$id/photos/$mediaId': typeof ApiV1AlbumsIdPhotosMediaIdRoute
   '/api/v1/auth/passkey/$flow/$action': typeof ApiV1AuthPasskeyFlowActionRoute
+  '/api/v1/admin/sync/$platform/sites/$uuid': typeof ApiV1AdminSyncPlatformSitesUuidRoute
+  '/api/v1/sync/$platform/job/$id/status': typeof ApiV1SyncPlatformJobIdStatusRoute
   '/api/v1/music/proxy/$platform/songs/$id/$asset': typeof ApiV1MusicProxyPlatformSongsIdAssetRoute
 }
 export interface FileRouteTypes {
@@ -1359,6 +1417,7 @@ export interface FileRouteTypes {
     | '/api/v1/i18n/$locale'
     | '/api/v1/i18n/current'
     | '/api/v1/i18n/locales'
+    | '/api/v1/import/$platform'
     | '/api/v1/install/create-admin'
     | '/api/v1/install/finish'
     | '/api/v1/install/status'
@@ -1446,13 +1505,18 @@ export interface FileRouteTypes {
     | '/api/v1/posts/slug/$slug'
     | '/api/v1/public/albums/$id'
     | '/api/v1/social/fetch-feeds/status'
+    | '/api/v1/sync/$platform/$action'
     | '/api/v1/themes/$id/activate'
     | '/api/v1/admin/annotations/'
     | '/api/v1/admin/footprints/'
     | '/api/v1/public/albums/'
+    | '/api/v1/admin/sync/$platform/jobs'
+    | '/api/v1/admin/sync/$platform/sites'
     | '/api/v1/admin/system/upgrade/status'
     | '/api/v1/albums/$id/photos/$mediaId'
     | '/api/v1/auth/passkey/$flow/$action'
+    | '/api/v1/admin/sync/$platform/sites/$uuid'
+    | '/api/v1/sync/$platform/job/$id/status'
     | '/api/v1/music/proxy/$platform/songs/$id/$asset'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -1502,6 +1566,7 @@ export interface FileRouteTypes {
     | '/api/v1/i18n/$locale'
     | '/api/v1/i18n/current'
     | '/api/v1/i18n/locales'
+    | '/api/v1/import/$platform'
     | '/api/v1/install/create-admin'
     | '/api/v1/install/finish'
     | '/api/v1/install/status'
@@ -1589,13 +1654,18 @@ export interface FileRouteTypes {
     | '/api/v1/posts/slug/$slug'
     | '/api/v1/public/albums/$id'
     | '/api/v1/social/fetch-feeds/status'
+    | '/api/v1/sync/$platform/$action'
     | '/api/v1/themes/$id/activate'
     | '/api/v1/admin/annotations'
     | '/api/v1/admin/footprints'
     | '/api/v1/public/albums'
+    | '/api/v1/admin/sync/$platform/jobs'
+    | '/api/v1/admin/sync/$platform/sites'
     | '/api/v1/admin/system/upgrade/status'
     | '/api/v1/albums/$id/photos/$mediaId'
     | '/api/v1/auth/passkey/$flow/$action'
+    | '/api/v1/admin/sync/$platform/sites/$uuid'
+    | '/api/v1/sync/$platform/job/$id/status'
     | '/api/v1/music/proxy/$platform/songs/$id/$asset'
   id:
     | '__root__'
@@ -1645,6 +1715,7 @@ export interface FileRouteTypes {
     | '/api/v1/i18n/$locale'
     | '/api/v1/i18n/current'
     | '/api/v1/i18n/locales'
+    | '/api/v1/import/$platform'
     | '/api/v1/install/create-admin'
     | '/api/v1/install/finish'
     | '/api/v1/install/status'
@@ -1732,13 +1803,18 @@ export interface FileRouteTypes {
     | '/api/v1/posts/slug/$slug'
     | '/api/v1/public/albums/$id'
     | '/api/v1/social/fetch-feeds/status'
+    | '/api/v1/sync/$platform/$action'
     | '/api/v1/themes/$id/activate'
     | '/api/v1/admin/annotations/'
     | '/api/v1/admin/footprints/'
     | '/api/v1/public/albums/'
+    | '/api/v1/admin/sync/$platform/jobs'
+    | '/api/v1/admin/sync/$platform/sites'
     | '/api/v1/admin/system/upgrade/status'
     | '/api/v1/albums/$id/photos/$mediaId'
     | '/api/v1/auth/passkey/$flow/$action'
+    | '/api/v1/admin/sync/$platform/sites/$uuid'
+    | '/api/v1/sync/$platform/job/$id/status'
     | '/api/v1/music/proxy/$platform/songs/$id/$asset'
   fileRoutesById: FileRoutesById
 }
@@ -1787,6 +1863,7 @@ export interface RootRouteChildren {
   ApiV1I18nLocaleRoute: typeof ApiV1I18nLocaleRoute
   ApiV1I18nCurrentRoute: typeof ApiV1I18nCurrentRoute
   ApiV1I18nLocalesRoute: typeof ApiV1I18nLocalesRoute
+  ApiV1ImportPlatformRoute: typeof ApiV1ImportPlatformRoute
   ApiV1InstallCreateAdminRoute: typeof ApiV1InstallCreateAdminRoute
   ApiV1InstallFinishRoute: typeof ApiV1InstallFinishRoute
   ApiV1InstallStatusRoute: typeof ApiV1InstallStatusRoute
@@ -1859,11 +1936,15 @@ export interface RootRouteChildren {
   ApiV1NetworkOauthActionRoute: typeof ApiV1NetworkOauthActionRoute
   ApiV1PlaylistsIdSongsRoute: typeof ApiV1PlaylistsIdSongsRoute
   ApiV1PublicAlbumsIdRoute: typeof ApiV1PublicAlbumsIdRoute
+  ApiV1SyncPlatformActionRoute: typeof ApiV1SyncPlatformActionRoute
   ApiV1AdminAnnotationsIndexRoute: typeof ApiV1AdminAnnotationsIndexRoute
   ApiV1AdminFootprintsIndexRoute: typeof ApiV1AdminFootprintsIndexRoute
   ApiV1PublicAlbumsIndexRoute: typeof ApiV1PublicAlbumsIndexRoute
+  ApiV1AdminSyncPlatformJobsRoute: typeof ApiV1AdminSyncPlatformJobsRoute
+  ApiV1AdminSyncPlatformSitesRoute: typeof ApiV1AdminSyncPlatformSitesRouteWithChildren
   ApiV1AdminSystemUpgradeStatusRoute: typeof ApiV1AdminSystemUpgradeStatusRoute
   ApiV1AuthPasskeyFlowActionRoute: typeof ApiV1AuthPasskeyFlowActionRoute
+  ApiV1SyncPlatformJobIdStatusRoute: typeof ApiV1SyncPlatformJobIdStatusRoute
   ApiV1MusicProxyPlatformSongsIdAssetRoute: typeof ApiV1MusicProxyPlatformSongsIdAssetRoute
 }
 
@@ -2429,6 +2510,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1InstallCreateAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/import/$platform': {
+      id: '/api/v1/import/$platform'
+      path: '/api/v1/import/$platform'
+      fullPath: '/api/v1/import/$platform'
+      preLoaderRoute: typeof ApiV1ImportPlatformRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/i18n/locales': {
       id: '/api/v1/i18n/locales'
       path: '/api/v1/i18n/locales'
@@ -2646,6 +2734,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1ThemesIdActivateRouteImport
       parentRoute: typeof ApiV1ThemesIdRoute
     }
+    '/api/v1/sync/$platform/$action': {
+      id: '/api/v1/sync/$platform/$action'
+      path: '/api/v1/sync/$platform/$action'
+      fullPath: '/api/v1/sync/$platform/$action'
+      preLoaderRoute: typeof ApiV1SyncPlatformActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/social/fetch-feeds/status': {
       id: '/api/v1/social/fetch-feeds/status'
       path: '/status'
@@ -2849,6 +2944,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1AdminSystemUpgradeStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/admin/sync/$platform/sites': {
+      id: '/api/v1/admin/sync/$platform/sites'
+      path: '/api/v1/admin/sync/$platform/sites'
+      fullPath: '/api/v1/admin/sync/$platform/sites'
+      preLoaderRoute: typeof ApiV1AdminSyncPlatformSitesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/admin/sync/$platform/jobs': {
+      id: '/api/v1/admin/sync/$platform/jobs'
+      path: '/api/v1/admin/sync/$platform/jobs'
+      fullPath: '/api/v1/admin/sync/$platform/jobs'
+      preLoaderRoute: typeof ApiV1AdminSyncPlatformJobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/sync/$platform/job/$id/status': {
+      id: '/api/v1/sync/$platform/job/$id/status'
+      path: '/api/v1/sync/$platform/job/$id/status'
+      fullPath: '/api/v1/sync/$platform/job/$id/status'
+      preLoaderRoute: typeof ApiV1SyncPlatformJobIdStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/admin/sync/$platform/sites/$uuid': {
+      id: '/api/v1/admin/sync/$platform/sites/$uuid'
+      path: '/$uuid'
+      fullPath: '/api/v1/admin/sync/$platform/sites/$uuid'
+      preLoaderRoute: typeof ApiV1AdminSyncPlatformSitesUuidRouteImport
+      parentRoute: typeof ApiV1AdminSyncPlatformSitesRoute
+    }
     '/api/v1/music/proxy/$platform/songs/$id/$asset': {
       id: '/api/v1/music/proxy/$platform/songs/$id/$asset'
       path: '/api/v1/music/proxy/$platform/songs/$id/$asset'
@@ -3026,6 +3149,20 @@ const ApiV1AlbumsIdPhotosRouteChildren: ApiV1AlbumsIdPhotosRouteChildren = {
 const ApiV1AlbumsIdPhotosRouteWithChildren =
   ApiV1AlbumsIdPhotosRoute._addFileChildren(ApiV1AlbumsIdPhotosRouteChildren)
 
+interface ApiV1AdminSyncPlatformSitesRouteChildren {
+  ApiV1AdminSyncPlatformSitesUuidRoute: typeof ApiV1AdminSyncPlatformSitesUuidRoute
+}
+
+const ApiV1AdminSyncPlatformSitesRouteChildren: ApiV1AdminSyncPlatformSitesRouteChildren =
+  {
+    ApiV1AdminSyncPlatformSitesUuidRoute: ApiV1AdminSyncPlatformSitesUuidRoute,
+  }
+
+const ApiV1AdminSyncPlatformSitesRouteWithChildren =
+  ApiV1AdminSyncPlatformSitesRoute._addFileChildren(
+    ApiV1AdminSyncPlatformSitesRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
@@ -3071,6 +3208,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1I18nLocaleRoute: ApiV1I18nLocaleRoute,
   ApiV1I18nCurrentRoute: ApiV1I18nCurrentRoute,
   ApiV1I18nLocalesRoute: ApiV1I18nLocalesRoute,
+  ApiV1ImportPlatformRoute: ApiV1ImportPlatformRoute,
   ApiV1InstallCreateAdminRoute: ApiV1InstallCreateAdminRoute,
   ApiV1InstallFinishRoute: ApiV1InstallFinishRoute,
   ApiV1InstallStatusRoute: ApiV1InstallStatusRoute,
@@ -3143,11 +3281,16 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1NetworkOauthActionRoute: ApiV1NetworkOauthActionRoute,
   ApiV1PlaylistsIdSongsRoute: ApiV1PlaylistsIdSongsRoute,
   ApiV1PublicAlbumsIdRoute: ApiV1PublicAlbumsIdRoute,
+  ApiV1SyncPlatformActionRoute: ApiV1SyncPlatformActionRoute,
   ApiV1AdminAnnotationsIndexRoute: ApiV1AdminAnnotationsIndexRoute,
   ApiV1AdminFootprintsIndexRoute: ApiV1AdminFootprintsIndexRoute,
   ApiV1PublicAlbumsIndexRoute: ApiV1PublicAlbumsIndexRoute,
+  ApiV1AdminSyncPlatformJobsRoute: ApiV1AdminSyncPlatformJobsRoute,
+  ApiV1AdminSyncPlatformSitesRoute:
+    ApiV1AdminSyncPlatformSitesRouteWithChildren,
   ApiV1AdminSystemUpgradeStatusRoute: ApiV1AdminSystemUpgradeStatusRoute,
   ApiV1AuthPasskeyFlowActionRoute: ApiV1AuthPasskeyFlowActionRoute,
+  ApiV1SyncPlatformJobIdStatusRoute: ApiV1SyncPlatformJobIdStatusRoute,
   ApiV1MusicProxyPlatformSongsIdAssetRoute:
     ApiV1MusicProxyPlatformSongsIdAssetRoute,
 }

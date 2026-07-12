@@ -1606,6 +1606,270 @@ async function importSyncBatch(jobId: string, siteUuid: string, resource: string
   return imported;
 }
 
+type SyncPlatform = 'wordpress' | 'typecho';
+
+export class ImportSyncServiceError extends Error {
+  constructor(public status: number, public code: string, message: string) {
+    super(message);
+  }
+}
+
+function requireSyncPlatform(value: unknown): SyncPlatform {
+  const platform = String(value || '').trim().toLowerCase();
+  if (platform === 'wordpress' || platform === 'typecho') return platform;
+  throw new ImportSyncServiceError(404, 'NOT_FOUND', '同步平台不存在');
+}
+
+function syncRequestBody(value: unknown): Record<string, any> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {};
+}
+
+async function authenticatedSyncSite(body: Record<string, any>, platform: SyncPlatform) {
+  try {
+    return await authSyncEnvelope(body, platform);
+  } catch (error) {
+    throw new ImportSyncServiceError(401, 'BAD_AUTH', error instanceof Error ? error.message : '认证失败');
+  }
+}
+
+export async function importWordPressPayload(request: Request, userId: number) {
+  const contentType = request.headers.get('content-type') || '';
+  if (contentType.includes('multipart/form-data')) {
+    const form = await request.formData().catch(() => null);
+    const file = form?.get('file');
+    if (!(file instanceof File)) throw new ImportSyncServiceError(400, 'BAD_REQUEST', '请上传 WordPress WXR XML 文件');
+    const result = await importWordPressWxr(await file.text(), userId);
+    return { imported: result.posts + result.pages, ...result };
+  }
+
+  const body = syncRequestBody(await request.json().catch(() => ({})));
+  if (!Array.isArray(body.posts)) {
+    throw new ImportSyncServiceError(400, 'BAD_REQUEST', '请上传 WordPress WXR XML 文件，或提交 posts 数组');
+  }
+  let imported = 0;
+  for (const post of body.posts) {
+    const item = syncRequestBody(post);
+    const row = await one<{ id: number }>(
+      `insert into ${table('posts')} (title, slug, content, excerpt, author_id, status, type, created_at, updated_at, source_type, source_id)
+       values ($1,$2,$3,$4,$5,$6,'post',$7,$7,'wordpress',$8)
+       on conflict (slug) where deleted_at = 0 do update set title = excluded.title, content = excluded.content, excerpt = excluded.excerpt, updated_at = excluded.updated_at
+       returning id`,
+      [item.title || '', item.slug || simpleSlug(item.title || ''), item.content || '', item.excerpt || '', userId || 1, item.status || 'draft', nowUnix(), String(item.id || item.source_id || '')],
+    ).catch(() => null);
+    if (row?.id) imported++;
+  }
+  return { imported, posts: imported, pages: 0, comments: 0 };
+}
+
+export async function importTypechoPayload(value: unknown, userId: number) {
+  const body = syncRequestBody(value);
+  if (!Array.isArray(body.posts)) {
+    return {
+      imported: 0,
+      posts: 0,
+      pages: 0,
+      comments: 0,
+      skipped: true,
+      message: 'Typecho 旧直连导入已由 Typecho 同步插件替代，请使用 /api/v1/sync/typecho/* 或后台同步站点配置。',
+      sync_endpoints: {
+        ping: '/api/v1/sync/typecho/ping',
+        start: '/api/v1/sync/typecho/start',
+        batch: '/api/v1/sync/typecho/batch',
+        finish: '/api/v1/sync/typecho/finish',
+      },
+    };
+  }
+  let imported = 0;
+  for (const post of body.posts) {
+    const item = syncRequestBody(post);
+    const row = await one<{ id: number }>(
+      `insert into ${table('posts')} (title, slug, content, excerpt, author_id, status, type, created_at, updated_at, source_type, source_id)
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$8,'typecho',$9)
+       on conflict (slug) where deleted_at = 0 do update set title = excluded.title, content = excluded.content, excerpt = excluded.excerpt, updated_at = excluded.updated_at
+       returning id`,
+      [
+        item.title || '',
+        item.slug || simpleSlug(item.title || ''),
+        item.content || item.text || '',
+        item.excerpt || '',
+        userId || 1,
+        item.status || 'draft',
+        item.type === 'page' ? 'page' : 'post',
+        Number(item.created_at || item.created || nowUnix()),
+        String(item.id || item.cid || item.source_id || ''),
+      ],
+    ).catch(() => null);
+    if (row?.id) imported++;
+  }
+  return { imported, posts: imported, pages: 0, comments: 0 };
+}
+
+export async function syncPingPayload(platformValue: unknown, value: unknown) {
+  const platform = requireSyncPlatform(platformValue);
+  const site = await authenticatedSyncSite(syncRequestBody(value), platform);
+  return {
+    ok: true,
+    platform,
+    app: 'utterlog-bun',
+    site_uuid: site.site_uuid,
+    label: site.label,
+    source_url: site.source_url,
+    server_time: nowUnix(),
+  };
+}
+
+export async function syncStartPayload(platformValue: unknown, value: unknown) {
+  const platform = requireSyncPlatform(platformValue);
+  const body = syncRequestBody(value);
+  const site = await authenticatedSyncSite(body, platform);
+  const manifest = syncRequestBody(body.manifest);
+  if (manifest.source_url) {
+    await exec(`update ${table('sync_sites')} set source_url = $1, updated_at = $2 where site_uuid = $3`, [String(manifest.source_url), nowUnix(), site.site_uuid]).catch(() => {});
+  }
+  const jobId = `job_${randomBytes(12).toString('hex')}`;
+  await exec(
+    `insert into ${table('sync_jobs')} (job_id, site_uuid, status, stage, manifest, started_at)
+     values ($1,$2,'running','import',$3::jsonb,$4)`,
+    [jobId, site.site_uuid, JSON.stringify(manifest), nowUnix()],
+  );
+  return { job_id: jobId, started_at: nowUnix() };
+}
+
+export async function syncBatchPayload(platformValue: unknown, value: unknown) {
+  const platform = requireSyncPlatform(platformValue);
+  const body = syncRequestBody(value);
+  const site = await authenticatedSyncSite(body, platform);
+  const jobId = String(body.job_id || '');
+  const resource = String(body.resource || '');
+  const batchNo = Number(body.batch_no || 0);
+  const items = Array.isArray(body.items) ? body.items.map(syncRequestBody) : [];
+  if (!jobId || !resource || batchNo <= 0) {
+    throw new ImportSyncServiceError(400, 'BAD_REQUEST', '缺少 job_id / resource / batch_no');
+  }
+  const job = await one<{ site_uuid: string }>(`select site_uuid from ${table('sync_jobs')} where job_id = $1`, [jobId]).catch(() => null);
+  if (!job) throw new ImportSyncServiceError(404, 'NOT_FOUND', 'job 不存在');
+  if (job.site_uuid !== site.site_uuid) throw new ImportSyncServiceError(403, 'FORBIDDEN', 'job 不属于当前同步站点');
+  const seen = await one<{ count: string }>(
+    `select count(*)::text as count from ${table('sync_batches')} where job_id = $1 and resource = $2 and batch_no = $3`,
+    [jobId, resource, batchNo],
+  );
+  if (Number(seen?.count || 0) > 0) return { duplicate: true, items_received: items.length };
+  try {
+    const imported = await importSyncBatch(jobId, site.site_uuid, resource, items, 1, site.platform);
+    await exec(
+      `insert into ${table('sync_batches')} (job_id, resource, batch_no, received_at, item_count)
+       values ($1,$2,$3,$4,$5) on conflict (job_id, resource, batch_no) do nothing`,
+      [jobId, resource, batchNo, nowUnix(), imported],
+    );
+    return { imported, resource, batch_no: batchNo };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '导入失败';
+    await exec(`update ${table('sync_jobs')} set status = 'error', error_message = $1 where job_id = $2`, [message, jobId]).catch(() => {});
+    throw new ImportSyncServiceError(500, 'IMPORT_ERR', message);
+  }
+}
+
+export async function syncFinishPayload(platformValue: unknown, value: unknown) {
+  const platform = requireSyncPlatform(platformValue);
+  const body = syncRequestBody(value);
+  const site = await authenticatedSyncSite(body, platform);
+  const jobId = String(body.job_id || '');
+  if (!jobId) throw new ImportSyncServiceError(400, 'BAD_REQUEST', '缺少 job_id');
+  const job = await one<{ site_uuid: string }>(`select site_uuid from ${table('sync_jobs')} where job_id = $1`, [jobId]).catch(() => null);
+  if (!job) throw new ImportSyncServiceError(404, 'NOT_FOUND', 'job 不存在');
+  if (job.site_uuid !== site.site_uuid) throw new ImportSyncServiceError(403, 'FORBIDDEN', 'job 不属于当前同步站点');
+  const counts = syncRequestBody(body.summary);
+  await exec(`update ${table('sync_jobs')} set status='processing', stage='media_scan', counts=$1::jsonb where job_id=$2`, [JSON.stringify(counts), jobId]);
+  void runSyncFinishWorker(jobId, site.site_uuid, counts).catch(() => {});
+  return {
+    job_id: jobId,
+    status: 'processing',
+    stage: 'media_scan',
+    next_stage: 'media download + content rewrite',
+    hint: `轮询 /api/v1/sync/${platform}/job/${jobId}/status`,
+  };
+}
+
+export async function syncRollbackPayload(platformValue: unknown, value: unknown) {
+  const platform = requireSyncPlatform(platformValue);
+  const body = syncRequestBody(value);
+  const site = await authenticatedSyncSite(body, platform);
+  if (String(body.confirm || '') !== site.site_uuid) {
+    throw new ImportSyncServiceError(400, 'CONFIRM_MISMATCH', `confirm 字段必须等于 site_uuid (${site.site_uuid})`);
+  }
+  const rowsRemoved: Record<string, number> = {};
+  for (const name of ['comments', 'posts', 'metas', 'media', 'links']) {
+    rowsRemoved[name] = await execChanged(`delete from ${table(name)} where source_site_uuid = $1`, [site.site_uuid]).catch(() => 0);
+  }
+  await exec(`delete from ${table('sync_id_map')} where site_uuid = $1`, [site.site_uuid]).catch(() => {});
+  await exec(`delete from ${table('sync_media_queue')} where job_id in (select job_id from ${table('sync_jobs')} where site_uuid = $1)`, [site.site_uuid]).catch(() => {});
+  await exec(`delete from ${table('sync_batches')} where job_id in (select job_id from ${table('sync_jobs')} where site_uuid = $1)`, [site.site_uuid]).catch(() => {});
+  await exec(`delete from ${table('sync_jobs')} where site_uuid = $1`, [site.site_uuid]).catch(() => {});
+  return { rolled_back: true, site_uuid: site.site_uuid, rows_removed: rowsRemoved };
+}
+
+export async function syncJobStatusPayload(platformValue: unknown, jobId: unknown) {
+  requireSyncPlatform(platformValue);
+  const row = await one<Record<string, unknown>>(`select * from ${table('sync_jobs')} where job_id = $1`, [String(jobId || '')]).catch(() => null);
+  if (!row) throw new ImportSyncServiceError(404, 'NOT_FOUND', 'job 不存在');
+  return row;
+}
+
+export async function createSyncSitePayload(platformValue: unknown, value: unknown) {
+  const platform = requireSyncPlatform(platformValue);
+  const body = syncRequestBody(value);
+  let siteUuid = String(body.site_uuid || '').trim();
+  if (!siteUuid) {
+    const installUuid = await installationSiteUuid();
+    if (installUuid) {
+      const exists = await one<{ count: string }>(
+        `select count(*)::text as count from ${table('sync_sites')} where site_uuid = $1`,
+        [installUuid],
+      ).catch(() => null);
+      siteUuid = Number(exists?.count || 0) > 0 ? '' : installUuid;
+    }
+  }
+  if (!siteUuid) siteUuid = `${platform.slice(0, 2)}_${randomBytes(16).toString('hex')}`;
+  const token = randomBytes(24).toString('hex');
+  const hash = await Bun.password.hash(token, { algorithm: 'bcrypt' });
+  await exec(
+    `insert into ${table('sync_sites')} (site_uuid, label, source_url, token_hash, platform, created_at, updated_at)
+     values ($1,$2,$3,$4,$5,$6,$6)`,
+    [siteUuid, String(body.label || ''), String(body.source_url || ''), hash, platform, nowUnix()],
+  );
+  return { site_uuid: siteUuid, token, label: body.label || '', platform, note: '请立即保存 token，之后无法再次查看' };
+}
+
+export async function listSyncSitesPayload(platformValue: unknown) {
+  const platform = requireSyncPlatform(platformValue);
+  const rows = await many<Record<string, unknown>>(
+    `select s.id, s.site_uuid, s.label, s.source_url, s.disabled, s.platform, s.last_seen_at, s.created_at, s.updated_at,
+            coalesce((select count(*) from ${table('sync_jobs')} j where j.site_uuid = s.site_uuid), 0)::int as recent_jobs
+     from ${table('sync_sites')} s where s.platform = $1 order by s.created_at desc`,
+    [platform],
+  ).catch(() => []);
+  return { sites: rows };
+}
+
+export async function deleteSyncSitePayload(platformValue: unknown, siteUuid: unknown) {
+  const platform = requireSyncPlatform(platformValue);
+  const uuid = String(siteUuid || '');
+  await exec(`delete from ${table('sync_sites')} where site_uuid = $1 and platform = $2`, [uuid, platform]);
+  return { deleted: uuid };
+}
+
+export async function listSyncJobsPayload(platformValue: unknown, searchParams: URLSearchParams) {
+  const platform = requireSyncPlatform(platformValue);
+  const limit = Math.max(1, Math.min(200, intParam(searchParams.get('limit') || undefined, 20)));
+  const rows = await many<Record<string, unknown>>(
+    `select j.job_id, j.site_uuid, j.status, j.stage, j.media_total, j.media_done, j.posts_rewritten, j.started_at, j.finished_at
+     from ${table('sync_jobs')} j inner join ${table('sync_sites')} s on s.site_uuid = j.site_uuid
+     where s.platform = $1 order by j.started_at desc limit $2`,
+    [platform, limit],
+  ).catch(() => []);
+  return { jobs: rows };
+}
+
 const base32Alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 
 function base32Encode(buf: Buffer) {

@@ -74,6 +74,12 @@ export function isStartNativeApiRequest(request: Request) {
   if (url.pathname === '/api/v1/social/fetch-feeds/status') return method === 'GET';
   if (/^\/api\/v1\/social\/(follow-status|following|management)$/.test(url.pathname)) return method === 'GET';
   if (/^\/api\/v1\/social\/(follow|unfollow)$/.test(url.pathname)) return method === 'POST';
+  if (/^\/api\/v1\/import\/(wordpress|typecho)$/.test(url.pathname)) return method === 'POST';
+  if (/^\/api\/v1\/sync\/(wordpress|typecho)\/(ping|start|batch|finish|rollback)$/.test(url.pathname)) return method === 'POST';
+  if (/^\/api\/v1\/sync\/(wordpress|typecho)\/job\/[^/]+\/status$/.test(url.pathname)) return method === 'GET';
+  if (/^\/api\/v1\/admin\/sync\/(wordpress|typecho)\/sites$/.test(url.pathname)) return method === 'GET' || method === 'POST';
+  if (/^\/api\/v1\/admin\/sync\/(wordpress|typecho)\/sites\/[^/]+$/.test(url.pathname)) return method === 'DELETE';
+  if (/^\/api\/v1\/admin\/sync\/(wordpress|typecho)\/jobs$/.test(url.pathname)) return method === 'GET';
   if (/^\/api\/v1\/telegram\/(webhook|test|get-chat-id|setup-webhook)$/.test(url.pathname)) return method === 'POST';
   if (url.pathname === '/api/v1/federation/metadata') return method === 'GET';
   if (/^\/api\/v1\/federation\/(follow|verify|webhook|token)$/.test(url.pathname)) return method === 'POST';
