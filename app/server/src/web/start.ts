@@ -80,6 +80,15 @@ export function isStartNativeApiRequest(request: Request) {
   if (/^\/api\/v1\/admin\/sync\/(wordpress|typecho)\/sites$/.test(url.pathname)) return method === 'GET' || method === 'POST';
   if (/^\/api\/v1\/admin\/sync\/(wordpress|typecho)\/sites\/[^/]+$/.test(url.pathname)) return method === 'DELETE';
   if (/^\/api\/v1\/admin\/sync\/(wordpress|typecho)\/jobs$/.test(url.pathname)) return method === 'GET';
+  if (url.pathname === '/api/v1/ai/providers') return method === 'GET' || method === 'POST';
+  if (/^\/api\/v1\/ai\/providers\/[^/]+$/.test(url.pathname)) return method === 'DELETE';
+  if (/^\/api\/v1\/ai\/(conversations|logs|stats|batch-status)$/.test(url.pathname)) return method === 'GET';
+  if (/^\/api\/v1\/ai\/conversations\/[^/]+$/.test(url.pathname)) return method === 'GET' || method === 'DELETE';
+  if (/^\/api\/v1\/ai\/(test|generate-image|cover|chat|slug|summary|tags|format|query|reader-chat|batch-questions|batch-summary|batch-all|batch-delete|batch-stop)$/.test(url.pathname)) return method === 'POST';
+  if (url.pathname === '/api/v1/admin/ai-comments') return method === 'GET';
+  if (/^\/api\/v1\/admin\/ai-comments\/[^/]+\/(approve|reject|regenerate)$/.test(url.pathname)) return method === 'POST';
+  if (/^\/api\/v1\/admin\/ai-comments\/[^/]+$/.test(url.pathname)) return method === 'DELETE';
+  if (url.pathname === '/api/v1/search/rebuild') return method === 'POST';
   if (/^\/api\/v1\/telegram\/(webhook|test|get-chat-id|setup-webhook)$/.test(url.pathname)) return method === 'POST';
   if (url.pathname === '/api/v1/federation/metadata') return method === 'GET';
   if (/^\/api\/v1\/federation\/(follow|verify|webhook|token)$/.test(url.pathname)) return method === 'POST';

@@ -1238,6 +1238,540 @@ export async function rebuildEmbeddings(limit = 0, userId = 0) {
   return { total: posts.length, embedded, failed };
 }
 
+export class AiServiceError extends Error {
+  constructor(public status: number, public code: string, message: string) {
+    super(message);
+  }
+}
+
+export type AiActionResult = {
+  data?: unknown;
+  response?: Response;
+  pagination?: { total: number; page: number; per_page: number; total_pages: number };
+};
+
+function aiInput(value: unknown): Record<string, any> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {};
+}
+
+function normalizedAiBatchType(value: unknown): AiBatchType {
+  return value === 'summary' || value === 'all' ? value : 'questions';
+}
+
+export async function aiProvidersPayload() {
+  const providers = await many<Record<string, unknown>>(
+    `select * from ${table('ai_providers')} order by sort_order asc, id asc`,
+  ).catch(() => []);
+  return { providers, presets: aiPresets, purposes: aiPurposes, prompt_defaults: aiPromptDefaults };
+}
+
+export async function saveAiProviderPayload(value: unknown) {
+  const body = aiInput(value);
+  const now = nowUnix();
+  const id = intParam(String(body.id || ''));
+  const name = String(body.name || '').trim();
+  const endpoint = String(body.endpoint || '').trim();
+  const model = String(body.model || '').trim();
+  if (!name || !endpoint || !model) {
+    throw new AiServiceError(400, 'BAD_REQUEST', '名称、端点和模型为必填项');
+  }
+  const params = [
+    name,
+    body.slug || body.name || '',
+    body.type || 'text',
+    endpoint,
+    model,
+    body.api_key || '',
+    Number(body.temperature ?? 0.7),
+    Number(body.max_tokens ?? 4096),
+    Number(body.timeout ?? 30),
+    body.is_active ?? true,
+    body.is_default ?? false,
+    Number(body.sort_order ?? 0),
+    JSON.stringify(body.extra || {}),
+    now,
+  ];
+  if (id > 0) {
+    await exec(
+      `update ${table('ai_providers')} set name=$1, slug=$2, type=$3, endpoint=$4, model=$5, api_key=$6,
+       temperature=$7, max_tokens=$8, timeout=$9, is_active=$10, is_default=$11, sort_order=$12, extra=$13::jsonb, updated_at=$14
+       where id=$15`,
+      [...params, id],
+    );
+    return { id };
+  }
+  const rows = await many<{ id: number }>(
+    `insert into ${table('ai_providers')}
+     (name, slug, type, endpoint, model, api_key, temperature, max_tokens, timeout, is_active, is_default, sort_order, extra, created_at, updated_at)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::jsonb,$14,$14) returning id`,
+    params,
+  );
+  return { id: rows[0]?.id || 0 };
+}
+
+export async function deleteAiProviderPayload(id: unknown) {
+  await exec(`delete from ${table('ai_providers')} where id = $1`, [String(id || '')]).catch(() => {});
+  return null;
+}
+
+async function testAiProviderPayload(value: unknown, userId: number) {
+  const body = aiInput(value);
+  const endpoint = String(body.endpoint || '').trim();
+  const model = String(body.model || '').trim();
+  const apiKey = String(body.api_key || '').trim();
+  const providerType = ['text', 'embedding', 'image'].includes(String(body.type || '')) ? String(body.type) : 'text';
+  if (!endpoint || !model || !apiKey) {
+    throw new AiServiceError(400, 'BAD_REQUEST', '端点、模型和 API Key 为必填项');
+  }
+  if (providerType === 'image') {
+    await logAi(userId, { endpoint, model, slug: 'test' }, 'test-image', 'success', 'image provider config checked');
+    return { ok: true, content: '图片提供商已完成本地配置校验；为避免触发生成计费，测试连接不会请求图片生成端点。', model };
+  }
+  try {
+    const payload = providerType === 'embedding'
+      ? { model, input: 'Utterlog connection test' }
+      : endpoint.includes('api.anthropic.com')
+      ? { model, system: '', messages: [{ role: 'user', content: 'Hi, reply OK' }], max_tokens: 10, temperature: 0.1 }
+      : { model, messages: [{ role: 'user', content: 'Hi, reply OK' }], max_tokens: 10, temperature: 0.1 };
+    const headers: Record<string, string> = { 'content-type': 'application/json' };
+    if (endpoint.includes('api.anthropic.com')) {
+      headers['x-api-key'] = apiKey;
+      headers['anthropic-version'] = '2023-06-01';
+    } else {
+      headers.authorization = `Bearer ${apiKey}`;
+    }
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(15_000),
+    });
+    const result: any = await response.json().catch(() => ({}));
+    if (!response.ok || result.error) {
+      const message = String(result.error?.message || result.error || `HTTP ${response.status}`);
+      await logAi(userId, { endpoint, model, slug: 'test' }, `test-${providerType}`, 'error', message);
+      throw new AiServiceError(400, 'API_ERROR', message);
+    }
+    if (providerType === 'embedding') {
+      const embedding = result.data?.[0]?.embedding || result.embedding;
+      if (!Array.isArray(embedding) || embedding.length === 0) {
+        const message = 'embedding provider 返回为空';
+        await logAi(userId, { endpoint, model, slug: 'test' }, 'test-embedding', 'error', message);
+        throw new AiServiceError(400, 'API_ERROR', message);
+      }
+      await logAi(userId, { endpoint, model, slug: 'test' }, 'test-embedding', 'success', `embedding:${embedding.length}`);
+      return { ok: true, content: `Embedding OK (${embedding.length} dimensions)`, model };
+    }
+    const content = result.content?.[0]?.text || result.choices?.[0]?.message?.content || result.choices?.[0]?.text || '';
+    await logAi(userId, { endpoint, model, slug: 'test' }, 'test-text', 'success', String(content || 'OK'));
+    return { ok: true, content: String(content || 'OK'), model };
+  } catch (error) {
+    if (error instanceof AiServiceError) throw error;
+    throw new AiServiceError(400, 'CONNECTION_ERROR', error instanceof Error ? error.message : 'AI 连接失败');
+  }
+}
+
+async function adminAiChatResponse(value: unknown, userId: number) {
+  const body = aiInput(value);
+  const message = String(body.message || body.prompt || '').trim();
+  if (!message) throw new AiServiceError(400, 'BAD_REQUEST', 'message 不能为空');
+  let conversationId = intParam(String(body.conversation_id || ''));
+  if (!conversationId) {
+    const row = await one<{ id: number }>(
+      `insert into ${table('ai_conversations')} (user_id, title, created_at, updated_at) values ($1,$2,$3,$3) returning id`,
+      [userId, message.slice(0, 80), nowUnix()],
+    );
+    conversationId = row?.id || 0;
+  }
+  const history = conversationId ? await many<{ role: string; content: string }>(
+    `select role, content from ${table('ai_messages')} where conversation_id = $1 order by id asc limit 20`,
+    [conversationId],
+  ).catch(() => []) : [];
+  if (conversationId) {
+    await exec(
+      `insert into ${table('ai_messages')} (conversation_id, role, content, model, created_at) values ($1,'user',$2,'',$3)`,
+      [conversationId, message, nowUnix()],
+    ).catch(() => {});
+  }
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    async start(controller) {
+      const send = (event: Record<string, unknown>) => controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
+      send({ type: 'meta', conversation_id: conversationId });
+      try {
+        const systemPrompt = await buildAdminSystemPrompt();
+        const result = await callAiTextWithTools(
+          [{ role: 'system', content: systemPrompt }, ...history, { role: 'user', content: message }],
+          userId,
+          send,
+        );
+        send({ type: 'chunk', content: result });
+        if (conversationId) {
+          await exec(
+            `insert into ${table('ai_messages')} (conversation_id, role, content, model, created_at) values ($1,'assistant',$2,$3,$4)`,
+            [conversationId, result, '', nowUnix()],
+          ).catch(() => {});
+          await exec(
+            `update ${table('ai_conversations')} set message_count = message_count + 2, updated_at = $1 where id = $2`,
+            [nowUnix(), conversationId],
+          ).catch(() => {});
+        }
+      } catch (error) {
+        send({ type: 'chunk', content: `[Error: ${error instanceof Error ? error.message : 'AI 请求失败'}]` });
+      } finally {
+        send({ type: 'done' });
+        controller.close();
+      }
+    },
+  });
+  return new Response(stream, {
+    headers: { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-cache', connection: 'keep-alive' },
+  });
+}
+
+export async function aiGetActionPayload(action: string, userId: number, searchParams: URLSearchParams): Promise<AiActionResult> {
+  if (action === 'conversations') {
+    const rows = await many<Record<string, unknown>>(
+      `select * from ${table('ai_conversations')} where user_id = $1 order by updated_at desc, id desc limit 100`,
+      [userId],
+    ).catch(() => []);
+    return { data: rows };
+  }
+  if (action === 'logs') {
+    const { page, perPage, offset } = pageParams(searchParams);
+    const total = await one<{ count: string }>(`select count(*)::text as count from ${table('ai_logs')}`).catch(() => null);
+    const rows = await many<Record<string, unknown>>(
+      `select * from ${table('ai_logs')} order by created_at desc, id desc limit $1 offset $2`,
+      [perPage, offset],
+    ).catch(() => []);
+    const count = Number(total?.count || 0);
+    return { data: rows, pagination: { total: count, page, per_page: perPage, total_pages: Math.ceil(count / perPage) } };
+  }
+  if (action === 'stats') {
+    const [totals, byAction, byModel] = await Promise.all([
+      one<{ total_calls: number; total_tokens: number }>(
+        `select count(*)::int as total_calls, coalesce(sum(total_tokens),0)::int as total_tokens from ${table('ai_logs')} where user_id = $1`,
+        [userId],
+      ).catch(() => null),
+      many<Record<string, unknown>>(
+        `select coalesce(nullif(action,''),'unknown') as action, count(*)::int as count, coalesce(sum(total_tokens),0)::int as tokens
+         from ${table('ai_logs')} where user_id = $1 group by action order by count desc, action asc`,
+        [userId],
+      ).catch(() => []),
+      many<Record<string, unknown>>(
+        `select coalesce(nullif(model,''),'unknown') as model, count(*)::int as count, coalesce(sum(total_tokens),0)::int as tokens
+         from ${table('ai_logs')} where user_id = $1 group by model order by count desc, model asc limit 20`,
+        [userId],
+      ).catch(() => []),
+    ]);
+    return { data: { totals: totals || { total_calls: 0, total_tokens: 0 }, by_action: byAction, by_model: byModel } };
+  }
+  if (action === 'batch-status') {
+    return { data: await getAiBatchStatus(normalizedAiBatchType(searchParams.get('type'))) };
+  }
+  throw new AiServiceError(404, 'NOT_FOUND', 'AI 接口不存在');
+}
+
+export async function aiPostActionPayload(action: string, value: unknown, userId: number, searchParams: URLSearchParams): Promise<AiActionResult> {
+  const body = aiInput(value);
+  if (action === 'test') return { data: await testAiProviderPayload(body, userId) };
+  if (action === 'generate-image') {
+    const prompt = String(body.prompt || '').trim();
+    if (!prompt) throw new AiServiceError(400, 'BAD_REQUEST', 'prompt 不能为空');
+    try {
+      return { data: await callAiImage(prompt, userId, String(body.size || '')) };
+    } catch (error) {
+      throw new AiServiceError(500, 'GENERATION_FAILED', error instanceof Error ? error.message : '图片生成失败');
+    }
+  }
+  if (action === 'cover') {
+    const title = String(body.title || '').trim();
+    if (!title) throw new AiServiceError(400, 'BAD_REQUEST', 'title 不能为空');
+    const prompt = renderPrompt(await resolvedPrompt('ai_image_prompt', 'cover'), {
+      title,
+      excerpt: String(body.excerpt || body.content || '').slice(0, 500),
+      excerpt_block: excerptBlock(body.excerpt || body.content),
+      style: String(await optionValue('ai_image_style', 'editorial')),
+      text_policy: String(await optionValue('ai_image_text', 'no_text')),
+    });
+    try {
+      return { data: { ...(await callAiImage(prompt, userId)), prompt } };
+    } catch (error) {
+      throw new AiServiceError(500, 'GENERATION_FAILED', error instanceof Error ? error.message : 'AI 生成封面失败');
+    }
+  }
+  if (action === 'chat') return { response: await adminAiChatResponse(body, userId) };
+  if (action === 'slug') {
+    const title = String(body.title || body.text || '').trim();
+    if (!title) throw new AiServiceError(400, 'BAD_REQUEST', 'title 不能为空');
+    const prompt = renderPrompt(await resolvedPrompt('ai_slug_prompt', 'slug'), { title });
+    const result = await callAiText([{ role: 'user', content: prompt }], 'slug', userId);
+    const slug = result.content.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 120);
+    return { data: { slug } };
+  }
+  if (action === 'summary') {
+    const content = String(body.content || body.text || '').slice(0, 12_000);
+    if (!content) throw new AiServiceError(400, 'BAD_REQUEST', 'content 不能为空');
+    const prompt = renderPrompt(await resolvedPrompt('ai_summary_prompt', 'summary'), {
+      title: String(body.title || ''),
+      content,
+      excerpt: String(body.excerpt || ''),
+      excerpt_section: excerptSection(body.excerpt),
+      min_len: await optionValue('ai_summary_min_len', '80'),
+      max_len: await optionValue('ai_summary_max_length', '200'),
+    });
+    return { data: { summary: (await callAiText([{ role: 'user', content: prompt }], 'summary', userId)).content } };
+  }
+  if (action === 'tags') {
+    const prompt = renderPrompt(await resolvedPrompt('ai_keywords_prompt', 'keywords'), {
+      title: String(body.title || ''),
+      content: String(body.content || body.text || '').slice(0, 8000),
+      tags_count: String(body.tags_count || 5),
+    });
+    const result = await callAiText([{ role: 'user', content: prompt }], 'tags', userId);
+    let tags: string[] = [];
+    try {
+      tags = JSON.parse(result.content);
+    } catch {
+      tags = result.content.split(/[,，\n]/).map((item: string) => item.trim()).filter(Boolean);
+    }
+    return { data: { tags: tags.slice(0, 12) } };
+  }
+  if (action === 'format') {
+    const prompt = renderPrompt(await resolvedPrompt('ai_polish_prompt', 'polish'), { content: String(body.content || '') });
+    const result = await callAiText([{ role: 'user', content: prompt }], 'format', userId);
+    return { data: { content: result.content } };
+  }
+  if (action === 'query') {
+    const permissions = parseJsonOption<Record<string, boolean>>(await optionValue('ai_data_permissions', '{}'), {});
+    if (!permissions.database_query) throw new AiServiceError(403, 'FORBIDDEN', '数据库查询权限未开启');
+    const safe = safeReadonlySql(body.query || body.sql || body.prompt, 100);
+    if (safe.error) throw new AiServiceError(403, 'FORBIDDEN', safe.error.replace(/^错误：/, ''));
+    try {
+      const rows = await many<Record<string, unknown>>(safe.limitedSql || '');
+      return { data: { columns: rows.length ? Object.keys(rows[0]) : [], rows, count: rows.length, sql: safe.sql } };
+    } catch (error) {
+      throw new AiServiceError(400, 'QUERY_ERROR', error instanceof Error ? error.message : '查询失败');
+    }
+  }
+  if (action === 'batch-questions' || action === 'batch-summary' || action === 'batch-all') {
+    const type: AiBatchType = action === 'batch-summary' ? 'summary' : action === 'batch-all' ? 'all' : 'questions';
+    try {
+      return { data: await startAiBatch(type, userId) };
+    } catch (error) {
+      throw new AiServiceError(400, 'NO_AI_PROVIDER', error instanceof Error ? error.message : '启动失败');
+    }
+  }
+  if (action === 'batch-delete') {
+    try {
+      return { data: await deleteAiBatchData(body.fields) };
+    } catch (error) {
+      throw new AiServiceError(400, 'BAD_REQUEST', error instanceof Error ? error.message : '清空失败');
+    }
+  }
+  if (action === 'batch-stop') {
+    return { data: await stopAiBatch(normalizedAiBatchType(searchParams.get('type'))) };
+  }
+  throw new AiServiceError(404, 'NOT_FOUND', 'AI 接口不存在');
+}
+
+export async function aiConversationPayload(id: unknown, userId: number) {
+  const conversationId = String(id || '');
+  const row = await one<Record<string, unknown>>(
+    `select * from ${table('ai_conversations')} where id = $1 and user_id = $2`,
+    [conversationId, userId],
+  ).catch(() => null);
+  if (!row) throw new AiServiceError(404, 'NOT_FOUND', '对话');
+  const messages = await many<Record<string, unknown>>(
+    `select * from ${table('ai_messages')} where conversation_id = $1 order by id asc`,
+    [conversationId],
+  ).catch(() => []);
+  return { ...row, messages };
+}
+
+export async function deleteAiConversationPayload(id: unknown, userId: number) {
+  const conversationId = String(id || '');
+  await exec(`delete from ${table('ai_messages')} where conversation_id = $1`, [conversationId]).catch(() => {});
+  await exec(`delete from ${table('ai_conversations')} where id = $1 and user_id = $2`, [conversationId, userId]).catch(() => {});
+  return null;
+}
+
+export async function readerAiChatPayload(value: unknown, userId: number): Promise<AiActionResult> {
+  const body = aiInput(value);
+  const postId = Number(body.post_id || body.postId || 0);
+  const question = String(body.message || body.question || '').trim();
+  let post: { id: number; title: string; excerpt: string | null; content: string | null; ai_questions: string | null } | null = null;
+  if (postId > 0) {
+    post = await one<{ id: number; title: string; excerpt: string | null; content: string | null; ai_questions: string | null }>(
+      `select id, title, excerpt, content, ai_questions from ${table('posts')} where id = $1 and status = 'publish' limit 1`,
+      [postId],
+    ).catch(() => null);
+    if (!post) throw new AiServiceError(404, 'NOT_FOUND', '文章');
+  }
+  if (!question) {
+    if (!post) return { data: { questions: [] } };
+    const cached = String(post.ai_questions || '').trim();
+    if (cached) {
+      let questions: string[] = [];
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed)) questions = parsed.map((item) => String(item).trim()).filter(Boolean);
+      } catch {
+        questions = cached.split(/\r?\n/).map((line) => line.replace(/^[\s\d.)-]+/, '').trim()).filter(Boolean);
+      }
+      if (questions.length > 0) return { data: { questions: questions.slice(0, 3) } };
+    }
+    const prompt = renderPrompt(await resolvedPrompt('ai_questions_prompt', 'questions'), {
+      title: post.title,
+      content: String(post.content || '').slice(0, 4000),
+      excerpt: String(post.excerpt || ''),
+      excerpt_section: excerptSection(post.excerpt),
+    });
+    try {
+      const result = await callAiText([{ role: 'user', content: prompt }], 'reader-chat', userId);
+      const questions = result.content
+        .split(/\r?\n/)
+        .map((line: string) => line.replace(/^[\s\d.)-]+/, '').trim())
+        .filter(Boolean)
+        .slice(0, 3);
+      if (questions.length > 0) {
+        await exec(`update ${table('posts')} set ai_questions = $1, updated_at = $2 where id = $3`, [JSON.stringify(questions), nowUnix(), post.id]).catch(() => {});
+      }
+      return { data: { questions } };
+    } catch {
+      return { data: { questions: [] } };
+    }
+  }
+  if ((await optionValue('ai_chat_guest', 'false')).toLowerCase() !== 'true' && userId === 0) {
+    throw new AiServiceError(401, 'GUEST_BLOCKED', '请先登录后再使用 AI 聊天');
+  }
+  const sessionId = safeSessionId(body.session_id || body.sessionId) || `r_${postId}_${randomUUID()}`;
+  const session = await getReaderSession(sessionId);
+  session.lastUsed = Date.now();
+  session.messages.push({ role: 'user', content: question });
+  session.messages = session.messages.slice(-10);
+  await saveReaderSession(sessionId, session);
+  const systemParts: string[] = [];
+  if (post) {
+    systemParts.push(await optionValue('ai_system_prompt', '你是一个友好的 AI 阅读助手，专注于帮助读者理解和探讨博客文章。'));
+    const memory = await optionValue('ai_blogger_memory', '');
+    if (memory.trim()) systemParts.push(`## 背景记忆\n${memory.trim()}`);
+    const articleContent = `${post.title}\n\n${String(post.content || body.context || body.content || '').slice(0, 4000)}`;
+    systemParts.push(`你正在陪读的文章：\n\n标题：${post.title}\n\n内容：${articleContent}\n\n请围绕这篇文章回答用户的问题，可以总结、解释、延伸讨论，但不要透露站点内部数据。使用与用户相同的语言回复。回答简洁精炼。使用 Markdown 格式排版。严禁使用任何 emoji 表情符号。`);
+  } else {
+    systemParts.push(await optionValue('ai_system_prompt', '你是这个博客的 AI 助手，代表博主跟访客交流。可以介绍博客主题、推荐文章、回答关于博主的问题，但不要透露站点后台敏感信息。'));
+    const bloggerName = await optionValue('ai_blogger_name', '');
+    const bloggerBio = await optionValue('ai_blogger_bio', '');
+    const bloggerStyle = await optionValue('ai_blogger_style', '');
+    const bloggerMemory = await optionValue('ai_blogger_memory', '');
+    if (bloggerName.trim()) systemParts.push(`博主昵称：${bloggerName.trim()}`);
+    if (bloggerBio.trim()) systemParts.push(`博客简介：${bloggerBio.trim()}`);
+    if (bloggerStyle.trim()) systemParts.push(`博主写作风格：${bloggerStyle.trim()}`);
+    if (bloggerMemory.trim()) systemParts.push(`## 背景记忆\n${bloggerMemory.trim()}`);
+    systemParts.push('请用与访客相同的语言回复。回答简洁精炼，使用 Markdown 格式排版。严禁使用任何 emoji 表情符号。');
+  }
+  const stream = new ReadableStream({
+    async start(controller) {
+      const encoder = new TextEncoder();
+      const send = (payload: Record<string, unknown>) => controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
+      send({ type: 'meta', session_id: sessionId });
+      try {
+        const messages = [{ role: 'system', content: systemParts.join('\n\n') }, ...session.messages];
+        const result = await callAiText(messages, 'reader-chat', userId);
+        session.messages.push({ role: 'assistant', content: result.content });
+        session.messages = session.messages.slice(-10);
+        session.lastUsed = Date.now();
+        await saveReaderSession(sessionId, session);
+        send({ type: 'chunk', content: result.content, delta: result.content });
+        send({ type: 'done' });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'AI 暂时无法回复';
+        send({ type: 'chunk', content: `[Error: ${message}]`, delta: `[Error: ${message}]` });
+      } finally {
+        controller.close();
+      }
+    },
+  });
+  return {
+    response: new Response(stream, {
+      headers: { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-cache', connection: 'keep-alive' },
+    }),
+  };
+}
+
+export async function listAiCommentsPayload(searchParams: URLSearchParams) {
+  const status = String(searchParams.get('status') || '').trim();
+  const limit = Math.max(1, Math.min(500, intParam(searchParams.get('limit') || undefined, 50)));
+  const params: unknown[] = [];
+  let where = '';
+  if (status) {
+    params.push(status);
+    where = `where q.status = $${params.length}`;
+  }
+  params.push(limit);
+  const items = await many<Record<string, unknown>>(
+    `select q.id, q.comment_id, q.post_id, coalesce(p.title,'') as post_title,
+            q.comment_text, coalesce(c.author_name,'') as comment_author,
+            q.ai_reply, q.status, q.created_at, q.processed_at, q.error_msg,
+            q.ai_audit_passed, q.ai_audit_confidence, q.ai_audit_reason
+     from ${table('ai_comment_queue')} q
+     left join ${table('comments')} c on c.id = q.comment_id
+     left join ${table('posts')} p on p.id = q.post_id
+     ${where}
+     order by q.created_at desc limit $${params.length}`,
+    params,
+  ).catch(() => []);
+  const stats = await one<Record<string, unknown>>(
+    `select
+      count(*) filter (where status='pending')::int as pending,
+      count(*) filter (where status='approved')::int as approved,
+      count(*) filter (where status='rejected')::int as rejected,
+      count(*) filter (where status='error')::int as error
+     from ${table('ai_comment_queue')}`,
+  ).catch(() => null);
+  return { items, stats: stats || { pending: 0, approved: 0, rejected: 0, error: 0 } };
+}
+
+export async function mutateAiCommentPayload(idValue: unknown, action: string, value: unknown, userId: number) {
+  const id = intParam(String(idValue || ''));
+  if (!id) throw new AiServiceError(400, 'BAD_REQUEST', '参数错误');
+  if (action === 'approve') {
+    try {
+      await publishAiCommentReply(id, String(aiInput(value).content || '').trim(), userId);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '处理失败';
+      throw new AiServiceError(message.includes('不存在') ? 404 : 400, message.includes('不存在') ? 'NOT_FOUND' : 'BAD_REQUEST', message);
+    }
+    return { id };
+  }
+  if (action === 'reject') {
+    await exec(
+      `update ${table('ai_comment_queue')} set status = 'rejected', processed_at = $1, reviewer_id = $2 where id = $3 and status in ('pending','error')`,
+      [nowUnix(), userId, id],
+    );
+    return { id };
+  }
+  if (action === 'regenerate') {
+    const row = await one<{ comment_text: string }>(`select comment_text from ${table('ai_comment_queue')} where id = $1`, [id]);
+    if (!row) throw new AiServiceError(404, 'NOT_FOUND', '队列条目不存在');
+    const result = await callAiText(
+      [{ role: 'user', content: `请以站点管理员身份，友好、简洁地回复这条评论：\n${row.comment_text}` }],
+      'comment-reply',
+      userId,
+    );
+    await exec(`update ${table('ai_comment_queue')} set ai_reply = $1, status = 'pending', error_msg = null where id = $2`, [result.content, id]);
+    return { id, reply: result.content };
+  }
+  throw new AiServiceError(404, 'NOT_FOUND', 'AI 评论操作不存在');
+}
+
+export async function deleteAiCommentPayload(idValue: unknown) {
+  const id = intParam(String(idValue || ''));
+  if (!id) throw new AiServiceError(400, 'BAD_REQUEST', '参数错误');
+  await exec(`delete from ${table('ai_comment_queue')} where id = $1`, [id]);
+  return { id };
+}
+
 export function registerAiRoutes(app: Hono) {
   app.get('/api/v1/ai/providers', auth, async (c) => {
     const rows = await many<Record<string, unknown>>(`select * from ${table('ai_providers')} order by sort_order asc, id asc`).catch(() => []);

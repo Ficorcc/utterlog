@@ -58,6 +58,7 @@ import { Route as ApiV1SetupTestDbRouteImport } from './routes/api/v1/setup/test
 import { Route as ApiV1SetupStatusRouteImport } from './routes/api/v1/setup/status'
 import { Route as ApiV1SetupSaveRouteImport } from './routes/api/v1/setup/save'
 import { Route as ApiV1SecurityActionRouteImport } from './routes/api/v1/security/$action'
+import { Route as ApiV1SearchRebuildRouteImport } from './routes/api/v1/search/rebuild'
 import { Route as ApiV1RssParseRouteImport } from './routes/api/v1/rss/parse'
 import { Route as ApiV1ProfileSendCodeRouteImport } from './routes/api/v1/profile/send-code'
 import { Route as ApiV1PostsIdRouteImport } from './routes/api/v1/posts/$id'
@@ -115,11 +116,14 @@ import { Route as ApiV1AuthLoginRouteImport } from './routes/api/v1/auth/login'
 import { Route as ApiV1AuthForgotPasswordRouteImport } from './routes/api/v1/auth/forgot-password'
 import { Route as ApiV1ArchiveStatsRouteImport } from './routes/api/v1/archive/stats'
 import { Route as ApiV1AnalyticsActionRouteImport } from './routes/api/v1/analytics/$action'
+import { Route as ApiV1AiProvidersRouteImport } from './routes/api/v1/ai/providers'
+import { Route as ApiV1AiActionRouteImport } from './routes/api/v1/ai/$action'
 import { Route as ApiV1AdminStatsRouteImport } from './routes/api/v1/admin/stats'
 import { Route as ApiV1ResourceIdRouteImport } from './routes/api/v1/$resource/$id'
 import { Route as ApiV1PublicAlbumsIndexRouteImport } from './routes/api/v1/public/albums/index'
 import { Route as ApiV1AdminFootprintsIndexRouteImport } from './routes/api/v1/admin/footprints/index'
 import { Route as ApiV1AdminAnnotationsIndexRouteImport } from './routes/api/v1/admin/annotations/index'
+import { Route as ApiV1AdminAiCommentsIndexRouteImport } from './routes/api/v1/admin/ai-comments/index'
 import { Route as ApiV1ThemesIdActivateRouteImport } from './routes/api/v1/themes/$id/activate'
 import { Route as ApiV1SyncPlatformActionRouteImport } from './routes/api/v1/sync/$platform/$action'
 import { Route as ApiV1SocialFetchFeedsStatusRouteImport } from './routes/api/v1/social/fetch-feeds/status'
@@ -140,6 +144,8 @@ import { Route as ApiV1BackupDownloadFilenameRouteImport } from './routes/api/v1
 import { Route as ApiV1AuthTotpActionRouteImport } from './routes/api/v1/auth/totp/$action'
 import { Route as ApiV1AuthPasskeyAvailableRouteImport } from './routes/api/v1/auth/passkey/available'
 import { Route as ApiV1AlbumsIdPhotosRouteImport } from './routes/api/v1/albums/$id/photos'
+import { Route as ApiV1AiProvidersIdRouteImport } from './routes/api/v1/ai/providers/$id'
+import { Route as ApiV1AiConversationsIdRouteImport } from './routes/api/v1/ai/conversations/$id'
 import { Route as ApiV1AdminSystemActionRouteImport } from './routes/api/v1/admin/system/$action'
 import { Route as ApiV1AdminFootprintsPlacesRouteImport } from './routes/api/v1/admin/footprints/places'
 import { Route as ApiV1AdminFootprintsGeocodeRouteImport } from './routes/api/v1/admin/footprints/geocode'
@@ -148,11 +154,13 @@ import { Route as ApiV1AdminAnnotationsBatchDeleteRouteImport } from './routes/a
 import { Route as ApiV1AdminAnnotationsIdRouteImport } from './routes/api/v1/admin/annotations/$id'
 import { Route as ApiV1AdminAnalyticsStatsRouteImport } from './routes/api/v1/admin/analytics/stats'
 import { Route as ApiV1AdminAnalyticsPurgeRouteImport } from './routes/api/v1/admin/analytics/purge'
+import { Route as ApiV1AdminAiCommentsIdRouteImport } from './routes/api/v1/admin/ai-comments/$id'
 import { Route as ApiV1AuthPasskeyFlowActionRouteImport } from './routes/api/v1/auth/passkey/$flow/$action'
 import { Route as ApiV1AlbumsIdPhotosMediaIdRouteImport } from './routes/api/v1/albums/$id/photos/$mediaId'
 import { Route as ApiV1AdminSystemUpgradeStatusRouteImport } from './routes/api/v1/admin/system/upgrade/status'
 import { Route as ApiV1AdminSyncPlatformSitesRouteImport } from './routes/api/v1/admin/sync/$platform/sites'
 import { Route as ApiV1AdminSyncPlatformJobsRouteImport } from './routes/api/v1/admin/sync/$platform/jobs'
+import { Route as ApiV1AdminAiCommentsIdActionRouteImport } from './routes/api/v1/admin/ai-comments/$id/$action'
 import { Route as ApiV1SyncPlatformJobIdStatusRouteImport } from './routes/api/v1/sync/$platform/job/$id/status'
 import { Route as ApiV1AdminSyncPlatformSitesUuidRouteImport } from './routes/api/v1/admin/sync/$platform/sites/$uuid'
 import { Route as ApiV1MusicProxyPlatformSongsIdAssetRouteImport } from './routes/api/v1/music/proxy/$platform/songs/$id/$asset'
@@ -402,6 +410,11 @@ const ApiV1SecurityActionRoute = ApiV1SecurityActionRouteImport.update({
   id: '/api/v1/security/$action',
   path: '/api/v1/security/$action',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1SearchRebuildRoute = ApiV1SearchRebuildRouteImport.update({
+  id: '/rebuild',
+  path: '/rebuild',
+  getParentRoute: () => ApiV1SearchRoute,
 } as any)
 const ApiV1RssParseRoute = ApiV1RssParseRouteImport.update({
   id: '/api/v1/rss/parse',
@@ -694,6 +707,16 @@ const ApiV1AnalyticsActionRoute = ApiV1AnalyticsActionRouteImport.update({
   path: '/api/v1/analytics/$action',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1AiProvidersRoute = ApiV1AiProvidersRouteImport.update({
+  id: '/api/v1/ai/providers',
+  path: '/api/v1/ai/providers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1AiActionRoute = ApiV1AiActionRouteImport.update({
+  id: '/api/v1/ai/$action',
+  path: '/api/v1/ai/$action',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1AdminStatsRoute = ApiV1AdminStatsRouteImport.update({
   id: '/api/v1/admin/stats',
   path: '/api/v1/admin/stats',
@@ -719,6 +742,12 @@ const ApiV1AdminAnnotationsIndexRoute =
   ApiV1AdminAnnotationsIndexRouteImport.update({
     id: '/api/v1/admin/annotations/',
     path: '/api/v1/admin/annotations/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1AdminAiCommentsIndexRoute =
+  ApiV1AdminAiCommentsIndexRouteImport.update({
+    id: '/api/v1/admin/ai-comments/',
+    path: '/api/v1/admin/ai-comments/',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiV1ThemesIdActivateRoute = ApiV1ThemesIdActivateRouteImport.update({
@@ -826,6 +855,16 @@ const ApiV1AlbumsIdPhotosRoute = ApiV1AlbumsIdPhotosRouteImport.update({
   path: '/api/v1/albums/$id/photos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1AiProvidersIdRoute = ApiV1AiProvidersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiV1AiProvidersRoute,
+} as any)
+const ApiV1AiConversationsIdRoute = ApiV1AiConversationsIdRouteImport.update({
+  id: '/api/v1/ai/conversations/$id',
+  path: '/api/v1/ai/conversations/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1AdminSystemActionRoute = ApiV1AdminSystemActionRouteImport.update({
   id: '/api/v1/admin/system/$action',
   path: '/api/v1/admin/system/$action',
@@ -871,6 +910,11 @@ const ApiV1AdminAnalyticsPurgeRoute =
     path: '/api/v1/admin/analytics/purge',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiV1AdminAiCommentsIdRoute = ApiV1AdminAiCommentsIdRouteImport.update({
+  id: '/api/v1/admin/ai-comments/$id',
+  path: '/api/v1/admin/ai-comments/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1AuthPasskeyFlowActionRoute =
   ApiV1AuthPasskeyFlowActionRouteImport.update({
     id: '/api/v1/auth/passkey/$flow/$action',
@@ -900,6 +944,12 @@ const ApiV1AdminSyncPlatformJobsRoute =
     id: '/api/v1/admin/sync/$platform/jobs',
     path: '/api/v1/admin/sync/$platform/jobs',
     getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1AdminAiCommentsIdActionRoute =
+  ApiV1AdminAiCommentsIdActionRouteImport.update({
+    id: '/$action',
+    path: '/$action',
+    getParentRoute: () => ApiV1AdminAiCommentsIdRoute,
   } as any)
 const ApiV1SyncPlatformJobIdStatusRoute =
   ApiV1SyncPlatformJobIdStatusRouteImport.update({
@@ -937,11 +987,13 @@ export interface FileRoutesByFullPath {
   '/api/v1/options': typeof ApiV1OptionsRouteWithChildren
   '/api/v1/owner': typeof ApiV1OwnerRoute
   '/api/v1/posts': typeof ApiV1PostsRouteWithChildren
-  '/api/v1/search': typeof ApiV1SearchRoute
+  '/api/v1/search': typeof ApiV1SearchRouteWithChildren
   '/api/v1/tags': typeof ApiV1TagsRouteWithChildren
   '/api/v1/track': typeof ApiV1TrackRouteWithChildren
   '/api/v1/$resource/$id': typeof ApiV1ResourceIdRoute
   '/api/v1/admin/stats': typeof ApiV1AdminStatsRoute
+  '/api/v1/ai/$action': typeof ApiV1AiActionRoute
+  '/api/v1/ai/providers': typeof ApiV1AiProvidersRouteWithChildren
   '/api/v1/analytics/$action': typeof ApiV1AnalyticsActionRoute
   '/api/v1/archive/stats': typeof ApiV1ArchiveStatsRoute
   '/api/v1/auth/forgot-password': typeof ApiV1AuthForgotPasswordRoute
@@ -999,6 +1051,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
   '/api/v1/rss/parse': typeof ApiV1RssParseRoute
+  '/api/v1/search/rebuild': typeof ApiV1SearchRebuildRoute
   '/api/v1/security/$action': typeof ApiV1SecurityActionRoute
   '/api/v1/setup/save': typeof ApiV1SetupSaveRoute
   '/api/v1/setup/status': typeof ApiV1SetupStatusRoute
@@ -1029,6 +1082,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/plugins/': typeof ApiV1PluginsIndexRoute
   '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
   '/api/v1/themes/': typeof ApiV1ThemesIndexRoute
+  '/api/v1/admin/ai-comments/$id': typeof ApiV1AdminAiCommentsIdRouteWithChildren
   '/api/v1/admin/analytics/purge': typeof ApiV1AdminAnalyticsPurgeRoute
   '/api/v1/admin/analytics/stats': typeof ApiV1AdminAnalyticsStatsRoute
   '/api/v1/admin/annotations/$id': typeof ApiV1AdminAnnotationsIdRoute
@@ -1037,6 +1091,8 @@ export interface FileRoutesByFullPath {
   '/api/v1/admin/footprints/geocode': typeof ApiV1AdminFootprintsGeocodeRoute
   '/api/v1/admin/footprints/places': typeof ApiV1AdminFootprintsPlacesRoute
   '/api/v1/admin/system/$action': typeof ApiV1AdminSystemActionRoute
+  '/api/v1/ai/conversations/$id': typeof ApiV1AiConversationsIdRoute
+  '/api/v1/ai/providers/$id': typeof ApiV1AiProvidersIdRoute
   '/api/v1/albums/$id/photos': typeof ApiV1AlbumsIdPhotosRouteWithChildren
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
   '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
@@ -1057,9 +1113,11 @@ export interface FileRoutesByFullPath {
   '/api/v1/social/fetch-feeds/status': typeof ApiV1SocialFetchFeedsStatusRoute
   '/api/v1/sync/$platform/$action': typeof ApiV1SyncPlatformActionRoute
   '/api/v1/themes/$id/activate': typeof ApiV1ThemesIdActivateRoute
+  '/api/v1/admin/ai-comments/': typeof ApiV1AdminAiCommentsIndexRoute
   '/api/v1/admin/annotations/': typeof ApiV1AdminAnnotationsIndexRoute
   '/api/v1/admin/footprints/': typeof ApiV1AdminFootprintsIndexRoute
   '/api/v1/public/albums/': typeof ApiV1PublicAlbumsIndexRoute
+  '/api/v1/admin/ai-comments/$id/$action': typeof ApiV1AdminAiCommentsIdActionRoute
   '/api/v1/admin/sync/$platform/jobs': typeof ApiV1AdminSyncPlatformJobsRoute
   '/api/v1/admin/sync/$platform/sites': typeof ApiV1AdminSyncPlatformSitesRouteWithChildren
   '/api/v1/admin/system/upgrade/status': typeof ApiV1AdminSystemUpgradeStatusRoute
@@ -1086,11 +1144,13 @@ export interface FileRoutesByTo {
   '/api/v1/options': typeof ApiV1OptionsRouteWithChildren
   '/api/v1/owner': typeof ApiV1OwnerRoute
   '/api/v1/posts': typeof ApiV1PostsRouteWithChildren
-  '/api/v1/search': typeof ApiV1SearchRoute
+  '/api/v1/search': typeof ApiV1SearchRouteWithChildren
   '/api/v1/tags': typeof ApiV1TagsRouteWithChildren
   '/api/v1/track': typeof ApiV1TrackRouteWithChildren
   '/api/v1/$resource/$id': typeof ApiV1ResourceIdRoute
   '/api/v1/admin/stats': typeof ApiV1AdminStatsRoute
+  '/api/v1/ai/$action': typeof ApiV1AiActionRoute
+  '/api/v1/ai/providers': typeof ApiV1AiProvidersRouteWithChildren
   '/api/v1/analytics/$action': typeof ApiV1AnalyticsActionRoute
   '/api/v1/archive/stats': typeof ApiV1ArchiveStatsRoute
   '/api/v1/auth/forgot-password': typeof ApiV1AuthForgotPasswordRoute
@@ -1148,6 +1208,7 @@ export interface FileRoutesByTo {
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
   '/api/v1/rss/parse': typeof ApiV1RssParseRoute
+  '/api/v1/search/rebuild': typeof ApiV1SearchRebuildRoute
   '/api/v1/security/$action': typeof ApiV1SecurityActionRoute
   '/api/v1/setup/save': typeof ApiV1SetupSaveRoute
   '/api/v1/setup/status': typeof ApiV1SetupStatusRoute
@@ -1178,6 +1239,7 @@ export interface FileRoutesByTo {
   '/api/v1/plugins': typeof ApiV1PluginsIndexRoute
   '/api/v1/profile': typeof ApiV1ProfileIndexRoute
   '/api/v1/themes': typeof ApiV1ThemesIndexRoute
+  '/api/v1/admin/ai-comments/$id': typeof ApiV1AdminAiCommentsIdRouteWithChildren
   '/api/v1/admin/analytics/purge': typeof ApiV1AdminAnalyticsPurgeRoute
   '/api/v1/admin/analytics/stats': typeof ApiV1AdminAnalyticsStatsRoute
   '/api/v1/admin/annotations/$id': typeof ApiV1AdminAnnotationsIdRoute
@@ -1186,6 +1248,8 @@ export interface FileRoutesByTo {
   '/api/v1/admin/footprints/geocode': typeof ApiV1AdminFootprintsGeocodeRoute
   '/api/v1/admin/footprints/places': typeof ApiV1AdminFootprintsPlacesRoute
   '/api/v1/admin/system/$action': typeof ApiV1AdminSystemActionRoute
+  '/api/v1/ai/conversations/$id': typeof ApiV1AiConversationsIdRoute
+  '/api/v1/ai/providers/$id': typeof ApiV1AiProvidersIdRoute
   '/api/v1/albums/$id/photos': typeof ApiV1AlbumsIdPhotosRouteWithChildren
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
   '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
@@ -1206,9 +1270,11 @@ export interface FileRoutesByTo {
   '/api/v1/social/fetch-feeds/status': typeof ApiV1SocialFetchFeedsStatusRoute
   '/api/v1/sync/$platform/$action': typeof ApiV1SyncPlatformActionRoute
   '/api/v1/themes/$id/activate': typeof ApiV1ThemesIdActivateRoute
+  '/api/v1/admin/ai-comments': typeof ApiV1AdminAiCommentsIndexRoute
   '/api/v1/admin/annotations': typeof ApiV1AdminAnnotationsIndexRoute
   '/api/v1/admin/footprints': typeof ApiV1AdminFootprintsIndexRoute
   '/api/v1/public/albums': typeof ApiV1PublicAlbumsIndexRoute
+  '/api/v1/admin/ai-comments/$id/$action': typeof ApiV1AdminAiCommentsIdActionRoute
   '/api/v1/admin/sync/$platform/jobs': typeof ApiV1AdminSyncPlatformJobsRoute
   '/api/v1/admin/sync/$platform/sites': typeof ApiV1AdminSyncPlatformSitesRouteWithChildren
   '/api/v1/admin/system/upgrade/status': typeof ApiV1AdminSystemUpgradeStatusRoute
@@ -1236,11 +1302,13 @@ export interface FileRoutesById {
   '/api/v1/options': typeof ApiV1OptionsRouteWithChildren
   '/api/v1/owner': typeof ApiV1OwnerRoute
   '/api/v1/posts': typeof ApiV1PostsRouteWithChildren
-  '/api/v1/search': typeof ApiV1SearchRoute
+  '/api/v1/search': typeof ApiV1SearchRouteWithChildren
   '/api/v1/tags': typeof ApiV1TagsRouteWithChildren
   '/api/v1/track': typeof ApiV1TrackRouteWithChildren
   '/api/v1/$resource/$id': typeof ApiV1ResourceIdRoute
   '/api/v1/admin/stats': typeof ApiV1AdminStatsRoute
+  '/api/v1/ai/$action': typeof ApiV1AiActionRoute
+  '/api/v1/ai/providers': typeof ApiV1AiProvidersRouteWithChildren
   '/api/v1/analytics/$action': typeof ApiV1AnalyticsActionRoute
   '/api/v1/archive/stats': typeof ApiV1ArchiveStatsRoute
   '/api/v1/auth/forgot-password': typeof ApiV1AuthForgotPasswordRoute
@@ -1298,6 +1366,7 @@ export interface FileRoutesById {
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
   '/api/v1/rss/parse': typeof ApiV1RssParseRoute
+  '/api/v1/search/rebuild': typeof ApiV1SearchRebuildRoute
   '/api/v1/security/$action': typeof ApiV1SecurityActionRoute
   '/api/v1/setup/save': typeof ApiV1SetupSaveRoute
   '/api/v1/setup/status': typeof ApiV1SetupStatusRoute
@@ -1328,6 +1397,7 @@ export interface FileRoutesById {
   '/api/v1/plugins/': typeof ApiV1PluginsIndexRoute
   '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
   '/api/v1/themes/': typeof ApiV1ThemesIndexRoute
+  '/api/v1/admin/ai-comments/$id': typeof ApiV1AdminAiCommentsIdRouteWithChildren
   '/api/v1/admin/analytics/purge': typeof ApiV1AdminAnalyticsPurgeRoute
   '/api/v1/admin/analytics/stats': typeof ApiV1AdminAnalyticsStatsRoute
   '/api/v1/admin/annotations/$id': typeof ApiV1AdminAnnotationsIdRoute
@@ -1336,6 +1406,8 @@ export interface FileRoutesById {
   '/api/v1/admin/footprints/geocode': typeof ApiV1AdminFootprintsGeocodeRoute
   '/api/v1/admin/footprints/places': typeof ApiV1AdminFootprintsPlacesRoute
   '/api/v1/admin/system/$action': typeof ApiV1AdminSystemActionRoute
+  '/api/v1/ai/conversations/$id': typeof ApiV1AiConversationsIdRoute
+  '/api/v1/ai/providers/$id': typeof ApiV1AiProvidersIdRoute
   '/api/v1/albums/$id/photos': typeof ApiV1AlbumsIdPhotosRouteWithChildren
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
   '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
@@ -1356,9 +1428,11 @@ export interface FileRoutesById {
   '/api/v1/social/fetch-feeds/status': typeof ApiV1SocialFetchFeedsStatusRoute
   '/api/v1/sync/$platform/$action': typeof ApiV1SyncPlatformActionRoute
   '/api/v1/themes/$id/activate': typeof ApiV1ThemesIdActivateRoute
+  '/api/v1/admin/ai-comments/': typeof ApiV1AdminAiCommentsIndexRoute
   '/api/v1/admin/annotations/': typeof ApiV1AdminAnnotationsIndexRoute
   '/api/v1/admin/footprints/': typeof ApiV1AdminFootprintsIndexRoute
   '/api/v1/public/albums/': typeof ApiV1PublicAlbumsIndexRoute
+  '/api/v1/admin/ai-comments/$id/$action': typeof ApiV1AdminAiCommentsIdActionRoute
   '/api/v1/admin/sync/$platform/jobs': typeof ApiV1AdminSyncPlatformJobsRoute
   '/api/v1/admin/sync/$platform/sites': typeof ApiV1AdminSyncPlatformSitesRouteWithChildren
   '/api/v1/admin/system/upgrade/status': typeof ApiV1AdminSystemUpgradeStatusRoute
@@ -1392,6 +1466,8 @@ export interface FileRouteTypes {
     | '/api/v1/track'
     | '/api/v1/$resource/$id'
     | '/api/v1/admin/stats'
+    | '/api/v1/ai/$action'
+    | '/api/v1/ai/providers'
     | '/api/v1/analytics/$action'
     | '/api/v1/archive/stats'
     | '/api/v1/auth/forgot-password'
@@ -1449,6 +1525,7 @@ export interface FileRouteTypes {
     | '/api/v1/posts/$id'
     | '/api/v1/profile/send-code'
     | '/api/v1/rss/parse'
+    | '/api/v1/search/rebuild'
     | '/api/v1/security/$action'
     | '/api/v1/setup/save'
     | '/api/v1/setup/status'
@@ -1479,6 +1556,7 @@ export interface FileRouteTypes {
     | '/api/v1/plugins/'
     | '/api/v1/profile/'
     | '/api/v1/themes/'
+    | '/api/v1/admin/ai-comments/$id'
     | '/api/v1/admin/analytics/purge'
     | '/api/v1/admin/analytics/stats'
     | '/api/v1/admin/annotations/$id'
@@ -1487,6 +1565,8 @@ export interface FileRouteTypes {
     | '/api/v1/admin/footprints/geocode'
     | '/api/v1/admin/footprints/places'
     | '/api/v1/admin/system/$action'
+    | '/api/v1/ai/conversations/$id'
+    | '/api/v1/ai/providers/$id'
     | '/api/v1/albums/$id/photos'
     | '/api/v1/auth/passkey/available'
     | '/api/v1/auth/totp/$action'
@@ -1507,9 +1587,11 @@ export interface FileRouteTypes {
     | '/api/v1/social/fetch-feeds/status'
     | '/api/v1/sync/$platform/$action'
     | '/api/v1/themes/$id/activate'
+    | '/api/v1/admin/ai-comments/'
     | '/api/v1/admin/annotations/'
     | '/api/v1/admin/footprints/'
     | '/api/v1/public/albums/'
+    | '/api/v1/admin/ai-comments/$id/$action'
     | '/api/v1/admin/sync/$platform/jobs'
     | '/api/v1/admin/sync/$platform/sites'
     | '/api/v1/admin/system/upgrade/status'
@@ -1541,6 +1623,8 @@ export interface FileRouteTypes {
     | '/api/v1/track'
     | '/api/v1/$resource/$id'
     | '/api/v1/admin/stats'
+    | '/api/v1/ai/$action'
+    | '/api/v1/ai/providers'
     | '/api/v1/analytics/$action'
     | '/api/v1/archive/stats'
     | '/api/v1/auth/forgot-password'
@@ -1598,6 +1682,7 @@ export interface FileRouteTypes {
     | '/api/v1/posts/$id'
     | '/api/v1/profile/send-code'
     | '/api/v1/rss/parse'
+    | '/api/v1/search/rebuild'
     | '/api/v1/security/$action'
     | '/api/v1/setup/save'
     | '/api/v1/setup/status'
@@ -1628,6 +1713,7 @@ export interface FileRouteTypes {
     | '/api/v1/plugins'
     | '/api/v1/profile'
     | '/api/v1/themes'
+    | '/api/v1/admin/ai-comments/$id'
     | '/api/v1/admin/analytics/purge'
     | '/api/v1/admin/analytics/stats'
     | '/api/v1/admin/annotations/$id'
@@ -1636,6 +1722,8 @@ export interface FileRouteTypes {
     | '/api/v1/admin/footprints/geocode'
     | '/api/v1/admin/footprints/places'
     | '/api/v1/admin/system/$action'
+    | '/api/v1/ai/conversations/$id'
+    | '/api/v1/ai/providers/$id'
     | '/api/v1/albums/$id/photos'
     | '/api/v1/auth/passkey/available'
     | '/api/v1/auth/totp/$action'
@@ -1656,9 +1744,11 @@ export interface FileRouteTypes {
     | '/api/v1/social/fetch-feeds/status'
     | '/api/v1/sync/$platform/$action'
     | '/api/v1/themes/$id/activate'
+    | '/api/v1/admin/ai-comments'
     | '/api/v1/admin/annotations'
     | '/api/v1/admin/footprints'
     | '/api/v1/public/albums'
+    | '/api/v1/admin/ai-comments/$id/$action'
     | '/api/v1/admin/sync/$platform/jobs'
     | '/api/v1/admin/sync/$platform/sites'
     | '/api/v1/admin/system/upgrade/status'
@@ -1690,6 +1780,8 @@ export interface FileRouteTypes {
     | '/api/v1/track'
     | '/api/v1/$resource/$id'
     | '/api/v1/admin/stats'
+    | '/api/v1/ai/$action'
+    | '/api/v1/ai/providers'
     | '/api/v1/analytics/$action'
     | '/api/v1/archive/stats'
     | '/api/v1/auth/forgot-password'
@@ -1747,6 +1839,7 @@ export interface FileRouteTypes {
     | '/api/v1/posts/$id'
     | '/api/v1/profile/send-code'
     | '/api/v1/rss/parse'
+    | '/api/v1/search/rebuild'
     | '/api/v1/security/$action'
     | '/api/v1/setup/save'
     | '/api/v1/setup/status'
@@ -1777,6 +1870,7 @@ export interface FileRouteTypes {
     | '/api/v1/plugins/'
     | '/api/v1/profile/'
     | '/api/v1/themes/'
+    | '/api/v1/admin/ai-comments/$id'
     | '/api/v1/admin/analytics/purge'
     | '/api/v1/admin/analytics/stats'
     | '/api/v1/admin/annotations/$id'
@@ -1785,6 +1879,8 @@ export interface FileRouteTypes {
     | '/api/v1/admin/footprints/geocode'
     | '/api/v1/admin/footprints/places'
     | '/api/v1/admin/system/$action'
+    | '/api/v1/ai/conversations/$id'
+    | '/api/v1/ai/providers/$id'
     | '/api/v1/albums/$id/photos'
     | '/api/v1/auth/passkey/available'
     | '/api/v1/auth/totp/$action'
@@ -1805,9 +1901,11 @@ export interface FileRouteTypes {
     | '/api/v1/social/fetch-feeds/status'
     | '/api/v1/sync/$platform/$action'
     | '/api/v1/themes/$id/activate'
+    | '/api/v1/admin/ai-comments/'
     | '/api/v1/admin/annotations/'
     | '/api/v1/admin/footprints/'
     | '/api/v1/public/albums/'
+    | '/api/v1/admin/ai-comments/$id/$action'
     | '/api/v1/admin/sync/$platform/jobs'
     | '/api/v1/admin/sync/$platform/sites'
     | '/api/v1/admin/system/upgrade/status'
@@ -1835,10 +1933,12 @@ export interface RootRouteChildren {
   ApiV1OptionsRoute: typeof ApiV1OptionsRouteWithChildren
   ApiV1OwnerRoute: typeof ApiV1OwnerRoute
   ApiV1PostsRoute: typeof ApiV1PostsRouteWithChildren
-  ApiV1SearchRoute: typeof ApiV1SearchRoute
+  ApiV1SearchRoute: typeof ApiV1SearchRouteWithChildren
   ApiV1TagsRoute: typeof ApiV1TagsRouteWithChildren
   ApiV1TrackRoute: typeof ApiV1TrackRouteWithChildren
   ApiV1AdminStatsRoute: typeof ApiV1AdminStatsRoute
+  ApiV1AiActionRoute: typeof ApiV1AiActionRoute
+  ApiV1AiProvidersRoute: typeof ApiV1AiProvidersRouteWithChildren
   ApiV1AnalyticsActionRoute: typeof ApiV1AnalyticsActionRoute
   ApiV1ArchiveStatsRoute: typeof ApiV1ArchiveStatsRoute
   ApiV1AuthForgotPasswordRoute: typeof ApiV1AuthForgotPasswordRoute
@@ -1921,6 +2021,7 @@ export interface RootRouteChildren {
   ApiV1PluginsIndexRoute: typeof ApiV1PluginsIndexRoute
   ApiV1ProfileIndexRoute: typeof ApiV1ProfileIndexRoute
   ApiV1ThemesIndexRoute: typeof ApiV1ThemesIndexRoute
+  ApiV1AdminAiCommentsIdRoute: typeof ApiV1AdminAiCommentsIdRouteWithChildren
   ApiV1AdminAnalyticsPurgeRoute: typeof ApiV1AdminAnalyticsPurgeRoute
   ApiV1AdminAnalyticsStatsRoute: typeof ApiV1AdminAnalyticsStatsRoute
   ApiV1AdminAnnotationsIdRoute: typeof ApiV1AdminAnnotationsIdRoute
@@ -1929,6 +2030,7 @@ export interface RootRouteChildren {
   ApiV1AdminFootprintsGeocodeRoute: typeof ApiV1AdminFootprintsGeocodeRoute
   ApiV1AdminFootprintsPlacesRoute: typeof ApiV1AdminFootprintsPlacesRoute
   ApiV1AdminSystemActionRoute: typeof ApiV1AdminSystemActionRoute
+  ApiV1AiConversationsIdRoute: typeof ApiV1AiConversationsIdRoute
   ApiV1AlbumsIdPhotosRoute: typeof ApiV1AlbumsIdPhotosRouteWithChildren
   ApiV1AuthPasskeyAvailableRoute: typeof ApiV1AuthPasskeyAvailableRoute
   ApiV1AuthTotpActionRoute: typeof ApiV1AuthTotpActionRoute
@@ -1937,6 +2039,7 @@ export interface RootRouteChildren {
   ApiV1PlaylistsIdSongsRoute: typeof ApiV1PlaylistsIdSongsRoute
   ApiV1PublicAlbumsIdRoute: typeof ApiV1PublicAlbumsIdRoute
   ApiV1SyncPlatformActionRoute: typeof ApiV1SyncPlatformActionRoute
+  ApiV1AdminAiCommentsIndexRoute: typeof ApiV1AdminAiCommentsIndexRoute
   ApiV1AdminAnnotationsIndexRoute: typeof ApiV1AdminAnnotationsIndexRoute
   ApiV1AdminFootprintsIndexRoute: typeof ApiV1AdminFootprintsIndexRoute
   ApiV1PublicAlbumsIndexRoute: typeof ApiV1PublicAlbumsIndexRoute
@@ -2292,6 +2395,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/v1/security/$action'
       preLoaderRoute: typeof ApiV1SecurityActionRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/search/rebuild': {
+      id: '/api/v1/search/rebuild'
+      path: '/rebuild'
+      fullPath: '/api/v1/search/rebuild'
+      preLoaderRoute: typeof ApiV1SearchRebuildRouteImport
+      parentRoute: typeof ApiV1SearchRoute
     }
     '/api/v1/rss/parse': {
       id: '/api/v1/rss/parse'
@@ -2692,6 +2802,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1AnalyticsActionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/ai/providers': {
+      id: '/api/v1/ai/providers'
+      path: '/api/v1/ai/providers'
+      fullPath: '/api/v1/ai/providers'
+      preLoaderRoute: typeof ApiV1AiProvidersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/ai/$action': {
+      id: '/api/v1/ai/$action'
+      path: '/api/v1/ai/$action'
+      fullPath: '/api/v1/ai/$action'
+      preLoaderRoute: typeof ApiV1AiActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/admin/stats': {
       id: '/api/v1/admin/stats'
       path: '/api/v1/admin/stats'
@@ -2725,6 +2849,13 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/admin/annotations'
       fullPath: '/api/v1/admin/annotations/'
       preLoaderRoute: typeof ApiV1AdminAnnotationsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/admin/ai-comments/': {
+      id: '/api/v1/admin/ai-comments/'
+      path: '/api/v1/admin/ai-comments'
+      fullPath: '/api/v1/admin/ai-comments/'
+      preLoaderRoute: typeof ApiV1AdminAiCommentsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/themes/$id/activate': {
@@ -2867,6 +2998,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1AlbumsIdPhotosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/ai/providers/$id': {
+      id: '/api/v1/ai/providers/$id'
+      path: '/$id'
+      fullPath: '/api/v1/ai/providers/$id'
+      preLoaderRoute: typeof ApiV1AiProvidersIdRouteImport
+      parentRoute: typeof ApiV1AiProvidersRoute
+    }
+    '/api/v1/ai/conversations/$id': {
+      id: '/api/v1/ai/conversations/$id'
+      path: '/api/v1/ai/conversations/$id'
+      fullPath: '/api/v1/ai/conversations/$id'
+      preLoaderRoute: typeof ApiV1AiConversationsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/admin/system/$action': {
       id: '/api/v1/admin/system/$action'
       path: '/api/v1/admin/system/$action'
@@ -2923,6 +3068,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1AdminAnalyticsPurgeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/admin/ai-comments/$id': {
+      id: '/api/v1/admin/ai-comments/$id'
+      path: '/api/v1/admin/ai-comments/$id'
+      fullPath: '/api/v1/admin/ai-comments/$id'
+      preLoaderRoute: typeof ApiV1AdminAiCommentsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/auth/passkey/$flow/$action': {
       id: '/api/v1/auth/passkey/$flow/$action'
       path: '/api/v1/auth/passkey/$flow/$action'
@@ -2957,6 +3109,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/v1/admin/sync/$platform/jobs'
       preLoaderRoute: typeof ApiV1AdminSyncPlatformJobsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/admin/ai-comments/$id/$action': {
+      id: '/api/v1/admin/ai-comments/$id/$action'
+      path: '/$action'
+      fullPath: '/api/v1/admin/ai-comments/$id/$action'
+      preLoaderRoute: typeof ApiV1AdminAiCommentsIdActionRouteImport
+      parentRoute: typeof ApiV1AdminAiCommentsIdRoute
     }
     '/api/v1/sync/$platform/job/$id/status': {
       id: '/api/v1/sync/$platform/job/$id/status'
@@ -3050,6 +3209,18 @@ const ApiV1PostsRouteWithChildren = ApiV1PostsRoute._addFileChildren(
   ApiV1PostsRouteChildren,
 )
 
+interface ApiV1SearchRouteChildren {
+  ApiV1SearchRebuildRoute: typeof ApiV1SearchRebuildRoute
+}
+
+const ApiV1SearchRouteChildren: ApiV1SearchRouteChildren = {
+  ApiV1SearchRebuildRoute: ApiV1SearchRebuildRoute,
+}
+
+const ApiV1SearchRouteWithChildren = ApiV1SearchRoute._addFileChildren(
+  ApiV1SearchRouteChildren,
+)
+
 interface ApiV1TagsRouteChildren {
   ApiV1TagsIdRoute: typeof ApiV1TagsIdRoute
 }
@@ -3073,6 +3244,17 @@ const ApiV1TrackRouteChildren: ApiV1TrackRouteChildren = {
 const ApiV1TrackRouteWithChildren = ApiV1TrackRoute._addFileChildren(
   ApiV1TrackRouteChildren,
 )
+
+interface ApiV1AiProvidersRouteChildren {
+  ApiV1AiProvidersIdRoute: typeof ApiV1AiProvidersIdRoute
+}
+
+const ApiV1AiProvidersRouteChildren: ApiV1AiProvidersRouteChildren = {
+  ApiV1AiProvidersIdRoute: ApiV1AiProvidersIdRoute,
+}
+
+const ApiV1AiProvidersRouteWithChildren =
+  ApiV1AiProvidersRoute._addFileChildren(ApiV1AiProvidersRouteChildren)
 
 interface ApiV1CommentsIdRouteChildren {
   ApiV1CommentsIdApproveRoute: typeof ApiV1CommentsIdApproveRoute
@@ -3138,6 +3320,20 @@ const ApiV1ThemesIdRouteWithChildren = ApiV1ThemesIdRoute._addFileChildren(
   ApiV1ThemesIdRouteChildren,
 )
 
+interface ApiV1AdminAiCommentsIdRouteChildren {
+  ApiV1AdminAiCommentsIdActionRoute: typeof ApiV1AdminAiCommentsIdActionRoute
+}
+
+const ApiV1AdminAiCommentsIdRouteChildren: ApiV1AdminAiCommentsIdRouteChildren =
+  {
+    ApiV1AdminAiCommentsIdActionRoute: ApiV1AdminAiCommentsIdActionRoute,
+  }
+
+const ApiV1AdminAiCommentsIdRouteWithChildren =
+  ApiV1AdminAiCommentsIdRoute._addFileChildren(
+    ApiV1AdminAiCommentsIdRouteChildren,
+  )
+
 interface ApiV1AlbumsIdPhotosRouteChildren {
   ApiV1AlbumsIdPhotosMediaIdRoute: typeof ApiV1AlbumsIdPhotosMediaIdRoute
 }
@@ -3180,10 +3376,12 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1OptionsRoute: ApiV1OptionsRouteWithChildren,
   ApiV1OwnerRoute: ApiV1OwnerRoute,
   ApiV1PostsRoute: ApiV1PostsRouteWithChildren,
-  ApiV1SearchRoute: ApiV1SearchRoute,
+  ApiV1SearchRoute: ApiV1SearchRouteWithChildren,
   ApiV1TagsRoute: ApiV1TagsRouteWithChildren,
   ApiV1TrackRoute: ApiV1TrackRouteWithChildren,
   ApiV1AdminStatsRoute: ApiV1AdminStatsRoute,
+  ApiV1AiActionRoute: ApiV1AiActionRoute,
+  ApiV1AiProvidersRoute: ApiV1AiProvidersRouteWithChildren,
   ApiV1AnalyticsActionRoute: ApiV1AnalyticsActionRoute,
   ApiV1ArchiveStatsRoute: ApiV1ArchiveStatsRoute,
   ApiV1AuthForgotPasswordRoute: ApiV1AuthForgotPasswordRoute,
@@ -3266,6 +3464,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1PluginsIndexRoute: ApiV1PluginsIndexRoute,
   ApiV1ProfileIndexRoute: ApiV1ProfileIndexRoute,
   ApiV1ThemesIndexRoute: ApiV1ThemesIndexRoute,
+  ApiV1AdminAiCommentsIdRoute: ApiV1AdminAiCommentsIdRouteWithChildren,
   ApiV1AdminAnalyticsPurgeRoute: ApiV1AdminAnalyticsPurgeRoute,
   ApiV1AdminAnalyticsStatsRoute: ApiV1AdminAnalyticsStatsRoute,
   ApiV1AdminAnnotationsIdRoute: ApiV1AdminAnnotationsIdRoute,
@@ -3274,6 +3473,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1AdminFootprintsGeocodeRoute: ApiV1AdminFootprintsGeocodeRoute,
   ApiV1AdminFootprintsPlacesRoute: ApiV1AdminFootprintsPlacesRoute,
   ApiV1AdminSystemActionRoute: ApiV1AdminSystemActionRoute,
+  ApiV1AiConversationsIdRoute: ApiV1AiConversationsIdRoute,
   ApiV1AlbumsIdPhotosRoute: ApiV1AlbumsIdPhotosRouteWithChildren,
   ApiV1AuthPasskeyAvailableRoute: ApiV1AuthPasskeyAvailableRoute,
   ApiV1AuthTotpActionRoute: ApiV1AuthTotpActionRoute,
@@ -3282,6 +3482,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1PlaylistsIdSongsRoute: ApiV1PlaylistsIdSongsRoute,
   ApiV1PublicAlbumsIdRoute: ApiV1PublicAlbumsIdRoute,
   ApiV1SyncPlatformActionRoute: ApiV1SyncPlatformActionRoute,
+  ApiV1AdminAiCommentsIndexRoute: ApiV1AdminAiCommentsIndexRoute,
   ApiV1AdminAnnotationsIndexRoute: ApiV1AdminAnnotationsIndexRoute,
   ApiV1AdminFootprintsIndexRoute: ApiV1AdminFootprintsIndexRoute,
   ApiV1PublicAlbumsIndexRoute: ApiV1PublicAlbumsIndexRoute,

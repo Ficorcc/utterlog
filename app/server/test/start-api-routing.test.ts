@@ -59,6 +59,26 @@ describe('TanStack Start native API routing', () => {
     }
   });
 
+  test('routes AI providers, generation, chat, batches, and moderation to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/ai/providers', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/ai/providers', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/ai/providers/7', 'DELETE'))).toBe(true);
+    for (const action of ['conversations', 'logs', 'stats', 'batch-status']) {
+      expect(isStartNativeApiRequest(request(`/api/v1/ai/${action}`, 'GET'))).toBe(true);
+    }
+    expect(isStartNativeApiRequest(request('/api/v1/ai/conversations/7', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/ai/conversations/7', 'DELETE'))).toBe(true);
+    for (const action of ['test', 'generate-image', 'cover', 'chat', 'slug', 'summary', 'tags', 'format', 'query', 'reader-chat', 'batch-questions', 'batch-summary', 'batch-all', 'batch-delete', 'batch-stop']) {
+      expect(isStartNativeApiRequest(request(`/api/v1/ai/${action}`, 'POST'))).toBe(true);
+    }
+    expect(isStartNativeApiRequest(request('/api/v1/admin/ai-comments', 'GET'))).toBe(true);
+    for (const action of ['approve', 'reject', 'regenerate']) {
+      expect(isStartNativeApiRequest(request(`/api/v1/admin/ai-comments/7/${action}`, 'POST'))).toBe(true);
+    }
+    expect(isStartNativeApiRequest(request('/api/v1/admin/ai-comments/7', 'DELETE'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/search/rebuild', 'POST'))).toBe(true);
+  });
+
   test('routes federation and Passport protocols to Start', () => {
     expect(isStartNativeApiRequest(request('/api/v1/federation/metadata', 'GET'))).toBe(true);
     for (const action of ['follow', 'verify', 'webhook', 'token']) {
