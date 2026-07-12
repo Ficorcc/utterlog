@@ -2514,6 +2514,96 @@ export async function networkOauthCallback(query: URLSearchParams) {
   return finish(true);
 }
 
+export class SocialServiceError extends Error {
+  constructor(public status: number, public code: string, message: string) {
+    super(message);
+  }
+}
+
+export async function followSocialSite(userId: number, input: Record<string, unknown>) {
+  const siteUrl = normalizedSiteUrl(input.site_url || input.source_site);
+  if (!siteUrl) throw new SocialServiceError(400, 'VALIDATION_ERROR', 'site_url 不能为空');
+  let meta: Record<string, unknown>;
+  try { meta = await fetchRemoteMetadata(siteUrl); }
+  catch { throw new SocialServiceError(400, 'DISCOVERY_FAILED', '无法连接目标站点'); }
+  const user = await one<{ username: string; nickname: string | null; avatar: string | null }>(
+    `select username, nickname, avatar from ${table('users')} where id = $1`, [userId],
+  ).catch(() => null);
+  const ownMeta = await siteMetadata();
+  void assertPublicHttpUrl(siteUrl).then((safeSiteUrl) => fetch(`${safeSiteUrl}/api/v1/federation/follow`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ follower_site: config.appUrl, follower_name: user?.nickname || user?.username || ownMeta.name || config.appUrl,
+      follower_avatar: user?.avatar || ownMeta.logo || '', follower_url: config.appUrl }), signal: AbortSignal.timeout(10000),
+  })).catch(() => {});
+  const now = nowUnix();
+  await exec(
+    `insert into ${table('followers')} (user_id, follower_id, source_site, status, mutual, created_at, updated_at)
+     values ($1,0,$2,'active',false,$3,$3)
+     on conflict (user_id, source_site) where source_site != '' and following_id = 0 do update set status='active', updated_at=$3`,
+    [userId, siteUrl, now],
+  ).catch(async () => {
+    await exec(
+      `insert into ${table('followers')} (user_id, follower_id, source_site, status, mutual, created_at, updated_at)
+       values ($1,0,$2,'active',false,$3,$3)`, [userId, siteUrl, now],
+    ).catch(() => {});
+  });
+  const siteName = normalizeDisplayName(meta.name || meta.title) || siteUrl;
+  const siteLogo = String(meta.logo || meta.favicon || '');
+  await exec(
+    `insert into ${table('rss_subscriptions')} (user_id, site_url, feed_url, site_name, site_avatar, last_fetched_at, created_at)
+     values ($1,$2,$3,$4,$5,0,$6)
+     on conflict (user_id, feed_url) do update set site_url=$2, site_name=$4, site_avatar=$5`,
+    [userId, siteUrl, `${siteUrl}/api/v1/feed`, siteName, siteLogo, now],
+  ).catch(() => {});
+  const incoming = await one<{ count: string }>(
+    `select count(*)::text as count from ${table('followers')} where following_id = $1 and source_site = $2`, [userId, siteUrl],
+  ).catch(() => null);
+  const mutual = Number(incoming?.count || 0) > 0;
+  if (mutual) {
+    await exec(`update ${table('followers')} set mutual = true, updated_at = $2 where source_site = $1 and (user_id = $3 or following_id = $3)`,
+      [siteUrl, now, userId]).catch(() => {});
+    await exec(
+      `insert into ${table('links')} (name, url, description, logo, status, order_num, created_at, updated_at)
+       values ($1,$2,'互关好友',$3,1,0,$4,$4) on conflict do nothing`, [siteName, siteUrl, siteLogo, now],
+    ).catch(() => {});
+  }
+  return { followed: true, mutual, rss_subscribed: true };
+}
+
+export async function unfollowSocialSite(userId: number, input: Record<string, unknown>) {
+  const siteUrl = normalizedSiteUrl(input.site_url || input.source_site);
+  await exec(`delete from ${table('followers')} where user_id = $1 and source_site = $2`, [userId, siteUrl]).catch(() => {});
+  await exec(`delete from ${table('rss_subscriptions')} where user_id = $1 and site_url = $2`, [userId, siteUrl]).catch(() => {});
+  return { unfollowed: true };
+}
+
+export async function socialFollowStatus(userId: number, rawSiteUrl: unknown) {
+  const siteUrl = normalizedSiteUrl(rawSiteUrl);
+  if (!siteUrl) throw new SocialServiceError(400, 'VALIDATION_ERROR', 'site_url 参数不能为空');
+  const row = await one<{ count: string; mutual: boolean }>(
+    `select count(*)::text as count, coalesce(bool_or(mutual), false) as mutual
+     from ${table('followers')} where user_id = $1 and source_site = $2`, [userId, siteUrl],
+  ).catch(() => null);
+  return { following: Number(row?.count || 0) > 0, mutual: row?.mutual === true };
+}
+
+export async function socialFollowing(userId: number) {
+  return many<Record<string, unknown>>(
+    `select f.*, rs.site_name, rs.site_url from ${table('followers')} f
+     left join ${table('rss_subscriptions')} rs on f.source_site = rs.site_url and rs.user_id = $1
+     where f.user_id = $1 and coalesce(f.source_site,'') != '' order by f.created_at desc`, [userId],
+  ).catch(() => []);
+}
+
+export async function socialManagement(userId: number) {
+  const following = await socialFollowing(userId);
+  const followers = await many<Record<string, unknown>>(
+    `select * from ${table('followers')} where following_id = $1 and coalesce(source_site,'') != '' order by created_at desc`, [userId],
+  ).catch(() => []);
+  const mutual = following.filter((row) => row.mutual === true);
+  return { following, followers, mutual, counts: { following: following.length, followers: followers.length, mutual: mutual.length } };
+}
+
 export function registerCompatRoutes(app: Hono) {
   startBackupScheduler();
   registerCodingRoutes(app);

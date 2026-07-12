@@ -72,6 +72,8 @@ export function isStartNativeApiRequest(request: Request) {
   if (url.pathname === '/api/v1/feed' || url.pathname === '/api/v1/social/feed-timeline' || url.pathname === '/api/v1/social/feed-stats') return method === 'GET';
   if (url.pathname === '/api/v1/social/fetch-feeds') return method === 'POST';
   if (url.pathname === '/api/v1/social/fetch-feeds/status') return method === 'GET';
+  if (/^\/api\/v1\/social\/(follow-status|following|management)$/.test(url.pathname)) return method === 'GET';
+  if (/^\/api\/v1\/social\/(follow|unfollow)$/.test(url.pathname)) return method === 'POST';
   if (/^\/api\/v1\/telegram\/(webhook|test|get-chat-id|setup-webhook)$/.test(url.pathname)) return method === 'POST';
   if (url.pathname === '/api/v1/federation/metadata') return method === 'GET';
   if (/^\/api\/v1\/federation\/(follow|verify|webhook|token)$/.test(url.pathname)) return method === 'POST';

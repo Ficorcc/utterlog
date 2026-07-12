@@ -53,6 +53,7 @@ import { Route as ApiV1SystemStatusRouteImport } from './routes/api/v1/system/st
 import { Route as ApiV1SocialFetchFeedsRouteImport } from './routes/api/v1/social/fetch-feeds'
 import { Route as ApiV1SocialFeedTimelineRouteImport } from './routes/api/v1/social/feed-timeline'
 import { Route as ApiV1SocialFeedStatsRouteImport } from './routes/api/v1/social/feed-stats'
+import { Route as ApiV1SocialActionRouteImport } from './routes/api/v1/social/$action'
 import { Route as ApiV1SetupTestDbRouteImport } from './routes/api/v1/setup/test-db'
 import { Route as ApiV1SetupStatusRouteImport } from './routes/api/v1/setup/status'
 import { Route as ApiV1SetupSaveRouteImport } from './routes/api/v1/setup/save'
@@ -369,6 +370,11 @@ const ApiV1SocialFeedTimelineRoute = ApiV1SocialFeedTimelineRouteImport.update({
 const ApiV1SocialFeedStatsRoute = ApiV1SocialFeedStatsRouteImport.update({
   id: '/api/v1/social/feed-stats',
   path: '/api/v1/social/feed-stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1SocialActionRoute = ApiV1SocialActionRouteImport.update({
+  id: '/api/v1/social/$action',
+  path: '/api/v1/social/$action',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1SetupTestDbRoute = ApiV1SetupTestDbRouteImport.update({
@@ -956,6 +962,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/setup/save': typeof ApiV1SetupSaveRoute
   '/api/v1/setup/status': typeof ApiV1SetupStatusRoute
   '/api/v1/setup/test-db': typeof ApiV1SetupTestDbRoute
+  '/api/v1/social/$action': typeof ApiV1SocialActionRoute
   '/api/v1/social/feed-stats': typeof ApiV1SocialFeedStatsRoute
   '/api/v1/social/feed-timeline': typeof ApiV1SocialFeedTimelineRoute
   '/api/v1/social/fetch-feeds': typeof ApiV1SocialFetchFeedsRouteWithChildren
@@ -1098,6 +1105,7 @@ export interface FileRoutesByTo {
   '/api/v1/setup/save': typeof ApiV1SetupSaveRoute
   '/api/v1/setup/status': typeof ApiV1SetupStatusRoute
   '/api/v1/setup/test-db': typeof ApiV1SetupTestDbRoute
+  '/api/v1/social/$action': typeof ApiV1SocialActionRoute
   '/api/v1/social/feed-stats': typeof ApiV1SocialFeedStatsRoute
   '/api/v1/social/feed-timeline': typeof ApiV1SocialFeedTimelineRoute
   '/api/v1/social/fetch-feeds': typeof ApiV1SocialFetchFeedsRouteWithChildren
@@ -1241,6 +1249,7 @@ export interface FileRoutesById {
   '/api/v1/setup/save': typeof ApiV1SetupSaveRoute
   '/api/v1/setup/status': typeof ApiV1SetupStatusRoute
   '/api/v1/setup/test-db': typeof ApiV1SetupTestDbRoute
+  '/api/v1/social/$action': typeof ApiV1SocialActionRoute
   '/api/v1/social/feed-stats': typeof ApiV1SocialFeedStatsRoute
   '/api/v1/social/feed-timeline': typeof ApiV1SocialFeedTimelineRoute
   '/api/v1/social/fetch-feeds': typeof ApiV1SocialFetchFeedsRouteWithChildren
@@ -1385,6 +1394,7 @@ export interface FileRouteTypes {
     | '/api/v1/setup/save'
     | '/api/v1/setup/status'
     | '/api/v1/setup/test-db'
+    | '/api/v1/social/$action'
     | '/api/v1/social/feed-stats'
     | '/api/v1/social/feed-timeline'
     | '/api/v1/social/fetch-feeds'
@@ -1527,6 +1537,7 @@ export interface FileRouteTypes {
     | '/api/v1/setup/save'
     | '/api/v1/setup/status'
     | '/api/v1/setup/test-db'
+    | '/api/v1/social/$action'
     | '/api/v1/social/feed-stats'
     | '/api/v1/social/feed-timeline'
     | '/api/v1/social/fetch-feeds'
@@ -1669,6 +1680,7 @@ export interface FileRouteTypes {
     | '/api/v1/setup/save'
     | '/api/v1/setup/status'
     | '/api/v1/setup/test-db'
+    | '/api/v1/social/$action'
     | '/api/v1/social/feed-stats'
     | '/api/v1/social/feed-timeline'
     | '/api/v1/social/fetch-feeds'
@@ -1808,6 +1820,7 @@ export interface RootRouteChildren {
   ApiV1SetupSaveRoute: typeof ApiV1SetupSaveRoute
   ApiV1SetupStatusRoute: typeof ApiV1SetupStatusRoute
   ApiV1SetupTestDbRoute: typeof ApiV1SetupTestDbRoute
+  ApiV1SocialActionRoute: typeof ApiV1SocialActionRoute
   ApiV1SocialFeedStatsRoute: typeof ApiV1SocialFeedStatsRoute
   ApiV1SocialFeedTimelineRoute: typeof ApiV1SocialFeedTimelineRoute
   ApiV1SocialFetchFeedsRoute: typeof ApiV1SocialFetchFeedsRouteWithChildren
@@ -2162,6 +2175,13 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/social/feed-stats'
       fullPath: '/api/v1/social/feed-stats'
       preLoaderRoute: typeof ApiV1SocialFeedStatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/social/$action': {
+      id: '/api/v1/social/$action'
+      path: '/api/v1/social/$action'
+      fullPath: '/api/v1/social/$action'
+      preLoaderRoute: typeof ApiV1SocialActionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/setup/test-db': {
@@ -3084,6 +3104,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1SetupSaveRoute: ApiV1SetupSaveRoute,
   ApiV1SetupStatusRoute: ApiV1SetupStatusRoute,
   ApiV1SetupTestDbRoute: ApiV1SetupTestDbRoute,
+  ApiV1SocialActionRoute: ApiV1SocialActionRoute,
   ApiV1SocialFeedStatsRoute: ApiV1SocialFeedStatsRoute,
   ApiV1SocialFeedTimelineRoute: ApiV1SocialFeedTimelineRoute,
   ApiV1SocialFetchFeedsRoute: ApiV1SocialFetchFeedsRouteWithChildren,

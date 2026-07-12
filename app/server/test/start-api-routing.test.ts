@@ -36,6 +36,14 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/social/fetch-feeds/status', 'GET'))).toBe(true);
   });
 
+  test('routes social follow management to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/social/follow', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/social/unfollow', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/social/follow-status?site_url=https://example.com', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/social/following', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/social/management', 'GET'))).toBe(true);
+  });
+
   test('routes federation and Passport protocols to Start', () => {
     expect(isStartNativeApiRequest(request('/api/v1/federation/metadata', 'GET'))).toBe(true);
     for (const action of ['follow', 'verify', 'webhook', 'token']) {
