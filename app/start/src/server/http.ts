@@ -14,6 +14,14 @@ export function apiFail(status: number, code: string, message: string) {
   return Response.json({ success: false, error: { code, message }, meta: meta() }, { status });
 }
 
+export function apiPaginated(data: unknown, pagination: { total: number; page: number; per_page: number; total_pages: number }) {
+  return Response.json({
+    success: true,
+    data,
+    meta: { ...meta(), ...pagination, has_more: pagination.page < pagination.total_pages },
+  });
+}
+
 export async function withAdmin(request: Request, handler: () => Promise<Response>) {
   try {
     await requireAdminRequest(request);

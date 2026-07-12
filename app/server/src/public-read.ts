@@ -484,7 +484,15 @@ export async function listMoments(params: { page?: number; perPage?: number } = 
   };
 }
 
-export async function listComments(params: { page?: number; perPage?: number; status?: string; excludeAdmin?: boolean } = {}) {
+export async function listComments(params: {
+  page?: number;
+  perPage?: number;
+  status?: string;
+  excludeAdmin?: boolean;
+  postId?: number;
+  topLevel?: boolean;
+  order?: string;
+} = {}) {
   const page = Math.max(1, params.page || 1);
   const perPage = Math.min(500, Math.max(1, params.perPage || 20));
   const offset = (page - 1) * perPage;
@@ -495,6 +503,11 @@ export async function listComments(params: { page?: number; perPage?: number; st
     queryParams.push(status);
     where.push(`c.status = $${queryParams.length}`);
   }
+  if (params.postId && params.postId > 0) {
+    queryParams.push(params.postId);
+    where.push(`c.post_id = $${queryParams.length}`);
+  }
+  if (params.topLevel) where.push(`(c.parent_id is null or c.parent_id = 0)`);
   if (params.excludeAdmin) {
     where.push(`coalesce(u.role, '') != 'admin'`);
     const adminEmails = await many<{ email: string }>(`select lower(trim(email)) as email from ${table('users')} where role = 'admin'`).catch(() => []);
@@ -524,7 +537,7 @@ export async function listComments(params: { page?: number; perPage?: number; st
      left join ${table('users')} u on u.id = c.user_id
      left join ${table('comments')} pc on pc.id = c.parent_id
      ${whereSql}
-     order by c.created_at desc, c.id desc
+     order by c.created_at ${normalizeDirection(params.order)}, c.id ${normalizeDirection(params.order)}
      limit $${queryParams.length + 1} offset $${queryParams.length + 2}`,
     [...queryParams, perPage, offset],
   ).catch(() => []);

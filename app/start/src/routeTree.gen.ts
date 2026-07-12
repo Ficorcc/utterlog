@@ -12,8 +12,15 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostsSlugRouteImport } from './routes/posts/$slug'
+import { Route as ApiV1TagsRouteImport } from './routes/api/v1/tags'
+import { Route as ApiV1PostsRouteImport } from './routes/api/v1/posts'
+import { Route as ApiV1OptionsRouteImport } from './routes/api/v1/options'
+import { Route as ApiV1CategoriesRouteImport } from './routes/api/v1/categories'
+import { Route as ApiV1ResourceRouteImport } from './routes/api/v1/$resource'
 import { Route as ApiV1ProfileIndexRouteImport } from './routes/api/v1/profile/index'
 import { Route as ApiV1PasskeysIndexRouteImport } from './routes/api/v1/passkeys/index'
+import { Route as ApiV1MomentsIndexRouteImport } from './routes/api/v1/moments/index'
+import { Route as ApiV1CommentsIndexRouteImport } from './routes/api/v1/comments/index'
 import { Route as ApiV1VisitorWeatherRouteImport } from './routes/api/v1/visitor/weather'
 import { Route as ApiV1ProfileSendCodeRouteImport } from './routes/api/v1/profile/send-code'
 import { Route as ApiV1PasskeysIdRouteImport } from './routes/api/v1/passkeys/$id'
@@ -45,6 +52,31 @@ const PostsSlugRoute = PostsSlugRouteImport.update({
   path: '/posts/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1TagsRoute = ApiV1TagsRouteImport.update({
+  id: '/api/v1/tags',
+  path: '/api/v1/tags',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1PostsRoute = ApiV1PostsRouteImport.update({
+  id: '/api/v1/posts',
+  path: '/api/v1/posts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1OptionsRoute = ApiV1OptionsRouteImport.update({
+  id: '/api/v1/options',
+  path: '/api/v1/options',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1CategoriesRoute = ApiV1CategoriesRouteImport.update({
+  id: '/api/v1/categories',
+  path: '/api/v1/categories',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1ResourceRoute = ApiV1ResourceRouteImport.update({
+  id: '/api/v1/$resource',
+  path: '/api/v1/$resource',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1ProfileIndexRoute = ApiV1ProfileIndexRouteImport.update({
   id: '/api/v1/profile/',
   path: '/api/v1/profile/',
@@ -53,6 +85,16 @@ const ApiV1ProfileIndexRoute = ApiV1ProfileIndexRouteImport.update({
 const ApiV1PasskeysIndexRoute = ApiV1PasskeysIndexRouteImport.update({
   id: '/api/v1/passkeys/',
   path: '/api/v1/passkeys/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1MomentsIndexRoute = ApiV1MomentsIndexRouteImport.update({
+  id: '/api/v1/moments/',
+  path: '/api/v1/moments/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1CommentsIndexRoute = ApiV1CommentsIndexRouteImport.update({
+  id: '/api/v1/comments/',
+  path: '/api/v1/comments/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1VisitorWeatherRoute = ApiV1VisitorWeatherRouteImport.update({
@@ -137,6 +179,11 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/posts/$slug': typeof PostsSlugRoute
+  '/api/v1/$resource': typeof ApiV1ResourceRoute
+  '/api/v1/categories': typeof ApiV1CategoriesRoute
+  '/api/v1/options': typeof ApiV1OptionsRoute
+  '/api/v1/posts': typeof ApiV1PostsRoute
+  '/api/v1/tags': typeof ApiV1TagsRoute
   '/api/v1/auth/forgot-password': typeof ApiV1AuthForgotPasswordRoute
   '/api/v1/auth/login': typeof ApiV1AuthLoginRoute
   '/api/v1/auth/logout': typeof ApiV1AuthLogoutRoute
@@ -149,6 +196,8 @@ export interface FileRoutesByFullPath {
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
+  '/api/v1/comments/': typeof ApiV1CommentsIndexRoute
+  '/api/v1/moments/': typeof ApiV1MomentsIndexRoute
   '/api/v1/passkeys/': typeof ApiV1PasskeysIndexRoute
   '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
@@ -159,6 +208,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/posts/$slug': typeof PostsSlugRoute
+  '/api/v1/$resource': typeof ApiV1ResourceRoute
+  '/api/v1/categories': typeof ApiV1CategoriesRoute
+  '/api/v1/options': typeof ApiV1OptionsRoute
+  '/api/v1/posts': typeof ApiV1PostsRoute
+  '/api/v1/tags': typeof ApiV1TagsRoute
   '/api/v1/auth/forgot-password': typeof ApiV1AuthForgotPasswordRoute
   '/api/v1/auth/login': typeof ApiV1AuthLoginRoute
   '/api/v1/auth/logout': typeof ApiV1AuthLogoutRoute
@@ -171,6 +225,8 @@ export interface FileRoutesByTo {
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
+  '/api/v1/comments': typeof ApiV1CommentsIndexRoute
+  '/api/v1/moments': typeof ApiV1MomentsIndexRoute
   '/api/v1/passkeys': typeof ApiV1PasskeysIndexRoute
   '/api/v1/profile': typeof ApiV1ProfileIndexRoute
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
@@ -182,6 +238,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/posts/$slug': typeof PostsSlugRoute
+  '/api/v1/$resource': typeof ApiV1ResourceRoute
+  '/api/v1/categories': typeof ApiV1CategoriesRoute
+  '/api/v1/options': typeof ApiV1OptionsRoute
+  '/api/v1/posts': typeof ApiV1PostsRoute
+  '/api/v1/tags': typeof ApiV1TagsRoute
   '/api/v1/auth/forgot-password': typeof ApiV1AuthForgotPasswordRoute
   '/api/v1/auth/login': typeof ApiV1AuthLoginRoute
   '/api/v1/auth/logout': typeof ApiV1AuthLogoutRoute
@@ -194,6 +255,8 @@ export interface FileRoutesById {
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
+  '/api/v1/comments/': typeof ApiV1CommentsIndexRoute
+  '/api/v1/moments/': typeof ApiV1MomentsIndexRoute
   '/api/v1/passkeys/': typeof ApiV1PasskeysIndexRoute
   '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
@@ -206,6 +269,11 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/posts/$slug'
+    | '/api/v1/$resource'
+    | '/api/v1/categories'
+    | '/api/v1/options'
+    | '/api/v1/posts'
+    | '/api/v1/tags'
     | '/api/v1/auth/forgot-password'
     | '/api/v1/auth/login'
     | '/api/v1/auth/logout'
@@ -218,6 +286,8 @@ export interface FileRouteTypes {
     | '/api/v1/passkeys/$id'
     | '/api/v1/profile/send-code'
     | '/api/v1/visitor/weather'
+    | '/api/v1/comments/'
+    | '/api/v1/moments/'
     | '/api/v1/passkeys/'
     | '/api/v1/profile/'
     | '/api/v1/auth/passkey/available'
@@ -228,6 +298,11 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/posts/$slug'
+    | '/api/v1/$resource'
+    | '/api/v1/categories'
+    | '/api/v1/options'
+    | '/api/v1/posts'
+    | '/api/v1/tags'
     | '/api/v1/auth/forgot-password'
     | '/api/v1/auth/login'
     | '/api/v1/auth/logout'
@@ -240,6 +315,8 @@ export interface FileRouteTypes {
     | '/api/v1/passkeys/$id'
     | '/api/v1/profile/send-code'
     | '/api/v1/visitor/weather'
+    | '/api/v1/comments'
+    | '/api/v1/moments'
     | '/api/v1/passkeys'
     | '/api/v1/profile'
     | '/api/v1/auth/passkey/available'
@@ -250,6 +327,11 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/posts/$slug'
+    | '/api/v1/$resource'
+    | '/api/v1/categories'
+    | '/api/v1/options'
+    | '/api/v1/posts'
+    | '/api/v1/tags'
     | '/api/v1/auth/forgot-password'
     | '/api/v1/auth/login'
     | '/api/v1/auth/logout'
@@ -262,6 +344,8 @@ export interface FileRouteTypes {
     | '/api/v1/passkeys/$id'
     | '/api/v1/profile/send-code'
     | '/api/v1/visitor/weather'
+    | '/api/v1/comments/'
+    | '/api/v1/moments/'
     | '/api/v1/passkeys/'
     | '/api/v1/profile/'
     | '/api/v1/auth/passkey/available'
@@ -273,6 +357,11 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
   PostsSlugRoute: typeof PostsSlugRoute
+  ApiV1ResourceRoute: typeof ApiV1ResourceRoute
+  ApiV1CategoriesRoute: typeof ApiV1CategoriesRoute
+  ApiV1OptionsRoute: typeof ApiV1OptionsRoute
+  ApiV1PostsRoute: typeof ApiV1PostsRoute
+  ApiV1TagsRoute: typeof ApiV1TagsRoute
   ApiV1AuthForgotPasswordRoute: typeof ApiV1AuthForgotPasswordRoute
   ApiV1AuthLoginRoute: typeof ApiV1AuthLoginRoute
   ApiV1AuthLogoutRoute: typeof ApiV1AuthLogoutRoute
@@ -285,6 +374,8 @@ export interface RootRouteChildren {
   ApiV1PasskeysIdRoute: typeof ApiV1PasskeysIdRoute
   ApiV1ProfileSendCodeRoute: typeof ApiV1ProfileSendCodeRoute
   ApiV1VisitorWeatherRoute: typeof ApiV1VisitorWeatherRoute
+  ApiV1CommentsIndexRoute: typeof ApiV1CommentsIndexRoute
+  ApiV1MomentsIndexRoute: typeof ApiV1MomentsIndexRoute
   ApiV1PasskeysIndexRoute: typeof ApiV1PasskeysIndexRoute
   ApiV1ProfileIndexRoute: typeof ApiV1ProfileIndexRoute
   ApiV1AuthPasskeyAvailableRoute: typeof ApiV1AuthPasskeyAvailableRoute
@@ -315,6 +406,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/tags': {
+      id: '/api/v1/tags'
+      path: '/api/v1/tags'
+      fullPath: '/api/v1/tags'
+      preLoaderRoute: typeof ApiV1TagsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/posts': {
+      id: '/api/v1/posts'
+      path: '/api/v1/posts'
+      fullPath: '/api/v1/posts'
+      preLoaderRoute: typeof ApiV1PostsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/options': {
+      id: '/api/v1/options'
+      path: '/api/v1/options'
+      fullPath: '/api/v1/options'
+      preLoaderRoute: typeof ApiV1OptionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/categories': {
+      id: '/api/v1/categories'
+      path: '/api/v1/categories'
+      fullPath: '/api/v1/categories'
+      preLoaderRoute: typeof ApiV1CategoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/$resource': {
+      id: '/api/v1/$resource'
+      path: '/api/v1/$resource'
+      fullPath: '/api/v1/$resource'
+      preLoaderRoute: typeof ApiV1ResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/profile/': {
       id: '/api/v1/profile/'
       path: '/api/v1/profile'
@@ -327,6 +453,20 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/passkeys'
       fullPath: '/api/v1/passkeys/'
       preLoaderRoute: typeof ApiV1PasskeysIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/moments/': {
+      id: '/api/v1/moments/'
+      path: '/api/v1/moments'
+      fullPath: '/api/v1/moments/'
+      preLoaderRoute: typeof ApiV1MomentsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/comments/': {
+      id: '/api/v1/comments/'
+      path: '/api/v1/comments'
+      fullPath: '/api/v1/comments/'
+      preLoaderRoute: typeof ApiV1CommentsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/visitor/weather': {
@@ -441,6 +581,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
   PostsSlugRoute: PostsSlugRoute,
+  ApiV1ResourceRoute: ApiV1ResourceRoute,
+  ApiV1CategoriesRoute: ApiV1CategoriesRoute,
+  ApiV1OptionsRoute: ApiV1OptionsRoute,
+  ApiV1PostsRoute: ApiV1PostsRoute,
+  ApiV1TagsRoute: ApiV1TagsRoute,
   ApiV1AuthForgotPasswordRoute: ApiV1AuthForgotPasswordRoute,
   ApiV1AuthLoginRoute: ApiV1AuthLoginRoute,
   ApiV1AuthLogoutRoute: ApiV1AuthLogoutRoute,
@@ -453,6 +598,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1PasskeysIdRoute: ApiV1PasskeysIdRoute,
   ApiV1ProfileSendCodeRoute: ApiV1ProfileSendCodeRoute,
   ApiV1VisitorWeatherRoute: ApiV1VisitorWeatherRoute,
+  ApiV1CommentsIndexRoute: ApiV1CommentsIndexRoute,
+  ApiV1MomentsIndexRoute: ApiV1MomentsIndexRoute,
   ApiV1PasskeysIndexRoute: ApiV1PasskeysIndexRoute,
   ApiV1ProfileIndexRoute: ApiV1ProfileIndexRoute,
   ApiV1AuthPasskeyAvailableRoute: ApiV1AuthPasskeyAvailableRoute,

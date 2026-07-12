@@ -44,6 +44,7 @@ export async function handleStartRequest(request: Request): Promise<Response | n
 export function isStartNativeApiRequest(request: Request) {
   const url = new URL(request.url);
   const method = request.method.toUpperCase();
+  const anonymousGet = method === 'GET' && !request.headers.get('authorization');
   if (url.pathname === '/api/v1/auth/login' || url.pathname === '/api/v1/auth/refresh' || url.pathname === '/api/v1/auth/logout') {
     return method === 'POST';
   }
@@ -58,6 +59,8 @@ export function isStartNativeApiRequest(request: Request) {
   if (url.pathname === '/api/v1/passkeys') return method === 'GET';
   if (/^\/api\/v1\/passkeys\/[^/]+$/.test(url.pathname)) return method === 'DELETE';
   if (url.pathname === '/api/v1/visitor/weather') return method === 'GET';
+  if (anonymousGet && ['/api/v1/options', '/api/v1/categories', '/api/v1/tags', '/api/v1/posts', '/api/v1/comments', '/api/v1/moments'].includes(url.pathname)) return true;
+  if (anonymousGet && /^\/api\/v1\/(books|games|goods|links|movies|music|playlists)$/.test(url.pathname)) return true;
   if (url.pathname === '/api/v1/comments/batch') return method === 'POST';
   if (/^\/api\/v1\/comments\/\d+$/.test(url.pathname)) {
     return method === 'PUT' || method === 'PATCH' || method === 'DELETE';

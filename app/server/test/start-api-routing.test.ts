@@ -51,6 +51,16 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/visitor/weather', 'POST'))).toBe(false);
   });
 
+  test('routes anonymous public reads to Start while retaining authenticated admin reads', () => {
+    for (const path of ['/api/v1/options', '/api/v1/categories', '/api/v1/tags', '/api/v1/posts', '/api/v1/comments', '/api/v1/moments', '/api/v1/links']) {
+      expect(isStartNativeApiRequest(request(path, 'GET'))).toBe(true);
+      expect(isStartNativeApiRequest(new Request(`https://example.test${path}`, {
+        headers: { authorization: 'Bearer admin-token' },
+      }))).toBe(false);
+    }
+    expect(isStartNativeApiRequest(request('/api/v1/posts', 'POST'))).toBe(false);
+  });
+
   test('keeps public creation, replies, and reads on the compatibility API', () => {
     expect(isStartNativeApiRequest(request('/api/v1/comments', 'POST'))).toBe(false);
     expect(isStartNativeApiRequest(request('/api/v1/comments/42/reply', 'POST'))).toBe(false);
