@@ -8,6 +8,7 @@ import { config } from '../config';
 import { adminAuth } from '../auth/middleware';
 import { bodySizeLimit, rateLimit, securityDefense, securityHeaders } from '../http/security';
 import { handleRevalidate } from '../cache/revalidate';
+import { handleStartApiRequest } from '../web/start';
 
 const adminMutationPrefixes = [
   '/api/v1/admin/',
@@ -104,6 +105,11 @@ export function createApp(dbReady: boolean) {
     return c.json({ success: true, message: 'Cache cleared', ...result });
   });
   app.options('/api/revalidate', (c) => c.body(null, 204));
+  app.use('/api/v1/*', async (c, next) => {
+    const response = await handleStartApiRequest(c.req.raw);
+    if (response) return response;
+    return next();
+  });
   app.use('/api/v1/*', async (c, next) => {
     if (['GET', 'HEAD', 'OPTIONS'].includes(c.req.method.toUpperCase())) return next();
     if (adminMutation(c.req.path)) return adminAuth(c, next);

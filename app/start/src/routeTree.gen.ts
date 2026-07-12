@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostsSlugRouteImport } from './routes/posts/$slug'
+import { Route as ApiV1CommentsBatchRouteImport } from './routes/api/v1/comments/batch'
+import { Route as ApiV1CommentsIdRouteImport } from './routes/api/v1/comments/$id'
 
 const SplatRoute = SplatRouteImport.update({
   id: '/$',
@@ -28,35 +30,69 @@ const PostsSlugRoute = PostsSlugRouteImport.update({
   path: '/posts/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1CommentsBatchRoute = ApiV1CommentsBatchRouteImport.update({
+  id: '/api/v1/comments/batch',
+  path: '/api/v1/comments/batch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1CommentsIdRoute = ApiV1CommentsIdRouteImport.update({
+  id: '/api/v1/comments/$id',
+  path: '/api/v1/comments/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/posts/$slug': typeof PostsSlugRoute
+  '/api/v1/comments/$id': typeof ApiV1CommentsIdRoute
+  '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/posts/$slug': typeof PostsSlugRoute
+  '/api/v1/comments/$id': typeof ApiV1CommentsIdRoute
+  '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/posts/$slug': typeof PostsSlugRoute
+  '/api/v1/comments/$id': typeof ApiV1CommentsIdRoute
+  '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/$' | '/posts/$slug'
+  fullPaths:
+    | '/'
+    | '/$'
+    | '/posts/$slug'
+    | '/api/v1/comments/$id'
+    | '/api/v1/comments/batch'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$' | '/posts/$slug'
-  id: '__root__' | '/' | '/$' | '/posts/$slug'
+  to:
+    | '/'
+    | '/$'
+    | '/posts/$slug'
+    | '/api/v1/comments/$id'
+    | '/api/v1/comments/batch'
+  id:
+    | '__root__'
+    | '/'
+    | '/$'
+    | '/posts/$slug'
+    | '/api/v1/comments/$id'
+    | '/api/v1/comments/batch'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
   PostsSlugRoute: typeof PostsSlugRoute
+  ApiV1CommentsIdRoute: typeof ApiV1CommentsIdRoute
+  ApiV1CommentsBatchRoute: typeof ApiV1CommentsBatchRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +118,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/comments/batch': {
+      id: '/api/v1/comments/batch'
+      path: '/api/v1/comments/batch'
+      fullPath: '/api/v1/comments/batch'
+      preLoaderRoute: typeof ApiV1CommentsBatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/comments/$id': {
+      id: '/api/v1/comments/$id'
+      path: '/api/v1/comments/$id'
+      fullPath: '/api/v1/comments/$id'
+      preLoaderRoute: typeof ApiV1CommentsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +139,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
   PostsSlugRoute: PostsSlugRoute,
+  ApiV1CommentsIdRoute: ApiV1CommentsIdRoute,
+  ApiV1CommentsBatchRoute: ApiV1CommentsBatchRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

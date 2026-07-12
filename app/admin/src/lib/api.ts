@@ -145,6 +145,9 @@ export const commentsApi = {
   approve: (id: number) => api.patch(`/comments/${id}/approve`),
   delete: (id: number) => api.delete(`/comments/${id}`),
   reply: (id: number, content: string) => api.post(`/comments/${id}/reply`, { content }),
+  batch: (ids: number[], action: 'approve' | 'delete' | 'spam' | 'trash') =>
+    api.post('/comments/batch', { ids, action }),
+  emptyTrash: () => api.post('/comments/batch', { action: 'delete', all: true, status: 'trash' }),
 };
 
 // Links API — raise per_page so the admin list shows the full set, not

@@ -25,7 +25,6 @@ async function startServer() {
 export async function handleStartRequest(request: Request): Promise<Response | null> {
   if (!startFrontendEnabled()) return null;
   const method = request.method.toUpperCase();
-  if (method !== 'GET' && method !== 'HEAD') return null;
 
   const server = await startServer();
   if (!server) return null;
@@ -40,4 +39,18 @@ export async function handleStartRequest(request: Request): Promise<Response | n
     console.error('TanStack Start render error:', err);
     return null;
   }
+}
+
+export function isStartNativeApiRequest(request: Request) {
+  const url = new URL(request.url);
+  const method = request.method.toUpperCase();
+  if (url.pathname === '/api/v1/comments/batch') return method === 'POST';
+  if (/^\/api\/v1\/comments\/\d+$/.test(url.pathname)) {
+    return method === 'PUT' || method === 'PATCH' || method === 'DELETE';
+  }
+  return false;
+}
+
+export async function handleStartApiRequest(request: Request) {
+  return isStartNativeApiRequest(request) ? handleStartRequest(request) : null;
 }

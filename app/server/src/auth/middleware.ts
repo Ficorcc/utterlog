@@ -1,8 +1,6 @@
 import type { Context, Next } from 'hono';
-import { verifyAccessToken } from './jwt';
 import { forbidden, unauthorized } from '../http/response';
-import { one } from '../db/helpers';
-import { table } from '../config';
+import { authenticateRequest } from './session';
 
 type AuthVariables = {
   userId?: number;
@@ -10,18 +8,11 @@ type AuthVariables = {
 };
 
 async function authenticateAccess(c: Context) {
-  const header = c.req.header('authorization') || '';
-  const token = header.toLowerCase().startsWith('bearer ') ? header.slice(7).trim() : '';
-  if (!token) return null;
-  const { userId } = await verifyAccessToken(token);
-  const user = await one<{ role: string; status: string }>(
-    `select role, status from ${table('users')} where id = $1`,
-    [userId],
-  );
-  if (!user || user.status !== 'active') throw new Error('inactive user');
-  c.set('userId', userId);
-  c.set('userRole', user.role);
-  return { userId, role: user.role };
+  const session = await authenticateRequest(c.req.raw);
+  if (!session) return null;
+  c.set('userId', session.userId);
+  c.set('userRole', session.role);
+  return session;
 }
 
 export async function auth(c: Context, next: Next) {

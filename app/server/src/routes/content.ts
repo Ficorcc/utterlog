@@ -39,6 +39,7 @@ import {
 } from '../media/storage';
 import { buildFaviconIco, clearBrandingFaviconFiles, resolveFaviconUrl } from '../media/favicon';
 import { parsePermalinkPath } from '../services/permalink';
+import { approveAdminComment, batchAdminComments, deleteAdminComment, updateAdminComment } from '../services/comments';
 
 const contentTables = new Set(['moments', 'music', 'movies', 'books', 'games', 'videos', 'goods', 'links', 'playlists']);
 const writableTables = new Set([...contentTables, 'posts', 'comments', 'media', 'albums', 'notifications']);
@@ -2865,27 +2866,13 @@ export function registerContentRoutes(app: Hono) {
   });
   app.put('/api/v1/comments/:id', auth, async (c) => {
     const id = intParam(c.req.param('id'));
-    const before = await one<{ post_id: number; status: string }>(`select post_id, status from ${table('comments')} where id = $1`, [id]);
-    if (!before) return notFound(c, 'comment not found');
     const body = await c.req.json().catch(() => ({}));
-    const patch: Record<string, unknown> = { ...body };
-    if (body.author_name !== undefined || body.author !== undefined || body.name !== undefined) {
-      patch.author_name = body.author_name ?? body.author ?? body.name;
+    try {
+      const updated = await updateAdminComment(id, body);
+      return updated ? ok(c, updated) : notFound(c, 'comment not found');
+    } catch (err) {
+      return badRequest(c, err instanceof Error ? err.message : '评论更新失败');
     }
-    if (body.author_email !== undefined || body.email !== undefined) {
-      patch.author_email = body.author_email ?? body.email;
-    }
-    if (body.author_url !== undefined || body.url !== undefined) {
-      patch.author_url = body.author_url ?? body.url;
-    }
-    const updated = await genericUpdate('comments', id, patch);
-    const nextStatus = String(patch.status ?? before.status);
-    if (before.status !== 'approved' && nextStatus === 'approved') {
-      await exec(`update ${table('posts')} set comment_count = comment_count + 1 where id = $1`, [before.post_id]).catch(() => {});
-    } else if (before.status === 'approved' && nextStatus !== 'approved') {
-      await exec(`update ${table('posts')} set comment_count = greatest(comment_count - 1, 0) where id = $1`, [before.post_id]).catch(() => {});
-    }
-    return ok(c, { id: updated });
   });
   app.put('/api/v1/comments/:id/edit', async (c) => {
     const body = await c.req.json().catch(() => ({}));
@@ -2909,12 +2896,8 @@ export function registerContentRoutes(app: Hono) {
   });
   app.patch('/api/v1/comments/:id/approve', auth, async (c) => {
     const id = intParam(c.req.param('id'));
-    const existing = await one<{ post_id: number; status: string }>(`select post_id, status from ${table('comments')} where id = $1`, [id]);
-    const updated = await genericUpdate('comments', id, { status: 'approved' });
-    if (existing && existing.status !== 'approved') {
-      await exec(`update ${table('posts')} set comment_count = comment_count + 1 where id = $1`, [existing.post_id]).catch(() => {});
-    }
-    return ok(c, { id: updated });
+    const updated = await approveAdminComment(id);
+    return updated ? ok(c, updated) : notFound(c, 'comment not found');
   });
   app.post('/api/v1/comments/:id/reply', auth, async (c) => {
     const parentId = intParam(c.req.param('id'));
@@ -2964,12 +2947,21 @@ export function registerContentRoutes(app: Hono) {
     return ok(c, { id });
   });
   app.delete('/api/v1/comments/:id', auth, async (c) => {
-    const existing = await one<{ post_id: number; status: string }>(`select post_id, status from ${table('comments')} where id = $1`, [c.req.param('id')]).catch(() => null);
-    await exec(`delete from ${table('comments')} where id = $1`, [c.req.param('id')]);
-    if (existing?.status === 'approved') {
-      await exec(`update ${table('posts')} set comment_count = greatest(comment_count - 1, 0) where id = $1`, [existing.post_id]).catch(() => {});
+    const result = await deleteAdminComment(intParam(c.req.param('id')));
+    return ok(c, result);
+  });
+  app.post('/api/v1/comments/batch', auth, async (c) => {
+    const body = await c.req.json().catch(() => ({}));
+    try {
+      const result = await batchAdminComments({
+        ids: body.ids,
+        action: String(body.action || '') as any,
+        allStatus: body.all === true ? String(body.status || '') : undefined,
+      });
+      return ok(c, result);
+    } catch (err) {
+      return badRequest(c, err instanceof Error ? err.message : '批量操作失败');
     }
-    return ok(c, null);
   });
   app.get('/api/v1/comments/pending-count', auth, async (c) => {
     const [pending, spam] = await Promise.all([

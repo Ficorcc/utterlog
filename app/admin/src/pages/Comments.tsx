@@ -325,10 +325,7 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
 
   const handleEmptyTrash = async () => {
     try {
-      // Delete all trash comments one by one (no batch endpoint)
-      for (const c of comments) {
-        await commentsApi.delete(c.id);
-      }
+      await commentsApi.emptyTrash();
       setComments([]);
       setTotal(0);
       toast.success(t('admin.comments.toast.trashEmptied', '回收站已清空'));
@@ -347,14 +344,8 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
     try {
-      for (const id of ids) {
-        if (action === 'delete') {
-          const c = comments.find(c => c.id === id);
-          if (c?.status === 'trash') await commentsApi.delete(id);
-          else await commentsApi.update(id, { status: 'trash' });
-        } else if (action === 'spam') await commentsApi.update(id, { status: 'spam' });
-        else if (action === 'approve') await commentsApi.approve(id);
-      }
+      const actionName = action === 'delete' && status !== 'trash' ? 'trash' : action;
+      await commentsApi.batch(ids, actionName);
       setComments(prev => prev.filter(c => !selectedIds.has(c.id)));
       setTotal(prev => Math.max(prev - ids.length, 0));
       setSelectedIds(new Set());
