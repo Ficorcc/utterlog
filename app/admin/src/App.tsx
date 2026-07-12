@@ -2,6 +2,7 @@ import { useEffect, useState, lazy, Suspense, Component, type ErrorInfo, type Re
 import { Routes, Route, useNavigate, Outlet, Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/lib/store';
 import DashboardLayout from '@/layouts/DashboardLayout';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { Spinner } from '@/components/ui';
 import { loadSiteOptions } from '@/lib/site';
 
@@ -133,14 +134,22 @@ function AuthGate() {
   }
   return (
     <DashboardLayout>
-      <ChunkErrorBoundary>
-        {/* Suspense fallback：之前用 <RouteLoading />（全屏 overlay）会让
-            每次路由切换都闪一下；改成透明占位 + 顶部细进度条 —— 侧栏 /
-            头部保持可见，仅内容区轻微闪动，体感顺滑很多。 */}
-        <Suspense fallback={<RouteFallback />}>
-          <Outlet />
-        </Suspense>
-      </ChunkErrorBoundary>
+      {/* ErrorBoundary 兜底：ChunkErrorBoundary 只认 chunk 加载失败，
+          其它渲染期异常会重新 throw。没有这层兜底的话，任何页面（尤其
+          统计页的 mapbox-gl 异步回调 / 数据形状异常）抛错都会一路冒泡
+          到 React 根，整棵树卸载 —— 表现就是「点开页面先显示一下，过
+          一会儿整页白屏，侧栏也没了」。包这层后，侧栏 / 头部始终可见，
+          只是内容区显示错误回退，用户能点重试或切走恢复。 */}
+      <ErrorBoundary>
+        <ChunkErrorBoundary>
+          {/* Suspense fallback：之前用 <RouteLoading />（全屏 overlay）会让
+              每次路由切换都闪一下；改成透明占位 + 顶部细进度条 —— 侧栏 /
+              头部保持可见，仅内容区轻微闪动，体感顺滑很多。 */}
+          <Suspense fallback={<RouteFallback />}>
+            <Outlet />
+          </Suspense>
+        </ChunkErrorBoundary>
+      </ErrorBoundary>
     </DashboardLayout>
   );
 }

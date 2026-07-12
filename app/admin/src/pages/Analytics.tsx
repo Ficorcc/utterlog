@@ -18,8 +18,8 @@ const periods = [
 ];
 
 function BarChart({ data, labelKey, valueKey, color = 'var(--color-primary)' }: { data: any[]; labelKey: string; valueKey: string; color?: string }) {
-  if (!data?.length) return <EmptyPanel title="暂无数据" padding="16px" fontSize="12px" />;
-  const max = Math.max(...data.map(d => d[valueKey] || 0), 1);
+  if (!Array.isArray(data) || !data.length) return <EmptyPanel title="暂无数据" padding="16px" fontSize="12px" />;
+  const max = Math.max(...data.map(d => Number(d[valueKey]) || 0), 1);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
       {data.slice(0, 8).map((d, i) => (
@@ -36,7 +36,7 @@ function BarChart({ data, labelKey, valueKey, color = 'var(--color-primary)' }: 
 }
 
 function CountryRow({ data }: { data: any[] }) {
-  if (!data?.length) return <EmptyPanel title="暂无数据" padding="16px" fontSize="12px" />;
+  if (!Array.isArray(data) || !data.length) return <EmptyPanel title="暂无数据" padding="16px" fontSize="12px" />;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
       {data.slice(0, 10).map((d, i) => (
@@ -51,8 +51,8 @@ function CountryRow({ data }: { data: any[] }) {
 }
 
 function IconStatList({ data, nameKey, valueKey, icon }: { data: any[]; nameKey: string; valueKey: string; icon: (d: any) => React.ReactNode }) {
-  if (!data?.length) return <EmptyPanel title="暂无数据" padding="16px" fontSize="12px" />;
-  const max = Math.max(...data.map(d => d[valueKey] || 0), 1);
+  if (!Array.isArray(data) || !data.length) return <EmptyPanel title="暂无数据" padding="16px" fontSize="12px" />;
+  const max = Math.max(...data.map(d => Number(d[valueKey]) || 0), 1);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
       {data.slice(0, 8).map((d, i) => (
@@ -80,13 +80,22 @@ export default function AnalyticsPage() {
   useEffect(() => {
     setLoading(true);
     api.get(`/analytics?period=${period}`).then((r: any) => {
-      setData(r.data || r);
+      // r 已经被 axios 拦截器解包成 { success, data, meta }；
+      // r.data 才是真正的 overview 对象。某些异常路径下 data 可能为
+      // null —— 收敛成 {} 让下游的 s.total_visits 等走 || 0 兜底。
+      const overview = r?.data ?? r;
+      setData(overview && typeof overview === 'object' ? overview : {});
+    }).catch(() => {
+      setData({});
     }).finally(() => setLoading(false));
   }, [period]);
 
   // Fetch online users + poll every 30s
   useEffect(() => {
-    const fetch = () => api.get('/analytics/online').then((r: any) => setOnlineUsers(r.data?.online || [])).catch(() => {});
+    const fetch = () => api.get('/analytics/online').then((r: any) => {
+      const online = r?.data?.online;
+      setOnlineUsers(Array.isArray(online) ? online : []);
+    }).catch(() => {});
     fetch();
     const timer = setInterval(fetch, 30000);
     return () => clearInterval(timer);
@@ -188,9 +197,9 @@ export default function AnalyticsPage() {
         {/* Summary stats overlay at bottom */}
         <div style={{ position: 'absolute', bottom: 12, left: 12, zIndex: 1000, display: 'flex', gap: '16px', padding: '8px 16px', background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', borderRadius: '4px' }}>
           {[
-            { label: '访问次数', value: s.total_visits || 0, color: 'var(--color-primary)' },
-            { label: '独立访客', value: s.unique_ips || 0, color: 'var(--color-success)' },
-            { label: '访问页面', value: s.unique_pages || 0, color: 'var(--color-warning)' },
+            { label: '访问次数', value: Number(s.total_visits) || 0, color: 'var(--color-primary)' },
+            { label: '独立访客', value: Number(s.unique_ips) || 0, color: 'var(--color-success)' },
+            { label: '访问页面', value: Number(s.unique_pages) || 0, color: 'var(--color-warning)' },
           ].map((card, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
               <span style={{ fontSize: '20px', fontWeight: 700, color: card.color }}>{card.value.toLocaleString()}</span>
@@ -417,9 +426,13 @@ function RecentVisitorsPanel() {
     api.get('/analytics/visitors', { params: { page, per_page: 10 } })
       .then((r: any) => {
         if (cancelled) return;
-        setVisitors(r.data || []);
-        setTotal(r.meta?.total || 0);
-        setTotalPages(r.meta?.total_pages || 1);
+        // r 已被拦截器解包；r.data 是访客数组，r.meta 是分页信息。
+        // 异常路径下 data 可能为 null —— 收敛成数组，避免 Table 的
+        // data.map 在非数组上抛错。
+        const rows = r?.data;
+        setVisitors(Array.isArray(rows) ? rows : []);
+        setTotal(Number(r?.meta?.total) || 0);
+        setTotalPages(Number(r?.meta?.total_pages) || 1);
       })
       .catch(() => {})
       .finally(() => {

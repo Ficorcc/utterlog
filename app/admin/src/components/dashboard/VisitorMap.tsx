@@ -34,12 +34,18 @@ export default function VisitorMap({ period }: { period: string }) {
   useEffect(() => {
     api.get(`/analytics/map?period=${period}`).then((r: any) => {
       const payload = r.data || r || {};
-      setPoints(Array.isArray(payload) ? payload : payload.points || []);
+      // 后端可能返回 { points: [...] } 或裸数组；也可能在异常时返回
+      // null —— 都收敛成数组，避免下游 .map / .find 在非数组上抛错。
+      const arr = Array.isArray(payload) ? payload : payload.points;
+      setPoints(Array.isArray(arr) ? arr : []);
     }).catch(() => {});
   }, [period]);
 
   useEffect(() => {
-    const fetchOnline = () => api.get('/analytics/online').then((r: any) => setOnlineUsers(r.data?.online || [])).catch(() => {});
+    const fetchOnline = () => api.get('/analytics/online').then((r: any) => {
+      const online = r.data?.online;
+      setOnlineUsers(Array.isArray(online) ? online : []);
+    }).catch(() => {});
     fetchOnline();
     const timer = setInterval(fetchOnline, 30000);
     return () => clearInterval(timer);
@@ -81,22 +87,36 @@ export default function VisitorMap({ period }: { period: string }) {
     mapObjRef.current = map;
 
     map.on('load', () => {
-      map.resize();
-      // 国家填充层（用 Mapbox 内置的 country boundaries）
-      map.addSource('country-boundaries', {
-        type: 'vector',
-        url: 'mapbox://mapbox.country-boundaries-v1',
-      });
-      map.addLayer({
-        id: 'country-fills',
-        type: 'fill',
-        source: 'country-boundaries',
-        'source-layer': 'country_boundaries',
-        paint: {
-          'fill-color': '#22c55e',
-          'fill-opacity': 0,
-        },
-      }, 'country-label');
+      try {
+        map.resize();
+        // 国家填充层（用 Mapbox 内置的 country boundaries）
+        // addSource / addLayer 在 style 加载失败 / token 无效时会抛错，
+        // 这里整块包 try/catch —— 高亮国家只是锦上添花，不能因为它
+        // 抛错把整个地图（进而整个统计页）搞挂。
+        if (!map.getSource('country-boundaries')) {
+          map.addSource('country-boundaries', {
+            type: 'vector',
+            url: 'mapbox://mapbox.country-boundaries-v1',
+          });
+        }
+        // beforeId 'country-label' 仅在该 layer 存在时才传，否则 mapbox-gl
+        // 会抛 "Layer with id "country-label" does not exist on this map"。
+        const beforeId = map.getLayer('country-label') ? 'country-label' : undefined;
+        if (!map.getLayer('country-fills')) {
+          map.addLayer({
+            id: 'country-fills',
+            type: 'fill',
+            source: 'country-boundaries',
+            'source-layer': 'country_boundaries',
+            paint: {
+              'fill-color': '#22c55e',
+              'fill-opacity': 0,
+            },
+          }, beforeId as any);
+        }
+      } catch (e) {
+        console.warn('[VisitorMap] 初始化国家填充层失败:', e);
+      }
     });
 
     // SPA 切到 /admin/analytics 时，容器布局往往还没稳定（侧栏过渡 /
@@ -134,53 +154,71 @@ export default function VisitorMap({ period }: { period: string }) {
     if (!map) return;
 
     const update = () => {
-      for (const m of markersRef.current) m.remove();
-      markersRef.current = [];
+      // 整块包 try/catch：map.getLayer / setPaintProperty 在 style 未就绪
+      // 或 layer 缺失时会抛，这些是 mapbox-gl 内部回调，抛错会冒泡成
+      // React 渲染异常 → 白屏。标记/高亮是装饰性的，失败就静默跳过。
+      try {
+        for (const m of markersRef.current) m.remove();
+        markersRef.current = [];
 
-      // 高亮有访客的国家 — 按访问量渐变
-      const countryMap = new Map<string, number>();
-      for (const p of points) {
-        if (!p.code) continue;
-        const code = p.code.toUpperCase();
-        countryMap.set(code, (countryMap.get(code) || 0) + p.count);
-      }
-      const maxCountryCount = Math.max(...countryMap.values(), 1);
-
-      if (map.getLayer('country-fills') && countryMap.size > 0) {
-        // 构建 match 表达式：国家代码 → 透明度
-        const matchExpr: any[] = ['match', ['get', 'iso_3166_1']];
-        for (const [code, count] of countryMap) {
-          const t = count / maxCountryCount;
-          matchExpr.push(code, 0.08 + t * 0.25);
+        // 高亮有访客的国家 — 按访问量渐变
+        const countryMap = new Map<string, number>();
+        for (const p of points) {
+          if (!p.code) continue;
+          const code = p.code.toUpperCase();
+          countryMap.set(code, (countryMap.get(code) || 0) + p.count);
         }
-        matchExpr.push(0); // 默认值
+        const maxCountryCount = countryMap.size > 0 ? Math.max(...countryMap.values(), 1) : 1;
 
-        map.setPaintProperty('country-fills', 'fill-opacity', matchExpr as any);
-      }
+        if (map.getLayer('country-fills') && countryMap.size > 0) {
+          // 构建 match 表达式：国家代码 → 透明度
+          const matchExpr: any[] = ['match', ['get', 'iso_3166_1']];
+          for (const [code, count] of countryMap) {
+            const t = count / maxCountryCount;
+            matchExpr.push(code, 0.08 + t * 0.25);
+          }
+          matchExpr.push(0); // 默认值
 
-      // 只显示在线用户绿点
-      for (const u of onlineUsers) {
-        if (!u.country_code) continue;
-        const matched = points.find(p => p.code === u.country_code);
-        if (!matched) continue;
-        const el = document.createElement('div');
-        el.style.cssText = 'width:12px;height:12px;border-radius:50%;background:#22c55e;border:2px solid #fff;box-shadow:0 0 8px rgba(34,197,94,0.6);';
-        const marker = new mapboxgl.Marker({ element: el })
-          .setLngLat([matched.lon, matched.lat])
-          .addTo(map);
-        markersRef.current.push(marker);
+          map.setPaintProperty('country-fills', 'fill-opacity', matchExpr as any);
+        }
+
+        // 只显示在线用户绿点
+        for (const u of onlineUsers) {
+          if (!u.country_code) continue;
+          const matched = points.find(p => p.code === u.country_code);
+          if (!matched) continue;
+          const el = document.createElement('div');
+          el.style.cssText = 'width:12px;height:12px;border-radius:50%;background:#22c55e;border:2px solid #fff;box-shadow:0 0 8px rgba(34,197,94,0.6);';
+          const marker = new mapboxgl.Marker({ element: el })
+            .setLngLat([matched.lon, matched.lat])
+            .addTo(map);
+          markersRef.current.push(marker);
+        }
+      } catch (e) {
+        console.warn('[VisitorMap] 更新标记失败:', e);
       }
     };
 
-    // 确保地图 style 加载完再更新
+    // 确保地图 style 加载完再更新。
+    // isStyleLoaded 在 style 加载失败后可能长期返回 false，map.once
+    // ('styledata') 可能不再触发 —— 不要无限等待，加一个兜底超时。
+    let fired = false;
+    const run = () => {
+      if (fired) return;
+      fired = true;
+      update();
+    };
     const tryUpdate = () => {
-      if (map.isStyleLoaded()) {
-        update();
-      } else {
+      if (!fired && map.isStyleLoaded()) {
+        run();
+      } else if (!fired) {
         map.once('styledata', tryUpdate);
       }
     };
     tryUpdate();
+    // 兜底：2s 后无论如何更新一次，避免 style 加载失败时标记永远不显示。
+    const fallback = window.setTimeout(run, 2000);
+    return () => window.clearTimeout(fallback);
   }, [points, onlineUsers]);
 
   // 没配 Mapbox token 的占位 UI — 提示如何启用
