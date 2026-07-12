@@ -23,12 +23,12 @@ export function processGithubRepoLinks(text: string): string {
       const safeOwner = escapeAttr(String(match[1]));
       const safeRepo = escapeAttr(cleanRepo);
       const safeUrl = `https://github.com/${safeOwner}/${safeRepo}`;
-      return `<div data-github-repo-card data-owner="${safeOwner}" data-repo="${safeRepo}" data-url="${safeUrl}"></div>`;
+      return `\n<div data-github-repo-card data-owner="${safeOwner}" data-repo="${safeRepo}" data-url="${safeUrl}"></div>\n`;
     }
 
     const xMatch = line.match(xPostLinePattern);
     if (xMatch) {
-      return `<div data-x-post-embed data-url="${escapeAttr(xMatch[1])}"></div>`;
+      return `\n<div data-x-post-embed data-url="${escapeAttr(xMatch[1])}"></div>\n`;
     }
 
     return line;
