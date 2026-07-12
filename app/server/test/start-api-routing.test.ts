@@ -46,6 +46,11 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/auth/totp/setup', 'GET'))).toBe(false);
   });
 
+  test('routes visitor weather to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/visitor/weather', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/visitor/weather', 'POST'))).toBe(false);
+  });
+
   test('keeps public creation, replies, and reads on the compatibility API', () => {
     expect(isStartNativeApiRequest(request('/api/v1/comments', 'POST'))).toBe(false);
     expect(isStartNativeApiRequest(request('/api/v1/comments/42/reply', 'POST'))).toBe(false);

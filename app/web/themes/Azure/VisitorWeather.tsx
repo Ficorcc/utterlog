@@ -66,10 +66,10 @@ function temperatureLabel(value?: number | null) {
 }
 
 export default function VisitorWeather() {
-  const { options } = useThemeContext();
+  const { options, visitorWeather } = useThemeContext();
   const enabled = options.azure_sidebar_weather_enabled !== 'false';
-  const [weather, setWeather] = useState<VisitorWeatherData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [weather, setWeather] = useState<VisitorWeatherData | null>(visitorWeather || null);
+  const [loading, setLoading] = useState(!visitorWeather);
 
   useEffect(() => {
     if (!enabled) {
@@ -78,8 +78,14 @@ export default function VisitorWeather() {
       return;
     }
 
+    if (visitorWeather && !visitorWeather.stale) {
+      setWeather(visitorWeather);
+      setLoading(false);
+      return;
+    }
+
     let cancelled = false;
-    setLoading(true);
+    if (!visitorWeather) setLoading(true);
     fetch(`${API}/visitor/weather`, { cache: 'no-store' })
       .then((response) => response.ok ? response.json() : Promise.reject(new Error('weather request failed')))
       .then((payload) => {
@@ -96,7 +102,7 @@ export default function VisitorWeather() {
     return () => {
       cancelled = true;
     };
-  }, [enabled]);
+  }, [enabled, visitorWeather]);
 
   if (!enabled) return null;
 

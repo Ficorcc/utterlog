@@ -69,6 +69,18 @@ export interface ThemeContextData {
     manifest?: import('./theme').ThemeManifest;
   };
   options: Record<string, string>;
+  visitorWeather?: {
+    city?: string;
+    country?: string;
+    country_code?: string;
+    temperature?: number | null;
+    apparent_temperature?: number | null;
+    humidity?: number | null;
+    weather_code?: number | null;
+    is_day?: boolean;
+    fallback?: boolean;
+    stale?: boolean;
+  } | null;
 }
 
 const ThemeContext = createContext<ThemeContextData | null>(null);

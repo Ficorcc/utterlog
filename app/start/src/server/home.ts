@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start';
+import { getRequestHeader } from '@tanstack/react-start/server';
 import type { ThemeContextData } from '@/lib/theme-context';
-import { loadHomePageDataDirect } from '../../../server/src/public-read';
+import { getVisitorWeather, loadHomePageDataDirect } from '../../../server/src/public-read';
 import { loadStartThemeContextDirect } from './theme';
 
 type HomeResponse = {
@@ -31,10 +32,16 @@ async function safe<T>(promise: Promise<T>, fallback: T, ms = 1500): Promise<T> 
 }
 
 export const loadStartHome = createServerFn({ method: 'GET' }).handler(async (): Promise<HomeResponse> => {
-  const [themeCtx, homeData] = await Promise.all([
+  const ip = getRequestHeader('cf-connecting-ip')
+    || getRequestHeader('x-real-ip')
+    || getRequestHeader('x-forwarded-for')?.split(',')[0]?.trim()
+    || '127.0.0.1';
+  const [themeCtx, homeData, visitorWeather] = await Promise.all([
     safe(loadStartThemeContextDirect(), null),
     safe(loadHomePageDataDirect(1), null),
+    safe(getVisitorWeather(ip), null, 1200),
   ]);
+  if (themeCtx) themeCtx.visitorWeather = visitorWeather;
 
   return {
     options: homeData?.options || themeCtx?.options || {},

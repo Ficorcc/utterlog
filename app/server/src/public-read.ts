@@ -4,6 +4,7 @@ import { exec, intParam, many, nowUnix, one } from './db/helpers';
 import { optionValue } from './db/options';
 import { parsePermalinkPath } from './services/permalink';
 import { readOptionMap } from './services/options';
+import { defaultWeatherLocation, fetchVisitorWeather, visitorWeatherLocation, type VisitorWeatherResponse } from './weather';
 
 type MetaType = 'category' | 'tag';
 type PublicContentTable = 'albums' | 'books' | 'games' | 'goods' | 'links' | 'movies' | 'music' | 'playlists';
@@ -169,6 +170,34 @@ async function attachPostRelations(rows: Record<string, unknown>[], detail = fal
 
 export async function getOptionsMap() {
   return readOptionMap(false);
+}
+
+export async function getVisitorWeather(ip: string): Promise<VisitorWeatherResponse> {
+  const readOption = (name: string, fallback = '') => optionValue(name, fallback);
+  let { location, fallback } = await visitorWeatherLocation(ip, readOption);
+  let data = await fetchVisitorWeather(location, readOption).catch(() => null);
+  if (!data && location.source !== 'default') {
+    location = await defaultWeatherLocation(readOption);
+    fallback = true;
+    data = await fetchVisitorWeather(location, readOption).catch(() => null);
+  }
+  if (!data) {
+    data = {
+      ...(await defaultWeatherLocation(readOption)),
+      temperature: null,
+      apparent_temperature: null,
+      humidity: null,
+      weather_code: null,
+      is_day: true,
+      wind_speed: null,
+      timezone: '',
+      time: '',
+      fallback: true,
+      stale: true,
+    };
+  }
+  data.fallback = data.fallback || fallback;
+  return data;
 }
 
 export async function getOwnerPublic() {

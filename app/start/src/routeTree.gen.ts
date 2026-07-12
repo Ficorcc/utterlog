@@ -14,6 +14,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostsSlugRouteImport } from './routes/posts/$slug'
 import { Route as ApiV1ProfileIndexRouteImport } from './routes/api/v1/profile/index'
 import { Route as ApiV1PasskeysIndexRouteImport } from './routes/api/v1/passkeys/index'
+import { Route as ApiV1VisitorWeatherRouteImport } from './routes/api/v1/visitor/weather'
 import { Route as ApiV1ProfileSendCodeRouteImport } from './routes/api/v1/profile/send-code'
 import { Route as ApiV1PasskeysIdRouteImport } from './routes/api/v1/passkeys/$id'
 import { Route as ApiV1CommentsBatchRouteImport } from './routes/api/v1/comments/batch'
@@ -52,6 +53,11 @@ const ApiV1ProfileIndexRoute = ApiV1ProfileIndexRouteImport.update({
 const ApiV1PasskeysIndexRoute = ApiV1PasskeysIndexRouteImport.update({
   id: '/api/v1/passkeys/',
   path: '/api/v1/passkeys/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1VisitorWeatherRoute = ApiV1VisitorWeatherRouteImport.update({
+  id: '/api/v1/visitor/weather',
+  path: '/api/v1/visitor/weather',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1ProfileSendCodeRoute = ApiV1ProfileSendCodeRouteImport.update({
@@ -142,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
+  '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
   '/api/v1/passkeys/': typeof ApiV1PasskeysIndexRoute
   '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
@@ -163,6 +170,7 @@ export interface FileRoutesByTo {
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
+  '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
   '/api/v1/passkeys': typeof ApiV1PasskeysIndexRoute
   '/api/v1/profile': typeof ApiV1ProfileIndexRoute
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
@@ -185,6 +193,7 @@ export interface FileRoutesById {
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
+  '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
   '/api/v1/passkeys/': typeof ApiV1PasskeysIndexRoute
   '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
@@ -208,6 +217,7 @@ export interface FileRouteTypes {
     | '/api/v1/comments/batch'
     | '/api/v1/passkeys/$id'
     | '/api/v1/profile/send-code'
+    | '/api/v1/visitor/weather'
     | '/api/v1/passkeys/'
     | '/api/v1/profile/'
     | '/api/v1/auth/passkey/available'
@@ -229,6 +239,7 @@ export interface FileRouteTypes {
     | '/api/v1/comments/batch'
     | '/api/v1/passkeys/$id'
     | '/api/v1/profile/send-code'
+    | '/api/v1/visitor/weather'
     | '/api/v1/passkeys'
     | '/api/v1/profile'
     | '/api/v1/auth/passkey/available'
@@ -250,6 +261,7 @@ export interface FileRouteTypes {
     | '/api/v1/comments/batch'
     | '/api/v1/passkeys/$id'
     | '/api/v1/profile/send-code'
+    | '/api/v1/visitor/weather'
     | '/api/v1/passkeys/'
     | '/api/v1/profile/'
     | '/api/v1/auth/passkey/available'
@@ -272,6 +284,7 @@ export interface RootRouteChildren {
   ApiV1CommentsBatchRoute: typeof ApiV1CommentsBatchRoute
   ApiV1PasskeysIdRoute: typeof ApiV1PasskeysIdRoute
   ApiV1ProfileSendCodeRoute: typeof ApiV1ProfileSendCodeRoute
+  ApiV1VisitorWeatherRoute: typeof ApiV1VisitorWeatherRoute
   ApiV1PasskeysIndexRoute: typeof ApiV1PasskeysIndexRoute
   ApiV1ProfileIndexRoute: typeof ApiV1ProfileIndexRoute
   ApiV1AuthPasskeyAvailableRoute: typeof ApiV1AuthPasskeyAvailableRoute
@@ -314,6 +327,13 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/passkeys'
       fullPath: '/api/v1/passkeys/'
       preLoaderRoute: typeof ApiV1PasskeysIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/visitor/weather': {
+      id: '/api/v1/visitor/weather'
+      path: '/api/v1/visitor/weather'
+      fullPath: '/api/v1/visitor/weather'
+      preLoaderRoute: typeof ApiV1VisitorWeatherRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/profile/send-code': {
@@ -432,6 +452,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1CommentsBatchRoute: ApiV1CommentsBatchRoute,
   ApiV1PasskeysIdRoute: ApiV1PasskeysIdRoute,
   ApiV1ProfileSendCodeRoute: ApiV1ProfileSendCodeRoute,
+  ApiV1VisitorWeatherRoute: ApiV1VisitorWeatherRoute,
   ApiV1PasskeysIndexRoute: ApiV1PasskeysIndexRoute,
   ApiV1ProfileIndexRoute: ApiV1ProfileIndexRoute,
   ApiV1AuthPasskeyAvailableRoute: ApiV1AuthPasskeyAvailableRoute,

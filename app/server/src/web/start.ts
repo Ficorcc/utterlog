@@ -57,6 +57,7 @@ export function isStartNativeApiRequest(request: Request) {
   if (url.pathname === '/api/v1/auth/passkey/available') return method === 'GET';
   if (url.pathname === '/api/v1/passkeys') return method === 'GET';
   if (/^\/api\/v1\/passkeys\/[^/]+$/.test(url.pathname)) return method === 'DELETE';
+  if (url.pathname === '/api/v1/visitor/weather') return method === 'GET';
   if (url.pathname === '/api/v1/comments/batch') return method === 'POST';
   if (/^\/api\/v1\/comments\/\d+$/.test(url.pathname)) {
     return method === 'PUT' || method === 'PATCH' || method === 'DELETE';
