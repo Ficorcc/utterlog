@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { nowUnix } from '../db/helpers';
 import { optionValue } from '../db/options';
 import { ephemeral } from '../store/ephemeral';
+import { PublicWriteError } from './public-write';
 
 export async function commentCaptchaMode() {
   const mode = (await optionValue('comment_captcha_mode', '')).trim();
@@ -90,4 +91,25 @@ export async function verifyCommentCaptcha(body: Record<string, unknown>) {
   if (mode === 'off') return true;
   if (mode === 'image') return verifyImageCaptcha(body.captcha_id, body.captcha_code);
   return verifyPowCaptcha(body.captcha_challenge, body.captcha_nonce);
+}
+
+export async function createCommentCaptchaChallenge() {
+  const mode = await commentCaptchaMode();
+  if (mode === 'off') return { enabled: false, mode: 'off' as const };
+  if (mode === 'image') return { enabled: true, mode: 'image' as const };
+  const challenge = crypto.randomUUID().replaceAll('-', '');
+  const difficulty = await commentCaptchaDifficulty();
+  const expires = nowUnix() + 120;
+  await ephemeral.set(`captcha:${challenge}`, `${difficulty}:${expires}`, 120);
+  return { enabled: true, mode: 'pow' as const, challenge, difficulty, expires };
+}
+
+export async function createCommentImageCaptcha(seed = '') {
+  if (await commentCaptchaMode() !== 'image') {
+    throw new PublicWriteError(400, 'WRONG_MODE', '图片验证码未启用');
+  }
+  const code = randomCommentCaptchaCode();
+  const id = createHash('md5').update(`${Date.now()}-${seed}-${code}-${Math.random()}`).digest('hex');
+  await ephemeral.set(`captcha:img:${id}`, code.toLowerCase(), 300);
+  return { id, image: commentCaptchaSvgDataUrl(code) };
 }

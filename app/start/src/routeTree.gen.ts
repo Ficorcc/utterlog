@@ -32,6 +32,8 @@ import { Route as ApiV1LinksApplyRouteImport } from './routes/api/v1/links/apply
 import { Route as ApiV1CommentsPendingCountRouteImport } from './routes/api/v1/comments/pending-count'
 import { Route as ApiV1CommentsBatchRouteImport } from './routes/api/v1/comments/batch'
 import { Route as ApiV1CommentsIdRouteImport } from './routes/api/v1/comments/$id'
+import { Route as ApiV1CaptchaImageRouteImport } from './routes/api/v1/captcha/image'
+import { Route as ApiV1CaptchaChallengeRouteImport } from './routes/api/v1/captcha/challenge'
 import { Route as ApiV1AuthResetPasswordRouteImport } from './routes/api/v1/auth/reset-password'
 import { Route as ApiV1AuthRefreshRouteImport } from './routes/api/v1/auth/refresh'
 import { Route as ApiV1AuthPasswordRouteImport } from './routes/api/v1/auth/password'
@@ -170,6 +172,16 @@ const ApiV1CommentsIdRoute = ApiV1CommentsIdRouteImport.update({
   path: '/api/v1/comments/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1CaptchaImageRoute = ApiV1CaptchaImageRouteImport.update({
+  id: '/api/v1/captcha/image',
+  path: '/api/v1/captcha/image',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1CaptchaChallengeRoute = ApiV1CaptchaChallengeRouteImport.update({
+  id: '/api/v1/captcha/challenge',
+  path: '/api/v1/captcha/challenge',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1AuthResetPasswordRoute = ApiV1AuthResetPasswordRouteImport.update({
   id: '/api/v1/auth/reset-password',
   path: '/api/v1/auth/reset-password',
@@ -298,6 +310,8 @@ export interface FileRoutesByFullPath {
   '/api/v1/auth/password': typeof ApiV1AuthPasswordRoute
   '/api/v1/auth/refresh': typeof ApiV1AuthRefreshRoute
   '/api/v1/auth/reset-password': typeof ApiV1AuthResetPasswordRoute
+  '/api/v1/captcha/challenge': typeof ApiV1CaptchaChallengeRoute
+  '/api/v1/captcha/image': typeof ApiV1CaptchaImageRoute
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRouteWithChildren
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
   '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
@@ -344,6 +358,8 @@ export interface FileRoutesByTo {
   '/api/v1/auth/password': typeof ApiV1AuthPasswordRoute
   '/api/v1/auth/refresh': typeof ApiV1AuthRefreshRoute
   '/api/v1/auth/reset-password': typeof ApiV1AuthResetPasswordRoute
+  '/api/v1/captcha/challenge': typeof ApiV1CaptchaChallengeRoute
+  '/api/v1/captcha/image': typeof ApiV1CaptchaImageRoute
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRouteWithChildren
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
   '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
@@ -391,6 +407,8 @@ export interface FileRoutesById {
   '/api/v1/auth/password': typeof ApiV1AuthPasswordRoute
   '/api/v1/auth/refresh': typeof ApiV1AuthRefreshRoute
   '/api/v1/auth/reset-password': typeof ApiV1AuthResetPasswordRoute
+  '/api/v1/captcha/challenge': typeof ApiV1CaptchaChallengeRoute
+  '/api/v1/captcha/image': typeof ApiV1CaptchaImageRoute
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRouteWithChildren
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
   '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
@@ -439,6 +457,8 @@ export interface FileRouteTypes {
     | '/api/v1/auth/password'
     | '/api/v1/auth/refresh'
     | '/api/v1/auth/reset-password'
+    | '/api/v1/captcha/challenge'
+    | '/api/v1/captcha/image'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
     | '/api/v1/comments/pending-count'
@@ -485,6 +505,8 @@ export interface FileRouteTypes {
     | '/api/v1/auth/password'
     | '/api/v1/auth/refresh'
     | '/api/v1/auth/reset-password'
+    | '/api/v1/captcha/challenge'
+    | '/api/v1/captcha/image'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
     | '/api/v1/comments/pending-count'
@@ -531,6 +553,8 @@ export interface FileRouteTypes {
     | '/api/v1/auth/password'
     | '/api/v1/auth/refresh'
     | '/api/v1/auth/reset-password'
+    | '/api/v1/captcha/challenge'
+    | '/api/v1/captcha/image'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
     | '/api/v1/comments/pending-count'
@@ -578,6 +602,8 @@ export interface RootRouteChildren {
   ApiV1AuthPasswordRoute: typeof ApiV1AuthPasswordRoute
   ApiV1AuthRefreshRoute: typeof ApiV1AuthRefreshRoute
   ApiV1AuthResetPasswordRoute: typeof ApiV1AuthResetPasswordRoute
+  ApiV1CaptchaChallengeRoute: typeof ApiV1CaptchaChallengeRoute
+  ApiV1CaptchaImageRoute: typeof ApiV1CaptchaImageRoute
   ApiV1CommentsIdRoute: typeof ApiV1CommentsIdRouteWithChildren
   ApiV1CommentsBatchRoute: typeof ApiV1CommentsBatchRoute
   ApiV1CommentsPendingCountRoute: typeof ApiV1CommentsPendingCountRoute
@@ -758,6 +784,20 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/comments/$id'
       fullPath: '/api/v1/comments/$id'
       preLoaderRoute: typeof ApiV1CommentsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/captcha/image': {
+      id: '/api/v1/captcha/image'
+      path: '/api/v1/captcha/image'
+      fullPath: '/api/v1/captcha/image'
+      preLoaderRoute: typeof ApiV1CaptchaImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/captcha/challenge': {
+      id: '/api/v1/captcha/challenge'
+      path: '/api/v1/captcha/challenge'
+      fullPath: '/api/v1/captcha/challenge'
+      preLoaderRoute: typeof ApiV1CaptchaChallengeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/auth/reset-password': {
@@ -977,6 +1017,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1AuthPasswordRoute: ApiV1AuthPasswordRoute,
   ApiV1AuthRefreshRoute: ApiV1AuthRefreshRoute,
   ApiV1AuthResetPasswordRoute: ApiV1AuthResetPasswordRoute,
+  ApiV1CaptchaChallengeRoute: ApiV1CaptchaChallengeRoute,
+  ApiV1CaptchaImageRoute: ApiV1CaptchaImageRoute,
   ApiV1CommentsIdRoute: ApiV1CommentsIdRouteWithChildren,
   ApiV1CommentsBatchRoute: ApiV1CommentsBatchRoute,
   ApiV1CommentsPendingCountRoute: ApiV1CommentsPendingCountRoute,

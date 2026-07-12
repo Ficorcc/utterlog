@@ -48,10 +48,8 @@ import {
 } from '../services/comments';
 import { readOptionMap } from '../services/options';
 import {
-  commentCaptchaDifficulty,
-  commentCaptchaMode,
-  commentCaptchaSvgDataUrl,
-  randomCommentCaptchaCode,
+  createCommentCaptchaChallenge,
+  createCommentImageCaptcha,
 } from '../services/comment-captcha';
 import { createPublicComment } from '../services/public-comments';
 import { PublicWriteError } from '../services/public-write';
@@ -3499,21 +3497,15 @@ export function registerContentRoutes(app: Hono) {
   });
 
   app.get('/api/v1/captcha/challenge', async (c) => {
-    const mode = await commentCaptchaMode();
-    if (mode === 'off') return ok(c, { enabled: false, mode: 'off' });
-    if (mode === 'image') return ok(c, { enabled: true, mode: 'image' });
-    const challenge = crypto.randomUUID().replaceAll('-', '');
-    const difficulty = await commentCaptchaDifficulty();
-    const expires = nowUnix() + 120;
-    await ephemeral.set(`captcha:${challenge}`, `${difficulty}:${expires}`, 120);
-    return ok(c, { enabled: true, mode: 'pow', challenge, difficulty, expires });
+    return ok(c, await createCommentCaptchaChallenge());
   });
   app.get('/api/v1/captcha/image', async (c) => {
-    if (await commentCaptchaMode() !== 'image') return badRequest(c, '图片验证码未启用', 'WRONG_MODE');
-    const code = randomCommentCaptchaCode();
-    const id = createHash('md5').update(`${Date.now()}-${clientIp(c)}-${code}-${Math.random()}`).digest('hex');
-    await ephemeral.set(`captcha:img:${id}`, code.toLowerCase(), 300);
-    return ok(c, { id, image: commentCaptchaSvgDataUrl(code) });
+    try {
+      return ok(c, await createCommentImageCaptcha(clientIp(c)));
+    } catch (err) {
+      if (err instanceof PublicWriteError) return fail(c, err.status, err.code, err.message);
+      throw err;
+    }
   });
 
   app.post('/api/v1/track', async (c) => {

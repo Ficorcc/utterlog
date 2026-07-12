@@ -54,6 +54,12 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/visitor/weather', 'POST'))).toBe(false);
   });
 
+  test('routes comment captcha generation to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/captcha/challenge', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/captcha/image', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/captcha/challenge', 'POST'))).toBe(false);
+  });
+
   test('routes anonymous public reads to Start while retaining authenticated admin reads', () => {
     for (const path of ['/api/v1/options', '/api/v1/categories', '/api/v1/tags', '/api/v1/posts', '/api/v1/moments', '/api/v1/links']) {
       expect(isStartNativeApiRequest(request(path, 'GET'))).toBe(true);
