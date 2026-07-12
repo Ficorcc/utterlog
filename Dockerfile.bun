@@ -33,8 +33,19 @@ ARG GIT_SHA=unknown
 ARG GIT_BRANCH=unknown
 LABEL org.opencontainers.image.revision="${GIT_SHA}"
 LABEL org.opencontainers.image.source="https://github.com/utterlog/utterlog"
+# postgresql-client-18：官方 Debian trixie 源只提供 client v17，但
+# 生产用 PG18 服务器。pg_dump 17 不能备份 PG18（"server version
+# mismatch" 报错导致备份功能失效），必须从 PostgreSQL 官方 APT 源
+# 装 client-18。unzip 用于解压主题/插件上传包。
+# 先装 wget（基础镜像没有）用于获取 PG 官方 GPG key。
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends postgresql-client unzip \
+  && apt-get install -y --no-install-recommends wget ca-certificates \
+  && install -d /usr/share/postgresql-common/pgdg \
+  && wget -qO /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+  && echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] http://apt.postgresql.org/pub/repos/apt trixie-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends postgresql-client-18 unzip \
+  && apt-get purge -y --auto-remove wget \
   && rm -rf /var/lib/apt/lists/*
 ENV NODE_ENV=production
 ENV PORT=8080
