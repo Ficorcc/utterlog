@@ -19,7 +19,7 @@ jobs:
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: '1.3.14'
+          bun-version: canary
 
       - name: Install Bun app deps
         run: bun install --frozen-lockfile
@@ -30,6 +30,15 @@ jobs:
       - name: Build admin SPA
         working-directory: app/admin
         run: bun run build
+
+      - name: Type check TanStack Start
+        run: bun run start:check
+
+      - name: Build TanStack Start
+        run: bun run start:build
+
+      - name: Test Bun services and Start contracts
+        run: bun run test:server
 
       - name: Sync theme styles
         working-directory: app/web
