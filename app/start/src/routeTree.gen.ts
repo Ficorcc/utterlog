@@ -33,6 +33,7 @@ import { Route as ApiV1NotificationsIndexRouteImport } from './routes/api/v1/not
 import { Route as ApiV1MomentsIndexRouteImport } from './routes/api/v1/moments/index'
 import { Route as ApiV1MediaIndexRouteImport } from './routes/api/v1/media/index'
 import { Route as ApiV1CommentsIndexRouteImport } from './routes/api/v1/comments/index'
+import { Route as ApiV1AnnotationsIndexRouteImport } from './routes/api/v1/annotations/index'
 import { Route as ApiV1AnalyticsIndexRouteImport } from './routes/api/v1/analytics/index'
 import { Route as ApiV1VisitorWeatherRouteImport } from './routes/api/v1/visitor/weather'
 import { Route as ApiV1VisitorGeoRouteImport } from './routes/api/v1/visitor/geo'
@@ -93,6 +94,7 @@ import { Route as ApiV1AdminStatsRouteImport } from './routes/api/v1/admin/stats
 import { Route as ApiV1ResourceIdRouteImport } from './routes/api/v1/$resource/$id'
 import { Route as ApiV1PublicAlbumsIndexRouteImport } from './routes/api/v1/public/albums/index'
 import { Route as ApiV1AdminFootprintsIndexRouteImport } from './routes/api/v1/admin/footprints/index'
+import { Route as ApiV1AdminAnnotationsIndexRouteImport } from './routes/api/v1/admin/annotations/index'
 import { Route as ApiV1ThemesIdActivateRouteImport } from './routes/api/v1/themes/$id/activate'
 import { Route as ApiV1PublicAlbumsIdRouteImport } from './routes/api/v1/public/albums/$id'
 import { Route as ApiV1PostsSlugSlugRouteImport } from './routes/api/v1/posts/slug/$slug'
@@ -114,6 +116,8 @@ import { Route as ApiV1AdminSystemActionRouteImport } from './routes/api/v1/admi
 import { Route as ApiV1AdminFootprintsPlacesRouteImport } from './routes/api/v1/admin/footprints/places'
 import { Route as ApiV1AdminFootprintsGeocodeRouteImport } from './routes/api/v1/admin/footprints/geocode'
 import { Route as ApiV1AdminFootprintsIdRouteImport } from './routes/api/v1/admin/footprints/$id'
+import { Route as ApiV1AdminAnnotationsBatchDeleteRouteImport } from './routes/api/v1/admin/annotations/batch-delete'
+import { Route as ApiV1AdminAnnotationsIdRouteImport } from './routes/api/v1/admin/annotations/$id'
 import { Route as ApiV1AdminAnalyticsStatsRouteImport } from './routes/api/v1/admin/analytics/stats'
 import { Route as ApiV1AdminAnalyticsPurgeRouteImport } from './routes/api/v1/admin/analytics/purge'
 import { Route as ApiV1AuthPasskeyFlowActionRouteImport } from './routes/api/v1/auth/passkey/$flow/$action'
@@ -238,6 +242,11 @@ const ApiV1MediaIndexRoute = ApiV1MediaIndexRouteImport.update({
 const ApiV1CommentsIndexRoute = ApiV1CommentsIndexRouteImport.update({
   id: '/api/v1/comments/',
   path: '/api/v1/comments/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1AnnotationsIndexRoute = ApiV1AnnotationsIndexRouteImport.update({
+  id: '/api/v1/annotations/',
+  path: '/api/v1/annotations/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1AnalyticsIndexRoute = ApiV1AnalyticsIndexRouteImport.update({
@@ -547,6 +556,12 @@ const ApiV1AdminFootprintsIndexRoute =
     path: '/api/v1/admin/footprints/',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiV1AdminAnnotationsIndexRoute =
+  ApiV1AdminAnnotationsIndexRouteImport.update({
+    id: '/api/v1/admin/annotations/',
+    path: '/api/v1/admin/annotations/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiV1ThemesIdActivateRoute = ApiV1ThemesIdActivateRouteImport.update({
   id: '/activate',
   path: '/activate',
@@ -658,6 +673,17 @@ const ApiV1AdminFootprintsIdRoute = ApiV1AdminFootprintsIdRouteImport.update({
   path: '/api/v1/admin/footprints/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1AdminAnnotationsBatchDeleteRoute =
+  ApiV1AdminAnnotationsBatchDeleteRouteImport.update({
+    id: '/api/v1/admin/annotations/batch-delete',
+    path: '/api/v1/admin/annotations/batch-delete',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1AdminAnnotationsIdRoute = ApiV1AdminAnnotationsIdRouteImport.update({
+  id: '/api/v1/admin/annotations/$id',
+  path: '/api/v1/admin/annotations/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1AdminAnalyticsStatsRoute =
   ApiV1AdminAnalyticsStatsRouteImport.update({
     id: '/api/v1/admin/analytics/stats',
@@ -764,6 +790,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/visitor/geo': typeof ApiV1VisitorGeoRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
   '/api/v1/analytics/': typeof ApiV1AnalyticsIndexRoute
+  '/api/v1/annotations/': typeof ApiV1AnnotationsIndexRoute
   '/api/v1/comments/': typeof ApiV1CommentsIndexRoute
   '/api/v1/media/': typeof ApiV1MediaIndexRoute
   '/api/v1/moments/': typeof ApiV1MomentsIndexRoute
@@ -774,6 +801,8 @@ export interface FileRoutesByFullPath {
   '/api/v1/themes/': typeof ApiV1ThemesIndexRoute
   '/api/v1/admin/analytics/purge': typeof ApiV1AdminAnalyticsPurgeRoute
   '/api/v1/admin/analytics/stats': typeof ApiV1AdminAnalyticsStatsRoute
+  '/api/v1/admin/annotations/$id': typeof ApiV1AdminAnnotationsIdRoute
+  '/api/v1/admin/annotations/batch-delete': typeof ApiV1AdminAnnotationsBatchDeleteRoute
   '/api/v1/admin/footprints/$id': typeof ApiV1AdminFootprintsIdRoute
   '/api/v1/admin/footprints/geocode': typeof ApiV1AdminFootprintsGeocodeRoute
   '/api/v1/admin/footprints/places': typeof ApiV1AdminFootprintsPlacesRoute
@@ -795,6 +824,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/posts/slug/$slug': typeof ApiV1PostsSlugSlugRoute
   '/api/v1/public/albums/$id': typeof ApiV1PublicAlbumsIdRoute
   '/api/v1/themes/$id/activate': typeof ApiV1ThemesIdActivateRoute
+  '/api/v1/admin/annotations/': typeof ApiV1AdminAnnotationsIndexRoute
   '/api/v1/admin/footprints/': typeof ApiV1AdminFootprintsIndexRoute
   '/api/v1/public/albums/': typeof ApiV1PublicAlbumsIndexRoute
   '/api/v1/admin/system/upgrade/status': typeof ApiV1AdminSystemUpgradeStatusRoute
@@ -876,6 +906,7 @@ export interface FileRoutesByTo {
   '/api/v1/visitor/geo': typeof ApiV1VisitorGeoRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
   '/api/v1/analytics': typeof ApiV1AnalyticsIndexRoute
+  '/api/v1/annotations': typeof ApiV1AnnotationsIndexRoute
   '/api/v1/comments': typeof ApiV1CommentsIndexRoute
   '/api/v1/media': typeof ApiV1MediaIndexRoute
   '/api/v1/moments': typeof ApiV1MomentsIndexRoute
@@ -886,6 +917,8 @@ export interface FileRoutesByTo {
   '/api/v1/themes': typeof ApiV1ThemesIndexRoute
   '/api/v1/admin/analytics/purge': typeof ApiV1AdminAnalyticsPurgeRoute
   '/api/v1/admin/analytics/stats': typeof ApiV1AdminAnalyticsStatsRoute
+  '/api/v1/admin/annotations/$id': typeof ApiV1AdminAnnotationsIdRoute
+  '/api/v1/admin/annotations/batch-delete': typeof ApiV1AdminAnnotationsBatchDeleteRoute
   '/api/v1/admin/footprints/$id': typeof ApiV1AdminFootprintsIdRoute
   '/api/v1/admin/footprints/geocode': typeof ApiV1AdminFootprintsGeocodeRoute
   '/api/v1/admin/footprints/places': typeof ApiV1AdminFootprintsPlacesRoute
@@ -907,6 +940,7 @@ export interface FileRoutesByTo {
   '/api/v1/posts/slug/$slug': typeof ApiV1PostsSlugSlugRoute
   '/api/v1/public/albums/$id': typeof ApiV1PublicAlbumsIdRoute
   '/api/v1/themes/$id/activate': typeof ApiV1ThemesIdActivateRoute
+  '/api/v1/admin/annotations': typeof ApiV1AdminAnnotationsIndexRoute
   '/api/v1/admin/footprints': typeof ApiV1AdminFootprintsIndexRoute
   '/api/v1/public/albums': typeof ApiV1PublicAlbumsIndexRoute
   '/api/v1/admin/system/upgrade/status': typeof ApiV1AdminSystemUpgradeStatusRoute
@@ -989,6 +1023,7 @@ export interface FileRoutesById {
   '/api/v1/visitor/geo': typeof ApiV1VisitorGeoRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
   '/api/v1/analytics/': typeof ApiV1AnalyticsIndexRoute
+  '/api/v1/annotations/': typeof ApiV1AnnotationsIndexRoute
   '/api/v1/comments/': typeof ApiV1CommentsIndexRoute
   '/api/v1/media/': typeof ApiV1MediaIndexRoute
   '/api/v1/moments/': typeof ApiV1MomentsIndexRoute
@@ -999,6 +1034,8 @@ export interface FileRoutesById {
   '/api/v1/themes/': typeof ApiV1ThemesIndexRoute
   '/api/v1/admin/analytics/purge': typeof ApiV1AdminAnalyticsPurgeRoute
   '/api/v1/admin/analytics/stats': typeof ApiV1AdminAnalyticsStatsRoute
+  '/api/v1/admin/annotations/$id': typeof ApiV1AdminAnnotationsIdRoute
+  '/api/v1/admin/annotations/batch-delete': typeof ApiV1AdminAnnotationsBatchDeleteRoute
   '/api/v1/admin/footprints/$id': typeof ApiV1AdminFootprintsIdRoute
   '/api/v1/admin/footprints/geocode': typeof ApiV1AdminFootprintsGeocodeRoute
   '/api/v1/admin/footprints/places': typeof ApiV1AdminFootprintsPlacesRoute
@@ -1020,6 +1057,7 @@ export interface FileRoutesById {
   '/api/v1/posts/slug/$slug': typeof ApiV1PostsSlugSlugRoute
   '/api/v1/public/albums/$id': typeof ApiV1PublicAlbumsIdRoute
   '/api/v1/themes/$id/activate': typeof ApiV1ThemesIdActivateRoute
+  '/api/v1/admin/annotations/': typeof ApiV1AdminAnnotationsIndexRoute
   '/api/v1/admin/footprints/': typeof ApiV1AdminFootprintsIndexRoute
   '/api/v1/public/albums/': typeof ApiV1PublicAlbumsIndexRoute
   '/api/v1/admin/system/upgrade/status': typeof ApiV1AdminSystemUpgradeStatusRoute
@@ -1103,6 +1141,7 @@ export interface FileRouteTypes {
     | '/api/v1/visitor/geo'
     | '/api/v1/visitor/weather'
     | '/api/v1/analytics/'
+    | '/api/v1/annotations/'
     | '/api/v1/comments/'
     | '/api/v1/media/'
     | '/api/v1/moments/'
@@ -1113,6 +1152,8 @@ export interface FileRouteTypes {
     | '/api/v1/themes/'
     | '/api/v1/admin/analytics/purge'
     | '/api/v1/admin/analytics/stats'
+    | '/api/v1/admin/annotations/$id'
+    | '/api/v1/admin/annotations/batch-delete'
     | '/api/v1/admin/footprints/$id'
     | '/api/v1/admin/footprints/geocode'
     | '/api/v1/admin/footprints/places'
@@ -1134,6 +1175,7 @@ export interface FileRouteTypes {
     | '/api/v1/posts/slug/$slug'
     | '/api/v1/public/albums/$id'
     | '/api/v1/themes/$id/activate'
+    | '/api/v1/admin/annotations/'
     | '/api/v1/admin/footprints/'
     | '/api/v1/public/albums/'
     | '/api/v1/admin/system/upgrade/status'
@@ -1215,6 +1257,7 @@ export interface FileRouteTypes {
     | '/api/v1/visitor/geo'
     | '/api/v1/visitor/weather'
     | '/api/v1/analytics'
+    | '/api/v1/annotations'
     | '/api/v1/comments'
     | '/api/v1/media'
     | '/api/v1/moments'
@@ -1225,6 +1268,8 @@ export interface FileRouteTypes {
     | '/api/v1/themes'
     | '/api/v1/admin/analytics/purge'
     | '/api/v1/admin/analytics/stats'
+    | '/api/v1/admin/annotations/$id'
+    | '/api/v1/admin/annotations/batch-delete'
     | '/api/v1/admin/footprints/$id'
     | '/api/v1/admin/footprints/geocode'
     | '/api/v1/admin/footprints/places'
@@ -1246,6 +1291,7 @@ export interface FileRouteTypes {
     | '/api/v1/posts/slug/$slug'
     | '/api/v1/public/albums/$id'
     | '/api/v1/themes/$id/activate'
+    | '/api/v1/admin/annotations'
     | '/api/v1/admin/footprints'
     | '/api/v1/public/albums'
     | '/api/v1/admin/system/upgrade/status'
@@ -1327,6 +1373,7 @@ export interface FileRouteTypes {
     | '/api/v1/visitor/geo'
     | '/api/v1/visitor/weather'
     | '/api/v1/analytics/'
+    | '/api/v1/annotations/'
     | '/api/v1/comments/'
     | '/api/v1/media/'
     | '/api/v1/moments/'
@@ -1337,6 +1384,8 @@ export interface FileRouteTypes {
     | '/api/v1/themes/'
     | '/api/v1/admin/analytics/purge'
     | '/api/v1/admin/analytics/stats'
+    | '/api/v1/admin/annotations/$id'
+    | '/api/v1/admin/annotations/batch-delete'
     | '/api/v1/admin/footprints/$id'
     | '/api/v1/admin/footprints/geocode'
     | '/api/v1/admin/footprints/places'
@@ -1358,6 +1407,7 @@ export interface FileRouteTypes {
     | '/api/v1/posts/slug/$slug'
     | '/api/v1/public/albums/$id'
     | '/api/v1/themes/$id/activate'
+    | '/api/v1/admin/annotations/'
     | '/api/v1/admin/footprints/'
     | '/api/v1/public/albums/'
     | '/api/v1/admin/system/upgrade/status'
@@ -1435,6 +1485,7 @@ export interface RootRouteChildren {
   ApiV1VisitorGeoRoute: typeof ApiV1VisitorGeoRoute
   ApiV1VisitorWeatherRoute: typeof ApiV1VisitorWeatherRoute
   ApiV1AnalyticsIndexRoute: typeof ApiV1AnalyticsIndexRoute
+  ApiV1AnnotationsIndexRoute: typeof ApiV1AnnotationsIndexRoute
   ApiV1CommentsIndexRoute: typeof ApiV1CommentsIndexRoute
   ApiV1MediaIndexRoute: typeof ApiV1MediaIndexRoute
   ApiV1MomentsIndexRoute: typeof ApiV1MomentsIndexRoute
@@ -1445,6 +1496,8 @@ export interface RootRouteChildren {
   ApiV1ThemesIndexRoute: typeof ApiV1ThemesIndexRoute
   ApiV1AdminAnalyticsPurgeRoute: typeof ApiV1AdminAnalyticsPurgeRoute
   ApiV1AdminAnalyticsStatsRoute: typeof ApiV1AdminAnalyticsStatsRoute
+  ApiV1AdminAnnotationsIdRoute: typeof ApiV1AdminAnnotationsIdRoute
+  ApiV1AdminAnnotationsBatchDeleteRoute: typeof ApiV1AdminAnnotationsBatchDeleteRoute
   ApiV1AdminFootprintsIdRoute: typeof ApiV1AdminFootprintsIdRoute
   ApiV1AdminFootprintsGeocodeRoute: typeof ApiV1AdminFootprintsGeocodeRoute
   ApiV1AdminFootprintsPlacesRoute: typeof ApiV1AdminFootprintsPlacesRoute
@@ -1455,6 +1508,7 @@ export interface RootRouteChildren {
   ApiV1BackupDownloadFilenameRoute: typeof ApiV1BackupDownloadFilenameRoute
   ApiV1PlaylistsIdSongsRoute: typeof ApiV1PlaylistsIdSongsRoute
   ApiV1PublicAlbumsIdRoute: typeof ApiV1PublicAlbumsIdRoute
+  ApiV1AdminAnnotationsIndexRoute: typeof ApiV1AdminAnnotationsIndexRoute
   ApiV1AdminFootprintsIndexRoute: typeof ApiV1AdminFootprintsIndexRoute
   ApiV1PublicAlbumsIndexRoute: typeof ApiV1PublicAlbumsIndexRoute
   ApiV1AdminSystemUpgradeStatusRoute: typeof ApiV1AdminSystemUpgradeStatusRoute
@@ -1629,6 +1683,13 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/comments'
       fullPath: '/api/v1/comments/'
       preLoaderRoute: typeof ApiV1CommentsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/annotations/': {
+      id: '/api/v1/annotations/'
+      path: '/api/v1/annotations'
+      fullPath: '/api/v1/annotations/'
+      preLoaderRoute: typeof ApiV1AnnotationsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/analytics/': {
@@ -2051,6 +2112,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1AdminFootprintsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/admin/annotations/': {
+      id: '/api/v1/admin/annotations/'
+      path: '/api/v1/admin/annotations'
+      fullPath: '/api/v1/admin/annotations/'
+      preLoaderRoute: typeof ApiV1AdminAnnotationsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/themes/$id/activate': {
       id: '/api/v1/themes/$id/activate'
       path: '/activate'
@@ -2196,6 +2264,20 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/admin/footprints/$id'
       fullPath: '/api/v1/admin/footprints/$id'
       preLoaderRoute: typeof ApiV1AdminFootprintsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/admin/annotations/batch-delete': {
+      id: '/api/v1/admin/annotations/batch-delete'
+      path: '/api/v1/admin/annotations/batch-delete'
+      fullPath: '/api/v1/admin/annotations/batch-delete'
+      preLoaderRoute: typeof ApiV1AdminAnnotationsBatchDeleteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/admin/annotations/$id': {
+      id: '/api/v1/admin/annotations/$id'
+      path: '/api/v1/admin/annotations/$id'
+      fullPath: '/api/v1/admin/annotations/$id'
+      preLoaderRoute: typeof ApiV1AdminAnnotationsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/admin/analytics/stats': {
@@ -2448,6 +2530,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1VisitorGeoRoute: ApiV1VisitorGeoRoute,
   ApiV1VisitorWeatherRoute: ApiV1VisitorWeatherRoute,
   ApiV1AnalyticsIndexRoute: ApiV1AnalyticsIndexRoute,
+  ApiV1AnnotationsIndexRoute: ApiV1AnnotationsIndexRoute,
   ApiV1CommentsIndexRoute: ApiV1CommentsIndexRoute,
   ApiV1MediaIndexRoute: ApiV1MediaIndexRoute,
   ApiV1MomentsIndexRoute: ApiV1MomentsIndexRoute,
@@ -2458,6 +2541,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1ThemesIndexRoute: ApiV1ThemesIndexRoute,
   ApiV1AdminAnalyticsPurgeRoute: ApiV1AdminAnalyticsPurgeRoute,
   ApiV1AdminAnalyticsStatsRoute: ApiV1AdminAnalyticsStatsRoute,
+  ApiV1AdminAnnotationsIdRoute: ApiV1AdminAnnotationsIdRoute,
+  ApiV1AdminAnnotationsBatchDeleteRoute: ApiV1AdminAnnotationsBatchDeleteRoute,
   ApiV1AdminFootprintsIdRoute: ApiV1AdminFootprintsIdRoute,
   ApiV1AdminFootprintsGeocodeRoute: ApiV1AdminFootprintsGeocodeRoute,
   ApiV1AdminFootprintsPlacesRoute: ApiV1AdminFootprintsPlacesRoute,
@@ -2468,6 +2553,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1BackupDownloadFilenameRoute: ApiV1BackupDownloadFilenameRoute,
   ApiV1PlaylistsIdSongsRoute: ApiV1PlaylistsIdSongsRoute,
   ApiV1PublicAlbumsIdRoute: ApiV1PublicAlbumsIdRoute,
+  ApiV1AdminAnnotationsIndexRoute: ApiV1AdminAnnotationsIndexRoute,
   ApiV1AdminFootprintsIndexRoute: ApiV1AdminFootprintsIndexRoute,
   ApiV1PublicAlbumsIndexRoute: ApiV1PublicAlbumsIndexRoute,
   ApiV1AdminSystemUpgradeStatusRoute: ApiV1AdminSystemUpgradeStatusRoute,

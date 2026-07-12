@@ -46,6 +46,14 @@ import {
   startBackupScheduler,
 } from './backup';
 import { OptionServiceError, sendTestEmail } from '../services/options';
+import {
+  AnnotationServiceError,
+  batchDeleteAnnotations,
+  createAnnotation,
+  deleteAnnotation,
+  listAdminAnnotations,
+  listAnnotations,
+} from '../services/annotations';
 
 function safeId(id: unknown) {
   const clean = String(id || '').trim();
@@ -2429,101 +2437,40 @@ export function registerCompatRoutes(app: Hono) {
 
 
   app.get('/api/v1/annotations', async (c) => {
-    const postId = intParam(new URL(c.req.url).searchParams.get('post_id') || undefined);
-    if (!postId) return badRequest(c, 'post_id 不能为空');
-    const rows = await many<Record<string, unknown>>(
-      `select id, post_id, block_id, user_name, coalesce(user_avatar,'') as user_avatar,
-              coalesce(user_site,'') as user_site, coalesce(utterlog_id,'') as utterlog_id,
-              content, created_at
-       from ${table('annotations')} where post_id = $1 order by created_at asc`,
-      [postId],
-    );
-    const grouped: Record<string, Record<string, unknown>[]> = {};
-    for (const row of rows) {
-      const block = String(row.block_id || '');
-      grouped[block] ||= [];
-      grouped[block].push(row);
+    try { return ok(c, await listAnnotations(new URL(c.req.url).searchParams.get('post_id'))); }
+    catch (error) {
+      if (error instanceof AnnotationServiceError) return fail(c, error.status, error.code, error.message);
+      throw error;
     }
-    return ok(c, { annotations: grouped, total: rows.length });
   });
   app.post('/api/v1/annotations', optionalAuth, async (c) => {
-    const body = await c.req.json().catch(() => ({}));
-    const postId = intParam(String(body.post_id || ''));
-    const blockId = String(body.block_id || '').trim();
-    const content = String(body.content || '').trim();
-    if (!postId || !blockId || !content) return badRequest(c, 'post_id、block_id、content 不能为空');
-
-    let userName = '';
-    let userEmail = '';
-    let userAvatar = '';
-    let userSite = '';
-    let utterlogId = '';
-
-    if (body.federation_token) {
-      try {
-        const claims: any = decodeJwt(String(body.federation_token));
-        userName = String(claims.nickname || claims.name || '');
-        userEmail = String(claims.email || '');
-        userAvatar = String(claims.avatar || '');
-        userSite = String(claims.site || '');
-        utterlogId = String(claims.utterlog_id || '');
-      } catch {
-        // Invalid remote tokens fall through to local identity.
-      }
+    try { return ok(c, await createAnnotation(await c.req.json().catch(() => ({})), currentUserId(c))); }
+    catch (error) {
+      if (error instanceof AnnotationServiceError) return fail(c, error.status, error.code, error.message);
+      throw error;
     }
-
-    const userId = currentUserId(c);
-    if (!userName && userId > 0) {
-      const user = await one<Record<string, unknown>>(
-        `select username, email, nickname, avatar, utterlog_avatar, utterlog_id from ${table('users')} where id = $1`,
-        [userId],
-      );
-      if (user) {
-        userName = String(user.nickname || user.username || '');
-        userEmail = String(user.email || '');
-        userAvatar = String(user.utterlog_avatar || user.avatar || '');
-        userSite = config.appUrl;
-        utterlogId = String(user.utterlog_id || '');
-      }
-    }
-
-    if (!userName) return forbidden(c, '需要登录才能发表点评');
-    const rows = await many<{ id: number }>(
-      `insert into ${table('annotations')}
-       (post_id, block_id, user_name, user_email, user_avatar, user_site, utterlog_id, content, created_at)
-       values ($1,$2,$3,$4,$5,$6,$7,$8,$9) returning id`,
-      [postId, blockId, userName, userEmail, userAvatar, userSite, utterlogId, content, nowUnix()],
-    );
-    return ok(c, { id: rows[0]?.id || 0 });
   });
   app.get('/api/v1/admin/annotations', auth, async (c) => {
     const sp = new URL(c.req.url).searchParams;
-    const { page, perPage, offset } = pageParams(sp);
-    const postId = intParam(sp.get('post_id') || undefined);
-    const where = postId ? 'where a.post_id = $1' : '';
-    const params: unknown[] = postId ? [postId] : [];
-    const total = await one<{ count: string }>(`select count(*)::text as count from ${table('annotations')} a ${where}`, params);
-    const rows = await many<Record<string, unknown>>(
-      `select a.id, a.post_id, a.block_id, a.user_name, coalesce(a.user_email,'') as user_email,
-              coalesce(a.user_avatar,'') as user_avatar, coalesce(a.user_site,'') as user_site,
-              coalesce(a.utterlog_id,'') as utterlog_id, a.content, a.created_at,
-              coalesce(p.title,'') as post_title, coalesce(p.slug,'') as post_slug
-       from ${table('annotations')} a left join ${table('posts')} p on p.id = a.post_id
-       ${where} order by a.created_at desc limit $${params.length + 1} offset $${params.length + 2}`,
-      [...params, perPage, offset],
-    );
-    return paginate(c, rows, Number(total?.count || 0), page, perPage);
+    const result = await listAdminAnnotations({ page: Number(sp.get('page') || 1), perPage: Number(sp.get('per_page') || 20),
+      postId: Number(sp.get('post_id') || 0) });
+    return paginate(c, result.rows, result.meta.total, result.meta.page, result.meta.per_page);
   });
   app.delete('/api/v1/admin/annotations/:id', auth, async (c) => {
-    await exec(`delete from ${table('annotations')} where id = $1`, [c.req.param('id')]);
-    return ok(c, { deleted: true });
+    try { return ok(c, await deleteAnnotation(c.req.param('id'))); }
+    catch (error) {
+      if (error instanceof AnnotationServiceError) return fail(c, error.status, error.code, error.message);
+      throw error;
+    }
   });
   app.post('/api/v1/admin/annotations/batch-delete', auth, async (c) => {
-    const body = await c.req.json().catch(() => ({}));
-    const ids = Array.isArray(body.ids) ? body.ids.map((id: unknown) => Number(id)).filter((id: number) => Number.isFinite(id) && id > 0) : [];
-    if (ids.length === 0) return badRequest(c, 'ids 不能为空');
-    await exec(`delete from ${table('annotations')} where id = any($1::int[])`, [ids]);
-    return ok(c, { deleted: ids.length });
+    try {
+      const body = await c.req.json().catch(() => ({}));
+      return ok(c, await batchDeleteAnnotations(body.ids));
+    } catch (error) {
+      if (error instanceof AnnotationServiceError) return fail(c, error.status, error.code, error.message);
+      throw error;
+    }
   });
 
   app.get('/api/v1/visitor/weather', async (c) => {

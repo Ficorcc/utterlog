@@ -88,6 +88,10 @@ export function isStartNativeApiRequest(request: Request) {
   if (url.pathname === '/api/v1/notifications/read-all') return method === 'POST';
   if (/^\/api\/v1\/notifications\/\d+\/read$/.test(url.pathname)) return method === 'POST';
   if (/^\/api\/v1\/notifications\/\d+$/.test(url.pathname)) return method === 'DELETE';
+  if (url.pathname === '/api/v1/annotations') return method === 'GET' || method === 'POST';
+  if (url.pathname === '/api/v1/admin/annotations') return method === 'GET';
+  if (url.pathname === '/api/v1/admin/annotations/batch-delete') return method === 'POST';
+  if (/^\/api\/v1\/admin\/annotations\/\d+$/.test(url.pathname)) return method === 'DELETE';
   if (/^\/api\/v1\/security\/(overview|settings|bans|timeline)$/.test(url.pathname)) return method === 'GET' || (url.pathname.endsWith('/settings') && method === 'POST');
   if (/^\/api\/v1\/security\/(ban|unban)$/.test(url.pathname)) return method === 'POST';
   if (url.pathname === '/api/v1/system/status' || url.pathname === '/api/v1/admin/stats') return method === 'GET';

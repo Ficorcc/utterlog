@@ -85,6 +85,14 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/notifications/7', 'DELETE'))).toBe(true);
   });
 
+  test('routes public and admin annotations to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/annotations?post_id=1', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/annotations', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/admin/annotations', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/admin/annotations/batch-delete', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/admin/annotations/7', 'DELETE'))).toBe(true);
+  });
+
   test('routes security management to Start', () => {
     for (const action of ['overview', 'settings', 'bans', 'timeline']) {
       expect(isStartNativeApiRequest(request(`/api/v1/security/${action}`, 'GET'))).toBe(true);
