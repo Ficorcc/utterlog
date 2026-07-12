@@ -79,6 +79,11 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/search/rebuild', 'POST'))).toBe(true);
   });
 
+  test('routes comment reply unsubscribe pages to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/unsubscribe/comment-reply?e=x&t=y', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/unsubscribe/comment-reply', 'POST'))).toBe(false);
+  });
+
   test('routes federation and Passport protocols to Start', () => {
     expect(isStartNativeApiRequest(request('/api/v1/federation/metadata', 'GET'))).toBe(true);
     for (const action of ['follow', 'verify', 'webhook', 'token']) {

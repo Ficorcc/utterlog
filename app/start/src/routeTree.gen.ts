@@ -9,11 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
+import { Route as LlmsFullDottxtRouteImport } from './routes/llms-full[.]txt'
 import { Route as InstallRouteImport } from './routes/install'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostsSlugRouteImport } from './routes/posts/$slug'
+import { Route as ApiRevalidateRouteImport } from './routes/api/revalidate'
 import { Route as AdminSplatRouteImport } from './routes/admin/$'
 import { Route as ApiV1TrackRouteImport } from './routes/api/v1/track'
 import { Route as ApiV1TagsRouteImport } from './routes/api/v1/tags'
@@ -40,6 +45,7 @@ import { Route as ApiV1AnnotationsIndexRouteImport } from './routes/api/v1/annot
 import { Route as ApiV1AnalyticsIndexRouteImport } from './routes/api/v1/analytics/index'
 import { Route as ApiV1VisitorWeatherRouteImport } from './routes/api/v1/visitor/weather'
 import { Route as ApiV1VisitorGeoRouteImport } from './routes/api/v1/visitor/geo'
+import { Route as ApiV1UnsubscribeCommentReplyRouteImport } from './routes/api/v1/unsubscribe/comment-reply'
 import { Route as ApiV1TrackDurationRouteImport } from './routes/api/v1/track/duration'
 import { Route as ApiV1ThemesUploadRouteImport } from './routes/api/v1/themes/upload'
 import { Route as ApiV1ThemesIdRouteImport } from './routes/api/v1/themes/$id'
@@ -165,9 +171,29 @@ import { Route as ApiV1SyncPlatformJobIdStatusRouteImport } from './routes/api/v
 import { Route as ApiV1AdminSyncPlatformSitesUuidRouteImport } from './routes/api/v1/admin/sync/$platform/sites/$uuid'
 import { Route as ApiV1MusicProxyPlatformSongsIdAssetRouteImport } from './routes/api/v1/music/proxy/$platform/songs/$id/$asset'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
+  id: '/llms.txt',
+  path: '/llms.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LlmsFullDottxtRoute = LlmsFullDottxtRouteImport.update({
+  id: '/llms-full.txt',
+  path: '/llms-full.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InstallRoute = InstallRouteImport.update({
@@ -188,6 +214,11 @@ const IndexRoute = IndexRouteImport.update({
 const PostsSlugRoute = PostsSlugRouteImport.update({
   id: '/posts/$slug',
   path: '/posts/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRevalidateRoute = ApiRevalidateRouteImport.update({
+  id: '/api/revalidate',
+  path: '/api/revalidate',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSplatRoute = AdminSplatRouteImport.update({
@@ -320,6 +351,12 @@ const ApiV1VisitorGeoRoute = ApiV1VisitorGeoRouteImport.update({
   path: '/api/v1/visitor/geo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1UnsubscribeCommentReplyRoute =
+  ApiV1UnsubscribeCommentReplyRouteImport.update({
+    id: '/api/v1/unsubscribe/comment-reply',
+    path: '/api/v1/unsubscribe/comment-reply',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiV1TrackDurationRoute = ApiV1TrackDurationRouteImport.update({
   id: '/duration',
   path: '/duration',
@@ -974,8 +1011,13 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/install': typeof InstallRoute
+  '/llms-full.txt': typeof LlmsFullDottxtRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/$': typeof AdminSplatRoute
+  '/api/revalidate': typeof ApiRevalidateRoute
   '/posts/$slug': typeof PostsSlugRoute
   '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
   '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
@@ -1070,6 +1112,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/themes/$id': typeof ApiV1ThemesIdRouteWithChildren
   '/api/v1/themes/upload': typeof ApiV1ThemesUploadRoute
   '/api/v1/track/duration': typeof ApiV1TrackDurationRoute
+  '/api/v1/unsubscribe/comment-reply': typeof ApiV1UnsubscribeCommentReplyRoute
   '/api/v1/visitor/geo': typeof ApiV1VisitorGeoRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
   '/api/v1/analytics/': typeof ApiV1AnalyticsIndexRoute
@@ -1131,8 +1174,13 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/install': typeof InstallRoute
+  '/llms-full.txt': typeof LlmsFullDottxtRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/$': typeof AdminSplatRoute
+  '/api/revalidate': typeof ApiRevalidateRoute
   '/posts/$slug': typeof PostsSlugRoute
   '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
   '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
@@ -1227,6 +1275,7 @@ export interface FileRoutesByTo {
   '/api/v1/themes/$id': typeof ApiV1ThemesIdRouteWithChildren
   '/api/v1/themes/upload': typeof ApiV1ThemesUploadRoute
   '/api/v1/track/duration': typeof ApiV1TrackDurationRoute
+  '/api/v1/unsubscribe/comment-reply': typeof ApiV1UnsubscribeCommentReplyRoute
   '/api/v1/visitor/geo': typeof ApiV1VisitorGeoRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
   '/api/v1/analytics': typeof ApiV1AnalyticsIndexRoute
@@ -1289,8 +1338,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/install': typeof InstallRoute
+  '/llms-full.txt': typeof LlmsFullDottxtRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/$': typeof AdminSplatRoute
+  '/api/revalidate': typeof ApiRevalidateRoute
   '/posts/$slug': typeof PostsSlugRoute
   '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
   '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
@@ -1385,6 +1439,7 @@ export interface FileRoutesById {
   '/api/v1/themes/$id': typeof ApiV1ThemesIdRouteWithChildren
   '/api/v1/themes/upload': typeof ApiV1ThemesUploadRoute
   '/api/v1/track/duration': typeof ApiV1TrackDurationRoute
+  '/api/v1/unsubscribe/comment-reply': typeof ApiV1UnsubscribeCommentReplyRoute
   '/api/v1/visitor/geo': typeof ApiV1VisitorGeoRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
   '/api/v1/analytics/': typeof ApiV1AnalyticsIndexRoute
@@ -1448,8 +1503,13 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/install'
+    | '/llms-full.txt'
+    | '/llms.txt'
     | '/login'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/admin/$'
+    | '/api/revalidate'
     | '/posts/$slug'
     | '/api/v1/$resource'
     | '/api/v1/categories'
@@ -1544,6 +1604,7 @@ export interface FileRouteTypes {
     | '/api/v1/themes/$id'
     | '/api/v1/themes/upload'
     | '/api/v1/track/duration'
+    | '/api/v1/unsubscribe/comment-reply'
     | '/api/v1/visitor/geo'
     | '/api/v1/visitor/weather'
     | '/api/v1/analytics/'
@@ -1605,8 +1666,13 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/install'
+    | '/llms-full.txt'
+    | '/llms.txt'
     | '/login'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/admin/$'
+    | '/api/revalidate'
     | '/posts/$slug'
     | '/api/v1/$resource'
     | '/api/v1/categories'
@@ -1701,6 +1767,7 @@ export interface FileRouteTypes {
     | '/api/v1/themes/$id'
     | '/api/v1/themes/upload'
     | '/api/v1/track/duration'
+    | '/api/v1/unsubscribe/comment-reply'
     | '/api/v1/visitor/geo'
     | '/api/v1/visitor/weather'
     | '/api/v1/analytics'
@@ -1762,8 +1829,13 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/install'
+    | '/llms-full.txt'
+    | '/llms.txt'
     | '/login'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/admin/$'
+    | '/api/revalidate'
     | '/posts/$slug'
     | '/api/v1/$resource'
     | '/api/v1/categories'
@@ -1858,6 +1930,7 @@ export interface FileRouteTypes {
     | '/api/v1/themes/$id'
     | '/api/v1/themes/upload'
     | '/api/v1/track/duration'
+    | '/api/v1/unsubscribe/comment-reply'
     | '/api/v1/visitor/geo'
     | '/api/v1/visitor/weather'
     | '/api/v1/analytics/'
@@ -1920,8 +1993,13 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
   InstallRoute: typeof InstallRoute
+  LlmsFullDottxtRoute: typeof LlmsFullDottxtRoute
+  LlmsDottxtRoute: typeof LlmsDottxtRoute
   LoginRoute: typeof LoginRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AdminSplatRoute: typeof AdminSplatRoute
+  ApiRevalidateRoute: typeof ApiRevalidateRoute
   PostsSlugRoute: typeof PostsSlugRoute
   ApiV1ResourceRoute: typeof ApiV1ResourceRouteWithChildren
   ApiV1CategoriesRoute: typeof ApiV1CategoriesRouteWithChildren
@@ -2009,6 +2087,7 @@ export interface RootRouteChildren {
   ApiV1TelegramWebhookRoute: typeof ApiV1TelegramWebhookRoute
   ApiV1ThemesIdRoute: typeof ApiV1ThemesIdRouteWithChildren
   ApiV1ThemesUploadRoute: typeof ApiV1ThemesUploadRoute
+  ApiV1UnsubscribeCommentReplyRoute: typeof ApiV1UnsubscribeCommentReplyRoute
   ApiV1VisitorGeoRoute: typeof ApiV1VisitorGeoRoute
   ApiV1VisitorWeatherRoute: typeof ApiV1VisitorWeatherRoute
   ApiV1AnalyticsIndexRoute: typeof ApiV1AnalyticsIndexRoute
@@ -2053,11 +2132,39 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/llms.txt': {
+      id: '/llms.txt'
+      path: '/llms.txt'
+      fullPath: '/llms.txt'
+      preLoaderRoute: typeof LlmsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/llms-full.txt': {
+      id: '/llms-full.txt'
+      path: '/llms-full.txt'
+      fullPath: '/llms-full.txt'
+      preLoaderRoute: typeof LlmsFullDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/install': {
@@ -2086,6 +2193,13 @@ declare module '@tanstack/react-router' {
       path: '/posts/$slug'
       fullPath: '/posts/$slug'
       preLoaderRoute: typeof PostsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/revalidate': {
+      id: '/api/revalidate'
+      path: '/api/revalidate'
+      fullPath: '/api/revalidate'
+      preLoaderRoute: typeof ApiRevalidateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/$': {
@@ -2268,6 +2382,13 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/visitor/geo'
       fullPath: '/api/v1/visitor/geo'
       preLoaderRoute: typeof ApiV1VisitorGeoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/unsubscribe/comment-reply': {
+      id: '/api/v1/unsubscribe/comment-reply'
+      path: '/api/v1/unsubscribe/comment-reply'
+      fullPath: '/api/v1/unsubscribe/comment-reply'
+      preLoaderRoute: typeof ApiV1UnsubscribeCommentReplyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/track/duration': {
@@ -3363,8 +3484,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
   InstallRoute: InstallRoute,
+  LlmsFullDottxtRoute: LlmsFullDottxtRoute,
+  LlmsDottxtRoute: LlmsDottxtRoute,
   LoginRoute: LoginRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   AdminSplatRoute: AdminSplatRoute,
+  ApiRevalidateRoute: ApiRevalidateRoute,
   PostsSlugRoute: PostsSlugRoute,
   ApiV1ResourceRoute: ApiV1ResourceRouteWithChildren,
   ApiV1CategoriesRoute: ApiV1CategoriesRouteWithChildren,
@@ -3452,6 +3578,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1TelegramWebhookRoute: ApiV1TelegramWebhookRoute,
   ApiV1ThemesIdRoute: ApiV1ThemesIdRouteWithChildren,
   ApiV1ThemesUploadRoute: ApiV1ThemesUploadRoute,
+  ApiV1UnsubscribeCommentReplyRoute: ApiV1UnsubscribeCommentReplyRoute,
   ApiV1VisitorGeoRoute: ApiV1VisitorGeoRoute,
   ApiV1VisitorWeatherRoute: ApiV1VisitorWeatherRoute,
   ApiV1AnalyticsIndexRoute: ApiV1AnalyticsIndexRoute,

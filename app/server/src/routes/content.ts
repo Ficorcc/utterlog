@@ -1983,6 +1983,150 @@ async function sendPublishNotificationIfNeeded(postId: number, wasPublished: boo
   void sendPostPublishedTelegram({ title: String(post.title || '未命名文章'), url });
 }
 
+export async function robotsTxtResponse() {
+  const opts: Record<string, string> = await optionMap(false).catch(() => ({}));
+  const site = siteOrigin(opts);
+  const aiAllowed = boolOptionValue(opts.ai_crawl_allowed, true);
+  const lines = ['User-agent: *', 'Allow: /', 'Disallow: /admin/', 'Disallow: /api/', ''];
+  for (const agent of aiBotUserAgents) {
+    lines.push(`User-agent: ${agent}`, `${aiAllowed ? 'Allow' : 'Disallow'}: /`, '');
+  }
+  if (site) {
+    lines.push(`Sitemap: ${site}/sitemap.xml`);
+    if (boolOptionValue(opts.llms_txt_enabled, true)) lines.push(`# llms.txt available at ${site}/llms.txt`);
+  }
+  return new Response(`${lines.join('\n')}\n`, {
+    headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'public, max-age=3600' },
+  });
+}
+
+export async function sitemapXmlResponse() {
+  const opts: Record<string, string> = await optionMap(false).catch(() => ({}));
+  const site = siteOrigin(opts);
+  const headers = { 'content-type': 'application/xml; charset=utf-8', 'cache-control': 'public, max-age=3600' };
+  if (!site) {
+    return new Response('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"/>', { headers });
+  }
+  const now = new Date().toISOString();
+  const items: { loc: string; lastmod: string; changefreq: string; priority: string }[] = [
+    { loc: `${site}/`, lastmod: now, changefreq: 'daily', priority: '1.0' },
+  ];
+  for (const path of ['/about', '/archives', '/films', '/moments', '/footprints', '/coding', '/links', '/albums', '/music', '/books', '/games', '/movies', '/goods', '/feeds']) {
+    items.push({ loc: `${site}${path}`, lastmod: now, changefreq: 'weekly', priority: '0.6' });
+  }
+  const posts = await many<Record<string, unknown>>(
+    `select p.id, p.slug, p.display_id, p.type, p.created_at, p.updated_at, p.published_at,
+            coalesce((
+              select m.slug from ${table('relationships')} r
+              join ${table('metas')} m on m.id = r.meta_id and m.type = 'category'
+              where r.post_id = p.id order by m.id asc limit 1
+            ), '') as category_slug
+     from ${table('posts')} p
+     where p.status = 'publish'
+     order by coalesce(p.published_at, to_timestamp(p.created_at)) desc
+     limit 5000`,
+  ).catch(() => []);
+  const permalink = opts.permalink_structure || '/posts/%postname%';
+  for (const post of posts) {
+    const path = String(post.type || '') === 'video'
+      ? `/films/${encodeURIComponent(String(post.slug || post.display_id || post.id || ''))}`
+      : buildPostPath(post, permalink);
+    items.push({
+      loc: `${site}${path}`,
+      lastmod: postDateParts({ published_at: post.updated_at || post.published_at || post.created_at }).iso,
+      changefreq: 'monthly',
+      priority: '0.8',
+    });
+  }
+  const metas = await many<Record<string, unknown>>(
+    `select slug, type, updated_at, created_at
+     from ${table('metas')}
+     where type in ('category','tag') and coalesce(slug,'') <> ''`,
+  ).catch(() => []);
+  for (const meta of metas) {
+    const base = meta.type === 'category' ? '/categories/' : '/tags/';
+    items.push({
+      loc: `${site}${base}${encodeURIComponent(String(meta.slug || ''))}`,
+      lastmod: postDateParts({ published_at: meta.updated_at || meta.created_at }).iso,
+      changefreq: 'weekly',
+      priority: meta.type === 'category' ? '0.5' : '0.4',
+    });
+  }
+  const urls = items.map((item) => (
+    `  <url><loc>${xmlEscape(item.loc)}</loc><lastmod>${item.lastmod}</lastmod><changefreq>${item.changefreq}</changefreq><priority>${item.priority}</priority></url>`
+  )).join('\n');
+  return new Response(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`, { headers });
+}
+
+export async function llmsTxtResponse() {
+  const opts: Record<string, string> = await optionMap(false).catch(() => ({}));
+  if (!boolOptionValue(opts.llms_txt_enabled, true)) {
+    return new Response('llms.txt is disabled in this site SEO settings', {
+      status: 404,
+      headers: { 'content-type': 'text/plain; charset=utf-8' },
+    });
+  }
+  const site = siteOrigin(opts);
+  const title = String(opts.site_title || 'Utterlog').trim() || 'Utterlog';
+  const tagline = String(opts.seo_default_description || opts.site_description || '').trim();
+  const posts = await many<{ title: string; slug: string; excerpt: string; created_at: number }>(
+    `select title, slug, coalesce(excerpt,'') as excerpt, created_at
+     from ${table('posts')}
+     where status = 'publish' and type = 'post'
+     order by coalesce(published_at, to_timestamp(created_at)) desc
+     limit 200`,
+  ).catch(() => []);
+  const lines = [`# ${title}`, ''];
+  if (tagline) lines.push(`> ${oneLine(tagline)}`, '');
+  if (site) lines.push(`Site: ${site}`, '');
+  if (posts.length) {
+    lines.push('## Posts', '');
+    for (const post of posts) {
+      const url = `${site || ''}/posts/${encodeURIComponent(post.slug || '')}`;
+      const summary = oneLine(post.excerpt || post.title || '');
+      lines.push(summary && summary !== post.title ? `- [${post.title}](${url}): ${summary}` : `- [${post.title}](${url})`);
+    }
+  }
+  return new Response(`${lines.join('\n')}\n`, {
+    headers: { 'content-type': 'text/markdown; charset=utf-8', 'cache-control': 'public, max-age=3600' },
+  });
+}
+
+export async function llmsFullTxtResponse() {
+  const opts: Record<string, string> = await optionMap(false).catch(() => ({}));
+  if (String(opts.llms_full_enabled || '').trim().toLowerCase() !== 'true') {
+    return new Response('llms-full.txt is disabled in this site SEO settings', {
+      status: 404,
+      headers: { 'content-type': 'text/plain; charset=utf-8' },
+    });
+  }
+  const site = siteOrigin(opts);
+  const title = String(opts.site_title || 'Utterlog').trim() || 'Utterlog';
+  const tagline = String(opts.seo_default_description || opts.site_description || '').trim();
+  const posts = await many<{ title: string; slug: string; excerpt: string; content: string; published_at: unknown; created_at: unknown }>(
+    `select title, slug, excerpt, content, published_at, created_at
+     from ${table('posts')}
+     where status = 'publish' and type = 'post'
+     order by coalesce(published_at, to_timestamp(created_at)) desc
+     limit 500`,
+  ).catch(() => []);
+  const body = posts.map((post) => {
+    const url = `${site}/${encodeURIComponent(String(post.slug || ''))}`;
+    const excerpt = String(post.excerpt || '').trim();
+    return [
+      `## ${post.title}`,
+      `URL: ${url}`,
+      `Published: ${postDateParts(post).iso}`,
+      excerpt ? `Summary: ${excerpt}` : '',
+      String(post.content || '').trim(),
+    ].filter(Boolean).join('\n');
+  }).join('\n\n---\n\n');
+  const header = [`# ${title}`, tagline ? `\n> ${oneLine(tagline)}\n` : '', site ? `\nSite: ${site}\nGenerated: ${new Date().toISOString()}\n` : ''].join('');
+  return new Response(`${header}\n${body}\n`, {
+    headers: { 'content-type': 'text/markdown; charset=utf-8', 'cache-control': 'public, max-age=3600' },
+  });
+}
+
 export function registerContentRoutes(app: Hono) {
   app.get('/robots.txt', async (c) => {
     const opts: Record<string, string> = await optionMap(false).catch(() => ({}));

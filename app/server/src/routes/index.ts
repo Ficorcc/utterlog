@@ -8,7 +8,7 @@ import { config } from '../config';
 import { adminAuth } from '../auth/middleware';
 import { bodySizeLimit, rateLimit, securityDefense, securityHeaders } from '../http/security';
 import { handleRevalidate } from '../cache/revalidate';
-import { handleStartApiRequest } from '../web/start';
+import { handleStartApiRequest, handleStartRequest } from '../web/start';
 
 const adminMutationPrefixes = [
   '/api/v1/admin/',
@@ -99,6 +99,13 @@ export function createApp(dbReady: boolean) {
   }));
 
   serveStaticFiles(app);
+  for (const path of ['/api/revalidate', '/robots.txt', '/sitemap.xml', '/llms.txt', '/llms-full.txt']) {
+    app.use(path, async (c, next) => {
+      const response = await handleStartRequest(c.req.raw);
+      if (response) return response;
+      return next();
+    });
+  }
   app.post('/api/revalidate', adminAuth, async (c) => {
     const body = await c.req.json().catch(() => ({}));
     const result = await handleRevalidate(body);

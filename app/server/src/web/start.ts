@@ -89,6 +89,7 @@ export function isStartNativeApiRequest(request: Request) {
   if (/^\/api\/v1\/admin\/ai-comments\/[^/]+\/(approve|reject|regenerate)$/.test(url.pathname)) return method === 'POST';
   if (/^\/api\/v1\/admin\/ai-comments\/[^/]+$/.test(url.pathname)) return method === 'DELETE';
   if (url.pathname === '/api/v1/search/rebuild') return method === 'POST';
+  if (url.pathname === '/api/v1/unsubscribe/comment-reply') return method === 'GET';
   if (/^\/api\/v1\/telegram\/(webhook|test|get-chat-id|setup-webhook)$/.test(url.pathname)) return method === 'POST';
   if (url.pathname === '/api/v1/federation/metadata') return method === 'GET';
   if (/^\/api\/v1\/federation\/(follow|verify|webhook|token)$/.test(url.pathname)) return method === 'POST';
