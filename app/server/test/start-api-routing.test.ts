@@ -102,7 +102,9 @@ describe('TanStack Start native API routing', () => {
       expect(authenticated).toBe(['/api/v1/options', '/api/v1/categories', '/api/v1/tags', '/api/v1/posts', '/api/v1/moments'].includes(path));
     }
     expect(isStartNativeApiRequest(request('/api/v1/comments', 'GET'))).toBe(true);
-    expect(isStartNativeApiRequest(request('/api/v1/posts', 'POST'))).toBe(false);
+    expect(isStartNativeApiRequest(request('/api/v1/posts', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/posts/-3', 'PUT'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/posts/12', 'DELETE'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/options', 'PUT'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/options', 'POST'))).toBe(true);
   });

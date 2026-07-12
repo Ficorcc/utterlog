@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { authenticateRequest } from '../../../../../server/src/auth/session';
 import { listPosts } from '../../../../../server/src/public-read';
-import { apiPaginated } from '../../../server/http';
+import { createPost, PostServiceError } from '../../../../../server/src/services/posts';
+import { apiFail, apiOk, apiPaginated, withAdmin } from '../../../server/http';
 
 function positive(value: string | null, fallback: number) {
   const number = Number(value || fallback);
@@ -21,5 +22,13 @@ export const Route = createFileRoute('/api/v1/posts')({
       genre: query.get('genre') || '', orderBy: query.get('order_by') || '', order: query.get('order') || '',
     });
     return apiPaginated(result.data, result.meta);
-  } } },
+  }, POST: ({ request }) => withAdmin(request, async (session) => {
+    try {
+      const body = await request.json().catch(() => ({})) as Record<string, unknown>;
+      return apiOk({ id: await createPost(body, session.userId) });
+    } catch (error) {
+      if (error instanceof PostServiceError) return apiFail(error.status, error.code, error.message);
+      throw error;
+    }
+  }) } },
 });
