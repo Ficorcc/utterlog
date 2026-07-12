@@ -53,6 +53,15 @@ export default function VisitorMap({ period }: { period: string }) {
 
   // 初始化地图
   useEffect(() => {
+    // 诊断日志：确认 effect 是否执行、token / ref 状态
+    console.log('[VisitorMap] init effect', {
+      hasRef: !!mapRef.current,
+      tokenLen: mapboxToken.length,
+      tokenPreview: mapboxToken.slice(0, 10),
+      containerSize: mapRef.current
+        ? `${mapRef.current.clientWidth}x${mapRef.current.clientHeight}`
+        : 'null',
+    });
     if (!mapRef.current) return;
     // 没配 Mapbox token 就不初始化，避免 "An API access token is required" 异常
     // 冒泡到 React 导致整个 Analytics 页白屏
