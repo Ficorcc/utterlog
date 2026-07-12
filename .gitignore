@@ -13,6 +13,9 @@ Thumbs.db
 DEPLOY.md
 /deploy.sh
 
+# ZCode agent workspace (local plans / session metadata)
+.zcode/
+
 # IDE
 .idea/
 .vscode/
