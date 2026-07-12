@@ -25,6 +25,7 @@ import { Route as ApiV1CategoriesRouteImport } from './routes/api/v1/categories'
 import { Route as ApiV1ResourceRouteImport } from './routes/api/v1/$resource'
 import { Route as ApiV1ProfileIndexRouteImport } from './routes/api/v1/profile/index'
 import { Route as ApiV1PasskeysIndexRouteImport } from './routes/api/v1/passkeys/index'
+import { Route as ApiV1NotificationsIndexRouteImport } from './routes/api/v1/notifications/index'
 import { Route as ApiV1MomentsIndexRouteImport } from './routes/api/v1/moments/index'
 import { Route as ApiV1MediaIndexRouteImport } from './routes/api/v1/media/index'
 import { Route as ApiV1CommentsIndexRouteImport } from './routes/api/v1/comments/index'
@@ -34,6 +35,10 @@ import { Route as ApiV1ProfileSendCodeRouteImport } from './routes/api/v1/profil
 import { Route as ApiV1PostsIdRouteImport } from './routes/api/v1/posts/$id'
 import { Route as ApiV1PlaylistsImportRouteImport } from './routes/api/v1/playlists/import'
 import { Route as ApiV1PasskeysIdRouteImport } from './routes/api/v1/passkeys/$id'
+import { Route as ApiV1NotificationsUnreadCountRouteImport } from './routes/api/v1/notifications/unread-count'
+import { Route as ApiV1NotificationsStreamRouteImport } from './routes/api/v1/notifications/stream'
+import { Route as ApiV1NotificationsReadAllRouteImport } from './routes/api/v1/notifications/read-all'
+import { Route as ApiV1NotificationsIdRouteImport } from './routes/api/v1/notifications/$id'
 import { Route as ApiV1MomentsRecentTagsRouteImport } from './routes/api/v1/moments/recent-tags'
 import { Route as ApiV1MomentsIdRouteImport } from './routes/api/v1/moments/$id'
 import { Route as ApiV1MediaUploadBrandingRouteImport } from './routes/api/v1/media/upload-branding'
@@ -67,6 +72,7 @@ import { Route as ApiV1PostsIdNavigationRouteImport } from './routes/api/v1/post
 import { Route as ApiV1PostsIdEpisodesRouteImport } from './routes/api/v1/posts/$id/episodes'
 import { Route as ApiV1PostsIdCommentsRouteImport } from './routes/api/v1/posts/$id/comments'
 import { Route as ApiV1PlaylistsIdSongsRouteImport } from './routes/api/v1/playlists/$id/songs'
+import { Route as ApiV1NotificationsIdReadRouteImport } from './routes/api/v1/notifications/$id/read'
 import { Route as ApiV1CommentsIdReplyRouteImport } from './routes/api/v1/comments/$id/reply'
 import { Route as ApiV1CommentsIdEditRouteImport } from './routes/api/v1/comments/$id/edit'
 import { Route as ApiV1CommentsIdApproveRouteImport } from './routes/api/v1/comments/$id/approve'
@@ -156,6 +162,11 @@ const ApiV1PasskeysIndexRoute = ApiV1PasskeysIndexRouteImport.update({
   path: '/api/v1/passkeys/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1NotificationsIndexRoute = ApiV1NotificationsIndexRouteImport.update({
+  id: '/api/v1/notifications/',
+  path: '/api/v1/notifications/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1MomentsIndexRoute = ApiV1MomentsIndexRouteImport.update({
   id: '/api/v1/moments/',
   path: '/api/v1/moments/',
@@ -199,6 +210,29 @@ const ApiV1PlaylistsImportRoute = ApiV1PlaylistsImportRouteImport.update({
 const ApiV1PasskeysIdRoute = ApiV1PasskeysIdRouteImport.update({
   id: '/api/v1/passkeys/$id',
   path: '/api/v1/passkeys/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1NotificationsUnreadCountRoute =
+  ApiV1NotificationsUnreadCountRouteImport.update({
+    id: '/api/v1/notifications/unread-count',
+    path: '/api/v1/notifications/unread-count',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1NotificationsStreamRoute =
+  ApiV1NotificationsStreamRouteImport.update({
+    id: '/api/v1/notifications/stream',
+    path: '/api/v1/notifications/stream',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1NotificationsReadAllRoute =
+  ApiV1NotificationsReadAllRouteImport.update({
+    id: '/api/v1/notifications/read-all',
+    path: '/api/v1/notifications/read-all',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1NotificationsIdRoute = ApiV1NotificationsIdRouteImport.update({
+  id: '/api/v1/notifications/$id',
+  path: '/api/v1/notifications/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1MomentsRecentTagsRoute = ApiV1MomentsRecentTagsRouteImport.update({
@@ -370,6 +404,12 @@ const ApiV1PlaylistsIdSongsRoute = ApiV1PlaylistsIdSongsRouteImport.update({
   path: '/api/v1/playlists/$id/songs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1NotificationsIdReadRoute =
+  ApiV1NotificationsIdReadRouteImport.update({
+    id: '/read',
+    path: '/read',
+    getParentRoute: () => ApiV1NotificationsIdRoute,
+  } as any)
 const ApiV1CommentsIdReplyRoute = ApiV1CommentsIdReplyRouteImport.update({
   id: '/reply',
   path: '/reply',
@@ -454,6 +494,10 @@ export interface FileRoutesByFullPath {
   '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
   '/api/v1/moments/$id': typeof ApiV1MomentsIdRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
+  '/api/v1/notifications/$id': typeof ApiV1NotificationsIdRouteWithChildren
+  '/api/v1/notifications/read-all': typeof ApiV1NotificationsReadAllRoute
+  '/api/v1/notifications/stream': typeof ApiV1NotificationsStreamRoute
+  '/api/v1/notifications/unread-count': typeof ApiV1NotificationsUnreadCountRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/playlists/import': typeof ApiV1PlaylistsImportRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
@@ -463,6 +507,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/comments/': typeof ApiV1CommentsIndexRoute
   '/api/v1/media/': typeof ApiV1MediaIndexRoute
   '/api/v1/moments/': typeof ApiV1MomentsIndexRoute
+  '/api/v1/notifications/': typeof ApiV1NotificationsIndexRoute
   '/api/v1/passkeys/': typeof ApiV1PasskeysIndexRoute
   '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
   '/api/v1/albums/$id/photos': typeof ApiV1AlbumsIdPhotosRouteWithChildren
@@ -471,6 +516,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/comments/$id/approve': typeof ApiV1CommentsIdApproveRoute
   '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
   '/api/v1/comments/$id/reply': typeof ApiV1CommentsIdReplyRoute
+  '/api/v1/notifications/$id/read': typeof ApiV1NotificationsIdReadRoute
   '/api/v1/playlists/$id/songs': typeof ApiV1PlaylistsIdSongsRoute
   '/api/v1/posts/$id/comments': typeof ApiV1PostsIdCommentsRoute
   '/api/v1/posts/$id/episodes': typeof ApiV1PostsIdEpisodesRoute
@@ -522,6 +568,10 @@ export interface FileRoutesByTo {
   '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
   '/api/v1/moments/$id': typeof ApiV1MomentsIdRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
+  '/api/v1/notifications/$id': typeof ApiV1NotificationsIdRouteWithChildren
+  '/api/v1/notifications/read-all': typeof ApiV1NotificationsReadAllRoute
+  '/api/v1/notifications/stream': typeof ApiV1NotificationsStreamRoute
+  '/api/v1/notifications/unread-count': typeof ApiV1NotificationsUnreadCountRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/playlists/import': typeof ApiV1PlaylistsImportRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
@@ -531,6 +581,7 @@ export interface FileRoutesByTo {
   '/api/v1/comments': typeof ApiV1CommentsIndexRoute
   '/api/v1/media': typeof ApiV1MediaIndexRoute
   '/api/v1/moments': typeof ApiV1MomentsIndexRoute
+  '/api/v1/notifications': typeof ApiV1NotificationsIndexRoute
   '/api/v1/passkeys': typeof ApiV1PasskeysIndexRoute
   '/api/v1/profile': typeof ApiV1ProfileIndexRoute
   '/api/v1/albums/$id/photos': typeof ApiV1AlbumsIdPhotosRouteWithChildren
@@ -539,6 +590,7 @@ export interface FileRoutesByTo {
   '/api/v1/comments/$id/approve': typeof ApiV1CommentsIdApproveRoute
   '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
   '/api/v1/comments/$id/reply': typeof ApiV1CommentsIdReplyRoute
+  '/api/v1/notifications/$id/read': typeof ApiV1NotificationsIdReadRoute
   '/api/v1/playlists/$id/songs': typeof ApiV1PlaylistsIdSongsRoute
   '/api/v1/posts/$id/comments': typeof ApiV1PostsIdCommentsRoute
   '/api/v1/posts/$id/episodes': typeof ApiV1PostsIdEpisodesRoute
@@ -591,6 +643,10 @@ export interface FileRoutesById {
   '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
   '/api/v1/moments/$id': typeof ApiV1MomentsIdRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
+  '/api/v1/notifications/$id': typeof ApiV1NotificationsIdRouteWithChildren
+  '/api/v1/notifications/read-all': typeof ApiV1NotificationsReadAllRoute
+  '/api/v1/notifications/stream': typeof ApiV1NotificationsStreamRoute
+  '/api/v1/notifications/unread-count': typeof ApiV1NotificationsUnreadCountRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/playlists/import': typeof ApiV1PlaylistsImportRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
@@ -600,6 +656,7 @@ export interface FileRoutesById {
   '/api/v1/comments/': typeof ApiV1CommentsIndexRoute
   '/api/v1/media/': typeof ApiV1MediaIndexRoute
   '/api/v1/moments/': typeof ApiV1MomentsIndexRoute
+  '/api/v1/notifications/': typeof ApiV1NotificationsIndexRoute
   '/api/v1/passkeys/': typeof ApiV1PasskeysIndexRoute
   '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
   '/api/v1/albums/$id/photos': typeof ApiV1AlbumsIdPhotosRouteWithChildren
@@ -608,6 +665,7 @@ export interface FileRoutesById {
   '/api/v1/comments/$id/approve': typeof ApiV1CommentsIdApproveRoute
   '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
   '/api/v1/comments/$id/reply': typeof ApiV1CommentsIdReplyRoute
+  '/api/v1/notifications/$id/read': typeof ApiV1NotificationsIdReadRoute
   '/api/v1/playlists/$id/songs': typeof ApiV1PlaylistsIdSongsRoute
   '/api/v1/posts/$id/comments': typeof ApiV1PostsIdCommentsRoute
   '/api/v1/posts/$id/episodes': typeof ApiV1PostsIdEpisodesRoute
@@ -661,6 +719,10 @@ export interface FileRouteTypes {
     | '/api/v1/media/upload-branding'
     | '/api/v1/moments/$id'
     | '/api/v1/moments/recent-tags'
+    | '/api/v1/notifications/$id'
+    | '/api/v1/notifications/read-all'
+    | '/api/v1/notifications/stream'
+    | '/api/v1/notifications/unread-count'
     | '/api/v1/passkeys/$id'
     | '/api/v1/playlists/import'
     | '/api/v1/posts/$id'
@@ -670,6 +732,7 @@ export interface FileRouteTypes {
     | '/api/v1/comments/'
     | '/api/v1/media/'
     | '/api/v1/moments/'
+    | '/api/v1/notifications/'
     | '/api/v1/passkeys/'
     | '/api/v1/profile/'
     | '/api/v1/albums/$id/photos'
@@ -678,6 +741,7 @@ export interface FileRouteTypes {
     | '/api/v1/comments/$id/approve'
     | '/api/v1/comments/$id/edit'
     | '/api/v1/comments/$id/reply'
+    | '/api/v1/notifications/$id/read'
     | '/api/v1/playlists/$id/songs'
     | '/api/v1/posts/$id/comments'
     | '/api/v1/posts/$id/episodes'
@@ -729,6 +793,10 @@ export interface FileRouteTypes {
     | '/api/v1/media/upload-branding'
     | '/api/v1/moments/$id'
     | '/api/v1/moments/recent-tags'
+    | '/api/v1/notifications/$id'
+    | '/api/v1/notifications/read-all'
+    | '/api/v1/notifications/stream'
+    | '/api/v1/notifications/unread-count'
     | '/api/v1/passkeys/$id'
     | '/api/v1/playlists/import'
     | '/api/v1/posts/$id'
@@ -738,6 +806,7 @@ export interface FileRouteTypes {
     | '/api/v1/comments'
     | '/api/v1/media'
     | '/api/v1/moments'
+    | '/api/v1/notifications'
     | '/api/v1/passkeys'
     | '/api/v1/profile'
     | '/api/v1/albums/$id/photos'
@@ -746,6 +815,7 @@ export interface FileRouteTypes {
     | '/api/v1/comments/$id/approve'
     | '/api/v1/comments/$id/edit'
     | '/api/v1/comments/$id/reply'
+    | '/api/v1/notifications/$id/read'
     | '/api/v1/playlists/$id/songs'
     | '/api/v1/posts/$id/comments'
     | '/api/v1/posts/$id/episodes'
@@ -797,6 +867,10 @@ export interface FileRouteTypes {
     | '/api/v1/media/upload-branding'
     | '/api/v1/moments/$id'
     | '/api/v1/moments/recent-tags'
+    | '/api/v1/notifications/$id'
+    | '/api/v1/notifications/read-all'
+    | '/api/v1/notifications/stream'
+    | '/api/v1/notifications/unread-count'
     | '/api/v1/passkeys/$id'
     | '/api/v1/playlists/import'
     | '/api/v1/posts/$id'
@@ -806,6 +880,7 @@ export interface FileRouteTypes {
     | '/api/v1/comments/'
     | '/api/v1/media/'
     | '/api/v1/moments/'
+    | '/api/v1/notifications/'
     | '/api/v1/passkeys/'
     | '/api/v1/profile/'
     | '/api/v1/albums/$id/photos'
@@ -814,6 +889,7 @@ export interface FileRouteTypes {
     | '/api/v1/comments/$id/approve'
     | '/api/v1/comments/$id/edit'
     | '/api/v1/comments/$id/reply'
+    | '/api/v1/notifications/$id/read'
     | '/api/v1/playlists/$id/songs'
     | '/api/v1/posts/$id/comments'
     | '/api/v1/posts/$id/episodes'
@@ -864,6 +940,10 @@ export interface RootRouteChildren {
   ApiV1MediaUploadBrandingRoute: typeof ApiV1MediaUploadBrandingRoute
   ApiV1MomentsIdRoute: typeof ApiV1MomentsIdRoute
   ApiV1MomentsRecentTagsRoute: typeof ApiV1MomentsRecentTagsRoute
+  ApiV1NotificationsIdRoute: typeof ApiV1NotificationsIdRouteWithChildren
+  ApiV1NotificationsReadAllRoute: typeof ApiV1NotificationsReadAllRoute
+  ApiV1NotificationsStreamRoute: typeof ApiV1NotificationsStreamRoute
+  ApiV1NotificationsUnreadCountRoute: typeof ApiV1NotificationsUnreadCountRoute
   ApiV1PasskeysIdRoute: typeof ApiV1PasskeysIdRoute
   ApiV1PlaylistsImportRoute: typeof ApiV1PlaylistsImportRoute
   ApiV1ProfileSendCodeRoute: typeof ApiV1ProfileSendCodeRoute
@@ -871,6 +951,7 @@ export interface RootRouteChildren {
   ApiV1CommentsIndexRoute: typeof ApiV1CommentsIndexRoute
   ApiV1MediaIndexRoute: typeof ApiV1MediaIndexRoute
   ApiV1MomentsIndexRoute: typeof ApiV1MomentsIndexRoute
+  ApiV1NotificationsIndexRoute: typeof ApiV1NotificationsIndexRoute
   ApiV1PasskeysIndexRoute: typeof ApiV1PasskeysIndexRoute
   ApiV1ProfileIndexRoute: typeof ApiV1ProfileIndexRoute
   ApiV1AlbumsIdPhotosRoute: typeof ApiV1AlbumsIdPhotosRouteWithChildren
@@ -996,6 +1077,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1PasskeysIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/notifications/': {
+      id: '/api/v1/notifications/'
+      path: '/api/v1/notifications'
+      fullPath: '/api/v1/notifications/'
+      preLoaderRoute: typeof ApiV1NotificationsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/moments/': {
       id: '/api/v1/moments/'
       path: '/api/v1/moments'
@@ -1057,6 +1145,34 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/passkeys/$id'
       fullPath: '/api/v1/passkeys/$id'
       preLoaderRoute: typeof ApiV1PasskeysIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/notifications/unread-count': {
+      id: '/api/v1/notifications/unread-count'
+      path: '/api/v1/notifications/unread-count'
+      fullPath: '/api/v1/notifications/unread-count'
+      preLoaderRoute: typeof ApiV1NotificationsUnreadCountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/notifications/stream': {
+      id: '/api/v1/notifications/stream'
+      path: '/api/v1/notifications/stream'
+      fullPath: '/api/v1/notifications/stream'
+      preLoaderRoute: typeof ApiV1NotificationsStreamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/notifications/read-all': {
+      id: '/api/v1/notifications/read-all'
+      path: '/api/v1/notifications/read-all'
+      fullPath: '/api/v1/notifications/read-all'
+      preLoaderRoute: typeof ApiV1NotificationsReadAllRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/notifications/$id': {
+      id: '/api/v1/notifications/$id'
+      path: '/api/v1/notifications/$id'
+      fullPath: '/api/v1/notifications/$id'
+      preLoaderRoute: typeof ApiV1NotificationsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/moments/recent-tags': {
@@ -1290,6 +1406,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1PlaylistsIdSongsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/notifications/$id/read': {
+      id: '/api/v1/notifications/$id/read'
+      path: '/read'
+      fullPath: '/api/v1/notifications/$id/read'
+      preLoaderRoute: typeof ApiV1NotificationsIdReadRouteImport
+      parentRoute: typeof ApiV1NotificationsIdRoute
+    }
     '/api/v1/comments/$id/reply': {
       id: '/api/v1/comments/$id/reply'
       path: '/reply'
@@ -1433,6 +1556,17 @@ const ApiV1CommentsIdRouteWithChildren = ApiV1CommentsIdRoute._addFileChildren(
   ApiV1CommentsIdRouteChildren,
 )
 
+interface ApiV1NotificationsIdRouteChildren {
+  ApiV1NotificationsIdReadRoute: typeof ApiV1NotificationsIdReadRoute
+}
+
+const ApiV1NotificationsIdRouteChildren: ApiV1NotificationsIdRouteChildren = {
+  ApiV1NotificationsIdReadRoute: ApiV1NotificationsIdReadRoute,
+}
+
+const ApiV1NotificationsIdRouteWithChildren =
+  ApiV1NotificationsIdRoute._addFileChildren(ApiV1NotificationsIdRouteChildren)
+
 interface ApiV1AlbumsIdPhotosRouteChildren {
   ApiV1AlbumsIdPhotosMediaIdRoute: typeof ApiV1AlbumsIdPhotosMediaIdRoute
 }
@@ -1482,6 +1616,10 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1MediaUploadBrandingRoute: ApiV1MediaUploadBrandingRoute,
   ApiV1MomentsIdRoute: ApiV1MomentsIdRoute,
   ApiV1MomentsRecentTagsRoute: ApiV1MomentsRecentTagsRoute,
+  ApiV1NotificationsIdRoute: ApiV1NotificationsIdRouteWithChildren,
+  ApiV1NotificationsReadAllRoute: ApiV1NotificationsReadAllRoute,
+  ApiV1NotificationsStreamRoute: ApiV1NotificationsStreamRoute,
+  ApiV1NotificationsUnreadCountRoute: ApiV1NotificationsUnreadCountRoute,
   ApiV1PasskeysIdRoute: ApiV1PasskeysIdRoute,
   ApiV1PlaylistsImportRoute: ApiV1PlaylistsImportRoute,
   ApiV1ProfileSendCodeRoute: ApiV1ProfileSendCodeRoute,
@@ -1489,6 +1627,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1CommentsIndexRoute: ApiV1CommentsIndexRoute,
   ApiV1MediaIndexRoute: ApiV1MediaIndexRoute,
   ApiV1MomentsIndexRoute: ApiV1MomentsIndexRoute,
+  ApiV1NotificationsIndexRoute: ApiV1NotificationsIndexRoute,
   ApiV1PasskeysIndexRoute: ApiV1PasskeysIndexRoute,
   ApiV1ProfileIndexRoute: ApiV1ProfileIndexRoute,
   ApiV1AlbumsIdPhotosRoute: ApiV1AlbumsIdPhotosRouteWithChildren,

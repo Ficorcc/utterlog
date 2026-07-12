@@ -79,6 +79,11 @@ export function isStartNativeApiRequest(request: Request) {
   if (url.pathname === '/api/v1/auth/passkey/available') return method === 'GET';
   if (url.pathname === '/api/v1/passkeys') return method === 'GET';
   if (/^\/api\/v1\/passkeys\/[^/]+$/.test(url.pathname)) return method === 'DELETE';
+  if (url.pathname === '/api/v1/notifications') return method === 'GET';
+  if (url.pathname === '/api/v1/notifications/unread-count' || url.pathname === '/api/v1/notifications/stream') return method === 'GET';
+  if (url.pathname === '/api/v1/notifications/read-all') return method === 'POST';
+  if (/^\/api\/v1\/notifications\/\d+\/read$/.test(url.pathname)) return method === 'POST';
+  if (/^\/api\/v1\/notifications\/\d+$/.test(url.pathname)) return method === 'DELETE';
   if (url.pathname === '/api/v1/visitor/weather') return method === 'GET';
   if (url.pathname === '/api/v1/coding') return method === 'GET';
   if (url.pathname === '/api/v1/media/upload-branding') return method === 'POST';
