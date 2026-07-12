@@ -1998,7 +1998,7 @@ log "升级应用 [Utterlog] 成功 [TASK-END]"
   }
 }
 
-async function versionPayload() {
+export async function versionPayload() {
   const current = appVersion();
   const releases = await fetchReleaseList().catch(() => []);
   const latest = releases.find((r: any) => !r.draft) || null;
@@ -2024,6 +2024,116 @@ async function versionPayload() {
     update_available: latestVersion ? compareSemver(latestVersion, current) > 0 : false,
     checked_at: new Date().toISOString(),
   };
+}
+
+export class SystemServiceError extends Error {
+  constructor(public status: number, public code: string, message: string) {
+    super(message);
+  }
+}
+
+export async function releaseListPayload() {
+  try {
+    return { releases: await fetchReleaseList(), error: '' };
+  } catch (error) {
+    return { releases: [], error: error instanceof Error ? error.message : '更新历史读取失败' };
+  }
+}
+
+export async function requestSystemUpgrade() {
+  const current = await upgradeStatusPayload();
+  if (current.running) throw new SystemServiceError(409, 'UPGRADE_IN_PROGRESS', '升级正在进行，请稍候');
+  const probe = await runtimeUpgradeProbe();
+  if (!probe.supported) {
+    const message = `当前 Bun 容器未启用运行时升级：${probe.reason}。请在部署目录执行 docker compose pull app && docker compose up -d app。`;
+    await markUpgradeStatus({ running: false, finished: true, success: false, message, started_at: new Date().toISOString() });
+    return { started: false, message };
+  }
+  await mkdir(config.uploadDir, { recursive: true }).catch(() => {});
+  await Bun.write(upgradeLogPath, `${logTime()} 升级请求 已收到\n`);
+  await markUpgradeStatus({ running: true, finished: false, success: false, message: '', started_at: new Date().toISOString() });
+  void runSystemUpgrade();
+  return { started: true, log_path: '/uploads/upgrade.log',
+    hint: 'app 容器将在 sidecar 中被重新拉取并重建；期间请勿关闭升级日志窗口' };
+}
+
+export async function systemUpgradeStatusPayload() {
+  return upgradeStatusPayload();
+}
+
+export async function rebuildSystemStats() {
+  return rebuildStats();
+}
+
+export async function clearSystemCache() {
+  return { cleared: await clearEphemeralCache(), note: '已清理 Bun 缓存' };
+}
+
+export async function clearRssCache() {
+  const cleared = await execChanged(`delete from ${table('feed_items')}`);
+  await exec(`update ${table('rss_subscriptions')} set last_fetched_at = 0`).catch(() => {});
+  return { cleared_items: cleared, note: '下次手动刷新订阅时会重新拉取' };
+}
+
+export async function cleanupSystemDatabase() {
+  return cleanupDatabase();
+}
+
+export async function systemUpdateCheckPayload() {
+  const payload = await versionPayload();
+  return { has_update: payload.update_available, latest: payload.latest, current: payload.current };
+}
+
+export async function adminAnalyticsStatsPayload() {
+  const [total, botCount, uniqueVisitors, oldest] = await Promise.all([
+    one<{ count: string }>(`select count(*)::text as count from ${table('access_logs')}`).catch(() => null),
+    one<{ count: string }>(`select count(*)::text as count from ${table('access_logs')} where ${botSqlPattern}`).catch(() => null),
+    one<{ count: string }>(
+      `select count(distinct coalesce(nullif(visitor_id,''), ip))::text as count from ${table('access_logs')}`,
+    ).catch(() => null),
+    one<{ oldest: string }>(`select coalesce(min(created_at), 0)::text as oldest from ${table('access_logs')}`).catch(() => null),
+  ]);
+  const totalRows = Number(total?.count || 0);
+  const botRows = Number(botCount?.count || 0);
+  return { total_rows: totalRows, bot_rows: botRows, real_rows: Math.max(0, totalRows - botRows),
+    unique_visitors: Number(uniqueVisitors?.count || 0), oldest_ts: Number(oldest?.oldest || 0) };
+}
+
+export async function purgeAnalytics(query: URLSearchParams) {
+  const result = { bots_deleted: 0, duplicates_deleted: 0, aged_deleted: 0 };
+  if (query.get('bots') !== '0') {
+    result.bots_deleted = await execChanged(`delete from ${table('access_logs')} where ${botSqlPattern}`);
+  }
+  if (query.get('duplicates') !== '0') {
+    result.duplicates_deleted = await execChanged(
+      `delete from ${table('access_logs')} where id in (
+        select id from (
+          select id, row_number() over (
+            partition by path, coalesce(nullif(visitor_id,''), ip), (created_at / 30)
+            order by created_at asc, id asc
+          ) as rn from ${table('access_logs')}
+        ) ranked where rn > 1
+      )`,
+    );
+    result.duplicates_deleted += await execChanged(
+      `delete from ${table('access_logs')} a
+       where coalesce(a.visitor_id,'') = '' and coalesce(a.fingerprint,'') = ''
+         and a.user_agent is not null and length(a.user_agent) >= 15 and not (${botSqlPattern})
+         and exists (
+           select 1 from ${table('access_logs')} b
+           where b.path = a.path and b.ip = a.ip and b.visitor_id is not null and b.visitor_id != ''
+             and b.created_at between a.created_at - 30 and a.created_at + 30
+         )`,
+    );
+  }
+  const days = Number(query.get('older_than_days') || 0);
+  if (Number.isFinite(days) && days > 0) {
+    result.aged_deleted = await execChanged(
+      `delete from ${table('access_logs')} where created_at < extract(epoch from now() - ($1 * interval '1 day'))::bigint`,
+      [days],
+    );
+  }
+  return result;
 }
 
 export function registerCompatRoutes(app: Hono) {
@@ -2539,121 +2649,22 @@ export function registerCompatRoutes(app: Hono) {
 
 
   app.get('/api/v1/admin/system/version', auth, async (c) => ok(c, await versionPayload()));
-  app.get('/api/v1/admin/system/releases', auth, async (c) => {
-    try {
-      return ok(c, { releases: await fetchReleaseList(), error: '' });
-    } catch (err) {
-      return ok(c, { releases: [], error: err instanceof Error ? err.message : '更新历史读取失败' });
-    }
-  });
+  app.get('/api/v1/admin/system/releases', auth, async (c) => ok(c, await releaseListPayload()));
   app.post('/api/v1/admin/system/upgrade', auth, async (c) => {
-    const current = await upgradeStatusPayload();
-    if (current.running) {
-      return fail(c, 409, 'UPGRADE_IN_PROGRESS', '升级正在进行，请稍候');
+    try { return ok(c, await requestSystemUpgrade()); }
+    catch (error) {
+      if (error instanceof SystemServiceError) return fail(c, error.status, error.code, error.message);
+      throw error;
     }
-    const probe = await runtimeUpgradeProbe();
-    if (!probe.supported) {
-      const message = `当前 Bun 容器未启用运行时升级：${probe.reason}。请在部署目录执行 docker compose pull app && docker compose up -d app。`;
-      await markUpgradeStatus({ running: false, finished: true, success: false, message, started_at: new Date().toISOString() });
-      return ok(c, { started: false, message });
-    }
-    await mkdir(config.uploadDir, { recursive: true }).catch(() => {});
-    await Bun.write(upgradeLogPath, `${logTime()} 升级请求 已收到\n`);
-    await markUpgradeStatus({
-      running: true,
-      finished: false,
-      success: false,
-      message: '',
-      started_at: new Date().toISOString(),
-    });
-    runSystemUpgrade();
-    return ok(c, {
-      started: true,
-      log_path: '/uploads/upgrade.log',
-      hint: 'app 容器将在 sidecar 中被重新拉取并重建；期间请勿关闭升级日志窗口',
-    });
   });
-  app.get('/api/v1/admin/system/upgrade/status', auth, async (c) => ok(c, await upgradeStatusPayload()));
-  app.post('/api/v1/admin/system/rebuild-stats', auth, async (c) => ok(c, await rebuildStats()));
-  app.post('/api/v1/admin/system/clear-cache', auth, async (c) => {
-    const cleared = await clearEphemeralCache();
-    return ok(c, {
-      cleared,
-      note: '已清理 Bun 缓存',
-    });
-  });
-  app.post('/api/v1/admin/system/clear-rss-cache', auth, async (c) => {
-    const cleared = await execChanged(`delete from ${table('feed_items')}`);
-    await exec(`update ${table('rss_subscriptions')} set last_fetched_at = 0`).catch(() => {});
-    return ok(c, { cleared_items: cleared, note: '下次手动刷新订阅时会重新拉取' });
-  });
-  app.post('/api/v1/admin/system/cleanup-database', auth, async (c) => ok(c, await cleanupDatabase()));
-  app.get('/api/v1/system/update-check', auth, async (c) => {
-    const payload = await versionPayload();
-    return ok(c, { has_update: payload.update_available, latest: payload.latest, current: payload.current });
-  });
-  app.get('/api/v1/admin/analytics/stats', auth, async (c) => {
-    const [total, botCount, uniqueVisitors, oldest] = await Promise.all([
-      one<{ count: string }>(`select count(*)::text as count from ${table('access_logs')}`).catch(() => null),
-      one<{ count: string }>(`select count(*)::text as count from ${table('access_logs')} where ${botSqlPattern}`).catch(() => null),
-      one<{ count: string }>(
-        `select count(distinct coalesce(nullif(visitor_id,''), ip))::text as count from ${table('access_logs')}`,
-      ).catch(() => null),
-      one<{ oldest: string }>(`select coalesce(min(created_at), 0)::text as oldest from ${table('access_logs')}`).catch(() => null),
-    ]);
-    const totalRows = Number(total?.count || 0);
-    const botRows = Number(botCount?.count || 0);
-    return ok(c, {
-      total_rows: totalRows,
-      bot_rows: botRows,
-      real_rows: Math.max(0, totalRows - botRows),
-      unique_visitors: Number(uniqueVisitors?.count || 0),
-      oldest_ts: Number(oldest?.oldest || 0),
-    });
-  });
-  app.post('/api/v1/admin/analytics/purge', auth, async (c) => {
-    const sp = new URL(c.req.url).searchParams;
-    const result = { bots_deleted: 0, duplicates_deleted: 0, aged_deleted: 0 };
-    if (sp.get('bots') !== '0') {
-      result.bots_deleted = await execChanged(`delete from ${table('access_logs')} where ${botSqlPattern}`);
-    }
-    if (sp.get('duplicates') !== '0') {
-      result.duplicates_deleted = await execChanged(
-        `delete from ${table('access_logs')} where id in (
-          select id from (
-            select id, row_number() over (
-              partition by path, coalesce(nullif(visitor_id,''), ip), (created_at / 30)
-              order by created_at asc, id asc
-            ) as rn from ${table('access_logs')}
-          ) ranked where rn > 1
-        )`,
-      );
-      result.duplicates_deleted += await execChanged(
-        `delete from ${table('access_logs')} a
-         where coalesce(a.visitor_id,'') = ''
-           and coalesce(a.fingerprint,'') = ''
-           and a.user_agent is not null
-           and length(a.user_agent) >= 15
-           and not (${botSqlPattern})
-           and exists (
-             select 1 from ${table('access_logs')} b
-             where b.path = a.path
-               and b.ip = a.ip
-               and b.visitor_id is not null
-               and b.visitor_id != ''
-               and b.created_at between a.created_at - 30 and a.created_at + 30
-           )`,
-      );
-    }
-    const days = Number(sp.get('older_than_days') || 0);
-    if (Number.isFinite(days) && days > 0) {
-      result.aged_deleted = await execChanged(
-        `delete from ${table('access_logs')} where created_at < extract(epoch from now() - ($1 * interval '1 day'))::bigint`,
-        [days],
-      );
-    }
-    return ok(c, result);
-  });
+  app.get('/api/v1/admin/system/upgrade/status', auth, async (c) => ok(c, await systemUpgradeStatusPayload()));
+  app.post('/api/v1/admin/system/rebuild-stats', auth, async (c) => ok(c, await rebuildSystemStats()));
+  app.post('/api/v1/admin/system/clear-cache', auth, async (c) => ok(c, await clearSystemCache()));
+  app.post('/api/v1/admin/system/clear-rss-cache', auth, async (c) => ok(c, await clearRssCache()));
+  app.post('/api/v1/admin/system/cleanup-database', auth, async (c) => ok(c, await cleanupSystemDatabase()));
+  app.get('/api/v1/system/update-check', auth, async (c) => ok(c, await systemUpdateCheckPayload()));
+  app.get('/api/v1/admin/analytics/stats', auth, async (c) => ok(c, await adminAnalyticsStatsPayload()));
+  app.post('/api/v1/admin/analytics/purge', auth, async (c) => ok(c, await purgeAnalytics(new URL(c.req.url).searchParams)));
 
   app.post('/api/v1/media/parse', auth, async (c) => {
     const body = await c.req.json().catch(() => ({}));

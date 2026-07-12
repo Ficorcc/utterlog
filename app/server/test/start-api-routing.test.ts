@@ -99,6 +99,19 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/admin/stats', 'GET'))).toBe(true);
   });
 
+  test('routes system maintenance and analytics cleanup to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/admin/system/version', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/admin/system/releases', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/admin/system/upgrade', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/admin/system/upgrade/status', 'GET'))).toBe(true);
+    for (const action of ['rebuild-stats', 'clear-cache', 'clear-rss-cache', 'cleanup-database']) {
+      expect(isStartNativeApiRequest(request(`/api/v1/admin/system/${action}`, 'POST'))).toBe(true);
+    }
+    expect(isStartNativeApiRequest(request('/api/v1/system/update-check', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/admin/analytics/stats', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/admin/analytics/purge', 'POST'))).toBe(true);
+  });
+
   test('routes analytics reads to Start', () => {
     expect(isStartNativeApiRequest(request('/api/v1/analytics?period=7d', 'GET'))).toBe(true);
     for (const action of ['online', 'visitors', 'logs', 'geoip', 'map', 'breakdown']) {

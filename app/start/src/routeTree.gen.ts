@@ -39,6 +39,7 @@ import { Route as ApiV1VisitorGeoRouteImport } from './routes/api/v1/visitor/geo
 import { Route as ApiV1ThemesUploadRouteImport } from './routes/api/v1/themes/upload'
 import { Route as ApiV1ThemesIdRouteImport } from './routes/api/v1/themes/$id'
 import { Route as ApiV1TagsIdRouteImport } from './routes/api/v1/tags/$id'
+import { Route as ApiV1SystemUpdateCheckRouteImport } from './routes/api/v1/system/update-check'
 import { Route as ApiV1SystemStatusRouteImport } from './routes/api/v1/system/status'
 import { Route as ApiV1SetupTestDbRouteImport } from './routes/api/v1/setup/test-db'
 import { Route as ApiV1SetupStatusRouteImport } from './routes/api/v1/setup/status'
@@ -109,11 +110,15 @@ import { Route as ApiV1BackupDownloadFilenameRouteImport } from './routes/api/v1
 import { Route as ApiV1AuthTotpActionRouteImport } from './routes/api/v1/auth/totp/$action'
 import { Route as ApiV1AuthPasskeyAvailableRouteImport } from './routes/api/v1/auth/passkey/available'
 import { Route as ApiV1AlbumsIdPhotosRouteImport } from './routes/api/v1/albums/$id/photos'
+import { Route as ApiV1AdminSystemActionRouteImport } from './routes/api/v1/admin/system/$action'
 import { Route as ApiV1AdminFootprintsPlacesRouteImport } from './routes/api/v1/admin/footprints/places'
 import { Route as ApiV1AdminFootprintsGeocodeRouteImport } from './routes/api/v1/admin/footprints/geocode'
 import { Route as ApiV1AdminFootprintsIdRouteImport } from './routes/api/v1/admin/footprints/$id'
+import { Route as ApiV1AdminAnalyticsStatsRouteImport } from './routes/api/v1/admin/analytics/stats'
+import { Route as ApiV1AdminAnalyticsPurgeRouteImport } from './routes/api/v1/admin/analytics/purge'
 import { Route as ApiV1AuthPasskeyFlowActionRouteImport } from './routes/api/v1/auth/passkey/$flow/$action'
 import { Route as ApiV1AlbumsIdPhotosMediaIdRouteImport } from './routes/api/v1/albums/$id/photos/$mediaId'
+import { Route as ApiV1AdminSystemUpgradeStatusRouteImport } from './routes/api/v1/admin/system/upgrade/status'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -264,6 +269,11 @@ const ApiV1TagsIdRoute = ApiV1TagsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => ApiV1TagsRoute,
+} as any)
+const ApiV1SystemUpdateCheckRoute = ApiV1SystemUpdateCheckRouteImport.update({
+  id: '/api/v1/system/update-check',
+  path: '/api/v1/system/update-check',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1SystemStatusRoute = ApiV1SystemStatusRouteImport.update({
   id: '/api/v1/system/status',
@@ -626,6 +636,11 @@ const ApiV1AlbumsIdPhotosRoute = ApiV1AlbumsIdPhotosRouteImport.update({
   path: '/api/v1/albums/$id/photos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1AdminSystemActionRoute = ApiV1AdminSystemActionRouteImport.update({
+  id: '/api/v1/admin/system/$action',
+  path: '/api/v1/admin/system/$action',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1AdminFootprintsPlacesRoute =
   ApiV1AdminFootprintsPlacesRouteImport.update({
     id: '/api/v1/admin/footprints/places',
@@ -643,6 +658,18 @@ const ApiV1AdminFootprintsIdRoute = ApiV1AdminFootprintsIdRouteImport.update({
   path: '/api/v1/admin/footprints/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1AdminAnalyticsStatsRoute =
+  ApiV1AdminAnalyticsStatsRouteImport.update({
+    id: '/api/v1/admin/analytics/stats',
+    path: '/api/v1/admin/analytics/stats',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1AdminAnalyticsPurgeRoute =
+  ApiV1AdminAnalyticsPurgeRouteImport.update({
+    id: '/api/v1/admin/analytics/purge',
+    path: '/api/v1/admin/analytics/purge',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiV1AuthPasskeyFlowActionRoute =
   ApiV1AuthPasskeyFlowActionRouteImport.update({
     id: '/api/v1/auth/passkey/$flow/$action',
@@ -654,6 +681,12 @@ const ApiV1AlbumsIdPhotosMediaIdRoute =
     id: '/$mediaId',
     path: '/$mediaId',
     getParentRoute: () => ApiV1AlbumsIdPhotosRoute,
+  } as any)
+const ApiV1AdminSystemUpgradeStatusRoute =
+  ApiV1AdminSystemUpgradeStatusRouteImport.update({
+    id: '/api/v1/admin/system/upgrade/status',
+    path: '/api/v1/admin/system/upgrade/status',
+    getParentRoute: () => rootRouteImport,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -724,6 +757,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/setup/status': typeof ApiV1SetupStatusRoute
   '/api/v1/setup/test-db': typeof ApiV1SetupTestDbRoute
   '/api/v1/system/status': typeof ApiV1SystemStatusRoute
+  '/api/v1/system/update-check': typeof ApiV1SystemUpdateCheckRoute
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
   '/api/v1/themes/$id': typeof ApiV1ThemesIdRouteWithChildren
   '/api/v1/themes/upload': typeof ApiV1ThemesUploadRoute
@@ -738,9 +772,12 @@ export interface FileRoutesByFullPath {
   '/api/v1/plugins/': typeof ApiV1PluginsIndexRoute
   '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
   '/api/v1/themes/': typeof ApiV1ThemesIndexRoute
+  '/api/v1/admin/analytics/purge': typeof ApiV1AdminAnalyticsPurgeRoute
+  '/api/v1/admin/analytics/stats': typeof ApiV1AdminAnalyticsStatsRoute
   '/api/v1/admin/footprints/$id': typeof ApiV1AdminFootprintsIdRoute
   '/api/v1/admin/footprints/geocode': typeof ApiV1AdminFootprintsGeocodeRoute
   '/api/v1/admin/footprints/places': typeof ApiV1AdminFootprintsPlacesRoute
+  '/api/v1/admin/system/$action': typeof ApiV1AdminSystemActionRoute
   '/api/v1/albums/$id/photos': typeof ApiV1AlbumsIdPhotosRouteWithChildren
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
   '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
@@ -760,6 +797,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/themes/$id/activate': typeof ApiV1ThemesIdActivateRoute
   '/api/v1/admin/footprints/': typeof ApiV1AdminFootprintsIndexRoute
   '/api/v1/public/albums/': typeof ApiV1PublicAlbumsIndexRoute
+  '/api/v1/admin/system/upgrade/status': typeof ApiV1AdminSystemUpgradeStatusRoute
   '/api/v1/albums/$id/photos/$mediaId': typeof ApiV1AlbumsIdPhotosMediaIdRoute
   '/api/v1/auth/passkey/$flow/$action': typeof ApiV1AuthPasskeyFlowActionRoute
 }
@@ -831,6 +869,7 @@ export interface FileRoutesByTo {
   '/api/v1/setup/status': typeof ApiV1SetupStatusRoute
   '/api/v1/setup/test-db': typeof ApiV1SetupTestDbRoute
   '/api/v1/system/status': typeof ApiV1SystemStatusRoute
+  '/api/v1/system/update-check': typeof ApiV1SystemUpdateCheckRoute
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
   '/api/v1/themes/$id': typeof ApiV1ThemesIdRouteWithChildren
   '/api/v1/themes/upload': typeof ApiV1ThemesUploadRoute
@@ -845,9 +884,12 @@ export interface FileRoutesByTo {
   '/api/v1/plugins': typeof ApiV1PluginsIndexRoute
   '/api/v1/profile': typeof ApiV1ProfileIndexRoute
   '/api/v1/themes': typeof ApiV1ThemesIndexRoute
+  '/api/v1/admin/analytics/purge': typeof ApiV1AdminAnalyticsPurgeRoute
+  '/api/v1/admin/analytics/stats': typeof ApiV1AdminAnalyticsStatsRoute
   '/api/v1/admin/footprints/$id': typeof ApiV1AdminFootprintsIdRoute
   '/api/v1/admin/footprints/geocode': typeof ApiV1AdminFootprintsGeocodeRoute
   '/api/v1/admin/footprints/places': typeof ApiV1AdminFootprintsPlacesRoute
+  '/api/v1/admin/system/$action': typeof ApiV1AdminSystemActionRoute
   '/api/v1/albums/$id/photos': typeof ApiV1AlbumsIdPhotosRouteWithChildren
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
   '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
@@ -867,6 +909,7 @@ export interface FileRoutesByTo {
   '/api/v1/themes/$id/activate': typeof ApiV1ThemesIdActivateRoute
   '/api/v1/admin/footprints': typeof ApiV1AdminFootprintsIndexRoute
   '/api/v1/public/albums': typeof ApiV1PublicAlbumsIndexRoute
+  '/api/v1/admin/system/upgrade/status': typeof ApiV1AdminSystemUpgradeStatusRoute
   '/api/v1/albums/$id/photos/$mediaId': typeof ApiV1AlbumsIdPhotosMediaIdRoute
   '/api/v1/auth/passkey/$flow/$action': typeof ApiV1AuthPasskeyFlowActionRoute
 }
@@ -939,6 +982,7 @@ export interface FileRoutesById {
   '/api/v1/setup/status': typeof ApiV1SetupStatusRoute
   '/api/v1/setup/test-db': typeof ApiV1SetupTestDbRoute
   '/api/v1/system/status': typeof ApiV1SystemStatusRoute
+  '/api/v1/system/update-check': typeof ApiV1SystemUpdateCheckRoute
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
   '/api/v1/themes/$id': typeof ApiV1ThemesIdRouteWithChildren
   '/api/v1/themes/upload': typeof ApiV1ThemesUploadRoute
@@ -953,9 +997,12 @@ export interface FileRoutesById {
   '/api/v1/plugins/': typeof ApiV1PluginsIndexRoute
   '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
   '/api/v1/themes/': typeof ApiV1ThemesIndexRoute
+  '/api/v1/admin/analytics/purge': typeof ApiV1AdminAnalyticsPurgeRoute
+  '/api/v1/admin/analytics/stats': typeof ApiV1AdminAnalyticsStatsRoute
   '/api/v1/admin/footprints/$id': typeof ApiV1AdminFootprintsIdRoute
   '/api/v1/admin/footprints/geocode': typeof ApiV1AdminFootprintsGeocodeRoute
   '/api/v1/admin/footprints/places': typeof ApiV1AdminFootprintsPlacesRoute
+  '/api/v1/admin/system/$action': typeof ApiV1AdminSystemActionRoute
   '/api/v1/albums/$id/photos': typeof ApiV1AlbumsIdPhotosRouteWithChildren
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
   '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
@@ -975,6 +1022,7 @@ export interface FileRoutesById {
   '/api/v1/themes/$id/activate': typeof ApiV1ThemesIdActivateRoute
   '/api/v1/admin/footprints/': typeof ApiV1AdminFootprintsIndexRoute
   '/api/v1/public/albums/': typeof ApiV1PublicAlbumsIndexRoute
+  '/api/v1/admin/system/upgrade/status': typeof ApiV1AdminSystemUpgradeStatusRoute
   '/api/v1/albums/$id/photos/$mediaId': typeof ApiV1AlbumsIdPhotosMediaIdRoute
   '/api/v1/auth/passkey/$flow/$action': typeof ApiV1AuthPasskeyFlowActionRoute
 }
@@ -1048,6 +1096,7 @@ export interface FileRouteTypes {
     | '/api/v1/setup/status'
     | '/api/v1/setup/test-db'
     | '/api/v1/system/status'
+    | '/api/v1/system/update-check'
     | '/api/v1/tags/$id'
     | '/api/v1/themes/$id'
     | '/api/v1/themes/upload'
@@ -1062,9 +1111,12 @@ export interface FileRouteTypes {
     | '/api/v1/plugins/'
     | '/api/v1/profile/'
     | '/api/v1/themes/'
+    | '/api/v1/admin/analytics/purge'
+    | '/api/v1/admin/analytics/stats'
     | '/api/v1/admin/footprints/$id'
     | '/api/v1/admin/footprints/geocode'
     | '/api/v1/admin/footprints/places'
+    | '/api/v1/admin/system/$action'
     | '/api/v1/albums/$id/photos'
     | '/api/v1/auth/passkey/available'
     | '/api/v1/auth/totp/$action'
@@ -1084,6 +1136,7 @@ export interface FileRouteTypes {
     | '/api/v1/themes/$id/activate'
     | '/api/v1/admin/footprints/'
     | '/api/v1/public/albums/'
+    | '/api/v1/admin/system/upgrade/status'
     | '/api/v1/albums/$id/photos/$mediaId'
     | '/api/v1/auth/passkey/$flow/$action'
   fileRoutesByTo: FileRoutesByTo
@@ -1155,6 +1208,7 @@ export interface FileRouteTypes {
     | '/api/v1/setup/status'
     | '/api/v1/setup/test-db'
     | '/api/v1/system/status'
+    | '/api/v1/system/update-check'
     | '/api/v1/tags/$id'
     | '/api/v1/themes/$id'
     | '/api/v1/themes/upload'
@@ -1169,9 +1223,12 @@ export interface FileRouteTypes {
     | '/api/v1/plugins'
     | '/api/v1/profile'
     | '/api/v1/themes'
+    | '/api/v1/admin/analytics/purge'
+    | '/api/v1/admin/analytics/stats'
     | '/api/v1/admin/footprints/$id'
     | '/api/v1/admin/footprints/geocode'
     | '/api/v1/admin/footprints/places'
+    | '/api/v1/admin/system/$action'
     | '/api/v1/albums/$id/photos'
     | '/api/v1/auth/passkey/available'
     | '/api/v1/auth/totp/$action'
@@ -1191,6 +1248,7 @@ export interface FileRouteTypes {
     | '/api/v1/themes/$id/activate'
     | '/api/v1/admin/footprints'
     | '/api/v1/public/albums'
+    | '/api/v1/admin/system/upgrade/status'
     | '/api/v1/albums/$id/photos/$mediaId'
     | '/api/v1/auth/passkey/$flow/$action'
   id:
@@ -1262,6 +1320,7 @@ export interface FileRouteTypes {
     | '/api/v1/setup/status'
     | '/api/v1/setup/test-db'
     | '/api/v1/system/status'
+    | '/api/v1/system/update-check'
     | '/api/v1/tags/$id'
     | '/api/v1/themes/$id'
     | '/api/v1/themes/upload'
@@ -1276,9 +1335,12 @@ export interface FileRouteTypes {
     | '/api/v1/plugins/'
     | '/api/v1/profile/'
     | '/api/v1/themes/'
+    | '/api/v1/admin/analytics/purge'
+    | '/api/v1/admin/analytics/stats'
     | '/api/v1/admin/footprints/$id'
     | '/api/v1/admin/footprints/geocode'
     | '/api/v1/admin/footprints/places'
+    | '/api/v1/admin/system/$action'
     | '/api/v1/albums/$id/photos'
     | '/api/v1/auth/passkey/available'
     | '/api/v1/auth/totp/$action'
@@ -1298,6 +1360,7 @@ export interface FileRouteTypes {
     | '/api/v1/themes/$id/activate'
     | '/api/v1/admin/footprints/'
     | '/api/v1/public/albums/'
+    | '/api/v1/admin/system/upgrade/status'
     | '/api/v1/albums/$id/photos/$mediaId'
     | '/api/v1/auth/passkey/$flow/$action'
   fileRoutesById: FileRoutesById
@@ -1366,6 +1429,7 @@ export interface RootRouteChildren {
   ApiV1SetupStatusRoute: typeof ApiV1SetupStatusRoute
   ApiV1SetupTestDbRoute: typeof ApiV1SetupTestDbRoute
   ApiV1SystemStatusRoute: typeof ApiV1SystemStatusRoute
+  ApiV1SystemUpdateCheckRoute: typeof ApiV1SystemUpdateCheckRoute
   ApiV1ThemesIdRoute: typeof ApiV1ThemesIdRouteWithChildren
   ApiV1ThemesUploadRoute: typeof ApiV1ThemesUploadRoute
   ApiV1VisitorGeoRoute: typeof ApiV1VisitorGeoRoute
@@ -1379,9 +1443,12 @@ export interface RootRouteChildren {
   ApiV1PluginsIndexRoute: typeof ApiV1PluginsIndexRoute
   ApiV1ProfileIndexRoute: typeof ApiV1ProfileIndexRoute
   ApiV1ThemesIndexRoute: typeof ApiV1ThemesIndexRoute
+  ApiV1AdminAnalyticsPurgeRoute: typeof ApiV1AdminAnalyticsPurgeRoute
+  ApiV1AdminAnalyticsStatsRoute: typeof ApiV1AdminAnalyticsStatsRoute
   ApiV1AdminFootprintsIdRoute: typeof ApiV1AdminFootprintsIdRoute
   ApiV1AdminFootprintsGeocodeRoute: typeof ApiV1AdminFootprintsGeocodeRoute
   ApiV1AdminFootprintsPlacesRoute: typeof ApiV1AdminFootprintsPlacesRoute
+  ApiV1AdminSystemActionRoute: typeof ApiV1AdminSystemActionRoute
   ApiV1AlbumsIdPhotosRoute: typeof ApiV1AlbumsIdPhotosRouteWithChildren
   ApiV1AuthPasskeyAvailableRoute: typeof ApiV1AuthPasskeyAvailableRoute
   ApiV1AuthTotpActionRoute: typeof ApiV1AuthTotpActionRoute
@@ -1390,6 +1457,7 @@ export interface RootRouteChildren {
   ApiV1PublicAlbumsIdRoute: typeof ApiV1PublicAlbumsIdRoute
   ApiV1AdminFootprintsIndexRoute: typeof ApiV1AdminFootprintsIndexRoute
   ApiV1PublicAlbumsIndexRoute: typeof ApiV1PublicAlbumsIndexRoute
+  ApiV1AdminSystemUpgradeStatusRoute: typeof ApiV1AdminSystemUpgradeStatusRoute
   ApiV1AuthPasskeyFlowActionRoute: typeof ApiV1AuthPasskeyFlowActionRoute
 }
 
@@ -1604,6 +1672,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/v1/tags/$id'
       preLoaderRoute: typeof ApiV1TagsIdRouteImport
       parentRoute: typeof ApiV1TagsRoute
+    }
+    '/api/v1/system/update-check': {
+      id: '/api/v1/system/update-check'
+      path: '/api/v1/system/update-check'
+      fullPath: '/api/v1/system/update-check'
+      preLoaderRoute: typeof ApiV1SystemUpdateCheckRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/v1/system/status': {
       id: '/api/v1/system/status'
@@ -2095,6 +2170,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1AlbumsIdPhotosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/admin/system/$action': {
+      id: '/api/v1/admin/system/$action'
+      path: '/api/v1/admin/system/$action'
+      fullPath: '/api/v1/admin/system/$action'
+      preLoaderRoute: typeof ApiV1AdminSystemActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/admin/footprints/places': {
       id: '/api/v1/admin/footprints/places'
       path: '/api/v1/admin/footprints/places'
@@ -2116,6 +2198,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1AdminFootprintsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/admin/analytics/stats': {
+      id: '/api/v1/admin/analytics/stats'
+      path: '/api/v1/admin/analytics/stats'
+      fullPath: '/api/v1/admin/analytics/stats'
+      preLoaderRoute: typeof ApiV1AdminAnalyticsStatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/admin/analytics/purge': {
+      id: '/api/v1/admin/analytics/purge'
+      path: '/api/v1/admin/analytics/purge'
+      fullPath: '/api/v1/admin/analytics/purge'
+      preLoaderRoute: typeof ApiV1AdminAnalyticsPurgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/auth/passkey/$flow/$action': {
       id: '/api/v1/auth/passkey/$flow/$action'
       path: '/api/v1/auth/passkey/$flow/$action'
@@ -2129,6 +2225,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/v1/albums/$id/photos/$mediaId'
       preLoaderRoute: typeof ApiV1AlbumsIdPhotosMediaIdRouteImport
       parentRoute: typeof ApiV1AlbumsIdPhotosRoute
+    }
+    '/api/v1/admin/system/upgrade/status': {
+      id: '/api/v1/admin/system/upgrade/status'
+      path: '/api/v1/admin/system/upgrade/status'
+      fullPath: '/api/v1/admin/system/upgrade/status'
+      preLoaderRoute: typeof ApiV1AdminSystemUpgradeStatusRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -2339,6 +2442,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1SetupStatusRoute: ApiV1SetupStatusRoute,
   ApiV1SetupTestDbRoute: ApiV1SetupTestDbRoute,
   ApiV1SystemStatusRoute: ApiV1SystemStatusRoute,
+  ApiV1SystemUpdateCheckRoute: ApiV1SystemUpdateCheckRoute,
   ApiV1ThemesIdRoute: ApiV1ThemesIdRouteWithChildren,
   ApiV1ThemesUploadRoute: ApiV1ThemesUploadRoute,
   ApiV1VisitorGeoRoute: ApiV1VisitorGeoRoute,
@@ -2352,9 +2456,12 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1PluginsIndexRoute: ApiV1PluginsIndexRoute,
   ApiV1ProfileIndexRoute: ApiV1ProfileIndexRoute,
   ApiV1ThemesIndexRoute: ApiV1ThemesIndexRoute,
+  ApiV1AdminAnalyticsPurgeRoute: ApiV1AdminAnalyticsPurgeRoute,
+  ApiV1AdminAnalyticsStatsRoute: ApiV1AdminAnalyticsStatsRoute,
   ApiV1AdminFootprintsIdRoute: ApiV1AdminFootprintsIdRoute,
   ApiV1AdminFootprintsGeocodeRoute: ApiV1AdminFootprintsGeocodeRoute,
   ApiV1AdminFootprintsPlacesRoute: ApiV1AdminFootprintsPlacesRoute,
+  ApiV1AdminSystemActionRoute: ApiV1AdminSystemActionRoute,
   ApiV1AlbumsIdPhotosRoute: ApiV1AlbumsIdPhotosRouteWithChildren,
   ApiV1AuthPasskeyAvailableRoute: ApiV1AuthPasskeyAvailableRoute,
   ApiV1AuthTotpActionRoute: ApiV1AuthTotpActionRoute,
@@ -2363,6 +2470,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1PublicAlbumsIdRoute: ApiV1PublicAlbumsIdRoute,
   ApiV1AdminFootprintsIndexRoute: ApiV1AdminFootprintsIndexRoute,
   ApiV1PublicAlbumsIndexRoute: ApiV1PublicAlbumsIndexRoute,
+  ApiV1AdminSystemUpgradeStatusRoute: ApiV1AdminSystemUpgradeStatusRoute,
   ApiV1AuthPasskeyFlowActionRoute: ApiV1AuthPasskeyFlowActionRoute,
 }
 export const routeTree = rootRouteImport

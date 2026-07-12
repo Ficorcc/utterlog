@@ -91,6 +91,11 @@ export function isStartNativeApiRequest(request: Request) {
   if (/^\/api\/v1\/security\/(overview|settings|bans|timeline)$/.test(url.pathname)) return method === 'GET' || (url.pathname.endsWith('/settings') && method === 'POST');
   if (/^\/api\/v1\/security\/(ban|unban)$/.test(url.pathname)) return method === 'POST';
   if (url.pathname === '/api/v1/system/status' || url.pathname === '/api/v1/admin/stats') return method === 'GET';
+  if (/^\/api\/v1\/admin\/system\/(version|releases)$/.test(url.pathname)) return method === 'GET';
+  if (/^\/api\/v1\/admin\/system\/(upgrade|rebuild-stats|clear-cache|clear-rss-cache|cleanup-database)$/.test(url.pathname)) return method === 'POST';
+  if (url.pathname === '/api/v1/admin/system/upgrade/status' || url.pathname === '/api/v1/system/update-check') return method === 'GET';
+  if (url.pathname === '/api/v1/admin/analytics/stats') return method === 'GET';
+  if (url.pathname === '/api/v1/admin/analytics/purge') return method === 'POST';
   if (url.pathname === '/api/v1/analytics' || /^\/api\/v1\/analytics\/(online|visitors|logs|geoip|map|breakdown)$/.test(url.pathname)) return method === 'GET';
   if (/^\/api\/v1\/backup\/(stats|list)$/.test(url.pathname)) return method === 'GET';
   if (/^\/api\/v1\/backup\/(create|import)$/.test(url.pathname)) return method === 'POST';
