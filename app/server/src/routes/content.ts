@@ -355,6 +355,18 @@ ${items}
 </rss>`;
 }
 
+export async function publicFeedResponse(request: Request) {
+  const opts: Record<string, string> = await optionMap(false).catch(() => ({}));
+  const posts = await loadPublishedPostsForFeed(rssItemLimit(opts));
+  const xml = buildRssFeedXml(opts, posts);
+  const etag = `"${createHash('sha1').update(xml).digest('hex')}"`;
+  if (request.headers.get('if-none-match') === etag) {
+    return new Response(null, { status: 304, headers: { etag, 'cache-control': 'public, max-age=300, must-revalidate' } });
+  }
+  return new Response(xml, { headers: { 'content-type': 'application/rss+xml; charset=utf-8',
+    'cache-control': 'public, max-age=300, must-revalidate', etag } });
+}
+
 function buildPostPath(
   post: { id?: unknown; display_id?: unknown; slug?: unknown; category_slug?: unknown; published_at?: unknown; created_at?: unknown },
   template = '',
@@ -2851,28 +2863,7 @@ export function registerContentRoutes(app: Hono) {
     return ok(c, await searchPosts(q, limit));
   });
   app.get('/api/v1/feed', async (c) => {
-    const opts: Record<string, string> = await optionMap(false).catch(() => ({}));
-    const limit = rssItemLimit(opts);
-    const posts = await loadPublishedPostsForFeed(limit);
-    const xml = buildRssFeedXml(opts, posts);
-    const etag = `"${createHash('sha1').update(xml).digest('hex')}"`;
-    const ifNoneMatch = c.req.header('if-none-match');
-    if (ifNoneMatch && ifNoneMatch === etag) {
-      return new Response(null, {
-        status: 304,
-        headers: {
-          etag,
-          'cache-control': 'public, max-age=300, must-revalidate',
-        },
-      });
-    }
-    return new Response(xml, {
-      headers: {
-        'content-type': 'application/rss+xml; charset=utf-8',
-        'cache-control': 'public, max-age=300, must-revalidate',
-        etag,
-      },
-    });
+    return publicFeedResponse(c.req.raw);
   });
 	  app.get('/api/v1/system/status', async (c) => {
 	    const geoProvider = await optionValue('ip_geo_provider', 'ipx');

@@ -28,6 +28,14 @@ describe('TanStack Start native API routing', () => {
     }
   });
 
+  test('routes RSS feed and social feed aggregation to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/feed', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/social/feed-timeline', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/social/feed-stats', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/social/fetch-feeds', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/social/fetch-feeds/status', 'GET'))).toBe(true);
+  });
+
   test('routes setup and installation APIs to Start', () => {
     expect(isStartNativeApiRequest(request('/api/v1/setup/status', 'GET'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/setup/test-db', 'POST'))).toBe(true);

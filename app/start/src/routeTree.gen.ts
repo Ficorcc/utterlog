@@ -24,6 +24,7 @@ import { Route as ApiV1OptionsRouteImport } from './routes/api/v1/options'
 import { Route as ApiV1OnlineRouteImport } from './routes/api/v1/online'
 import { Route as ApiV1HealthRouteImport } from './routes/api/v1/health'
 import { Route as ApiV1FootprintsRouteImport } from './routes/api/v1/footprints'
+import { Route as ApiV1FeedRouteImport } from './routes/api/v1/feed'
 import { Route as ApiV1CodingRouteImport } from './routes/api/v1/coding'
 import { Route as ApiV1CategoriesRouteImport } from './routes/api/v1/categories'
 import { Route as ApiV1ResourceRouteImport } from './routes/api/v1/$resource'
@@ -49,6 +50,9 @@ import { Route as ApiV1TelegramGetChatIdRouteImport } from './routes/api/v1/tele
 import { Route as ApiV1TagsIdRouteImport } from './routes/api/v1/tags/$id'
 import { Route as ApiV1SystemUpdateCheckRouteImport } from './routes/api/v1/system/update-check'
 import { Route as ApiV1SystemStatusRouteImport } from './routes/api/v1/system/status'
+import { Route as ApiV1SocialFetchFeedsRouteImport } from './routes/api/v1/social/fetch-feeds'
+import { Route as ApiV1SocialFeedTimelineRouteImport } from './routes/api/v1/social/feed-timeline'
+import { Route as ApiV1SocialFeedStatsRouteImport } from './routes/api/v1/social/feed-stats'
 import { Route as ApiV1SetupTestDbRouteImport } from './routes/api/v1/setup/test-db'
 import { Route as ApiV1SetupStatusRouteImport } from './routes/api/v1/setup/status'
 import { Route as ApiV1SetupSaveRouteImport } from './routes/api/v1/setup/save'
@@ -107,6 +111,7 @@ import { Route as ApiV1PublicAlbumsIndexRouteImport } from './routes/api/v1/publ
 import { Route as ApiV1AdminFootprintsIndexRouteImport } from './routes/api/v1/admin/footprints/index'
 import { Route as ApiV1AdminAnnotationsIndexRouteImport } from './routes/api/v1/admin/annotations/index'
 import { Route as ApiV1ThemesIdActivateRouteImport } from './routes/api/v1/themes/$id/activate'
+import { Route as ApiV1SocialFetchFeedsStatusRouteImport } from './routes/api/v1/social/fetch-feeds/status'
 import { Route as ApiV1PublicAlbumsIdRouteImport } from './routes/api/v1/public/albums/$id'
 import { Route as ApiV1PostsSlugSlugRouteImport } from './routes/api/v1/posts/slug/$slug'
 import { Route as ApiV1PostsByDisplayIdDisplayIdRouteImport } from './routes/api/v1/posts/by-display-id/$displayId'
@@ -209,6 +214,11 @@ const ApiV1HealthRoute = ApiV1HealthRouteImport.update({
 const ApiV1FootprintsRoute = ApiV1FootprintsRouteImport.update({
   id: '/api/v1/footprints',
   path: '/api/v1/footprints',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1FeedRoute = ApiV1FeedRouteImport.update({
+  id: '/api/v1/feed',
+  path: '/api/v1/feed',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1CodingRoute = ApiV1CodingRouteImport.update({
@@ -335,6 +345,21 @@ const ApiV1SystemUpdateCheckRoute = ApiV1SystemUpdateCheckRouteImport.update({
 const ApiV1SystemStatusRoute = ApiV1SystemStatusRouteImport.update({
   id: '/api/v1/system/status',
   path: '/api/v1/system/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1SocialFetchFeedsRoute = ApiV1SocialFetchFeedsRouteImport.update({
+  id: '/api/v1/social/fetch-feeds',
+  path: '/api/v1/social/fetch-feeds',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1SocialFeedTimelineRoute = ApiV1SocialFeedTimelineRouteImport.update({
+  id: '/api/v1/social/feed-timeline',
+  path: '/api/v1/social/feed-timeline',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1SocialFeedStatsRoute = ApiV1SocialFeedStatsRouteImport.update({
+  id: '/api/v1/social/feed-stats',
+  path: '/api/v1/social/feed-stats',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1SetupTestDbRoute = ApiV1SetupTestDbRouteImport.update({
@@ -635,6 +660,12 @@ const ApiV1ThemesIdActivateRoute = ApiV1ThemesIdActivateRouteImport.update({
   path: '/activate',
   getParentRoute: () => ApiV1ThemesIdRoute,
 } as any)
+const ApiV1SocialFetchFeedsStatusRoute =
+  ApiV1SocialFetchFeedsStatusRouteImport.update({
+    id: '/status',
+    path: '/status',
+    getParentRoute: () => ApiV1SocialFetchFeedsRoute,
+  } as any)
 const ApiV1PublicAlbumsIdRoute = ApiV1PublicAlbumsIdRouteImport.update({
   id: '/api/v1/public/albums/$id',
   path: '/api/v1/public/albums/$id',
@@ -799,6 +830,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
   '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
   '/api/v1/coding': typeof ApiV1CodingRoute
+  '/api/v1/feed': typeof ApiV1FeedRoute
   '/api/v1/footprints': typeof ApiV1FootprintsRoute
   '/api/v1/health': typeof ApiV1HealthRoute
   '/api/v1/online': typeof ApiV1OnlineRoute
@@ -862,6 +894,9 @@ export interface FileRoutesByFullPath {
   '/api/v1/setup/save': typeof ApiV1SetupSaveRoute
   '/api/v1/setup/status': typeof ApiV1SetupStatusRoute
   '/api/v1/setup/test-db': typeof ApiV1SetupTestDbRoute
+  '/api/v1/social/feed-stats': typeof ApiV1SocialFeedStatsRoute
+  '/api/v1/social/feed-timeline': typeof ApiV1SocialFeedTimelineRoute
+  '/api/v1/social/fetch-feeds': typeof ApiV1SocialFetchFeedsRouteWithChildren
   '/api/v1/system/status': typeof ApiV1SystemStatusRoute
   '/api/v1/system/update-check': typeof ApiV1SystemUpdateCheckRoute
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
@@ -908,6 +943,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/posts/by-display-id/$displayId': typeof ApiV1PostsByDisplayIdDisplayIdRoute
   '/api/v1/posts/slug/$slug': typeof ApiV1PostsSlugSlugRoute
   '/api/v1/public/albums/$id': typeof ApiV1PublicAlbumsIdRoute
+  '/api/v1/social/fetch-feeds/status': typeof ApiV1SocialFetchFeedsStatusRoute
   '/api/v1/themes/$id/activate': typeof ApiV1ThemesIdActivateRoute
   '/api/v1/admin/annotations/': typeof ApiV1AdminAnnotationsIndexRoute
   '/api/v1/admin/footprints/': typeof ApiV1AdminFootprintsIndexRoute
@@ -927,6 +963,7 @@ export interface FileRoutesByTo {
   '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
   '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
   '/api/v1/coding': typeof ApiV1CodingRoute
+  '/api/v1/feed': typeof ApiV1FeedRoute
   '/api/v1/footprints': typeof ApiV1FootprintsRoute
   '/api/v1/health': typeof ApiV1HealthRoute
   '/api/v1/online': typeof ApiV1OnlineRoute
@@ -990,6 +1027,9 @@ export interface FileRoutesByTo {
   '/api/v1/setup/save': typeof ApiV1SetupSaveRoute
   '/api/v1/setup/status': typeof ApiV1SetupStatusRoute
   '/api/v1/setup/test-db': typeof ApiV1SetupTestDbRoute
+  '/api/v1/social/feed-stats': typeof ApiV1SocialFeedStatsRoute
+  '/api/v1/social/feed-timeline': typeof ApiV1SocialFeedTimelineRoute
+  '/api/v1/social/fetch-feeds': typeof ApiV1SocialFetchFeedsRouteWithChildren
   '/api/v1/system/status': typeof ApiV1SystemStatusRoute
   '/api/v1/system/update-check': typeof ApiV1SystemUpdateCheckRoute
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
@@ -1036,6 +1076,7 @@ export interface FileRoutesByTo {
   '/api/v1/posts/by-display-id/$displayId': typeof ApiV1PostsByDisplayIdDisplayIdRoute
   '/api/v1/posts/slug/$slug': typeof ApiV1PostsSlugSlugRoute
   '/api/v1/public/albums/$id': typeof ApiV1PublicAlbumsIdRoute
+  '/api/v1/social/fetch-feeds/status': typeof ApiV1SocialFetchFeedsStatusRoute
   '/api/v1/themes/$id/activate': typeof ApiV1ThemesIdActivateRoute
   '/api/v1/admin/annotations': typeof ApiV1AdminAnnotationsIndexRoute
   '/api/v1/admin/footprints': typeof ApiV1AdminFootprintsIndexRoute
@@ -1056,6 +1097,7 @@ export interface FileRoutesById {
   '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
   '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
   '/api/v1/coding': typeof ApiV1CodingRoute
+  '/api/v1/feed': typeof ApiV1FeedRoute
   '/api/v1/footprints': typeof ApiV1FootprintsRoute
   '/api/v1/health': typeof ApiV1HealthRoute
   '/api/v1/online': typeof ApiV1OnlineRoute
@@ -1119,6 +1161,9 @@ export interface FileRoutesById {
   '/api/v1/setup/save': typeof ApiV1SetupSaveRoute
   '/api/v1/setup/status': typeof ApiV1SetupStatusRoute
   '/api/v1/setup/test-db': typeof ApiV1SetupTestDbRoute
+  '/api/v1/social/feed-stats': typeof ApiV1SocialFeedStatsRoute
+  '/api/v1/social/feed-timeline': typeof ApiV1SocialFeedTimelineRoute
+  '/api/v1/social/fetch-feeds': typeof ApiV1SocialFetchFeedsRouteWithChildren
   '/api/v1/system/status': typeof ApiV1SystemStatusRoute
   '/api/v1/system/update-check': typeof ApiV1SystemUpdateCheckRoute
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
@@ -1165,6 +1210,7 @@ export interface FileRoutesById {
   '/api/v1/posts/by-display-id/$displayId': typeof ApiV1PostsByDisplayIdDisplayIdRoute
   '/api/v1/posts/slug/$slug': typeof ApiV1PostsSlugSlugRoute
   '/api/v1/public/albums/$id': typeof ApiV1PublicAlbumsIdRoute
+  '/api/v1/social/fetch-feeds/status': typeof ApiV1SocialFetchFeedsStatusRoute
   '/api/v1/themes/$id/activate': typeof ApiV1ThemesIdActivateRoute
   '/api/v1/admin/annotations/': typeof ApiV1AdminAnnotationsIndexRoute
   '/api/v1/admin/footprints/': typeof ApiV1AdminFootprintsIndexRoute
@@ -1186,6 +1232,7 @@ export interface FileRouteTypes {
     | '/api/v1/$resource'
     | '/api/v1/categories'
     | '/api/v1/coding'
+    | '/api/v1/feed'
     | '/api/v1/footprints'
     | '/api/v1/health'
     | '/api/v1/online'
@@ -1249,6 +1296,9 @@ export interface FileRouteTypes {
     | '/api/v1/setup/save'
     | '/api/v1/setup/status'
     | '/api/v1/setup/test-db'
+    | '/api/v1/social/feed-stats'
+    | '/api/v1/social/feed-timeline'
+    | '/api/v1/social/fetch-feeds'
     | '/api/v1/system/status'
     | '/api/v1/system/update-check'
     | '/api/v1/tags/$id'
@@ -1295,6 +1345,7 @@ export interface FileRouteTypes {
     | '/api/v1/posts/by-display-id/$displayId'
     | '/api/v1/posts/slug/$slug'
     | '/api/v1/public/albums/$id'
+    | '/api/v1/social/fetch-feeds/status'
     | '/api/v1/themes/$id/activate'
     | '/api/v1/admin/annotations/'
     | '/api/v1/admin/footprints/'
@@ -1314,6 +1365,7 @@ export interface FileRouteTypes {
     | '/api/v1/$resource'
     | '/api/v1/categories'
     | '/api/v1/coding'
+    | '/api/v1/feed'
     | '/api/v1/footprints'
     | '/api/v1/health'
     | '/api/v1/online'
@@ -1377,6 +1429,9 @@ export interface FileRouteTypes {
     | '/api/v1/setup/save'
     | '/api/v1/setup/status'
     | '/api/v1/setup/test-db'
+    | '/api/v1/social/feed-stats'
+    | '/api/v1/social/feed-timeline'
+    | '/api/v1/social/fetch-feeds'
     | '/api/v1/system/status'
     | '/api/v1/system/update-check'
     | '/api/v1/tags/$id'
@@ -1423,6 +1478,7 @@ export interface FileRouteTypes {
     | '/api/v1/posts/by-display-id/$displayId'
     | '/api/v1/posts/slug/$slug'
     | '/api/v1/public/albums/$id'
+    | '/api/v1/social/fetch-feeds/status'
     | '/api/v1/themes/$id/activate'
     | '/api/v1/admin/annotations'
     | '/api/v1/admin/footprints'
@@ -1442,6 +1498,7 @@ export interface FileRouteTypes {
     | '/api/v1/$resource'
     | '/api/v1/categories'
     | '/api/v1/coding'
+    | '/api/v1/feed'
     | '/api/v1/footprints'
     | '/api/v1/health'
     | '/api/v1/online'
@@ -1505,6 +1562,9 @@ export interface FileRouteTypes {
     | '/api/v1/setup/save'
     | '/api/v1/setup/status'
     | '/api/v1/setup/test-db'
+    | '/api/v1/social/feed-stats'
+    | '/api/v1/social/feed-timeline'
+    | '/api/v1/social/fetch-feeds'
     | '/api/v1/system/status'
     | '/api/v1/system/update-check'
     | '/api/v1/tags/$id'
@@ -1551,6 +1611,7 @@ export interface FileRouteTypes {
     | '/api/v1/posts/by-display-id/$displayId'
     | '/api/v1/posts/slug/$slug'
     | '/api/v1/public/albums/$id'
+    | '/api/v1/social/fetch-feeds/status'
     | '/api/v1/themes/$id/activate'
     | '/api/v1/admin/annotations/'
     | '/api/v1/admin/footprints/'
@@ -1571,6 +1632,7 @@ export interface RootRouteChildren {
   ApiV1ResourceRoute: typeof ApiV1ResourceRouteWithChildren
   ApiV1CategoriesRoute: typeof ApiV1CategoriesRouteWithChildren
   ApiV1CodingRoute: typeof ApiV1CodingRoute
+  ApiV1FeedRoute: typeof ApiV1FeedRoute
   ApiV1FootprintsRoute: typeof ApiV1FootprintsRoute
   ApiV1HealthRoute: typeof ApiV1HealthRoute
   ApiV1OnlineRoute: typeof ApiV1OnlineRoute
@@ -1630,6 +1692,9 @@ export interface RootRouteChildren {
   ApiV1SetupSaveRoute: typeof ApiV1SetupSaveRoute
   ApiV1SetupStatusRoute: typeof ApiV1SetupStatusRoute
   ApiV1SetupTestDbRoute: typeof ApiV1SetupTestDbRoute
+  ApiV1SocialFeedStatsRoute: typeof ApiV1SocialFeedStatsRoute
+  ApiV1SocialFeedTimelineRoute: typeof ApiV1SocialFeedTimelineRoute
+  ApiV1SocialFetchFeedsRoute: typeof ApiV1SocialFetchFeedsRouteWithChildren
   ApiV1SystemStatusRoute: typeof ApiV1SystemStatusRoute
   ApiV1SystemUpdateCheckRoute: typeof ApiV1SystemUpdateCheckRoute
   ApiV1TelegramGetChatIdRoute: typeof ApiV1TelegramGetChatIdRoute
@@ -1777,6 +1842,13 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/footprints'
       fullPath: '/api/v1/footprints'
       preLoaderRoute: typeof ApiV1FootprintsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/feed': {
+      id: '/api/v1/feed'
+      path: '/api/v1/feed'
+      fullPath: '/api/v1/feed'
+      preLoaderRoute: typeof ApiV1FeedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/coding': {
@@ -1952,6 +2024,27 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/system/status'
       fullPath: '/api/v1/system/status'
       preLoaderRoute: typeof ApiV1SystemStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/social/fetch-feeds': {
+      id: '/api/v1/social/fetch-feeds'
+      path: '/api/v1/social/fetch-feeds'
+      fullPath: '/api/v1/social/fetch-feeds'
+      preLoaderRoute: typeof ApiV1SocialFetchFeedsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/social/feed-timeline': {
+      id: '/api/v1/social/feed-timeline'
+      path: '/api/v1/social/feed-timeline'
+      fullPath: '/api/v1/social/feed-timeline'
+      preLoaderRoute: typeof ApiV1SocialFeedTimelineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/social/feed-stats': {
+      id: '/api/v1/social/feed-stats'
+      path: '/api/v1/social/feed-stats'
+      fullPath: '/api/v1/social/feed-stats'
+      preLoaderRoute: typeof ApiV1SocialFeedStatsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/setup/test-db': {
@@ -2360,6 +2453,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1ThemesIdActivateRouteImport
       parentRoute: typeof ApiV1ThemesIdRoute
     }
+    '/api/v1/social/fetch-feeds/status': {
+      id: '/api/v1/social/fetch-feeds/status'
+      path: '/status'
+      fullPath: '/api/v1/social/fetch-feeds/status'
+      preLoaderRoute: typeof ApiV1SocialFetchFeedsStatusRouteImport
+      parentRoute: typeof ApiV1SocialFetchFeedsRoute
+    }
     '/api/v1/public/albums/$id': {
       id: '/api/v1/public/albums/$id'
       path: '/api/v1/public/albums/$id'
@@ -2690,6 +2790,19 @@ const ApiV1PluginsIdRouteWithChildren = ApiV1PluginsIdRoute._addFileChildren(
   ApiV1PluginsIdRouteChildren,
 )
 
+interface ApiV1SocialFetchFeedsRouteChildren {
+  ApiV1SocialFetchFeedsStatusRoute: typeof ApiV1SocialFetchFeedsStatusRoute
+}
+
+const ApiV1SocialFetchFeedsRouteChildren: ApiV1SocialFetchFeedsRouteChildren = {
+  ApiV1SocialFetchFeedsStatusRoute: ApiV1SocialFetchFeedsStatusRoute,
+}
+
+const ApiV1SocialFetchFeedsRouteWithChildren =
+  ApiV1SocialFetchFeedsRoute._addFileChildren(
+    ApiV1SocialFetchFeedsRouteChildren,
+  )
+
 interface ApiV1ThemesIdRouteChildren {
   ApiV1ThemesIdActivateRoute: typeof ApiV1ThemesIdActivateRoute
 }
@@ -2723,6 +2836,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1ResourceRoute: ApiV1ResourceRouteWithChildren,
   ApiV1CategoriesRoute: ApiV1CategoriesRouteWithChildren,
   ApiV1CodingRoute: ApiV1CodingRoute,
+  ApiV1FeedRoute: ApiV1FeedRoute,
   ApiV1FootprintsRoute: ApiV1FootprintsRoute,
   ApiV1HealthRoute: ApiV1HealthRoute,
   ApiV1OnlineRoute: ApiV1OnlineRoute,
@@ -2782,6 +2896,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1SetupSaveRoute: ApiV1SetupSaveRoute,
   ApiV1SetupStatusRoute: ApiV1SetupStatusRoute,
   ApiV1SetupTestDbRoute: ApiV1SetupTestDbRoute,
+  ApiV1SocialFeedStatsRoute: ApiV1SocialFeedStatsRoute,
+  ApiV1SocialFeedTimelineRoute: ApiV1SocialFeedTimelineRoute,
+  ApiV1SocialFetchFeedsRoute: ApiV1SocialFetchFeedsRouteWithChildren,
   ApiV1SystemStatusRoute: ApiV1SystemStatusRoute,
   ApiV1SystemUpdateCheckRoute: ApiV1SystemUpdateCheckRoute,
   ApiV1TelegramGetChatIdRoute: ApiV1TelegramGetChatIdRoute,

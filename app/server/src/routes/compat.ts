@@ -2180,6 +2180,60 @@ export async function doubanImportPayload(input: Record<string, unknown>) {
     tip: '推荐使用 NeoDB (neodb.social) 绑定豆瓣账号后，通过 NeoDB API 批量导入' };
 }
 
+export async function socialFeedTimeline(userId: number, query: URLSearchParams) {
+  const page = Math.max(1, intParam(query.get('page') || undefined, 1));
+  const perPage = Math.min(500, Math.max(1, intParam(query.get('per_page') || undefined, 20)));
+  const total = await one<{ count: string }>(
+    `select count(*)::text as count from ${table('feed_items')} fi
+     join ${table('rss_subscriptions')} rs on fi.subscription_id = rs.id where rs.user_id = $1`, [userId],
+  ).catch(() => null);
+  const rows = await many<Record<string, unknown>>(
+    `select fi.*, rs.site_name, rs.site_url from ${table('feed_items')} fi
+     join ${table('rss_subscriptions')} rs on fi.subscription_id = rs.id
+     where rs.user_id = $1 order by fi.pub_date desc nulls last, fi.id desc limit $2 offset $3`,
+    [userId, perPage, (page - 1) * perPage],
+  ).catch(() => []);
+  const count = Number(total?.count || 0);
+  return { rows, meta: { total: count, page, per_page: perPage, total_pages: Math.max(1, Math.ceil(count / perPage)) } };
+}
+
+export async function socialFeedStats(userId: number) {
+  const sevenDaysAgo = nowUnix() - 7 * 24 * 3600;
+  const [count7d, countTotal, rssCount, lastFetched] = await Promise.all([
+    one<{ count: string }>(
+      `select count(*)::text as count from ${table('feed_items')} fi
+       join ${table('rss_subscriptions')} rs on fi.subscription_id = rs.id where rs.user_id = $1 and fi.created_at >= $2`,
+      [userId, sevenDaysAgo],
+    ).catch(() => null),
+    one<{ count: string }>(
+      `select count(*)::text as count from ${table('feed_items')} fi
+       join ${table('rss_subscriptions')} rs on fi.subscription_id = rs.id where rs.user_id = $1`, [userId],
+    ).catch(() => null),
+    one<{ count: string }>(`select count(*)::text as count from ${table('rss_subscriptions')} where user_id = $1`, [userId]).catch(() => null),
+    one<{ last_fetched_at: string }>(
+      `select coalesce(max(last_fetched_at), 0)::text as last_fetched_at from ${table('rss_subscriptions')} where user_id = $1`, [userId],
+    ).catch(() => null),
+  ]);
+  return { count_7d: Number(count7d?.count || 0), count_total: Number(countTotal?.count || 0),
+    rss_count: Number(rssCount?.count || 0), last_fetched_at: Number(lastFetched?.last_fetched_at || 0) };
+}
+
+export function socialFeedFetchStatus() {
+  return feedFetchStatus();
+}
+
+export function startSocialFeedFetch(force: boolean) {
+  let started = false;
+  if (!feedFetchProgress.running) {
+    started = true;
+    feedFetchProgress = { ...emptyFeedFetchProgress(), running: true, force, started_at: nowUnix(), message: '准备刷新订阅' };
+    void runFeedFetch({ limit: force ? 0 : 100, force, trackProgress: true, cleanupOrphans: force }).catch((error) => {
+      feedFetchProgress = { ...feedFetchProgress, running: false, finished_at: nowUnix(), current_url: '', message: feedErrorMessage(error) };
+    });
+  }
+  return { started, ...feedFetchStatus() };
+}
+
 export function registerCompatRoutes(app: Hono) {
   startBackupScheduler();
   registerCodingRoutes(app);
@@ -2552,80 +2606,16 @@ export function registerCompatRoutes(app: Hono) {
     }
   });
   app.get('/api/v1/social/feed-timeline', optionalAuth, async (c) => {
-    const sp = new URL(c.req.url).searchParams;
-    const { page, perPage, offset } = pageParams(sp);
-    const userId = feedUserId(c);
-    const total = await one<{ count: string }>(
-      `select count(*)::text as count from ${table('feed_items')} fi
-       join ${table('rss_subscriptions')} rs on fi.subscription_id = rs.id where rs.user_id = $1`,
-      [userId],
-    ).catch(() => null);
-    const rows = await many<Record<string, unknown>>(
-      `select fi.*, rs.site_name, rs.site_url from ${table('feed_items')} fi
-       join ${table('rss_subscriptions')} rs on fi.subscription_id = rs.id
-       where rs.user_id = $1 order by fi.pub_date desc nulls last, fi.id desc limit $2 offset $3`,
-      [userId, perPage, offset],
-    ).catch(() => []);
-    return paginate(c, rows, Number(total?.count || 0), page, perPage);
+    const result = await socialFeedTimeline(feedUserId(c), new URL(c.req.url).searchParams);
+    return paginate(c, result.rows, result.meta.total, result.meta.page, result.meta.per_page);
   });
-  app.get('/api/v1/social/feed-stats', optionalAuth, async (c) => {
-    const userId = feedUserId(c);
-    const sevenDaysAgo = nowUnix() - 7 * 24 * 3600;
-    const [count7d, countTotal, rssCount, lastFetched] = await Promise.all([
-      one<{ count: string }>(
-        `select count(*)::text as count from ${table('feed_items')} fi
-         join ${table('rss_subscriptions')} rs on fi.subscription_id = rs.id where rs.user_id = $1 and fi.created_at >= $2`,
-        [userId, sevenDaysAgo],
-      ).catch(() => null),
-      one<{ count: string }>(
-        `select count(*)::text as count from ${table('feed_items')} fi
-         join ${table('rss_subscriptions')} rs on fi.subscription_id = rs.id where rs.user_id = $1`,
-        [userId],
-      ).catch(() => null),
-      one<{ count: string }>(`select count(*)::text as count from ${table('rss_subscriptions')} where user_id = $1`, [userId]).catch(() => null),
-      one<{ last_fetched_at: string }>(
-        `select coalesce(max(last_fetched_at), 0)::text as last_fetched_at from ${table('rss_subscriptions')} where user_id = $1`,
-        [userId],
-      ).catch(() => null),
-    ]);
-    return ok(c, {
-      count_7d: Number(count7d?.count || 0),
-      count_total: Number(countTotal?.count || 0),
-      rss_count: Number(rssCount?.count || 0),
-      last_fetched_at: Number(lastFetched?.last_fetched_at || 0),
-    });
-  });
-  app.get('/api/v1/social/fetch-feeds/status', auth, async (c) => ok(c, feedFetchStatus()));
+  app.get('/api/v1/social/feed-stats', optionalAuth, async (c) => ok(c, await socialFeedStats(feedUserId(c))));
+  app.get('/api/v1/social/fetch-feeds/status', auth, async (c) => ok(c, socialFeedFetchStatus()));
   app.post('/api/v1/social/fetch-feeds', auth, async (c) => {
     const sp = new URL(c.req.url).searchParams;
     const body = await c.req.json().catch(() => ({}));
     const force = body.force === true || sp.get('force') === '1';
-    let started = false;
-    if (!feedFetchProgress.running) {
-      started = true;
-      feedFetchProgress = {
-        ...emptyFeedFetchProgress(),
-        running: true,
-        force,
-        started_at: nowUnix(),
-        message: '准备刷新订阅',
-      };
-      void runFeedFetch({
-        limit: force ? 0 : 100,
-        force,
-        trackProgress: true,
-        cleanupOrphans: force,
-      }).catch((err) => {
-        feedFetchProgress = {
-          ...feedFetchProgress,
-          running: false,
-          finished_at: nowUnix(),
-          current_url: '',
-          message: feedErrorMessage(err),
-        };
-      });
-    }
-    return ok(c, { started, ...feedFetchStatus() });
+    return ok(c, startSocialFeedFetch(force));
   });
 
 
