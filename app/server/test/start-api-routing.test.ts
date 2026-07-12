@@ -6,6 +6,16 @@ function request(path: string, method: string) {
 }
 
 describe('TanStack Start native API routing', () => {
+  test('routes health and public utility APIs to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/health', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/i18n/locales', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/i18n/current', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/i18n/zh-CN', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/search?q=start', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/visitor/geo', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/options/test-email', 'POST'))).toBe(true);
+  });
+
   test('routes migrated comment mutations to Start', () => {
     expect(isStartNativeApiRequest(request('/api/v1/comments/batch', 'POST'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/comments/42', 'PUT'))).toBe(true);

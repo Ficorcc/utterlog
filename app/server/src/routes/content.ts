@@ -55,6 +55,9 @@ import {
 import { createPublicComment } from '../services/public-comments';
 import { PublicWriteError } from '../services/public-write';
 import { listComments as listCommentsDirect } from '../public-read';
+import { localeFiles, readLocale } from '../services/i18n';
+import { searchPosts } from '../services/search';
+import { visitorGeo } from '../services/analytics';
 
 const contentTables = new Set(['moments', 'music', 'movies', 'books', 'games', 'videos', 'goods', 'links', 'playlists']);
 const writableTables = new Set([...contentTables, 'posts', 'comments', 'media', 'albums', 'notifications']);
@@ -134,68 +137,6 @@ async function ownerPublicPayload(user: Record<string, unknown> | null) {
     gravatar_url: gravatarUrl,
     utterlog_avatar: utterlogAvatar,
   };
-}
-
-async function activeEmbeddingProvider() {
-  return one<Record<string, unknown>>(
-    `select * from ${table('ai_providers')} where type = 'embedding' and is_active = true order by is_default desc, sort_order asc, id asc limit 1`,
-  ).catch(() => null);
-}
-
-async function logAiEvent(provider: Record<string, unknown> | null, action: string, status: string, message: string, metadata: Record<string, unknown> = {}) {
-  const usage = ((metadata.usage || metadata.tokens) && typeof (metadata.usage || metadata.tokens) === 'object')
-    ? (metadata.usage || metadata.tokens) as Record<string, unknown>
-    : {};
-  const tokenValue = (value: unknown) => {
-    const n = Number(value || 0);
-    return Number.isFinite(n) && n > 0 ? Math.trunc(n) : 0;
-  };
-  const promptTokens = tokenValue(usage.prompt_tokens ?? usage.input_tokens);
-  const completionTokens = tokenValue(usage.completion_tokens ?? usage.output_tokens);
-  const totalTokens = tokenValue(usage.total_tokens) || promptTokens + completionTokens;
-  await exec(
-    `insert into ${table('ai_logs')} (user_id, provider, model, action, prompt_tokens, completion_tokens, total_tokens, status, message, metadata, created_at)
-     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb,$11)`,
-    [
-      null,
-      provider?.slug || provider?.name || '',
-      provider?.model || '',
-      action,
-      promptTokens,
-      completionTokens,
-      totalTokens,
-      status,
-      message.slice(0, 1000),
-      JSON.stringify(metadata),
-      nowUnix(),
-    ],
-  ).catch(() => {});
-}
-
-async function searchEmbedding(text: string) {
-  const provider = await activeEmbeddingProvider();
-  if (!provider) return null;
-  const endpoint = String(provider.endpoint || '').trim();
-  const model = String(provider.model || '').trim();
-  const apiKey = String(provider.api_key || '').trim();
-  if (!endpoint || !model || !apiKey) return null;
-  const res = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({ model, input: text }),
-    signal: AbortSignal.timeout(Math.max(10, Number(provider.timeout || 30)) * 1000),
-  });
-  const payload: any = await res.json().catch(() => ({}));
-  if (!res.ok || payload.error) {
-    const message = payload.error?.message || payload.error || `HTTP ${res.status}`;
-    await logAiEvent(provider, 'search-embedding', 'error', String(message));
-    return null;
-  }
-  const embedding = payload.data?.[0]?.embedding || payload.embedding;
-  if (!Array.isArray(embedding) || embedding.length === 0) return null;
-  await logAiEvent(provider, 'search-embedding', 'success', `embedding:${embedding.length}`, { tokens: payload.usage || {} });
-  const values = embedding.map((value: unknown) => Number(value)).filter((value: number) => Number.isFinite(value));
-  return values.length ? `[${values.join(',')}]` : null;
 }
 
 function htmlEscape(value: string) {
@@ -661,35 +602,6 @@ async function mergeMomentTagOption(mood: unknown) {
   const current = (await optionValue('moment_tags', '')).split(',').map((item) => item.trim()).filter(Boolean);
   if (current.includes(tag)) return;
   await saveOption('moment_tags', [...current, tag].join(','));
-}
-
-const customLocaleDir = 'locales';
-
-function localeFiles() {
-  const files = new Set<string>();
-  for (const dir of [runtimePaths.builtinLocaleDir, customLocaleDir]) {
-    if (!existsSync(dir)) continue;
-    for (const file of readdirSync(dir)) {
-      if (file.endsWith('.json')) files.add(file.replace(/\.json$/, ''));
-    }
-  }
-  return [...files].sort();
-}
-
-function readLocale(locale: string) {
-  const builtinPath = join(runtimePaths.builtinLocaleDir, `${locale}.json`);
-  const customPath = join(customLocaleDir, `${locale}.json`);
-  let data: any = null;
-  if (existsSync(builtinPath)) data = JSON.parse(readFileSync(builtinPath, 'utf8'));
-  if (existsSync(customPath)) {
-    const custom = JSON.parse(readFileSync(customPath, 'utf8'));
-    data = data ? {
-      ...data,
-      ...custom,
-      messages: { ...(data.messages || {}), ...(custom.messages || {}) },
-    } : custom;
-  }
-  return data;
 }
 
 function normalizeOrder(input: string | null, fallback: string) {
@@ -2974,33 +2886,7 @@ export function registerContentRoutes(app: Hono) {
   app.get('/api/v1/search', async (c) => {
     const q = searchParams(c).get('q') || '';
     const limit = Math.min(50, intParam(searchParams(c).get('limit') || undefined, 10));
-    const query = q.trim();
-    if (!query) return ok(c, { results: [], total: 0, mode: 'keyword' });
-
-    const vector = await searchEmbedding(query).catch(() => null);
-    if (vector) {
-      const semanticRows = await many<Record<string, unknown>>(
-        `select id, title, slug, excerpt, content, cover_url, published_at, created_at, updated_at,
-                1 - (embedding <=> $1::vector) as score
-         from ${table('posts')}
-         where status = 'publish' and type = 'post' and embedding is not null
-         order by embedding <=> $1::vector
-         limit $2`,
-        [vector, limit],
-      ).catch(() => []);
-      if (semanticRows.length > 0) {
-        return ok(c, { results: semanticRows, total: semanticRows.length, mode: 'semantic' });
-      }
-    }
-
-    const rows = await many<Record<string, unknown>>(
-      `select * from ${table('posts')}
-       where status = 'publish' and type = 'post' and (title ilike $1 or coalesce(excerpt,'') ilike $1 or coalesce(content,'') ilike $1)
-       order by published_at desc nulls last, id desc
-       limit $2`,
-      [`%${query}%`, limit],
-    );
-    return ok(c, { results: rows, total: rows.length, mode: 'keyword' });
+    return ok(c, await searchPosts(q, limit));
   });
   app.get('/api/v1/feed', async (c) => {
     const opts: Record<string, string> = await optionMap(false).catch(() => ({}));
@@ -3264,15 +3150,7 @@ export function registerContentRoutes(app: Hono) {
     return ok(c, geo);
   });
   app.get('/api/v1/visitor/geo', async (c) => {
-    const provider = await optionValue('ip_geo_provider', 'ipx');
-    const geo = await lookupGeoIp(clientIp(c), provider, 3000);
-    return ok(c, {
-      country_code: geo?.country_code || '',
-      country: geo?.country || '',
-      province: geo?.province || '',
-      city: geo?.city || '',
-      provider: geo?.provider || '',
-    });
+    return ok(c, await visitorGeo(clientIp(c)));
   });
   app.get('/api/v1/analytics/map', auth, async (c) => {
     const period = searchParams(c).get('period') || '24h';

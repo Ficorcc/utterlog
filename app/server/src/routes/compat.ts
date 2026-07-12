@@ -45,6 +45,7 @@ import {
   registerBackupRoutes,
   startBackupScheduler,
 } from './backup';
+import { OptionServiceError, sendTestEmail } from '../services/options';
 
 function safeId(id: unknown) {
   const clean = String(id || '').trim();
@@ -2246,17 +2247,12 @@ export function registerCompatRoutes(app: Hono) {
     return ok(c, { sent: true });
   });
   app.post('/api/v1/options/test-email', auth, async (c) => {
-    const body = await c.req.json().catch(() => ({}));
-    let to = String(body.to || '').trim();
-    if (!to) to = (await optionValue('admin_email', '')).trim();
-    if (!to) {
-      const user = await one<{ email: string }>(`select email from ${table('users')} where id = $1`, [currentUserId(c)]).catch(() => null);
-      to = String(user?.email || '').trim();
+    try {
+      return ok(c, await sendTestEmail(currentUserId(c), await c.req.json().catch(() => ({}))));
+    } catch (error) {
+      if (error instanceof OptionServiceError) return fail(c, error.status, error.code, error.message);
+      throw error;
     }
-    if (!to) return badRequest(c, '测试收件人不能为空，请先填写管理员邮箱或当前用户邮箱');
-    const siteName = await optionValue('site_title', 'Utterlog');
-    await sendConfiguredEmail(to, `${siteName} - 测试邮件`, `<p>如果你收到这封邮件，说明 Utterlog 邮件服务已配置成功。</p>`);
-    return ok(c, { sent: true, message: `测试邮件已发送到 ${to}`, to });
   });
 
   app.get('/api/v1/notifications', auth, async (c) => {

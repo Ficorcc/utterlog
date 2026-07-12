@@ -278,6 +278,18 @@ export async function analyticsGeoIp(ip: string, providerValue = '') {
   return geo || { provider, ip, country_code: '', country: '', province: '', city: '', latitude: 0, longitude: 0, unavailable: true };
 }
 
+export async function visitorGeo(ip: string) {
+  const provider = await optionValue('ip_geo_provider', 'ipx');
+  const geo = await lookupGeoIp(ip, provider, 3000);
+  return {
+    country_code: geo?.country_code || '',
+    country: geo?.country || '',
+    province: geo?.province || '',
+    city: geo?.city || '',
+    provider: geo?.provider || '',
+  };
+}
+
 export async function analyticsMap(period: AnalyticsPeriod) {
   const where = await analyticsWhere(period);
   const whereSql = where.sql

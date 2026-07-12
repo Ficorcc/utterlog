@@ -66,6 +66,7 @@ export function isStartNativeApiRequest(request: Request) {
   const url = new URL(request.url);
   const method = request.method.toUpperCase();
   const anonymousGet = method === 'GET' && !request.headers.get('authorization');
+  if (url.pathname === '/api/v1/health') return method === 'GET';
   if (url.pathname === '/api/v1/auth/login' || url.pathname === '/api/v1/auth/refresh' || url.pathname === '/api/v1/auth/logout') {
     return method === 'POST';
   }
@@ -98,6 +99,10 @@ export function isStartNativeApiRequest(request: Request) {
   if (/^\/api\/v1\/plugins\/[^/]+\/(activate|deactivate)$/.test(url.pathname)) return method === 'POST';
   if (/^\/api\/v1\/(themes|plugins)\/[^/]+$/.test(url.pathname)) return method === 'DELETE';
   if (url.pathname === '/api/v1/visitor/weather') return method === 'GET';
+  if (url.pathname === '/api/v1/visitor/geo' || url.pathname === '/api/v1/search') return method === 'GET';
+  if (url.pathname === '/api/v1/i18n/locales' || url.pathname === '/api/v1/i18n/current') return method === 'GET';
+  if (/^\/api\/v1\/i18n\/[^/]+$/.test(url.pathname)) return method === 'GET';
+  if (url.pathname === '/api/v1/options/test-email') return method === 'POST';
   if (url.pathname === '/api/v1/coding') return method === 'GET';
   if (url.pathname === '/api/v1/media/upload-branding') return method === 'POST';
   if (url.pathname === '/api/v1/media' || url.pathname === '/api/v1/media/stats') return method === 'GET';
