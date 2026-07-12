@@ -1270,8 +1270,7 @@ async function publicFrontendUrl() {
   return siteUrl.replace(/\/+$/, '');
 }
 
-async function listNetworkContent(c: any) {
-  const sp = new URL(c.req.url).searchParams;
+export async function networkContentPayload(sp: URLSearchParams) {
   const contentType = sp.get('type') || 'post';
   const since = Number(sp.get('since') || 0);
   const { page, perPage, offset } = pageParams(sp);
@@ -1294,7 +1293,11 @@ async function listNetworkContent(c: any) {
   const total = await one<{ count: string }>(totalSql, params).catch(() => null);
   const rows = await many<Record<string, unknown>>(`${sql} order by created_at desc limit $${params.length + 1} offset $${params.length + 2}`, [...params, perPage, offset]).catch(() => []);
   const meta = await siteMetadata();
-  return ok(c, { site: { name: meta.name, url: meta.url, logo: meta.logo }, items: rows, total: Number(total?.count || 0), page, per_page: perPage });
+  return { site: { name: meta.name, url: meta.url, logo: meta.logo }, items: rows, total: Number(total?.count || 0), page, per_page: perPage };
+}
+
+async function listNetworkContent(c: any) {
+  return ok(c, await networkContentPayload(new URL(c.req.url).searchParams));
 }
 
 
@@ -2352,6 +2355,163 @@ export async function identifyPassport(input: Record<string, unknown>) {
   if (!payload.success || !data.valid) throw new FederationServiceError(401, 'INVALID_PASSPORT', '身份验证失败');
   return { identified: true, utterlog_id: data.utterlog_id || '', nickname: data.nickname || '', avatar: data.avatar || '',
     email: data.email || '', email_hash: data.email_hash || '', site_url: data.site_url || '', follow_status: '', is_friend_link: false };
+}
+
+export class NetworkServiceError extends Error {
+  constructor(public status: number, public code: string, message: string) {
+    super(message);
+  }
+}
+
+export async function networkStatusPayload() {
+  const registered = await ensureNetworkRegistered().catch(async () => ({ site_id: await optionValue('utterlog_site_id', ''), connected: false }));
+  return { hub: utterlogHub, site_id: registered.site_id, fingerprint: `${siteFingerprint().slice(0, 12)}...`, connected: registered.connected };
+}
+
+export async function pushNetworkInfo() {
+  try { return await pushNetworkSiteInfo(); }
+  catch (error) { throw new NetworkServiceError(502, 'HUB_UNREACHABLE', error instanceof Error ? error.message : '无法连接 Utterlog 中心'); }
+}
+
+export async function networkHubFeed(query: URLSearchParams) {
+  const page = encodeURIComponent(query.get('page') || '1');
+  const perPage = encodeURIComponent(query.get('per_page') || '20');
+  try {
+    const { res, payload } = await hubRequest('GET', `/api/v1/activity?page=${page}&per_page=${perPage}`);
+    return res.ok && payload?.success ? payload.data || { items: [], total: 0 } : { items: [], total: 0, hub_status: 'error' };
+  } catch {
+    return { items: [], total: 0, hub_status: 'offline' };
+  }
+}
+
+export async function networkHubSites(query: URLSearchParams) {
+  try {
+    const { res, payload } = await hubRequest('GET', `/api/v1/sites?page=${encodeURIComponent(query.get('page') || '1')}`);
+    return res.ok && payload?.success ? payload.data || { sites: [], total: 0 } : { sites: [], total: 0 };
+  } catch {
+    return { sites: [], total: 0 };
+  }
+}
+
+export async function subscribeNetworkSite(userId: number, input: Record<string, unknown>) {
+  const siteUrl = normalizedSiteUrl(input.site_url);
+  if (!siteUrl) throw new NetworkServiceError(400, 'VALIDATION_ERROR', 'site_url 不能为空');
+  const meta = await fetchRemoteMetadata(siteUrl).catch(() => ({ name: siteUrl, logo: '', favicon: '' }));
+  const feedUrl = String(input.feed_url || `${siteUrl}/api/v1/feed`);
+  await exec(
+    `insert into ${table('rss_subscriptions')} (user_id, site_url, feed_url, site_name, site_avatar, last_fetched_at, created_at)
+     values ($1,$2,$3,$4,$5,0,$6)
+     on conflict (user_id, feed_url) do update set site_url=$2, site_name=$4, site_avatar=$5`,
+    [userId, siteUrl, feedUrl, meta.name || siteUrl, meta.logo || meta.favicon || '', nowUnix()],
+  );
+  return { subscribed: true, site_name: meta.name || siteUrl, site_logo: meta.logo || '' };
+}
+
+export async function unsubscribeNetworkSite(userId: number, input: Record<string, unknown>) {
+  await exec(`delete from ${table('rss_subscriptions')} where user_id = $1 and site_url = $2`, [userId, normalizedSiteUrl(input.site_url)]);
+  return { unsubscribed: true };
+}
+
+export async function networkSubscriptions(userId: number) {
+  return many<Record<string, unknown>>(
+    `select * from ${table('rss_subscriptions')} where user_id = $1 order by created_at desc`, [userId],
+  ).catch(() => []);
+}
+
+export async function pullNetworkContent(query: URLSearchParams) {
+  const siteUrl = normalizedSiteUrl(query.get('site_url'));
+  if (!siteUrl) throw new NetworkServiceError(400, 'VALIDATION_ERROR', 'site_url 参数不能为空');
+  const safeSiteUrl = await assertPublicHttpUrl(siteUrl);
+  const url = `${safeSiteUrl}/api/v1/network/content?type=${encodeURIComponent(query.get('type') || 'post')}${query.get('since') ? `&since=${encodeURIComponent(query.get('since') || '')}` : ''}`;
+  const payload = await fetchJson<any>(url, 15000).catch((error) => ({ success: false, error: error instanceof Error ? error.message : '拉取内容失败' }));
+  if (payload.success === false) throw new NetworkServiceError(502, 'PULL_FAILED', payload.error || '拉取内容失败');
+  return payload.data || payload;
+}
+
+export async function publishNetworkNotification(input: Record<string, unknown>) {
+  const rows = await many<{ source_site: string }>(
+    `select distinct source_site from ${table('followers')} where coalesce(source_site,'') != ''`,
+  ).catch(() => []);
+  let notified = 0;
+  for (const row of rows) {
+    void assertPublicHttpUrl(row.source_site).then((siteUrl) => fetch(`${siteUrl}/api/v1/federation/webhook`, {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ type: 'new_content', site: config.appUrl, title: input.title || '', post_id: input.post_id || 0,
+        content_type: input.content_type || 'post' }),
+    })).catch(() => {});
+    notified++;
+  }
+  const siteId = await optionValue('utterlog_site_id', '');
+  if (siteId) {
+    const siteTitle = await optionValue('site_title', 'Utterlog!');
+    void hubRequest('POST', '/api/v1/activity', { site_id: siteId, type: 'new_content', title: input.title || '',
+      content_type: input.content_type || 'post', url: config.appUrl, name: siteTitle || 'Utterlog!' }).catch(() => {});
+  }
+  return { notified };
+}
+
+export async function bindUtterlogId(userId: number, input: Record<string, unknown>) {
+  const utterlogId = String(input.utterlog_id || '').trim();
+  const token = String(input.token || '').trim();
+  if (!utterlogId || !token) throw new NetworkServiceError(400, 'VALIDATION_ERROR', 'utterlog_id 和 token 不能为空');
+  try {
+    const data = await verifyUtterlogIdToken(utterlogId, token);
+    await exec(`update ${table('users')} set utterlog_id = $1, utterlog_avatar = $2, updated_at = $3 where id = $4`,
+      [utterlogId, String(data.avatar || ''), nowUnix(), userId]);
+    return { bound: true, utterlog_id: utterlogId, utterlog_avatar: String(data.avatar || '') };
+  } catch (error) {
+    throw new NetworkServiceError(401, 'INVALID_TOKEN', error instanceof Error ? error.message : 'Utterlog ID 验证失败');
+  }
+}
+
+export async function unbindUtterlogId(userId: number) {
+  await exec(`update ${table('users')} set utterlog_id = '', utterlog_avatar = '', updated_at = $1 where id = $2`, [nowUnix(), userId]).catch(() => {});
+  return { unbound: true };
+}
+
+export async function utterlogProfile(userId: number) {
+  const user = await one<Record<string, unknown>>(
+    `select username, email, nickname, avatar, coalesce(utterlog_id,'') as utterlog_id, coalesce(utterlog_avatar,'') as utterlog_avatar
+     from ${table('users')} where id = $1`, [userId],
+  ).catch(() => null);
+  return { utterlog_id: String(user?.utterlog_id || ''), utterlog_avatar: String(user?.utterlog_avatar || ''),
+    username: String(user?.username || ''), nickname: String(user?.nickname || user?.username || ''), email: String(user?.email || ''),
+    avatar: String(user?.avatar || ''), avatar_url: String(user?.utterlog_avatar || user?.avatar || ''), bound: Boolean(user?.utterlog_id) };
+}
+
+export async function networkOauthAuthorization(userId: number) {
+  const registered = await ensureNetworkRegistered();
+  if (!registered.connected || !registered.site_id) throw new NetworkServiceError(502, 'NOT_CONNECTED', '无法连接 Utterlog 网络');
+  const redirectUri = `${(await publicFrontendUrl()).replace(/\/+$/, '')}/api/v1/network/oauth/callback`;
+  const state = `${Date.now()}-${userId}`;
+  const authUrl = `${utterlogHub}/oauth/authorize?client_id=${encodeURIComponent(registered.site_id)}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}&response_type=code&scope=profile`;
+  return { auth_url: authUrl, url: authUrl, state };
+}
+
+export async function networkOauthCallback(query: URLSearchParams) {
+  const code = String(query.get('code') || '');
+  const state = String(query.get('state') || '');
+  const siteId = await optionValue('utterlog_site_id', '');
+  const frontend = await publicFrontendUrl();
+  const finish = (bound: boolean) => new Response(`<!doctype html><html><body><script>
+    if (window.opener) { window.opener.location.reload(); }
+    window.close();
+    setTimeout(function(){ window.location.href = '${frontend}/admin/utterlog${bound ? '' : '?error=oauth_failed'}'; }, 500);
+  </script><p>${bound ? '绑定成功' : '绑定失败'}，正在关闭...</p></body></html>`, {
+    headers: { 'content-type': 'text/html; charset=utf-8' },
+  });
+  if (!code || !state || !siteId) return finish(false);
+  const { res, payload } = await hubRequest('POST', '/oauth/token', { grant_type: 'authorization_code', code, client_id: siteId,
+    fingerprint: siteFingerprint(), redirect_uri: `${frontend}/api/v1/network/oauth/callback` })
+    .catch(() => ({ res: null as any, payload: null as any }));
+  if (!res?.ok) return finish(false);
+  const data = payload?.data || payload || {};
+  const userId = intParam(state.split('-').at(-1) || '', 0);
+  if (userId > 0) {
+    await exec(`update ${table('users')} set utterlog_id = $1, utterlog_avatar = $2, updated_at = $3 where id = $4`,
+      [String(data.utterlog_id || ''), String(data.avatar || ''), nowUnix(), userId]).catch(() => {});
+  }
+  return finish(true);
 }
 
 export function registerCompatRoutes(app: Hono) {

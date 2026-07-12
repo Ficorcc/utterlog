@@ -45,6 +45,17 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/passport/identify', 'POST'))).toBe(true);
   });
 
+  test('routes network hub and OAuth workflows to Start', () => {
+    for (const action of ['status', 'feed', 'sites', 'subscriptions', 'pull-content', 'utterlog-profile', 'content']) {
+      expect(isStartNativeApiRequest(request(`/api/v1/network/${action}`, 'GET'))).toBe(true);
+    }
+    for (const action of ['push-info', 'subscribe', 'unsubscribe', 'publish-notify', 'bind-utterlog-id', 'unbind-utterlog-id']) {
+      expect(isStartNativeApiRequest(request(`/api/v1/network/${action}`, 'POST'))).toBe(true);
+    }
+    expect(isStartNativeApiRequest(request('/api/v1/network/oauth/authorize', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/network/oauth/callback', 'GET'))).toBe(true);
+  });
+
   test('routes setup and installation APIs to Start', () => {
     expect(isStartNativeApiRequest(request('/api/v1/setup/status', 'GET'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/setup/test-db', 'POST'))).toBe(true);
