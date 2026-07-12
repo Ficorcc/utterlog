@@ -31,6 +31,21 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/profile', 'DELETE'))).toBe(false);
   });
 
+  test('routes two-factor and passkey endpoints to Start', () => {
+    for (const action of ['setup', 'verify', 'disable', 'validate']) {
+      expect(isStartNativeApiRequest(request(`/api/v1/auth/totp/${action}`, 'POST'))).toBe(true);
+    }
+    for (const flow of ['register', 'login']) {
+      for (const action of ['begin', 'finish']) {
+        expect(isStartNativeApiRequest(request(`/api/v1/auth/passkey/${flow}/${action}`, 'POST'))).toBe(true);
+      }
+    }
+    expect(isStartNativeApiRequest(request('/api/v1/auth/passkey/available', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/passkeys', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/passkeys/7', 'DELETE'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/auth/totp/setup', 'GET'))).toBe(false);
+  });
+
   test('keeps public creation, replies, and reads on the compatibility API', () => {
     expect(isStartNativeApiRequest(request('/api/v1/comments', 'POST'))).toBe(false);
     expect(isStartNativeApiRequest(request('/api/v1/comments/42/reply', 'POST'))).toBe(false);

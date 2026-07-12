@@ -13,7 +13,9 @@ import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostsSlugRouteImport } from './routes/posts/$slug'
 import { Route as ApiV1ProfileIndexRouteImport } from './routes/api/v1/profile/index'
+import { Route as ApiV1PasskeysIndexRouteImport } from './routes/api/v1/passkeys/index'
 import { Route as ApiV1ProfileSendCodeRouteImport } from './routes/api/v1/profile/send-code'
+import { Route as ApiV1PasskeysIdRouteImport } from './routes/api/v1/passkeys/$id'
 import { Route as ApiV1CommentsBatchRouteImport } from './routes/api/v1/comments/batch'
 import { Route as ApiV1CommentsIdRouteImport } from './routes/api/v1/comments/$id'
 import { Route as ApiV1AuthResetPasswordRouteImport } from './routes/api/v1/auth/reset-password'
@@ -23,6 +25,9 @@ import { Route as ApiV1AuthMeRouteImport } from './routes/api/v1/auth/me'
 import { Route as ApiV1AuthLogoutRouteImport } from './routes/api/v1/auth/logout'
 import { Route as ApiV1AuthLoginRouteImport } from './routes/api/v1/auth/login'
 import { Route as ApiV1AuthForgotPasswordRouteImport } from './routes/api/v1/auth/forgot-password'
+import { Route as ApiV1AuthTotpActionRouteImport } from './routes/api/v1/auth/totp/$action'
+import { Route as ApiV1AuthPasskeyAvailableRouteImport } from './routes/api/v1/auth/passkey/available'
+import { Route as ApiV1AuthPasskeyFlowActionRouteImport } from './routes/api/v1/auth/passkey/$flow/$action'
 
 const SplatRoute = SplatRouteImport.update({
   id: '/$',
@@ -44,9 +49,19 @@ const ApiV1ProfileIndexRoute = ApiV1ProfileIndexRouteImport.update({
   path: '/api/v1/profile/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1PasskeysIndexRoute = ApiV1PasskeysIndexRouteImport.update({
+  id: '/api/v1/passkeys/',
+  path: '/api/v1/passkeys/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1ProfileSendCodeRoute = ApiV1ProfileSendCodeRouteImport.update({
   id: '/api/v1/profile/send-code',
   path: '/api/v1/profile/send-code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1PasskeysIdRoute = ApiV1PasskeysIdRouteImport.update({
+  id: '/api/v1/passkeys/$id',
+  path: '/api/v1/passkeys/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1CommentsBatchRoute = ApiV1CommentsBatchRouteImport.update({
@@ -94,6 +109,23 @@ const ApiV1AuthForgotPasswordRoute = ApiV1AuthForgotPasswordRouteImport.update({
   path: '/api/v1/auth/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1AuthTotpActionRoute = ApiV1AuthTotpActionRouteImport.update({
+  id: '/api/v1/auth/totp/$action',
+  path: '/api/v1/auth/totp/$action',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1AuthPasskeyAvailableRoute =
+  ApiV1AuthPasskeyAvailableRouteImport.update({
+    id: '/api/v1/auth/passkey/available',
+    path: '/api/v1/auth/passkey/available',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1AuthPasskeyFlowActionRoute =
+  ApiV1AuthPasskeyFlowActionRouteImport.update({
+    id: '/api/v1/auth/passkey/$flow/$action',
+    path: '/api/v1/auth/passkey/$flow/$action',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -108,8 +140,13 @@ export interface FileRoutesByFullPath {
   '/api/v1/auth/reset-password': typeof ApiV1AuthResetPasswordRoute
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRoute
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
+  '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
+  '/api/v1/passkeys/': typeof ApiV1PasskeysIndexRoute
   '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
+  '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
+  '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
+  '/api/v1/auth/passkey/$flow/$action': typeof ApiV1AuthPasskeyFlowActionRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -124,8 +161,13 @@ export interface FileRoutesByTo {
   '/api/v1/auth/reset-password': typeof ApiV1AuthResetPasswordRoute
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRoute
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
+  '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
+  '/api/v1/passkeys': typeof ApiV1PasskeysIndexRoute
   '/api/v1/profile': typeof ApiV1ProfileIndexRoute
+  '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
+  '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
+  '/api/v1/auth/passkey/$flow/$action': typeof ApiV1AuthPasskeyFlowActionRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -141,8 +183,13 @@ export interface FileRoutesById {
   '/api/v1/auth/reset-password': typeof ApiV1AuthResetPasswordRoute
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRoute
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
+  '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
+  '/api/v1/passkeys/': typeof ApiV1PasskeysIndexRoute
   '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
+  '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
+  '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
+  '/api/v1/auth/passkey/$flow/$action': typeof ApiV1AuthPasskeyFlowActionRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -159,8 +206,13 @@ export interface FileRouteTypes {
     | '/api/v1/auth/reset-password'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
+    | '/api/v1/passkeys/$id'
     | '/api/v1/profile/send-code'
+    | '/api/v1/passkeys/'
     | '/api/v1/profile/'
+    | '/api/v1/auth/passkey/available'
+    | '/api/v1/auth/totp/$action'
+    | '/api/v1/auth/passkey/$flow/$action'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -175,8 +227,13 @@ export interface FileRouteTypes {
     | '/api/v1/auth/reset-password'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
+    | '/api/v1/passkeys/$id'
     | '/api/v1/profile/send-code'
+    | '/api/v1/passkeys'
     | '/api/v1/profile'
+    | '/api/v1/auth/passkey/available'
+    | '/api/v1/auth/totp/$action'
+    | '/api/v1/auth/passkey/$flow/$action'
   id:
     | '__root__'
     | '/'
@@ -191,8 +248,13 @@ export interface FileRouteTypes {
     | '/api/v1/auth/reset-password'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
+    | '/api/v1/passkeys/$id'
     | '/api/v1/profile/send-code'
+    | '/api/v1/passkeys/'
     | '/api/v1/profile/'
+    | '/api/v1/auth/passkey/available'
+    | '/api/v1/auth/totp/$action'
+    | '/api/v1/auth/passkey/$flow/$action'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -208,8 +270,13 @@ export interface RootRouteChildren {
   ApiV1AuthResetPasswordRoute: typeof ApiV1AuthResetPasswordRoute
   ApiV1CommentsIdRoute: typeof ApiV1CommentsIdRoute
   ApiV1CommentsBatchRoute: typeof ApiV1CommentsBatchRoute
+  ApiV1PasskeysIdRoute: typeof ApiV1PasskeysIdRoute
   ApiV1ProfileSendCodeRoute: typeof ApiV1ProfileSendCodeRoute
+  ApiV1PasskeysIndexRoute: typeof ApiV1PasskeysIndexRoute
   ApiV1ProfileIndexRoute: typeof ApiV1ProfileIndexRoute
+  ApiV1AuthPasskeyAvailableRoute: typeof ApiV1AuthPasskeyAvailableRoute
+  ApiV1AuthTotpActionRoute: typeof ApiV1AuthTotpActionRoute
+  ApiV1AuthPasskeyFlowActionRoute: typeof ApiV1AuthPasskeyFlowActionRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -242,11 +309,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1ProfileIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/passkeys/': {
+      id: '/api/v1/passkeys/'
+      path: '/api/v1/passkeys'
+      fullPath: '/api/v1/passkeys/'
+      preLoaderRoute: typeof ApiV1PasskeysIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/profile/send-code': {
       id: '/api/v1/profile/send-code'
       path: '/api/v1/profile/send-code'
       fullPath: '/api/v1/profile/send-code'
       preLoaderRoute: typeof ApiV1ProfileSendCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/passkeys/$id': {
+      id: '/api/v1/passkeys/$id'
+      path: '/api/v1/passkeys/$id'
+      fullPath: '/api/v1/passkeys/$id'
+      preLoaderRoute: typeof ApiV1PasskeysIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/comments/batch': {
@@ -312,6 +393,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1AuthForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/auth/totp/$action': {
+      id: '/api/v1/auth/totp/$action'
+      path: '/api/v1/auth/totp/$action'
+      fullPath: '/api/v1/auth/totp/$action'
+      preLoaderRoute: typeof ApiV1AuthTotpActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/auth/passkey/available': {
+      id: '/api/v1/auth/passkey/available'
+      path: '/api/v1/auth/passkey/available'
+      fullPath: '/api/v1/auth/passkey/available'
+      preLoaderRoute: typeof ApiV1AuthPasskeyAvailableRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/auth/passkey/$flow/$action': {
+      id: '/api/v1/auth/passkey/$flow/$action'
+      path: '/api/v1/auth/passkey/$flow/$action'
+      fullPath: '/api/v1/auth/passkey/$flow/$action'
+      preLoaderRoute: typeof ApiV1AuthPasskeyFlowActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -328,8 +430,13 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1AuthResetPasswordRoute: ApiV1AuthResetPasswordRoute,
   ApiV1CommentsIdRoute: ApiV1CommentsIdRoute,
   ApiV1CommentsBatchRoute: ApiV1CommentsBatchRoute,
+  ApiV1PasskeysIdRoute: ApiV1PasskeysIdRoute,
   ApiV1ProfileSendCodeRoute: ApiV1ProfileSendCodeRoute,
+  ApiV1PasskeysIndexRoute: ApiV1PasskeysIndexRoute,
   ApiV1ProfileIndexRoute: ApiV1ProfileIndexRoute,
+  ApiV1AuthPasskeyAvailableRoute: ApiV1AuthPasskeyAvailableRoute,
+  ApiV1AuthTotpActionRoute: ApiV1AuthTotpActionRoute,
+  ApiV1AuthPasskeyFlowActionRoute: ApiV1AuthPasskeyFlowActionRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

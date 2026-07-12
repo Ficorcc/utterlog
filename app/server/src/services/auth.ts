@@ -83,7 +83,7 @@ function parseInput<T>(schema: z.ZodType<T>, input: unknown): T {
   return parsed.data;
 }
 
-async function authenticatedSession(request: Request) {
+export async function requireAuthenticatedSession(request: Request) {
   try {
     const session = await authenticateRequest(request);
     if (!session) throw new Error('missing token');
@@ -124,6 +124,10 @@ async function authUser(user: AuthUserRow) {
   };
 }
 
+export async function issueAuthSession(user: AuthUserRow) {
+  return { ...(await issueAuthTokens(user)), user: await authUser(user) };
+}
+
 export async function issueAuthTokens(user: AuthUserRow) {
   const access = await signAccessToken(user.id, {
     username: user.username,
@@ -154,7 +158,7 @@ export async function loginWithPassword(input: unknown) {
     await ephemeral.set(`totp-login:${tempToken}`, String(user.id), 300);
     return { require_2fa: true, temp_token: tempToken };
   }
-  return { ...(await issueAuthTokens(user)), user: await authUser(user) };
+  return issueAuthSession(user);
 }
 
 export async function refreshAuthTokens(input: unknown) {
@@ -183,7 +187,7 @@ export async function authenticatedUser(request: Request) {
 }
 
 export async function getProfile(request: Request) {
-  const { userId } = await authenticatedSession(request);
+  const { userId } = await requireAuthenticatedSession(request);
   const user = await one<AuthUserRow>(`select ${authUserColumns} from ${table('users')} where id = $1`, [userId]);
   if (!user) throw new AuthServiceError(401, 'UNAUTHORIZED', '用户不存在');
   const profile = publicAuthUser(user);
@@ -199,7 +203,7 @@ export async function getProfile(request: Request) {
 
 export async function updateProfile(request: Request, input: unknown) {
   const body = parseInput(profileSchema, input);
-  const { userId } = await authenticatedSession(request);
+  const { userId } = await requireAuthenticatedSession(request);
   const current = await one<AuthUserRow>(`select ${authUserColumns} from ${table('users')} where id = $1`, [userId]);
   if (!current) throw new AuthServiceError(401, 'UNAUTHORIZED', '用户不存在');
   const username = String(body.username || current.username).trim();
@@ -228,7 +232,7 @@ export async function updateProfile(request: Request, input: unknown) {
 
 export async function changePassword(request: Request, input: unknown) {
   const body = parseInput(passwordChangeSchema, input);
-  const { userId } = await authenticatedSession(request);
+  const { userId } = await requireAuthenticatedSession(request);
   const verifyCode = String(body.verify_code || body.verifyCode || '').trim();
   if (await ephemeral.get(`email_code:${userId}`) !== verifyCode) {
     throw new AuthServiceError(400, 'INVALID_CODE', '验证码错误或已过期');
@@ -247,7 +251,7 @@ export async function changePassword(request: Request, input: unknown) {
 }
 
 export async function sendProfileVerificationCode(request: Request) {
-  const { userId } = await authenticatedSession(request);
+  const { userId } = await requireAuthenticatedSession(request);
   const user = await one<{ email: string }>(`select email from ${table('users')} where id = $1`, [userId]);
   if (!user?.email) throw new AuthServiceError(400, 'BAD_REQUEST', '用户邮箱不存在');
   const code = String(randomInt(100000, 1000000));
