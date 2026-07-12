@@ -501,18 +501,22 @@ export async function listPostComments(postId: number) {
   return rows.map((row) => ({ ...row, geo: commentGeoFromRow(row.geo) }));
 }
 
-export async function listMoments(params: { page?: number; perPage?: number } = {}) {
+export async function listMoments(params: { page?: number; perPage?: number; authed?: boolean; visibility?: string } = {}) {
   const page = Math.max(1, params.page || 1);
   const perPage = Math.min(500, Math.max(1, params.perPage || 20));
   const offset = (page - 1) * perPage;
+  const visibility = params.authed ? String(params.visibility || '').trim() : 'public';
+  const whereSql = visibility ? 'where visibility = $1' : '';
+  const queryParams: unknown[] = visibility ? [visibility] : [];
   const total = await one<{ count: string }>(
-    `select count(*)::text as count from ${table('moments')} where visibility = 'public'`,
+    `select count(*)::text as count from ${table('moments')} ${whereSql}`,
+    queryParams,
   ).catch(() => null);
   const rows = await many<Record<string, unknown>>(
-    `select * from ${table('moments')} where visibility = 'public'
+    `select * from ${table('moments')} ${whereSql}
      order by is_pinned desc, created_at desc, id desc
-     limit $1 offset $2`,
-    [perPage, offset],
+     limit $${queryParams.length + 1} offset $${queryParams.length + 2}`,
+    [...queryParams, perPage, offset],
   ).catch(() => []);
   const count = Number(total?.count || 0);
   return {

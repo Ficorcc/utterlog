@@ -86,7 +86,7 @@ describe('TanStack Start native API routing', () => {
       const authenticated = isStartNativeApiRequest(new Request(`https://example.test${path}`, {
         headers: { authorization: 'Bearer admin-token' },
       }));
-      expect(authenticated).toBe(['/api/v1/options', '/api/v1/categories', '/api/v1/tags'].includes(path));
+      expect(authenticated).toBe(['/api/v1/options', '/api/v1/categories', '/api/v1/tags', '/api/v1/posts', '/api/v1/moments'].includes(path));
     }
     expect(isStartNativeApiRequest(request('/api/v1/comments', 'GET'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/posts', 'POST'))).toBe(false);
