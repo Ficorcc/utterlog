@@ -22,6 +22,7 @@ const LinksClient = lazy(() => import('@/app/(blog)/links/LinksClient'));
 const FeedsClient = lazy(() => import('@/app/(blog)/feeds/FeedsClient'));
 const AlbumsClient = lazy(() => import('@/app/(blog)/albums/AlbumsClient'));
 const MusicClient = lazy(() => import('@/app/(blog)/music/MusicClient'));
+const AboutContent = lazy(() => import('@/app/(blog)/about/AboutContent'));
 
 const shelfMeta = {
   movies: { title: '电影', subtitle: '我看过的', icon: 'fa-sharp fa-light fa-film', unit: '部电影', imageRatio: '2/3' },
@@ -237,6 +238,12 @@ export function StartLegacyPage({ data }: { data: StartLegacyRouteData }) {
           const theme = getThemeComponents(data.ctx.theme.name);
           const Component = theme.TagPage || DefaultTagPage;
           return <Component tag={data.tag} posts={data.posts} timeZone={data.ctx.timeZone} />;
+        }
+        if (data.kind === 'about') return <AboutContent />;
+        if (data.kind === 'coding') {
+          return data.html
+            ? <div dangerouslySetInnerHTML={{ __html: data.html }} />
+            : <p className="text-dim" style={{ textAlign: 'center', padding: '80px 0' }}>Coding 数据暂时无法加载。</p>;
         }
         if (data.kind === 'footprints') return <FootprintsClient initialRows={data.rows} options={data.options} />;
         if (data.kind === 'moments') return <MomentsClient initialLoaded initialMoments={data.moments} initialTags={data.tags} initialFetchedAt={data.fetchedAt} />;

@@ -1,4 +1,6 @@
 import { createServerFn } from '@tanstack/react-start';
+import { renderToStaticMarkup } from 'react-dom/server';
+import CodingPage from '@/app/(blog)/coding/page';
 import type { ThemeContextData } from '@/lib/theme-context';
 import { datePartsInTimeZone, resolveSiteTimeZone } from '@/lib/timezone';
 import { postDateInput } from '@/lib/post-date';
@@ -37,6 +39,8 @@ export type StartLegacyRouteData =
   | { kind: 'category'; ctx: ThemeContextData; category: any; posts: any[] }
   | { kind: 'tags'; ctx: ThemeContextData }
   | { kind: 'tag'; ctx: ThemeContextData; tag: any; posts: any[] }
+  | { kind: 'about'; ctx: ThemeContextData | null }
+  | { kind: 'coding'; ctx: ThemeContextData | null; html: string }
   | { kind: 'footprints'; ctx: ThemeContextData | null; rows: any[]; options: Record<string, string> }
   | { kind: 'moments'; ctx: ThemeContextData | null; moments: any[]; tags: string[]; fetchedAt: number }
   | { kind: 'client'; ctx: ThemeContextData | null; page: 'links' | 'feeds' | 'albums' | 'music'; items?: any[] }
@@ -223,6 +227,17 @@ export const loadStartLegacyRoute = createServerFn({ method: 'GET' })
       const body = await safe(searchPublicPosts(query, 20), { results: [] as any[], total: 0, mode: 'keyword' });
       const results = body.results || [];
       return { kind: 'search', ctx, query, results, mode: body.mode || '', total: body.total || results.length, timeZone };
+    }
+
+    if (pathname === '/about') return { kind: 'about', ctx };
+
+    if (pathname === '/coding') {
+      const html = await safe(
+        CodingPage().then((element) => renderToStaticMarkup(element)),
+        '',
+        10_000,
+      );
+      return { kind: 'coding', ctx, html };
     }
 
     if (pathname === '/footprints') {

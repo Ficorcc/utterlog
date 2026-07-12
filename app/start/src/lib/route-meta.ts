@@ -6,6 +6,8 @@ const pageTitles: Partial<Record<StartLegacyRouteData['kind'], string>> = {
   tags: '标签',
   footprints: '足迹',
   moments: '说说',
+  about: '关于',
+  coding: 'Coding',
   search: '搜索',
   films: '影视',
 };

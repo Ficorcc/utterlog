@@ -46,10 +46,16 @@ export async function handleStartRequest(request: Request): Promise<Response | n
 
   try {
     const response = await server.fetch(request);
+    const headers = new Headers(response.headers);
+    if (!headers.has('x-utterlog-renderer')) headers.set('x-utterlog-renderer', 'tanstack-start');
     if (method === 'HEAD') {
-      return new Response(null, { status: response.status, headers: response.headers });
+      return new Response(null, { status: response.status, statusText: response.statusText, headers });
     }
-    return response;
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
   } catch (err) {
     console.error('TanStack Start render error:', err);
     return null;
@@ -74,9 +80,12 @@ export function isStartNativeApiRequest(request: Request) {
   if (url.pathname === '/api/v1/passkeys') return method === 'GET';
   if (/^\/api\/v1\/passkeys\/[^/]+$/.test(url.pathname)) return method === 'DELETE';
   if (url.pathname === '/api/v1/visitor/weather') return method === 'GET';
+  if (url.pathname === '/api/v1/coding') return method === 'GET';
+  if (url.pathname === '/api/v1/media/upload-branding') return method === 'POST';
   if (url.pathname === '/api/v1/captcha/challenge' || url.pathname === '/api/v1/captcha/image') return method === 'GET';
   if (method === 'GET' && url.pathname === '/api/v1/comments') return true;
-  if (anonymousGet && ['/api/v1/options', '/api/v1/categories', '/api/v1/tags', '/api/v1/posts', '/api/v1/moments'].includes(url.pathname)) return true;
+  if (url.pathname === '/api/v1/options') return method === 'GET' || method === 'PUT' || method === 'POST';
+  if (anonymousGet && ['/api/v1/categories', '/api/v1/tags', '/api/v1/posts', '/api/v1/moments'].includes(url.pathname)) return true;
   if (url.pathname === '/api/v1/comments' && method === 'POST') return true;
   if (anonymousGet && /^\/api\/v1\/(books|games|goods|links|movies|music|playlists)$/.test(url.pathname)) return true;
   if (anonymousGet && ['/api/v1/owner', '/api/v1/archive/stats', '/api/v1/footprints', '/api/v1/moments/recent-tags', '/api/v1/public/albums'].includes(url.pathname)) return true;

@@ -20,6 +20,7 @@ import { Route as ApiV1PostsRouteImport } from './routes/api/v1/posts'
 import { Route as ApiV1OwnerRouteImport } from './routes/api/v1/owner'
 import { Route as ApiV1OptionsRouteImport } from './routes/api/v1/options'
 import { Route as ApiV1FootprintsRouteImport } from './routes/api/v1/footprints'
+import { Route as ApiV1CodingRouteImport } from './routes/api/v1/coding'
 import { Route as ApiV1CategoriesRouteImport } from './routes/api/v1/categories'
 import { Route as ApiV1ResourceRouteImport } from './routes/api/v1/$resource'
 import { Route as ApiV1ProfileIndexRouteImport } from './routes/api/v1/profile/index'
@@ -31,6 +32,7 @@ import { Route as ApiV1ProfileSendCodeRouteImport } from './routes/api/v1/profil
 import { Route as ApiV1PostsIdRouteImport } from './routes/api/v1/posts/$id'
 import { Route as ApiV1PasskeysIdRouteImport } from './routes/api/v1/passkeys/$id'
 import { Route as ApiV1MomentsRecentTagsRouteImport } from './routes/api/v1/moments/recent-tags'
+import { Route as ApiV1MediaUploadBrandingRouteImport } from './routes/api/v1/media/upload-branding'
 import { Route as ApiV1LinksApplyRouteImport } from './routes/api/v1/links/apply'
 import { Route as ApiV1CommentsPendingCountRouteImport } from './routes/api/v1/comments/pending-count'
 import { Route as ApiV1CommentsBatchRouteImport } from './routes/api/v1/comments/batch'
@@ -114,6 +116,11 @@ const ApiV1FootprintsRoute = ApiV1FootprintsRouteImport.update({
   path: '/api/v1/footprints',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1CodingRoute = ApiV1CodingRouteImport.update({
+  id: '/api/v1/coding',
+  path: '/api/v1/coding',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1CategoriesRoute = ApiV1CategoriesRouteImport.update({
   id: '/api/v1/categories',
   path: '/api/v1/categories',
@@ -169,6 +176,12 @@ const ApiV1MomentsRecentTagsRoute = ApiV1MomentsRecentTagsRouteImport.update({
   path: '/api/v1/moments/recent-tags',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1MediaUploadBrandingRoute =
+  ApiV1MediaUploadBrandingRouteImport.update({
+    id: '/api/v1/media/upload-branding',
+    path: '/api/v1/media/upload-branding',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiV1LinksApplyRoute = ApiV1LinksApplyRouteImport.update({
   id: '/api/v1/links/apply',
   path: '/api/v1/links/apply',
@@ -318,6 +331,7 @@ export interface FileRoutesByFullPath {
   '/posts/$slug': typeof PostsSlugRoute
   '/api/v1/$resource': typeof ApiV1ResourceRoute
   '/api/v1/categories': typeof ApiV1CategoriesRoute
+  '/api/v1/coding': typeof ApiV1CodingRoute
   '/api/v1/footprints': typeof ApiV1FootprintsRoute
   '/api/v1/options': typeof ApiV1OptionsRoute
   '/api/v1/owner': typeof ApiV1OwnerRoute
@@ -337,6 +351,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
   '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
+  '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
@@ -369,6 +384,7 @@ export interface FileRoutesByTo {
   '/posts/$slug': typeof PostsSlugRoute
   '/api/v1/$resource': typeof ApiV1ResourceRoute
   '/api/v1/categories': typeof ApiV1CategoriesRoute
+  '/api/v1/coding': typeof ApiV1CodingRoute
   '/api/v1/footprints': typeof ApiV1FootprintsRoute
   '/api/v1/options': typeof ApiV1OptionsRoute
   '/api/v1/owner': typeof ApiV1OwnerRoute
@@ -388,6 +404,7 @@ export interface FileRoutesByTo {
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
   '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
+  '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
@@ -421,6 +438,7 @@ export interface FileRoutesById {
   '/posts/$slug': typeof PostsSlugRoute
   '/api/v1/$resource': typeof ApiV1ResourceRoute
   '/api/v1/categories': typeof ApiV1CategoriesRoute
+  '/api/v1/coding': typeof ApiV1CodingRoute
   '/api/v1/footprints': typeof ApiV1FootprintsRoute
   '/api/v1/options': typeof ApiV1OptionsRoute
   '/api/v1/owner': typeof ApiV1OwnerRoute
@@ -440,6 +458,7 @@ export interface FileRoutesById {
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
   '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
+  '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/posts/$id': typeof ApiV1PostsIdRouteWithChildren
@@ -474,6 +493,7 @@ export interface FileRouteTypes {
     | '/posts/$slug'
     | '/api/v1/$resource'
     | '/api/v1/categories'
+    | '/api/v1/coding'
     | '/api/v1/footprints'
     | '/api/v1/options'
     | '/api/v1/owner'
@@ -493,6 +513,7 @@ export interface FileRouteTypes {
     | '/api/v1/comments/batch'
     | '/api/v1/comments/pending-count'
     | '/api/v1/links/apply'
+    | '/api/v1/media/upload-branding'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/passkeys/$id'
     | '/api/v1/posts/$id'
@@ -525,6 +546,7 @@ export interface FileRouteTypes {
     | '/posts/$slug'
     | '/api/v1/$resource'
     | '/api/v1/categories'
+    | '/api/v1/coding'
     | '/api/v1/footprints'
     | '/api/v1/options'
     | '/api/v1/owner'
@@ -544,6 +566,7 @@ export interface FileRouteTypes {
     | '/api/v1/comments/batch'
     | '/api/v1/comments/pending-count'
     | '/api/v1/links/apply'
+    | '/api/v1/media/upload-branding'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/passkeys/$id'
     | '/api/v1/posts/$id'
@@ -576,6 +599,7 @@ export interface FileRouteTypes {
     | '/posts/$slug'
     | '/api/v1/$resource'
     | '/api/v1/categories'
+    | '/api/v1/coding'
     | '/api/v1/footprints'
     | '/api/v1/options'
     | '/api/v1/owner'
@@ -595,6 +619,7 @@ export interface FileRouteTypes {
     | '/api/v1/comments/batch'
     | '/api/v1/comments/pending-count'
     | '/api/v1/links/apply'
+    | '/api/v1/media/upload-branding'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/passkeys/$id'
     | '/api/v1/posts/$id'
@@ -628,6 +653,7 @@ export interface RootRouteChildren {
   PostsSlugRoute: typeof PostsSlugRoute
   ApiV1ResourceRoute: typeof ApiV1ResourceRoute
   ApiV1CategoriesRoute: typeof ApiV1CategoriesRoute
+  ApiV1CodingRoute: typeof ApiV1CodingRoute
   ApiV1FootprintsRoute: typeof ApiV1FootprintsRoute
   ApiV1OptionsRoute: typeof ApiV1OptionsRoute
   ApiV1OwnerRoute: typeof ApiV1OwnerRoute
@@ -647,6 +673,7 @@ export interface RootRouteChildren {
   ApiV1CommentsBatchRoute: typeof ApiV1CommentsBatchRoute
   ApiV1CommentsPendingCountRoute: typeof ApiV1CommentsPendingCountRoute
   ApiV1LinksApplyRoute: typeof ApiV1LinksApplyRoute
+  ApiV1MediaUploadBrandingRoute: typeof ApiV1MediaUploadBrandingRoute
   ApiV1MomentsRecentTagsRoute: typeof ApiV1MomentsRecentTagsRoute
   ApiV1PasskeysIdRoute: typeof ApiV1PasskeysIdRoute
   ApiV1ProfileSendCodeRoute: typeof ApiV1ProfileSendCodeRoute
@@ -741,6 +768,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1FootprintsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/coding': {
+      id: '/api/v1/coding'
+      path: '/api/v1/coding'
+      fullPath: '/api/v1/coding'
+      preLoaderRoute: typeof ApiV1CodingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/categories': {
       id: '/api/v1/categories'
       path: '/api/v1/categories'
@@ -816,6 +850,13 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/moments/recent-tags'
       fullPath: '/api/v1/moments/recent-tags'
       preLoaderRoute: typeof ApiV1MomentsRecentTagsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/media/upload-branding': {
+      id: '/api/v1/media/upload-branding'
+      path: '/api/v1/media/upload-branding'
+      fullPath: '/api/v1/media/upload-branding'
+      preLoaderRoute: typeof ApiV1MediaUploadBrandingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/links/apply': {
@@ -1067,6 +1108,7 @@ const rootRouteChildren: RootRouteChildren = {
   PostsSlugRoute: PostsSlugRoute,
   ApiV1ResourceRoute: ApiV1ResourceRoute,
   ApiV1CategoriesRoute: ApiV1CategoriesRoute,
+  ApiV1CodingRoute: ApiV1CodingRoute,
   ApiV1FootprintsRoute: ApiV1FootprintsRoute,
   ApiV1OptionsRoute: ApiV1OptionsRoute,
   ApiV1OwnerRoute: ApiV1OwnerRoute,
@@ -1086,6 +1128,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1CommentsBatchRoute: ApiV1CommentsBatchRoute,
   ApiV1CommentsPendingCountRoute: ApiV1CommentsPendingCountRoute,
   ApiV1LinksApplyRoute: ApiV1LinksApplyRoute,
+  ApiV1MediaUploadBrandingRoute: ApiV1MediaUploadBrandingRoute,
   ApiV1MomentsRecentTagsRoute: ApiV1MomentsRecentTagsRoute,
   ApiV1PasskeysIdRoute: ApiV1PasskeysIdRoute,
   ApiV1ProfileSendCodeRoute: ApiV1ProfileSendCodeRoute,

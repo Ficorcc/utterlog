@@ -18,5 +18,7 @@ describe('TanStack Start route metadata', () => {
   test('names collection and dated archive pages', () => {
     expect(startRouteMeta({ kind: 'moments', ctx, moments: [], tags: [], fetchedAt: 0 }).title).toBe('说说 - 西风');
     expect(startRouteMeta({ kind: 'date', ctx, posts: [], year: 2026, month: 7, timeZone: 'UTC' }).title).toBe('2026/07 归档 - 西风');
+    expect(startRouteMeta({ kind: 'about', ctx }).title).toBe('关于 - 西风');
+    expect(startRouteMeta({ kind: 'coding', ctx, html: '' }).title).toBe('Coding - 西风');
   });
 });

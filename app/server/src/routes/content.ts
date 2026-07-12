@@ -1,6 +1,6 @@
 import type { Hono } from 'hono';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statfsSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, rmSync, statfsSync } from 'node:fs';
 import { cpus, freemem, loadavg, totalmem } from 'node:os';
 import { join, resolve } from 'node:path';
 import { z } from 'zod';
@@ -24,7 +24,6 @@ import { getHostOsInfo, parsePostgresVersion, resolveHostPublicIp } from '../sys
 import { isBotUa } from '../bot-detect';
 import {
   allowedMediaExts,
-  brandingExts,
   detectMediaCategory,
   imageExts,
   mediaExt,
@@ -36,8 +35,7 @@ import {
   testS3Connection,
   validUploadFolders,
 } from '../media/storage';
-import { buildFaviconIco, clearBrandingFaviconFiles, resolveFaviconUrl } from '../media/favicon';
-import { optimizeBrandingLogo } from '../media/branding';
+import { BrandingUploadError, storeBrandingUpload } from '../services/branding';
 import { parsePermalinkPath } from '../services/permalink';
 import {
   adminCommentPendingCounts,
@@ -47,7 +45,7 @@ import {
   replyToAdminComment,
   updateAdminComment,
 } from '../services/comments';
-import { readOptionMap } from '../services/options';
+import { readResolvedOptionMap, writeOptionMap } from '../services/options';
 import {
   createCommentCaptchaChallenge,
   createCommentImageCaptcha,
@@ -81,9 +79,7 @@ async function isAdmin(userId: number) {
 }
 
 async function optionMap(includeSensitive: boolean) {
-  const result = await readOptionMap(includeSensitive);
-  if (result.site_favicon) result.site_favicon = resolveFaviconUrl(result.site_favicon);
-  return result;
+  return readResolvedOptionMap(includeSensitive);
 }
 
 function gravatarUrlForEmail(email: string, size = 64) {
@@ -2249,32 +2245,12 @@ export function registerContentRoutes(app: Hono) {
   app.get('/api/v1/options', optionalAuth, async (c) => ok(c, await optionMap(await isAdmin(currentUserId(c)))));
   app.put('/api/v1/options', auth, async (c) => {
     const body = await c.req.json().catch(() => ({}));
-    const now = nowUnix();
-    for (const [key, raw] of Object.entries(body)) {
-      let value = typeof raw === 'string' ? raw : String(raw ?? '');
-      if (key === 'site_favicon') value = resolveFaviconUrl(value) || value;
-      await exec(
-        `insert into ${table('options')} (name, value, created_at, updated_at)
-         values ($1,$2,$3,$3)
-         on conflict (name) do update set value = excluded.value, updated_at = excluded.updated_at`,
-        [key, value, now],
-      );
-    }
+    await writeOptionMap(body);
     return ok(c, null);
   });
   app.post('/api/v1/options', auth, async (c) => {
     const body = await c.req.json().catch(() => ({}));
-    const now = nowUnix();
-    for (const [key, raw] of Object.entries(body)) {
-      let value = String(raw ?? '');
-      if (key === 'site_favicon') value = resolveFaviconUrl(value) || value;
-      await exec(
-        `insert into ${table('options')} (name, value, created_at, updated_at)
-         values ($1,$2,$3,$3)
-         on conflict (name) do update set value = excluded.value, updated_at = excluded.updated_at`,
-        [key, value, now],
-      );
-    }
+    await writeOptionMap(body);
     return ok(c, null);
   });
 
@@ -2701,47 +2677,11 @@ export function registerContentRoutes(app: Hono) {
   app.post('/api/v1/media/upload-branding', auth, async (c) => {
     const form = await c.req.formData();
     const file = form.get('file');
-    const purpose = String(form.get('purpose') || 'logo').replace(/[^a-zA-Z0-9_-]/g, '');
     if (!(file instanceof File)) return badRequest(c, 'file 不能为空');
-    if (!['logo', 'dark-logo', 'favicon'].includes(purpose)) return badRequest(c, 'purpose 必须为 logo、dark-logo 或 favicon');
-    const ext = mediaExt(file.name, 'png');
-    if (!brandingExts.has(ext)) return badRequest(c, '不支持的图片格式，请使用 PNG/JPG/GIF/WebP/AVIF/ICO/SVG');
-    if (file.size > 5 * 1024 * 1024) return badRequest(c, '文件大小不能超过 5MB');
-    const dir = join(config.uploadDir, 'branding');
-    mkdirSync(dir, { recursive: true });
-    const bytes = Buffer.from(await file.arrayBuffer());
-
-    if (purpose === 'favicon') {
-      try {
-        const ico = await buildFaviconIco(bytes, ext);
-        clearBrandingFaviconFiles(dir, rmSync);
-        await Bun.write(join(dir, 'favicon.ico'), ico);
-        return ok(c, { url: '/favicon.ico', filename: 'favicon.ico', purpose });
-      } catch (err) {
-        return badRequest(c, err instanceof Error ? err.message : 'Favicon 转换失败');
-      }
-    }
-
     try {
-      const optimized = await optimizeBrandingLogo(bytes, ext);
-      const filename = `${purpose}.${optimized.ext}`;
-      for (const oldExt of brandingExts) {
-        if (oldExt === optimized.ext) continue;
-        rmSync(join(dir, `${purpose}.${oldExt}`), { force: true });
-      }
-      await Bun.write(join(dir, filename), optimized.bytes);
-      return ok(c, {
-        url: `/${filename}?v=${Date.now()}`,
-        filename,
-        purpose,
-        format: optimized.ext,
-        width: optimized.width,
-        height: optimized.height,
-        size: optimized.bytes.length,
-        original_size: bytes.length,
-      });
+      return ok(c, await storeBrandingUpload(file, form.get('purpose')));
     } catch (err) {
-      return badRequest(c, err instanceof Error ? `Logo 转换失败：${err.message}` : 'Logo 转换失败');
+      return badRequest(c, err instanceof BrandingUploadError ? err.message : '品牌图片上传失败');
     }
   });
   app.post('/api/v1/media/download-url', auth, async (c) => {

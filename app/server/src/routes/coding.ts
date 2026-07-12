@@ -418,9 +418,8 @@ function activityDays(events: CodingActivity[], repos: CodingRepo[], selected: S
     });
 }
 
-async function codingPayload(c: Context) {
+export async function codingPayload(includeRepos = false) {
   const enabled = (await optionValue('page_coding', 'true')) !== 'false';
-  const includeRepos = new URL(c.req.url).searchParams.get('include_repos') === 'true' && currentUserId(c) > 0;
   const { source, raw } = await resolveCodingSources();
   const seenOwners = new Set<string>();
   const sourceRepos = new Set<string>();
@@ -541,5 +540,8 @@ async function codingPayload(c: Context) {
 }
 
 export function registerCodingRoutes(app: Hono) {
-  app.get('/api/v1/coding', optionalAuth, async (c) => ok(c, await codingPayload(c)));
+  app.get('/api/v1/coding', optionalAuth, async (c) => {
+    const includeRepos = new URL(c.req.url).searchParams.get('include_repos') === 'true' && currentUserId(c) > 0;
+    return ok(c, await codingPayload(includeRepos));
+  });
 }

@@ -54,6 +54,16 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/visitor/weather', 'POST'))).toBe(false);
   });
 
+  test('routes coding data to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/coding', 'GET'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/coding', 'POST'))).toBe(false);
+  });
+
+  test('routes branding uploads to Start', () => {
+    expect(isStartNativeApiRequest(request('/api/v1/media/upload-branding', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/media/upload-branding', 'GET'))).toBe(false);
+  });
+
   test('routes comment captcha generation to Start', () => {
     expect(isStartNativeApiRequest(request('/api/v1/captcha/challenge', 'GET'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/captcha/image', 'GET'))).toBe(true);
@@ -63,12 +73,15 @@ describe('TanStack Start native API routing', () => {
   test('routes anonymous public reads to Start while retaining authenticated admin reads', () => {
     for (const path of ['/api/v1/options', '/api/v1/categories', '/api/v1/tags', '/api/v1/posts', '/api/v1/moments', '/api/v1/links']) {
       expect(isStartNativeApiRequest(request(path, 'GET'))).toBe(true);
-      expect(isStartNativeApiRequest(new Request(`https://example.test${path}`, {
+      const authenticated = isStartNativeApiRequest(new Request(`https://example.test${path}`, {
         headers: { authorization: 'Bearer admin-token' },
-      }))).toBe(false);
+      }));
+      expect(authenticated).toBe(path === '/api/v1/options');
     }
     expect(isStartNativeApiRequest(request('/api/v1/comments', 'GET'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/posts', 'POST'))).toBe(false);
+    expect(isStartNativeApiRequest(request('/api/v1/options', 'PUT'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/options', 'POST'))).toBe(true);
   });
 
   test('routes authenticated comment list reads to Start for admin filtering', () => {
