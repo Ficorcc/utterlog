@@ -44,6 +44,10 @@ export async function handleStartRequest(request: Request): Promise<Response | n
 export function isStartNativeApiRequest(request: Request) {
   const url = new URL(request.url);
   const method = request.method.toUpperCase();
+  if (url.pathname === '/api/v1/auth/login' || url.pathname === '/api/v1/auth/refresh' || url.pathname === '/api/v1/auth/logout') {
+    return method === 'POST';
+  }
+  if (url.pathname === '/api/v1/auth/me') return method === 'GET';
   if (url.pathname === '/api/v1/comments/batch') return method === 'POST';
   if (/^\/api\/v1\/comments\/\d+$/.test(url.pathname)) {
     return method === 'PUT' || method === 'PATCH' || method === 'DELETE';

@@ -3,6 +3,7 @@ import { table } from './config';
 import { exec, intParam, many, nowUnix, one } from './db/helpers';
 import { optionValue } from './db/options';
 import { parsePermalinkPath } from './services/permalink';
+import { readOptionMap } from './services/options';
 
 type MetaType = 'category' | 'tag';
 type PublicContentTable = 'albums' | 'books' | 'games' | 'goods' | 'links' | 'movies' | 'music' | 'playlists';
@@ -167,11 +168,7 @@ async function attachPostRelations(rows: Record<string, unknown>[], detail = fal
 }
 
 export async function getOptionsMap() {
-  const rows = await many<{ name: string; value: string }>(`select name, value from ${table('options')} order by name asc`).catch(() => []);
-  const result: Record<string, string> = {};
-  for (const row of rows) result[row.name] = row.value;
-  result.site_timezone_effective = result.site_timezone || 'UTC';
-  return result;
+  return readOptionMap(false);
 }
 
 export async function getOwnerPublic() {

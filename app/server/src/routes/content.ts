@@ -40,12 +40,11 @@ import {
 import { buildFaviconIco, clearBrandingFaviconFiles, resolveFaviconUrl } from '../media/favicon';
 import { parsePermalinkPath } from '../services/permalink';
 import { approveAdminComment, batchAdminComments, deleteAdminComment, updateAdminComment } from '../services/comments';
+import { readOptionMap } from '../services/options';
 
 const contentTables = new Set(['moments', 'music', 'movies', 'books', 'games', 'videos', 'goods', 'links', 'playlists']);
 const writableTables = new Set([...contentTables, 'posts', 'comments', 'media', 'albums', 'notifications']);
 const readableTables = new Set([...writableTables]);
-const sensitiveSuffixes = ['_api_key', '_secret', '_token', '_pass', '_password', '_access_key', '_secret_key'];
-const publicOptionAllowlist = new Set(['mapbox_access_token', 'footprint_mapbox_token', 'mapbox_api_url']);
 
 const linkApplySchema = z.object({
   name: nonEmptyString(150),
@@ -61,13 +60,6 @@ function searchParams(c: any) {
   return new URL(c.req.url).searchParams as URLSearchParams;
 }
 
-function isSensitiveOption(name: string) {
-  const key = name.trim().toLowerCase();
-  if (!key || publicOptionAllowlist.has(key)) return false;
-  if (['smtp_pass', 's3_access_key', 's3_secret_key'].includes(key)) return true;
-  return sensitiveSuffixes.some((suffix) => key.endsWith(suffix));
-}
-
 async function isAdmin(userId: number) {
   if (!userId) return false;
   const row = await one<{ role: string }>(`select role from ${table('users')} where id = $1`, [userId]);
@@ -75,13 +67,7 @@ async function isAdmin(userId: number) {
 }
 
 async function optionMap(includeSensitive: boolean) {
-  const rows = await many<{ name: string; value: string }>(`select name, value from ${table('options')} order by name asc`);
-  const result: Record<string, string> = {};
-  for (const row of rows) {
-    if (!includeSensitive && isSensitiveOption(row.name)) continue;
-    result[row.name] = row.value;
-  }
-  result.site_timezone_effective = result.site_timezone || 'UTC';
+  const result = await readOptionMap(includeSensitive);
   if (result.site_favicon) result.site_favicon = resolveFaviconUrl(result.site_favicon);
   return result;
 }

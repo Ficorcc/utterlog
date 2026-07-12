@@ -14,6 +14,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostsSlugRouteImport } from './routes/posts/$slug'
 import { Route as ApiV1CommentsBatchRouteImport } from './routes/api/v1/comments/batch'
 import { Route as ApiV1CommentsIdRouteImport } from './routes/api/v1/comments/$id'
+import { Route as ApiV1AuthRefreshRouteImport } from './routes/api/v1/auth/refresh'
+import { Route as ApiV1AuthMeRouteImport } from './routes/api/v1/auth/me'
+import { Route as ApiV1AuthLogoutRouteImport } from './routes/api/v1/auth/logout'
+import { Route as ApiV1AuthLoginRouteImport } from './routes/api/v1/auth/login'
 
 const SplatRoute = SplatRouteImport.update({
   id: '/$',
@@ -40,11 +44,35 @@ const ApiV1CommentsIdRoute = ApiV1CommentsIdRouteImport.update({
   path: '/api/v1/comments/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1AuthRefreshRoute = ApiV1AuthRefreshRouteImport.update({
+  id: '/api/v1/auth/refresh',
+  path: '/api/v1/auth/refresh',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1AuthMeRoute = ApiV1AuthMeRouteImport.update({
+  id: '/api/v1/auth/me',
+  path: '/api/v1/auth/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1AuthLogoutRoute = ApiV1AuthLogoutRouteImport.update({
+  id: '/api/v1/auth/logout',
+  path: '/api/v1/auth/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1AuthLoginRoute = ApiV1AuthLoginRouteImport.update({
+  id: '/api/v1/auth/login',
+  path: '/api/v1/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/posts/$slug': typeof PostsSlugRoute
+  '/api/v1/auth/login': typeof ApiV1AuthLoginRoute
+  '/api/v1/auth/logout': typeof ApiV1AuthLogoutRoute
+  '/api/v1/auth/me': typeof ApiV1AuthMeRoute
+  '/api/v1/auth/refresh': typeof ApiV1AuthRefreshRoute
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRoute
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
 }
@@ -52,6 +80,10 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/posts/$slug': typeof PostsSlugRoute
+  '/api/v1/auth/login': typeof ApiV1AuthLoginRoute
+  '/api/v1/auth/logout': typeof ApiV1AuthLogoutRoute
+  '/api/v1/auth/me': typeof ApiV1AuthMeRoute
+  '/api/v1/auth/refresh': typeof ApiV1AuthRefreshRoute
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRoute
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
 }
@@ -60,6 +92,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/posts/$slug': typeof PostsSlugRoute
+  '/api/v1/auth/login': typeof ApiV1AuthLoginRoute
+  '/api/v1/auth/logout': typeof ApiV1AuthLogoutRoute
+  '/api/v1/auth/me': typeof ApiV1AuthMeRoute
+  '/api/v1/auth/refresh': typeof ApiV1AuthRefreshRoute
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRoute
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
 }
@@ -69,6 +105,10 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/posts/$slug'
+    | '/api/v1/auth/login'
+    | '/api/v1/auth/logout'
+    | '/api/v1/auth/me'
+    | '/api/v1/auth/refresh'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
   fileRoutesByTo: FileRoutesByTo
@@ -76,6 +116,10 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/posts/$slug'
+    | '/api/v1/auth/login'
+    | '/api/v1/auth/logout'
+    | '/api/v1/auth/me'
+    | '/api/v1/auth/refresh'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
   id:
@@ -83,6 +127,10 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/posts/$slug'
+    | '/api/v1/auth/login'
+    | '/api/v1/auth/logout'
+    | '/api/v1/auth/me'
+    | '/api/v1/auth/refresh'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
   fileRoutesById: FileRoutesById
@@ -91,6 +139,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
   PostsSlugRoute: typeof PostsSlugRoute
+  ApiV1AuthLoginRoute: typeof ApiV1AuthLoginRoute
+  ApiV1AuthLogoutRoute: typeof ApiV1AuthLogoutRoute
+  ApiV1AuthMeRoute: typeof ApiV1AuthMeRoute
+  ApiV1AuthRefreshRoute: typeof ApiV1AuthRefreshRoute
   ApiV1CommentsIdRoute: typeof ApiV1CommentsIdRoute
   ApiV1CommentsBatchRoute: typeof ApiV1CommentsBatchRoute
 }
@@ -132,6 +184,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1CommentsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/auth/refresh': {
+      id: '/api/v1/auth/refresh'
+      path: '/api/v1/auth/refresh'
+      fullPath: '/api/v1/auth/refresh'
+      preLoaderRoute: typeof ApiV1AuthRefreshRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/auth/me': {
+      id: '/api/v1/auth/me'
+      path: '/api/v1/auth/me'
+      fullPath: '/api/v1/auth/me'
+      preLoaderRoute: typeof ApiV1AuthMeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/auth/logout': {
+      id: '/api/v1/auth/logout'
+      path: '/api/v1/auth/logout'
+      fullPath: '/api/v1/auth/logout'
+      preLoaderRoute: typeof ApiV1AuthLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/auth/login': {
+      id: '/api/v1/auth/login'
+      path: '/api/v1/auth/login'
+      fullPath: '/api/v1/auth/login'
+      preLoaderRoute: typeof ApiV1AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -139,6 +219,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
   PostsSlugRoute: PostsSlugRoute,
+  ApiV1AuthLoginRoute: ApiV1AuthLoginRoute,
+  ApiV1AuthLogoutRoute: ApiV1AuthLogoutRoute,
+  ApiV1AuthMeRoute: ApiV1AuthMeRoute,
+  ApiV1AuthRefreshRoute: ApiV1AuthRefreshRoute,
   ApiV1CommentsIdRoute: ApiV1CommentsIdRoute,
   ApiV1CommentsBatchRoute: ApiV1CommentsBatchRoute,
 }

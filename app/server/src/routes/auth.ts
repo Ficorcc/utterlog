@@ -1,43 +1,19 @@
 import type { Hono } from 'hono';
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import { z } from 'zod';
 import { config, table } from '../config';
 import { many, nowUnix, one } from '../db/helpers';
 import { optionValue } from '../db/options';
 import { sendConfiguredEmail } from '../email';
 import { badRequest, ok, unauthorized } from '../http/response';
-import { nonEmptyString, parseJson } from '../http/validation';
+import { parseJson } from '../http/validation';
 import { auth, currentUserId } from '../auth/middleware';
-import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../auth/jwt';
 import { createPasswordResetToken, hashPasswordResetToken } from '../auth/password-reset';
 import { ephemeral } from '../store/ephemeral';
+import { authenticatedUser, AuthServiceError, authUserColumns, loginWithPassword, publicAuthUser, refreshAuthTokens, type AuthUserRow } from '../services/auth';
 
-type UserRow = {
-  id: number;
-  username: string;
-  email: string;
-  password: string;
-  nickname: string | null;
-  avatar: string | null;
-  bio?: string | null;
-  url?: string | null;
-  role: string;
-  status: string;
-  totp_enabled?: boolean;
-  utterlog_id?: string | null;
-  utterlog_avatar?: string | null;
-};
-
-const userColumns = 'id, username, email, password, nickname, avatar, bio, url, role, status, coalesce(totp_enabled, false) as totp_enabled, coalesce(utterlog_id, \'\') as utterlog_id, coalesce(utterlog_avatar, \'\') as utterlog_avatar';
-
-const loginSchema = z.object({
-  email: nonEmptyString(320),
-  password: z.string().min(1).max(1024),
-});
-
-const refreshSchema = z.object({
-  refresh_token: nonEmptyString(4096),
-});
+type UserRow = AuthUserRow;
+const userColumns = authUserColumns;
 
 const profileSchema = z.object({
   username: z.string().trim().min(1).max(80).optional(),
@@ -77,19 +53,7 @@ const resetPasswordSchema = z.object({
   .refine((body) => body.password || body.new_password || body.newPassword, '新密码至少需要 8 个字符');
 
 function publicUser(user: UserRow) {
-  return {
-    id: user.id,
-    username: user.username,
-    email: user.email,
-    nickname: user.nickname || user.username,
-    avatar: user.avatar || '',
-    bio: user.bio || '',
-    url: user.url || '',
-    role: user.role,
-    totp_enabled: !!user.totp_enabled,
-    utterlog_id: user.utterlog_id || '',
-    utterlog_avatar: user.utterlog_avatar || '',
-  };
+  return publicAuthUser(user);
 }
 
 function emailHash(email: string) {
@@ -100,73 +64,29 @@ function gravatarUrl(email: string, size = 128) {
   return `https://gravatar.bluecdn.com/avatar/${emailHash(email)}?s=${size}&d=mp`;
 }
 
-function utterlogAvatarUrl(email: string) {
-  return `https://id.utterlog.com/avatar/${emailHash(email)}`;
-}
-
-async function authUser(user: UserRow) {
-  const source = await optionValue('avatar_source', 'gravatar');
-  return {
-    ...publicUser(user),
-    avatar: source === 'utterlog' ? utterlogAvatarUrl(user.email) : gravatarUrl(user.email, 128),
-  };
-}
-
-async function issueTokens(user: UserRow) {
-  const data = {
-    username: user.username,
-    email: user.email,
-    role: user.role,
-    nickname: user.nickname || user.username,
-  };
-  const access = await signAccessToken(user.id, data);
-  const refresh = await signRefreshToken(user.id);
-  return {
-    access_token: access.token,
-    refresh_token: refresh,
-    expires_in: 86400,
-    expires_at: access.expiresAt,
-    token_type: 'Bearer',
-  };
-}
-
 export function registerAuthRoutes(app: Hono) {
   app.post('/api/v1/auth/login', async (c) => {
-    const parsed = await parseJson(c, loginSchema);
-    if (!parsed.ok) return parsed.response;
-    const { email, password } = parsed.data;
-    const user = await one<UserRow>(`select ${userColumns} from ${table('users')} where email = $1`, [email]);
-    if (!user) return unauthorized(c, '账号不存在');
-    const valid = await Bun.password.verify(password, user.password).catch(() => false);
-    if (!valid) return unauthorized(c, '密码错误');
-    if (user.totp_enabled) {
-      const tempToken = randomBytes(32).toString('hex');
-      await ephemeral.set(`totp-login:${tempToken}`, String(user.id), 300);
-      return ok(c, { require_2fa: true, temp_token: tempToken });
+    try {
+      return ok(c, await loginWithPassword(await c.req.json().catch(() => ({}))));
+    } catch (err) {
+      if (err instanceof AuthServiceError) return err.status === 401 ? unauthorized(c, err.message) : badRequest(c, err.message, err.code);
+      throw err;
     }
-    return ok(c, { ...(await issueTokens(user)), user: await authUser(user) });
   });
 
   app.post('/api/v1/auth/refresh', async (c) => {
-    const parsed = await parseJson(c, refreshSchema);
-    if (!parsed.ok) return parsed.response;
-    const token = parsed.data.refresh_token;
     try {
-      const { userId } = await verifyRefreshToken(token);
-      const user = await one<UserRow>(`select ${userColumns} from ${table('users')} where id = $1`, [userId]);
-      if (!user) return unauthorized(c, '用户不存在');
-      return ok(c, await issueTokens(user));
-    } catch {
-      return unauthorized(c, 'Refresh Token 无效');
+      return ok(c, await refreshAuthTokens(await c.req.json().catch(() => ({}))));
+    } catch (err) {
+      if (err instanceof AuthServiceError) return err.status === 401 ? unauthorized(c, err.message) : badRequest(c, err.message, err.code);
+      throw err;
     }
   });
 
   app.post('/api/v1/auth/logout', auth, (c) => ok(c, null));
 
   app.get('/api/v1/auth/me', auth, async (c) => {
-    const user = await one<UserRow>(`select ${userColumns} from ${table('users')} where id = $1`, [currentUserId(c)]);
-    if (!user) return unauthorized(c, '用户不存在');
-    return ok(c, await authUser(user));
+    return ok(c, await authenticatedUser(c.req.raw));
   });
 
   app.get('/api/v1/profile', auth, async (c) => {
