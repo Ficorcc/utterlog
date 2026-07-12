@@ -22,6 +22,21 @@ async function startServer() {
   return mod.default?.fetch ? mod.default : null;
 }
 
+export async function preloadStartServer() {
+  if (!startFrontendEnabled()) return false;
+  return Boolean(await startServer());
+}
+
+export async function warmStartFrontend(origin: string) {
+  if (!startFrontendEnabled()) return false;
+  const response = await fetch(new URL('/', origin), {
+    headers: { 'x-utterlog-warmup': '1' },
+    signal: AbortSignal.timeout(15_000),
+  });
+  await response.arrayBuffer();
+  return response.ok;
+}
+
 export async function handleStartRequest(request: Request): Promise<Response | null> {
   if (!startFrontendEnabled()) return null;
   const method = request.method.toUpperCase();
