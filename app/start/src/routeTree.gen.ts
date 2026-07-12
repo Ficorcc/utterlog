@@ -29,6 +29,7 @@ import { Route as ApiV1PostsIdRouteImport } from './routes/api/v1/posts/$id'
 import { Route as ApiV1PasskeysIdRouteImport } from './routes/api/v1/passkeys/$id'
 import { Route as ApiV1MomentsRecentTagsRouteImport } from './routes/api/v1/moments/recent-tags'
 import { Route as ApiV1LinksApplyRouteImport } from './routes/api/v1/links/apply'
+import { Route as ApiV1CommentsPendingCountRouteImport } from './routes/api/v1/comments/pending-count'
 import { Route as ApiV1CommentsBatchRouteImport } from './routes/api/v1/comments/batch'
 import { Route as ApiV1CommentsIdRouteImport } from './routes/api/v1/comments/$id'
 import { Route as ApiV1AuthResetPasswordRouteImport } from './routes/api/v1/auth/reset-password'
@@ -46,7 +47,9 @@ import { Route as ApiV1PostsByDisplayIdDisplayIdRouteImport } from './routes/api
 import { Route as ApiV1PostsIdNavigationRouteImport } from './routes/api/v1/posts/$id/navigation'
 import { Route as ApiV1PostsIdEpisodesRouteImport } from './routes/api/v1/posts/$id/episodes'
 import { Route as ApiV1PostsIdCommentsRouteImport } from './routes/api/v1/posts/$id/comments'
+import { Route as ApiV1CommentsIdReplyRouteImport } from './routes/api/v1/comments/$id/reply'
 import { Route as ApiV1CommentsIdEditRouteImport } from './routes/api/v1/comments/$id/edit'
+import { Route as ApiV1CommentsIdApproveRouteImport } from './routes/api/v1/comments/$id/approve'
 import { Route as ApiV1AuthTotpActionRouteImport } from './routes/api/v1/auth/totp/$action'
 import { Route as ApiV1AuthPasskeyAvailableRouteImport } from './routes/api/v1/auth/passkey/available'
 import { Route as ApiV1AuthPasskeyFlowActionRouteImport } from './routes/api/v1/auth/passkey/$flow/$action'
@@ -151,6 +154,12 @@ const ApiV1LinksApplyRoute = ApiV1LinksApplyRouteImport.update({
   path: '/api/v1/links/apply',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1CommentsPendingCountRoute =
+  ApiV1CommentsPendingCountRouteImport.update({
+    id: '/api/v1/comments/pending-count',
+    path: '/api/v1/comments/pending-count',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiV1CommentsBatchRoute = ApiV1CommentsBatchRouteImport.update({
   id: '/api/v1/comments/batch',
   path: '/api/v1/comments/batch',
@@ -237,9 +246,19 @@ const ApiV1PostsIdCommentsRoute = ApiV1PostsIdCommentsRouteImport.update({
   path: '/comments',
   getParentRoute: () => ApiV1PostsIdRoute,
 } as any)
+const ApiV1CommentsIdReplyRoute = ApiV1CommentsIdReplyRouteImport.update({
+  id: '/reply',
+  path: '/reply',
+  getParentRoute: () => ApiV1CommentsIdRoute,
+} as any)
 const ApiV1CommentsIdEditRoute = ApiV1CommentsIdEditRouteImport.update({
   id: '/edit',
   path: '/edit',
+  getParentRoute: () => ApiV1CommentsIdRoute,
+} as any)
+const ApiV1CommentsIdApproveRoute = ApiV1CommentsIdApproveRouteImport.update({
+  id: '/approve',
+  path: '/approve',
   getParentRoute: () => ApiV1CommentsIdRoute,
 } as any)
 const ApiV1AuthTotpActionRoute = ApiV1AuthTotpActionRouteImport.update({
@@ -281,6 +300,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/auth/reset-password': typeof ApiV1AuthResetPasswordRoute
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRouteWithChildren
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
+  '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
@@ -293,7 +313,9 @@ export interface FileRoutesByFullPath {
   '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
   '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
+  '/api/v1/comments/$id/approve': typeof ApiV1CommentsIdApproveRoute
   '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
+  '/api/v1/comments/$id/reply': typeof ApiV1CommentsIdReplyRoute
   '/api/v1/posts/$id/comments': typeof ApiV1PostsIdCommentsRoute
   '/api/v1/posts/$id/episodes': typeof ApiV1PostsIdEpisodesRoute
   '/api/v1/posts/$id/navigation': typeof ApiV1PostsIdNavigationRoute
@@ -324,6 +346,7 @@ export interface FileRoutesByTo {
   '/api/v1/auth/reset-password': typeof ApiV1AuthResetPasswordRoute
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRouteWithChildren
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
+  '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
@@ -336,7 +359,9 @@ export interface FileRoutesByTo {
   '/api/v1/profile': typeof ApiV1ProfileIndexRoute
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
   '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
+  '/api/v1/comments/$id/approve': typeof ApiV1CommentsIdApproveRoute
   '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
+  '/api/v1/comments/$id/reply': typeof ApiV1CommentsIdReplyRoute
   '/api/v1/posts/$id/comments': typeof ApiV1PostsIdCommentsRoute
   '/api/v1/posts/$id/episodes': typeof ApiV1PostsIdEpisodesRoute
   '/api/v1/posts/$id/navigation': typeof ApiV1PostsIdNavigationRoute
@@ -368,6 +393,7 @@ export interface FileRoutesById {
   '/api/v1/auth/reset-password': typeof ApiV1AuthResetPasswordRoute
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRouteWithChildren
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
+  '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
   '/api/v1/links/apply': typeof ApiV1LinksApplyRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
@@ -380,7 +406,9 @@ export interface FileRoutesById {
   '/api/v1/profile/': typeof ApiV1ProfileIndexRoute
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
   '/api/v1/auth/totp/$action': typeof ApiV1AuthTotpActionRoute
+  '/api/v1/comments/$id/approve': typeof ApiV1CommentsIdApproveRoute
   '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
+  '/api/v1/comments/$id/reply': typeof ApiV1CommentsIdReplyRoute
   '/api/v1/posts/$id/comments': typeof ApiV1PostsIdCommentsRoute
   '/api/v1/posts/$id/episodes': typeof ApiV1PostsIdEpisodesRoute
   '/api/v1/posts/$id/navigation': typeof ApiV1PostsIdNavigationRoute
@@ -413,6 +441,7 @@ export interface FileRouteTypes {
     | '/api/v1/auth/reset-password'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
+    | '/api/v1/comments/pending-count'
     | '/api/v1/links/apply'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/passkeys/$id'
@@ -425,7 +454,9 @@ export interface FileRouteTypes {
     | '/api/v1/profile/'
     | '/api/v1/auth/passkey/available'
     | '/api/v1/auth/totp/$action'
+    | '/api/v1/comments/$id/approve'
     | '/api/v1/comments/$id/edit'
+    | '/api/v1/comments/$id/reply'
     | '/api/v1/posts/$id/comments'
     | '/api/v1/posts/$id/episodes'
     | '/api/v1/posts/$id/navigation'
@@ -456,6 +487,7 @@ export interface FileRouteTypes {
     | '/api/v1/auth/reset-password'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
+    | '/api/v1/comments/pending-count'
     | '/api/v1/links/apply'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/passkeys/$id'
@@ -468,7 +500,9 @@ export interface FileRouteTypes {
     | '/api/v1/profile'
     | '/api/v1/auth/passkey/available'
     | '/api/v1/auth/totp/$action'
+    | '/api/v1/comments/$id/approve'
     | '/api/v1/comments/$id/edit'
+    | '/api/v1/comments/$id/reply'
     | '/api/v1/posts/$id/comments'
     | '/api/v1/posts/$id/episodes'
     | '/api/v1/posts/$id/navigation'
@@ -499,6 +533,7 @@ export interface FileRouteTypes {
     | '/api/v1/auth/reset-password'
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
+    | '/api/v1/comments/pending-count'
     | '/api/v1/links/apply'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/passkeys/$id'
@@ -511,7 +546,9 @@ export interface FileRouteTypes {
     | '/api/v1/profile/'
     | '/api/v1/auth/passkey/available'
     | '/api/v1/auth/totp/$action'
+    | '/api/v1/comments/$id/approve'
     | '/api/v1/comments/$id/edit'
+    | '/api/v1/comments/$id/reply'
     | '/api/v1/posts/$id/comments'
     | '/api/v1/posts/$id/episodes'
     | '/api/v1/posts/$id/navigation'
@@ -543,6 +580,7 @@ export interface RootRouteChildren {
   ApiV1AuthResetPasswordRoute: typeof ApiV1AuthResetPasswordRoute
   ApiV1CommentsIdRoute: typeof ApiV1CommentsIdRouteWithChildren
   ApiV1CommentsBatchRoute: typeof ApiV1CommentsBatchRoute
+  ApiV1CommentsPendingCountRoute: typeof ApiV1CommentsPendingCountRoute
   ApiV1LinksApplyRoute: typeof ApiV1LinksApplyRoute
   ApiV1MomentsRecentTagsRoute: typeof ApiV1MomentsRecentTagsRoute
   ApiV1PasskeysIdRoute: typeof ApiV1PasskeysIdRoute
@@ -701,6 +739,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1LinksApplyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/comments/pending-count': {
+      id: '/api/v1/comments/pending-count'
+      path: '/api/v1/comments/pending-count'
+      fullPath: '/api/v1/comments/pending-count'
+      preLoaderRoute: typeof ApiV1CommentsPendingCountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/comments/batch': {
       id: '/api/v1/comments/batch'
       path: '/api/v1/comments/batch'
@@ -820,11 +865,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1PostsIdCommentsRouteImport
       parentRoute: typeof ApiV1PostsIdRoute
     }
+    '/api/v1/comments/$id/reply': {
+      id: '/api/v1/comments/$id/reply'
+      path: '/reply'
+      fullPath: '/api/v1/comments/$id/reply'
+      preLoaderRoute: typeof ApiV1CommentsIdReplyRouteImport
+      parentRoute: typeof ApiV1CommentsIdRoute
+    }
     '/api/v1/comments/$id/edit': {
       id: '/api/v1/comments/$id/edit'
       path: '/edit'
       fullPath: '/api/v1/comments/$id/edit'
       preLoaderRoute: typeof ApiV1CommentsIdEditRouteImport
+      parentRoute: typeof ApiV1CommentsIdRoute
+    }
+    '/api/v1/comments/$id/approve': {
+      id: '/api/v1/comments/$id/approve'
+      path: '/approve'
+      fullPath: '/api/v1/comments/$id/approve'
+      preLoaderRoute: typeof ApiV1CommentsIdApproveRouteImport
       parentRoute: typeof ApiV1CommentsIdRoute
     }
     '/api/v1/auth/totp/$action': {
@@ -884,11 +943,15 @@ const ApiV1PostsRouteWithChildren = ApiV1PostsRoute._addFileChildren(
 )
 
 interface ApiV1CommentsIdRouteChildren {
+  ApiV1CommentsIdApproveRoute: typeof ApiV1CommentsIdApproveRoute
   ApiV1CommentsIdEditRoute: typeof ApiV1CommentsIdEditRoute
+  ApiV1CommentsIdReplyRoute: typeof ApiV1CommentsIdReplyRoute
 }
 
 const ApiV1CommentsIdRouteChildren: ApiV1CommentsIdRouteChildren = {
+  ApiV1CommentsIdApproveRoute: ApiV1CommentsIdApproveRoute,
   ApiV1CommentsIdEditRoute: ApiV1CommentsIdEditRoute,
+  ApiV1CommentsIdReplyRoute: ApiV1CommentsIdReplyRoute,
 }
 
 const ApiV1CommentsIdRouteWithChildren = ApiV1CommentsIdRoute._addFileChildren(
@@ -916,6 +979,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1AuthResetPasswordRoute: ApiV1AuthResetPasswordRoute,
   ApiV1CommentsIdRoute: ApiV1CommentsIdRouteWithChildren,
   ApiV1CommentsBatchRoute: ApiV1CommentsBatchRoute,
+  ApiV1CommentsPendingCountRoute: ApiV1CommentsPendingCountRoute,
   ApiV1LinksApplyRoute: ApiV1LinksApplyRoute,
   ApiV1MomentsRecentTagsRoute: ApiV1MomentsRecentTagsRoute,
   ApiV1PasskeysIdRoute: ApiV1PasskeysIdRoute,

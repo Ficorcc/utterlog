@@ -23,10 +23,10 @@ export function apiPaginated(data: unknown, pagination: { total: number; page: n
   });
 }
 
-export async function withAdmin(request: Request, handler: () => Promise<Response>) {
+export async function withAdmin(request: Request, handler: (session: { userId: number; role: string }) => Promise<Response>) {
   try {
-    await requireAdminRequest(request);
-    return await handler();
+    const session = await requireAdminRequest(request);
+    return await handler(session);
   } catch (err) {
     if (err instanceof AuthRequestError) {
       return apiFail(err.status, err.status === 403 ? 'FORBIDDEN' : 'UNAUTHORIZED', err.message);

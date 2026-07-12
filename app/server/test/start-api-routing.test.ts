@@ -11,6 +11,9 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/comments/42', 'PUT'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/comments/42', 'PATCH'))).toBe(true);
     expect(isStartNativeApiRequest(request('/api/v1/comments/42', 'DELETE'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/comments/42/approve', 'PATCH'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/comments/42/reply', 'POST'))).toBe(true);
+    expect(isStartNativeApiRequest(request('/api/v1/comments/pending-count', 'GET'))).toBe(true);
   });
 
   test('routes core authentication endpoints to Start', () => {
@@ -75,9 +78,8 @@ describe('TanStack Start native API routing', () => {
     expect(isStartNativeApiRequest(request('/api/v1/comments/7/edit', 'GET'))).toBe(false);
   });
 
-  test('keeps public creation, replies, and reads on the compatibility API', () => {
+  test('keeps public creation and authenticated reads on the compatibility API', () => {
     expect(isStartNativeApiRequest(request('/api/v1/comments', 'POST'))).toBe(false);
-    expect(isStartNativeApiRequest(request('/api/v1/comments/42/reply', 'POST'))).toBe(false);
     expect(isStartNativeApiRequest(request('/api/v1/comments/42', 'GET'))).toBe(false);
   });
 });

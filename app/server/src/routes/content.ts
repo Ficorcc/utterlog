@@ -1,5 +1,5 @@
 import type { Hono } from 'hono';
-import { createHash, createHmac, randomUUID } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statfsSync } from 'node:fs';
 import { cpus, freemem, loadavg, totalmem } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -39,7 +39,14 @@ import {
 } from '../media/storage';
 import { buildFaviconIco, clearBrandingFaviconFiles, resolveFaviconUrl } from '../media/favicon';
 import { parsePermalinkPath } from '../services/permalink';
-import { approveAdminComment, batchAdminComments, deleteAdminComment, updateAdminComment } from '../services/comments';
+import {
+  adminCommentPendingCounts,
+  approveAdminComment,
+  batchAdminComments,
+  deleteAdminComment,
+  replyToAdminComment,
+  updateAdminComment,
+} from '../services/comments';
 import { readOptionMap } from '../services/options';
 
 const contentTables = new Set(['moments', 'music', 'movies', 'books', 'games', 'videos', 'goods', 'links', 'playlists']);
@@ -437,34 +444,6 @@ const aiBotUserAgents = [
   'DuckAssistBot',
   'Diffbot',
 ];
-
-async function commentReplyUnsubscribeSecret() {
-  let secret = (await optionValue('unsubscribe_secret', '')).trim();
-  if (!secret) {
-    secret = createHash('sha256').update(randomUUID()).digest('hex');
-    await saveOption('unsubscribe_secret', secret);
-  }
-  return secret;
-}
-
-async function commentReplyUnsubscribeUrl(siteUrl: string, email: string) {
-  const normalized = email.trim().toLowerCase();
-  if (!normalized) return '';
-  const enc = Buffer.from(normalized).toString('base64url');
-  const sig = createHmac('sha256', await commentReplyUnsubscribeSecret()).update(`comment_reply:${normalized}`).digest('base64url').slice(0, 22);
-  return `${siteUrl.replace(/\/+$/, '')}/api/v1/unsubscribe/comment-reply?e=${enc}&t=${sig}`;
-}
-
-async function isCommentReplyOptedOut(email: string) {
-  const normalized = email.trim().toLowerCase();
-  if (!normalized) return false;
-  try {
-    const optouts = JSON.parse(await optionValue('comment_reply_optouts_v1', '{}')) as Record<string, unknown>;
-    return Object.prototype.hasOwnProperty.call(optouts, normalized);
-  } catch {
-    return false;
-  }
-}
 
 async function captchaMode() {
   const mode = (await optionValue('comment_captcha_mode', '')).trim();
@@ -2886,51 +2865,13 @@ export function registerContentRoutes(app: Hono) {
     return updated ? ok(c, updated) : notFound(c, 'comment not found');
   });
   app.post('/api/v1/comments/:id/reply', auth, async (c) => {
-    const parentId = intParam(c.req.param('id'));
-    const parent = await one<{ post_id: number; author_name: string; author_email: string | null; content: string; user_id: number | null; role: string | null }>(
-      `select c.post_id, c.author_name, c.author_email, c.content, c.user_id, coalesce(u.role,'') as role
-       from ${table('comments')} c left join ${table('users')} u on u.id = c.user_id where c.id = $1`,
-      [parentId],
-    );
-    if (!parent) return notFound(c, 'comment not found');
     const body = await c.req.json().catch(() => ({}));
-    const admin = await one<{ email: string; username: string; nickname: string | null }>(
-      `select email, username, nickname from ${table('users')} where id = $1`,
-      [currentUserId(c)],
-    ).catch(() => null);
-    const id = await genericCreate('comments', {
-      post_id: parent.post_id,
-      parent_id: parentId,
-      user_id: currentUserId(c),
-      author_name: admin?.nickname || admin?.username || 'Admin',
-      author_email: admin?.email || '',
-      content: body.content || '',
-      status: 'approved',
-      source: 'local',
-    });
-    await exec(`update ${table('posts')} set comment_count = comment_count + 1 where id = $1`, [parent.post_id]).catch(() => {});
-    const recipient = String(parent.author_email || '').trim().toLowerCase();
-    if (recipient && parent.role !== 'admin' && recipient !== String(admin?.email || '').trim().toLowerCase() && !(await isCommentReplyOptedOut(recipient))) {
-      const post = await one<{ title: string; slug: string | null }>(`select title, slug from ${table('posts')} where id = $1`, [parent.post_id]).catch(() => null);
-      const siteTitle = await optionValue('site_title', 'Utterlog');
-      const siteUrl = (await optionValue('site_url', config.appUrl)).replace(/\/+$/, '');
-      const postUrl = `${siteUrl}/posts/${encodeURIComponent(post?.slug || String(parent.post_id))}#comment-${id}`;
-      const unsubscribe = await commentReplyUnsubscribeUrl(siteUrl, recipient);
-      const preview = String(body.content || '').slice(0, 500);
-      const original = String(parent.content || '').slice(0, 300);
-      await sendConfiguredEmail(
-        recipient,
-        `你的评论收到了回复 - ${siteTitle}`,
-        `<div style="font:14px/1.7 -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;color:#0d1a2d">
-          <p>${htmlEscape(parent.author_name || '你好')}，你在《${htmlEscape(post?.title || '')}》下的评论收到了回复。</p>
-          <blockquote style="margin:12px 0;padding:10px 14px;background:#f5f7fa;border-left:3px solid #cdd5df;color:#5a6b7f">${htmlEscape(original)}</blockquote>
-          <div style="margin:12px 0;padding:12px 14px;background:#fff;border:1px solid #e5eaf0">${htmlEscape(preview)}</div>
-          <p><a href="${htmlEscape(postUrl)}">查看回复</a></p>
-          <p style="font-size:12px;color:#8ea0b4">不想再收到回复通知？<a href="${htmlEscape(unsubscribe)}">点击此处退订</a>。</p>
-        </div>`,
-      ).catch(() => {});
+    try {
+      const result = await replyToAdminComment(intParam(c.req.param('id')), currentUserId(c), body);
+      return result ? ok(c, result) : notFound(c, 'comment not found');
+    } catch (err) {
+      return badRequest(c, err instanceof Error ? err.message : '回复失败');
     }
-    return ok(c, { id });
   });
   app.delete('/api/v1/comments/:id', auth, async (c) => {
     const result = await deleteAdminComment(intParam(c.req.param('id')));
@@ -2950,12 +2891,7 @@ export function registerContentRoutes(app: Hono) {
     }
   });
   app.get('/api/v1/comments/pending-count', auth, async (c) => {
-    const [pending, spam] = await Promise.all([
-      one<{ count: string }>(`select count(*)::text as count from ${table('comments')} where status = 'pending'`),
-      one<{ count: string }>(`select count(*)::text as count from ${table('comments')} where status = 'spam'`),
-    ]);
-    const pendingCount = Number(pending?.count || 0);
-    return ok(c, { count: pendingCount, pending: pendingCount, spam: Number(spam?.count || 0) });
+    return ok(c, await adminCommentPendingCounts());
   });
 
   app.get('/api/v1/media', auth, async (c) => {
