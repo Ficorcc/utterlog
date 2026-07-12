@@ -37,6 +37,7 @@ import {
   validUploadFolders,
 } from '../media/storage';
 import { buildFaviconIco, clearBrandingFaviconFiles, resolveFaviconUrl } from '../media/favicon';
+import { optimizeBrandingLogo } from '../media/branding';
 import { parsePermalinkPath } from '../services/permalink';
 import {
   adminCommentPendingCounts,
@@ -2721,13 +2722,27 @@ export function registerContentRoutes(app: Hono) {
       }
     }
 
-    const filename = `${purpose}.${ext}`;
-    for (const oldExt of brandingExts) {
-      if (oldExt === ext) continue;
-      rmSync(join(dir, `${purpose}.${oldExt}`), { force: true });
+    try {
+      const optimized = await optimizeBrandingLogo(bytes, ext);
+      const filename = `${purpose}.${optimized.ext}`;
+      for (const oldExt of brandingExts) {
+        if (oldExt === optimized.ext) continue;
+        rmSync(join(dir, `${purpose}.${oldExt}`), { force: true });
+      }
+      await Bun.write(join(dir, filename), optimized.bytes);
+      return ok(c, {
+        url: `/${filename}?v=${Date.now()}`,
+        filename,
+        purpose,
+        format: optimized.ext,
+        width: optimized.width,
+        height: optimized.height,
+        size: optimized.bytes.length,
+        original_size: bytes.length,
+      });
+    } catch (err) {
+      return badRequest(c, err instanceof Error ? `Logo 转换失败：${err.message}` : 'Logo 转换失败');
     }
-    await Bun.write(join(dir, filename), bytes);
-    return ok(c, { url: `/${filename}`, filename, purpose });
   });
   app.post('/api/v1/media/download-url', auth, async (c) => {
     const body = await c.req.json().catch(() => ({}));

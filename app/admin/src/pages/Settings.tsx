@@ -636,7 +636,7 @@ export default function SettingsPage() {
                 <FormRowInputC label={t('admin.settings.general.siteSince', '建站时间')} type="date" register={register('site_since')} hint={t('admin.settings.general.siteSinceHint', '留空则从第一篇文章算起。站点描述和关键词请到 SEO 与 AI tab 设置。')} last />
               </FormSectionC>
 
-              <FormSectionC title={t('admin.settings.branding.section', 'Logo & Favicon')} icon="fa-regular fa-image" footerHint={t('admin.settings.branding.footer', 'Logo 原样保存；Favicon 上传 PNG/JPG/SVG 等格式后自动转为 /favicon.ico。')}>
+              <FormSectionC title={t('admin.settings.branding.section', 'Logo & Favicon')} icon="fa-regular fa-image" footerHint={t('admin.settings.branding.footer', 'Logo 与深色 Logo 自动按比例压缩到 512×512 以内并转为 WebP；Favicon 自动生成多尺寸 /favicon.ico。')}>
                 <div style={{ padding: '16px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
                   {([
                     { label: t('admin.settings.branding.siteLogo', '网站 Logo'), field: 'site_logo', purpose: 'logo' as const, placeholder: 'https://...' },
