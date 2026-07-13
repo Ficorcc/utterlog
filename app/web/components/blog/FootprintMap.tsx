@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef } from 'react';
-import mapboxgl from 'mapbox-gl';
+import type mapboxgl from 'mapbox-gl';
 import { useThemeContext } from '@/lib/theme-context';
 
 type FootprintPoint = {
@@ -78,26 +78,33 @@ export default function FootprintMap({
 
   useEffect(() => {
     if (!token || !mapRef.current) return;
-    mapboxgl.accessToken = token;
-    (mapboxgl as any).config.API_URL = (apiUrl || '').trim().replace(/\/+$/, '') || 'https://api.mapbox.com';
+    let disposed = false;
 
-    if (mapObjRef.current) {
-      mapObjRef.current.remove();
-      mapObjRef.current = null;
-    }
+    const initializeMap = async () => {
+      const module = await import('mapbox-gl');
+      const mapbox = module.default;
+      if (disposed || !mapRef.current) return;
 
-    const map = new mapboxgl.Map({
-      container: mapRef.current,
-      style: mapStyle,
-      center,
-      zoom,
-      minZoom: 1,
-      maxZoom: 12,
-      attributionControl: false,
-      renderWorldCopies: false,
-    });
-    map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right');
-    mapObjRef.current = map;
+      mapbox.accessToken = token;
+      (mapbox as any).config.API_URL = (apiUrl || '').trim().replace(/\/+$/, '') || 'https://api.mapbox.com';
+
+      if (mapObjRef.current) {
+        mapObjRef.current.remove();
+        mapObjRef.current = null;
+      }
+
+      const map = new mapbox.Map({
+        container: mapRef.current,
+        style: mapStyle,
+        center,
+        zoom,
+        minZoom: 1,
+        maxZoom: 12,
+        attributionControl: false,
+        renderWorldCopies: false,
+      });
+      map.addControl(new mapbox.NavigationControl({ showCompass: false }), 'bottom-right');
+      mapObjRef.current = map;
 
     map.on('load', () => {
       if (countryCodes.length > 0) {
@@ -141,7 +148,7 @@ export default function FootprintMap({
         } as any, labelLayer?.id);
       }
 
-      const bounds = new mapboxgl.LngLatBounds();
+      const bounds = new mapbox.LngLatBounds();
       coords.forEach(({ point, points: markerPoints, lngLat }) => {
         const el = document.createElement('div');
         el.className = 'footprint-map-marker';
@@ -190,9 +197,9 @@ export default function FootprintMap({
             popup.appendChild(card);
           });
 
-        new mapboxgl.Marker({ element: el, anchor: 'center' })
+        new mapbox.Marker({ element: el, anchor: 'center' })
           .setLngLat(lngLat)
-          .setPopup(new mapboxgl.Popup({ offset: 16, maxWidth: '360px', className: 'footprint-mapbox-popup' }).setDOMContent(popup))
+          .setPopup(new mapbox.Popup({ offset: 16, maxWidth: '360px', className: 'footprint-mapbox-popup' }).setDOMContent(popup))
           .addTo(map);
         bounds.extend(lngLat);
       });
@@ -202,10 +209,14 @@ export default function FootprintMap({
       } else if (coords.length > 1) {
         map.fitBounds(bounds, { padding: 56, maxZoom: 6, duration: 0 });
       }
-    });
+      });
+    };
+
+    void initializeMap();
 
     return () => {
-      map.remove();
+      disposed = true;
+      mapObjRef.current?.remove();
       mapObjRef.current = null;
     };
   }, [token, apiUrl, center[0], center[1], zoom, coordsKey, countryCodesKey, mapStyle]);

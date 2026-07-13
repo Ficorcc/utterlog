@@ -17,7 +17,7 @@ const mappings: Mapping[] = [
   {
     label: 'web app routes',
     oldRoot: '/Users/gentpan/projects/utterlog/web/app',
-    newRoot: 'app/web/app',
+    newRoot: 'app/start/src/routes',
   },
   {
     label: 'web themes',
