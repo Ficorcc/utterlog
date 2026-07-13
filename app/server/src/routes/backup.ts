@@ -12,6 +12,25 @@ import { publicStorageUrl, putStorageObject, storageSettings } from '../media/st
 
 const backupDir = process.env.BACKUP_DIR || 'backups';
 
+// 用站点时区（site_timezone）格式化时间戳，供备份文件名 / 列表展示用。
+// 之前直接 new Date().toISOString() 取的是 UTC，中国站点显示的时间会
+// 比"实际"早 8 小时，看着像"创建于未来/过去"。这里读 ul_options 里
+// 配置的 site_timezone（默认 UTC）来格式化。
+async function backupTimestamp(date = new Date()): Promise<string> {
+  const timeZone = (await optionValue('site_timezone', 'UTC')).trim() || 'UTC';
+  try {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone,
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+    }).formatToParts(date);
+    const get = (t: string) => parts.find(p => p.type === t)?.value || '';
+    return `${get('year')}${get('month')}${get('day')}-${get('hour')}${get('minute')}${get('second')}`;
+  } catch {
+    return date.toISOString().replace(/[-:]/g, '').replace(/\..+/, '').replace('T', '-');
+  }
+}
+
 async function runCommand(cmd: string[]) {
   const proc = Bun.spawn(cmd, { stdout: 'pipe', stderr: 'pipe', env: { ...process.env, PGPASSWORD: config.dbPassword } });
   const [stdout, stderr, code] = await Promise.all([
@@ -161,7 +180,7 @@ async function configuredBackupDestination() {
 async function createBackupArchive(options: { includeUploads?: boolean } = {}) {
   const includeUploads = options.includeUploads !== false;
   mkdirSync(backupDir, { recursive: true });
-  const ts = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '').replace('T', '-');
+  const ts = await backupTimestamp();
   const filename = `utterlog-backup-${ts}.zip`;
   const dbDumpPath = join(backupDir, `db-${ts}.sql`);
   const dump = await runCommand([
@@ -287,8 +306,22 @@ export function registerBackupRoutes(app: Hono) {
       backup_count: backups.length,
     });
   });
-  app.get('/api/v1/backup/list', auth, (c) => {
+  app.get('/api/v1/backup/list', auth, async (c) => {
     mkdirSync(backupDir, { recursive: true });
+    // 文件 mtime 用站点时区展示（和文件名里的创建时间一致）。
+    const timeZone = (await optionValue('site_timezone', 'UTC')).trim() || 'UTC';
+    const fmtTime = (date: Date) => {
+      try {
+        const parts = new Intl.DateTimeFormat('en-CA', {
+          timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
+          hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+        }).formatToParts(date);
+        const get = (t: string) => parts.find(p => p.type === t)?.value || '';
+        return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}:${get('second')}`;
+      } catch {
+        return date.toISOString().replace('T', ' ').slice(0, 19);
+      }
+    };
     const items = readdirSync(backupDir)
       .filter((name) => name.endsWith('.zip'))
       .map((name) => {
@@ -297,7 +330,7 @@ export function registerBackupRoutes(app: Hono) {
         return {
           filename: name,
           size: stat.size,
-          created: stat.mtime.toISOString().replace('T', ' ').slice(0, 19),
+          created: fmtTime(stat.mtime),
           url: `${config.appUrl.replace(/\/$/, '')}/api/v1/backup/download/${encodeURIComponent(name)}`,
         };
       })
