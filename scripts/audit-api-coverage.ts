@@ -16,11 +16,11 @@ type Route = {
 
 const frontendRoots = [
   'app/admin/src',
-  'app/web/app',
   'app/web/components',
   'app/web/hooks',
   'app/web/lib',
   'app/web/themes',
+  'app/start/src',
 ];
 const routeRoots = ['app/server/src/routes', 'app/server/src/static'];
 const originalMain = '/Users/gentpan/projects/utterlog/api/main.go';
@@ -78,6 +78,7 @@ function expandRouteTemplate(path: string) {
 function extractFrontendEndpoints() {
   const endpoints: Endpoint[] = [];
   for (const root of frontendRoots) {
+    if (!existsSync(root)) continue;
     for (const file of walk(root, ['.ts', '.tsx'])) {
       const text = readFileSync(file, 'utf8');
       const rel = relative(process.cwd(), file);
@@ -103,6 +104,7 @@ function extractFrontendEndpoints() {
 function extractBunRoutes() {
   const routes: Route[] = [];
   for (const root of routeRoots) {
+    if (!existsSync(root)) continue;
     for (const file of walk(root, ['.ts'])) {
       const text = readFileSync(file, 'utf8');
       const rel = relative(process.cwd(), file);
@@ -125,6 +127,24 @@ function extractBunRoutes() {
   }
   const key = (r: Route) => `${r.method} ${r.path}`;
   return [...new Map(routes.map((r) => [key(r), r])).values()].sort((a, b) => `${a.method} ${a.path}`.localeCompare(`${b.method} ${b.path}`));
+}
+
+const startApiRoot = 'app/start/src/routes/api/v1';
+
+function extractStartRoutes() {
+  if (!existsSync(startApiRoot)) return [] as Route[];
+  return walk(startApiRoot, ['.ts']).map((file) => {
+    const rel = relative(startApiRoot, file).replace(/\\/g, '/').replace(/\.ts$/, '');
+    const parts = rel.split('/');
+    const last = parts.pop() || '';
+    if (last !== 'index') parts.push(last);
+    const path = `/api/v1/${parts.join('/')}`
+      .replace(/\$([A-Za-z0-9_]+)/g, ':$1')
+      .replace(/\[\.\]/g, '.')
+      .replace(/\/+/g, '/')
+      .replace(/\/index$/, '');
+    return { method: 'ALL', path: normalizeDynamic(path), file: relative(process.cwd(), file) };
+  });
 }
 
 function quotedList(input: string) {
@@ -197,7 +217,7 @@ function routeMatches(endpoint: Endpoint, route: Route) {
 }
 
 const endpoints = extractFrontendEndpoints();
-const routes = extractBunRoutes();
+const routes = [...extractBunRoutes(), ...extractStartRoutes()];
 const goRoutes = extractGoRoutes();
 const missing = endpoints.filter((endpoint) => !routes.some((route) => routeMatches(endpoint, route)));
 const missingGoRoutes = goRoutes.filter((goRoute) => !routes.some((route) => route.method === goRoute.method && routeRegex(route.path).test(goRoute.path)));

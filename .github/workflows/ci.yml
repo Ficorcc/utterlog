@@ -13,6 +13,20 @@ jobs:
   app:
     name: Bun app + frontend builds
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg18
+        env:
+          POSTGRES_USER: utterlog_test
+          POSTGRES_PASSWORD: utterlog_test
+          POSTGRES_DB: utterlog_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U utterlog_test -d utterlog_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
     steps:
       - uses: actions/checkout@v5
 
@@ -38,7 +52,18 @@ jobs:
         run: bun run start:build
 
       - name: Test Bun services and Start contracts
+        env:
+          UTTERLOG_INTEGRATION_DB: '1'
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_NAME: utterlog_test
+          DB_USER: utterlog_test
+          DB_PASSWORD: utterlog_test
+          JWT_SECRET: test-secret-for-server-tests
         run: bun run test:server
+
+      - name: Audit API coverage
+        run: bun run audit:api
 
       - name: Sync theme styles
         working-directory: app/web
