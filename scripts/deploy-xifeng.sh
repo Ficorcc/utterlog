@@ -149,8 +149,8 @@ preflight() {
   log "Preflight: admin build (Vite 8)"
   (cd app/admin && bun run build)
 
-  log "Preflight: blog client bundle"
-  bun run build:blog-client
+  log "Preflight: TanStack Start build"
+  bun run start:build
 
   if [ "$SKIP_TESTS" -eq 0 ]; then
     log "Preflight: server tests"
