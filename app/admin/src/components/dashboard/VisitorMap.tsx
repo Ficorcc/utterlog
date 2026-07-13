@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import api from '@/lib/api';
 
@@ -16,8 +15,8 @@ interface MapPoint {
 
 export default function VisitorMap({ period }: { period: string }) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapObjRef = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const mapObjRef = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
   const [points, setPoints] = useState<MapPoint[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
   const [mapboxToken, setMapboxToken] = useState('');
@@ -52,15 +51,20 @@ export default function VisitorMap({ period }: { period: string }) {
     // 没配 Mapbox token 就不初始化，避免 "An API access token is required" 异常
     // 冒泡到 React 导致整个 Analytics 页白屏
     if (!mapboxToken) return;
-    mapboxgl.accessToken = mapboxToken;
-    (mapboxgl as any).config.API_URL = mapboxApiUrl || 'https://api.mapbox.com';
-    // 清理旧实例（HMR 热更新时）
-    if (mapObjRef.current) {
-      mapObjRef.current.remove();
-      mapObjRef.current = null;
-    }
+    let cancelled = false;
+    let map: any = null;
+    const initialize = async () => {
+      const mapboxgl = await import('mapbox-gl');
+      if (cancelled || !mapRef.current) return;
+      mapboxgl.default.accessToken = mapboxToken;
+      (mapboxgl.default as any).config.API_URL = mapboxApiUrl || 'https://api.mapbox.com';
+      // 清理旧实例（HMR 热更新时）
+      if (mapObjRef.current) {
+        mapObjRef.current.remove();
+        mapObjRef.current = null;
+      }
 
-    const map = new mapboxgl.Map({
+      map = new mapboxgl.default.Map({
       container: mapRef.current,
       style: 'mapbox://styles/mapbox/light-v11',
       center: [105, 20],
@@ -74,14 +78,14 @@ export default function VisitorMap({ period }: { period: string }) {
       dragPan: true,
       scrollZoom: true,
       touchZoomRotate: true,
-    });
+      });
 
-    map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right');
-    map.dragPan.enable();
-    map.touchZoomRotate.enable();
-    mapObjRef.current = map;
+      map.addControl(new mapboxgl.default.NavigationControl({ showCompass: false }), 'bottom-right');
+      map.dragPan.enable();
+      map.touchZoomRotate.enable();
+      mapObjRef.current = map;
 
-    map.on('load', () => {
+      map.on('load', () => {
       map.resize();
       // 国家填充层（用 Mapbox 内置的 country boundaries）
       try {
@@ -104,14 +108,14 @@ export default function VisitorMap({ period }: { period: string }) {
       } catch (error) {
         console.warn('[VisitorMap] optional country layer failed', error);
       }
-    });
+      });
 
     // SPA 切到 /admin/analytics 时，容器布局往往还没稳定（侧栏过渡 /
     // 卡片高度变化 / 异步加载子组件等），地图会用一个早期的不正确
     // 宽高初始化 canvas，之后再也不刷新 —— 表现就是"打开页面地图空
     // 白，强制刷新才能正常渲染"。监听容器尺寸变化主动调 resize。
-    let ro: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== 'undefined' && mapRef.current) {
+      let ro: ResizeObserver | null = null;
+      if (typeof ResizeObserver !== 'undefined' && mapRef.current) {
       ro = new ResizeObserver(() => {
         // requestAnimationFrame 合并多次回调，避免拖窗口时高频触发
         requestAnimationFrame(() => {
@@ -119,19 +123,27 @@ export default function VisitorMap({ period }: { period: string }) {
         });
       });
       ro.observe(mapRef.current);
-    }
+      }
 
     // 兜底：mount 后下一帧 + 200ms 各 resize 一次，处理一些极端情况
     // 下 ResizeObserver 不会触发的初始布局抖动
-    const raf = requestAnimationFrame(() => mapObjRef.current?.resize());
-    const t = window.setTimeout(() => mapObjRef.current?.resize(), 200);
+      const raf = requestAnimationFrame(() => mapObjRef.current?.resize());
+      const t = window.setTimeout(() => mapObjRef.current?.resize(), 200);
+
+      cleanup = () => {
+        cancelAnimationFrame(raf);
+        window.clearTimeout(t);
+        ro?.disconnect();
+        map?.remove();
+        mapObjRef.current = null;
+      };
+    };
+    let cleanup = () => {};
+    initialize().catch((error) => console.warn('[VisitorMap] Mapbox load failed', error));
 
     return () => {
-      cancelAnimationFrame(raf);
-      window.clearTimeout(t);
-      if (ro) ro.disconnect();
-      map.remove();
-      mapObjRef.current = null;
+      cancelled = true;
+      cleanup();
     };
   }, [mapboxToken, mapboxApiUrl]);
 
@@ -140,7 +152,8 @@ export default function VisitorMap({ period }: { period: string }) {
     const map = mapObjRef.current;
     if (!map) return;
 
-    const update = () => {
+    const update = async () => {
+      const mapboxgl = await import('mapbox-gl');
       try {
         for (const m of markersRef.current) m.remove();
       markersRef.current = [];
@@ -173,7 +186,7 @@ export default function VisitorMap({ period }: { period: string }) {
         if (!matched) continue;
         const el = document.createElement('div');
         el.style.cssText = 'width:12px;height:12px;border-radius:50%;background:#22c55e;border:2px solid #fff;box-shadow:0 0 8px rgba(34,197,94,0.6);';
-        const marker = new mapboxgl.Marker({ element: el })
+        const marker = new mapboxgl.default.Marker({ element: el })
           .setLngLat([matched.lon, matched.lat])
           .addTo(map);
         markersRef.current.push(marker);
