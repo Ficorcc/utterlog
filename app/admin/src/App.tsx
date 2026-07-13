@@ -5,6 +5,7 @@ import { useAuthStore } from '@/lib/store';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import { Spinner } from '@/components/ui';
 import { loadSiteOptions } from '@/lib/site';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 /**
  * ChunkErrorBoundary — auto-reloads the page when a lazy-loaded chunk 404s.
@@ -134,14 +135,16 @@ function AuthGate() {
   }
   return (
     <DashboardLayout>
-      <ChunkErrorBoundary>
+      <ErrorBoundary>
+        <ChunkErrorBoundary>
         {/* Suspense fallback：之前用 <RouteLoading />（全屏 overlay）会让
             每次路由切换都闪一下；改成透明占位 + 顶部细进度条 —— 侧栏 /
             头部保持可见，仅内容区轻微闪动，体感顺滑很多。 */}
         <Suspense fallback={<RouteFallback />}>
           <Outlet />
         </Suspense>
-      </ChunkErrorBoundary>
+        </ChunkErrorBoundary>
+      </ErrorBoundary>
     </DashboardLayout>
   );
 }

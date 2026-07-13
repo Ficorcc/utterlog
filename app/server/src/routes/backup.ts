@@ -9,6 +9,20 @@ import { publicStorageUrl, putStorageObject, storageSettings } from '../media/st
 
 const backupDir = process.env.BACKUP_DIR || 'backups';
 
+async function backupTimestamp(date = new Date()) {
+  const timeZone = (await optionValue('site_timezone', 'UTC')).trim() || 'UTC';
+  try {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+    }).formatToParts(date);
+    const get = (type: string) => parts.find((part) => part.type === type)?.value || '';
+    return `${get('year')}${get('month')}${get('day')}-${get('hour')}${get('minute')}${get('second')}`;
+  } catch {
+    return date.toISOString().replace(/[-:]/g, '').replace(/\..+/, '').replace('T', '-');
+  }
+}
+
 async function runCommand(cmd: string[]) {
   const proc = Bun.spawn(cmd, { stdout: 'pipe', stderr: 'pipe', env: { ...process.env, PGPASSWORD: config.dbPassword } });
   const [stdout, stderr, code] = await Promise.all([
@@ -158,7 +172,7 @@ async function configuredBackupDestination() {
 async function createBackupArchive(options: { includeUploads?: boolean } = {}) {
   const includeUploads = options.includeUploads !== false;
   mkdirSync(backupDir, { recursive: true });
-  const ts = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '').replace('T', '-');
+  const ts = await backupTimestamp();
   const filename = `utterlog-backup-${ts}.zip`;
   const dbDumpPath = join(backupDir, `db-${ts}.sql`);
   const dump = await runCommand([
@@ -286,12 +300,25 @@ export async function backupStatsPayload() {
     content_size: formatBytes(contentBytes), content_bytes: contentBytes, backup_count: backups.length };
 }
 
-export function backupListPayload() {
+export async function backupListPayload() {
   mkdirSync(backupDir, { recursive: true });
+  const timeZone = (await optionValue('site_timezone', 'UTC')).trim() || 'UTC';
+  const formatTime = (date: Date) => {
+    try {
+      const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+      }).formatToParts(date);
+      const get = (type: string) => parts.find((part) => part.type === type)?.value || '';
+      return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}:${get('second')}`;
+    } catch {
+      return date.toISOString().replace('T', ' ').slice(0, 19);
+    }
+  };
   return readdirSync(backupDir).filter((name) => name.endsWith('.zip')).map((name) => {
     const path = join(backupDir, name);
     const stat = statSync(path);
-    return { filename: name, size: stat.size, created: stat.mtime.toISOString().replace('T', ' ').slice(0, 19),
+    return { filename: name, size: stat.size, created: formatTime(stat.mtime),
       url: `${config.appUrl.replace(/\/$/, '')}/api/v1/backup/download/${encodeURIComponent(name)}` };
   }).sort((a, b) => b.created.localeCompare(a.created));
 }

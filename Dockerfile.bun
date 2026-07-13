@@ -38,7 +38,13 @@ ARG GIT_BRANCH=unknown
 LABEL org.opencontainers.image.revision="${GIT_SHA}"
 LABEL org.opencontainers.image.source="https://github.com/utterlog/utterlog"
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends postgresql-client unzip \
+  && apt-get install -y --no-install-recommends wget ca-certificates \
+  && install -d /usr/share/postgresql-common/pgdg \
+  && wget -qO /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+  && echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] http://apt.postgresql.org/pub/repos/apt trixie-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends postgresql-client-18 unzip \
+  && apt-get purge -y --auto-remove wget \
   && rm -rf /var/lib/apt/lists/*
 ENV NODE_ENV=production
 ENV PORT=8080

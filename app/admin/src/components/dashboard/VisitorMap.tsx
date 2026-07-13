@@ -34,12 +34,13 @@ export default function VisitorMap({ period }: { period: string }) {
   useEffect(() => {
     api.get(`/analytics/map?period=${period}`).then((r: any) => {
       const payload = r.data || r || {};
-      setPoints(Array.isArray(payload) ? payload : payload.points || []);
+      const points = Array.isArray(payload) ? payload : payload.points;
+      setPoints(Array.isArray(points) ? points : []);
     }).catch(() => {});
   }, [period]);
 
   useEffect(() => {
-    const fetchOnline = () => api.get('/analytics/online').then((r: any) => setOnlineUsers(r.data?.online || [])).catch(() => {});
+    const fetchOnline = () => api.get('/analytics/online').then((r: any) => setOnlineUsers(Array.isArray(r.data?.online) ? r.data.online : [])).catch(() => {});
     fetchOnline();
     const timer = setInterval(fetchOnline, 30000);
     return () => clearInterval(timer);
@@ -83,11 +84,14 @@ export default function VisitorMap({ period }: { period: string }) {
     map.on('load', () => {
       map.resize();
       // 国家填充层（用 Mapbox 内置的 country boundaries）
-      map.addSource('country-boundaries', {
+      try {
+        if (map.getSource('country-boundaries')) return;
+        map.addSource('country-boundaries', {
         type: 'vector',
         url: 'mapbox://mapbox.country-boundaries-v1',
-      });
-      map.addLayer({
+        });
+        if (map.getLayer('country-fills')) return;
+        map.addLayer({
         id: 'country-fills',
         type: 'fill',
         source: 'country-boundaries',
@@ -96,7 +100,10 @@ export default function VisitorMap({ period }: { period: string }) {
           'fill-color': '#22c55e',
           'fill-opacity': 0,
         },
-      }, 'country-label');
+        }, map.getLayer('country-label') ? 'country-label' : undefined as any);
+      } catch (error) {
+        console.warn('[VisitorMap] optional country layer failed', error);
+      }
     });
 
     // SPA 切到 /admin/analytics 时，容器布局往往还没稳定（侧栏过渡 /
@@ -134,7 +141,8 @@ export default function VisitorMap({ period }: { period: string }) {
     if (!map) return;
 
     const update = () => {
-      for (const m of markersRef.current) m.remove();
+      try {
+        for (const m of markersRef.current) m.remove();
       markersRef.current = [];
 
       // 高亮有访客的国家 — 按访问量渐变
@@ -169,6 +177,9 @@ export default function VisitorMap({ period }: { period: string }) {
           .setLngLat([matched.lon, matched.lat])
           .addTo(map);
         markersRef.current.push(marker);
+        }
+      } catch (error) {
+        console.warn('[VisitorMap] marker update failed', error);
       }
     };
 
@@ -181,6 +192,8 @@ export default function VisitorMap({ period }: { period: string }) {
       }
     };
     tryUpdate();
+    const fallback = window.setTimeout(update, 2000);
+    return () => window.clearTimeout(fallback);
   }, [points, onlineUsers]);
 
   // 没配 Mapbox token 的占位 UI — 提示如何启用

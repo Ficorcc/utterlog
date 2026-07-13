@@ -10,7 +10,7 @@ function serviceError(error: unknown) {
 export const Route = createFileRoute('/api/v1/backup/$action')({ server: { handlers: {
   GET: ({ request, params }) => withAdmin(request, async () => {
     if (params.action === 'stats') return apiOk(await backupStatsPayload());
-    if (params.action === 'list') return apiOk(backupListPayload());
+    if (params.action === 'list') return apiOk(await backupListPayload());
     return apiFail(404, 'NOT_FOUND', '备份接口不存在');
   }),
   POST: ({ request, params }) => withAdmin(request, async () => {
