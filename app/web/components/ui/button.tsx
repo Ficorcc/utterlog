@@ -2,7 +2,7 @@
 
 // Shared <Button> for the blog frontend.
 //
-// 完全走 app/web/app/globals.css 的 .btn 体系（.btn / .btn-primary /
+// 完全走 app/web/globals.css 的 .btn 体系（.btn / .btn-primary /
 // .btn-secondary / .btn-danger / .btn-ghost + .btn-sm / .btn-lg），
 // 这样 hover / :focus-visible / :disabled / :active 都在 CSS 层一次
 // 定义，跟 admin .btn 的状态行为对齐 —— 不再用 inline CSSProperties，

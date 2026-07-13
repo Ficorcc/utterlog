@@ -1,7 +1,7 @@
 # xifeng.net 部署
 
 站点：**https://xifeng.net**  
-服务器：`141.11.77.152`（Debian 13，x86_64）  
+服务器：`43.161.221.122`（Debian 13，x86_64）
 部署目录：`/opt/utterlog-xifeng`
 
 ## 三端一致
@@ -16,7 +16,7 @@
 
 ## 前置条件
 
-- 本地：Docker、Bun 1.3.14+、Git
+- 本地：Docker、Bun 1.4.0+、Git
 - SSH 私钥：`~/Desktop/gentpan.pem` 或 `~/.ssh/gentpan.pem`（或设 `UTTERLOG_SSH_KEY`）
 - 服务器已有：`.env`、`uploads/`、`content/`、`pgdata/`（首次需手动初始化，见下方）
 
@@ -36,7 +36,7 @@ bash scripts/deploy-xifeng.sh
 
 1. 检查工作区干净
 2. `git push origin <当前分支>`
-3. `bun install --frozen-lockfile` + typecheck + admin/blog 构建 + 测试
+3. `bun install --frozen-lockfile` + typecheck + Admin/TanStack Start 构建 + 测试
 4. `docker build --platform linux/amd64` 打标签 `utterlog-app:local` 和 `utterlog-app:<sha>`
 5. 流式上传镜像到服务器并 `docker load`
 6. 同步 `deploy/xifeng/docker-compose*.yml`
@@ -56,7 +56,7 @@ bash scripts/deploy-xifeng.sh --allow-dirty  # 允许未提交（破坏三端一
 
 ```bash
 export UTTERLOG_SSH_KEY=~/Desktop/gentpan.pem
-export UTTERLOG_DEPLOY_HOST=141.11.77.152
+export UTTERLOG_DEPLOY_HOST=43.161.221.122
 export UTTERLOG_DEPLOY_PATH=/opt/utterlog-xifeng
 export UTTERLOG_APP_URL=https://xifeng.net
 ```
@@ -64,7 +64,7 @@ export UTTERLOG_APP_URL=https://xifeng.net
 ## 服务器运维
 
 ```bash
-ssh -i ~/Desktop/gentpan.pem root@141.11.77.152
+ssh -i ~/Desktop/gentpan.pem root@43.161.221.122
 
 cd /opt/utterlog-xifeng
 docker ps

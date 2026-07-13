@@ -1,7 +1,6 @@
 # AGENT.md - Utterlog Bun migration reference
 
-This workspace is the Bun migration copy at `/Users/gentpan/projects/utterlog-bun`.
-Do not edit the original project at `/Users/gentpan/projects/utterlog` from this tree.
+This workspace is the active TanStack Start application at `/Users/gentpan/projects/utterlog`.
 
 ## Current target architecture
 
@@ -9,7 +8,7 @@ Utterlog is being migrated from the old `postgres + api(Go) + web(Next)` split t
 
 - Bun TypeScript application gateway/API on one public app port.
 - PostgreSQL as the required database.
-- React blog SSR rendered by Bun (no Next.js subprocess).
+- TanStack Start + React 19 SSR and file-based routing.
 - Vite/React admin built as static assets and served by the Bun app.
 - Ephemeral state (captcha, online users, coding cache, reader chat sessions) uses in-process memory only.
 - Deployment target is `app + postgres`, or one `app` container when PostgreSQL is external.
@@ -35,7 +34,8 @@ Use Bun commands for this migration:
 
 ```bash
 bun run server:check
-bun run build:blog-client
+  bun run start:check
+  bun run start:build
 bun run build:admin
 docker compose -f docker-compose.yml config
 docker compose -f docker-compose.prod.yml config
@@ -60,7 +60,6 @@ Treat these as local/runtime data, not source cleanup targets unless the user ex
 - `backup/`
 - `ssl/`
 - `node_modules/`
-- `.next/`
 - `app/admin/dist/`
 
 The ignored `community/`, `id/`, `wordpress-plugin/`, and `Comment/` directories are retained as adjacent/reference material unless the user asks to remove them.
@@ -117,11 +116,11 @@ The ignored `community/`, `id/`, `wordpress-plugin/`, and `Comment/` directories
 | **Utterlog** | 旗舰参考 | 默认基线 |
 | **Chred** | 备选 | — |
 
-注册位置：`app/web/lib/theme-data.ts`（页面元信息）+ `app/server/src/blog-themes.ts`（后端枚举）+ `app/blog/src/live-page-registry.ts`（客户端 live page 注册）。
+注册位置：`app/web/lib/theme-data.ts`（页面元信息）+ `app/server/src/blog-themes.ts`（后端枚举）。
 
-主题切换：admin → `/admin/themes` → 调 Next.js `/api/revalidate` 清缓存 → 立即生效。
+主题切换：admin → `/admin/themes` → 调用 TanStack Start revalidate 接口清缓存 → 立即生效。
 上传 zip：admin 解压到 `content/themes/<name>/`，激活后写 options。
-`:root` 默认 CSS 变量已固定为 Azure 蓝（`web/app/globals.css`），`[data-theme="steel"]` 兜底映射到 Azure，避免 localStorage 残留导致灰色。
+`:root` 默认 CSS 变量已固定为 Azure 蓝，`[data-theme="steel"]` 兜底映射到 Azure，避免 localStorage 残留导致灰色。
 
 **写代码注意**：注释只能提"当前主题"或泛指，**不要写"和某主题保持一致"**。
 
@@ -129,7 +128,7 @@ The ignored `community/`, `id/`, `wordpress-plugin/`, and `Comment/` directories
 
 ## 9. 设计 Token（admin）
 
-`api/admin/src/styles/globals.css` `:root`：
+`app/admin/src/styles/globals.css` `:root`：
 
 ```css
 --ctrl-h-sm: 32px;
@@ -253,8 +252,8 @@ gh release create vX.Y.Z --notes "..."
 
 **构建注意**：
 
-- 镜像：`Dockerfile.bun`（multi-stage，oven/bun:1.3.14 base）
-- `app/web/app/layout.tsx` 的 `generateMetadata` 在构建期**不能**直接调 API；必须 gate `INTERNAL_API_URL`，否则 prerender 挂 60s × 3 重试
+- 镜像：`Dockerfile.bun`（multi-stage，Bun 1.4 base）
+- TanStack Start 路由的服务端 loader 在构建期**不能**无条件访问外部 API；必须 gate `INTERNAL_API_URL`，否则 prerender 可能重复等待
 
 ---
 
@@ -267,7 +266,7 @@ curl -fsSL https://raw.githubusercontent.com/utterlog/utterlog/main/install.sh |
 # 带自动 HTTPS（无现成反代）
 curl -fsSL https://raw.githubusercontent.com/utterlog/utterlog/main/install.sh | DOMAIN=blog.x.com bash
 
-# 复用宿主机 PG / Redis（1Panel / 宝塔常见）
+# 复用宿主机 PostgreSQL（1Panel / 宝塔常见）
 UTTERLOG_DB_MODE=external curl -fsSL https://...install.sh | bash
 ```
 
@@ -287,14 +286,14 @@ UTTERLOG_DB_MODE=external curl -fsSL https://...install.sh | bash
 - 静态根：host `/opt/1panel/1panel/www/wwwroot/` ↔ container `/www/wwwroot/`
 - systemd：`utterlog-api` (8081) / `utterlog-hub` (8091) / `utterlog-id` (8090) / `utterlog-web` (3001)
 - 二进制：`/www/wwwroot/utterlog.com/api/utterlog-api`
-- DB：PostgreSQL 18 (Docker pgvector) / Redis 8.6.2 (Docker, 1Panel)
+- DB：PostgreSQL 18 (Docker pgvector)；本项目不依赖 Redis
 
-**xifeng.net (141.11.77.152)** — Utterlog 单容器 Bun 部署点，Debian 13
+**xifeng.net (43.161.221.122)** — Utterlog 单容器 Bun 部署点，Debian 13
 
-- SSH：复用 `~/.ssh/gentpan.pem` 直连 `root@141.11.77.152`（host key 偶尔轮换，重新 `ssh-keyscan` 即可）
+- SSH：复用 `~/.ssh/gentpan.pem` 直连 `root@43.161.221.122`（host key 偶尔轮换，重新 `ssh-keyscan` 即可）
 - 部署目录：`/opt/utterlog-xifeng`
 - Compose：`docker-compose.bun.yml` (app) + `docker-compose.infra.yml` (postgres)，网络 `utterlog_default`
-- App 容器：`utterlog-xifeng-app`，镜像 `utterlog-app:local`（bun:1.3.14 base + 源码构建，OCI label 仍指 oven-sh/bun；tag 是 `local` 不是 release tag，**版本比对要看源码 hash，不要只看 tag**）
+- App 容器：`utterlog-xifeng-app`，镜像 `utterlog-app:local`（Bun 1.4 base + 源码构建，tag 是 `local` 不是 release tag，**版本比对要看源码 hash，不要只看 tag**）
 - 端口：`127.0.0.1:9261` → 容器 8080（仅 loopback，反代由 host 自行处理）
 - DB：独立 compose，`utterlog-postgres-1` (utterlog-postgres:19beta1-pgvector)，5432
 - 备份镜像：`backup-YYYYMMDDhhmmss` 形式保留在本地 registry
@@ -390,15 +389,12 @@ memory 索引在 `~/.claude/projects/-Users-gentpan-projects-utterlog/memory/MEM
 | Admin 设计 token / 全局样式 | `app/admin/src/styles/globals.css` |
 | Admin 通用 UI | `app/admin/src/components/ui/*` |
 | Admin 关键页面 | `app/admin/src/pages/{DashboardHome,Comments,Posts,Settings,Plugins,Themes,Backup,MusicPlaylists,Analytics,Assistant,AiLogs,AiSettings,...}.tsx` |
-| Blog 客户端 bundle 入口 | `app/blog/src/blog-app.tsx` + `app/blog/src/client.tsx` |
-| Live page 注册 | `app/blog/src/live-page-registry.ts` |
-| Web（Next-like SSR）入口 | `app/web/app/layout.tsx` |
-| Web 页面 | `app/web/app/(blog)/{about,albums,posts/[slug],categories,tags,archives,music,moments,...}/page.tsx` |
+| TanStack Start 入口 | `app/start/src/` |
+| Web 页面组件 | `app/web/components/pages/` |
 | Web 主题源码 | `app/web/themes/{Utterlog,Azure,Flux,Nebula,Renascent}/` |
-| Web 设计 token / 全局样式 | `app/web/app/globals.css` |
+| Web 设计 token / 全局样式 | `app/web/globals.css` |
 | Web 组件（blog 业务 / UI / icons / editor） | `app/web/components/{blog,ui,icons,editor}/` |
 | Web Lib | `app/web/lib/{api,store,theme,theme-context,theme-data,...}.ts(x)` |
-| Next.js 兼容 shim | `app/next-shim/*` |
 | 跨包共享 | `app/shared/{blog-theme,site-favicon,string-utils}.ts` |
 | Schema | `app/server/assets/schema.sql` |
 | Docker dev / prod | `Dockerfile.bun` + `docker-compose.yml` / `docker-compose.prod.yml` |
@@ -412,8 +408,8 @@ memory 索引在 `~/.claude/projects/-Users-gentpan-projects-utterlog/memory/MEM
 1. **文章状态字段** `publish` 不是 `published`。AI prompt 写错过导致查到 0 篇。
 2. **发布时间** 优先用 `published_at`（不是 `created_at`）；草稿首发要写入当前时间，不能直接套草稿创建时间。`datetime-local` 输入按站点时区解析。
 3. **Slug 唯一约束** 草稿和正式文章共用同表，草稿首发时可能撞 slug，要单独处理。
-4. **`/api/revalidate` 必须转发**：保存主题菜单 / 站点设置 / 主题切换 / Coding 设置 / 关于页模板都要 POST `/api/revalidate` 清 Next.js 缓存，否则前台仍是旧数据。
-5. **Next.js rebuild 期 chunk 失效** → `ChunkErrorBoundary` + sessionStorage 限流自动硬刷。
+4. **缓存失效**：保存主题菜单 / 站点设置 / 主题切换 / Coding 设置 / 关于页模板后要调用当前 revalidate 接口，否则前台可能仍显示旧数据。
+5. **构建期 chunk 失效**：保留错误边界和有限重试，避免无限刷新。
 6. **Admin 缓存策略**：`index.html` 设 `no-cache`，`assets/*.js` 设 `immutable`。
 7. **AI 陪读头像** 优先 admin 个人 `avatar`（非 gravatar_url）。
 8. **所有邮件**（含验证码）站点品牌化，footer 保留 "Powered by Utterlog"。

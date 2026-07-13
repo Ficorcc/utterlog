@@ -108,7 +108,7 @@ export default function MomentsPage() {
   const openEdit = (m: any) => { setEditingId(m.id); const imgs = parseImages(m); setFormImages(imgs); setForm({ content: m.content, location: m.location || '', mood: m.mood || '', images: '', visibility: m.visibility }); setIsModalOpen(true); };
 
   // 浏览器定位 + 反查地址。统一走后端 /api/v1/location/reverse —— 与前台
-  // 说说发布（app/web/app/(blog)/moments/MomentsClient.tsx）共用同一服务端
+  // 说说发布（app/web/components/pages/moments/）共用同一服务端
   // 实现：Mapbox → 高德 → 腾讯三档 fallback，且全部限定到城市/区/省/国家
   // 五级，不返回街道或 POI，保证 admin / 前台写入数据库的 location 粒度
   // 一致（城市名）。
