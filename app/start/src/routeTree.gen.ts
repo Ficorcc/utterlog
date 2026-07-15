@@ -45,9 +45,14 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as UploadsSplatRouteImport } from './routes/uploads/$'
 import { Route as ThemesSplatRouteImport } from './routes/themes/$'
 import { Route as TagsSlugRouteImport } from './routes/tags/$slug'
+import { Route as StylesSplatRouteImport } from './routes/styles/$'
+import { Route as StaticSplatRouteImport } from './routes/static/$'
 import { Route as PostsSlugRouteImport } from './routes/posts/$slug'
 import { Route as PageNumRouteImport } from './routes/page/$num'
+import { Route as ImagesSplatRouteImport } from './routes/images/$'
+import { Route as IconsSplatRouteImport } from './routes/icons/$'
 import { Route as FilmsSlugRouteImport } from './routes/films/$slug'
+import { Route as EmojiSplatRouteImport } from './routes/emoji/$'
 import { Route as DateYearRouteImport } from './routes/date/$year'
 import { Route as CategoriesSlugRouteImport } from './routes/categories/$slug'
 import { Route as AssetsSplatRouteImport } from './routes/assets/$'
@@ -387,6 +392,16 @@ const TagsSlugRoute = TagsSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => TagsRoute,
 } as any)
+const StylesSplatRoute = StylesSplatRouteImport.update({
+  id: '/styles/$',
+  path: '/styles/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StaticSplatRoute = StaticSplatRouteImport.update({
+  id: '/static/$',
+  path: '/static/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PostsSlugRoute = PostsSlugRouteImport.update({
   id: '/posts/$slug',
   path: '/posts/$slug',
@@ -397,10 +412,25 @@ const PageNumRoute = PageNumRouteImport.update({
   path: '/page/$num',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ImagesSplatRoute = ImagesSplatRouteImport.update({
+  id: '/images/$',
+  path: '/images/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IconsSplatRoute = IconsSplatRouteImport.update({
+  id: '/icons/$',
+  path: '/icons/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FilmsSlugRoute = FilmsSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => FilmsRoute,
+} as any)
+const EmojiSplatRoute = EmojiSplatRouteImport.update({
+  id: '/emoji/$',
+  path: '/emoji/$',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const DateYearRoute = DateYearRouteImport.update({
   id: '/date/$year',
@@ -1263,9 +1293,14 @@ export interface FileRoutesByFullPath {
   '/assets/$': typeof AssetsSplatRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/date/$year': typeof DateYearRouteWithChildren
+  '/emoji/$': typeof EmojiSplatRoute
   '/films/$slug': typeof FilmsSlugRoute
+  '/icons/$': typeof IconsSplatRoute
+  '/images/$': typeof ImagesSplatRoute
   '/page/$num': typeof PageNumRoute
   '/posts/$slug': typeof PostsSlugRoute
+  '/static/$': typeof StaticSplatRoute
+  '/styles/$': typeof StylesSplatRoute
   '/tags/$slug': typeof TagsSlugRoute
   '/themes/$': typeof ThemesSplatRoute
   '/uploads/$': typeof UploadsSplatRoute
@@ -1462,9 +1497,14 @@ export interface FileRoutesByTo {
   '/assets/$': typeof AssetsSplatRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/date/$year': typeof DateYearRouteWithChildren
+  '/emoji/$': typeof EmojiSplatRoute
   '/films/$slug': typeof FilmsSlugRoute
+  '/icons/$': typeof IconsSplatRoute
+  '/images/$': typeof ImagesSplatRoute
   '/page/$num': typeof PageNumRoute
   '/posts/$slug': typeof PostsSlugRoute
+  '/static/$': typeof StaticSplatRoute
+  '/styles/$': typeof StylesSplatRoute
   '/tags/$slug': typeof TagsSlugRoute
   '/themes/$': typeof ThemesSplatRoute
   '/uploads/$': typeof UploadsSplatRoute
@@ -1662,9 +1702,14 @@ export interface FileRoutesById {
   '/assets/$': typeof AssetsSplatRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/date/$year': typeof DateYearRouteWithChildren
+  '/emoji/$': typeof EmojiSplatRoute
   '/films/$slug': typeof FilmsSlugRoute
+  '/icons/$': typeof IconsSplatRoute
+  '/images/$': typeof ImagesSplatRoute
   '/page/$num': typeof PageNumRoute
   '/posts/$slug': typeof PostsSlugRoute
+  '/static/$': typeof StaticSplatRoute
+  '/styles/$': typeof StylesSplatRoute
   '/tags/$slug': typeof TagsSlugRoute
   '/themes/$': typeof ThemesSplatRoute
   '/uploads/$': typeof UploadsSplatRoute
@@ -1863,9 +1908,14 @@ export interface FileRouteTypes {
     | '/assets/$'
     | '/categories/$slug'
     | '/date/$year'
+    | '/emoji/$'
     | '/films/$slug'
+    | '/icons/$'
+    | '/images/$'
     | '/page/$num'
     | '/posts/$slug'
+    | '/static/$'
+    | '/styles/$'
     | '/tags/$slug'
     | '/themes/$'
     | '/uploads/$'
@@ -2062,9 +2112,14 @@ export interface FileRouteTypes {
     | '/assets/$'
     | '/categories/$slug'
     | '/date/$year'
+    | '/emoji/$'
     | '/films/$slug'
+    | '/icons/$'
+    | '/images/$'
     | '/page/$num'
     | '/posts/$slug'
+    | '/static/$'
+    | '/styles/$'
     | '/tags/$slug'
     | '/themes/$'
     | '/uploads/$'
@@ -2261,9 +2316,14 @@ export interface FileRouteTypes {
     | '/assets/$'
     | '/categories/$slug'
     | '/date/$year'
+    | '/emoji/$'
     | '/films/$slug'
+    | '/icons/$'
+    | '/images/$'
     | '/page/$num'
     | '/posts/$slug'
+    | '/static/$'
+    | '/styles/$'
     | '/tags/$slug'
     | '/themes/$'
     | '/uploads/$'
@@ -2459,8 +2519,13 @@ export interface RootRouteChildren {
   ApiRevalidateRoute: typeof ApiRevalidateRoute
   AssetsSplatRoute: typeof AssetsSplatRoute
   DateYearRoute: typeof DateYearRouteWithChildren
+  EmojiSplatRoute: typeof EmojiSplatRoute
+  IconsSplatRoute: typeof IconsSplatRoute
+  ImagesSplatRoute: typeof ImagesSplatRoute
   PageNumRoute: typeof PageNumRoute
   PostsSlugRoute: typeof PostsSlugRoute
+  StaticSplatRoute: typeof StaticSplatRoute
+  StylesSplatRoute: typeof StylesSplatRoute
   ThemesSplatRoute: typeof ThemesSplatRoute
   UploadsSplatRoute: typeof UploadsSplatRoute
   ApiV1ResourceRoute: typeof ApiV1ResourceRouteWithChildren
@@ -2846,6 +2911,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TagsSlugRouteImport
       parentRoute: typeof TagsRoute
     }
+    '/styles/$': {
+      id: '/styles/$'
+      path: '/styles/$'
+      fullPath: '/styles/$'
+      preLoaderRoute: typeof StylesSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/static/$': {
+      id: '/static/$'
+      path: '/static/$'
+      fullPath: '/static/$'
+      preLoaderRoute: typeof StaticSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/posts/$slug': {
       id: '/posts/$slug'
       path: '/posts/$slug'
@@ -2860,12 +2939,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PageNumRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/images/$': {
+      id: '/images/$'
+      path: '/images/$'
+      fullPath: '/images/$'
+      preLoaderRoute: typeof ImagesSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/icons/$': {
+      id: '/icons/$'
+      path: '/icons/$'
+      fullPath: '/icons/$'
+      preLoaderRoute: typeof IconsSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/films/$slug': {
       id: '/films/$slug'
       path: '/$slug'
       fullPath: '/films/$slug'
       preLoaderRoute: typeof FilmsSlugRouteImport
       parentRoute: typeof FilmsRoute
+    }
+    '/emoji/$': {
+      id: '/emoji/$'
+      path: '/emoji/$'
+      fullPath: '/emoji/$'
+      preLoaderRoute: typeof EmojiSplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/date/$year': {
       id: '/date/$year'
@@ -4298,8 +4398,13 @@ const rootRouteChildren: RootRouteChildren = {
   ApiRevalidateRoute: ApiRevalidateRoute,
   AssetsSplatRoute: AssetsSplatRoute,
   DateYearRoute: DateYearRouteWithChildren,
+  EmojiSplatRoute: EmojiSplatRoute,
+  IconsSplatRoute: IconsSplatRoute,
+  ImagesSplatRoute: ImagesSplatRoute,
   PageNumRoute: PageNumRoute,
   PostsSlugRoute: PostsSlugRoute,
+  StaticSplatRoute: StaticSplatRoute,
+  StylesSplatRoute: StylesSplatRoute,
   ThemesSplatRoute: ThemesSplatRoute,
   UploadsSplatRoute: UploadsSplatRoute,
   ApiV1ResourceRoute: ApiV1ResourceRouteWithChildren,
