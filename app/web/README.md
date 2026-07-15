@@ -6,8 +6,7 @@
 
 ```text
 浏览器
-  -> Bun + Hono 安全/限流/静态网关
-  -> TanStack Start
+  -> Bun + TanStack Start
      -> TanStack Router 页面与 Server Routes
      -> app/web React 组件和主题
      -> PostgreSQL 数据服务

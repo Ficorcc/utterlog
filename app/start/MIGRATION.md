@@ -8,8 +8,9 @@ The full-stack cutover is complete.
 - TanStack Router file routes define the application and API surface.
 - Server Routes call framework-independent services backed by PostgreSQL.
 - Bun 1.4 runs the application process.
-- Hono is limited to security headers, rate limiting, CORS, and static file delivery.
-- There is no Hono business API registration or compatibility fallback.
+- The Bun process calls the TanStack Start server entry directly.
+- Security headers, CORS, request limits, static files, and install redirects use Start request middleware and Server Routes.
+- There is no Hono dependency or compatibility fallback.
 
 ## Verification Gates
 

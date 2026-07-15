@@ -120,7 +120,7 @@ const errorBoundary = createMiddleware().server(async ({ next, context }) => {
 });
 
 // Keep baseline response hardening inside Start so direct Start requests do
-// not depend on the legacy Hono gateway for security headers.
+// not depend on an external gateway for security headers.
 const securityHeaders = createMiddleware().server(async ({ next }) => {
   const result = await next();
   const headers = new Headers(result.response.headers);
