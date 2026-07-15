@@ -3,6 +3,7 @@ import { exec, nowUnix, one } from '../../../server/src/db/helpers';
 import { optionValue } from '../../../server/src/db/options';
 import { lookupGeoIp, normalizeGeoProvider } from '../../../server/src/geoip';
 import type { AuthSession } from '../../../server/src/auth/session';
+import { verifyAccessToken } from '../../../server/src/auth/jwt';
 
 type Bucket = { count: number; resetAt: number };
 type SecuritySettings = {
@@ -14,6 +15,7 @@ type SecuritySettings = {
   geoCountries: string[];
   geoProvider: string;
   apiRateLimit: number;
+  requireLogin: boolean;
 };
 
 const buckets = new Map<string, Bucket>();
@@ -38,6 +40,7 @@ async function settings() {
     geoCountries: String(await optionValue('geo_countries', 'CN,HK,TW,MO')).split(',').map((v) => v.trim().toUpperCase()).filter(Boolean),
     geoProvider: normalizeGeoProvider(await optionValue('ip_geo_provider', 'ipx')),
     apiRateLimit: Math.max(1, Number(await optionValue('rate_limit', '300')) || 300),
+    requireLogin: boolValue(await optionValue('require_login', 'false')),
   };
   settingsCache = { value, expiresAt: now + 5000 };
   return value;
@@ -94,12 +97,34 @@ function limitFor(path: string, configured: number) {
   return configured;
 }
 
+function frontPage(path: string, method: string) {
+  if (!['GET', 'HEAD'].includes(method)) return false;
+  return !path.startsWith('/api/') && !path.startsWith('/admin') && !path.startsWith('/install')
+    && !path.startsWith('/uploads/') && !path.startsWith('/assets/') && !path.startsWith('/themes/')
+    && !path.startsWith('/static/') && !path.startsWith('/styles/') && !path.startsWith('/emoji/')
+    && !path.startsWith('/icons/') && !path.startsWith('/images/')
+    && !/\.(?:ico|png|jpg|jpeg|svg|webp|avif|gif|css|js|woff2?|ttf|map|xml)$/i.test(path);
+}
+
+async function cookieHasAccess(request: Request) {
+  const cookie = request.headers.get('cookie') || '';
+  const token = cookie.split(';').map((part) => part.trim()).find((part) => part.startsWith('utterlog_access_token='))?.slice('utterlog_access_token='.length) || '';
+  if (!token) return false;
+  try {
+    await verifyAccessToken(decodeURIComponent(token));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function checkStartSecurity(request: Request, ip: string, session: AuthSession | null) {
   const path = new URL(request.url).pathname;
-  if (!path.startsWith('/api/')) return null;
+  const isApi = path.startsWith('/api/');
+  if (!isApi && !frontPage(path, request.method.toUpperCase())) return null;
   if (path.startsWith('/api/v1/install') || path.startsWith('/api/v1/setup')) return null;
 
-  const admin = path.startsWith('/api/v1/admin/') || path.startsWith('/api/v1/security') || path.startsWith('/api/v1/sync/');
+  const admin = isApi && (path.startsWith('/api/v1/admin/') || path.startsWith('/api/v1/security') || path.startsWith('/api/v1/sync/'));
   if (!admin && await banned(ip)) {
     await logEvent(ip, 'ip_banned', path);
     return fail(403, 'IP_BANNED', '当前 IP 已被封禁');
@@ -108,6 +133,15 @@ export async function checkStartSecurity(request: Request, ip: string, session: 
   if (session) return null;
   const configured = await settings().catch(() => null);
   if (!configured) return null;
+
+  if (configured.requireLogin && frontPage(path, request.method) && !await cookieHasAccess(request)) {
+    const url = new URL(request.url);
+    const login = new URL('/login', url.origin);
+    login.searchParams.set('next', `${url.pathname}${url.search}`);
+    const response = Response.redirect(login, 302);
+    response.headers.append('set-cookie', 'utterlog_access_token=; Path=/; Max-Age=0; SameSite=Lax');
+    return response;
+  }
 
   if (!admin && configured.geoEnabled) {
     const country = String(request.headers.get('cf-ipcountry') || request.headers.get('x-vercel-ip-country') || '').trim().toUpperCase();
@@ -136,7 +170,7 @@ export async function checkStartSecurity(request: Request, ip: string, session: 
     }
   }
 
-  if (publicRead(path, request.method.toUpperCase())) return null;
+  if (!isApi || publicRead(path, request.method.toUpperCase())) return null;
   const max = limitFor(path, configured.apiRateLimit);
   const bucket = bump(buckets, `${path}:${ip}`, 60_000);
   if (bucket.count > max) {
