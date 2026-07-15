@@ -1,5 +1,18 @@
 import { createMiddleware, createStart } from '@tanstack/react-start';
 import { config } from '../../server/src/config';
+import { authenticateRequest, type AuthSession } from '../../server/src/auth/session';
+
+export type StartRequestContext = {
+  session: AuthSession | null;
+};
+
+declare module '@tanstack/react-router' {
+  interface Register {
+    server: {
+      requestContext: StartRequestContext;
+    };
+  }
+}
 
 const allowedHeaders = 'Content-Type, Authorization, X-WebAuthn-Session, X-Utterlog-Passport';
 const allowedMethods = 'GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD';
@@ -64,6 +77,20 @@ const securityHeaders = createMiddleware().server(async ({ next }) => {
   });
 });
 
+const authContext = createMiddleware().server(async ({ next, request }) => {
+  const authorization = request.headers.get('authorization') || '';
+  let session: AuthSession | null = null;
+  if (authorization.toLowerCase().startsWith('bearer ')) {
+    try {
+      session = await authenticateRequest(request);
+    } catch {
+      // Invalid or expired credentials remain anonymous. Protected handlers
+      // still return their normal 401/403 response through withAdmin.
+    }
+  }
+  return next({ context: { session } });
+});
+
 export const startInstance = createStart(() => ({
-  requestMiddleware: [cors, securityHeaders],
+  requestMiddleware: [authContext, cors, securityHeaders],
 }));
