@@ -3,6 +3,7 @@ import { config } from '../../server/src/config';
 import { authenticateRequest, type AuthSession } from '../../server/src/auth/session';
 import { dbReady } from '../../server/src/db/client';
 import { installRedirect } from '../../server/src/http/install-redirect';
+import { checkStartSecurity } from './server/security';
 
 export type StartRequestContext = {
   session: AuthSession | null;
@@ -110,6 +111,11 @@ const installGuard = createMiddleware().server(async ({ next, request }) => {
   return redirect || next();
 });
 
+const securityPolicy = createMiddleware().server(async ({ next, request, context }) => {
+  const blocked = await checkStartSecurity(request, context.clientIp, context.session);
+  return blocked || next();
+});
+
 const errorBoundary = createMiddleware().server(async ({ next, context }) => {
   try {
     return await next();
@@ -155,5 +161,5 @@ const authContext = createMiddleware().server(async ({ next, request }) => {
 });
 
 export const startInstance = createStart(() => ({
-  requestMiddleware: [errorBoundary, installGuard, authContext, cors, bodyLimit, apiNoCache, securityHeaders],
+  requestMiddleware: [errorBoundary, installGuard, authContext, securityPolicy, cors, bodyLimit, apiNoCache, securityHeaders],
 }));
