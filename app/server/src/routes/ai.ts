@@ -683,11 +683,50 @@ async function buildAdminSystemPrompt() {
 
 type AgentMessage = Record<string, unknown> & { role: string; content?: unknown };
 
+function isAnthropicEndpoint(endpoint: string) {
+  try {
+    const url = new URL(endpoint);
+    return url.hostname.toLowerCase().includes('anthropic.com') || url.pathname.toLowerCase().includes('/anthropic');
+  } catch {
+    const value = endpoint.toLowerCase();
+    return value.includes('anthropic.com') || value.includes('/anthropic');
+  }
+}
+
+// Provider settings accept either a complete API endpoint or an SDK-style base URL.
+// Normalize only the compatible text/embedding APIs; image providers have different paths.
+function normalizeAiEndpoint(rawEndpoint: string, type: string) {
+  const endpoint = rawEndpoint.trim();
+  if (!endpoint || type === 'image') return endpoint;
+
+  let url: URL;
+  try {
+    url = new URL(endpoint);
+  } catch {
+    return endpoint;
+  }
+
+  const path = url.pathname.replace(/\/+$/, '');
+  const lowerPath = path.toLowerCase();
+  if (lowerPath.endsWith('/chat/completions') || lowerPath.endsWith('/messages') || lowerPath.endsWith('/embeddings')) {
+    return endpoint;
+  }
+
+  if (type === 'embedding') {
+    url.pathname = `${path}/embeddings`;
+  } else if (isAnthropicEndpoint(endpoint)) {
+    url.pathname = lowerPath.endsWith('/v1') ? `${path}/messages` : `${path}/v1/messages`;
+  } else {
+    url.pathname = `${path}/chat/completions`;
+  }
+  return url.toString();
+}
+
 async function callAiTextWithTools(messages: AgentMessage[], userId: number, onEvent: (event: Record<string, unknown>) => void) {
   const provider = await activeAiProvider('text', 'chat');
   if (!provider) throw new Error('未配置启用的文本 AI 提供商');
-  const endpoint = String(provider.endpoint || '');
-  if (endpoint.includes('api.anthropic.com')) {
+  const endpoint = normalizeAiEndpoint(String(provider.endpoint || ''), 'text');
+  if (isAnthropicEndpoint(endpoint)) {
     const fallback = await callAiText(messages.filter((m) => typeof m.content === 'string').map((m) => ({ role: m.role, content: String(m.content || '') })), 'chat', userId);
     return fallback.content;
   }
@@ -757,7 +796,7 @@ export async function callAiText(messages: { role: string; content: string }[], 
   const errors: string[] = [];
 
   for (const provider of providers) {
-    const endpoint = String(provider.endpoint || '');
+    const endpoint = normalizeAiEndpoint(String(provider.endpoint || ''), 'text');
     const model = String(provider.model || '');
     const apiKey = String(provider.api_key || '');
     const timeout = Math.max(5, Number(provider.timeout || 30)) * 1000;
@@ -766,7 +805,7 @@ export async function callAiText(messages: { role: string; content: string }[], 
 
     let body: Record<string, unknown>;
     const headers: Record<string, string> = { 'content-type': 'application/json' };
-    if (endpoint.includes('api.anthropic.com')) {
+    if (isAnthropicEndpoint(endpoint)) {
       headers['x-api-key'] = apiKey;
       headers['anthropic-version'] = '2023-06-01';
       const system = messages.find((m) => m.role === 'system')?.content || '';
@@ -785,7 +824,7 @@ export async function callAiText(messages: { role: string; content: string }[], 
         errors.push(`[${provider.name || provider.slug || model}] ${message}`);
         continue;
       }
-      const content = endpoint.includes('api.anthropic.com')
+      const content = isAnthropicEndpoint(endpoint)
         ? (payload.content || []).map((part: any) => part.text || '').join('\n').trim()
         : String(payload.choices?.[0]?.message?.content || payload.choices?.[0]?.text || '').trim();
       if (!content) {
@@ -1187,7 +1226,7 @@ async function publishAiCommentReply(queueId: number, reply: string, reviewerId:
 async function callEmbedding(text: string, userId: number) {
   const provider = await activeAiProvider('embedding');
   if (!provider) throw new Error('请先配置 embedding 类型的 AI 提供商');
-  const endpoint = String(provider.endpoint || '');
+  const endpoint = normalizeAiEndpoint(String(provider.endpoint || ''), 'embedding');
   const model = String(provider.model || '');
   const apiKey = String(provider.api_key || '');
   const res = await fetch(endpoint, {
@@ -1313,10 +1352,10 @@ export async function deleteAiProviderPayload(id: unknown) {
 
 async function testAiProviderPayload(value: unknown, userId: number) {
   const body = aiInput(value);
-  const endpoint = String(body.endpoint || '').trim();
   const model = String(body.model || '').trim();
   const apiKey = String(body.api_key || '').trim();
   const providerType = ['text', 'embedding', 'image'].includes(String(body.type || '')) ? String(body.type) : 'text';
+  const endpoint = normalizeAiEndpoint(String(body.endpoint || ''), providerType);
   if (!endpoint || !model || !apiKey) {
     throw new AiServiceError(400, 'BAD_REQUEST', '端点、模型和 API Key 为必填项');
   }
@@ -1327,11 +1366,11 @@ async function testAiProviderPayload(value: unknown, userId: number) {
   try {
     const payload = providerType === 'embedding'
       ? { model, input: 'Utterlog connection test' }
-      : endpoint.includes('api.anthropic.com')
+      : isAnthropicEndpoint(endpoint)
       ? { model, system: '', messages: [{ role: 'user', content: 'Hi, reply OK' }], max_tokens: 10, temperature: 0.1 }
       : { model, messages: [{ role: 'user', content: 'Hi, reply OK' }], max_tokens: 10, temperature: 0.1 };
     const headers: Record<string, string> = { 'content-type': 'application/json' };
-    if (endpoint.includes('api.anthropic.com')) {
+    if (isAnthropicEndpoint(endpoint)) {
       headers['x-api-key'] = apiKey;
       headers['anthropic-version'] = '2023-06-01';
     } else {
