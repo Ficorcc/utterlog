@@ -3,8 +3,8 @@ import { useNavigate, useLocation } from '@/lib/router';
 import Sidebar from '@/components/layout/Sidebar';
 import NotificationBell from '@/components/layout/NotificationBell';
 import { useAuthStore } from '@/lib/store';
-import { optionsApi } from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
+import { getSiteOptions, loadSiteOptions } from '@/lib/site';
 import { setAdminTimeZone } from '@/lib/timezone';
 
 // Page-level badge slot — pages call `setPageBadge(<span>共 58 条</span>)`
@@ -142,14 +142,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => { setPageBadge(null); }, [pathname]);
 
   useEffect(() => {
-    optionsApi.list().then((r: any) => {
-      const opts = r.data || r || {};
-      setSiteUrl(resolveVisitSiteUrl(opts.site_url));
-      if (opts.site_title) setSiteTitle(opts.site_title);
-      setAdminTimeZone(opts.site_timezone, opts.site_timezone_effective);
+    let active = true;
+    loadSiteOptions().then(() => {
+      if (!active) return;
+      const opts = getSiteOptions();
+      setSiteUrl(resolveVisitSiteUrl(opts?.site_url));
+      if (opts?.site_title) setSiteTitle(opts.site_title);
+      setAdminTimeZone(opts?.site_timezone, opts?.site_timezone_effective);
     }).catch(() => {
-      setSiteUrl(resolveVisitSiteUrl());
+      if (active) setSiteUrl(resolveVisitSiteUrl());
     });
+    return () => { active = false; };
   }, []);
 
   // Sync browser tab title: "页面标题 - 站点名称 | Utterlog"

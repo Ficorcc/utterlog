@@ -28,14 +28,12 @@ export default function NotificationBell() {
   }, []);
 
   const fetchUnread = async () => {
-    try {
-      const r: any = await api.get('/notifications/unread-count');
-      setUnread(r.data?.count || 0);
-    } catch {}
-    try {
-      const r: any = await api.get('/comments/pending-count');
-      setPendingComments(r.data?.pending || 0);
-    } catch {}
+    const [unreadResult, pendingResult] = await Promise.all([
+      api.get('/notifications/unread-count').catch(() => null),
+      api.get('/comments/pending-count').catch(() => null),
+    ]);
+    if (unreadResult) setUnread((unreadResult as any).data?.count || 0);
+    if (pendingResult) setPendingComments((pendingResult as any).data?.pending || 0);
   };
 
   const fetchNotifications = async () => {

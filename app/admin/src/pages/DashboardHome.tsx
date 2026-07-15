@@ -26,7 +26,7 @@ function AnimatedNumber({ value }: { value: number }) {
 
   return <>{display.toLocaleString()}</>;
 }
-import api, { postsApi, commentsApi, linksApi, networkApi } from '@/lib/api';
+import api, { networkApi } from '@/lib/api';
 import { formatRelativeTime } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import { postUrlOf } from '@/lib/site';
@@ -55,12 +55,9 @@ export default function DashboardPage() {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const [dashRes, postsRes, commentsRes]: any = await Promise.all([
-        api.get('/admin/stats'),
-        postsApi.list({ limit: 5, status: 'publish' }),
-        commentsApi.list({ per_page: 15, status: 'approved' }),
-      ]);
-      const d = dashRes.data || dashRes;
+      const bootstrapRes: any = await api.get('/admin/bootstrap');
+      const bootstrap = bootstrapRes.data || bootstrapRes;
+      const d = bootstrap.stats || bootstrap;
       setStats({
         posts: d.posts || 0, comments: d.comments || 0, links: d.links || 0,
         views: d.total_views || 0, today: d.today_visits || 0,
@@ -81,8 +78,8 @@ export default function DashboardPage() {
         days30.push({ date: key, visits: v.visits, visitors: v.visitors, weekday: t(`admin.dashboard.weekday.${weekdays[day.getDay()]}`, weekdays[day.getDay()]) });
       }
       setSparkline(days30);
-      setRecentPosts((postsRes.data?.posts || postsRes.data || []).filter((p: any) => p.id != null).slice(0, 5));
-      setRecentComments((commentsRes.data?.comments || commentsRes.data || []).filter((c: any) => c.id != null && !c.user_id).slice(0, 5));
+      setRecentPosts((bootstrap.recent_posts || []).filter((p: any) => p.id != null).slice(0, 5));
+      setRecentComments((bootstrap.recent_comments || []).filter((c: any) => c.id != null && !c.user_id).slice(0, 5));
     } finally { setLoading(false); }
 
     // Fetch Utterlog Network data (non-blocking)

@@ -3,7 +3,7 @@ import { statfsSync } from 'node:fs';
 import { table } from '../config';
 import { many, one } from '../db/helpers';
 import { optionValue } from '../db/options';
-import { archiveStatsPayload } from '../public-read';
+import { archiveStatsPayload, listComments, listPosts } from '../public-read';
 import { getHostOsInfo, parsePostgresVersion, resolveHostPublicIp } from '../system/host';
 import { appVersion, getCpuPercent, getHostUptimeLabel, getHostUptimeSeconds } from '../system/metrics';
 
@@ -93,4 +93,22 @@ export async function adminStatsPayload() {
     media: Number(media?.count || 0), categories: Number(categories?.count || 0), tags: Number(tags?.count || 0),
     total_views: archive.total_views, today_visits: Number(todayVisits?.count || 0), total_words: archive.word_count,
     days: archive.days, trend };
+}
+
+/**
+ * Initial dashboard data in one authenticated request. The admin is commonly
+ * reached through a CDN, so collapsing these small reads avoids three extra
+ * edge-to-origin round trips without changing any page-level APIs.
+ */
+export async function adminDashboardPayload() {
+  const [stats, posts, comments] = await Promise.all([
+    adminStatsPayload(),
+    listPosts({ page: 1, perPage: 5, status: 'publish' }),
+    listComments({ page: 1, perPage: 15, status: 'approved' }),
+  ]);
+  return {
+    stats,
+    recent_posts: posts.data,
+    recent_comments: comments.data,
+  };
 }

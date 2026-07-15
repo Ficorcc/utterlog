@@ -23,7 +23,13 @@ type PostLike = {
   categories?: { slug?: string }[];
 };
 
-let cached: { site_url: string; site_title: string; permalink_structure: string } | null = null;
+let cached: {
+  site_url: string;
+  site_title: string;
+  permalink_structure: string;
+  site_timezone: string;
+  site_timezone_effective: string;
+} | null = null;
 let loadPromise: Promise<void> | null = null;
 
 const pad2 = (value: number) => String(value).padStart(2, '0');
@@ -67,9 +73,14 @@ async function doLoad(): Promise<void> {
       site_url: (opts.site_url || '').replace(/\/$/, ''),
       site_title: opts.site_title || 'Utterlog',
       permalink_structure: (opts.permalink_structure || DEFAULT_PERMALINK).toString(),
+      site_timezone: String(opts.site_timezone || ''),
+      site_timezone_effective: String(opts.site_timezone_effective || ''),
     };
   } catch {
-    cached = { site_url: '', site_title: 'Utterlog', permalink_structure: DEFAULT_PERMALINK };
+    cached = {
+      site_url: '', site_title: 'Utterlog', permalink_structure: DEFAULT_PERMALINK,
+      site_timezone: '', site_timezone_effective: '',
+    };
   }
 }
 
@@ -93,6 +104,11 @@ export function getSiteUrl(): string {
 
 export function getSiteTitle(): string {
   return cached?.site_title || 'Utterlog';
+}
+
+/** Read the already-loaded options without issuing another request. */
+export function getSiteOptions() {
+  return cached;
 }
 
 export function getPermalinkStructure(): string {
