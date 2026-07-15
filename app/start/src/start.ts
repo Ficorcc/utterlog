@@ -87,6 +87,22 @@ const bodyLimit = createMiddleware().server(async ({ next, request }) => {
   return next();
 });
 
+const apiNoCache = createMiddleware().server(async ({ next, pathname }) => {
+  const result = await next();
+  if (!pathname.startsWith('/api/')) return result;
+  const headers = new Headers(result.response.headers);
+  if (!headers.has('cache-control')) {
+    headers.set('cache-control', 'private, no-store, no-cache, must-revalidate');
+    headers.set('pragma', 'no-cache');
+    headers.set('expires', '0');
+  }
+  return new Response(result.response.body, {
+    status: result.response.status,
+    statusText: result.response.statusText,
+    headers,
+  });
+});
+
 const errorBoundary = createMiddleware().server(async ({ next, context }) => {
   try {
     return await next();
@@ -132,5 +148,5 @@ const authContext = createMiddleware().server(async ({ next, request }) => {
 });
 
 export const startInstance = createStart(() => ({
-  requestMiddleware: [errorBoundary, authContext, cors, bodyLimit, securityHeaders],
+  requestMiddleware: [errorBoundary, authContext, cors, bodyLimit, apiNoCache, securityHeaders],
 }));
