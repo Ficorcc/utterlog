@@ -35,6 +35,7 @@ import { Route as BooksRouteImport } from './routes/books'
 import { Route as AtomDotxmlRouteImport } from './routes/atom[.]xml'
 import { Route as ArchivesRouteImport } from './routes/archives'
 import { Route as AlbumsRouteImport } from './routes/albums'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
@@ -331,6 +332,11 @@ const AlbumsRoute = AlbumsRouteImport.update({
   path: '/albums',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -392,9 +398,9 @@ const ApiSplatRoute = ApiSplatRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSplatRoute = AdminSplatRouteImport.update({
-  id: '/admin/$',
-  path: '/admin/$',
-  getParentRoute: () => rootRouteImport,
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => AdminRoute,
 } as any)
 const DateYearMonthRoute = DateYearMonthRouteImport.update({
   id: '/$month',
@@ -1191,6 +1197,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/albums': typeof AlbumsRoute
   '/archives': typeof ArchivesRoute
   '/atom.xml': typeof AtomDotxmlRoute
@@ -1384,6 +1391,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/albums': typeof AlbumsRoute
   '/archives': typeof ArchivesRoute
   '/atom.xml': typeof AtomDotxmlRoute
@@ -1578,6 +1586,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/albums': typeof AlbumsRoute
   '/archives': typeof ArchivesRoute
   '/atom.xml': typeof AtomDotxmlRoute
@@ -1773,6 +1782,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/about'
+    | '/admin'
     | '/albums'
     | '/archives'
     | '/atom.xml'
@@ -1966,6 +1976,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/about'
+    | '/admin'
     | '/albums'
     | '/archives'
     | '/atom.xml'
@@ -2159,6 +2170,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/about'
+    | '/admin'
     | '/albums'
     | '/archives'
     | '/atom.xml'
@@ -2353,6 +2365,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
   AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AlbumsRoute: typeof AlbumsRoute
   ArchivesRoute: typeof ArchivesRoute
   AtomDotxmlRoute: typeof AtomDotxmlRoute
@@ -2379,7 +2392,6 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TagsRoute: typeof TagsRouteWithChildren
-  AdminSplatRoute: typeof AdminSplatRoute
   ApiSplatRoute: typeof ApiSplatRoute
   ApiRevalidateRoute: typeof ApiRevalidateRoute
   AssetsSplatRoute: typeof AssetsSplatRoute
@@ -2699,6 +2711,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AlbumsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -2785,10 +2804,10 @@ declare module '@tanstack/react-router' {
     }
     '/admin/$': {
       id: '/admin/$'
-      path: '/admin/$'
+      path: '/$'
       fullPath: '/admin/$'
       preLoaderRoute: typeof AdminSplatRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/date/$year/$month': {
       id: '/date/$year/$month'
@@ -3857,6 +3876,16 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminSplatRoute: typeof AdminSplatRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminSplatRoute: AdminSplatRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface CategoriesRouteChildren {
   CategoriesSlugRoute: typeof CategoriesSlugRoute
 }
@@ -4135,6 +4164,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
   AboutRoute: AboutRoute,
+  AdminRoute: AdminRouteWithChildren,
   AlbumsRoute: AlbumsRoute,
   ArchivesRoute: ArchivesRoute,
   AtomDotxmlRoute: AtomDotxmlRoute,
@@ -4161,7 +4191,6 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TagsRoute: TagsRouteWithChildren,
-  AdminSplatRoute: AdminSplatRoute,
   ApiSplatRoute: ApiSplatRoute,
   ApiRevalidateRoute: ApiRevalidateRoute,
   AssetsSplatRoute: AssetsSplatRoute,
