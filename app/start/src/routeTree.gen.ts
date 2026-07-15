@@ -44,6 +44,7 @@ import { Route as PageNumRouteImport } from './routes/page/$num'
 import { Route as FilmsSlugRouteImport } from './routes/films/$slug'
 import { Route as DateYearRouteImport } from './routes/date/$year'
 import { Route as CategoriesSlugRouteImport } from './routes/categories/$slug'
+import { Route as AssetsSplatRouteImport } from './routes/assets/$'
 import { Route as ApiRevalidateRouteImport } from './routes/api/revalidate'
 import { Route as ApiSplatRouteImport } from './routes/api/$'
 import { Route as AdminSplatRouteImport } from './routes/admin/$'
@@ -374,6 +375,11 @@ const CategoriesSlugRoute = CategoriesSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => CategoriesRoute,
+} as any)
+const AssetsSplatRoute = AssetsSplatRouteImport.update({
+  id: '/assets/$',
+  path: '/assets/$',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiRevalidateRoute = ApiRevalidateRouteImport.update({
   id: '/api/revalidate',
@@ -1214,6 +1220,7 @@ export interface FileRoutesByFullPath {
   '/admin/$': typeof AdminSplatRoute
   '/api/$': typeof ApiSplatRoute
   '/api/revalidate': typeof ApiRevalidateRoute
+  '/assets/$': typeof AssetsSplatRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/date/$year': typeof DateYearRouteWithChildren
   '/films/$slug': typeof FilmsSlugRoute
@@ -1406,6 +1413,7 @@ export interface FileRoutesByTo {
   '/admin/$': typeof AdminSplatRoute
   '/api/$': typeof ApiSplatRoute
   '/api/revalidate': typeof ApiRevalidateRoute
+  '/assets/$': typeof AssetsSplatRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/date/$year': typeof DateYearRouteWithChildren
   '/films/$slug': typeof FilmsSlugRoute
@@ -1599,6 +1607,7 @@ export interface FileRoutesById {
   '/admin/$': typeof AdminSplatRoute
   '/api/$': typeof ApiSplatRoute
   '/api/revalidate': typeof ApiRevalidateRoute
+  '/assets/$': typeof AssetsSplatRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/date/$year': typeof DateYearRouteWithChildren
   '/films/$slug': typeof FilmsSlugRoute
@@ -1793,6 +1802,7 @@ export interface FileRouteTypes {
     | '/admin/$'
     | '/api/$'
     | '/api/revalidate'
+    | '/assets/$'
     | '/categories/$slug'
     | '/date/$year'
     | '/films/$slug'
@@ -1985,6 +1995,7 @@ export interface FileRouteTypes {
     | '/admin/$'
     | '/api/$'
     | '/api/revalidate'
+    | '/assets/$'
     | '/categories/$slug'
     | '/date/$year'
     | '/films/$slug'
@@ -2177,6 +2188,7 @@ export interface FileRouteTypes {
     | '/admin/$'
     | '/api/$'
     | '/api/revalidate'
+    | '/assets/$'
     | '/categories/$slug'
     | '/date/$year'
     | '/films/$slug'
@@ -2370,6 +2382,7 @@ export interface RootRouteChildren {
   AdminSplatRoute: typeof AdminSplatRoute
   ApiSplatRoute: typeof ApiSplatRoute
   ApiRevalidateRoute: typeof ApiRevalidateRoute
+  AssetsSplatRoute: typeof AssetsSplatRoute
   DateYearRoute: typeof DateYearRouteWithChildren
   PageNumRoute: typeof PageNumRoute
   PostsSlugRoute: typeof PostsSlugRoute
@@ -2748,6 +2761,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/categories/$slug'
       preLoaderRoute: typeof CategoriesSlugRouteImport
       parentRoute: typeof CategoriesRoute
+    }
+    '/assets/$': {
+      id: '/assets/$'
+      path: '/assets/$'
+      fullPath: '/assets/$'
+      preLoaderRoute: typeof AssetsSplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/revalidate': {
       id: '/api/revalidate'
@@ -4144,6 +4164,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminSplatRoute: AdminSplatRoute,
   ApiSplatRoute: ApiSplatRoute,
   ApiRevalidateRoute: ApiRevalidateRoute,
+  AssetsSplatRoute: AssetsSplatRoute,
   DateYearRoute: DateYearRouteWithChildren,
   PageNumRoute: PageNumRoute,
   PostsSlugRoute: PostsSlugRoute,
