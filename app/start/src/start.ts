@@ -4,6 +4,8 @@ import { authenticateRequest, type AuthSession } from '../../server/src/auth/ses
 
 export type StartRequestContext = {
   session: AuthSession | null;
+  requestId: string;
+  clientIp: string;
 };
 
 declare module '@tanstack/react-router' {
@@ -17,11 +19,11 @@ declare module '@tanstack/react-router' {
 const allowedHeaders = 'Content-Type, Authorization, X-WebAuthn-Session, X-Utterlog-Passport';
 const allowedMethods = 'GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD';
 
-function errorResponse() {
+function errorResponse(requestId: string = crypto.randomUUID()) {
   return Response.json({
     success: false,
     error: { code: 'INTERNAL_ERROR', message: '服务器内部错误' },
-    meta: { request_id: crypto.randomUUID(), timestamp: new Date().toISOString() },
+    meta: { request_id: requestId, timestamp: new Date().toISOString() },
   }, { status: 500 });
 }
 
@@ -85,12 +87,12 @@ const bodyLimit = createMiddleware().server(async ({ next, request }) => {
   return next();
 });
 
-const errorBoundary = createMiddleware().server(async ({ next }) => {
+const errorBoundary = createMiddleware().server(async ({ next, context }) => {
   try {
     return await next();
   } catch (error) {
     console.error('TanStack Start request error:', error);
-    return errorResponse();
+    return errorResponse(context.requestId);
   }
 });
 
@@ -121,7 +123,12 @@ const authContext = createMiddleware().server(async ({ next, request }) => {
       // still return their normal 401/403 response through withAdmin.
     }
   }
-  return next({ context: { session } });
+  const forwarded = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
+  const clientIp = request.headers.get('cf-connecting-ip')
+    || request.headers.get('x-real-ip')
+    || forwarded
+    || 'unknown';
+  return next({ context: { session, requestId: crypto.randomUUID(), clientIp } });
 });
 
 export const startInstance = createStart(() => ({
