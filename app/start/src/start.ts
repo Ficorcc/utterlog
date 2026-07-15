@@ -17,6 +17,14 @@ declare module '@tanstack/react-router' {
 const allowedHeaders = 'Content-Type, Authorization, X-WebAuthn-Session, X-Utterlog-Passport';
 const allowedMethods = 'GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD';
 
+function errorResponse() {
+  return Response.json({
+    success: false,
+    error: { code: 'INTERNAL_ERROR', message: '服务器内部错误' },
+    meta: { request_id: crypto.randomUUID(), timestamp: new Date().toISOString() },
+  }, { status: 500 });
+}
+
 function allowedOrigin(origin: string | null) {
   if (!origin) return '';
   if (config.corsOrigin === '*') return '*';
@@ -61,6 +69,31 @@ const cors = createMiddleware().server(async ({ next, request }) => {
   });
 });
 
+const bodyLimit = createMiddleware().server(async ({ next, request }) => {
+  const method = request.method.toUpperCase();
+  const contentType = request.headers.get('content-type') || '';
+  const contentLength = Number.parseInt(request.headers.get('content-length') || '', 10);
+  if (['POST', 'PUT', 'PATCH'].includes(method)
+    && !contentType.includes('multipart/form-data')
+    && Number.isFinite(contentLength)
+    && contentLength > 2 * 1024 * 1024) {
+    return Response.json({
+      success: false,
+      error: { code: 'PAYLOAD_TOO_LARGE', message: '请求体过大' },
+    }, { status: 413 });
+  }
+  return next();
+});
+
+const errorBoundary = createMiddleware().server(async ({ next }) => {
+  try {
+    return await next();
+  } catch (error) {
+    console.error('TanStack Start request error:', error);
+    return errorResponse();
+  }
+});
+
 // Keep baseline response hardening inside Start so direct Start requests do
 // not depend on the legacy Hono gateway for security headers.
 const securityHeaders = createMiddleware().server(async ({ next }) => {
@@ -92,5 +125,5 @@ const authContext = createMiddleware().server(async ({ next, request }) => {
 });
 
 export const startInstance = createStart(() => ({
-  requestMiddleware: [authContext, cors, securityHeaders],
+  requestMiddleware: [errorBoundary, authContext, cors, bodyLimit, securityHeaders],
 }));
