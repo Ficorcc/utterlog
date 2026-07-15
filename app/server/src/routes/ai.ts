@@ -106,7 +106,7 @@ async function activeAiProviders(type = 'text', purpose = '') {
 
 const aiPresets = {
   openai: { name: 'OpenAI', endpoint: 'https://api.openai.com/v1/chat/completions', models: ['gpt-5.5', 'gpt-5', 'gpt-4.1', 'gpt-4.1-mini', 'o3-mini'] },
-  deepseek: { name: 'DeepSeek', endpoint: 'https://api.deepseek.com/chat/completions', models: ['deepseek-v4', 'deepseek-v3', 'deepseek-chat', 'deepseek-reasoner'] },
+  deepseek: { name: 'DeepSeek', endpoint: 'https://api.deepseek.com/chat/completions', models: ['deepseek-v4-flash', 'deepseek-v4-pro', 'deepseek-chat', 'deepseek-reasoner'] },
   gemini: { name: 'Google Gemini', endpoint: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', models: ['gemini-2.5-pro', 'gemini-2.5-flash'] },
   qwen: { name: 'Qwen · 文本', endpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions', models: ['qwen3-max', 'qwen-plus', 'qwen-turbo'] },
   kimi: { name: 'Kimi', endpoint: 'https://api.moonshot.cn/v1/chat/completions', models: ['kimi-k2.6', 'kimi-k2.5', 'kimi-latest'] },

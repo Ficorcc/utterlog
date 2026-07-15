@@ -469,13 +469,12 @@ export default function AiSettingsPage() {
                   </Select>
                 </div>
                 <Input label={t('admin.aiSettings.providers.endpoint', 'API 端点')} value={editing.endpoint} onChange={e => setEditing({ ...editing, endpoint: e.target.value })} placeholder="https://api.openai.com/v1/chat/completions" />
-                {editing.slug && presets[editing.slug] ? (
-                  <Select label={t('admin.aiSettings.providers.model', '模型')} value={editing.model} onChange={e => setEditing({ ...editing, model: e.target.value })}>
-                    {presets[editing.slug].models.map((m: string) => <option key={m} value={m}>{m}</option>)}
-                  </Select>
-                ) : (
-                  <Input label={t('admin.aiSettings.providers.model', '模型')} value={editing.model} onChange={e => setEditing({ ...editing, model: e.target.value })} placeholder="gpt-4.1-mini" />
-                )}
+                <Input
+                  label={t('admin.aiSettings.providers.model', '模型')}
+                  value={editing.model}
+                  onChange={e => setEditing({ ...editing, model: e.target.value })}
+                  placeholder={editing.slug === 'deepseek' ? 'deepseek-v4-flash' : 'gpt-4.1-mini'}
+                />
                 <Input label="API Key" type="password" value={editing.api_key} onChange={e => setEditing({ ...editing, api_key: e.target.value })} placeholder="sk-..." />
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                   <div>
