@@ -2,12 +2,11 @@ import { assertSecureConfig, config } from './config';
 import { migrateLegacyBlogThemeOptions } from './blog-theme-options';
 import { startAnalyticsRollup } from './analytics/rollup';
 import { initDb } from './db/client';
-import { createApp } from './routes';
 import { startFeedFetchCron } from './social/feed-cron';
 import { startCpuMonitor } from './system/metrics';
 import { startTelegramDailyReport } from './telegram';
 import { startBackupScheduler } from './routes/backup';
-import { preloadStartServer, warmStartFrontend } from './web/start';
+import { handleStartRequest, preloadStartServer, warmStartFrontend } from './web/start';
 
 startCpuMonitor();
 
@@ -25,13 +24,13 @@ if (ready) {
 await preloadStartServer().catch((err) => {
   console.error('TanStack Start preload failed:', err);
 });
-const app = createApp(ready);
 
 console.log(`Utterlog Bun server listening on :${config.port} (${ready ? 'full' : 'setup-only'} mode)`);
 
 const server = Bun.serve({
   port: config.port,
-  fetch: app.fetch,
+  fetch: async (request) => await handleStartRequest(request)
+    || new Response('TanStack Start service unavailable', { status: 503 }),
 });
 
 void warmStartFrontend(server.url.origin)
