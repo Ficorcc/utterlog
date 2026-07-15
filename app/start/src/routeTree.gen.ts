@@ -40,6 +40,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UploadsSplatRouteImport } from './routes/uploads/$'
+import { Route as ThemesSplatRouteImport } from './routes/themes/$'
 import { Route as TagsSlugRouteImport } from './routes/tags/$slug'
 import { Route as PostsSlugRouteImport } from './routes/posts/$slug'
 import { Route as PageNumRouteImport } from './routes/page/$num'
@@ -356,6 +357,11 @@ const IndexRoute = IndexRouteImport.update({
 const UploadsSplatRoute = UploadsSplatRouteImport.update({
   id: '/uploads/$',
   path: '/uploads/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ThemesSplatRoute = ThemesSplatRouteImport.update({
+  id: '/themes/$',
+  path: '/themes/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TagsSlugRoute = TagsSlugRouteImport.update({
@@ -1240,6 +1246,7 @@ export interface FileRoutesByFullPath {
   '/page/$num': typeof PageNumRoute
   '/posts/$slug': typeof PostsSlugRoute
   '/tags/$slug': typeof TagsSlugRoute
+  '/themes/$': typeof ThemesSplatRoute
   '/uploads/$': typeof UploadsSplatRoute
   '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
   '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
@@ -1435,6 +1442,7 @@ export interface FileRoutesByTo {
   '/page/$num': typeof PageNumRoute
   '/posts/$slug': typeof PostsSlugRoute
   '/tags/$slug': typeof TagsSlugRoute
+  '/themes/$': typeof ThemesSplatRoute
   '/uploads/$': typeof UploadsSplatRoute
   '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
   '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
@@ -1631,6 +1639,7 @@ export interface FileRoutesById {
   '/page/$num': typeof PageNumRoute
   '/posts/$slug': typeof PostsSlugRoute
   '/tags/$slug': typeof TagsSlugRoute
+  '/themes/$': typeof ThemesSplatRoute
   '/uploads/$': typeof UploadsSplatRoute
   '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
   '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
@@ -1828,6 +1837,7 @@ export interface FileRouteTypes {
     | '/page/$num'
     | '/posts/$slug'
     | '/tags/$slug'
+    | '/themes/$'
     | '/uploads/$'
     | '/api/v1/$resource'
     | '/api/v1/categories'
@@ -2023,6 +2033,7 @@ export interface FileRouteTypes {
     | '/page/$num'
     | '/posts/$slug'
     | '/tags/$slug'
+    | '/themes/$'
     | '/uploads/$'
     | '/api/v1/$resource'
     | '/api/v1/categories'
@@ -2218,6 +2229,7 @@ export interface FileRouteTypes {
     | '/page/$num'
     | '/posts/$slug'
     | '/tags/$slug'
+    | '/themes/$'
     | '/uploads/$'
     | '/api/v1/$resource'
     | '/api/v1/categories'
@@ -2410,6 +2422,7 @@ export interface RootRouteChildren {
   DateYearRoute: typeof DateYearRouteWithChildren
   PageNumRoute: typeof PageNumRoute
   PostsSlugRoute: typeof PostsSlugRoute
+  ThemesSplatRoute: typeof ThemesSplatRoute
   UploadsSplatRoute: typeof UploadsSplatRoute
   ApiV1ResourceRoute: typeof ApiV1ResourceRouteWithChildren
   ApiV1CategoriesRoute: typeof ApiV1CategoriesRouteWithChildren
@@ -2757,6 +2770,13 @@ declare module '@tanstack/react-router' {
       path: '/uploads/$'
       fullPath: '/uploads/$'
       preLoaderRoute: typeof UploadsSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/themes/$': {
+      id: '/themes/$'
+      path: '/themes/$'
+      fullPath: '/themes/$'
+      preLoaderRoute: typeof ThemesSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tags/$slug': {
@@ -4217,6 +4237,7 @@ const rootRouteChildren: RootRouteChildren = {
   DateYearRoute: DateYearRouteWithChildren,
   PageNumRoute: PageNumRoute,
   PostsSlugRoute: PostsSlugRoute,
+  ThemesSplatRoute: ThemesSplatRoute,
   UploadsSplatRoute: UploadsSplatRoute,
   ApiV1ResourceRoute: ApiV1ResourceRouteWithChildren,
   ApiV1CategoriesRoute: ApiV1CategoriesRouteWithChildren,
