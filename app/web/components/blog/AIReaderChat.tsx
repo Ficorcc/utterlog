@@ -31,6 +31,8 @@ export default function AIReaderChat({ postId, title, excerpt, authorAvatar }: A
   // and apply the admin's left/right preference.
   const { owner, options } = useThemeContext();
   const readerRevealed = useReaderScrollReveal();
+  // Missing option means enabled so existing installations keep their current behavior.
+  const readerEnabled = options?.ai_reader_chat_enabled !== 'false';
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -48,9 +50,13 @@ export default function AIReaderChat({ postId, title, excerpt, authorAvatar }: A
   // 或强制刷新）才能让卡片重新出现。
   const dismissed = useReaderChatStore(s => s.dismissed);
   useEffect(() => {
+    if (!readerEnabled) {
+      useReaderChatStore.getState().unmount();
+      return;
+    }
     useReaderChatStore.getState().mount();
     return () => useReaderChatStore.getState().unmount();
-  }, []);
+  }, [readerEnabled]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -208,7 +214,7 @@ export default function AIReaderChat({ postId, title, excerpt, authorAvatar }: A
     ? { left: 24 }
     : { right: 24 };
 
-  if (!readerRevealed) return null;
+  if (!readerEnabled || !readerRevealed) return null;
   // 用户点了 × → 这次会话内不再渲染（footer 那个"重新打开陪读"按钮
   // 会接管入口）。强制刷新 / 切换文章会调 mount() 重置 dismissed
   if (dismissed) return null;

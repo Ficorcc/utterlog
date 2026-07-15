@@ -106,6 +106,8 @@ export default function AiSettingsPage() {
     ai_chat_enabled: 'false',
     ai_chat_guest: 'false',
     ai_chat_position: 'right',
+    // Article reader is enabled by default to preserve the existing site behavior.
+    ai_reader_chat_enabled: 'true',
     ai_summary_auto: 'false',
     ai_summary_max_length: '200',
     // Prompt textareas start empty — load() pre-fills them with the
@@ -569,10 +571,10 @@ export default function AiSettingsPage() {
       {/* ── 聊天配置 ── */}
       {activeTab === '聊天配置' && (
         <>
-          <FormSectionC title={t('admin.aiSettings.chat.title', '前端聊天气泡')} icon="fa-regular fa-comment-dots" footerHint={t('admin.aiSettings.chat.footer', '聊天气泡 = 全站浮动 AI 助手（首页 / 列表 / 归档等非文章页右下角圆形按钮）。文章详情页不显示气泡，让位给文章自带的「AI 陪读」（陪读有自己的对话上下文，是独立功能，不受这个开关控制）。')}>
+          <FormSectionC title={t('admin.aiSettings.chat.title', '前端聊天气泡')} icon="fa-regular fa-comment-dots" footerHint={t('admin.aiSettings.chat.footer', '聊天气泡 = 全站浮动 AI 助手（首页 / 列表 / 归档等非文章页右下角圆形按钮）。文章详情页 AI 伴读在「文章设置」中单独控制。')}>
             <FormRowToggleC
               label={t('admin.aiSettings.chat.enableBubble', '启用聊天气泡')}
-              hint={t('admin.aiSettings.chat.enableBubbleHint', '关闭后所有非文章页右下角的圆形 AI 助手按钮完全隐藏；不影响文章详情页的「AI 陪读」')}
+              hint={t('admin.aiSettings.chat.enableBubbleHint', '关闭后所有非文章页右下角的圆形 AI 助手按钮完全隐藏；不影响文章详情页的「AI 伴读」开关')}
               checked={config.ai_chat_enabled === 'true'}
               onChange={v => updateConfig('ai_chat_enabled', String(v))}
             />
@@ -636,6 +638,20 @@ export default function AiSettingsPage() {
               ))}
             </div>
           </div>
+
+          <FormSectionC
+            title={t('admin.aiSettings.posts.readerTitle', '文章页 AI 伴读')}
+            icon="fa-regular fa-book-open-reader"
+            description={t('admin.aiSettings.posts.readerDescription', '控制文章详情页的「边读边聊」卡片和推荐问题。关闭后不会影响非文章页的全站聊天气泡。')}
+          >
+            <FormRowToggleC
+              label={t('admin.aiSettings.posts.enableReader', '启用文章页 AI 伴读')}
+              hint={t('admin.aiSettings.posts.enableReaderHint', '关闭后文章详情页不显示 AI 伴读，也不会加载推荐问题或发送伴读请求')}
+              checked={config.ai_reader_chat_enabled !== 'false'}
+              onChange={v => updateConfig('ai_reader_chat_enabled', String(v))}
+              last
+            />
+          </FormSectionC>
 
           {/* 摘要设置 */}
           {config.ai_summary_auto === 'true' && (
