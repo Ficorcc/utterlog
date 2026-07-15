@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { momentsApi } from '@/lib/api';
 import { useThemeContext } from '@/lib/theme-context';
 import { formatDateInTimeZone } from '@/lib/timezone';
+import ResilientImage from './ResilientImage';
 
 interface MomentEmbedProps {
   id: string | number;
@@ -137,7 +138,7 @@ export default function MomentEmbed({ id }: MomentEmbedProps) {
       {images.length > 0 && (
         <div className={`utter-moment-embed__images utter-moment-embed__images--${Math.min(images.length, 4)}`}>
           {images.slice(0, 4).map((src, index) => (
-            <img key={`${src}-${index}`} src={src} alt="" loading="lazy" />
+            <ResilientImage key={`${src}-${index}`} src={src} alt="" loading="lazy" />
           ))}
           {images.length > 4 && <span className="utter-moment-embed__more">+{images.length - 4}</span>}
         </div>

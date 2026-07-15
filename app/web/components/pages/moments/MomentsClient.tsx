@@ -7,6 +7,7 @@ import { useThemeContext } from '@/lib/theme-context';
 import { datePartsInTimeZone, formatDateInTimeZone, formatDateTimeInTimeZone } from '@/lib/timezone';
 import PageTitle from '@/components/blog/PageTitle';
 import Lightbox from '@/components/blog/Lightbox';
+import ResilientImage from '@/components/blog/ResilientImage';
 import toast from 'react-hot-toast';
 
 const MOMENTS_CACHE_TTL = 60_000;
@@ -522,13 +523,13 @@ export default function MomentsPage({
 
                     {/* Images */}
                     {imgs.length === 1 && (
-                      <img src={imgs[0]} alt="" onClick={(e) => { e.stopPropagation(); openLightbox(imgs, 0, e.currentTarget.getBoundingClientRect()); }}
+                      <ResilientImage src={imgs[0]} alt="" onClick={(e) => { e.stopPropagation(); openLightbox(imgs, 0, e.currentTarget.getBoundingClientRect()); }}
                         style={{ width: '100%', aspectRatio: '16 / 9', objectFit: 'cover', cursor: 'zoom-in', display: 'block' }} />
                     )}
                     {imgs.length >= 2 && (
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px' }}>
                         {imgs.map((url, idx) => (
-                          <img key={idx} src={url} alt="" onClick={(e) => { e.stopPropagation(); openLightbox(imgs, idx, e.currentTarget.getBoundingClientRect()); }}
+                          <ResilientImage key={idx} src={url} alt="" onClick={(e) => { e.stopPropagation(); openLightbox(imgs, idx, e.currentTarget.getBoundingClientRect()); }}
                             style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', cursor: 'zoom-in', display: 'block' }} />
                         ))}
                       </div>

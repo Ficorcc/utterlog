@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import LoadingSpinner from './LoadingSpinner';
+import ResilientImage from './ResilientImage';
 
 interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   exifData?: Record<string, string>;
@@ -46,7 +47,7 @@ export default function LazyImage({ src, alt, exifData, ...props }: LazyImagePro
       <span className="blog-image-loader">
         <LoadingSpinner size={24} />
       </span>
-      <img
+      <ResilientImage
         ref={imgRef}
         src={src}
         alt={alt || ''}
