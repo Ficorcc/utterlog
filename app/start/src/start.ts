@@ -3,6 +3,7 @@ import { config } from '../../server/src/config';
 import { authenticateRequest, type AuthSession } from '../../server/src/auth/session';
 import { dbReady } from '../../server/src/db/client';
 import { installRedirect } from '../../server/src/http/install-redirect';
+import { requestIp } from '../../server/src/request-ip';
 import { checkStartSecurity } from './server/security';
 
 export type StartRequestContext = {
@@ -152,11 +153,7 @@ const authContext = createMiddleware().server(async ({ next, request }) => {
       // still return their normal 401/403 response through withAdmin.
     }
   }
-  const forwarded = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
-  const clientIp = request.headers.get('cf-connecting-ip')
-    || request.headers.get('x-real-ip')
-    || forwarded
-    || 'unknown';
+  const clientIp = requestIp(request);
   return next({ context: { session, requestId: crypto.randomUUID(), clientIp } });
 });
 

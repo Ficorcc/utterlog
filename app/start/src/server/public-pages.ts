@@ -16,6 +16,7 @@ import {
   resolvePublicPostPath,
   searchPublicPosts,
 } from '../../../server/src/public-read';
+import { requestIp } from '../../../server/src/request-ip';
 import { loadStartThemeContextDirect } from './theme';
 
 export type PublicPageRequest =
@@ -207,10 +208,13 @@ async function postBySlug(slug: string) {
 }
 
 async function homeRoute(ctx: ThemeContextData | null, page: number): Promise<PublicPageData> {
-  const ip = getRequestHeader('cf-connecting-ip')
-    || getRequestHeader('x-real-ip')
-    || getRequestHeader('x-forwarded-for')?.split(',')[0]?.trim()
-    || '127.0.0.1';
+  const ip = requestIp(new Request('https://utterlog.local', {
+    headers: {
+      'x-forwarded-for': getRequestHeader('x-forwarded-for') || '',
+      'x-real-ip': getRequestHeader('x-real-ip') || '',
+      'cf-connecting-ip': getRequestHeader('cf-connecting-ip') || '',
+    },
+  }));
   const [home, visitorWeather] = await Promise.all([
     safe(loadHomePageDataDirect(page), null),
     safe(getVisitorWeather(ip), null, 1200),

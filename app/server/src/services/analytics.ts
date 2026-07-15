@@ -3,6 +3,7 @@ import { table } from '../config';
 import { many, nowUnix, one } from '../db/helpers';
 import { optionValue } from '../db/options';
 import { lookupGeoIp, normalizeGeoProvider } from '../geoip';
+import { requestIp } from '../request-ip';
 import { ephemeral } from '../store/ephemeral';
 
 export const analyticsPeriods = ['24h', '7d', '30d', 'year', '365d', 'all'] as const;
@@ -327,7 +328,4 @@ export async function analyticsBreakdown(period: AnalyticsPeriod, dimension: str
   return result;
 }
 
-export function requestIp(request: Request) {
-  return request.headers.get('cf-connecting-ip') || request.headers.get('x-real-ip')
-    || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '127.0.0.1';
-}
+export { requestIp };

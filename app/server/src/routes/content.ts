@@ -57,6 +57,7 @@ import { searchPosts } from '../services/search';
 import { visitorGeo } from '../services/analytics';
 import { MusicProxyError, proxyMusicAsset, searchMusic } from '../services/music-proxy';
 import { publicOnlineVisitors, trackDuration, trackPageView } from '../services/tracking';
+import { requestIp } from '../request-ip';
 
 const contentTables = new Set(['moments', 'music', 'movies', 'books', 'games', 'videos', 'goods', 'links', 'playlists']);
 const writableTables = new Set([...contentTables, 'posts', 'comments', 'media', 'albums', 'notifications']);
@@ -655,10 +656,7 @@ function removeLocalUpload(relativePath: string) {
 }
 
 function clientIp(c: any) {
-  return c.req.header('cf-connecting-ip') ||
-    c.req.header('x-real-ip') ||
-    c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ||
-    '127.0.0.1';
+  return requestIp(c.req.raw);
 }
 
 function maskIp(ip: string) {

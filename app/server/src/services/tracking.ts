@@ -5,13 +5,11 @@ import { sql } from '../db/client';
 import { exec, nowUnix, one } from '../db/helpers';
 import { optionValue } from '../db/options';
 import { lookupGeoIp } from '../geoip';
+import { requestIp } from '../request-ip';
 import { parsePermalinkPath } from './permalink';
 import { ephemeral } from '../store/ephemeral';
 
-export function requestIp(request: Request) {
-  return request.headers.get('cf-connecting-ip') || request.headers.get('x-real-ip')
-    || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '127.0.0.1';
-}
+export { requestIp };
 
 function maskIp(ip: string) {
   if (ip.includes('.')) {

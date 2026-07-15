@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { listComments } from '../../../../../../server/src/public-read';
 import { authenticateRequest } from '../../../../../../server/src/auth/session';
 import { createPublicComment } from '../../../../../../server/src/services/public-comments';
+import { requestIp } from '../../../../../../server/src/request-ip';
 import { apiOk, apiPaginated, withPublicWrite } from '../../../../server/http';
 
 function positive(value: string | null, fallback: number) {
@@ -28,9 +29,8 @@ export const Route = createFileRoute('/api/v1/comments/')({
     POST: ({ request }) => withPublicWrite(async () => {
       const body = await request.json().catch(() => ({}));
       const session = await authenticateRequest(request).catch(() => null);
-      const forwarded = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
       return apiOk(await createPublicComment(body, {
-        ip: request.headers.get('cf-connecting-ip') || request.headers.get('x-real-ip') || forwarded || '127.0.0.1',
+        ip: requestIp(request),
         userAgent: request.headers.get('user-agent') || '',
         passportToken: request.headers.get('x-utterlog-passport') || '',
         userId: session?.userId || 0,
