@@ -8,7 +8,7 @@
 #   1. 检查工作区干净、可选 git push
 #   2. 本地 preflight（typecheck / build / test）
 #   3. docker build linux/amd64 → utterlog-app:local
-#   4. docker save | ssh load → 141.11.77.152
+#   4. docker save | ssh load → 124.222.230.137
 #   5. rsync compose 文件，force-recreate app 容器
 #   6. 健康检查 + revision 校验
 #
@@ -19,7 +19,7 @@
 #   bash scripts/deploy-xifeng.sh --dry-run      # 只跑 preflight，不构建/上传
 #
 # 环境变量（可覆盖）：
-#   UTTERLOG_DEPLOY_HOST   默认 141.11.77.152
+#   UTTERLOG_DEPLOY_HOST   默认 124.222.230.137
 #   UTTERLOG_DEPLOY_USER   默认 root
 #   UTTERLOG_DEPLOY_PATH   默认 /opt/utterlog-xifeng
 #   UTTERLOG_SSH_KEY       默认 ~/Desktop/gentpan.pem 或 ~/.ssh/gentpan.pem
@@ -31,7 +31,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-HOST="${UTTERLOG_DEPLOY_HOST:-141.11.77.152}"
+HOST="${UTTERLOG_DEPLOY_HOST:-124.222.230.137}"
 USER="${UTTERLOG_DEPLOY_USER:-root}"
 REMOTE_PATH="${UTTERLOG_DEPLOY_PATH:-/opt/utterlog-xifeng}"
 GIT_REMOTE="${UTTERLOG_GIT_REMOTE:-origin}"
