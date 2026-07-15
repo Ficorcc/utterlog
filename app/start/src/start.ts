@@ -4,6 +4,7 @@ import { authenticateRequest, type AuthSession } from '../../server/src/auth/ses
 import { dbReady } from '../../server/src/db/client';
 import { installRedirect } from '../../server/src/http/install-redirect';
 import { requestIp } from '../../server/src/request-ip';
+import { brandingAssetResponse } from './server/branding-assets';
 import { checkStartSecurity } from './server/security';
 
 export type StartRequestContext = {
@@ -112,6 +113,10 @@ const installGuard = createMiddleware().server(async ({ next, request }) => {
   return redirect || next();
 });
 
+const brandingAssets = createMiddleware().server(async ({ next, request }) => {
+  return await brandingAssetResponse(request) || next();
+});
+
 const securityPolicy = createMiddleware().server(async ({ next, request, context }) => {
   const blocked = await checkStartSecurity(request, context.clientIp, context.session);
   return blocked || next();
@@ -158,5 +163,5 @@ const authContext = createMiddleware().server(async ({ next, request }) => {
 });
 
 export const startInstance = createStart(() => ({
-  requestMiddleware: [errorBoundary, installGuard, authContext, securityPolicy, cors, bodyLimit, apiNoCache, securityHeaders],
+  requestMiddleware: [errorBoundary, installGuard, brandingAssets, authContext, securityPolicy, cors, bodyLimit, apiNoCache, securityHeaders],
 }));

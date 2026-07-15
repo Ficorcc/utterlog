@@ -129,7 +129,7 @@ function extractBunRoutes() {
   return [...new Map(routes.map((r) => [key(r), r])).values()].sort((a, b) => `${a.method} ${a.path}`.localeCompare(`${b.method} ${b.path}`));
 }
 
-const startApiRoot = 'app/start/src/routes/api/v1';
+const startApiRoot = 'app/start/src/routes/api';
 
 function extractStartRoutes() {
   if (!existsSync(startApiRoot)) return [] as Route[];
@@ -138,7 +138,7 @@ function extractStartRoutes() {
     const parts = rel.split('/');
     const last = parts.pop() || '';
     if (last !== 'index') parts.push(last);
-    const path = `/api/v1/${parts.join('/')}`
+    const path = `/api/${parts.join('/')}`
       .replace(/\$([A-Za-z0-9_]+)/g, ':$1')
       .replace(/\[\.\]/g, '.')
       .replace(/\/+/g, '/')
