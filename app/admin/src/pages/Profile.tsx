@@ -317,7 +317,7 @@ export default function ProfilePage() {
               style={{ textAlign: 'center', cursor: 'pointer' }}
               onClick={async () => {
                 setAvatarSource('gravatar');
-                try { await api.put('/options', { avatar_source: 'gravatar' }); toast.success(t('admin.profile.toast.switchedGravatar', '已切换为 Gravatar')); } catch {}
+                try { await optionsApi.updateMany({ avatar_source: 'gravatar' }); toast.success(t('admin.profile.toast.switchedGravatar', '已切换为 Gravatar')); } catch {}
               }}
             >
               <div style={{
@@ -335,7 +335,7 @@ export default function ProfilePage() {
               onClick={async () => {
                 if (!utterlogBound) { toast.error(t('admin.profile.toast.bindUtterlogFirst', '请先绑定 Utterlog ID')); return; }
                 setAvatarSource('utterlog');
-                try { await api.put('/options', { avatar_source: 'utterlog' }); toast.success(t('admin.profile.toast.switchedFederatedAvatar', '已切换为联盟头像')); } catch {}
+                try { await optionsApi.updateMany({ avatar_source: 'utterlog' }); toast.success(t('admin.profile.toast.switchedFederatedAvatar', '已切换为联盟头像')); } catch {}
               }}
             >
               <div style={{

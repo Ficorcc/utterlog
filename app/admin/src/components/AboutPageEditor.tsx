@@ -172,7 +172,7 @@ export default function AboutPageEditor({ open, onClose }: { open: boolean; onCl
     setLoading(true);
     (async () => {
       try {
-        const r: any = await api.get('/options');
+        const r: any = await optionsApi.list();
         const opts = r.data || r || {};
         setConfig(parseConfig(opts.page_about_config));
         setMarkdownContent(opts.page_about_markdown || '');

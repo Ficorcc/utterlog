@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import api from '@/lib/api';
+import api, { optionsApi } from '@/lib/api';
 
 interface MapPoint {
   lat: number;
@@ -23,7 +23,7 @@ export default function VisitorMap({ period }: { period: string }) {
   const [mapboxApiUrl, setMapboxApiUrl] = useState('https://api.mapbox.com');
 
   useEffect(() => {
-    api.get('/options').then((r: any) => {
+    optionsApi.list().then((r: any) => {
       const options = r.data || r || {};
       setMapboxToken(String(options.mapbox_access_token || options.footprint_mapbox_token || '').trim());
       setMapboxApiUrl(String(options.mapbox_api_url || '').trim() || 'https://api.mapbox.com');

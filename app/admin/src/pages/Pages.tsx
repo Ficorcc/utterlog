@@ -144,7 +144,7 @@ export default function PagesPage() {
       return;
     }
     try {
-      const r: any = await api.get('/options');
+      const r: any = await optionsApi.list();
       const opts = r.data || r || {};
       setEditingContent(opts[contentKey] || '');
       setEditingKey(contentKey);
@@ -193,7 +193,7 @@ export default function PagesPage() {
 
   const openCodingSettings = async () => {
     try {
-      const r: any = await api.get('/options');
+      const r: any = await optionsApi.list();
       const opts = r.data || r || {};
       setCodingGitHubURL(String(opts.coding_github_url || '').trim());
       setCodingTokenConfigured(String(opts.github_access_token || '').trim() !== '');
@@ -233,7 +233,7 @@ export default function PagesPage() {
 
   const fetchBuiltinStatus = async () => {
     try {
-      const r: any = await api.get('/options');
+      const r: any = await optionsApi.list();
       const opts = r.data || r || {};
       const status: Record<string, boolean> = {};
       builtinPages.forEach(p => {

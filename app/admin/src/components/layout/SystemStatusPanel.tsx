@@ -35,7 +35,6 @@ export default function SystemStatusPanel({ isOpen }: { isOpen: boolean }) {
   const [data, setData] = useState<any>(null);
   const [ok, setOk] = useState(false);
   const [clock, setClock] = useState('');
-  const [tick, setTick] = useState(0);
 
   const fetchStatus = async () => {
     try {
@@ -43,14 +42,15 @@ export default function SystemStatusPanel({ isOpen }: { isOpen: boolean }) {
       const d = r?.data?.status !== undefined ? r.data : r;
       setData({ ...d });
       setOk(d.status === 'ok' && d.database?.connected !== false);
-      setTick(t => t + 1);
     } catch { setOk(false); }
   };
 
   useEffect(() => {
     fetchStatus();
-    // 侧栏打开时 3s 轮询；折叠时 30s 保活
-    const statusInterval = setInterval(fetchStatus, isOpen ? 3000 : 30000);
+    // Poll quickly only while the panel is actually visible. The old
+    // isOpen-only check caused a full system/database request every 3s on
+    // every admin page while the sidebar was expanded.
+    const statusInterval = setInterval(fetchStatus, isOpen && expanded ? 10000 : 60000);
     // 时钟按 site_timezone 显示 —— 站长可能在境外远程维护，site_timezone
     // 跟浏览器本地时区不一致，此处应反映"站点所在地"的当前时间。
     const tz = adminTimeZone() || undefined;
@@ -60,7 +60,7 @@ export default function SystemStatusPanel({ isOpen }: { isOpen: boolean }) {
     const clockInterval = setInterval(() => setClock(fmt()), 1000);
     setClock(fmt());
     return () => { clearInterval(statusInterval); clearInterval(clockInterval); };
-  }, [isOpen, locale]);
+  }, [expanded, isOpen, locale]);
 
   const memPct = Number(data?.memory?.percent ?? 0);
   const diskPct = Number(data?.disk?.percent ?? 0);

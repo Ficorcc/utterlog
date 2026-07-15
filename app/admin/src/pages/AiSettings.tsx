@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import api from '@/lib/api';
+import api, { optionsApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Button, ConfirmDialog, EmptyPanel, Input, RowActions, SaveButton, Textarea, Select, Modal, Toggle, SettingsTabs, Spinner } from '@/components/ui';
 import { FormSectionC, FormRowInputC, FormRowTextareaC, FormRowSelectC, FormRowToggleC, FormRowRangeC } from '@/components/form/FormC';
@@ -149,7 +149,7 @@ export default function AiSettingsPage() {
     try {
       const [provR, optR]: any[] = await Promise.all([
         api.get('/ai/providers'),
-        api.get('/options'),
+        optionsApi.list(),
       ]);
 
       const p = provR.data?.providers || provR.providers || [];
@@ -309,7 +309,7 @@ export default function AiSettingsPage() {
         }
         aiOpts[k] = v;
       });
-      await api.put('/options', aiOpts);
+      await optionsApi.updateMany(aiOpts);
       toast.success(t('admin.settings.toast.saved', '设置已保存'));
     } catch {
       toast.error(t('admin.settings.toast.saveFailed', '保存失败'));

@@ -208,20 +208,39 @@ export const annotationsApi = {
 };
 
 // Options API
+let optionsCache: any | null = null;
+let optionsRequest: Promise<any> | null = null;
+
+function invalidateOptionsCache() {
+  optionsCache = null;
+}
+
 export const optionsApi = {
-  list: () => api.get('/options'),
+  list: () => {
+    if (optionsCache) return Promise.resolve(optionsCache);
+    if (optionsRequest) return optionsRequest;
+    optionsRequest = api.get('/options').then((response) => {
+      optionsCache = response;
+      return response;
+    }).finally(() => {
+      optionsRequest = null;
+    });
+    return optionsRequest;
+  },
   get: async (name: string) => {
-    const r: any = await api.get('/options');
+    const r: any = await optionsApi.list();
     const data = r.data || r;
     return { data: { value: data[name] } };
   },
   update: async (name: string, value: any) => {
     const r = await api.put('/options', { [name]: value });
+    invalidateOptionsCache();
     revalidateCache();
     return r;
   },
   updateMany: async (data: Record<string, any>) => {
     const r = await api.put('/options', data);
+    invalidateOptionsCache();
     revalidateCache();
     return r;
   },

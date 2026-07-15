@@ -68,7 +68,7 @@ export default function SecurityPage() {
   const saveSettings = async () => {
     setSaving(true);
     try {
-      await api.put('/options', {
+      await optionsApi.updateMany({
         require_login: accessOpts.require_login,
         rate_limit: accessOpts.rate_limit,
       });

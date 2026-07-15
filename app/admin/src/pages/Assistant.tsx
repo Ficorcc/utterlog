@@ -1,6 +1,6 @@
 
 import { useEffect, useState, useRef } from 'react';
-import api from '@/lib/api';
+import api, { optionsApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { Button, ConfirmDialog } from '@/components/ui';
 import toast from 'react-hot-toast';
@@ -81,12 +81,12 @@ export default function AiChatPage() {
   const saveToMemory = async (content: string, msgIdx: number) => {
     try {
       // Append to ai_blogger_memory option
-      const r: any = await api.get('/options');
+      const r: any = await optionsApi.list();
       const opts = r.data || r || {};
       const existing = opts.ai_blogger_memory || '';
       const timestamp = adminDateYMDHM(new Date()).replace('T', ' ');
       const entry = `\n---\n[${timestamp}]\n${content.trim()}\n`;
-      await api.put('/options', { ai_blogger_memory: existing + entry });
+      await optionsApi.updateMany({ ai_blogger_memory: existing + entry });
       setSavedMsgIds(prev => new Set(prev).add(msgIdx));
       toast.success('已保存到 Memory');
     } catch {
@@ -96,7 +96,7 @@ export default function AiChatPage() {
 
   const compressMemory = async () => {
     try {
-      const r: any = await api.get('/options');
+      const r: any = await optionsApi.list();
       const memory = (r.data || r)?.ai_blogger_memory || '';
       if (!memory.trim()) { toast.error('Memory 为空'); return; }
       toast.loading('AI 正在整理 Memory...');
@@ -107,7 +107,7 @@ export default function AiChatPage() {
       toast.dismiss();
       if (cr.data?.summary || cr.summary) {
         const compressed = cr.data?.summary || cr.summary;
-        await api.put('/options', { ai_blogger_memory: compressed });
+        await optionsApi.updateMany({ ai_blogger_memory: compressed });
         toast.success('Memory 已整理压缩');
       } else {
         toast.error('整理失败');

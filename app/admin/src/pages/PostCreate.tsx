@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useLocation, useSearchParams } from '@/lib/router';
-import { postsApi, categoriesApi, tagsApi, mediaApi } from '@/lib/api';
+import { postsApi, categoriesApi, tagsApi, mediaApi, optionsApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui';
 import api from '@/lib/api';
@@ -81,7 +81,7 @@ export default function CreatePostPage() {
       } catch {}
     }
     categoriesApi.list().then((r: any) => setCategories(r.data || [])).catch(() => {});
-    api.get('/options').then((r: any) => {
+    optionsApi.list().then((r: any) => {
       const o = r.data || r || {};
       setAiFlags({ summary: o.ai_summary_auto === 'true', image: o.ai_image_auto === 'true', slug: o.ai_slug_auto === 'true', keywords: o.ai_keywords_auto === 'true', polish: o.ai_polish_auto === 'true' });
     }).catch(() => {});
