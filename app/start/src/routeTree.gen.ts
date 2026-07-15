@@ -18,6 +18,7 @@ import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as MusicRouteImport } from './routes/music'
 import { Route as MoviesRouteImport } from './routes/movies'
 import { Route as MomentsRouteImport } from './routes/moments'
+import { Route as LogoDotextRouteImport } from './routes/logo[.]$ext'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as LlmsFullDottxtRouteImport } from './routes/llms-full[.]txt'
@@ -29,6 +30,8 @@ import { Route as FootprintsRouteImport } from './routes/footprints'
 import { Route as FilmsRouteImport } from './routes/films'
 import { Route as FeedsRouteImport } from './routes/feeds'
 import { Route as FeedRouteImport } from './routes/feed'
+import { Route as FaviconDotextRouteImport } from './routes/favicon[.]$ext'
+import { Route as DarkLogoDotextRouteImport } from './routes/dark-logo[.]$ext'
 import { Route as CodingRouteImport } from './routes/coding'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as BooksRouteImport } from './routes/books'
@@ -249,6 +252,11 @@ const MomentsRoute = MomentsRouteImport.update({
   path: '/moments',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LogoDotextRoute = LogoDotextRouteImport.update({
+  id: '/logo.$ext',
+  path: '/logo.$ext',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -302,6 +310,16 @@ const FeedsRoute = FeedsRouteImport.update({
 const FeedRoute = FeedRouteImport.update({
   id: '/feed',
   path: '/feed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaviconDotextRoute = FaviconDotextRouteImport.update({
+  id: '/favicon.$ext',
+  path: '/favicon.$ext',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DarkLogoDotextRoute = DarkLogoDotextRouteImport.update({
+  id: '/dark-logo.$ext',
+  path: '/dark-logo.$ext',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CodingRoute = CodingRouteImport.update({
@@ -1216,6 +1234,8 @@ export interface FileRoutesByFullPath {
   '/books': typeof BooksRoute
   '/categories': typeof CategoriesRouteWithChildren
   '/coding': typeof CodingRoute
+  '/dark-logo.$ext': typeof DarkLogoDotextRoute
+  '/favicon.$ext': typeof FaviconDotextRoute
   '/feed': typeof FeedRoute
   '/feeds': typeof FeedsRoute
   '/films': typeof FilmsRouteWithChildren
@@ -1227,6 +1247,7 @@ export interface FileRoutesByFullPath {
   '/llms-full.txt': typeof LlmsFullDottxtRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
+  '/logo.$ext': typeof LogoDotextRoute
   '/moments': typeof MomentsRoute
   '/movies': typeof MoviesRoute
   '/music': typeof MusicRoute
@@ -1412,6 +1433,8 @@ export interface FileRoutesByTo {
   '/books': typeof BooksRoute
   '/categories': typeof CategoriesRouteWithChildren
   '/coding': typeof CodingRoute
+  '/dark-logo.$ext': typeof DarkLogoDotextRoute
+  '/favicon.$ext': typeof FaviconDotextRoute
   '/feed': typeof FeedRoute
   '/feeds': typeof FeedsRoute
   '/films': typeof FilmsRouteWithChildren
@@ -1423,6 +1446,7 @@ export interface FileRoutesByTo {
   '/llms-full.txt': typeof LlmsFullDottxtRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
+  '/logo.$ext': typeof LogoDotextRoute
   '/moments': typeof MomentsRoute
   '/movies': typeof MoviesRoute
   '/music': typeof MusicRoute
@@ -1609,6 +1633,8 @@ export interface FileRoutesById {
   '/books': typeof BooksRoute
   '/categories': typeof CategoriesRouteWithChildren
   '/coding': typeof CodingRoute
+  '/dark-logo.$ext': typeof DarkLogoDotextRoute
+  '/favicon.$ext': typeof FaviconDotextRoute
   '/feed': typeof FeedRoute
   '/feeds': typeof FeedsRoute
   '/films': typeof FilmsRouteWithChildren
@@ -1620,6 +1646,7 @@ export interface FileRoutesById {
   '/llms-full.txt': typeof LlmsFullDottxtRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
+  '/logo.$ext': typeof LogoDotextRoute
   '/moments': typeof MomentsRoute
   '/movies': typeof MoviesRoute
   '/music': typeof MusicRoute
@@ -1807,6 +1834,8 @@ export interface FileRouteTypes {
     | '/books'
     | '/categories'
     | '/coding'
+    | '/dark-logo.$ext'
+    | '/favicon.$ext'
     | '/feed'
     | '/feeds'
     | '/films'
@@ -1818,6 +1847,7 @@ export interface FileRouteTypes {
     | '/llms-full.txt'
     | '/llms.txt'
     | '/login'
+    | '/logo.$ext'
     | '/moments'
     | '/movies'
     | '/music'
@@ -2003,6 +2033,8 @@ export interface FileRouteTypes {
     | '/books'
     | '/categories'
     | '/coding'
+    | '/dark-logo.$ext'
+    | '/favicon.$ext'
     | '/feed'
     | '/feeds'
     | '/films'
@@ -2014,6 +2046,7 @@ export interface FileRouteTypes {
     | '/llms-full.txt'
     | '/llms.txt'
     | '/login'
+    | '/logo.$ext'
     | '/moments'
     | '/movies'
     | '/music'
@@ -2199,6 +2232,8 @@ export interface FileRouteTypes {
     | '/books'
     | '/categories'
     | '/coding'
+    | '/dark-logo.$ext'
+    | '/favicon.$ext'
     | '/feed'
     | '/feeds'
     | '/films'
@@ -2210,6 +2245,7 @@ export interface FileRouteTypes {
     | '/llms-full.txt'
     | '/llms.txt'
     | '/login'
+    | '/logo.$ext'
     | '/moments'
     | '/movies'
     | '/music'
@@ -2396,6 +2432,8 @@ export interface RootRouteChildren {
   BooksRoute: typeof BooksRoute
   CategoriesRoute: typeof CategoriesRouteWithChildren
   CodingRoute: typeof CodingRoute
+  DarkLogoDotextRoute: typeof DarkLogoDotextRoute
+  FaviconDotextRoute: typeof FaviconDotextRoute
   FeedRoute: typeof FeedRoute
   FeedsRoute: typeof FeedsRoute
   FilmsRoute: typeof FilmsRouteWithChildren
@@ -2407,6 +2445,7 @@ export interface RootRouteChildren {
   LlmsFullDottxtRoute: typeof LlmsFullDottxtRoute
   LlmsDottxtRoute: typeof LlmsDottxtRoute
   LoginRoute: typeof LoginRoute
+  LogoDotextRoute: typeof LogoDotextRoute
   MomentsRoute: typeof MomentsRoute
   MoviesRoute: typeof MoviesRoute
   MusicRoute: typeof MusicRoute
@@ -2618,6 +2657,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MomentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/logo.$ext': {
+      id: '/logo.$ext'
+      path: '/logo.$ext'
+      fullPath: '/logo.$ext'
+      preLoaderRoute: typeof LogoDotextRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -2693,6 +2739,20 @@ declare module '@tanstack/react-router' {
       path: '/feed'
       fullPath: '/feed'
       preLoaderRoute: typeof FeedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/favicon.$ext': {
+      id: '/favicon.$ext'
+      path: '/favicon.$ext'
+      fullPath: '/favicon.$ext'
+      preLoaderRoute: typeof FaviconDotextRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dark-logo.$ext': {
+      id: '/dark-logo.$ext'
+      path: '/dark-logo.$ext'
+      fullPath: '/dark-logo.$ext'
+      preLoaderRoute: typeof DarkLogoDotextRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/coding': {
@@ -4211,6 +4271,8 @@ const rootRouteChildren: RootRouteChildren = {
   BooksRoute: BooksRoute,
   CategoriesRoute: CategoriesRouteWithChildren,
   CodingRoute: CodingRoute,
+  DarkLogoDotextRoute: DarkLogoDotextRoute,
+  FaviconDotextRoute: FaviconDotextRoute,
   FeedRoute: FeedRoute,
   FeedsRoute: FeedsRoute,
   FilmsRoute: FilmsRouteWithChildren,
@@ -4222,6 +4284,7 @@ const rootRouteChildren: RootRouteChildren = {
   LlmsFullDottxtRoute: LlmsFullDottxtRoute,
   LlmsDottxtRoute: LlmsDottxtRoute,
   LoginRoute: LoginRoute,
+  LogoDotextRoute: LogoDotextRoute,
   MomentsRoute: MomentsRoute,
   MoviesRoute: MoviesRoute,
   MusicRoute: MusicRoute,
