@@ -30,6 +30,7 @@ import { Route as FootprintsRouteImport } from './routes/footprints'
 import { Route as FilmsRouteImport } from './routes/films'
 import { Route as FeedsRouteImport } from './routes/feeds'
 import { Route as FeedRouteImport } from './routes/feed'
+import { Route as FaviconDoticoRouteImport } from './routes/favicon[.]ico'
 import { Route as FaviconDotextRouteImport } from './routes/favicon[.]$ext'
 import { Route as DarkLogoDotextRouteImport } from './routes/dark-logo[.]$ext'
 import { Route as CodingRouteImport } from './routes/coding'
@@ -315,6 +316,11 @@ const FeedsRoute = FeedsRouteImport.update({
 const FeedRoute = FeedRouteImport.update({
   id: '/feed',
   path: '/feed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaviconDoticoRoute = FaviconDoticoRouteImport.update({
+  id: '/favicon.ico',
+  path: '/favicon.ico',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FaviconDotextRoute = FaviconDotextRouteImport.update({
@@ -1266,6 +1272,7 @@ export interface FileRoutesByFullPath {
   '/coding': typeof CodingRoute
   '/dark-logo.$ext': typeof DarkLogoDotextRoute
   '/favicon.$ext': typeof FaviconDotextRoute
+  '/favicon.ico': typeof FaviconDoticoRoute
   '/feed': typeof FeedRoute
   '/feeds': typeof FeedsRoute
   '/films': typeof FilmsRouteWithChildren
@@ -1470,6 +1477,7 @@ export interface FileRoutesByTo {
   '/coding': typeof CodingRoute
   '/dark-logo.$ext': typeof DarkLogoDotextRoute
   '/favicon.$ext': typeof FaviconDotextRoute
+  '/favicon.ico': typeof FaviconDoticoRoute
   '/feed': typeof FeedRoute
   '/feeds': typeof FeedsRoute
   '/films': typeof FilmsRouteWithChildren
@@ -1675,6 +1683,7 @@ export interface FileRoutesById {
   '/coding': typeof CodingRoute
   '/dark-logo.$ext': typeof DarkLogoDotextRoute
   '/favicon.$ext': typeof FaviconDotextRoute
+  '/favicon.ico': typeof FaviconDoticoRoute
   '/feed': typeof FeedRoute
   '/feeds': typeof FeedsRoute
   '/films': typeof FilmsRouteWithChildren
@@ -1881,6 +1890,7 @@ export interface FileRouteTypes {
     | '/coding'
     | '/dark-logo.$ext'
     | '/favicon.$ext'
+    | '/favicon.ico'
     | '/feed'
     | '/feeds'
     | '/films'
@@ -2085,6 +2095,7 @@ export interface FileRouteTypes {
     | '/coding'
     | '/dark-logo.$ext'
     | '/favicon.$ext'
+    | '/favicon.ico'
     | '/feed'
     | '/feeds'
     | '/films'
@@ -2289,6 +2300,7 @@ export interface FileRouteTypes {
     | '/coding'
     | '/dark-logo.$ext'
     | '/favicon.$ext'
+    | '/favicon.ico'
     | '/feed'
     | '/feeds'
     | '/films'
@@ -2494,6 +2506,7 @@ export interface RootRouteChildren {
   CodingRoute: typeof CodingRoute
   DarkLogoDotextRoute: typeof DarkLogoDotextRoute
   FaviconDotextRoute: typeof FaviconDotextRoute
+  FaviconDoticoRoute: typeof FaviconDoticoRoute
   FeedRoute: typeof FeedRoute
   FeedsRoute: typeof FeedsRoute
   FilmsRoute: typeof FilmsRouteWithChildren
@@ -2804,6 +2817,13 @@ declare module '@tanstack/react-router' {
       path: '/feed'
       fullPath: '/feed'
       preLoaderRoute: typeof FeedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/favicon.ico': {
+      id: '/favicon.ico'
+      path: '/favicon.ico'
+      fullPath: '/favicon.ico'
+      preLoaderRoute: typeof FaviconDoticoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/favicon.$ext': {
@@ -4373,6 +4393,7 @@ const rootRouteChildren: RootRouteChildren = {
   CodingRoute: CodingRoute,
   DarkLogoDotextRoute: DarkLogoDotextRoute,
   FaviconDotextRoute: FaviconDotextRoute,
+  FaviconDoticoRoute: FaviconDoticoRoute,
   FeedRoute: FeedRoute,
   FeedsRoute: FeedsRoute,
   FilmsRoute: FilmsRouteWithChildren,

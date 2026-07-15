@@ -11,7 +11,7 @@ async function faviconResponse(request: Request, ext: string) {
   if (!brandingExts.has(normalized)) return new Response('Not Found', { status: 404 });
   const acceptEncoding = request.headers.get('accept-encoding') || '';
   const branding = join(config.uploadDir, 'branding', `favicon.${normalized}`);
-  const fallback = join(runtimePaths.serverPublicDir, `favicon.${normalized}`);
+  const fallback = join(runtimePaths.webAppDir, 'public', `favicon.${normalized}`);
   const response = await fileResponse(branding, acceptEncoding) || await fileResponse(fallback, acceptEncoding);
   if (response) {
     return request.method === 'HEAD'
@@ -21,7 +21,7 @@ async function faviconResponse(request: Request, ext: string) {
   if (normalized !== 'ico') {
     const ico = existsSync(join(config.uploadDir, 'branding', 'favicon.ico'))
       ? join(config.uploadDir, 'branding', 'favicon.ico')
-      : join(runtimePaths.serverPublicDir, 'favicon.ico');
+      : join(runtimePaths.webAppDir, 'public', 'favicon.ico');
     const fallbackResponse = await fileResponse(ico, acceptEncoding);
     if (fallbackResponse) return fallbackResponse;
   }
