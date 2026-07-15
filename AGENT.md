@@ -62,7 +62,7 @@ Treat these as local/runtime data, not source cleanup targets unless the user ex
 - `node_modules/`
 - `app/admin/dist/`
 
-The ignored `community/`, `id/`, `wordpress-plugin/`, and `Comment/` directories are retained as adjacent/reference material unless the user asks to remove them.
+The independent `community/`, `id/`, and `wordpress-plugin/` projects live outside this repository under `../utterlog-others/`. `Comment/` remains adjacent/reference material.
 
 ## Development rules
 
@@ -83,8 +83,8 @@ The ignored `community/`, `id/`, `wordpress-plugin/`, and `Comment/` directories
 |---|---|---|---|
 | **用户自己的博客** | 个人站 | `utterlog/utterlog`（本仓库） | 单 docker-compose 全栈 |
 | **utterlog.io** | 程序发布站 + install.sh / update.sh 分发 | `utterlog/utterlog-landing`（私有） | 静态 |
-| **utterlog.com** | 去中心化网络中心站（Network Hub） | 本仓库 `community/` | utterlog-hub :8091 + utterlog-web :3001 |
-| **id.utterlog.com** | Utterlog ID 账号中心（OAuth） | 本仓库 `id/` | utterlog-id :8090 |
+| **utterlog.com** | 去中心化网络中心站（Network Hub） | `../utterlog-others/community/` | utterlog-hub :8091 + utterlog-web :3001 |
+| **id.utterlog.com** | Utterlog ID 账号中心（OAuth） | `../utterlog-others/id/` | utterlog-id :8090 |
 | **docs.utterlog.io** | 文档 | `utterlog/utterlog-docs`（私有） | 静态 |
 | **registry.utterlog.io** | Docker 镜像分发（CF 加速 GHCR） | 本仓库 `.github/workflows/docker-publish.yml` | CF |
 | **demo.utterlog.io** | 在线演示 | 本仓库部署的一个实例 | 同博客 |
@@ -417,7 +417,7 @@ memory 索引在 `~/.claude/projects/-Users-gentpan-projects-utterlog/memory/MEM
 10. **生产 `Dockerfile.prod`** 需要 `.env` bind mount（`- ./.env:/app/.env:rw`）才能让 setup 写入的配置在重启后被读到。
 11. **dev `./api:/app` bind mount**，setup 写 `.env` 落到 host `api/.env` 而非根 `.env` —— `findEnvPath` 已覆盖。
 12. **id-center 新 passkey** 需 `residentKey: required` 才支持 discoverable login；老 passkey 失效需重新注册。
-13. **`community/web` SSR** 用 `INTERNAL_API_URL`，浏览器侧用 `/api/v1` 相对路径（hub JWT 不能从浏览器直连 :8091）。
+13. **Network Hub SSR** 用 `INTERNAL_API_URL`，浏览器侧用 `/api/v1` 相对路径（hub JWT 不能从浏览器直连 :8091）。源码位于 `../utterlog-others/community/`。
 14. **位置反查失败** 不要直接把经纬度写入位置字段，要提示用户手动填位置（2.0.7 修复）。
 15. **段落点评 Azure 外层 overflow** 可能裁切 `-40px` 触发按钮 → article `padding-left: 48px`。
 16. **AI 错误透传**：保存 / 状态切换失败时把后端原因带回前台，不要只显示通用错误。
