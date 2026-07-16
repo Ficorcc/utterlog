@@ -3,8 +3,12 @@ import { join } from 'node:path';
 import { config } from '../../../../server/src/config';
 import { fileResponse, safeJoin } from '../../../../server/src/static/response';
 
+export function isAdminAssetPath(splat: string) {
+  return Boolean(splat && /\.[a-z0-9]+(?:\.(?:br|gz))?$/i.test(splat));
+}
+
 async function adminResponse(request: Request, splat: string) {
-  if (splat && /\.[a-z0-9]+(?:\.(?:br|gz))?$/i.test(splat)) {
+  if (isAdminAssetPath(splat)) {
     const asset = await fileResponse(
       safeJoin(config.adminDistDir, splat),
       request.headers.get('accept-encoding') || '',
@@ -16,6 +20,14 @@ async function adminResponse(request: Request, splat: string) {
       if (request.method === 'HEAD') return new Response(null, { status: asset.status, headers });
       return new Response(asset.body, { status: asset.status, headers });
     }
+
+    return new Response(request.method === 'HEAD' ? null : 'Not Found', {
+      status: 404,
+      headers: {
+        'content-type': 'text/plain; charset=utf-8',
+        'cache-control': 'no-cache, no-store, must-revalidate',
+      },
+    });
   }
 
   const file = Bun.file(join(config.adminDistDir, 'index.html'));

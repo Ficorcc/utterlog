@@ -1,5 +1,5 @@
-import { useEffect, useState, lazy, Suspense, Component, type ErrorInfo, type ReactNode } from 'react';
-import { createRootRoute, createRoute, createRouter, RouterProvider } from '@tanstack/react-router';
+import { useEffect, useState, Suspense, Component, type ErrorInfo, type ReactNode } from 'react';
+import { createRootRoute, createRoute, createRouter, RouterProvider, lazyRouteComponent } from '@tanstack/react-router';
 import { useNavigate, Outlet, Navigate } from '@/lib/router';
 import { useAuthStore } from '@/lib/store';
 import DashboardLayout from '@/layouts/DashboardLayout';
@@ -61,47 +61,47 @@ import NotFound from '@/pages/NotFound';
 import DashboardHome from '@/pages/DashboardHome';
 
 // Lazy-loaded (code-split per route, reduces initial bundle)
-const PostsLayout = lazy(() => import('@/layouts/PostsLayout'));
-const Posts = lazy(() => import('@/pages/Posts'));
-const PostCreate = lazy(() => import('@/pages/PostCreate'));
-const PostEdit = lazy(() => import('@/pages/PostEdit'));
-const PostCategories = lazy(() => import('@/pages/PostCategories'));
-const PostTags = lazy(() => import('@/pages/PostTags'));
-const Pages = lazy(() => import('@/pages/Pages'));
-const PageCreate = lazy(() => import('@/pages/PageCreate'));
-const PageEdit = lazy(() => import('@/pages/PageEdit'));
-const Films = lazy(() => import('@/pages/Films'));
-const Moments = lazy(() => import('@/pages/Moments'));
-const Footprints = lazy(() => import('@/pages/Footprints'));
-const Comments = lazy(() => import('@/pages/Comments'));
-const CommentsByStatus = lazy(() => import('@/pages/CommentsByStatus'));
-const AICommentsQueue = lazy(() => import('@/pages/AICommentsQueue'));
-const Annotations = lazy(() => import('@/pages/Annotations'));
-const Follows = lazy(() => import('@/pages/Follows'));
-const Links = lazy(() => import('@/pages/Links'));
-const Media = lazy(() => import('@/pages/Media'));
-const Albums = lazy(() => import('@/pages/Albums'));
-const Music = lazy(() => import('@/pages/Music'));
-const MusicPlaylists = lazy(() => import('@/pages/MusicPlaylists'));
-const Playlists = lazy(() => import('@/pages/Playlists'));
-const Movies = lazy(() => import('@/pages/Movies'));
-const Videos = lazy(() => import('@/pages/Videos'));
-const Books = lazy(() => import('@/pages/Books'));
-const Games = lazy(() => import('@/pages/Games'));
-const Goods = lazy(() => import('@/pages/Goods'));
-const Analytics = lazy(() => import('@/pages/Analytics'));
-const Security = lazy(() => import('@/pages/Security'));
-const Themes = lazy(() => import('@/pages/Themes'));
-const Plugins = lazy(() => import('@/pages/Plugins'));
-const Tools = lazy(() => import('@/pages/Tools'));
-const Settings = lazy(() => import('@/pages/Settings'));
-const Profile = lazy(() => import('@/pages/Profile'));
-const Backup = lazy(() => import('@/pages/Backup'));
-const Assistant = lazy(() => import('@/pages/Assistant'));
-const AiLogs = lazy(() => import('@/pages/AiLogs'));
-const AiSettings = lazy(() => import('@/pages/AiSettings'));
-const Utterlog = lazy(() => import('@/pages/Utterlog'));
-const FormDemo = lazy(() => import('@/pages/FormDemo'));
+const PostsLayout = lazyRouteComponent(() => import('@/layouts/PostsLayout'));
+const Posts = lazyRouteComponent(() => import('@/pages/Posts'));
+const PostCreate = lazyRouteComponent(() => import('@/pages/PostCreate'));
+const PostEdit = lazyRouteComponent(() => import('@/pages/PostEdit'));
+const PostCategories = lazyRouteComponent(() => import('@/pages/PostCategories'));
+const PostTags = lazyRouteComponent(() => import('@/pages/PostTags'));
+const Pages = lazyRouteComponent(() => import('@/pages/Pages'));
+const PageCreate = lazyRouteComponent(() => import('@/pages/PageCreate'));
+const PageEdit = lazyRouteComponent(() => import('@/pages/PageEdit'));
+const Films = lazyRouteComponent(() => import('@/pages/Films'));
+const Moments = lazyRouteComponent(() => import('@/pages/Moments'));
+const Footprints = lazyRouteComponent(() => import('@/pages/Footprints'));
+const Comments = lazyRouteComponent(() => import('@/pages/Comments'));
+const CommentsByStatus = lazyRouteComponent(() => import('@/pages/CommentsByStatus'));
+const AICommentsQueue = lazyRouteComponent(() => import('@/pages/AICommentsQueue'));
+const Annotations = lazyRouteComponent(() => import('@/pages/Annotations'));
+const Follows = lazyRouteComponent(() => import('@/pages/Follows'));
+const Links = lazyRouteComponent(() => import('@/pages/Links'));
+const Media = lazyRouteComponent(() => import('@/pages/Media'));
+const Albums = lazyRouteComponent(() => import('@/pages/Albums'));
+const Music = lazyRouteComponent(() => import('@/pages/Music'));
+const MusicPlaylists = lazyRouteComponent(() => import('@/pages/MusicPlaylists'));
+const Playlists = lazyRouteComponent(() => import('@/pages/Playlists'));
+const Movies = lazyRouteComponent(() => import('@/pages/Movies'));
+const Videos = lazyRouteComponent(() => import('@/pages/Videos'));
+const Books = lazyRouteComponent(() => import('@/pages/Books'));
+const Games = lazyRouteComponent(() => import('@/pages/Games'));
+const Goods = lazyRouteComponent(() => import('@/pages/Goods'));
+const Analytics = lazyRouteComponent(() => import('@/pages/Analytics'));
+const Security = lazyRouteComponent(() => import('@/pages/Security'));
+const Themes = lazyRouteComponent(() => import('@/pages/Themes'));
+const Plugins = lazyRouteComponent(() => import('@/pages/Plugins'));
+const Tools = lazyRouteComponent(() => import('@/pages/Tools'));
+const Settings = lazyRouteComponent(() => import('@/pages/Settings'));
+const Profile = lazyRouteComponent(() => import('@/pages/Profile'));
+const Backup = lazyRouteComponent(() => import('@/pages/Backup'));
+const Assistant = lazyRouteComponent(() => import('@/pages/Assistant'));
+const AiLogs = lazyRouteComponent(() => import('@/pages/AiLogs'));
+const AiSettings = lazyRouteComponent(() => import('@/pages/AiSettings'));
+const Utterlog = lazyRouteComponent(() => import('@/pages/Utterlog'));
+const FormDemo = lazyRouteComponent(() => import('@/pages/FormDemo'));
 
 /**
  * AuthGate — blocks protected routes until auth hydrates from localStorage.
@@ -117,9 +117,14 @@ function AuthGate() {
         navigate('/login', { replace: true });
         return;
       }
-      checkAuth().then((valid) => {
+
+      // Persisted auth is enough to render the shell immediately. API routes
+      // still enforce the token, while verification and site options load in
+      // parallel instead of adding two CDN round trips before the page mounts.
+      setReady(true);
+      void loadSiteOptions().catch(() => {});
+      void checkAuth().then((valid) => {
         if (!valid) navigate('/login', { replace: true });
-        else loadSiteOptions().finally(() => setReady(true));
       });
     };
     if (useAuthStore.persist.hasHydrated()) {

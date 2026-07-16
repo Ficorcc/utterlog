@@ -46,11 +46,13 @@ export default function SystemStatusPanel({ isOpen }: { isOpen: boolean }) {
   };
 
   useEffect(() => {
+    if (!isOpen || !expanded) return;
     fetchStatus();
-    // Poll quickly only while the panel is actually visible. The old
-    // isOpen-only check caused a full system/database request every 3s on
-    // every admin page while the sidebar was expanded.
-    const statusInterval = setInterval(fetchStatus, isOpen && expanded ? 10000 : 60000);
+    const statusInterval = setInterval(fetchStatus, 10000);
+    return () => clearInterval(statusInterval);
+  }, [expanded, isOpen]);
+
+  useEffect(() => {
     // 时钟按 site_timezone 显示 —— 站长可能在境外远程维护，site_timezone
     // 跟浏览器本地时区不一致，此处应反映"站点所在地"的当前时间。
     const tz = adminTimeZone() || undefined;
@@ -59,8 +61,8 @@ export default function SystemStatusPanel({ isOpen }: { isOpen: boolean }) {
     });
     const clockInterval = setInterval(() => setClock(fmt()), 1000);
     setClock(fmt());
-    return () => { clearInterval(statusInterval); clearInterval(clockInterval); };
-  }, [expanded, isOpen, locale]);
+    return () => clearInterval(clockInterval);
+  }, [locale]);
 
   const memPct = Number(data?.memory?.percent ?? 0);
   const diskPct = Number(data?.disk?.percent ?? 0);
@@ -79,9 +81,9 @@ export default function SystemStatusPanel({ isOpen }: { isOpen: boolean }) {
       >
         <span style={{
           width: '8px', height: '8px', borderRadius: '50%', flexShrink: 0,
-          background: ok ? 'var(--color-success)' : 'var(--color-error)',
-          boxShadow: ok ? '0 0 6px rgba(22,163,106,0.5)' : '0 0 6px rgba(220,38,38,0.5)',
-          animation: 'pulse-dot 2s infinite',
+          background: data == null ? 'var(--color-text-dim)' : ok ? 'var(--color-success)' : 'var(--color-error)',
+          boxShadow: data == null ? 'none' : ok ? '0 0 6px rgba(22,163,106,0.5)' : '0 0 6px rgba(220,38,38,0.5)',
+          animation: data == null ? 'none' : 'pulse-dot 2s infinite',
         }} />
         {isOpen && <span>{t('admin.system.status', '系统状态')}</span>}
         {isOpen && <span style={{ marginLeft: '4px', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-text-sub)' }}>{clock}</span>}

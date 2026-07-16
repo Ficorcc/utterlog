@@ -167,6 +167,7 @@ import { Route as ApiV1AnalyticsActionRouteImport } from './routes/api/v1/analyt
 import { Route as ApiV1AiProvidersRouteImport } from './routes/api/v1/ai/providers'
 import { Route as ApiV1AiActionRouteImport } from './routes/api/v1/ai/$action'
 import { Route as ApiV1AdminStatsRouteImport } from './routes/api/v1/admin/stats'
+import { Route as ApiV1AdminHeaderCountsRouteImport } from './routes/api/v1/admin/header-counts'
 import { Route as ApiV1AdminBootstrapRouteImport } from './routes/api/v1/admin/bootstrap'
 import { Route as ApiV1ResourceIdRouteImport } from './routes/api/v1/$resource/$id'
 import { Route as ApiV1PublicAlbumsIndexRouteImport } from './routes/api/v1/public/albums/index'
@@ -1012,6 +1013,11 @@ const ApiV1AdminStatsRoute = ApiV1AdminStatsRouteImport.update({
   path: '/api/v1/admin/stats',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1AdminHeaderCountsRoute = ApiV1AdminHeaderCountsRouteImport.update({
+  id: '/api/v1/admin/header-counts',
+  path: '/api/v1/admin/header-counts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1AdminBootstrapRoute = ApiV1AdminBootstrapRouteImport.update({
   id: '/api/v1/admin/bootstrap',
   path: '/api/v1/admin/bootstrap',
@@ -1333,6 +1339,7 @@ export interface FileRoutesByFullPath {
   '/date/$year/$month': typeof DateYearMonthRouteWithChildren
   '/api/v1/$resource/$id': typeof ApiV1ResourceIdRoute
   '/api/v1/admin/bootstrap': typeof ApiV1AdminBootstrapRoute
+  '/api/v1/admin/header-counts': typeof ApiV1AdminHeaderCountsRoute
   '/api/v1/admin/stats': typeof ApiV1AdminStatsRoute
   '/api/v1/ai/$action': typeof ApiV1AiActionRoute
   '/api/v1/ai/providers': typeof ApiV1AiProvidersRouteWithChildren
@@ -1539,6 +1546,7 @@ export interface FileRoutesByTo {
   '/date/$year/$month': typeof DateYearMonthRouteWithChildren
   '/api/v1/$resource/$id': typeof ApiV1ResourceIdRoute
   '/api/v1/admin/bootstrap': typeof ApiV1AdminBootstrapRoute
+  '/api/v1/admin/header-counts': typeof ApiV1AdminHeaderCountsRoute
   '/api/v1/admin/stats': typeof ApiV1AdminStatsRoute
   '/api/v1/ai/$action': typeof ApiV1AiActionRoute
   '/api/v1/ai/providers': typeof ApiV1AiProvidersRouteWithChildren
@@ -1746,6 +1754,7 @@ export interface FileRoutesById {
   '/date/$year/$month': typeof DateYearMonthRouteWithChildren
   '/api/v1/$resource/$id': typeof ApiV1ResourceIdRoute
   '/api/v1/admin/bootstrap': typeof ApiV1AdminBootstrapRoute
+  '/api/v1/admin/header-counts': typeof ApiV1AdminHeaderCountsRoute
   '/api/v1/admin/stats': typeof ApiV1AdminStatsRoute
   '/api/v1/ai/$action': typeof ApiV1AiActionRoute
   '/api/v1/ai/providers': typeof ApiV1AiProvidersRouteWithChildren
@@ -1954,6 +1963,7 @@ export interface FileRouteTypes {
     | '/date/$year/$month'
     | '/api/v1/$resource/$id'
     | '/api/v1/admin/bootstrap'
+    | '/api/v1/admin/header-counts'
     | '/api/v1/admin/stats'
     | '/api/v1/ai/$action'
     | '/api/v1/ai/providers'
@@ -2160,6 +2170,7 @@ export interface FileRouteTypes {
     | '/date/$year/$month'
     | '/api/v1/$resource/$id'
     | '/api/v1/admin/bootstrap'
+    | '/api/v1/admin/header-counts'
     | '/api/v1/admin/stats'
     | '/api/v1/ai/$action'
     | '/api/v1/ai/providers'
@@ -2366,6 +2377,7 @@ export interface FileRouteTypes {
     | '/date/$year/$month'
     | '/api/v1/$resource/$id'
     | '/api/v1/admin/bootstrap'
+    | '/api/v1/admin/header-counts'
     | '/api/v1/admin/stats'
     | '/api/v1/ai/$action'
     | '/api/v1/ai/providers'
@@ -2567,6 +2579,7 @@ export interface RootRouteChildren {
   ApiV1TagsRoute: typeof ApiV1TagsRouteWithChildren
   ApiV1TrackRoute: typeof ApiV1TrackRouteWithChildren
   ApiV1AdminBootstrapRoute: typeof ApiV1AdminBootstrapRoute
+  ApiV1AdminHeaderCountsRoute: typeof ApiV1AdminHeaderCountsRoute
   ApiV1AdminStatsRoute: typeof ApiV1AdminStatsRoute
   ApiV1AiActionRoute: typeof ApiV1AiActionRoute
   ApiV1AiProvidersRoute: typeof ApiV1AiProvidersRouteWithChildren
@@ -3791,6 +3804,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1AdminStatsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/admin/header-counts': {
+      id: '/api/v1/admin/header-counts'
+      path: '/api/v1/admin/header-counts'
+      fullPath: '/api/v1/admin/header-counts'
+      preLoaderRoute: typeof ApiV1AdminHeaderCountsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/admin/bootstrap': {
       id: '/api/v1/admin/bootstrap'
       path: '/api/v1/admin/bootstrap'
@@ -4462,6 +4482,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1TagsRoute: ApiV1TagsRouteWithChildren,
   ApiV1TrackRoute: ApiV1TrackRouteWithChildren,
   ApiV1AdminBootstrapRoute: ApiV1AdminBootstrapRoute,
+  ApiV1AdminHeaderCountsRoute: ApiV1AdminHeaderCountsRoute,
   ApiV1AdminStatsRoute: ApiV1AdminStatsRoute,
   ApiV1AiActionRoute: ApiV1AiActionRoute,
   ApiV1AiProvidersRoute: ApiV1AiProvidersRouteWithChildren,

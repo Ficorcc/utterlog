@@ -4,8 +4,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite dev --host 127.0.0.1 --port 3010",
-    "build": "vite build",
+    "dev": "cd ../.. && bun --bun app/start/node_modules/vite/bin/vite.js app/start --config app/start/vite.config.ts --host 127.0.0.1 --port 3010",
+    "build": "cd ../.. && bun --bun app/start/node_modules/vite/bin/vite.js build app/start --config app/start/vite.config.ts",
     "check": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

@@ -79,13 +79,16 @@ export async function adminStatsPayload() {
     one<{ count: string }>(`select count(*)::text as count from ${table('metas')} where type = 'category'`).catch(() => null),
     one<{ count: string }>(`select count(*)::text as count from ${table('metas')} where type = 'tag'`).catch(() => null),
     one<{ count: string }>(
-      `select count(*)::text as count from ${table('access_logs')} where (to_timestamp(created_at) at time zone $1)::date = $2::date`,
+      `select count(*)::text as count from ${table('access_logs')}
+       where created_at >= extract(epoch from (($2::date)::timestamp at time zone $1))::bigint
+         and created_at < extract(epoch from ((($2::date + 1))::timestamp at time zone $1))::bigint`,
       [timeZone, today],
     ).catch(() => null),
     many<Record<string, unknown>>(
       `select to_char(to_timestamp(created_at) at time zone $1, 'MM-DD') as date, count(*)::int as visits,
               count(distinct coalesce(nullif(visitor_id,''), ip))::int as visitors
-       from ${table('access_logs')} where (to_timestamp(created_at) at time zone $1)::date >= ($2::date - interval '29 days')
+       from ${table('access_logs')}
+       where created_at >= extract(epoch from ((($2::date - 29))::timestamp at time zone $1))::bigint
        group by date order by date asc`, [timeZone, today],
     ).catch(() => []),
   ]);
