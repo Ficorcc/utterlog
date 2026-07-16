@@ -13,7 +13,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 ### 优化
 
-- **Codex 前端开发规范补充**：`AGENT.md` 新增前端设计系统硬规则，明确颜色、字号、间距、组件、图标与禁用样式约束，后续 AI 修改前端需按 design token 收敛。
+暂无。
 
 ### 修复
 
@@ -22,6 +22,29 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 ### 移除
 
 暂无。
+
+## [1.3.8] - 2026-07-16
+
+### 新增
+
+- **TanStack Start 全栈架构**：完成前台、后台、服务端 API、认证、安全中间件和静态资源路由迁移，统一由 TanStack Start + React 19 + Bun 提供服务。
+- **AI 配置能力**：支持手动输入模型名称、兼容自定义服务地址、更新文章与聊天提示词，并增加文章 AI 伴读开关。
+
+### 优化
+
+- **后台加载性能**：减少仪表盘往返请求、选项重复加载和非必要轮询，地图等重资源改为按需加载。
+- **品牌图片处理**：Logo、深色 Logo 与 Favicon 上传后自动压缩并转换为现代图片格式。
+- **Codex 前端开发规范**：补充颜色、字号、间距、组件与图标等设计约束，统一后续界面修改标准。
+
+### 修复
+
+- **腾讯 EdgeOne 访客地址**：正确读取真实客户端 IP，修复天气和页脚访客位置显示 CDN 或服务器地址的问题。
+- **后台与资源路由**：修复后台入口、品牌资源、Favicon、主题样式和历史图片资源的路由及缓存问题。
+- **Azure 移动端页脚**：总浏览量与在线人数改为同一行，版权、访客信息、备案号和快捷按钮统一居中。
+
+### 移除
+
+- 移除 Hono 网关兼容层及已完成迁移的旧服务路径，运行时统一使用 TanStack Start。
 
 ## [1.3.7] - 2026-06-24
 
@@ -955,7 +978,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-[Unreleased]: https://github.com/utterlog/utterlog/compare/v1.3.7...HEAD
+[Unreleased]: https://github.com/utterlog/utterlog/compare/v1.3.8...HEAD
 [1.0.0]: https://github.com/utterlog/utterlog/releases/tag/v1.0.0
 [1.0.1]: https://github.com/utterlog/utterlog/compare/v1.0.0...v1.0.1
 [1.0.2]: https://github.com/utterlog/utterlog/compare/v1.0.1...v1.0.2
@@ -994,3 +1017,4 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 [1.3.5]: https://github.com/utterlog/utterlog/compare/v1.3.4...v1.3.5
 [1.3.6]: https://github.com/utterlog/utterlog/compare/v1.3.5...v1.3.6
 [1.3.7]: https://github.com/utterlog/utterlog/compare/v1.3.6...v1.3.7
+[1.3.8]: https://github.com/utterlog/utterlog/compare/v1.3.7...v1.3.8

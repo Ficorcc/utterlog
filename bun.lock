@@ -26,7 +26,7 @@
     },
     "app/admin": {
       "name": "utterlog-admin",
-      "version": "1.3.7",
+      "version": "1.3.8",
       "dependencies": {
         "@hookform/resolvers": "^5.4.0",
         "@tanstack/react-router": "^1.170.17",
@@ -82,7 +82,7 @@
     },
     "app/web": {
       "name": "utterlog-web",
-      "version": "1.3.7",
+      "version": "1.3.8",
       "dependencies": {
         "@hookform/resolvers": "^5.4.0",
         "@milkdown/kit": "^7.21.2",

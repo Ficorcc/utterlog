@@ -93,6 +93,6 @@ export function appVersion() {
       // try next
     }
   }
-  cachedAppVersion = '1.3.7';
+  cachedAppVersion = '1.3.8';
   return cachedAppVersion;
 }
