@@ -210,6 +210,8 @@ async function postBySlug(slug: string) {
 async function homeRoute(ctx: ThemeContextData | null, page: number): Promise<PublicPageData> {
   const ip = requestIp(new Request('https://utterlog.local', {
     headers: {
+      'eo-client-ip': getRequestHeader('eo-client-ip') || '',
+      'true-client-ip': getRequestHeader('true-client-ip') || '',
       'x-forwarded-for': getRequestHeader('x-forwarded-for') || '',
       'x-real-ip': getRequestHeader('x-real-ip') || '',
       'cf-connecting-ip': getRequestHeader('cf-connecting-ip') || '',

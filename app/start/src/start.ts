@@ -5,6 +5,7 @@ import { dbReady } from '../../server/src/db/client';
 import { installRedirect } from '../../server/src/http/install-redirect';
 import { requestIp } from '../../server/src/request-ip';
 import { brandingAssetResponse } from './server/branding-assets';
+import { isVisitorPersonalizedPage } from './server/cache-policy';
 import { checkStartSecurity } from './server/security';
 
 export type StartRequestContext = {
@@ -108,6 +109,20 @@ const apiNoCache = createMiddleware().server(async ({ next, pathname }) => {
   });
 });
 
+const personalizedPageNoCache = createMiddleware().server(async ({ next, pathname }) => {
+  const result = await next();
+  if (!isVisitorPersonalizedPage(pathname)) return result;
+  const headers = new Headers(result.response.headers);
+  headers.set('cache-control', 'private, no-store, no-cache, must-revalidate');
+  headers.set('pragma', 'no-cache');
+  headers.set('expires', '0');
+  return new Response(result.response.body, {
+    status: result.response.status,
+    statusText: result.response.statusText,
+    headers,
+  });
+});
+
 const installGuard = createMiddleware().server(async ({ next, request }) => {
   const redirect = await installRedirect(request, await dbReady());
   return redirect || next();
@@ -163,5 +178,5 @@ const authContext = createMiddleware().server(async ({ next, request }) => {
 });
 
 export const startInstance = createStart(() => ({
-  requestMiddleware: [errorBoundary, installGuard, brandingAssets, authContext, securityPolicy, cors, bodyLimit, apiNoCache, securityHeaders],
+  requestMiddleware: [errorBoundary, installGuard, brandingAssets, authContext, securityPolicy, cors, bodyLimit, apiNoCache, personalizedPageNoCache, securityHeaders],
 }));
