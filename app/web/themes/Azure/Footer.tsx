@@ -364,27 +364,28 @@ export default function Footer() {
         {/* Left: Copyright + Stats */}
         <div className="azure-footer-meta" style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
           <span>&copy; {new Date().getFullYear()} {siteName}. All rights reserved.</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <i className="fa-regular fa-eye" style={{ fontSize: '11px' }} /> 总浏览量 {totalViews}
-          </span>
-          {onlineEnabled && (
-            <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-              <button onClick={() => setOnlineOpen(!onlineOpen)} style={{
-                display: 'flex', alignItems: 'center', gap: '5px',
-                background: 'none', border: 'none', cursor: 'pointer', color: '#999', fontSize: '12px', padding: 0,
-              }}>
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 4px #22c55e' }} />
-                {onlineCount} 人在线
-              </button>
-              {onlineOpen && (
-                <>
-                  <div onClick={() => setOnlineOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 90 }} />
-                  <div className="azure-footer-online-popover" style={{
-                    position: 'absolute', left: 0, bottom: '100%', marginBottom: '10px', zIndex: 91,
-                    width: '280px', maxHeight: '300px', overflowY: 'auto',
-                    background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)',
-                    border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                  }}>
+          <div className="azure-footer-stats" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <i className="fa-regular fa-eye" style={{ fontSize: '11px' }} /> 总浏览量 {totalViews}
+            </span>
+            {onlineEnabled && (
+              <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <button onClick={() => setOnlineOpen(!onlineOpen)} style={{
+                  display: 'flex', alignItems: 'center', gap: '5px',
+                  background: 'none', border: 'none', cursor: 'pointer', color: '#999', fontSize: '12px', padding: 0,
+                }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 4px #22c55e' }} />
+                  {onlineCount} 人在线
+                </button>
+                {onlineOpen && (
+                  <>
+                    <div onClick={() => setOnlineOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 90 }} />
+                    <div className="azure-footer-online-popover" style={{
+                      position: 'absolute', left: 0, bottom: '100%', marginBottom: '10px', zIndex: 91,
+                      width: '280px', maxHeight: '300px', overflowY: 'auto',
+                      background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)',
+                      border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+                    }}>
                     <div style={{ padding: '10px 14px', borderBottom: '1px solid rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <span style={{ fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', color: '#333' }}>
                         <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e' }} />
@@ -426,11 +427,12 @@ export default function Footer() {
                         </div>
                       ))
                     )}
-                  </div>
-                </>
-              )}
-            </span>
-          )}
+                    </div>
+                  </>
+                )}
+              </span>
+            )}
+          </div>
           {visitor.city && visitor.code && (
             <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
               最近访客来自{' '}
