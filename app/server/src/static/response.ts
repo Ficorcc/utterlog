@@ -32,12 +32,11 @@ function typeFor(path: string) {
 async function rawFileResponse(path: string, encoding = '') {
   const file = Bun.file(path);
   if (!(await file.exists())) return null;
-  const headers: Record<string, string> = {};
+  const headers: Record<string, string> = { vary: 'Accept-Encoding' };
   const contentType = typeFor(path);
   if (contentType) headers['content-type'] = contentType;
   if (encoding) {
     headers['content-encoding'] = encoding;
-    headers.vary = 'Accept-Encoding';
   }
   return new Response(file, { headers });
 }

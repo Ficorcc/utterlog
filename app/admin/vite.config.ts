@@ -48,10 +48,13 @@ export default defineConfig({
     sourcemap: false,
     rolldownOptions: {
       output: {
+        entryFileNames: 'assets/v138-[name]-[hash].js',
+        chunkFileNames: 'assets/v138-[name]-[hash].js',
+        assetFileNames: 'assets/v138-[name]-[hash][extname]',
         codeSplitting: {
           groups: [
             {
-              name: 'react',
+              name: 'framework',
               test: /[\\/]node_modules[\\/](react|react-dom|@tanstack[\\/]react-router)[\\/]/,
               priority: 20,
             },

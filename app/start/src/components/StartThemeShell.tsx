@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import { Providers } from '@/components/AppProviders';
 import LazyScript from '@/components/LazyScript';
 import { ThemeProvider, type ThemeContextData } from '@/lib/theme-context';
@@ -27,10 +27,12 @@ export function StartThemeShell({
         <ThemeProvider value={ctx}>
           <SlotHead options={ctx.options} />
           <LazyScript src="https://id.utterlog.com/static/passport.js" strategy="lazyOnload" />
-          <ThemeLayout>
-            <PageViewTracker />
-            {children}
-          </ThemeLayout>
+          <Suspense fallback={<main style={{ minHeight: '100vh' }} aria-busy="true" />}>
+            <ThemeLayout>
+              <PageViewTracker />
+              {children}
+            </ThemeLayout>
+          </Suspense>
           <AIChatBubble />
           <SlotFooter options={ctx.options} />
         </ThemeProvider>

@@ -34,7 +34,7 @@ export interface ThemeManifest {
 }
 
 // Built-in blog themes rendered by TanStack Start.
-import type { ComponentType, ReactNode } from 'react';
+import { lazy, type ComponentType, type LazyExoticComponent, type ReactNode } from 'react';
 import {
   DEFAULT_BLOG_THEME,
   blogThemeAccentAttr,
@@ -42,39 +42,91 @@ import {
   resolveBlogTheme,
   type BlogThemeAccent,
 } from '@shared/blog-theme';
-import * as Azure from '@/themes/Azure';
-import * as Flux from '@/themes/Flux';
-import * as Nebula from '@/themes/Nebula';
-import * as Renascent from '@/themes/Renascent';
-import * as Utterlog from '@/themes/Utterlog';
 import AzureManifest from '@/themes/Azure/theme.json';
 import FluxManifest from '@/themes/Flux/theme.json';
 import NebulaManifest from '@/themes/Nebula/theme.json';
 import RenascentManifest from '@/themes/Renascent/theme.json';
 import UtterlogManifest from '@/themes/Utterlog/theme.json';
 
+type ThemeComponent<Props = any> = ComponentType<Props> | LazyExoticComponent<ComponentType<Props>>;
+
 export interface ThemeComponents {
-  Header: ComponentType<any>;
-  Footer: ComponentType<any>;
-  HomePage: ComponentType<any>;
-  PostPage: ComponentType<{ post: any; options?: Record<string, string> }>;
-  PostCard: ComponentType<{ post: any }>;
-  CommentSection: ComponentType<{ postId: number }>;
-  Layout: ComponentType<{ children: ReactNode }>;
-  ArchivePage?: ComponentType<any>;
-  CategoryPage?: ComponentType<any>;
-  TagPage?: ComponentType<any>;
-  CategoriesPage?: ComponentType<any>;
-  TagsPage?: ComponentType<any>;
-  NotFoundPage?: ComponentType<any>;
+  Header: ThemeComponent;
+  Footer: ThemeComponent;
+  HomePage: ThemeComponent;
+  PostPage: ThemeComponent<{ post: any; options?: Record<string, string> }>;
+  PostCard: ThemeComponent<{ post: any }>;
+  CommentSection: ThemeComponent<{ postId: number }>;
+  Layout: ThemeComponent<{ children: ReactNode }>;
+  ArchivePage?: ThemeComponent;
+  CategoryPage?: ThemeComponent;
+  TagPage?: ThemeComponent;
+  CategoriesPage?: ThemeComponent;
+  TagsPage?: ThemeComponent;
+  NotFoundPage?: ThemeComponent;
 }
 
+const SharedCommentSection = lazy(() => import('@/components/blog/CommentList'));
+
+// Keep theme modules out of the common hydration bundle. Only the selected
+// theme and current page type are downloaded by the browser.
+const Azure: ThemeComponents = {
+  Header: lazy(() => import('@/themes/Azure/Header')),
+  Footer: lazy(() => import('@/themes/Azure/Footer')),
+  Layout: lazy(() => import('@/themes/Azure/Layout')),
+  HomePage: lazy(() => import('@/themes/Azure/HomePage')),
+  PostPage: lazy(() => import('@/themes/Azure/PostPage')),
+  PostCard: lazy(() => import('@/themes/Azure/PostCard')),
+  CommentSection: SharedCommentSection,
+};
+
+const Flux: ThemeComponents = {
+  Header: lazy(() => import('@/themes/Flux/Header')),
+  Footer: lazy(() => import('@/themes/Flux/Footer')),
+  Layout: lazy(() => import('@/themes/Flux/Layout')),
+  HomePage: lazy(() => import('@/themes/Flux/HomePage')),
+  PostPage: lazy(() => import('@/themes/Flux/PostPage')),
+  PostCard: lazy(() => import('@/themes/Flux/PostCard')),
+  CommentSection: SharedCommentSection,
+};
+
+const Nebula: ThemeComponents = {
+  Header: lazy(() => import('@/themes/Nebula/Header')),
+  Footer: lazy(() => import('@/themes/Nebula/Footer')),
+  Layout: lazy(() => import('@/themes/Nebula/Layout')),
+  HomePage: lazy(() => import('@/themes/Nebula/HomePage')),
+  PostPage: lazy(() => import('@/themes/Nebula/PostPage')),
+  PostCard: lazy(() => import('@/themes/Nebula/PostCard')),
+  CommentSection: lazy(() => import('@/themes/Nebula/PostInteractive').then((module) => ({ default: module.CommentSection }))),
+  ArchivePage: lazy(() => import('@/themes/Nebula/ArchivePage')),
+};
+
+const Renascent: ThemeComponents = {
+  Header: lazy(() => import('@/themes/Renascent/Header')),
+  Footer: lazy(() => import('@/themes/Renascent/Footer')),
+  Layout: lazy(() => import('@/themes/Renascent/Layout')),
+  HomePage: lazy(() => import('@/themes/Renascent/HomePage')),
+  PostPage: lazy(() => import('@/themes/Renascent/PostPage')),
+  PostCard: lazy(() => import('@/themes/Renascent/PostCard')),
+  CommentSection: lazy(() => import('@/themes/Renascent/PostInteractive').then((module) => ({ default: module.CommentSection }))),
+};
+
+const Utterlog: ThemeComponents = {
+  Header: lazy(() => import('@/themes/Utterlog/Header')),
+  Footer: lazy(() => import('@/themes/Utterlog/Footer')),
+  Layout: lazy(() => import('@/themes/Utterlog/Layout')),
+  HomePage: lazy(() => import('@/themes/Utterlog/HomePage')),
+  PostPage: lazy(() => import('@/themes/Utterlog/PostPage')),
+  PostCard: lazy(() => import('@/themes/Utterlog/PostCard')),
+  CommentSection: SharedCommentSection,
+};
+
 const themeRegistry: Record<string, ThemeComponents> = {
-  Azure: Azure as unknown as ThemeComponents,
-  Flux: Flux as unknown as ThemeComponents,
-  Nebula: Nebula as unknown as ThemeComponents,
-  Renascent: Renascent as unknown as ThemeComponents,
-  Utterlog: Utterlog as unknown as ThemeComponents,
+  Azure,
+  Flux,
+  Nebula,
+  Renascent,
+  Utterlog,
 };
 
 const manifestRegistry: Record<string, ThemeManifest> = {
