@@ -80,6 +80,9 @@ export default function DashboardPage() {
       setSparkline(days30);
       setRecentPosts((bootstrap.recent_posts || []).filter((p: any) => p.id != null).slice(0, 5));
       setRecentComments((bootstrap.recent_comments || []).filter((c: any) => c.id != null && !c.user_id).slice(0, 5));
+    } catch {
+      // The shared API interceptor handles expired sessions and redirects.
+      // Keep the dashboard mounted without creating an unhandled promise.
     } finally { setLoading(false); }
 
     // Fetch Utterlog Network data (non-blocking)

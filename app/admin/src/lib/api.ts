@@ -9,6 +9,28 @@ const api: AxiosInstance = axios.create({
   timeout: 30000,
 });
 
+let refreshRequest: Promise<string> | null = null;
+
+function refreshAccessToken() {
+  if (refreshRequest) return refreshRequest;
+
+  refreshRequest = (async () => {
+    const refreshToken = useAuthStore.getState().refreshToken;
+    if (!refreshToken) throw new Error('No refresh token');
+
+    const response = await axios.post('/api/v1/auth/refresh', {
+      refresh_token: refreshToken,
+    });
+    const { access_token, refresh_token } = response.data.data;
+    useAuthStore.getState().setTokens(access_token, refresh_token);
+    return access_token as string;
+  })().finally(() => {
+    refreshRequest = null;
+  });
+
+  return refreshRequest;
+}
+
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
@@ -27,19 +49,13 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as typeof error.config & { _retry?: boolean };
 
-    // Don't run the refresh-and-retry dance on the auth endpoints
-    // themselves. Earlier rev would catch the 401 from a wrong-
-    // password POST /auth/login, find no refresh_token in the
-    // store (user isn't logged in yet), call logout(), and
-    // redirect to /admin/login — which is the page the user is
-    // already on, except the navigation unmounts the form before
-    // the '密码错误' toast renders. Net effect: typing the wrong
-    // password gave zero feedback. Skip the refresh path for any
-    // auth.* request so the actual error reaches the form.
+    // Authentication actions must surface their own errors. Other protected
+    // requests share one refresh operation when several fail together.
     const url = (originalRequest?.url || '').toLowerCase();
     const isAuthRequest =
       url.startsWith('/auth/login') ||
       url.startsWith('/auth/refresh') ||
+      url.startsWith('/auth/logout') ||
       url.startsWith('/auth/totp/validate') ||
       url.startsWith('/auth/passkey/');
 
@@ -47,26 +63,15 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshToken = useAuthStore.getState().refreshToken;
-        if (!refreshToken) {
-          throw new Error('No refresh token');
-        }
-
-        const refreshResponse = await axios.post(
-          `${'/api/v1'}/auth/refresh`,
-          { refresh_token: refreshToken },
-        );
-
-        const { access_token, refresh_token } = refreshResponse.data.data;
-        useAuthStore.getState().setTokens(access_token, refresh_token);
-
-        originalRequest.headers.Authorization = `Bearer ${access_token}`;
+        const accessToken = await refreshAccessToken();
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch {
-        useAuthStore.getState().logout();
-        if (typeof window !== 'undefined') {
-          window.location.href = '/admin/login';
+        useAuthStore.getState().clearSession();
+        if (typeof window !== 'undefined' && window.location.pathname !== '/admin/login') {
+          window.location.replace('/admin/login');
         }
+        return Promise.reject(error);
       }
     }
 

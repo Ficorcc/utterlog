@@ -248,7 +248,7 @@ const protectedRoutes: any[] = [
 ];
 
 const routeTree = rootRoute.addChildren([loginRoute, resetRoute, authRoute.addChildren(protectedRoutes as any)] as any);
-const router = createRouter({ routeTree, basepath: '/admin', defaultPreload: 'intent' });
+const router = createRouter({ routeTree, basepath: '/admin', defaultPreload: false });
 
 declare module '@tanstack/react-router' {
   interface Register {

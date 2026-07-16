@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from '@/lib/router';
 import api from '@/lib/api';
+import { useAuthStore } from '@/lib/store';
 import { useI18n } from '@/lib/i18n';
 import { formatWithAdminTimeZone } from '@/lib/timezone';
 
@@ -16,21 +17,27 @@ export default function NotificationBell() {
   useEffect(() => {
     // Header counts do not gate the page. Delay the first poll so the active
     // route's data request wins on high-latency CDN-to-origin connections.
-    const initialTimer = window.setTimeout(fetchUnread, 800);
-    const interval = setInterval(fetchUnread, 60000); // poll every minute
+    const fetchWhenVisible = () => {
+      if (document.visibilityState === 'visible') void fetchUnread();
+    };
+    const initialTimer = window.setTimeout(fetchWhenVisible, 800);
+    const interval = window.setInterval(fetchWhenVisible, 60000);
     // 实时事件总线 —— 评论页 / 通知页操作完成后调
     // window.dispatchEvent(new Event('admin:notifications-changed'))，
     // 铃铛立刻重拉一次。之前要等下一轮 60s 轮询，红点不消失体验差。
-    const onChanged = () => fetchUnread();
+    const onChanged = () => void fetchUnread();
     window.addEventListener('admin:notifications-changed', onChanged);
+    document.addEventListener('visibilitychange', fetchWhenVisible);
     return () => {
       window.clearTimeout(initialTimer);
-      clearInterval(interval);
+      window.clearInterval(interval);
       window.removeEventListener('admin:notifications-changed', onChanged);
+      document.removeEventListener('visibilitychange', fetchWhenVisible);
     };
   }, []);
 
   const fetchUnread = async () => {
+    if (!useAuthStore.getState().accessToken) return;
     const result: any = await api.get('/admin/header-counts').catch(() => null);
     if (!result) return;
     setUnread(Number(result.data?.unread || 0));

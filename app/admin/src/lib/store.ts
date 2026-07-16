@@ -33,6 +33,7 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>;
   validate2FA: (code: string) => Promise<void>;
   cancel2FA: () => void;
+  clearSession: () => void;
   logout: () => void;
   setAccessToken: (token: string) => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
@@ -105,15 +106,21 @@ export const useAuthStore = create<AuthState>()(
         set({ pending2FA: null, isLoading: false });
       },
 
-      logout: () => {
-        authApi.logout().catch(() => {});
+      clearSession: () => {
         syncAuthCookie(null);
         set({
           user: null,
           accessToken: null,
           refreshToken: null,
           isAuthenticated: false,
+          isLoading: false,
+          pending2FA: null,
         });
+      },
+
+      logout: () => {
+        authApi.logout().catch(() => {});
+        get().clearSession();
       },
 
       setAccessToken: (token: string) => {
