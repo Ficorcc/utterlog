@@ -58,9 +58,9 @@ class ChunkErrorBoundary extends Component<{ children: ReactNode }, { failed: bo
 import Login from '@/pages/Login';
 import ResetPassword from '@/pages/ResetPassword';
 import NotFound from '@/pages/NotFound';
-import DashboardHome from '@/pages/DashboardHome';
 
 // Lazy-loaded (code-split per route, reduces initial bundle)
+const DashboardHome = lazyRouteComponent(() => import('@/pages/DashboardHome'));
 const PostsLayout = lazyRouteComponent(() => import('@/layouts/PostsLayout'));
 const Posts = lazyRouteComponent(() => import('@/pages/Posts'));
 const PostCreate = lazyRouteComponent(() => import('@/pages/PostCreate'));

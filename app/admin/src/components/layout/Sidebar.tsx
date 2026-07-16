@@ -214,7 +214,7 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
         </svg>
         {!collapsed && (
           <>
-            <span style={{ fontSize: 14, fontWeight: 700, fontFamily: "'Ubuntu', -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif", letterSpacing: '-0.01em' }}>Utterlog!</span>
+            <span style={{ fontSize: 14, fontWeight: 700, fontFamily: 'var(--font-logo)', letterSpacing: '-0.01em' }}>Utterlog!</span>
             <VersionBadge variant="compact" />
           </>
         )}

@@ -41,7 +41,9 @@ export default function VersionBadge({ variant = 'compact' }: Props) {
   const [info, setInfo] = useState<VersionPayload | null>(cached.data);
 
   useEffect(() => {
-    fetchVersion().then(setInfo);
+    // Version metadata is non-critical. Let the route chunk and page API use
+    // the initial connection first, then refresh update information quietly.
+    const timer = window.setTimeout(() => { void fetchVersion().then(setInfo); }, 1200);
     // 监听升级完成事件 → 强制清缓存 + 重新拉，UI 立刻反映新版本号
     // 不用再等 10 分钟 TTL 或用户手动刷新页面
     const onVersionChanged = () => {
@@ -49,10 +51,13 @@ export default function VersionBadge({ variant = 'compact' }: Props) {
       fetchVersion(true).then(setInfo);
     };
     window.addEventListener('admin:version-changed', onVersionChanged);
-    return () => window.removeEventListener('admin:version-changed', onVersionChanged);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener('admin:version-changed', onVersionChanged);
+    };
   }, []);
 
-  const current = info?.current.version || 'v1.0';
+  const current = info?.current.version || __UTTERLOG_VERSION__;
   // Always show the release label — never the raw commit SHA. If the
   // build slipped out untagged (VERSION="dev"), prefer the latest known
   // release from GitHub so the pill still looks like a version, not a

@@ -54,7 +54,10 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    reload();
+    // The fallback pack renders immediately. Locale hydration is useful but
+    // should not compete with the active route's first data request.
+    const timer = window.setTimeout(() => { void reload(); }, 600);
+    return () => window.clearTimeout(timer);
   }, [reload]);
 
   useEffect(() => {

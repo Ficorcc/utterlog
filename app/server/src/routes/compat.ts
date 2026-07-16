@@ -1917,12 +1917,37 @@ function compareSemver(a: string, b: string) {
   return 0;
 }
 
-async function fetchReleaseList() {
-  const source = (await optionValue('version_source_url', '')).trim().replace(/\/+$/, '');
-  const url = source ? `${source}/api/releases.json` : 'https://utterlog.io/api/releases.json';
-  const fallback = 'https://api.github.com/repos/utterlog/utterlog/releases?per_page=20';
-  const payload = await fetchJson<any>(url, 8000).catch(() => fetchJson<any>(fallback, 8000));
-  return Array.isArray(payload) ? payload : payload.releases || [];
+const releaseListCacheTtlMs = 10 * 60 * 1000;
+const releaseListStaleMs = 24 * 60 * 60 * 1000;
+let releaseListCache: { loadedAt: number; releases: any[] } | null = null;
+let releaseListRequest: Promise<any[]> | null = null;
+
+async function fetchReleaseList(force = false) {
+  const now = Date.now();
+  if (!force && releaseListCache && now - releaseListCache.loadedAt < releaseListCacheTtlMs) {
+    return releaseListCache.releases;
+  }
+  if (releaseListRequest) return releaseListRequest;
+
+  releaseListRequest = (async () => {
+    try {
+      const source = (await optionValue('version_source_url', '')).trim().replace(/\/+$/, '');
+      const url = source ? `${source}/api/releases.json` : 'https://utterlog.io/api/releases.json';
+      const fallback = 'https://api.github.com/repos/utterlog/utterlog/releases?per_page=20';
+      const payload = await fetchJson<any>(url, 8000).catch(() => fetchJson<any>(fallback, 8000));
+      const releases = Array.isArray(payload) ? payload : payload.releases || [];
+      releaseListCache = { loadedAt: Date.now(), releases };
+      return releases;
+    } catch (error) {
+      if (releaseListCache && now - releaseListCache.loadedAt < releaseListStaleMs) {
+        return releaseListCache.releases;
+      }
+      throw error;
+    } finally {
+      releaseListRequest = null;
+    }
+  })();
+  return releaseListRequest;
 }
 
 const upgradeLogPath = join(config.uploadDir, 'upgrade.log');
@@ -2238,9 +2263,9 @@ log "升级应用 [Utterlog] 成功 [TASK-END]"
   }
 }
 
-export async function versionPayload() {
+export async function versionPayload(force = false) {
   const current = appVersion();
-  const releases = await fetchReleaseList().catch(() => []);
+  const releases = await fetchReleaseList(force).catch(() => []);
   const latest = releases.find((r: any) => !r.draft) || null;
   const latestVersion = latest?.tag_name || latest?.version || '';
   const upgradeProbe = await runtimeUpgradeProbe().catch((err) => ({ supported: false, reason: err instanceof Error ? err.message : 'runtime probe failed' }));
@@ -2272,9 +2297,9 @@ export class SystemServiceError extends Error {
   }
 }
 
-export async function releaseListPayload() {
+export async function releaseListPayload(force = false) {
   try {
-    return { releases: await fetchReleaseList(), error: '' };
+    return { releases: await fetchReleaseList(force), error: '' };
   } catch (error) {
     return { releases: [], error: error instanceof Error ? error.message : '更新历史读取失败' };
   }

@@ -13,8 +13,9 @@ import { apiFail, apiOk, withAdmin } from '../../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/admin/system/$action')({ server: { handlers: {
   GET: ({ request, params }) => withAdmin(request, async () => {
-    if (params.action === 'version') return apiOk(await versionPayload());
-    if (params.action === 'releases') return apiOk(await releaseListPayload());
+    const force = new URL(request.url).searchParams.get('refresh') === '1';
+    if (params.action === 'version') return apiOk(await versionPayload(force));
+    if (params.action === 'releases') return apiOk(await releaseListPayload(force));
     return apiFail(404, 'NOT_FOUND', '系统接口不存在');
   }),
   POST: ({ request, params }) => withAdmin(request, async () => {

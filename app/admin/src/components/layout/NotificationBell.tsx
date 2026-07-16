@@ -14,7 +14,9 @@ export default function NotificationBell() {
   const [pendingComments, setPendingComments] = useState(0);
 
   useEffect(() => {
-    fetchUnread();
+    // Header counts do not gate the page. Delay the first poll so the active
+    // route's data request wins on high-latency CDN-to-origin connections.
+    const initialTimer = window.setTimeout(fetchUnread, 800);
     const interval = setInterval(fetchUnread, 60000); // poll every minute
     // 实时事件总线 —— 评论页 / 通知页操作完成后调
     // window.dispatchEvent(new Event('admin:notifications-changed'))，
@@ -22,6 +24,7 @@ export default function NotificationBell() {
     const onChanged = () => fetchUnread();
     window.addEventListener('admin:notifications-changed', onChanged);
     return () => {
+      window.clearTimeout(initialTimer);
       clearInterval(interval);
       window.removeEventListener('admin:notifications-changed', onChanged);
     };
