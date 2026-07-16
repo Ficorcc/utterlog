@@ -25,7 +25,7 @@ describe('TanStack Start document assets', () => {
       'https://static.bluecdn.com/fonts/noto-sans-sc.css',
       'https://static.bluecdn.com/fonts/alimama-fangyuanti.css',
       'https://static.bluecdn.com/fonts/luo.css',
-      '/themes/Azure/styles.css?v=2.0.5',
+      '/themes/Azure/styles.css?v=2.0.6',
     ]);
   });
 
