@@ -85,7 +85,7 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
         fontSize: '13px', color: '#999', borderBottom: '1px solid #eee',
       }}>
         <span><i className="fa-regular fa-calendar" style={{ marginRight: '4px' }} />{formatDate(displayDate, timeZone)}</span>
-        {/* v2.1.7 起后端在 SSR fetch 时 (?track=1) 就同步 +1,这里直接显示 DB 值。 */}
+        {/* 阅读数由客户端统计通过行为校验后异步更新。 */}
         <span><i className="fa-solid fa-fire" style={{ marginRight: '4px', color: '#0052D9' }} />{post.view_count || 0} 阅读</span>
         <span><i className="fa-regular fa-comment" style={{ marginRight: '4px' }} /><CommentCount initial={post.comment_count || 0} /></span>
         {(post.word_count || 0) > 0 && (

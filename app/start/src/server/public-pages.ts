@@ -204,7 +204,7 @@ async function optionsFallback() {
 }
 
 async function postBySlug(slug: string) {
-  return safe(getPostBySlug(slug, true), null);
+  return safe(getPostBySlug(slug, false), null);
 }
 
 async function homeRoute(ctx: ThemeContextData | null, page: number): Promise<PublicPageData> {
@@ -373,7 +373,7 @@ export const loadStartPublicPage = createServerFn({ method: 'GET' })
       const segments = pathname.split('/').filter(Boolean).map(decodePathSegment);
       if (segments.length > 0) {
         const encodedPath = `/${segments.map((item) => encodeURIComponent(item)).join('/')}`;
-        const post = await safe(resolvePublicPostPath(encodedPath, true), null);
+        const post = await safe(resolvePublicPostPath(encodedPath, false), null);
         if (post) return { kind: 'post', ctx, post, options: ctx?.options || await optionsFallback() };
       }
       return { kind: 'not-found', ctx, pathname };

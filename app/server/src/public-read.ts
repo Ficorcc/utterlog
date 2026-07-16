@@ -101,33 +101,6 @@ function sanitizePostForResponse(row: Record<string, unknown>, detail: boolean) 
   return next;
 }
 
-async function siteDate(value = new Date()) {
-  const timeZone = (await optionValue('site_timezone', 'UTC')).trim() || 'UTC';
-  try {
-    const parts = new Intl.DateTimeFormat('en', {
-      timeZone,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    }).formatToParts(value);
-    const get = (type: string) => parts.find((part) => part.type === type)?.value || '';
-    return `${get('year')}-${get('month')}-${get('day')}`;
-  } catch {
-    return value.toISOString().slice(0, 10);
-  }
-}
-
-async function bumpPostView(postId: number) {
-  const today = await siteDate();
-  await exec(`update ${table('posts')} set view_count = coalesce(view_count, 0) + 1 where id = $1`, [postId]).catch(() => {});
-  await exec(
-    `insert into ${table('stats_post_daily')} (post_id, date, views, unique_visitors)
-     values ($1, $2::date, 1, 0)
-     on conflict (post_id, date) do update set views = ${table('stats_post_daily')}.views + 1`,
-    [postId, today],
-  ).catch(() => {});
-}
-
 async function ownerPublicPayload(user: Record<string, unknown> | null) {
   if (!user) return {};
   const email = String(user.email || '');
@@ -418,7 +391,7 @@ function footprintCountriesFrom(footprints: Record<string, any>[]) {
   return countries;
 }
 
-async function getPostBy(column: 'id' | 'display_id' | 'slug', value: string | number, track = false, postOnly = false, authed = false) {
+async function getPostBy(column: 'id' | 'display_id' | 'slug', value: string | number, _track = false, postOnly = false, authed = false) {
   const typeSql = postOnly ? ` and type = 'post'` : '';
   const statusSql = authed ? '' : ` and status = 'publish'`;
   const post = await one<Record<string, unknown>>(
@@ -426,10 +399,6 @@ async function getPostBy(column: 'id' | 'display_id' | 'slug', value: string | n
     [value],
   ).catch(() => null);
   if (!post || (!authed && post.status !== 'publish')) return null;
-  if (track && typeof post.id === 'number') {
-    await bumpPostView(post.id);
-    post.view_count = Number(post.view_count || 0) + 1;
-  }
   const metas = await many<Record<string, unknown>>(
     `select m.* from ${table('relationships')} r join ${table('metas')} m on m.id = r.meta_id where r.post_id = $1 order by m.type, m.name`,
     [post.id],

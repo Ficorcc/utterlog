@@ -11,6 +11,66 @@ import { ephemeral } from '../store/ephemeral';
 
 export { requestIp };
 
+export const PAGE_VIEW_DEDUP_SECONDS = 30;
+export const PAGE_VIEW_RATE_WINDOW_SECONDS = 60;
+export const PAGE_VIEW_RATE_LIMIT = 8;
+export const PAGE_VIEW_IP_RATE_LIMIT = 30;
+export const PAGE_VIEW_BLOCK_SECONDS = 3600;
+
+export type PageViewGateCounts = {
+  duplicate: number;
+  recent: number;
+  recentIp: number;
+};
+
+export function pageViewGateReason(counts: PageViewGateCounts) {
+  if (counts.duplicate > 0) return 'duplicate';
+  if (counts.recent >= PAGE_VIEW_RATE_LIMIT) return 'behavior_rate';
+  if (counts.recentIp >= PAGE_VIEW_IP_RATE_LIMIT) return 'ip_rate';
+  return '';
+}
+
+function analyticsKey(kind: string, value: string) {
+  return `analytics:${kind}:${createHash('sha256').update(value).digest('hex')}`;
+}
+
+async function pageViewGate(identity: string, ip: string, path: string, now: number) {
+  const identityBlockKey = analyticsKey('block:identity', identity);
+  const ipBlockKey = analyticsKey('block:ip', ip);
+  if (await ephemeral.get(identityBlockKey) || await ephemeral.get(ipBlockKey)) return 'behavior_blocked';
+
+  const duplicateKey = analyticsKey('dedup', `${identity}\0${path}`);
+  if (await ephemeral.get(duplicateKey)) return 'duplicate';
+
+  const identitySql = `coalesce(nullif(visitor_id,''),nullif(fingerprint,''),ip)`;
+  const counts = await one<{ duplicate: string; recent: string; recent_ip: string }>(
+    `select
+       count(*) filter (where path=$2 and ${identitySql}=$1 and created_at >= $3)::text as duplicate,
+       count(*) filter (where ${identitySql}=$1)::text as recent,
+       count(*) filter (where ip=$5)::text as recent_ip
+     from ${table('access_logs')}
+     where created_at >= $4 and (${identitySql}=$1 or ip=$5)`,
+    [identity, path, now - PAGE_VIEW_DEDUP_SECONDS, now - PAGE_VIEW_RATE_WINDOW_SECONDS, ip],
+  ).catch(() => null);
+  const reason = pageViewGateReason({
+    duplicate: Number(counts?.duplicate || 0),
+    recent: Number(counts?.recent || 0),
+    recentIp: Number(counts?.recent_ip || 0),
+  });
+  if (reason === 'behavior_rate') {
+    await ephemeral.set(identityBlockKey, '1', PAGE_VIEW_BLOCK_SECONDS);
+    return reason;
+  }
+  if (reason === 'ip_rate') {
+    await ephemeral.set(ipBlockKey, '1', PAGE_VIEW_BLOCK_SECONDS);
+    return reason;
+  }
+  if (reason) return reason;
+
+  await ephemeral.set(duplicateKey, '1', PAGE_VIEW_DEDUP_SECONDS);
+  return '';
+}
+
 function maskIp(ip: string) {
   if (ip.includes('.')) {
     const parts = ip.split('.');
@@ -127,7 +187,9 @@ async function enrichAccessGeo(logId: number, ip: string) {
 export async function trackPageView(request: Request, input: Record<string, unknown>) {
   const path = String(input.path || '/').slice(0, 500);
   const ip = requestIp(request);
-  const visitor = String(input.visitor_id || input.fingerprint || ip);
+  const visitorId = String(input.visitor_id || '').slice(0, 64);
+  const fingerprint = String(input.fingerprint || '').slice(0, 64);
+  const visitor = visitorId || fingerprint || ip;
   const ua = request.headers.get('user-agent') || '';
   if (isBotUa(ua)) return { tracked: false, reason: 'bot' };
   const parsed = parseUa(ua);
@@ -136,6 +198,8 @@ export async function trackPageView(request: Request, input: Record<string, unkn
   try { refererHost = referer ? new URL(referer).host : ''; } catch { refererHost = ''; }
   const geo = geoHeaders(request);
   const now = nowUnix();
+  const gateReason = await pageViewGate(visitor, ip, path, now);
+  if (gateReason) return { tracked: false, reason: gateReason };
   const today = await siteDate(new Date(now * 1000));
   const dimensions: Array<[string, string, string]> = [
     ['browser', parsed.browser || 'Unknown', ''], ['os', parsed.os || 'Unknown', ''], ['device', parsed.device || 'Unknown', ''],
@@ -156,7 +220,7 @@ export async function trackPageView(request: Request, input: Record<string, unkn
           country, country_name, region, city, latitude, longitude, created_at, visitor_id, fingerprint)
          values ($1,$2,$3,'GET',$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) returning id`,
         [ip, maskIp(ip), path, referer, refererHost, ua, parsed.device, parsed.browser, parsed.os, geo.country, geo.countryName,
-          geo.region, geo.city, geo.latitude, geo.longitude, now, String(input.visitor_id || ''), String(input.fingerprint || '')],
+          geo.region, geo.city, geo.latitude, geo.longitude, now, visitorId, fingerprint],
       );
       accessLogId = Number(accessRows[0]?.id || 0);
       await tx.unsafe(
@@ -180,14 +244,19 @@ export async function trackPageView(request: Request, input: Record<string, unkn
         );
       }
       if (trackedPostId > 0) {
+        await tx.unsafe(
+          `update ${table('posts')} set view_count=coalesce(view_count,0)+1 where id=$1 and type='post' and status='publish'`,
+          [trackedPostId],
+        );
         const postVisitorRows = await tx.unsafe<{ inserted: boolean }[]>(
           `insert into ${table('stats_visitor_post_dates')} (visitor_id, post_id, date) values ($1,$2,$3::date)
            on conflict (visitor_id, post_id, date) do update set visitor_id=excluded.visitor_id returning (xmax=0) as inserted`,
           [visitor, trackedPostId, today],
         );
         await tx.unsafe(
-          `insert into ${table('stats_post_daily')} (post_id, date, views, unique_visitors) values ($1,$2::date,0,$3)
-           on conflict (post_id, date) do update set unique_visitors=${table('stats_post_daily')}.unique_visitors+excluded.unique_visitors`,
+          `insert into ${table('stats_post_daily')} (post_id, date, views, unique_visitors) values ($1,$2::date,1,$3)
+           on conflict (post_id, date) do update set views=${table('stats_post_daily')}.views+1,
+             unique_visitors=${table('stats_post_daily')}.unique_visitors+excluded.unique_visitors`,
           [trackedPostId, today, postVisitorRows[0]?.inserted ? 1 : 0],
         );
       }

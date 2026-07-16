@@ -82,10 +82,7 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
       {/* Meta bar */}
       <div className="azure-post-meta">
         <span className="azure-post-meta-item"><i className="fa-regular fa-calendar" aria-hidden="true" />{formatDate(displayDate, timeZone)}</span>
-        {/* view_count 直接展示 DB 真实值。
-            v2.1.7 起后端在 SSR 拉这条文章时(?track=1)就同步 +1,所以
-            到达这里的 post.view_count 已经是 +1 之后的值。不再需要
-            前端 cosmetic +1,也不依赖客户端 /track 异步路径。 */}
+        {/* 阅读数由客户端统计通过行为校验后异步更新。 */}
         <span className="azure-post-meta-item"><i className="fa-solid fa-fire hot" aria-hidden="true" />{post.view_count || 0} 阅读</span>
         <span className="azure-post-meta-item"><i className="fa-regular fa-comment" aria-hidden="true" /><CommentCount initial={post.comment_count || 0} /></span>
         {(post.word_count || 0) > 0 && (

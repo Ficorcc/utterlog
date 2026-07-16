@@ -30,7 +30,7 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
               阅读时长按 300 字/分钟估算，最少 1 分钟。字段任一为 0 不渲染。 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', fontSize: '13px', color: '#9ca3af' }}>
             <span>{formatDate(displayDate, timeZone)}</span>
-            {/* v2.1.7 起后端 SSR fetch (?track=1) 就同步 +1,直接显示 DB 值。 */}
+            {/* 阅读数由客户端统计通过行为校验后异步更新。 */}
             {(post.view_count || 0) > 0 && (
               <span title="阅读次数">
                 <i className="fa-regular fa-eye" style={{ marginRight: 4 }} />

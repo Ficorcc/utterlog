@@ -29,10 +29,7 @@ export default function PageViewTracker() {
   const fpRef = useRef('');
   const [authHydrated, setAuthHydrated] = useState(hasAuthHydrated);
 
-  // v2.3.0: 删掉 isAdmin gate。v2.2.0 起后端"管理员也计入访问"是
-  // 用户明确决定;前端再 gate 反而让管理员的浏览只 +view_count(走
-  // SSR ?track=1 路径)而不写 access_logs,造成"明细看不到管理员、
-  // 但 view_count 涨了"的不一致。前后端口径统一为「全部都计入」。
+  // 管理员访问也沿用同一条统计链路，由后端统一去重和过滤。
   // accessToken 仍保留,因为登录态需要把 Bearer token 带上让后端
   // 自己判断(虽然现在判断完也不 skip)。
 
@@ -90,6 +87,13 @@ export default function PageViewTracker() {
         visitor_id: vidRef.current,
         fingerprint: fpRef.current,
       }),
+    }).then(async (response) => {
+      if (!response.ok) return;
+      const payload = await response.json().catch(() => null);
+      const result = payload?.data ?? payload;
+      if (result?.tracked) {
+        window.dispatchEvent(new CustomEvent('utterlog:pageview-tracked', { detail: { path: pathname } }));
+      }
     }).catch(() => {});
   }, [pathname, accessToken, authHydrated]);
 
