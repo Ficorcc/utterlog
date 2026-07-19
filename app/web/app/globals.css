@@ -862,6 +862,22 @@ body {
 .comment-hint { transition: opacity 0.2s; }
 div:hover > .comment-hint { opacity: 0.75 !important; }
 
+/* 评论框昵称/邮箱/网站三字段：桌面端横排，移动端垂直堆叠。
+   之前三个字段 display:flex + flex:1 横排，没有 flexWrap —— 移动端
+   Edge 窄屏下每个字段被挤到极窄导致内容错位、不换行。≤640px 改成
+   每个字段独立一行，并去掉字段间的竖向分隔线（竖线在堆叠时无意义）。 */
+@media (max-width: 640px) {
+  .comment-info-fields { flex-direction: column !important; }
+  .comment-info-field {
+    width: 100% !important;
+    height: 46px !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--color-border, #eee) !important;
+  }
+  /* 最后一个字段不需要底边框（外层已有 borderBottom） */
+  .comment-info-field:last-child { border-bottom: none !important; }
+}
+
 /* Blog image: lazy load with blur-fade effect.
    Single image = 80% width centered + 16:9. Multi-image grid images
    get their own aspect-ratio overrides below. */
