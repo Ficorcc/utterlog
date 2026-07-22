@@ -1,5 +1,9 @@
-import { useState } from 'react';
-import type { ComponentType, HTMLAttributes } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type {
+  ForwardRefExoticComponent,
+  HTMLAttributes,
+  RefAttributes,
+} from 'react';
 import { AudioLinesIcon } from '@/components/ui/audio-lines';
 import { BookTextIcon } from '@/components/ui/book-text';
 import { BotIcon } from '@/components/ui/bot';
@@ -36,7 +40,39 @@ import VersionBadge from '@/components/VersionBadge';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 
-type AnimatedIcon = ComponentType<HTMLAttributes<HTMLDivElement> & { size?: number }>;
+interface AnimatedIconHandle {
+  startAnimation: () => void;
+  stopAnimation: () => void;
+}
+
+type AnimatedIconProps = HTMLAttributes<HTMLDivElement> & { size?: number };
+type AnimatedIcon = ForwardRefExoticComponent<
+  AnimatedIconProps & RefAttributes<AnimatedIconHandle>
+>;
+
+function SidebarIcon({
+  icon: Icon,
+  hovered,
+  size,
+  className,
+}: {
+  icon: AnimatedIcon;
+  hovered: boolean;
+  size: number;
+  className: string;
+}) {
+  const iconRef = useRef<AnimatedIconHandle>(null);
+
+  useEffect(() => {
+    if (hovered) {
+      iconRef.current?.startAnimation();
+    } else {
+      iconRef.current?.stopAnimation();
+    }
+  }, [hovered]);
+
+  return <Icon ref={iconRef} aria-hidden size={size} className={className} />;
+}
 
 interface MenuItem {
   to: string;
@@ -139,6 +175,7 @@ interface Props {
 export default function Sidebar({ collapsed, onToggle }: Props) {
   const { t } = useI18n();
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
+  const [hoveredMenuItem, setHoveredMenuItem] = useState<string | null>(null);
 
   const toggleExpand = (key: string) => {
     setExpandedMenus((prev) =>
@@ -151,17 +188,25 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
     const expanded = expandedMenus.includes(item.to);
     const label = t(item.key || navKeys[item.to] || '', item.label);
     const Icon = item.icon;
+    const hoverKey = `menu:${item.to}`;
 
     if (hasChildren && !collapsed) {
       return (
         <div key={item.to}>
           <button
             onClick={() => toggleExpand(item.to)}
+            onMouseEnter={() => setHoveredMenuItem(hoverKey)}
+            onMouseLeave={() => setHoveredMenuItem(null)}
             // Match the NavLink padding below so rows with an expand
             // chevron render at the same height as plain rows.
             className="flex h-10 w-full items-center gap-2.5 border-l-2 border-transparent bg-transparent px-3.5 text-sm text-muted-foreground"
           >
-            <Icon aria-hidden size={16} className="flex size-4 shrink-0 items-center justify-center" />
+            <SidebarIcon
+              icon={Icon}
+              hovered={hoveredMenuItem === hoverKey}
+              size={16}
+              className="flex size-4 shrink-0 items-center justify-center"
+            />
             <span className="flex flex-1 items-baseline gap-1.5 text-left">
               <span>{label}</span>
               {item.sub && (
@@ -170,20 +215,42 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
                 </span>
               )}
             </span>
-            {expanded ? <ChevronDownIcon aria-hidden size={10} className="flex size-2.5 shrink-0 items-center justify-center" /> : <ChevronRightIcon aria-hidden size={10} className="flex size-2.5 shrink-0 items-center justify-center" />}
+            {expanded ? (
+              <SidebarIcon
+                icon={ChevronDownIcon}
+                hovered={hoveredMenuItem === hoverKey}
+                size={10}
+                className="flex size-2.5 shrink-0 items-center justify-center"
+              />
+            ) : (
+              <SidebarIcon
+                icon={ChevronRightIcon}
+                hovered={hoveredMenuItem === hoverKey}
+                size={10}
+                className="flex size-2.5 shrink-0 items-center justify-center"
+              />
+            )}
           </button>
           {expanded && item.children!.map((child) => {
             const ChildIcon = child.icon;
+            const childHoverKey = `child:${child.to}`;
             return (
               <NavLink key={child.to} to={child.to} className="block no-underline">
                 {({ isActive }) => (
                   <span
+                    onMouseEnter={() => setHoveredMenuItem(childHoverKey)}
+                    onMouseLeave={() => setHoveredMenuItem(null)}
                     className={cn(
                       'flex h-[38px] items-center gap-2.5 pl-10 pr-3.5 text-xs',
                       isActive ? 'bg-muted text-primary' : 'text-muted-foreground',
                     )}
                   >
-                    <ChildIcon aria-hidden size={14} className="flex size-3.5 shrink-0 items-center justify-center" />
+                    <SidebarIcon
+                      icon={ChildIcon}
+                      hovered={hoveredMenuItem === childHoverKey}
+                      size={14}
+                      className="flex size-3.5 shrink-0 items-center justify-center"
+                    />
                     <span>{t(navKeys[child.to] || '', child.label)}</span>
                   </span>
                 )}
@@ -204,13 +271,20 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
       >
         {({ isActive }) => (
           <span
+            onMouseEnter={() => setHoveredMenuItem(hoverKey)}
+            onMouseLeave={() => setHoveredMenuItem(null)}
             className={cn(
               'flex h-10 items-center gap-2.5 border-l-2 px-3.5 text-sm',
               isActive ? 'border-primary bg-muted text-primary' : 'border-transparent text-muted-foreground',
               collapsed ? 'justify-center' : 'justify-start',
             )}
           >
-            <Icon aria-hidden size={16} className="flex size-4 shrink-0 items-center justify-center" />
+            <SidebarIcon
+              icon={Icon}
+              hovered={hoveredMenuItem === hoverKey}
+              size={16}
+              className="flex size-4 shrink-0 items-center justify-center"
+            />
             {!collapsed && (
               <span className="inline-flex items-baseline gap-1.5">
                 <span>{label}</span>
