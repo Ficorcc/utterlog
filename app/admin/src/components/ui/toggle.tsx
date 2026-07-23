@@ -1,5 +1,6 @@
 
 import { forwardRef, InputHTMLAttributes, useRef, useState, useEffect, useCallback } from 'react';
+import { cn } from '@/lib/utils';
 
 interface ToggleProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label?: string;
@@ -35,12 +36,12 @@ const Toggle = forwardRef<HTMLInputElement, ToggleProps>(
     }, [rest.checked]);
 
     return (
-      <label className="flex items-center justify-between cursor-pointer" style={{ padding: '10px 0', ...style }}>
+      <label className={cn('flex cursor-pointer items-center justify-between py-2.5', className)} style={style}>
         <div className="flex-1">
           {label && <span className="text-sm text-muted-foreground">{label}</span>}
-          {description && <p className="text-xs text-muted-foreground" style={{ marginTop: '2px' }}>{description}</p>}
+          {description && <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>}
         </div>
-        <div style={{ position: 'relative', flexShrink: 0, marginLeft: '12px' }}>
+        <div className="ml-3" style={{ position: 'relative', flexShrink: 0 }}>
           <input
             ref={setRefs}
             type="checkbox"

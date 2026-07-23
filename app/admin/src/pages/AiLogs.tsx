@@ -63,18 +63,18 @@ export default function AiLogsPage() {
       {stats && (
         <div className="mb-6 grid grid-cols-2 gap-3">
           <Card className="p-4">
-            <h3 className="mb-2.5 text-[13px] font-semibold text-foreground">按功能</h3>
+            <h3 className="mb-2.5 text-xs-plus font-semibold text-foreground">按功能</h3>
             {stats.by_action?.map((a: any) => (
-              <div key={a.action} className="flex justify-between py-1 text-[13px] text-foreground">
+              <div key={a.action} className="flex justify-between py-1 text-xs-plus text-foreground">
                 <span>{a.action}</span>
                 <span className="text-muted-foreground">{a.count} 次 · {parseInt(a.tokens).toLocaleString()} tokens</span>
               </div>
             ))}
           </Card>
           <Card className="p-4">
-            <h3 className="mb-2.5 text-[13px] font-semibold text-foreground">按模型</h3>
+            <h3 className="mb-2.5 text-xs-plus font-semibold text-foreground">按模型</h3>
             {stats.by_model?.map((m: any) => (
-              <div key={m.model} className="flex justify-between py-1 text-[13px] text-foreground">
+              <div key={m.model} className="flex justify-between py-1 text-xs-plus text-foreground">
                 <span className="flex-1 truncate">{m.model}</span>
                 <span className="ml-2 shrink-0 text-muted-foreground">{m.count} 次</span>
               </div>

@@ -232,7 +232,7 @@ export default function AiChatPage() {
   const ToolCards = ({ events }: { events: ToolEvent[] }) => {
     if (!events || events.length === 0) return null;
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', marginBottom: '8px' }}>
+      <div className="mb-2" style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
         {events.map((e, i) => (
           <div
             key={i}
@@ -256,12 +256,12 @@ export default function AiChatPage() {
     <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
       {/* Sidebar: conversation list */}
       <div className="flex w-60 shrink-0 flex-col border-r border-border bg-muted">
-        <div style={{ padding: '12px', flexShrink: 0 }}>
+        <div className="p-3" style={{ flexShrink: 0 }}>
           <Button onClick={newChat} className="w-full">
             <Sparkles className="size-4" /> 新对话
           </Button>
         </div>
-        <div style={{ flex: 1, overflow: 'auto', padding: '0 6px 12px' }}>
+        <div className="px-1.5 pb-3" style={{ flex: 1, overflow: 'auto' }}>
           {conversations.map(c => (
             <div
               key={c.id}
@@ -273,21 +273,21 @@ export default function AiChatPage() {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                 <p
-                  className={cn('min-w-0 flex-1 truncate text-[13px] text-foreground', activeId === c.id ? 'font-semibold' : 'font-normal')}
+                  className={cn('min-w-0 flex-1 truncate text-xs-plus text-foreground', activeId === c.id ? 'font-semibold' : 'font-normal')}
                 >
                   {c.title || '新对话'}
                 </p>
                 <button
                   onClick={(e) => deleteConv(c.id, e)}
-                  className="shrink-0 px-0.5 text-muted-foreground"
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', opacity: 0.5, transition: 'opacity 0.15s' }}
+                  className="shrink-0 bg-transparent px-0.5 text-muted-foreground"
+                  style={{ border: 'none', cursor: 'pointer', opacity: 0.5, transition: 'opacity 0.15s' }}
                   onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
                   onMouseLeave={e => (e.currentTarget.style.opacity = '0.5')}
                 >
                   <Trash2 className="size-3" />
                 </button>
               </div>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">
+              <p className="mt-0.5 text-2xs text-muted-foreground">
                 {c.message_count} 条 · {formatTime(c.updated_at)}
               </p>
             </div>
@@ -297,7 +297,7 @@ export default function AiChatPage() {
           )}
         </div>
         {/* Memory compress button */}
-        <div className="shrink-0 border-t border-border" style={{ padding: '8px 12px' }}>
+        <div className="shrink-0 border-t border-border py-2 px-3">
           <Button variant="outline" size="sm" className="w-full text-muted-foreground" onClick={compressMemory}>
             <Shrink className="size-3.5" /> 整理 Memory
           </Button>
@@ -307,20 +307,20 @@ export default function AiChatPage() {
       {/* Main chat area */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         {/* Messages */}
-        <div style={{ flex: 1, overflow: 'auto', padding: '24px 32px' }}>
+        <div className="px-8 py-6" style={{ flex: 1, overflow: 'auto' }}>
           {messages.length === 0 && !streaming && (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '16px' }}>
               <UtterlogLogo size={48} />
-              <p className="text-[15px] font-semibold text-foreground">Utterlog AI 助手</p>
-              <p className="max-w-[400px] text-center text-[13px] leading-relaxed text-muted-foreground">
+              <p className="text-sm-plus font-semibold text-foreground">Utterlog AI 助手</p>
+              <p className="max-w-100 text-center text-xs-plus leading-relaxed text-muted-foreground">
                 聊天、生成摘要、格式化内容、生成 Slug 等
               </p>
             </div>
           )}
 
           {messages.map((msg, i) => (
-            <div key={i} style={{
-              marginBottom: '20px', display: 'flex', gap: '12px',
+            <div key={i} className="mb-5" style={{
+              display: 'flex', gap: '12px',
               flexDirection: msg.role === 'user' ? 'row-reverse' : 'row',
             }}>
               {/* Avatar */}
@@ -346,14 +346,14 @@ export default function AiChatPage() {
               {/* Bubble with save-to-memory */}
               <div style={{ maxWidth: '70%', position: 'relative' }} className="group">
                 <div
-                  className={cn(msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground')}
-                  style={{ padding: '12px 16px', fontSize: '14px', lineHeight: 1.7 }}
+                  className={cn('px-4 py-3 text-sm', msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground')}
+                  style={{ lineHeight: 1.7 }}
                 >
                   {msg.role === 'assistant' ? (
                     <>
                       {msg.toolEvents && <ToolCards events={msg.toolEvents} />}
                       {msg.content && (
-                        <div className="blog-prose" style={{ fontSize: '14px' }}>
+                        <div className="blog-prose text-sm">
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
                         </div>
                       )}
@@ -386,14 +386,14 @@ export default function AiChatPage() {
 
           {/* Streaming + Tool events */}
           {(streaming || currentToolEvents.length > 0) && (
-            <div style={{ marginBottom: '20px', display: 'flex', gap: '12px' }}>
+            <div className="mb-5" style={{ display: 'flex', gap: '12px' }}>
               <div style={{ width: '32px', height: '32px', flexShrink: 0 }}>
                 <UtterlogLogo size={32} />
               </div>
-              <div className="bg-muted" style={{ maxWidth: '70%', padding: '12px 16px', fontSize: '14px', lineHeight: 1.7 }}>
+              <div className="bg-muted px-4 py-3 text-sm" style={{ maxWidth: '70%', lineHeight: 1.7 }}>
                 {currentToolEvents.length > 0 && <ToolCards events={currentToolEvents} />}
                 {streaming && (
-                  <div className="blog-prose" style={{ fontSize: '14px' }}>
+                  <div className="blog-prose text-sm">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{streaming}</ReactMarkdown>
                   </div>
                 )}
@@ -405,11 +405,11 @@ export default function AiChatPage() {
 
           {/* Typing dots */}
           {sending && !streaming && currentToolEvents.length === 0 && (
-            <div style={{ marginBottom: '20px', display: 'flex', gap: '12px' }}>
+            <div className="mb-5" style={{ display: 'flex', gap: '12px' }}>
               <div style={{ width: '32px', height: '32px', flexShrink: 0 }}>
                 <UtterlogLogo size={32} />
               </div>
-              <div className="bg-muted" style={{ padding: '14px 16px', display: 'flex', gap: '5px', alignItems: 'center' }}>
+              <div className="bg-muted px-4 py-3.5" style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
                 {[0, 1, 2].map(i => (
                   <div key={i} className="bg-muted-foreground" style={{
                     width: '6px', height: '6px', borderRadius: '50%',
@@ -425,7 +425,7 @@ export default function AiChatPage() {
         </div>
 
         {/* Input */}
-        <div className="shrink-0 border-t border-border" style={{ padding: '12px 32px 20px' }}>
+        <div className="shrink-0 border-t border-border pt-3 px-8 pb-5">
           <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
             <Textarea
               ref={inputRef}

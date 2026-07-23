@@ -302,7 +302,7 @@ export default function MomentsPage() {
                 <span
                   key={tag}
                   className={cn(
-                    'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[13px] text-muted-foreground transition-colors',
+                    'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs-plus text-muted-foreground transition-colors',
                     isEditing ? 'border-primary bg-card' : 'border-border bg-muted',
                   )}
                 >
@@ -317,7 +317,7 @@ export default function MomentsPage() {
                       }}
                       onFocus={e => e.currentTarget.select()}
                       onBlur={() => commitTagEdit(tag, draft)}
-                      className="border-none bg-transparent p-0 text-[13px] text-foreground outline-none"
+                      className="border-none bg-transparent p-0 text-xs-plus text-foreground outline-none"
                       // 让宽度跟着内容长度走（中英混排粗略按 1ch ≈ 1 字符宽估算）
                       style={{ width: `${Math.max(2, draft.length) + 1}ch`, fontFamily: 'inherit' }}
                     />
@@ -355,7 +355,7 @@ export default function MomentsPage() {
               value={newTag}
               onChange={e => setNewTag(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
-              className="w-[180px]"
+              className="w-45"
             />
             <Button variant="outline" onClick={addTag}>{t('admin.common.add', '添加')}</Button>
           </div>
@@ -388,7 +388,7 @@ export default function MomentsPage() {
                     {m.mood && (
                       <>
                         <span>&middot;</span>
-                        <span className="rounded bg-muted px-2 py-px text-[11px] font-medium text-primary">{m.mood}</span>
+                        <span className="rounded bg-muted px-2 py-px text-2xs font-medium text-primary">{m.mood}</span>
                       </>
                     )}
                     {m.visibility !== 'public' && <><span>&middot;</span><span>{m.visibility === 'private' ? t('admin.moments.visibility.private', '仅自己') : t('admin.moments.visibility.unlisted', '不公开')}</span></>}
@@ -405,7 +405,7 @@ export default function MomentsPage() {
       )}
 
       <Dialog open={isModalOpen} onOpenChange={(o) => !o && setIsModalOpen(false)}>
-        <DialogContent className="max-h-[calc(100vh-32px)] max-w-[520px] overflow-y-auto">
+        <DialogContent className="max-h-[calc(100vh-32px)] max-w-130 overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingId ? t('admin.moments.editMoment', '编辑说说') : t('admin.moments.publishMoment', '发布说说')}</DialogTitle>
           </DialogHeader>

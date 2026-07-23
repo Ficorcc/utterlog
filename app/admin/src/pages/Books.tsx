@@ -97,7 +97,7 @@ export default function booksPage() {
             <Input label="ISBN" value={form.isbn || ""} onChange={(e) => setForm({...form, isbn: e.target.value})} style={{ width: "140px" }} />
           </div>
           <div>
-            <label className="text-muted-foreground" style={{ display: "block", fontSize: "13px", fontWeight: 500, marginBottom: "6px" }}>阅读状态</label>
+            <label className="mb-1.5 block text-xs-plus font-medium text-muted-foreground">阅读状态</label>
             <Select items={progressOptions} value={form.progress || "want"} onValueChange={(v) => setForm({...form, progress: v as string})}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -110,11 +110,11 @@ export default function booksPage() {
           <Input label="豆瓣/NeoDB 链接" value={form.platform_url || ""} onChange={(e) => setForm({...form, platform_url: e.target.value})} />
           <CoverInput label="封面图片" value={form.cover_url || ''} onChange={(url) => setForm({...form, cover_url: url})} folder="books" />
           <div>
-            <label className="text-muted-foreground" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>评分</label>
+            <label className="mb-1.5 block text-xs-plus font-medium text-muted-foreground">评分</label>
             <RatingStars value={form.rating || 0} onChange={(v) => setForm({...form, rating: v})} />
           </div>
           <div>
-            <label className="text-muted-foreground" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>评价</label>
+            <label className="mb-1.5 block text-xs-plus font-medium text-muted-foreground">评价</label>
             <Textarea rows={3} value={form.comment || ''} onChange={(e) => setForm({...form, comment: e.target.value})} />
           </div>
           <DialogFooter onCancel={() => setIsModalOpen(false)} onSubmit={onSubmit} submitting={submitting} submitText={editingId ? '保存' : '添加'} />

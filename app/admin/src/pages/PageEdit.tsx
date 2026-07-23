@@ -114,7 +114,7 @@ export default function EditPostPage() {
           </div>
         </div>
 
-        <div className="w-[280px] shrink-0 overflow-y-auto overflow-x-hidden border border-border bg-card">
+        <div className="w-70 shrink-0 overflow-y-auto overflow-x-hidden border border-border bg-card">
           <div className="border-b border-border p-4">
             <div className="flex gap-1.5">
               <Button onClick={handleSave} disabled={submitting} className="min-w-0 flex-1 px-2">保存</Button>
@@ -123,7 +123,7 @@ export default function EditPostPage() {
           </div>
 
           <div className="border-b border-border p-4">
-            <h3 className="mb-3.5 text-[13px] font-semibold text-foreground">设置</h3>
+            <h3 className="mb-3.5 text-xs-plus font-semibold text-foreground">设置</h3>
             <div className="flex flex-col gap-3.5">
               <div>
                 <Label className="mb-1.5 block text-xs text-muted-foreground">别名 (Slug)</Label>
@@ -152,7 +152,7 @@ export default function EditPostPage() {
           </div>
 
           <div className="p-4">
-            <h3 className="mb-3.5 text-[13px] font-semibold text-foreground">高级</h3>
+            <h3 className="mb-3.5 text-xs-plus font-semibold text-foreground">高级</h3>
             <div className="flex flex-col gap-3.5">
               <div>
                 <Label className="mb-1.5 block text-xs text-muted-foreground">摘要</Label>

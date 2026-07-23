@@ -6,6 +6,7 @@ import api from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { useI18n } from '@/lib/i18n';
 import { formatWithAdminTimeZone } from '@/lib/timezone';
+import { cn } from '@/lib/utils';
 
 export default function NotificationBell() {
   const { locale, t } = useI18n();
@@ -85,9 +86,9 @@ export default function NotificationBell() {
   return (
     <div style={{ position: 'relative', display: 'inline-flex' }}>
       <button onClick={handleOpen} className="relative inline-flex items-center justify-center rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground">
-        <Bell className="size-[18px]" />
+        <Bell className="size-4.5" />
         {(unread + pendingComments) > 0 && (
-          <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+          <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-3xs font-semibold text-destructive-foreground">
             {(unread + pendingComments) > 99 ? '99+' : unread + pendingComments}
           </span>
         )}
@@ -97,15 +98,15 @@ export default function NotificationBell() {
         <>
           <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 40 }} />
           <div
-            className="flex flex-col overflow-hidden rounded-md border border-border bg-card shadow-lg"
+            className="mt-2 flex flex-col overflow-hidden rounded-md border border-border bg-card shadow-lg"
             style={{
-              position: 'absolute', right: 0, top: '100%', marginTop: '8px',
+              position: 'absolute', right: 0, top: '100%',
               width: '340px', maxHeight: '400px', zIndex: 41,
             }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-border" style={{ padding: '12px 16px' }}>
-              <span style={{ fontSize: '14px', fontWeight: 600 }}>{t('admin.notification.title', '通知')}</span>
+            <div className="flex items-center justify-between border-b border-border py-3 px-4">
+              <span className="text-sm font-semibold">{t('admin.notification.title', '通知')}</span>
               {unread > 0 && (
                 <button onClick={markAllRead} className="cursor-pointer bg-transparent text-xs text-primary">
                   {t('admin.notification.markAllRead', '全部已读')}
@@ -118,8 +119,7 @@ export default function NotificationBell() {
               <Link
                 to="/comments/pending"
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-2 border-b border-amber-500/20 bg-amber-500/15 text-[13px] text-amber-700 no-underline dark:text-amber-400"
-                style={{ padding: '10px 16px' }}
+                className="flex items-center gap-2 border-b border-amber-500/20 bg-amber-500/15 py-2.5 px-4 text-xs-plus text-amber-700 no-underline dark:text-amber-400"
               >
                 <MessageSquare className="size-3.5" />
                 <span>{t('admin.notification.pendingComments', '{count} 条评论等待审核', { count: pendingComments })}</span>
@@ -130,25 +130,24 @@ export default function NotificationBell() {
             {/* List */}
             <div style={{ flex: 1, overflow: 'auto' }}>
               {loading ? (
-                <div className="text-center text-[13px] text-muted-foreground" style={{ padding: '24px' }}>{t('common.loading', '加载中…')}</div>
+                <div className="p-6 text-center text-xs-plus text-muted-foreground">{t('common.loading', '加载中…')}</div>
               ) : notifications.length === 0 ? (
-                <div className="text-center text-[13px] text-muted-foreground" style={{ padding: '32px' }}>{t('admin.notification.empty', '暂无通知')}</div>
+                <div className="p-8 text-center text-xs-plus text-muted-foreground">{t('admin.notification.empty', '暂无通知')}</div>
               ) : (
                 notifications.map((n, i) => (
                   <div
                     key={i}
-                    className={n.is_read ? 'cursor-pointer border-b border-border bg-transparent' : 'cursor-pointer border-b border-border bg-muted'}
-                    style={{ padding: '10px 16px' }}
+                    className={cn('cursor-pointer border-b border-border py-2.5 px-4', n.is_read ? 'bg-transparent' : 'bg-muted')}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                      <p style={{ fontSize: '13px', fontWeight: n.is_read ? 400 : 600, flex: 1 }}>
+                      <p className="text-xs-plus" style={{ fontWeight: n.is_read ? 400 : 600, flex: 1 }}>
                         {typeof n.title === 'string' ? n.title : String(n.title || '')}
                       </p>
-                      <span className="text-muted-foreground" style={{ fontSize: '11px', flexShrink: 0, marginLeft: '8px' }}>
+                      <span className="ml-2 shrink-0 text-2xs text-muted-foreground">
                         {formatTime(n.created_at)}
                       </span>
                     </div>
-                    {n.content && <p className="text-muted-foreground" style={{ fontSize: '12px', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{typeof n.content === 'string' ? n.content : ''}</p>}
+                    {n.content && <p className="mt-0.5 text-xs text-muted-foreground" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{typeof n.content === 'string' ? n.content : ''}</p>}
                   </div>
                 ))
               )}

@@ -238,7 +238,7 @@ export default function PostsPage() {
           <div className="flex items-center gap-2.5 border-b border-border bg-muted px-4 py-2.5">
             <span className="text-sm text-muted-foreground">{t('admin.posts.selectedCount', '已选 {count} 项', { count: selected.size })}</span>
             <Select value={batchAction} onValueChange={(v) => setBatchAction((v as string) ?? '')}>
-              <SelectTrigger className="h-8 w-[120px] text-xs">
+              <SelectTrigger className="h-8 w-30 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -264,7 +264,7 @@ export default function PostsPage() {
               <TableHead className="w-10">
                 <input type="checkbox" checked={posts.length > 0 && selected.size === posts.length} onChange={toggleAll} className="size-4 cursor-pointer align-middle accent-primary" />
               </TableHead>
-              <TableHead className="w-[72px]">{t('admin.posts.columns.number', '编号')}</TableHead>
+              <TableHead className="w-18">{t('admin.posts.columns.number', '编号')}</TableHead>
               <TableHead>
                 <button type="button" onClick={() => setOrderDir(d => d === 'desc' ? 'asc' : 'desc')} className="inline-flex select-none items-center gap-1">
                   {t('admin.posts.columns.title', '标题')}
@@ -274,12 +274,12 @@ export default function PostsPage() {
                   </span>
                 </button>
               </TableHead>
-              <TableHead className="w-[140px]">{t('common.categories', '分类')}</TableHead>
+              <TableHead className="w-35">{t('common.categories', '分类')}</TableHead>
               <TableHead>{t('admin.posts.columns.keywords', '关键词')}</TableHead>
-              <TableHead className="w-[160px]">{t('admin.posts.columns.time', '时间')}</TableHead>
-              <TableHead className="w-[100px]">{t('admin.posts.columns.viewsComments', '浏览/评论')}</TableHead>
-              <TableHead className="w-[72px]">{t('admin.posts.columns.status', '状态')}</TableHead>
-              <TableHead className="w-[190px] text-right">{t('admin.posts.columns.actions', '操作')}</TableHead>
+              <TableHead className="w-40">{t('admin.posts.columns.time', '时间')}</TableHead>
+              <TableHead className="w-25">{t('admin.posts.columns.viewsComments', '浏览/评论')}</TableHead>
+              <TableHead className="w-18">{t('admin.posts.columns.status', '状态')}</TableHead>
+              <TableHead className="w-47.5 text-right">{t('admin.posts.columns.actions', '操作')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -309,34 +309,34 @@ export default function PostsPage() {
                       <input type="checkbox" checked={selected.has(row.id)} onChange={() => toggleSelect(row.id)} className="size-4 cursor-pointer align-middle accent-primary" />
                     </TableCell>
                     <TableCell>
-                      <span className="text-[11px] text-muted-foreground" title={t('admin.posts.internalId', '内部 ID: {id}', { id: row.id })}>
+                      <span className="text-2xs text-muted-foreground" title={t('admin.posts.internalId', '内部 ID: {id}', { id: row.id })}>
                         {row.status === 'publish' && row.display_id > 0 ? row.display_id : '-'}
                       </span>
                     </TableCell>
                     <TableCell>
                       {/* max-width keeps long titles from blowing up the auto-layout
                           table; ellipsis still kicks in past ~440px. */}
-                      <p className="min-w-0 max-w-[440px] truncate text-[13px] font-medium text-foreground">{row.title}</p>
+                      <p className="min-w-0 max-w-110 truncate text-xs-plus font-medium text-foreground">{row.title}</p>
                     </TableCell>
                     <TableCell>
                       {!cat ? (
-                        <span className="text-[11px] text-muted-foreground">-</span>
+                        <span className="text-2xs text-muted-foreground">-</span>
                       ) : (
                         <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                          {cat.icon ? <i className={cn(cat.icon, 'shrink-0 text-[13px] text-primary')} /> : <Folder className="size-3.5 shrink-0 text-primary" />}
+                          {cat.icon ? <i className={cn(cat.icon, 'shrink-0 text-xs-plus text-primary')} /> : <Folder className="size-3.5 shrink-0 text-primary" />}
                           <span className="truncate">{cat.name}</span>
                         </span>
                       )}
                     </TableCell>
                     <TableCell>
                       {!tags.length ? (
-                        <span className="text-[11px] text-muted-foreground">-</span>
+                        <span className="text-2xs text-muted-foreground">-</span>
                       ) : (
                         // No wrap — the column is in an auto-layout table and grows to
                         // fit however many tags this post has.
                         <div className="inline-flex items-center gap-1">
                           {tags.map((tag: any) => (
-                            <span key={tag.id} className="inline-block rounded border border-border bg-muted px-2 py-px text-[11px] leading-relaxed text-muted-foreground">{tag.name}</span>
+                            <span key={tag.id} className="inline-block rounded border border-border bg-muted px-2 py-px text-2xs leading-relaxed text-muted-foreground">{tag.name}</span>
                           ))}
                         </div>
                       )}
@@ -387,7 +387,7 @@ export default function PostsPage() {
           </span>
           <div className="flex items-center gap-2">
             <Select value={perPage} onValueChange={(v) => { setPerPage(Number(v)); setPage(1); }}>
-              <SelectTrigger className="h-8 w-[110px] text-xs">
+              <SelectTrigger className="h-8 w-27.5 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -420,7 +420,7 @@ export default function PostsPage() {
       />
 
       <Dialog open={settingsOpen} onOpenChange={(o) => !o && setSettingsOpen(false)}>
-        <DialogContent className="max-h-[calc(100vh-32px)] max-w-[520px] overflow-y-auto">
+        <DialogContent className="max-h-[calc(100vh-32px)] max-w-130 overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t('admin.posts.settingsTitle', '文章设置')}</DialogTitle>
           </DialogHeader>
@@ -428,7 +428,7 @@ export default function PostsPage() {
             {/* 每页文章数 */}
             <div>
               <Label className="mb-1.5 block">{t('admin.posts.postsPerPage', '每页文章数')}</Label>
-              <Input type="number" min={1} max={100} value={postsPerPage} onChange={(e: any) => setPostsPerPage(parseInt(e.target.value) || 10)} className="w-[140px]" />
+              <Input type="number" min={1} max={100} value={postsPerPage} onChange={(e: any) => setPostsPerPage(parseInt(e.target.value) || 10)} className="w-35" />
               <p className="mt-1 text-xs text-muted-foreground">{t('admin.posts.postsPerPageHint', '影响首页和分类/标签列表的分页大小')}</p>
             </div>
 
@@ -446,9 +446,9 @@ export default function PostsPage() {
                       className="accent-primary"
                     />
                     <div className="min-w-0 flex-1">
-                      <div className="text-[13px] text-foreground">{t(`admin.posts.permalinkPreset.${p.key}`, p.label)}</div>
-                      <code className="text-[11px] text-muted-foreground">{p.template}</code>
-                      <span className="ml-2 text-[11px] text-muted-foreground">→ {p.example}</span>
+                      <div className="text-xs-plus text-foreground">{t(`admin.posts.permalinkPreset.${p.key}`, p.label)}</div>
+                      <code className="text-2xs text-muted-foreground">{p.template}</code>
+                      <span className="ml-2 text-2xs text-muted-foreground">→ {p.example}</span>
                     </div>
                   </label>
                 ))}
@@ -462,20 +462,20 @@ export default function PostsPage() {
                     className="mt-0.5 accent-primary"
                   />
                   <div className="min-w-0 flex-1">
-                    <div className="mb-1 text-[13px] text-foreground">{t('admin.posts.permalinkCustom', '自定义')}</div>
+                    <div className="mb-1 text-xs-plus text-foreground">{t('admin.posts.permalinkCustom', '自定义')}</div>
                     <Input
                       value={permalinkStructure}
                       onChange={(e: any) => setPermalinkStructure(e.target.value)}
                       placeholder="/posts/%postname%"
                       className="w-full font-mono text-xs"
                     />
-                    <p className="mt-1 text-[11px] text-muted-foreground">
+                    <p className="mt-1 text-2xs text-muted-foreground">
                       {t('admin.posts.permalinkPlaceholdersPrefix', '可用占位符：')}<code>%postname%</code>{t('admin.posts.placeholder.slug', '（slug）')}、<code>%display_id%</code>{t('admin.posts.placeholder.displayId', '（发布序号，推荐）')}、<code>%post_id%</code>{t('admin.posts.placeholder.postId', '（数据库 ID）')}、<code>%year%</code>、<code>%month%</code>、<code>%day%</code>、<code>%category%</code>
                     </p>
                   </div>
                 </label>
               </div>
-              <p className="mt-2 text-[11px] leading-normal text-muted-foreground">
+              <p className="mt-2 text-2xs leading-normal text-muted-foreground">
                 {t('admin.posts.permalinkRedirectHintPrefix', '旧的')} <code>/posts/slug</code> {t('admin.posts.permalinkRedirectHintSuffix', '链接会 308 重定向到新格式，老书签不会坏。')}
               </p>
             </div>

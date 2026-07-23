@@ -124,12 +124,12 @@ export default function FollowsPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-semibold">{siteName}</span>
-                    {isMutual && <span className="rounded-sm bg-primary px-1.5 py-px text-[10px] text-primary-foreground">互关</span>}
+                    {isMutual && <span className="rounded-sm bg-primary px-1.5 py-px text-3xs text-primary-foreground">互关</span>}
                   </div>
                   {siteDesc && <p className="mt-0.5 truncate text-xs text-muted-foreground">{siteDesc}</p>}
                   <div className="mt-1 flex items-center gap-2">
                     <a href={siteUrl} target="_blank" className="text-xs text-muted-foreground hover:text-foreground">{siteUrl}</a>
-                    {admin.nickname && <span className="text-[11px] text-muted-foreground">· {admin.nickname}</span>}
+                    {admin.nickname && <span className="text-2xs text-muted-foreground">· {admin.nickname}</span>}
                   </div>
                 </div>
 

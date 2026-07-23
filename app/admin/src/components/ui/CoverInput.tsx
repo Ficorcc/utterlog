@@ -47,7 +47,7 @@ export function CoverInput({ value, onChange, folder, label, placeholder = 'http
   return (
     <div>
       {displayLabel && (
-        <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">{displayLabel}</label>
+        <label className="mb-1.5 block text-xs-plus font-medium text-muted-foreground">{displayLabel}</label>
       )}
       <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
         {value && (
@@ -64,7 +64,7 @@ export function CoverInput({ value, onChange, folder, label, placeholder = 'http
         )}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <Input
-            className="text-[13px]"
+            className="text-xs-plus"
             value={value}
             onChange={e => onChange(e.target.value)}
             placeholder={placeholder}

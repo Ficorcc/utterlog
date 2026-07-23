@@ -480,18 +480,18 @@ export default function SystemUpdatePanel() {
   return (
     <div>
       {/* Version card */}
-      <div className="rounded-lg border border-border bg-card" style={{ padding: '20px 24px', marginBottom: 16 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div className="rounded-lg border border-border bg-card px-6 py-5 mb-4">
+        <div className="grid grid-cols-2 gap-4">
           <div>
             <div className="mb-1 text-xs text-muted-foreground">当前版本</div>
             <div className={cn('font-mono text-lg font-semibold', updateAvailable ? 'text-foreground' : stateTextClass)}>{cur}</div>
             {curCommit && (
-              <div className="mt-1 font-mono text-[11px] text-muted-foreground">
+              <div className="mt-1 font-mono text-2xs text-muted-foreground">
                 提交 {curCommit.length > 7 ? curCommit.slice(0, 7) : curCommit}
               </div>
             )}
             {info?.current.built_at && (
-              <div className="mt-0.5 text-[11px] text-muted-foreground">
+              <div className="mt-0.5 text-2xs text-muted-foreground">
                 构建于 {info.current.built_at}
               </div>
             )}
@@ -502,19 +502,19 @@ export default function SystemUpdatePanel() {
               {lat}
             </div>
             {info?.latest?.commit && (
-              <div className="mt-1 font-mono text-[11px] text-muted-foreground">
+              <div className="mt-1 font-mono text-2xs text-muted-foreground">
                 提交 {info.latest.commit}
               </div>
             )}
             {info?.latest?.published_at && (
-              <div className="mt-0.5 text-[11px] text-muted-foreground">
+              <div className="mt-0.5 text-2xs text-muted-foreground">
                 发布于 {formatWithAdminTimeZone(new Date(info.latest.published_at), 'zh-CN', {})}
               </div>
             )}
           </div>
         </div>
 
-        <div className="mt-[18px] flex flex-wrap items-center gap-2.5">
+        <div className="mt-4 flex flex-wrap items-center gap-2.5">
           {checkState === 'update' ? (
             <Button
               onClick={doUpgrade}
@@ -549,7 +549,7 @@ export default function SystemUpdatePanel() {
             <RefreshCw className={cn('size-4', loading && 'animate-spin')} />
             刷新检查
           </Button>
-          <div style={{ flex: 1 }} />
+          <div className="flex-1" />
           {info?.latest?.url && (
             <a href={info.latest.url} target="_blank" rel="noopener" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
               在 GitHub 查看 <ExternalLink className="size-2.5" />
@@ -558,13 +558,13 @@ export default function SystemUpdatePanel() {
         </div>
 
         {info?.error && (
-          <div className="mt-3 flex items-center gap-1.5 border-l-[3px] border-destructive bg-destructive/10 text-xs text-destructive" style={{ padding: '8px 12px' }}>
+          <div className="mt-3 flex items-center gap-1.5 border-l-[3px] border-destructive bg-destructive/10 text-xs text-destructive py-2 px-3">
             <CircleAlert className="size-3.5 shrink-0" />
             {info.error}
           </div>
         )}
         {!runtimeUpgradeSupported && (
-          <div className="mt-3 border-l-[3px] border-muted-foreground bg-muted text-xs text-foreground" style={{ padding: '10px 12px', lineHeight: 1.7 }}>
+          <div className="mt-3 border-l-[3px] border-muted-foreground bg-muted text-xs text-foreground py-2.5 px-3" style={{ lineHeight: 1.7 }}>
             <Terminal className="mr-1.5 inline size-3.5" />
             后台更新任务未启用。请在部署目录执行：
             <code className="ml-1.5 font-mono">sudo bash scripts/update-bun.sh</code>
@@ -574,7 +574,7 @@ export default function SystemUpdatePanel() {
 
       {/* Changelog */}
       {info?.latest?.body && (
-        <div className="rounded-lg border border-border bg-card" style={{ padding: '20px 24px', marginBottom: 16 }}>
+        <div className="rounded-lg border border-border bg-card px-6 py-5 mb-4">
           <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
             <ClipboardList className="size-4 text-primary" />
             更新内容 — {info.latest.version}
@@ -594,7 +594,7 @@ export default function SystemUpdatePanel() {
           size="sm"
           variant={upgradeStatus.running ? 'default' : 'outline'}
           onClick={() => setLogModalOpen(true)}
-          style={{ marginBottom: 16 }}
+          className="mb-4"
         >
           {upgradeStatus.running
             ? <Loader2 className="size-4 animate-spin" />
@@ -612,7 +612,7 @@ export default function SystemUpdatePanel() {
           终端面板刻意保持深色（两种主题下都是暗色终端观感），
           因此内部颜色沿用硬编码 hex，不走语义 token。 */}
       <Dialog open={logModalOpen && !!upgradeStatus && (upgrading || !!upgradeStatus.log_tail)} onOpenChange={(o) => !o && setLogModalOpen(false)}>
-        <DialogContent className="max-w-[860px] max-h-[calc(100vh-32px)] overflow-y-auto">
+        <DialogContent className="max-w-215 max-h-[calc(100vh-32px)] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {upgradeStatus?.running
@@ -622,40 +622,20 @@ export default function SystemUpdatePanel() {
                 : '升级失败 — 错误日志'}
             </DialogTitle>
           </DialogHeader>
-          <div style={{
-            background: '#0a0e1a',
-            color: '#cbd5e1',
-            padding: 0,
-            fontFamily: 'ui-monospace, "SF Mono", Menlo, Consolas, monospace',
-            fontSize: 12.5,
-            lineHeight: 1.75,
-            borderRadius: 6,
-            border: '1px solid #1e293b',
-            margin: '0 -24px -24px',  /* 抵消 DialogContent 内部 padding 让终端贴边 */
-          }}>
+          {/* 抵消 DialogContent 内部 padding 让终端贴边 */}
+          <div className="bg-terminal-bg text-terminal-text p-0 font-mono text-xs rounded-terminal border border-terminal-border mt-0 -mx-6 -mb-6" style={{ lineHeight: 1.75 }}>
             {/* 顶部状态条：spinner / 对勾 / 叉 + 文案 */}
-            <div style={{
-              fontSize: 11.5,
-              color: '#94a3b8',
-              padding: '14px 20px 10px',
-              borderBottom: '1px solid #1e293b',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              fontWeight: 500,
-              letterSpacing: 0.3,
-              background: 'linear-gradient(180deg, #0f1729 0%, #0a0e1a 100%)',
-            }}>
+            <div className="text-2xs text-terminal-dim pt-3.5 px-5 pb-2.5 border-b border-terminal-border flex items-center gap-2 font-medium bg-terminal-header-bg" style={{ letterSpacing: 0.3 }}>
               {upgradeStatus?.running
-                ? <Loader2 className="animate-spin" size={14} style={{ color: '#60a5fa' }} />
+                ? <Loader2 className="animate-spin text-terminal-info" size={14} />
                 : upgradeStatus?.success
-                ? <CircleCheck size={14} style={{ color: '#4ade80' }} />
-                : <CircleX size={14} style={{ color: '#f87171' }} />}
-              <span style={{ color: '#cbd5e1' }}>
+                ? <CircleCheck className="text-terminal-success" size={14} />
+                : <CircleX className="text-terminal-error" size={14} />}
+              <span className="text-terminal-text">
                 {upgradeStatus?.running ? '正在拉取源码 / Bun 构建 / 重启服务…' : upgradeStatus?.success ? '完成' : '失败'}
               </span>
               {upgradeStatus?.started_at && (
-                <span style={{ marginLeft: 'auto', color: '#64748b', fontSize: 11 }}>
+                <span className="ml-auto text-terminal-muted text-2xs">
                   started: {formatWithAdminTimeZone(new Date(upgradeStatus.started_at), 'zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
                 </span>
               )}
@@ -665,12 +645,8 @@ export default function SystemUpdatePanel() {
                 方便 useEffect 调 scrollIntoView */}
             <div
               ref={logScrollRef}
-              style={{
-                maxHeight: '60vh',
-                minHeight: 280,
-                overflowY: 'auto',
-                padding: '12px 20px 16px',
-              }}
+              className="min-h-70 overflow-y-auto pt-3 px-5 pb-4"
+              style={{ maxHeight: '60vh' }}
             >
               {(upgradeStatus?.log_tail || '').split('\n').filter(Boolean).map((line, i) => (
                 <div
@@ -680,7 +656,7 @@ export default function SystemUpdatePanel() {
                 />
               ))}
               {!upgradeStatus?.log_tail && (
-                <div style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div className="text-terminal-muted flex items-center gap-1.5">
                   <Loader2 className="animate-spin" size={13} />
                   正在启动 systemd 更新任务...
                 </div>
@@ -691,12 +667,7 @@ export default function SystemUpdatePanel() {
 
             {/* 底部进度条（running 时无限循环动画，完成后固定） */}
             {upgradeStatus?.running && (
-              <div style={{
-                height: 2,
-                background: '#1e293b',
-                overflow: 'hidden',
-                position: 'relative',
-              }}>
+              <div className="h-0.5 bg-terminal-border overflow-hidden relative">
                 <div className="upgrade-log-progress-bar" />
               </div>
             )}
@@ -705,12 +676,12 @@ export default function SystemUpdatePanel() {
       </Dialog>
 
       {/* Data preservation notice */}
-      <div className="border border-amber-500/30 bg-amber-500/10 text-xs text-amber-700 dark:text-amber-300" style={{ padding: '14px 18px', marginBottom: 24, borderRadius: 8 }}>
+      <div className="border border-amber-500/30 bg-amber-500/10 text-xs text-amber-700 dark:text-amber-300 py-3.5 px-4 mb-6 rounded-md">
         <div className="mb-1.5 flex items-center gap-1.5 font-semibold">
           <ShieldCheck className="size-3.5" />
           升级安全保证
         </div>
-        <ul style={{ margin: 0, paddingLeft: 18, lineHeight: 1.8 }}>
+        <ul className="m-0 pl-4" style={{ lineHeight: 1.8 }}>
           <li>数据库 (<code>pgdata/</code>) — 永不触碰</li>
           <li>配置文件 (<code>.env</code>) — 保持不变</li>
           <li>上传文件 (<code>uploads/</code>) 和用户扩展 (<code>content/</code>) — 完整保留</li>
@@ -720,11 +691,11 @@ export default function SystemUpdatePanel() {
 
       {/* ================= Release history / changelog ================= */}
       <div className="rounded-lg border border-border bg-card">
-        <div className="flex items-center justify-between gap-2 border-b border-border" style={{ padding: '14px 20px' }}>
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground" style={{ margin: 0 }}>
+        <div className="flex items-center justify-between gap-2 border-b border-border py-3.5 px-5">
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground m-0">
             <History className="size-4 text-primary" />
             更新历史
-            {releases && <span className="text-[11px] font-normal text-muted-foreground">最近 {releases.length} 个发布</span>}
+            {releases && <span className="text-2xs font-normal text-muted-foreground">最近 {releases.length} 个发布</span>}
           </h3>
           <Button variant="outline" size="sm" onClick={() => loadReleases(true)}>
             <RefreshCw className="size-3.5" />
@@ -733,7 +704,7 @@ export default function SystemUpdatePanel() {
         </div>
 
         {releasesErr && (
-          <div className="flex flex-wrap items-center gap-1 border-b border-destructive/40 bg-destructive/10 text-xs text-destructive" style={{ padding: '10px 20px' }}>
+          <div className="flex flex-wrap items-center gap-1 border-b border-destructive/40 bg-destructive/10 text-xs text-destructive py-2.5 px-5">
             <TriangleAlert className="size-3.5" />
             {releasesErr}
             {' · '}
@@ -744,12 +715,12 @@ export default function SystemUpdatePanel() {
         )}
 
         {releases === null ? (
-          <div className="flex items-center justify-center gap-1.5 text-center text-sm text-muted-foreground" style={{ padding: '40px 20px' }}>
+          <div className="flex items-center justify-center gap-1.5 text-center text-sm text-muted-foreground py-10 px-5">
             <Loader2 className="size-4 animate-spin" />
             加载更新历史…
           </div>
         ) : releases.length === 0 ? (
-          <div className="text-center text-sm text-muted-foreground" style={{ padding: '40px 20px' }}>
+          <div className="text-center text-sm text-muted-foreground py-10 px-5">
             还没有发布的 tag 版本。开发阶段的改动请看{' '}
             <a
               href="https://github.com/utterlog/utterlog/commits/main"
@@ -769,8 +740,7 @@ export default function SystemUpdatePanel() {
                   <button
                     type="button"
                     onClick={() => toggleExpand(rel.id)}
-                    className="flex w-full items-center gap-3 text-left text-foreground"
-                    style={{ padding: '14px 20px' }}
+                    className="flex w-full items-center gap-3 text-left text-foreground py-3.5 px-5"
                   >
                     {isOpen
                       ? <ChevronDown className="size-3 shrink-0 text-muted-foreground" />
@@ -789,13 +759,13 @@ export default function SystemUpdatePanel() {
                         {rel.name}
                       </span>
                     )}
-                    {!rel.name || rel.name === rel.tag_name ? <span style={{ flex: 1 }} /> : null}
-                    <span className="whitespace-nowrap font-mono text-[11px] text-muted-foreground">
+                    {!rel.name || rel.name === rel.tag_name ? <span className="flex-1" /> : null}
+                    <span className="whitespace-nowrap font-mono text-2xs text-muted-foreground">
                       {fmtDate(rel.published_at)}
                     </span>
                   </button>
                   {isOpen && (
-                    <div className="border-t border-dashed border-border" style={{ padding: '2px 20px 18px 42px' }}>
+                    <div className="border-t border-dashed border-border pt-0.5 pr-5 pb-4 pl-10">
                       <div
                         className="changelog-body text-sm text-foreground"
                         style={{ lineHeight: 1.7 }}
@@ -804,7 +774,7 @@ export default function SystemUpdatePanel() {
                       <a
                         href={rel.html_url}
                         target="_blank" rel="noopener"
-                        className="mt-2.5 inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
+                        className="mt-2.5 inline-flex items-center gap-1 text-2xs text-muted-foreground hover:text-foreground"
                       >
                         在 GitHub 查看完整发布 <ExternalLink className="size-2.5" />
                       </a>
@@ -819,12 +789,12 @@ export default function SystemUpdatePanel() {
 
       {/* Upgrade confirm dialog — styled modal, replaces native confirm() */}
       <Dialog open={confirmOpen} onOpenChange={(o) => !o && setConfirmOpen(false)}>
-        <DialogContent className="max-w-[400px]">
+        <DialogContent className="max-w-100">
           <DialogHeader>
             <DialogTitle>{checkState === 'update' ? '确认一键升级' : '确认重新部署'}</DialogTitle>
           </DialogHeader>
           <div>
-            <div className="mx-auto mb-3.5 flex items-center justify-center rounded-md bg-primary/10 text-primary" style={{ width: 44, height: 44 }}>
+            <div className="mx-auto mb-3.5 flex items-center justify-center rounded-md bg-primary/10 text-primary size-11">
               {checkState === 'update' ? <CloudDownload className="size-5" /> : <RefreshCw className="size-5" />}
             </div>
             <div className="mb-1.5 text-center text-sm text-foreground" style={{ lineHeight: 1.7 }}>
@@ -842,7 +812,7 @@ export default function SystemUpdatePanel() {
               期间后台短暂不可访问，数据、配置、上传文件全部保留。
             </div>
 
-            <div className="mb-[18px] flex items-center gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/10 text-xs text-amber-700 dark:text-amber-300" style={{ padding: '10px 14px', lineHeight: 1.6 }}>
+            <div className="mb-4 flex items-center gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/10 text-xs text-amber-700 dark:text-amber-300 py-2.5 px-3.5" style={{ lineHeight: 1.6 }}>
               <TriangleAlert className="size-3.5 shrink-0" />
               升级过程中请勿刷新或关闭此页面。
             </div>

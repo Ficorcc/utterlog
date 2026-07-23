@@ -50,7 +50,7 @@ export default function ResetPassword() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-6">
-      <Card className="w-[360px] max-w-full p-8">
+      <Card className="w-90 max-w-full p-8">
         <form onSubmit={submit} className="login-form flex flex-col">
           <h1 className="font-logo text-xl font-bold">{t('admin.reset.title', '重置密码')}</h1>
           <p className="mt-1 mb-5 text-sm text-muted-foreground">
@@ -106,7 +106,7 @@ export default function ResetPassword() {
             </div>
           )}
 
-          <div className="mt-[18px] text-center text-xs">
+          <div className="mt-4 text-center text-xs">
             <Link to="/login" className="text-muted-foreground no-underline hover:text-foreground">
               {t('admin.reset.backToLogin', '← 返回登录页')}
             </Link>

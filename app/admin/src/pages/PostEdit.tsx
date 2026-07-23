@@ -321,7 +321,7 @@ export default function EditPostPage() {
         </div>
 
         {/* Right sidebar — same as create page */}
-        <div className="w-[280px] shrink-0 overflow-y-auto overflow-x-hidden border border-border bg-card">
+        <div className="w-70 shrink-0 overflow-y-auto overflow-x-hidden border border-border bg-card">
           {/* Publish */}
           <div className="border-b border-border p-4">
             <div className="mb-2 flex gap-1.5">
@@ -346,7 +346,7 @@ export default function EditPostPage() {
 
           {/* Settings */}
           <div className="border-b border-border p-4">
-            <h3 className="mb-3.5 text-[13px] font-semibold text-foreground">{t('admin.postEditor.settings', '设置')}</h3>
+            <h3 className="mb-3.5 text-xs-plus font-semibold text-foreground">{t('admin.postEditor.settings', '设置')}</h3>
             <div className="flex flex-col gap-3.5">
               {/* Cover */}
               <div>
@@ -356,7 +356,7 @@ export default function EditPostPage() {
                     <img src={coverUrl} alt="" className="h-20 w-full border border-border object-cover" />
                     <button
                       onClick={() => setCoverUrl('')}
-                      className="absolute right-1 top-1 flex size-[18px] items-center justify-center bg-black/50 text-white"
+                      className="absolute right-1 top-1 flex size-4.5 items-center justify-center bg-black/50 text-white"
                     >
                       <X className="size-3" />
                     </button>
@@ -421,7 +421,7 @@ export default function EditPostPage() {
                 <div className="flex gap-1.5">
                   <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder={t('admin.postEditor.slugPlaceholderShort', '留空自动分配')} className="flex-1 text-xs" />
                   {aiFlags.slug && (
-                    <Button variant="outline" disabled={slugLoading} className="h-10 shrink-0 gap-1 px-2 text-[11px]" onClick={async () => {
+                    <Button variant="outline" disabled={slugLoading} className="h-10 shrink-0 gap-1 px-2 text-2xs" onClick={async () => {
                       if (!title) return; setSlugLoading(true);
                       try { const r: any = await api.post('/ai/slug', { title, content }); if (r.success && r.data?.slug) { setSlug(r.data.slug); toast.success(t('admin.postEditor.toast.slugGenerated', 'Slug 已生成')); } } catch { toast.error(t('admin.postEditor.toast.aiUnavailable', 'AI 服务不可用')); }
                       setSlugLoading(false);
@@ -449,7 +449,7 @@ export default function EditPostPage() {
                 <div className="mb-1.5 flex items-center justify-between">
                   <Label className="text-xs text-muted-foreground">{t('admin.postEditor.tags', '标签')}</Label>
                   {aiFlags.keywords && (
-                    <Button variant="ghost" disabled={tagsLoading} className="h-auto gap-1 p-0 text-[11px] text-primary hover:bg-transparent hover:text-primary/80" onClick={async () => {
+                    <Button variant="ghost" disabled={tagsLoading} className="h-auto gap-1 p-0 text-2xs text-primary hover:bg-transparent hover:text-primary/80" onClick={async () => {
                       if (!title && !content) return; setTagsLoading(true);
                       try { const r: any = await api.post('/ai/tags', { title, content: content.slice(0, 1000) }); if (r.data?.tags) { setTagInput(Array.isArray(r.data.tags) ? r.data.tags.join(', ') : r.data.tags); toast.success(t('admin.postEditor.toast.tagsGenerated', '标签已生成')); } } catch { toast.error(t('admin.postEditor.toast.aiUnavailable', 'AI 服务不可用')); }
                       setTagsLoading(false);
@@ -479,13 +479,13 @@ export default function EditPostPage() {
 
           {/* Advanced */}
           <div className="border-b border-border p-4">
-            <h3 className="mb-3.5 text-[13px] font-semibold text-foreground">{t('admin.postEditor.advanced', '高级')}</h3>
+            <h3 className="mb-3.5 text-xs-plus font-semibold text-foreground">{t('admin.postEditor.advanced', '高级')}</h3>
             <div className="flex flex-col gap-3.5">
               <div>
                 <div className="mb-1.5 flex items-center justify-between">
                   <Label className="text-xs text-muted-foreground">{t('admin.postEditor.excerpt', '摘要')}</Label>
                   {aiFlags.summary && (
-                    <Button variant="ghost" disabled={excerptLoading} className="h-auto gap-1 p-0 text-[11px] text-primary hover:bg-transparent hover:text-primary/80" onClick={async () => {
+                    <Button variant="ghost" disabled={excerptLoading} className="h-auto gap-1 p-0 text-2xs text-primary hover:bg-transparent hover:text-primary/80" onClick={async () => {
                       if (!content) { toast.error(t('admin.postEditor.toast.fillContentFirst', '请先填写内容')); return; } setExcerptLoading(true);
                       try { const r: any = await api.post('/ai/summary', { title, content }); if (r.success && r.data?.summary) { setExcerpt(r.data.summary); toast.success(t('admin.postEditor.toast.excerptGenerated', '摘要已生成')); } } catch { toast.error(t('admin.postEditor.toast.aiUnavailable', 'AI 服务不可用')); }
                       setExcerptLoading(false);
@@ -526,7 +526,7 @@ export default function EditPostPage() {
       {insertType && (
         <>
           <div onClick={() => setInsertType(null)} className="fixed inset-0 z-50 bg-black/30" />
-          <div className="fixed left-1/2 top-1/2 z-[51] flex max-h-[70vh] w-[500px] max-w-[90vw] flex-col border border-border bg-card shadow-lg" style={{ transform: 'translate(-50%,-50%)' }}>
+          <div className="fixed left-1/2 top-1/2 z-[51] flex max-h-[70vh] w-125 max-w-[90vw] flex-col border border-border bg-card shadow-lg" style={{ transform: 'translate(-50%,-50%)' }}>
             <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
               <h3 className="text-sm font-semibold">{t('admin.postEditor.insertType', '插入{type}', { type: insertType })}</h3>
               <button onClick={() => setInsertType(null)} className="text-muted-foreground hover:text-foreground">
@@ -534,8 +534,8 @@ export default function EditPostPage() {
               </button>
             </div>
             <div className="flex-1 overflow-auto px-5 py-3">
-              {insertLoading && <p className="py-5 text-center text-[13px] text-muted-foreground">{t('admin.common.loading', '加载中…')}</p>}
-              {!insertLoading && insertItems.length === 0 && <p className="py-5 text-center text-[13px] text-muted-foreground">{t('admin.common.noData', '暂无数据')}</p>}
+              {insertLoading && <p className="py-5 text-center text-xs-plus text-muted-foreground">{t('admin.common.loading', '加载中…')}</p>}
+              {!insertLoading && insertItems.length === 0 && <p className="py-5 text-center text-xs-plus text-muted-foreground">{t('admin.common.noData', '暂无数据')}</p>}
               {insertItems.map((item: any) => (
                 <div key={item.id} onClick={() => {
                   let md = '';
@@ -554,10 +554,10 @@ export default function EditPostPage() {
                 }} className="flex cursor-pointer items-center gap-3 border-b border-border px-3 py-2.5 transition-colors hover:bg-muted">
                   {(item.cover_url || item.image) && <img src={item.cover_url || item.image} alt="" className="size-10 shrink-0 object-cover" />}
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-[13px] font-medium">{item.title || item.content?.slice(0, 50)}</div>
-                    <div className="mt-0.5 text-[11px] text-muted-foreground">{item.artist || item.author || ''}</div>
+                    <div className="truncate text-xs-plus font-medium">{item.title || item.content?.slice(0, 50)}</div>
+                    <div className="mt-0.5 text-2xs text-muted-foreground">{item.artist || item.author || ''}</div>
                   </div>
-                  <span className="shrink-0 text-[11px] text-primary">{t('admin.postEditor.insert', '插入')}</span>
+                  <span className="shrink-0 text-2xs text-primary">{t('admin.postEditor.insert', '插入')}</span>
                 </div>
               ))}
             </div>
@@ -569,9 +569,9 @@ export default function EditPostPage() {
       {showAiModal && (
         <>
           <div onClick={() => { if (!aiProcessing) setShowAiModal(false); }} className="fixed inset-0 z-50 bg-black/30" />
-          <div className="fixed left-1/2 top-1/2 z-[51] flex max-h-[80vh] w-[560px] max-w-[90vw] flex-col border border-border bg-card shadow-lg" style={{ transform: 'translate(-50%,-50%)' }}>
+          <div className="fixed left-1/2 top-1/2 z-[51] flex max-h-[80vh] w-140 max-w-[90vw] flex-col border border-border bg-card shadow-lg" style={{ transform: 'translate(-50%,-50%)' }}>
             <div className="flex items-center justify-between border-b border-border px-5 py-4">
-              <h3 className="flex items-center gap-1.5 text-[15px] font-semibold"><Sparkles className="size-4" /> {t('admin.postEditor.aiProcessArticle', 'AI 处理文章')}</h3>
+              <h3 className="flex items-center gap-1.5 text-sm-plus font-semibold"><Sparkles className="size-4" /> {t('admin.postEditor.aiProcessArticle', 'AI 处理文章')}</h3>
               <button onClick={() => setShowAiModal(false)} className="text-muted-foreground hover:text-foreground">
                 <X className="size-4" />
               </button>
@@ -597,16 +597,16 @@ export default function EditPostPage() {
                     } catch { toast.error(t('admin.postEditor.toast.aiUnavailable', 'AI 服务不可用')); }
                     setAiProcessing(false);
                   }} className="flex flex-col items-center gap-1 border border-border bg-muted px-2 py-2.5 text-xs font-medium text-foreground transition-colors hover:border-primary disabled:cursor-wait disabled:opacity-50">
-                    <item.Icon className="size-[18px]" />
+                    <item.Icon className="size-4.5" />
                     {item.label}
                   </button>
                 ))}
               </div>
             </div>
-            <div className="min-h-[150px] flex-1 overflow-auto px-5 py-4">
-              {aiProcessing && <div className="flex items-center justify-center gap-2 py-10 text-[13px] text-muted-foreground"><Loader2 className="size-4 animate-spin" /> {t('admin.postEditor.aiProcessing', 'AI 处理中…')}</div>}
-              {aiResult && !aiProcessing && <pre className="m-0 max-h-[300px] overflow-auto bg-muted p-3 font-mono text-xs leading-relaxed" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{aiResult}</pre>}
-              {!aiResult && !aiProcessing && <p className="py-10 text-center text-[13px] text-muted-foreground">{t('admin.postEditor.chooseProcessMode', '选择处理方式')}</p>}
+            <div className="min-h-37.5 flex-1 overflow-auto px-5 py-4">
+              {aiProcessing && <div className="flex items-center justify-center gap-2 py-10 text-xs-plus text-muted-foreground"><Loader2 className="size-4 animate-spin" /> {t('admin.postEditor.aiProcessing', 'AI 处理中…')}</div>}
+              {aiResult && !aiProcessing && <pre className="m-0 max-h-75 overflow-auto bg-muted p-3 font-mono text-xs leading-relaxed" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{aiResult}</pre>}
+              {!aiResult && !aiProcessing && <p className="py-10 text-center text-xs-plus text-muted-foreground">{t('admin.postEditor.chooseProcessMode', '选择处理方式')}</p>}
             </div>
             {aiResult && !aiProcessing && (
               <div className="flex justify-end gap-2 border-t border-border px-5 py-3">

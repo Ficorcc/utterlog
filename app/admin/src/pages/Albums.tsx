@@ -177,7 +177,7 @@ export default function AlbumsPage() {
                   <ImageIcon className="size-8 text-muted-foreground" />
                 )}
                 <div className={cn(
-                  'absolute right-2 top-2 rounded-sm px-2 py-0.5 text-[11px] font-semibold',
+                  'absolute right-2 top-2 rounded-sm px-2 py-0.5 text-2xs font-semibold',
                   album.status === 'public' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-muted text-muted-foreground',
                 )}>
                   {album.status === 'public' ? '公开' : '私有'}
@@ -211,7 +211,7 @@ export default function AlbumsPage() {
 
       {/* Create/Edit Modal */}
       <Dialog open={showCreate || !!editAlbum} onOpenChange={(o) => { if (!o) { setShowCreate(false); setEditAlbum(null); } }}>
-        <DialogContent className="max-w-[400px]">
+        <DialogContent className="max-w-100">
           <DialogHeader>
             <DialogTitle>{editAlbum ? '编辑相册' : '新建相册'}</DialogTitle>
           </DialogHeader>
@@ -252,13 +252,13 @@ export default function AlbumsPage() {
 
       {/* Photo Management Modal */}
       <Dialog open={!!manageAlbum} onOpenChange={(o) => { if (!o) { setManageAlbum(null); setPhotos([]); } }}>
-        <DialogContent className="max-h-[calc(100vh-32px)] max-w-[680px] overflow-y-auto">
+        <DialogContent className="max-h-[calc(100vh-32px)] max-w-170 overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{manageAlbum ? `${manageAlbum.title} — 照片管理` : ''}</DialogTitle>
           </DialogHeader>
           <div>
             <div className="mb-4 flex items-center justify-between">
-              <span className="text-[13px] text-muted-foreground">{photos.length} 张照片</span>
+              <span className="text-xs-plus text-muted-foreground">{photos.length} 张照片</span>
               <Button onClick={openAddPhotos}><Plus className="size-4" /> 从媒体库添加</Button>
             </div>
             {photos.length === 0 ? (
@@ -284,7 +284,7 @@ export default function AlbumsPage() {
 
       {/* Add Photos from Media Library Modal */}
       <Dialog open={showAddPhotos} onOpenChange={(o) => !o && setShowAddPhotos(false)}>
-        <DialogContent className="max-h-[calc(100vh-32px)] max-w-[680px] overflow-y-auto">
+        <DialogContent className="max-h-[calc(100vh-32px)] max-w-170 overflow-y-auto">
           <DialogHeader>
             <DialogTitle>从媒体库选择照片</DialogTitle>
           </DialogHeader>
@@ -293,7 +293,7 @@ export default function AlbumsPage() {
               <EmptyState title="媒体库中暂无可用图片" />
             ) : (
               <>
-                <div className="mb-4 grid max-h-[400px] gap-2 overflow-y-auto" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))' }}>
+                <div className="mb-4 grid max-h-100 gap-2 overflow-y-auto" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))' }}>
                   {mediaList.map((file: any) => {
                     const selected = selectedMedia.includes(file.id);
                     return (

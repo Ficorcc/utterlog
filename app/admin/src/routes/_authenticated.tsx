@@ -44,7 +44,7 @@ class ChunkErrorBoundary extends Component<{ children: ReactNode }, { failed: bo
   render() {
     if (this.state.failed) {
       return (
-        <div className="text-muted-foreground" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontSize: 14 }}>
+        <div className="text-sm text-muted-foreground" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
           页面已更新，正在刷新…
         </div>
       );
@@ -104,13 +104,11 @@ function AuthGate() {
 // 路由 chunk 加载中的占位：顶部 2px 蓝色不定进度条，主内容区透明。
 function RouteFallback() {
   return (
-    <div style={{ position: 'relative', width: '100%', minHeight: 100 }}>
+    <div className="relative w-full min-h-25">
       <div
         aria-hidden
+        className="fixed inset-x-0 top-0 h-0.5 z-100 pointer-events-none bg-primary"
         style={{
-          position: 'fixed', top: 0, left: 0, right: 0, height: 2,
-          zIndex: 100, pointerEvents: 'none',
-          background: 'linear-gradient(90deg, transparent, var(--primary), transparent)',
           backgroundSize: '40% 100%',
           backgroundRepeat: 'no-repeat',
           animation: 'routeFallbackBar 1.2s linear infinite',

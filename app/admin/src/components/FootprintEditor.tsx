@@ -71,7 +71,7 @@ export default function FootprintEditor({
         {t('admin.footprint.enablePost', '加入足迹页面')}
       </label>
       {enabled && (
-        <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+        <p className="mt-2 text-2xs leading-relaxed text-muted-foreground">
           {t('admin.footprint.configureHint', '地点、坐标和路线请到左侧「足迹」页面配置。')}
         </p>
       )}

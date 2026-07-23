@@ -27,13 +27,13 @@ function VideoPlayer({ url, embed }: { url: string; embed?: string }) {
   const embedUrl = embed || getEmbedUrl(url);
   if (!embedUrl && !url) return null;
   if (/\.(mp4|webm|ogg)(\?|$)/i.test(embedUrl || url)) {
-    return <video controls className="max-h-[360px] w-full bg-black"><source src={embedUrl || url} /></video>;
+    return <video controls className="max-h-90 w-full bg-black"><source src={embedUrl || url} /></video>;
   }
   if (embedUrl) {
     return (
       <iframe
         src={embedUrl}
-        className="h-[360px] w-full border-none bg-black"
+        className="h-90 w-full border-none bg-black"
         allowFullScreen
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
       />
@@ -111,15 +111,15 @@ export default function VideosPage() {
               {playingId === item.id ? (
                 <VideoPlayer url={item.video_url} embed={item.embed_url} />
               ) : (
-                <div onClick={() => setPlayingId(item.id)} className="relative h-[180px] cursor-pointer bg-neutral-900">
+                <div onClick={() => setPlayingId(item.id)} className="relative h-45 cursor-pointer bg-neutral-900">
                   {item.cover_url && <img src={item.cover_url} alt="" className="size-full object-cover opacity-80" />}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="flex size-12 items-center justify-center rounded-full bg-white/90">
-                      <Play className="ml-0.5 size-[18px] text-neutral-900" />
+                      <Play className="ml-0.5 size-4.5 text-neutral-900" />
                     </div>
                   </div>
                   {item.platform && (
-                    <span className="absolute right-2 top-2 bg-black/60 px-1.5 py-0.5 text-[10px] text-white">
+                    <span className="absolute right-2 top-2 bg-black/60 px-1.5 py-0.5 text-3xs text-white">
                       {({ youtube: 'YouTube', bilibili: 'B站', tencent_video: '腾讯', youku: '优酷', iqiyi: '爱奇艺' } as Record<string, string>)[item.platform] || item.platform}
                     </span>
                   )}
@@ -128,7 +128,7 @@ export default function VideosPage() {
               <div className="flex items-start gap-2 p-3">
                 <div className="min-w-0 flex-1">
                   <h3 className="truncate text-sm font-semibold text-foreground">{item.title}</h3>
-                  {item.comment && <p className="mt-1 text-[11px] text-muted-foreground">{item.comment}</p>}
+                  {item.comment && <p className="mt-1 text-2xs text-muted-foreground">{item.comment}</p>}
                 </div>
                 <div className="flex shrink-0 gap-1">
                   <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground" onClick={() => openEdit(item)}><Pencil className="size-4" /></Button>

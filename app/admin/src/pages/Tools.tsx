@@ -235,7 +235,7 @@ export default function ToolsPage() {
               </p>
             )}
             <div className="mt-3.5 flex items-center justify-between">
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-2xs text-muted-foreground">
                 {backupSchedule !== 'off'
                   ? t('admin.tools.backup.scheduleEnabled', '自动备份已开启（{schedule}），备份到{destination}', {
                     schedule: backupSchedule === 'daily' ? t('admin.tools.backup.daily', '每天') : backupSchedule === 'weekly' ? t('admin.tools.backup.weekly', '每周') : t('admin.tools.backup.monthly', '每月'),
@@ -264,7 +264,7 @@ export default function ToolsPage() {
                   <TableHead>{t('admin.tools.backup.filename', '文件名')}</TableHead>
                   <TableHead>{t('admin.common.size', '大小')}</TableHead>
                   <TableHead>{t('admin.common.createdAt', '创建时间')}</TableHead>
-                  <TableHead className="w-[120px]">{t('admin.common.actions', '操作')}</TableHead>
+                  <TableHead className="w-30">{t('admin.common.actions', '操作')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -282,7 +282,7 @@ export default function ToolsPage() {
                       <TableCell className="text-muted-foreground">{b.created}</TableCell>
                       <TableCell>
                         <div className="flex gap-1.5">
-                          <a href={b.url} download className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'h-7 px-2 text-[11px]')}>{t('admin.common.download', '下载')}</a>
+                          <a href={b.url} download className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'h-7 px-2 text-2xs')}>{t('admin.common.download', '下载')}</a>
                           <RowActions onDelete={() => setDeleteBackupName(b.filename)} />
                         </div>
                       </TableCell>

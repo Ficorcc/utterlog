@@ -117,7 +117,7 @@ export default function FooterIconsEditor({
     if (icon.trim().startsWith('<svg')) return <span style={{ width: 16, height: 16, display: 'inline-flex' }} dangerouslySetInnerHTML={{ __html: icon }} />;
     if (icon.startsWith('http') || icon.startsWith('/uploads/')) return <img src={icon} alt="" style={{ width: 16, height: 16, objectFit: 'contain' }} />;
     // 用户在数据里存的可能是 FontAwesome 类名字符串，保留原样渲染
-    return <i className={icon} style={{ fontSize: 14 }} />;
+    return <i className={`${icon} text-sm`} />;
   };
 
   if (loading) return <LoadingState padding="20px 0" />;

@@ -58,7 +58,7 @@ export function FormSectionC({
         {children}
       </div>
       {footerHint && (
-        <p className="mx-4 mt-2 text-[11px] leading-relaxed text-muted-foreground">
+        <p className="mx-4 mt-2 text-2xs leading-relaxed text-muted-foreground">
           {footerHint}
         </p>
       )}
@@ -285,7 +285,7 @@ export function FormRowToggleC({
             checked: !!checked,
             onChange: (e: any) => onChange?.(e.target.checked),
           })}
-          style={{ padding: 0, width: 'auto', flex: 'none' }}
+          className="p-0 w-auto flex-none"
         />
       </div>
     </div>
@@ -358,8 +358,8 @@ export function FormRowRadioC({
               type="radio"
               value={opt.value}
               {...register}
-              className="accent-primary"
-              style={{ cursor: 'pointer', margin: 0 }}
+              className="accent-primary m-0"
+              style={{ cursor: 'pointer' }}
             />
             <span>{opt.label}</span>
           </label>

@@ -210,7 +210,7 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
             <span className="flex flex-1 items-baseline gap-1.5 text-left">
               <span>{label}</span>
               {item.sub && (
-                <span className="text-[10px] font-normal tracking-[0.02em] text-muted-foreground">
+                <span className="text-3xs font-normal tracking-[0.02em] text-muted-foreground">
                   {item.sub}
                 </span>
               )}
@@ -241,7 +241,7 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
                     onMouseEnter={() => setHoveredMenuItem(childHoverKey)}
                     onMouseLeave={() => setHoveredMenuItem(null)}
                     className={cn(
-                      'flex h-[38px] items-center gap-2.5 pl-10 pr-3.5 text-xs',
+                      'flex h-9.5 items-center gap-2.5 pl-10 pr-3.5 text-xs',
                       isActive ? 'bg-muted text-primary' : 'text-muted-foreground',
                     )}
                   >
@@ -289,7 +289,7 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
               <span className="inline-flex items-baseline gap-1.5">
                 <span>{label}</span>
                 {item.sub && (
-                  <span className="text-[10px] font-normal tracking-[0.02em] text-muted-foreground">
+                  <span className="text-3xs font-normal tracking-[0.02em] text-muted-foreground">
                     {item.sub}
                   </span>
                 )}
@@ -310,9 +310,9 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
       }}
     >
       <div
-        className="relative flex items-center gap-2 border-b border-border"
+        className="relative flex items-center gap-2 border-b border-border px-3"
         style={{
-          height: 56, padding: '0 12px',
+          height: 56,
           justifyContent: collapsed ? 'center' : 'flex-start',
         }}
       >
@@ -322,7 +322,7 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
         </svg>
         {!collapsed && (
           <>
-            <span style={{ fontSize: 14, fontWeight: 700, fontFamily: 'var(--font-logo)', letterSpacing: '-0.01em' }}>Utterlog!</span>
+            <span className="text-sm font-bold" style={{ fontFamily: 'var(--font-logo)', letterSpacing: '-0.01em' }}>Utterlog!</span>
             <VersionBadge variant="compact" />
           </>
         )}
@@ -338,20 +338,20 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
         </button>
       </div>
 
-      <nav style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
+      <nav className="py-2" style={{ flex: 1, overflowY: 'auto' }}>
         {menuItems.map(renderMenuItem)}
 
         {!collapsed && (
-          <div className="text-[10px] font-semibold uppercase tracking-[0.5px] text-muted-foreground" style={{ margin: '12px 12px 6px' }}>
+          <div className="text-3xs font-semibold uppercase tracking-[0.5px] text-muted-foreground mt-3 mx-3 mb-1.5">
             AI
           </div>
         )}
         {aiMenuItems.map(renderMenuItem)}
 
         {/* Utterlog Network */}
-        <div className="border-t border-border" style={{ margin: '6px 0' }} />
+        <div className="border-t border-border my-1.5" />
         {!collapsed && (
-          <p className="font-semibold tracking-[0.5px] text-muted-foreground" style={{ fontSize: 11, padding: '4px 12px' }}>
+          <p className="font-semibold tracking-[0.5px] text-muted-foreground text-2xs py-1 px-3">
             Utterlog
           </p>
         )}
@@ -375,7 +375,7 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
               {!collapsed && (
                 <span className="flex items-baseline gap-1.5">
                   {t('admin.nav.utterlogCenter', 'Utterlog 中心')}
-                  <span className="text-[10px] font-normal text-muted-foreground">Network</span>
+                  <span className="text-3xs font-normal text-muted-foreground">Network</span>
                 </span>
               )}
             </span>

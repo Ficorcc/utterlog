@@ -327,10 +327,10 @@ export default function PagesPage() {
           <TableHeader>
             <TableRow>
               <TableHead>{t('admin.pages.columns.page', '页面')}</TableHead>
-              <TableHead className="w-[120px]">{t('admin.pages.columns.path', '路径')}</TableHead>
-              <TableHead className="w-[70px]">{t('admin.pages.columns.type', '类型')}</TableHead>
-              <TableHead className="w-[70px]">{t('admin.pages.columns.enabled', '启用')}</TableHead>
-              <TableHead className="w-[90px] text-right">{t('admin.posts.columns.actions', '操作')}</TableHead>
+              <TableHead className="w-30">{t('admin.pages.columns.path', '路径')}</TableHead>
+              <TableHead className="w-17.5">{t('admin.pages.columns.type', '类型')}</TableHead>
+              <TableHead className="w-17.5">{t('admin.pages.columns.enabled', '启用')}</TableHead>
+              <TableHead className="w-22.5 text-right">{t('admin.posts.columns.actions', '操作')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -395,20 +395,20 @@ export default function PagesPage() {
       <AboutPageEditor open={aboutEditorOpen} onClose={() => setAboutEditorOpen(false)} />
 
       <Dialog open={codingEditorOpen} onOpenChange={(o) => !o && setCodingEditorOpen(false)}>
-        <DialogContent className="max-h-[calc(100vh-32px)] max-w-[860px] overflow-y-auto">
+        <DialogContent className="max-h-[calc(100vh-32px)] max-w-215 overflow-y-auto">
           <DialogHeader>
             <DialogTitle>配置 Coding 页面</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4">
             <div>
-              <Label className="mb-2 block text-[13px] font-semibold">
+              <Label className="mb-2 block text-xs-plus font-semibold">
                 GitHub 用户、组织或仓库地址（可多个）
               </Label>
               <Textarea
                 value={codingGitHubURL}
                 onChange={e => setCodingGitHubURL(e.target.value)}
                 placeholder={'https://github.com/username\nhttps://github.com/org\nhttps://github.com/org/repo'}
-                className="min-h-[88px] w-full resize-y leading-relaxed"
+                className="min-h-22 w-full resize-y leading-relaxed"
               />
               <div className="mt-2.5 flex justify-end">
                 <Button variant="outline" onClick={() => loadCodingRepos(true)} disabled={loadingCodingRepos}>
@@ -435,7 +435,7 @@ export default function PagesPage() {
             </div>
 
             <div className="border border-border bg-muted p-3">
-              <div className="mb-1 text-[13px] font-semibold text-foreground">展示项目</div>
+              <div className="mb-1 text-xs-plus font-semibold text-foreground">展示项目</div>
               <div className="text-xs leading-relaxed text-muted-foreground">
                 后台只读取这些用户和组织的公开项目。填写用户地址时，会同时读取该用户所属组织的公开项目；Token 只用于识别登录账号的组织列表、贡献统计或提升 GitHub API 速率，不会读取私有仓库。前台只展示勾选项目或上方仓库 URL 指定的项目；未选择时默认显示最近更新的 6 个项目。每个项目最多显示 5 条最近动作。
               </div>
@@ -447,11 +447,11 @@ export default function PagesPage() {
               </div>
             )}
 
-            <div className="max-h-[360px] overflow-auto border border-border">
+            <div className="max-h-90 overflow-auto border border-border">
               {loadingCodingRepos ? (
-                <div className="p-6 text-center text-[13px] text-muted-foreground">正在读取项目…</div>
+                <div className="p-6 text-center text-xs-plus text-muted-foreground">正在读取项目…</div>
               ) : codingRepos.length === 0 ? (
-                <div className="p-6 text-center text-[13px] text-muted-foreground">暂无可用项目。</div>
+                <div className="p-6 text-center text-xs-plus text-muted-foreground">暂无可用项目。</div>
               ) : codingRepos.map(repo => {
                 const fullName = String(repo.full_name || repo.name || '').trim();
                 const autoSelected = codingSourceSelectedRepos.includes(fullName.toLowerCase());
@@ -464,7 +464,7 @@ export default function PagesPage() {
                   >
                     <input type="checkbox" checked={checked} disabled={autoSelected} onChange={() => toggleCodingRepo(fullName)} className="size-4 accent-primary" />
                     <span className="min-w-0">
-                      <span className="block truncate text-[13px] font-semibold text-foreground">
+                      <span className="block truncate text-xs-plus font-semibold text-foreground">
                         {repo.name || fullName}
                       </span>
                       <span className="mt-1 block truncate text-xs text-muted-foreground">
@@ -497,7 +497,7 @@ export default function PagesPage() {
       </Dialog>
 
       <Dialog open={!!editingKey} onOpenChange={(o) => !o && setEditingKey(null)}>
-        <DialogContent className="max-h-[calc(100vh-32px)] w-[720px] max-w-[90vw] overflow-y-auto">
+        <DialogContent className="max-h-[calc(100vh-32px)] w-180 max-w-[90vw] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t('admin.pages.editingContentTitle', '编辑内容 — {key}', { key: editingKey ?? '' })}</DialogTitle>
           </DialogHeader>
@@ -506,7 +506,7 @@ export default function PagesPage() {
               {t('admin.pages.contentHint', '支持 HTML 片段。留空则恢复默认示例内容。')}
             </p>
             <Textarea
-              className="min-h-[360px] w-full font-mono text-[13px]"
+              className="min-h-90 w-full font-mono text-xs-plus"
               value={editingContent}
               onChange={e => setEditingContent(e.target.value)}
               placeholder={t('admin.pages.contentPlaceholder', '<p>欢迎来到我的博客…</p>')}

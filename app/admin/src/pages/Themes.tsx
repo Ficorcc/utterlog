@@ -131,7 +131,7 @@ export default function Themes() {
               key={ti.key}
               onClick={() => setTab(ti.key)}
               className={cn(
-                'inline-flex items-center gap-1.5 border-b-2 px-[18px] py-2.5 text-sm transition-colors',
+                'inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm transition-colors',
                 isActive
                   ? 'border-primary font-semibold text-primary'
                   : 'border-transparent font-normal text-muted-foreground hover:text-foreground',
@@ -215,7 +215,7 @@ export default function Themes() {
       )}
       <div className="mb-5 flex items-start gap-2 rounded-lg border border-border bg-muted px-4 py-3 text-xs leading-relaxed text-muted-foreground">
         <Lightbulb className="mt-0.5 size-4 shrink-0 text-primary" />
-        <p className="m-0">主题包为 <code className="rounded bg-background px-1.5 py-0.5 text-[11px]">.zip</code> 格式，根目录包含 <code className="rounded bg-background px-1.5 py-0.5 text-[11px]">manifest.json</code>（含 <code>id / name / version</code>）。上传后自动解压到 <code className="rounded bg-background px-1.5 py-0.5 text-[11px]">content/themes/&lt;id&gt;/</code>。</p>
+        <p className="m-0">主题包为 <code className="rounded bg-background px-1.5 py-0.5 text-2xs">.zip</code> 格式，根目录包含 <code className="rounded bg-background px-1.5 py-0.5 text-2xs">manifest.json</code>（含 <code>id / name / version</code>）。上传后自动解压到 <code className="rounded bg-background px-1.5 py-0.5 text-2xs">content/themes/&lt;id&gt;/</code>。</p>
       </div>
 
       {/* Grid */}
@@ -245,7 +245,7 @@ export default function Themes() {
                     <div className="flex size-10 items-center justify-center rounded bg-primary/10 text-lg font-bold text-primary">
                       {theme.name?.charAt(0).toUpperCase() || '?'}
                     </div>
-                    <span className="text-[11px] uppercase tracking-wider">{theme.name}</span>
+                    <span className="text-2xs uppercase tracking-wider">{theme.name}</span>
                   </div>
                   {theme.preview && (
                     <img src={theme.preview} alt={theme.name}
@@ -256,7 +256,7 @@ export default function Themes() {
                 </div>
 
                 {isActive && (
-                  <div className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground">
+                  <div className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-primary px-2 py-0.5 text-2xs font-semibold text-primary-foreground">
                     <Check className="size-2.5" /> 使用中
                   </div>
                 )}
@@ -266,16 +266,16 @@ export default function Themes() {
                     <h3 className="m-0 text-sm font-semibold text-foreground">
                       {theme.name}
                     </h3>
-                    <span className="text-[11px] text-muted-foreground">v{theme.version}</span>
+                    <span className="text-2xs text-muted-foreground">v{theme.version}</span>
                   </div>
                   {theme.author && (
-                    <p className="mb-2 mt-0 text-[11px] text-muted-foreground">by {theme.author}</p>
+                    <p className="mb-2 mt-0 text-2xs text-muted-foreground">by {theme.author}</p>
                   )}
                   {theme.description && (
                     <p className="mb-3 mt-0 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{theme.description}</p>
                   )}
                   {theme.supported === false && (
-                    <p className="mb-3 mt-0 text-[11px] text-amber-600 dark:text-amber-400">
+                    <p className="mb-3 mt-0 text-2xs text-amber-600 dark:text-amber-400">
                       当前运行时不支持此主题，暂不可切换
                     </p>
                   )}

@@ -108,7 +108,7 @@ export default function Plugins() {
       <div className="mb-5 flex items-start gap-2 rounded-lg border border-border bg-muted px-4 py-3 text-xs leading-relaxed text-muted-foreground">
         <Lightbulb className="mt-0.5 size-4 shrink-0" />
         <p className="m-0">
-          插件包为 <code className="rounded bg-background px-1.5 py-0.5 text-[11px]">.zip</code> 格式，根目录包含 <code className="rounded bg-background px-1.5 py-0.5 text-[11px]">manifest.json</code>。上传后解压到 <code className="rounded bg-background px-1.5 py-0.5 text-[11px]">content/plugins/&lt;id&gt;/</code>，默认**不自动启用**，需手动开启。
+          插件包为 <code className="rounded bg-background px-1.5 py-0.5 text-2xs">.zip</code> 格式，根目录包含 <code className="rounded bg-background px-1.5 py-0.5 text-2xs">manifest.json</code>。上传后解压到 <code className="rounded bg-background px-1.5 py-0.5 text-2xs">content/plugins/&lt;id&gt;/</code>，默认**不自动启用**，需手动开启。
         </p>
       </div>
 
@@ -129,7 +129,7 @@ export default function Plugins() {
               <div
                 key={plugin.id}
                 className={cn(
-                  'flex items-center gap-3.5 px-[18px] py-3.5',
+                  'flex items-center gap-3.5 px-4 py-3.5',
                   idx < plugins.length - 1 && 'border-b border-border',
                   enabled && 'bg-primary/5',
                 )}
@@ -146,12 +146,12 @@ export default function Plugins() {
                     <h3 className="m-0 text-sm font-semibold text-foreground">
                       {plugin.name}
                     </h3>
-                    <span className="text-[11px] text-muted-foreground">v{plugin.version}</span>
+                    <span className="text-2xs text-muted-foreground">v{plugin.version}</span>
                     {plugin.author && (
-                      <span className="text-[11px] text-muted-foreground">· {plugin.author}</span>
+                      <span className="text-2xs text-muted-foreground">· {plugin.author}</span>
                     )}
                     {plugin.builtin && (
-                      <Badge variant="secondary" className="px-1.5 py-0 text-[10px] font-normal">内置</Badge>
+                      <Badge variant="secondary" className="px-1.5 py-0 text-3xs font-normal">内置</Badge>
                     )}
                   </div>
                   {plugin.description && (
@@ -167,7 +167,7 @@ export default function Plugins() {
                       href={plugin.homepage}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex size-[30px] items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-primary"
+                      className="flex size-7.5 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-primary"
                       title="插件主页"
                     >
                       <ExternalLink className="size-4" />
@@ -178,7 +178,7 @@ export default function Plugins() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="min-w-[84px] border-primary bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary"
+                      className="min-w-21 border-primary bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary"
                       disabled={toggling === plugin.id}
                       onClick={() => handleToggle(plugin.id, true)}
                       title="点击禁用"
@@ -189,7 +189,7 @@ export default function Plugins() {
                   ) : (
                     <Button
                       size="sm"
-                      className="min-w-[84px]"
+                      className="min-w-21"
                       disabled={toggling === plugin.id}
                       onClick={() => handleToggle(plugin.id, false)}
                     >
@@ -201,7 +201,7 @@ export default function Plugins() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="size-[30px] text-muted-foreground hover:text-destructive"
+                      className="size-7.5 text-muted-foreground hover:text-destructive"
                       onClick={() => setDeleteId(plugin.id)}
                       title="删除"
                     >

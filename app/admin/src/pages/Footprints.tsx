@@ -326,7 +326,7 @@ export default function FootprintsPage() {
       )}
 
       <form onSubmit={onSearch} className="mb-4 flex items-center gap-2.5 rounded-lg border border-border bg-card p-3.5">
-        <div className="min-w-[180px] flex-1">
+        <div className="min-w-45 flex-1">
           <Input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
@@ -369,9 +369,9 @@ export default function FootprintsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>{t('admin.footprints.columns.post', '文章')}</TableHead>
-                <TableHead className="w-[180px]">{t('admin.footprints.columns.place', '地点')}</TableHead>
-                <TableHead className="w-[150px]">{t('admin.footprints.columns.date', '访问日期')}</TableHead>
-                <TableHead className="w-[90px] text-right">{t('admin.posts.columns.actions', '操作')}</TableHead>
+                <TableHead className="w-45">{t('admin.footprints.columns.place', '地点')}</TableHead>
+                <TableHead className="w-37.5">{t('admin.footprints.columns.date', '访问日期')}</TableHead>
+                <TableHead className="w-22.5 text-right">{t('admin.posts.columns.actions', '操作')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -390,11 +390,11 @@ export default function FootprintsPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        {flag && <img src={flag} alt="" className="h-[13px] w-[18px] object-cover ring-1 ring-border" />}
+                        {flag && <img src={flag} alt="" className="h-3.25 w-4.5 object-cover ring-1 ring-border" />}
                         <span>{item.place_id ? locationLabel(item) : t('admin.footprints.pending', '待配置')}</span>
                       </div>
                       {(item.latitude !== undefined || item.longitude !== undefined) && (
-                        <div className="mt-1 text-[11px] text-muted-foreground">
+                        <div className="mt-1 text-2xs text-muted-foreground">
                           {[item.latitude, item.longitude].filter((value) => value !== undefined && value !== null).join(', ')}
                         </div>
                       )}
@@ -424,7 +424,7 @@ export default function FootprintsPage() {
       </div>
 
       <Dialog open={settingsOpen} onOpenChange={(o) => !o && setSettingsOpen(false)}>
-        <DialogContent className="max-h-[calc(100vh-32px)] max-w-[680px] overflow-y-auto">
+        <DialogContent className="max-h-[calc(100vh-32px)] max-w-170 overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t('admin.footprints.settings', '足迹设置')}</DialogTitle>
           </DialogHeader>
@@ -515,7 +515,7 @@ export default function FootprintsPage() {
       </Dialog>
 
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
-        <DialogContent className="max-h-[calc(100vh-32px)] max-w-[680px] overflow-y-auto">
+        <DialogContent className="max-h-[calc(100vh-32px)] max-w-170 overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t('admin.footprints.editTitle', '配置足迹')}</DialogTitle>
           </DialogHeader>

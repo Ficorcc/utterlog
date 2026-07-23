@@ -57,7 +57,7 @@ function SettingsSection({
             )}
           </div>
           {!inlineDescription && description && (
-            <p className={cn('mt-1.5 text-xs leading-relaxed text-muted-foreground', Icon && 'pl-[22px]')}>
+            <p className={cn('mt-1.5 text-xs leading-relaxed text-muted-foreground', Icon && 'pl-6')}>
               {description}
             </p>
           )}
@@ -65,7 +65,7 @@ function SettingsSection({
       )}
       <Card className="overflow-hidden">{children}</Card>
       {footerHint && (
-        <p className="mx-4 mt-2 text-[11px] leading-relaxed text-muted-foreground">{footerHint}</p>
+        <p className="mx-4 mt-2 text-2xs leading-relaxed text-muted-foreground">{footerHint}</p>
       )}
     </section>
   );
@@ -82,7 +82,7 @@ function Panel({ title, action, children, className }: {
     <Card className={cn('mb-6 p-6', className)}>
       {(title || action) && (
         <div className={cn('flex items-center justify-between', action ? 'mb-2' : 'mb-5')}>
-          {title && <h3 className="text-[13px] font-semibold tracking-wide text-foreground">{title}</h3>}
+          {title && <h3 className="text-xs-plus font-semibold tracking-wide text-foreground">{title}</h3>}
           {action}
         </div>
       )}
@@ -100,9 +100,9 @@ function Row({ label, hint, last, align = 'left', column, children }: {
   children: ReactNode;
 }) {
   return (
-    <div className={cn('grid min-h-[56px] grid-cols-[32%_1fr]', !last && 'border-b border-border')}>
+    <div className={cn('grid min-h-14 grid-cols-[32%_1fr]', !last && 'border-b border-border')}>
       <div className="flex flex-col justify-center px-3.5 py-2.5">
-        {label && <div className="text-[13px] font-medium text-foreground">{label}</div>}
+        {label && <div className="text-xs-plus font-medium text-foreground">{label}</div>}
         {hint && <div className="mt-0.5 text-xs leading-normal text-muted-foreground">{hint}</div>}
       </div>
       <div className={cn('flex px-3.5 py-1.5', column ? 'flex-col justify-center' : 'items-center', align === 'right' && !column && 'justify-end')}>
@@ -173,7 +173,7 @@ function RadioRow({ label, hint, options, register, last }: {
     <Row label={label} hint={hint} last={last}>
       <div className="flex flex-wrap items-center gap-4">
         {options.map((opt) => (
-          <label key={opt.value} className="flex cursor-pointer items-center gap-1.5 text-[13px] text-foreground">
+          <label key={opt.value} className="flex cursor-pointer items-center gap-1.5 text-xs-plus text-foreground">
             <input type="radio" value={opt.value} {...register} className="accent-primary" />
             <span>{opt.label}</span>
           </label>
@@ -246,7 +246,7 @@ function BrandingPreview({ src, alt }: { src: string; alt: string }) {
       <div className="flex flex-col items-center gap-1 text-muted-foreground">
         <Icon className="size-6 opacity-40" />
         {error && (
-          <span className="text-[10px] opacity-70">{t('admin.settings.branding.loadFailed', '加载失败')}</span>
+          <span className="text-3xs opacity-70">{t('admin.settings.branding.loadFailed', '加载失败')}</span>
         )}
       </div>
     );
@@ -255,7 +255,7 @@ function BrandingPreview({ src, alt }: { src: string; alt: string }) {
     <img
       src={src}
       alt={alt}
-      className="max-h-12 max-w-[80%] object-contain"
+      className="max-h-12 max-w-4/5 object-contain"
       onError={() => setError(true)}
     />
   );
@@ -957,11 +957,11 @@ export default function SettingsPage() {
               <Panel title={t('admin.settings.email.sender.section', '发件人信息')}>
                 <div className="grid grid-cols-2 gap-x-8 gap-y-6">
                   <div className="space-y-1.5">
-                    <label className="text-[13px] font-medium text-muted-foreground">{t('admin.settings.email.sender.email', '发件人邮箱')}</label>
+                    <label className="text-xs-plus font-medium text-muted-foreground">{t('admin.settings.email.sender.email', '发件人邮箱')}</label>
                     <Input placeholder="noreply@yourdomain.com" {...register('email_from')} />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[13px] font-medium text-muted-foreground">{t('admin.settings.email.sender.name', '发件人名称')}</label>
+                    <label className="text-xs-plus font-medium text-muted-foreground">{t('admin.settings.email.sender.name', '发件人名称')}</label>
                     <Input placeholder="Utterlog" {...register('email_from_name')} />
                   </div>
                 </div>
@@ -969,7 +969,7 @@ export default function SettingsPage() {
 
               <Panel title={t('admin.settings.email.provider.section', '邮件服务商')}>
                 <div className="mb-6">
-                  <label className="mb-2 block text-[13px] font-medium text-muted-foreground">{t('admin.settings.email.provider.choose', '选择服务商')}</label>
+                  <label className="mb-2 block text-xs-plus font-medium text-muted-foreground">{t('admin.settings.email.provider.choose', '选择服务商')}</label>
                   <div className="flex gap-2.5">
                     {([
                       { value: 'smtp', label: 'SMTP', icon: Mail, desc: t('admin.settings.email.provider.smtpDesc', '通用 SMTP 协议') },
@@ -985,8 +985,8 @@ export default function SettingsPage() {
                         )}>
                           <input type="radio" value={d.value} {...register('email_provider')} className="hidden" />
                           <Icon className={cn('size-5', active ? 'text-primary' : 'text-muted-foreground')} />
-                          <span className={cn('text-[13px] font-semibold', active ? 'text-primary' : 'text-foreground')}>{d.label}</span>
-                          <span className="text-[11px] text-muted-foreground">{d.desc}</span>
+                          <span className={cn('text-xs-plus font-semibold', active ? 'text-primary' : 'text-foreground')}>{d.label}</span>
+                          <span className="text-2xs text-muted-foreground">{d.desc}</span>
                         </label>
                       );
                     })}
@@ -997,7 +997,7 @@ export default function SettingsPage() {
                   <div className="flex flex-col gap-5 rounded-md border border-border bg-muted p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Mail className="size-[15px] text-primary" />
+                        <Mail className="size-3.75 text-primary" />
                         <h4 className="text-sm font-semibold text-foreground">{t('admin.settings.email.smtp.section', 'SMTP 配置')}</h4>
                       </div>
                       <a href="https://support.google.com/a/answer/176600" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-muted-foreground no-underline hover:text-foreground">
@@ -1006,27 +1006,27 @@ export default function SettingsPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <label className="block text-[13px] font-medium text-muted-foreground">{t('admin.settings.email.smtp.host', 'SMTP 主机')}</label>
+                        <label className="block text-xs-plus font-medium text-muted-foreground">{t('admin.settings.email.smtp.host', 'SMTP 主机')}</label>
                         <Input {...register('smtp_host')} placeholder="smtp.gmail.com" />
                       </div>
                       <div className="space-y-1.5">
-                        <label className="block text-[13px] font-medium text-muted-foreground">{t('admin.settings.email.smtp.port', '端口')}</label>
+                        <label className="block text-xs-plus font-medium text-muted-foreground">{t('admin.settings.email.smtp.port', '端口')}</label>
                         <Input {...register('smtp_port')} placeholder="587" />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <label className="block text-[13px] font-medium text-muted-foreground">{t('admin.settings.email.smtp.username', '用户名')}</label>
+                        <label className="block text-xs-plus font-medium text-muted-foreground">{t('admin.settings.email.smtp.username', '用户名')}</label>
                         <Input {...register('smtp_user')} />
                       </div>
                       <div className="space-y-1.5">
-                        <label className="block text-[13px] font-medium text-muted-foreground">{t('admin.settings.email.smtp.password', '密码')}</label>
+                        <label className="block text-xs-plus font-medium text-muted-foreground">{t('admin.settings.email.smtp.password', '密码')}</label>
                         <Input type="password" {...register('smtp_pass')} />
                       </div>
                     </div>
                     <div className="space-y-1.5">
-                      <label className="block text-[13px] font-medium text-muted-foreground">{t('admin.settings.email.smtp.encryption', '加密方式')}</label>
-                      <select className={cn(SELECT_CLS, 'max-w-[200px]')} {...register('smtp_encryption')}>
+                      <label className="block text-xs-plus font-medium text-muted-foreground">{t('admin.settings.email.smtp.encryption', '加密方式')}</label>
+                      <select className={cn(SELECT_CLS, 'max-w-50')} {...register('smtp_encryption')}>
                         <option value="tls">TLS</option>
                         <option value="ssl">SSL</option>
                         <option value="none">{t('admin.settings.email.smtp.noEncryption', '无加密')}</option>
@@ -1039,7 +1039,7 @@ export default function SettingsPage() {
                   <div className="flex flex-col gap-5 rounded-md border border-border bg-muted p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Send className="size-[15px] text-primary" />
+                        <Send className="size-3.75 text-primary" />
                         <h4 className="text-sm font-semibold text-foreground">{t('admin.settings.email.resend.section', 'Resend 配置')}</h4>
                       </div>
                       <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-muted-foreground no-underline hover:text-foreground">
@@ -1047,7 +1047,7 @@ export default function SettingsPage() {
                       </a>
                     </div>
                     <div className="space-y-1.5">
-                      <label className="block text-[13px] font-medium text-muted-foreground">API Key</label>
+                      <label className="block text-xs-plus font-medium text-muted-foreground">API Key</label>
                       <Input type="password" {...register('resend_api_key')} placeholder="re_..." />
                       <p className="text-xs text-muted-foreground">{t('admin.settings.email.resend.apiKeyHint', '在 resend.com Dashboard 的 API Keys 中创建')}</p>
                     </div>
@@ -1058,7 +1058,7 @@ export default function SettingsPage() {
                   <div className="flex flex-col gap-5 rounded-md border border-border bg-muted p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Bird className="size-[15px] text-primary" />
+                        <Bird className="size-3.75 text-primary" />
                         <h4 className="text-sm font-semibold text-foreground">{t('admin.settings.email.sendflare.section', 'Sendflare 配置')}</h4>
                       </div>
                       <a href="https://sendflare.com?affiliateCode=98ee3f7h4nqf" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-muted-foreground no-underline hover:text-foreground">
@@ -1066,7 +1066,7 @@ export default function SettingsPage() {
                       </a>
                     </div>
                     <div className="space-y-1.5">
-                      <label className="block text-[13px] font-medium text-muted-foreground">API Key</label>
+                      <label className="block text-xs-plus font-medium text-muted-foreground">API Key</label>
                       <Input type="password" {...register('sendflare_api_key')} placeholder="sf_..." />
                       <p className="text-xs text-muted-foreground">{t('admin.settings.email.sendflare.apiKeyHint', '在 sendflare.com Dashboard 的 API Keys 中创建')}</p>
                     </div>
@@ -1079,7 +1079,7 @@ export default function SettingsPage() {
                 <div className="flex items-center gap-2.5">
                   <Input
                     placeholder={t('admin.settings.email.test.recipientPlaceholder', '收件邮箱（留空发送到管理员邮箱）')}
-                    className="max-w-[320px]"
+                    className="max-w-80"
                     id="test-email-input"
                   />
                   <Button
@@ -1109,13 +1109,13 @@ export default function SettingsPage() {
               <Panel title={t('admin.settings.telegram.connection.section', 'Bot 连接')}>
                 <div className="flex flex-col gap-5">
                   <div className="space-y-1.5">
-                    <label className="block text-[13px] font-medium text-muted-foreground">Bot Token</label>
+                    <label className="block text-xs-plus font-medium text-muted-foreground">Bot Token</label>
                     <Input type="password" placeholder={t('admin.settings.telegram.botTokenPlaceholder', '从 @BotFather 获取')} {...register('telegram_bot_token')} />
                     <p className="text-xs text-muted-foreground">{t('admin.settings.telegram.botFatherPrefix', '在 Telegram 中搜索')} <a href="https://t.me/BotFather" target="_blank" rel="noopener noreferrer" className="text-primary">@BotFather</a>{t('admin.settings.telegram.botFatherSuffix', '，发送 /newbot 创建')}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="block text-[13px] font-medium text-muted-foreground">Chat ID</label>
+                      <label className="block text-xs-plus font-medium text-muted-foreground">Chat ID</label>
                       <div className="flex gap-1.5">
                         <Input placeholder={t('admin.settings.telegram.chatIdPlaceholder', '你的用户/群组 ID')} className="min-w-0 flex-1" {...register('telegram_chat_id')} />
                         <Button
@@ -1148,7 +1148,7 @@ export default function SettingsPage() {
                                 key={chat.id}
                                 type="button"
                                 onClick={() => { reset({ ...getValues(), telegram_chat_id: chat.id }); setTgChats([]); }}
-                                className="flex w-full items-center gap-2 border-b border-border px-2.5 py-[7px] text-left text-xs last:border-b-0 hover:bg-accent"
+                                className="flex w-full items-center gap-2 border-b border-border px-2.5 py-2 text-left text-xs last:border-b-0 hover:bg-accent"
                               >
                                 <ChatIcon className="size-3 shrink-0 text-muted-foreground" />
                                 <span className="flex-1 text-foreground">{chat.name || t('admin.common.unknownWrapped', '(未知)')}</span>
@@ -1160,7 +1160,7 @@ export default function SettingsPage() {
                       )}
                     </div>
                     <div className="space-y-1.5">
-                      <label className="block text-[13px] font-medium text-muted-foreground">Webhook Secret</label>
+                      <label className="block text-xs-plus font-medium text-muted-foreground">Webhook Secret</label>
                       <Input type="password" placeholder={t('admin.settings.telegram.webhookSecretPlaceholder', '自定义密钥（可选）')} {...register('telegram_webhook_secret')} />
                     </div>
                   </div>
@@ -1271,8 +1271,8 @@ export default function SettingsPage() {
                           active ? 'border-primary bg-primary/5' : 'border-border bg-transparent',
                         )}>
                           <input type="radio" value={opt.value} {...register('comment_captcha_mode')} className="hidden" />
-                          <span className={cn('text-[13px] font-semibold', active ? 'text-primary' : 'text-foreground')}>{opt.label}</span>
-                          <span className="text-[11px] text-muted-foreground">{opt.desc}</span>
+                          <span className={cn('text-xs-plus font-semibold', active ? 'text-primary' : 'text-foreground')}>{opt.label}</span>
+                          <span className="text-2xs text-muted-foreground">{opt.desc}</span>
                         </label>
                       );
                     })}
@@ -1414,7 +1414,7 @@ export default function SettingsPage() {
                           <div className={cn('h-full transition-[width] duration-300', barColor(localRatio))} style={{ width: `${Math.min(localRatio * 100, 100)}%` }} />
                         </div>
                         {useDisk && (
-                          <div className="mt-1 text-[11px] text-muted-foreground">
+                          <div className="mt-1 text-2xs text-muted-foreground">
                             {t('admin.settings.media.uploadsDiskUsage', '其中 utterlog 上传文件 {size}（占主机磁盘 {percent}%）', { size: formatSize(local.size), percent: ((local.size / diskTotal) * 100).toFixed(1) })}
                           </div>
                         )}
@@ -1443,18 +1443,18 @@ export default function SettingsPage() {
               <Panel>
                 <div className="flex items-start justify-between gap-6">
                   <div className="flex-1">
-                    <h3 className="mb-2 text-[13px] font-semibold tracking-wide text-foreground">{t('admin.settings.media.cleanup.section', '数据库清理')}</h3>
+                    <h3 className="mb-2 text-xs-plus font-semibold tracking-wide text-foreground">{t('admin.settings.media.cleanup.section', '数据库清理')}</h3>
                     <p className="text-xs leading-relaxed text-muted-foreground">
                       {t('admin.settings.media.cleanup.description', '清理媒体库缺失文件记录、失效相册关联、孤儿文章关系、孤儿评论、足迹残留和过期授权数据。不会删除正文内容，也不会删除远程对象存储里的文件。')}
                     </p>
                   </div>
-                  <Button type="button" variant="secondary" disabled={cleaningDatabase} onClick={() => setConfirmCleanupDatabase(true)} className="min-w-[148px]">
+                  <Button type="button" variant="secondary" disabled={cleaningDatabase} onClick={() => setConfirmCleanupDatabase(true)} className="min-w-37">
                     {cleaningDatabase ? <Loader2 className="size-3.5 animate-spin" /> : <Brush className="size-3.5" />}
                     {t('admin.settings.media.cleanup.button', '清理数据库')}
                   </Button>
                 </div>
                 {databaseCleanupResult && (
-                  <div className="mt-[18px] grid grid-cols-4 gap-2">
+                  <div className="mt-4 grid grid-cols-4 gap-2">
                     {[
                       ['media_missing_files', t('admin.settings.media.cleanup.mediaMissingFiles', '缺失媒体')],
                       ['album_links_reset', t('admin.settings.media.cleanup.albumLinksReset', '相册关联')],
@@ -1468,7 +1468,7 @@ export default function SettingsPage() {
                     ].map(([key, label]) => (
                       <div key={key} className={cn('rounded-md border border-border px-3 py-2.5', key === 'total' ? 'bg-primary/5' : 'bg-muted')}>
                         <div className={cn('font-mono text-lg leading-tight', key === 'total' ? 'text-primary' : 'text-foreground')}>{Number(databaseCleanupResult[key] || 0)}</div>
-                        <div className="mt-1 text-[11px] text-muted-foreground">{label}</div>
+                        <div className="mt-1 text-2xs text-muted-foreground">{label}</div>
                       </div>
                     ))}
                   </div>
@@ -1477,7 +1477,7 @@ export default function SettingsPage() {
 
               <Panel title={t('admin.settings.media.driver.section', '存储方式')}>
                 <div className="mb-6">
-                  <label className="mb-2 block text-[13px] font-medium text-muted-foreground">{t('admin.settings.media.driver.label', '存储驱动')}</label>
+                  <label className="mb-2 block text-xs-plus font-medium text-muted-foreground">{t('admin.settings.media.driver.label', '存储驱动')}</label>
                   <div className="flex gap-2.5">
                     {([
                       { value: 'local', label: t('admin.settings.media.localStorage', '本地存储'), icon: HardDrive, desc: t('admin.settings.media.driver.localDesc', '文件保存在服务器本地') },
@@ -1492,9 +1492,9 @@ export default function SettingsPage() {
                           active ? 'border-primary bg-primary/5' : 'border-border bg-transparent',
                         )}>
                           <input type="radio" value={d.value} {...register('media_driver')} className="hidden" />
-                          <Icon className={cn('size-[22px]', active ? 'text-primary' : 'text-muted-foreground')} />
-                          <span className={cn('text-[13px] font-semibold', active ? 'text-primary' : 'text-foreground')}>{d.label}</span>
-                          <span className="text-center text-[11px] text-muted-foreground">{d.desc}</span>
+                          <Icon className={cn('size-5.5', active ? 'text-primary' : 'text-muted-foreground')} />
+                          <span className={cn('text-xs-plus font-semibold', active ? 'text-primary' : 'text-foreground')}>{d.label}</span>
+                          <span className="text-center text-2xs text-muted-foreground">{d.desc}</span>
                         </label>
                       );
                     })}
@@ -1510,27 +1510,27 @@ export default function SettingsPage() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <label className="block text-[13px] font-medium text-muted-foreground">Endpoint</label>
+                        <label className="block text-xs-plus font-medium text-muted-foreground">Endpoint</label>
                         <Input {...register('s3_endpoint')} placeholder={mediaDriver === 'r2' ? 'https://<account_id>.r2.cloudflarestorage.com' : 'https://s3.amazonaws.com'} />
                       </div>
                       <div className="space-y-1.5">
-                        <label className="block text-[13px] font-medium text-muted-foreground">Region</label>
+                        <label className="block text-xs-plus font-medium text-muted-foreground">Region</label>
                         <Input {...register('s3_region')} placeholder={mediaDriver === 'r2' ? 'auto' : 'us-east-1'} />
                       </div>
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="block text-[13px] font-medium text-muted-foreground">Bucket</label>
-                      <Input {...register('s3_bucket')} placeholder="my-bucket" className="max-w-[320px]" />
+                      <label className="block text-xs-plus font-medium text-muted-foreground">Bucket</label>
+                      <Input {...register('s3_bucket')} placeholder="my-bucket" className="max-w-80" />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <label className="block text-[13px] font-medium text-muted-foreground">Access Key</label>
+                        <label className="block text-xs-plus font-medium text-muted-foreground">Access Key</label>
                         <Input {...register('s3_access_key')} placeholder="AKIA..." />
                       </div>
                       <div className="space-y-1.5">
-                        <label className="block text-[13px] font-medium text-muted-foreground">Secret Key</label>
+                        <label className="block text-xs-plus font-medium text-muted-foreground">Secret Key</label>
                         <Input type="password" {...register('s3_secret_key')} placeholder="••••••••" />
                       </div>
                     </div>
@@ -1538,9 +1538,9 @@ export default function SettingsPage() {
                     <div className="border-t border-border pt-5">
                       <div className="mb-2 flex items-center gap-1.5">
                         <Globe className="size-3.5 text-primary" />
-                        <label className="text-[13px] font-medium text-muted-foreground">{t('admin.settings.media.customDomain', '自定义域名 (CDN)')}</label>
+                        <label className="text-xs-plus font-medium text-muted-foreground">{t('admin.settings.media.customDomain', '自定义域名 (CDN)')}</label>
                       </div>
-                      <Input {...register('s3_custom_domain')} placeholder="https://cdn.yourdomain.com" className="max-w-[400px]" />
+                      <Input {...register('s3_custom_domain')} placeholder="https://cdn.yourdomain.com" className="max-w-100" />
                       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
                         {t('admin.settings.media.customDomainHint', '绑定自定义域名后，所有文件 URL 将使用此域名访问。')}
                         {mediaDriver === 'r2' && ` ${t('admin.settings.media.r2CustomDomainHint', 'R2 可在 Cloudflare Dashboard 中绑定自定义域名。')}`}
@@ -1550,7 +1550,7 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="border-t border-border pt-5">
-                      <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">{t('admin.settings.media.storageLimit', '空间容量限制 (GB)')}</label>
+                      <label className="mb-1.5 block text-xs-plus font-medium text-muted-foreground">{t('admin.settings.media.storageLimit', '空间容量限制 (GB)')}</label>
                       <Input type="number" min={1} {...register('storage_limit_gb')} placeholder="10" className="w-40" />
                       <p className="mt-1 text-xs text-muted-foreground">{t('admin.settings.media.storageLimitHint', '超过此容量将不允许继续上传')}</p>
                     </div>
@@ -1581,11 +1581,11 @@ export default function SettingsPage() {
                     { key: 'folder_driver_avatars', label: t('admin.settings.media.folderRouting.avatars', '用户头像'), icon: User },
                   ].map(({ key, label, icon: Icon }) => (
                     <div key={key} className="flex items-center justify-between rounded-md border border-border bg-muted px-3.5 py-2.5">
-                      <span className="flex items-center gap-2 text-[13px] text-foreground">
+                      <span className="flex items-center gap-2 text-xs-plus text-foreground">
                         <Icon className="size-3.5 text-muted-foreground" />
                         {label}
                       </span>
-                      <select className={cn(SELECT_CLS, 'h-8 w-[100px] px-2 py-1 text-xs')} {...register(key)}>
+                      <select className={cn(SELECT_CLS, 'h-8 w-25 px-2 py-1 text-xs')} {...register(key)}>
                         <option value="">{t('admin.settings.media.folderRouting.followGlobal', '跟随全局')}</option>
                         <option value="local">{t('admin.settings.media.folderRouting.local', '本地')}</option>
                         <option value="cloud">{t('admin.settings.media.folderRouting.cloud', '云端')}</option>
@@ -1598,11 +1598,11 @@ export default function SettingsPage() {
               <Panel title={t('admin.settings.media.uploadLimits.section', '上传限制')}>
                 <div className="grid gap-y-6">
                   <div className="space-y-1.5">
-                    <label className="block text-[13px] font-medium text-muted-foreground">{t('admin.settings.media.uploadLimits.maxSize', '最大上传大小 (MB)')}</label>
+                    <label className="block text-xs-plus font-medium text-muted-foreground">{t('admin.settings.media.uploadLimits.maxSize', '最大上传大小 (MB)')}</label>
                     <Input type="number" {...register('max_upload_size')} />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-[13px] font-medium text-muted-foreground">{t('admin.settings.media.uploadLimits.allowedTypes', '允许的文件类型')}</label>
+                    <label className="block text-xs-plus font-medium text-muted-foreground">{t('admin.settings.media.uploadLimits.allowedTypes', '允许的文件类型')}</label>
                     <Textarea className="font-mono text-xs" rows={3} {...register('allowed_extensions')} placeholder={t('admin.settings.media.uploadLimits.allowedTypesPlaceholder', '每行一个扩展名，或用逗号分隔')} />
                     <p className="text-xs text-muted-foreground">
                       {t('admin.settings.media.uploadLimits.commonTypes', '常用：jpg, jpeg, png, gif, webp, svg, ico, mp4, mp3, pdf, zip, doc, docx, xls, xlsx, ppt, pptx, txt, md')}
@@ -1660,7 +1660,7 @@ export default function SettingsPage() {
                 <p className="-mt-3 mb-5 text-xs text-muted-foreground">{t('admin.settings.image.display.description', '前端文章特色图片和正文图片的加载动画效果')}</p>
                 <div className="grid gap-y-6">
                   <div>
-                    <label className="mb-2 block text-[13px] font-medium text-muted-foreground">{t('admin.settings.image.display.effect', '显示效果')}</label>
+                    <label className="mb-2 block text-xs-plus font-medium text-muted-foreground">{t('admin.settings.image.display.effect', '显示效果')}</label>
                     <div className="grid grid-cols-4 gap-2.5">
                       {[
                         { value: 'fade',  label: t('admin.settings.image.display.fade', '淡入'),    desc: t('admin.settings.image.display.fadeDesc', '模糊渐变透明') },
@@ -1675,8 +1675,8 @@ export default function SettingsPage() {
                             active ? 'border-primary bg-primary/5' : 'border-border bg-transparent',
                           )}>
                             <input type="radio" value={effect.value} {...register('image_display_effect')} className="hidden" />
-                            <p className={cn('text-[13px] font-semibold', active ? 'text-primary' : 'text-foreground')}>{effect.label}</p>
-                            <p className="mt-0.5 text-[11px] text-muted-foreground">{effect.desc}</p>
+                            <p className={cn('text-xs-plus font-semibold', active ? 'text-primary' : 'text-foreground')}>{effect.label}</p>
+                            <p className="mt-0.5 text-2xs text-muted-foreground">{effect.desc}</p>
                           </label>
                         );
                       })}
@@ -1684,7 +1684,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="block text-[13px] font-medium text-muted-foreground">{t('admin.settings.image.display.duration', '动画时长 (ms)')}</label>
+                    <label className="block text-xs-plus font-medium text-muted-foreground">{t('admin.settings.image.display.duration', '动画时长 (ms)')}</label>
                     <Input type="number" {...register('image_display_duration')} placeholder="300" />
                   </div>
                 </div>
@@ -1733,7 +1733,7 @@ export default function SettingsPage() {
           {/* ==================== 系统更新 ==================== */}
           {activeTab === 'update' && (
             <div>
-              <h3 className="mb-3 flex items-center gap-2 text-[13px] font-semibold tracking-wide text-foreground">
+              <h3 className="mb-3 flex items-center gap-2 text-xs-plus font-semibold tracking-wide text-foreground">
                 <CloudDownload className="size-4 text-primary" />
                 {t('admin.settings.update.section', '系统更新')}
               </h3>
@@ -1741,12 +1741,12 @@ export default function SettingsPage() {
                 {t('admin.settings.update.description', 'Utterlog 通过 GitHub Releases 推送新版本。下方会实时比对你当前运行的版本和最新发布；有新版本时点「一键升级」即可。升级过程保留所有数据、配置和用户上传。')}
               </p>
               <SystemUpdatePanel />
-              <div className="mt-6 border border-border bg-muted px-[18px] py-3.5 text-xs leading-loose text-muted-foreground">
+              <div className="mt-6 border border-border bg-muted px-4 py-3.5 text-xs leading-loose text-muted-foreground">
                 <div className="mb-1 flex items-center gap-1.5 font-semibold text-foreground">
                   <Info className="size-3.5" />
                   {t('admin.settings.update.otherMethods', '其它升级方式')}
                 </div>
-                · {t('admin.settings.update.commandLine', '命令行')}：<code className="border border-border bg-card px-1.5 py-px font-mono text-[11px]">curl -fsSL https://utterlog.io/update.sh | bash</code>
+                · {t('admin.settings.update.commandLine', '命令行')}：<code className="border border-border bg-card px-1.5 py-px font-mono text-2xs">curl -fsSL https://utterlog.io/update.sh | bash</code>
                 <br />
                 · {t('admin.settings.update.changelog', '历史版本')}：<a href="https://utterlog.io/changelog" target="_blank" rel="noopener" className="text-primary">utterlog.io/changelog</a>
                 <br />
@@ -1864,7 +1864,7 @@ function ImgEtBuilder({ register, watch, setValue }: { register: any; watch: any
           >
             {t('admin.settings.image.random.imgEtRecommended', 'img.et （推荐）')}
           </button>
-          <span className="ml-1 text-[11px] text-muted-foreground">
+          <span className="ml-1 text-2xs text-muted-foreground">
             {t('admin.settings.image.random.customUrlHint', '或在下方直接填自定义 URL')}
           </span>
         </div>
@@ -1913,7 +1913,7 @@ function ImgEtBuilder({ register, watch, setValue }: { register: any; watch: any
       <div>
         <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
           {t('admin.settings.image.random.finalUrl', '最终 API 地址')}
-          <span className="ml-1.5 text-[11px] font-normal text-muted-foreground">
+          <span className="ml-1.5 text-2xs font-normal text-muted-foreground">
             {t('admin.settings.image.random.finalUrlHint', '（可直接编辑；改上方参数会覆盖）')}
           </span>
         </label>
@@ -1939,7 +1939,7 @@ function ImgEtBuilder({ register, watch, setValue }: { register: any; watch: any
         </div>
         {currentUrl ? (
           <div
-            className="flex max-h-[280px] w-full items-center justify-center overflow-hidden rounded-md border border-border bg-muted"
+            className="flex max-h-70 w-full items-center justify-center overflow-hidden rounded-md border border-border bg-muted"
             style={{ aspectRatio: parsed.width && parsed.height ? `${parsed.width} / ${parsed.height}` : '16 / 9' }}
           >
             <img
@@ -1959,7 +1959,7 @@ function ImgEtBuilder({ register, watch, setValue }: { register: any; watch: any
       <p className="text-xs leading-relaxed text-muted-foreground">
         <Lightbulb className="mr-1.5 inline size-3 text-primary" />
         <strong>{t('admin.settings.image.random.example', '用法示例')}</strong>：
-        <code className="mx-1 bg-muted px-1.5 py-px text-[11px]">
+        <code className="mx-1 bg-muted px-1.5 py-px text-2xs">
           https://img.et/1920/1080?type=landscape&format=webp
         </code>
         {t('admin.settings.image.random.exampleDescription', '现代浏览器默认用 webp；Safari 17+ / Chrome 100+ 可选 avif 体积更小。更多详细用法可访问')}{' '}

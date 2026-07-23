@@ -316,7 +316,7 @@ export default function ProfilePage() {
         {/* Left column: Profile Info + Change Password */}
         <div className="flex flex-col gap-4">
         <Card className="p-6">
-          <h2 className="mb-4 text-[15px] font-semibold text-foreground">{t('admin.profile.basicInfo', '基本信息')}</h2>
+          <h2 className="mb-4 text-sm-plus font-semibold text-foreground">{t('admin.profile.basicInfo', '基本信息')}</h2>
 
           {/* Avatar */}
           <div className="mb-5 flex items-start gap-4">
@@ -329,12 +329,12 @@ export default function ProfilePage() {
               }}
             >
               <div className={cn(
-                'size-[72px] overflow-hidden rounded-full bg-muted transition-colors',
+                'size-18 overflow-hidden rounded-full bg-muted transition-colors',
                 avatarSource === 'gravatar' ? 'border-[3px] border-primary' : 'border-2 border-border',
               )}>
                 {gravatarUrl && <img src={gravatarUrl} alt="" className="size-full object-cover" />}
               </div>
-              <span className={cn('mt-1 block text-[10px]', avatarSource === 'gravatar' ? 'font-semibold text-primary' : 'text-muted-foreground')}>Gravatar</span>
+              <span className={cn('mt-1 block text-3xs', avatarSource === 'gravatar' ? 'font-semibold text-primary' : 'text-muted-foreground')}>Gravatar</span>
             </div>
             {/* Utterlog */}
             <div
@@ -346,7 +346,7 @@ export default function ProfilePage() {
               }}
             >
               <div className={cn(
-                'flex size-[72px] items-center justify-center overflow-hidden rounded-full bg-muted transition-colors',
+                'flex size-18 items-center justify-center overflow-hidden rounded-full bg-muted transition-colors',
                 avatarSource === 'utterlog' ? 'border-[3px] border-primary' : utterlogBound ? 'border-2 border-border' : 'border-2 border-dashed border-border',
               )}>
                 {utterlogAvatar ? (
@@ -355,10 +355,10 @@ export default function ProfilePage() {
                   <Globe className="size-6 text-muted-foreground" />
                 )}
               </div>
-              <span className={cn('mt-1 block text-[10px]', avatarSource === 'utterlog' ? 'font-semibold text-primary' : 'text-muted-foreground')}>{t('admin.profile.federatedAvatar', '联盟头像')}</span>
+              <span className={cn('mt-1 block text-3xs', avatarSource === 'utterlog' ? 'font-semibold text-primary' : 'text-muted-foreground')}>{t('admin.profile.federatedAvatar', '联盟头像')}</span>
             </div>
             <div className="flex-1 pt-2">
-              <p className="text-[11px] leading-relaxed text-muted-foreground">
+              <p className="text-2xs leading-relaxed text-muted-foreground">
                 {t('admin.profile.avatarSourceHint', '点击头像切换前端显示来源。')}
                 {!utterlogBound && <> <a href="/utterlog" className="text-primary hover:underline">{t('admin.profile.bindUtterlogId', '绑定 Utterlog ID')}</a> {t('admin.profile.avatarBindSuffix', '后可使用联盟头像。')}</>}
               </p>
@@ -386,7 +386,7 @@ export default function ProfilePage() {
               <Label className="mb-1.5 block">{t('admin.profile.bio', '简介')}</Label>
               <Textarea rows={3} {...register('bio')} placeholder={t('admin.profile.bioPlaceholder', '介绍一下自己…')} />
             </div>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-2xs text-muted-foreground">
               {t('admin.profile.sensitiveChangeHint', '修改登录账号或邮箱需要验证当前密码和邮箱验证码')}
             </p>
             <div className="flex justify-end">
@@ -400,7 +400,7 @@ export default function ProfilePage() {
 
         {/* Change Password */}
         <Card className="p-6">
-          <h2 className="mb-4 text-[15px] font-semibold text-foreground">{t('admin.profile.changePassword', '修改密码')}</h2>
+          <h2 className="mb-4 text-sm-plus font-semibold text-foreground">{t('admin.profile.changePassword', '修改密码')}</h2>
           <form onSubmit={handlePwSubmit(onChangePassword)} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <Label>{t('admin.profile.currentPassword', '当前密码')}</Label>
@@ -439,7 +439,7 @@ export default function ProfilePage() {
         {/* Social Links */}
         <Card className="p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-[15px] font-semibold text-foreground">{t('admin.profile.socialLinks', '社交链接')}</h2>
+            <h2 className="text-sm-plus font-semibold text-foreground">{t('admin.profile.socialLinks', '社交链接')}</h2>
             <Button type="button" variant="outline" size="sm" onClick={() => setShowAddSocial(true)}>
               <Plus className="size-4" />{t('admin.common.add', '添加')}
             </Button>
@@ -449,7 +449,7 @@ export default function ProfilePage() {
             {socialLinks.map((link, idx) => (
               <div key={idx} className="flex items-center gap-2">
                 <i className={cn(link.icon || 'fa-light fa-link', 'w-5 shrink-0 text-center text-sm text-primary')} />
-                <span className="w-[60px] shrink-0 text-xs text-muted-foreground">{link.name}</span>
+                <span className="w-15 shrink-0 text-xs text-muted-foreground">{link.name}</span>
                 <Input
                   className="h-9 flex-1 text-xs"
                   placeholder={t('admin.profile.socialUrlPlaceholder', '输入 {name} 链接', { name: link.name === '微信' ? t('admin.profile.social.wechat', '微信') : link.name })}
@@ -463,7 +463,7 @@ export default function ProfilePage() {
                       const inp = document.querySelector(`input[data-idx="${idx}"]`) as HTMLInputElement;
                       inp?.click();
                     }} title={t('admin.profile.uploadQr', '上传二维码')}>
-                      {link.qr ? <img src={link.qr} alt="" className="size-[18px] object-cover" /> : <QrCode className="size-3.5" />}
+                      {link.qr ? <img src={link.qr} alt="" className="size-4.5 object-cover" /> : <QrCode className="size-3.5" />}
                     </Button>
                   </>
                 ) : null}
@@ -496,7 +496,7 @@ export default function ProfilePage() {
                   setShowAddSocial(false);
                 }}>{t('admin.common.add', '添加')}</Button>
               </div>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-2xs text-muted-foreground">
                 {t('admin.profile.commonIcons', '常用图标：fa-brands fa-bilibili, fa-brands fa-weixin, fa-brands fa-tiktok, fa-brands fa-xiaohongshu')}
               </p>
             </div>
@@ -513,8 +513,8 @@ export default function ProfilePage() {
           {/* Two-Factor Authentication */}
         <Card className="p-6">
           <div className="mb-4 flex items-center gap-2.5">
-            <ShieldCheck className="size-[18px] text-primary" />
-            <h2 className="text-[15px] font-semibold text-foreground">{t('admin.profile.twoFactor', '两步验证')}</h2>
+            <ShieldCheck className="size-4.5 text-primary" />
+            <h2 className="text-sm-plus font-semibold text-foreground">{t('admin.profile.twoFactor', '两步验证')}</h2>
             {totpEnabled && (
               <Badge className="border-transparent bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
                 {t('admin.profile.enabled', '已启用')}
@@ -526,7 +526,7 @@ export default function ProfilePage() {
             /* Show backup codes after enabling */
             <div>
               <div className="mb-4 rounded-md border border-amber-500/30 bg-amber-500/15 p-4">
-                <p className="mb-2 flex items-center gap-1.5 text-[13px] font-semibold text-amber-700 dark:text-amber-400">
+                <p className="mb-2 flex items-center gap-1.5 text-xs-plus font-semibold text-amber-700 dark:text-amber-400">
                   <TriangleAlert className="size-4" />
                   {t('admin.profile.saveBackupCodes', '请保存以下备用码')}
                 </p>
@@ -572,16 +572,16 @@ export default function ProfilePage() {
                   <img
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(totpUri)}`}
                     alt="TOTP QR Code"
-                    className="inline-block size-[200px] [image-rendering:pixelated]"
+                    className="inline-block size-50 [image-rendering:pixelated]"
                   />
                 )}
               </div>
 
               {/* Manual secret */}
               <div className="mb-4">
-                <Label className="mb-1 block text-[11px] text-muted-foreground">{t('admin.profile.manualSecret', '手动输入密钥')}</Label>
+                <Label className="mb-1 block text-2xs text-muted-foreground">{t('admin.profile.manualSecret', '手动输入密钥')}</Label>
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 break-all rounded bg-muted px-3 py-2 text-[13px] font-semibold tracking-wider text-foreground">
+                  <code className="flex-1 break-all rounded bg-muted px-3 py-2 text-xs-plus font-semibold tracking-wider text-foreground">
                     {totpSecret}
                   </code>
                   <Button variant="ghost" size="icon" className="shrink-0" onClick={() => { navigator.clipboard.writeText(totpSecret); toast.success(t('admin.profile.toast.copied', '已复制')); }}>
@@ -648,7 +648,7 @@ export default function ProfilePage() {
           ) : totpDisableMode ? (
             /* Disable flow */
             <div>
-              <p className="mb-4 text-[13px] text-muted-foreground">
+              <p className="mb-4 text-xs-plus text-muted-foreground">
                 {t('admin.profile.disableTotpHint', '关闭两步验证需要当前密码和验证码确认。')}
               </p>
               <div className="mb-4 flex flex-col gap-3">
@@ -690,7 +690,7 @@ export default function ProfilePage() {
           ) : totpEnabled ? (
             /* Already enabled */
             <div>
-              <p className="mb-4 text-[13px] leading-relaxed text-muted-foreground">
+              <p className="mb-4 text-xs-plus leading-relaxed text-muted-foreground">
                 {t('admin.profile.totpEnabledDescription', '两步验证已启用，每次登录时需要输入验证器应用生成的验证码。')}
               </p>
               <Button variant="outline" className="gap-2.5 px-6 text-destructive hover:text-destructive" onClick={() => setTotpDisableMode(true)}>
@@ -701,7 +701,7 @@ export default function ProfilePage() {
           ) : (
             /* Not enabled */
             <div>
-              <p className="mb-4 text-[13px] leading-relaxed text-muted-foreground">
+              <p className="mb-4 text-xs-plus leading-relaxed text-muted-foreground">
                 {t('admin.profile.totpDescription', '启用两步验证后，除密码外还需要验证器应用（如 Google Authenticator）生成的验证码才能登录，大幅提升账户安全性。')}
               </p>
               <Button
@@ -745,14 +745,14 @@ export default function ProfilePage() {
         {/* Passkeys */}
         <Card className="p-6">
           <div className="mb-4 flex items-center gap-2.5">
-            <KeyRound className="size-[18px] text-primary" />
-            <h2 className="text-[15px] font-semibold text-foreground">{t('admin.profile.passkeys', '通行密钥')}</h2>
+            <KeyRound className="size-4.5 text-primary" />
+            <h2 className="text-sm-plus font-semibold text-foreground">{t('admin.profile.passkeys', '通行密钥')}</h2>
             {passkeys.length > 0 && (
               <span className="text-xs text-muted-foreground">{t('admin.profile.passkeyCount', '{count} 个', { count: passkeys.length })}</span>
             )}
           </div>
 
-          <p className="mb-4 text-[13px] leading-relaxed text-muted-foreground">
+          <p className="mb-4 text-xs-plus leading-relaxed text-muted-foreground">
             {t('admin.profile.passkeyDescription', '通行密钥（Passkey）使用设备生物识别（指纹、面容）或安全密钥替代密码登录，更安全便捷。')}
           </p>
 
@@ -762,8 +762,8 @@ export default function ProfilePage() {
                 <div key={pk.id} className="flex items-center gap-3 border-b border-border py-2.5">
                   <Fingerprint className="size-5 text-primary" />
                   <div className="flex-1">
-                    <p className="text-[13px] font-medium text-foreground">{pk.name || t('admin.profile.unnamedPasskey', '未命名密钥')}</p>
-                    <p className="text-[11px] text-muted-foreground">
+                    <p className="text-xs-plus font-medium text-foreground">{pk.name || t('admin.profile.unnamedPasskey', '未命名密钥')}</p>
+                    <p className="text-2xs text-muted-foreground">
                       {t('admin.profile.passkeyCreatedAt', '添加于 {date}', { date: formatWithAdminTimeZone(new Date(pk.created_at * 1000), locale || 'zh-CN', { year: 'numeric', month: 'short', day: 'numeric' }) })}
                       {pk.last_used_at > 0 && <> · {t('admin.profile.passkeyLastUsed', '最后使用 {date}', { date: formatWithAdminTimeZone(new Date(pk.last_used_at * 1000), locale || 'zh-CN', { year: 'numeric', month: 'short', day: 'numeric' }) })}</>}
                     </p>
@@ -788,7 +788,7 @@ export default function ProfilePage() {
                 value={passkeyName}
                 onChange={e => setPasskeyName(e.target.value)}
                 placeholder={t('admin.profile.passkeyNamePlaceholder', '为此密钥命名（如：MacBook）')}
-                className="flex-1 text-[13px]"
+                className="flex-1 text-xs-plus"
                 autoFocus
                 onKeyDown={e => { if (e.key === 'Escape') { setPasskeyNaming(false); setPasskeyName(''); } }}
               />
@@ -879,7 +879,7 @@ export default function ProfilePage() {
             <DialogTitle>{t('admin.profile.securityVerification', '安全验证')}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-3.5">
-            <p className="text-[13px] text-muted-foreground">
+            <p className="text-xs-plus text-muted-foreground">
               {t('admin.profile.securityVerificationHint', '修改登录账号或邮箱需要验证身份，验证码将发送到当前邮箱。')}
             </p>
             <div className="flex flex-col gap-1.5">

@@ -139,7 +139,7 @@ export default function MusicPage() {
         <div className="mb-4 rounded-lg border border-border bg-card p-4">
           <div className="mb-3 flex gap-2">
             <Select value={searchPlatform} onValueChange={(v) => setSearchPlatform((v as string) || 'netease')}>
-              <SelectTrigger className="w-[100px] shrink-0 text-xs">
+              <SelectTrigger className="w-25 shrink-0 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -163,7 +163,7 @@ export default function MusicPage() {
           </div>
 
           {searchResults.length > 0 && (
-            <div className="max-h-[300px] overflow-auto">
+            <div className="max-h-75 overflow-auto">
               {searchResults.slice(0, 20).map((r: any, i: number) => {
                 const key = String(r.id);
                 const exists = items.some((it: any) => it.platform_id === key);
@@ -173,11 +173,11 @@ export default function MusicPage() {
                       <img src={r.cover} alt="" className="size-9 shrink-0 object-cover" />
                     )}
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-[13px] font-medium text-foreground">{r.name || r.title}</p>
-                      <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      <p className="truncate text-xs-plus font-medium text-foreground">{r.name || r.title}</p>
+                      <p className="mt-0.5 text-2xs text-muted-foreground">
                         {r.artist || (r.artists || []).join(', ')}
                         {r.album && <span> · {r.album}</span>}
-                        <span className="ml-1.5 rounded-sm bg-muted px-1 text-[10px]">{r._src}</span>
+                        <span className="ml-1.5 rounded-sm bg-muted px-1 text-3xs">{r._src}</span>
                       </p>
                     </div>
                     {exists ? (
@@ -193,7 +193,7 @@ export default function MusicPage() {
             </div>
           )}
           {searchResults.length === 0 && keyword && !searching && (
-            <p className="py-4 text-center text-[13px] text-muted-foreground">无搜索结果</p>
+            <p className="py-4 text-center text-xs-plus text-muted-foreground">无搜索结果</p>
           )}
         </div>
       )}
@@ -214,7 +214,7 @@ export default function MusicPage() {
               )}
             >
               {/* Cover */}
-              <div className="h-[200px] w-full shrink-0 overflow-hidden bg-muted">
+              <div className="h-50 w-full shrink-0 overflow-hidden bg-muted">
                 {item.cover_url ? (
                   <img src={item.cover_url} alt={item.title} className="size-full object-cover" />
                 ) : (
@@ -235,7 +235,7 @@ export default function MusicPage() {
               </div>
               {/* Footer */}
               <div className="flex shrink-0 items-center justify-between border-t border-border px-3 py-2">
-                <span className="rounded-sm bg-muted px-1.5 py-px text-[11px] text-muted-foreground">
+                <span className="rounded-sm bg-muted px-1.5 py-px text-2xs text-muted-foreground">
                   {{ netease: '网易云', tencent: 'QQ', kugou: '酷狗', kuwo: '酷我', baidu: '百度', local: '本地' }[item.platform as string] || item.platform || '本地'}
                 </span>
                 <div className="flex gap-1">
@@ -252,7 +252,7 @@ export default function MusicPage() {
       )}
 
       <Dialog open={isModalOpen} onOpenChange={(o) => !o && setIsModalOpen(false)}>
-        <DialogContent className="max-h-[calc(100vh-32px)] max-w-[520px] overflow-y-auto">
+        <DialogContent className="max-h-[calc(100vh-32px)] max-w-130 overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingId ? '编辑' : '添加音乐'}</DialogTitle>
           </DialogHeader>

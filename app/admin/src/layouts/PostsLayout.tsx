@@ -33,15 +33,7 @@ export default function PostsLayout() {
             the Links page layout. No bottom rule on the row — only the
             active tab carries its own 2px primary underline. */}
         <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 12,
-            marginBottom: 16,
-            flexWrap: 'wrap',
-            rowGap: 8,
-          }}
+          className="flex items-center justify-between gap-x-3 gap-y-2 mb-4 flex-wrap"
         >
           <div
             role="tablist"
@@ -67,7 +59,7 @@ export default function PostsLayout() {
                   {({ isActive }) => (
                     <span
                       className={cn(
-                        'inline-flex min-h-10 items-center justify-center gap-[7px] whitespace-nowrap border-b-2 px-4 text-sm',
+                        'inline-flex min-h-10 items-center justify-center gap-2 whitespace-nowrap border-b-2 px-4 text-sm',
                         isActive
                           ? 'border-primary font-bold text-primary'
                           : 'border-transparent font-medium text-muted-foreground',

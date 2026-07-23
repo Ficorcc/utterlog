@@ -264,7 +264,7 @@ export default function MenusPage() {
   return (
     <div>
       <div className="mb-4 flex items-center gap-3">
-        <span className="text-[13px] text-muted-foreground">
+        <span className="text-xs-plus text-muted-foreground">
           {t('admin.menus.themePositionSummary', '当前主题 {theme} 声明了 {count} 个菜单位置', { theme: activeTheme || '—', count: positions.length })}
         </span>
         <div className="ml-auto flex gap-2">
@@ -284,7 +284,7 @@ export default function MenusPage() {
             key={p.key}
             onClick={() => setActivePos(p.key)}
             className={cn(
-              'cursor-pointer border-b-2 bg-transparent px-[18px] py-2.5 text-[13px]',
+              'cursor-pointer border-b-2 bg-transparent px-4 py-2.5 text-xs-plus',
               activePos === p.key
                 ? 'border-primary font-semibold text-primary'
                 : 'border-transparent text-muted-foreground',
@@ -305,7 +305,7 @@ export default function MenusPage() {
                 <Button type="button" variant="outline" size="icon" className="size-6" disabled><ChevronUp className="size-3" /></Button>
                 <Button type="button" variant="outline" size="icon" className="size-6" disabled><ChevronDown className="size-3" /></Button>
               </div>
-              <div className="inline-flex min-h-9 w-[200px] shrink-0 items-center gap-2 border border-border bg-card px-3 text-sm text-foreground">
+              <div className="inline-flex min-h-9 w-50 shrink-0 items-center gap-2 border border-border bg-card px-3 text-sm text-foreground">
                 <LayoutGrid className="size-4 text-primary" />
                 {t('admin.menus.all', '全部')}
               </div>
@@ -335,13 +335,13 @@ export default function MenusPage() {
                 </Button>
               </div>
               <Input
-                className="w-[200px] shrink-0 text-[13px]"
+                className="w-50 shrink-0 text-xs-plus"
                 value={item.label}
                 onChange={e => updateItem(idx, 'label', e.target.value)}
                 placeholder={t('admin.menus.itemLabelPlaceholder', '菜单文本')}
               />
               <Input
-                className="flex-1 text-[13px]"
+                className="flex-1 text-xs-plus"
                 value={item.href}
                 onChange={e => updateItem(idx, 'href', e.target.value)}
                 placeholder={t('admin.menus.itemHrefPlaceholder', '/path 或 https://...')}
@@ -366,7 +366,7 @@ export default function MenusPage() {
                 {item.children.map((child, cIdx) => (
                   <div key={cIdx} className="flex gap-2">
                     <Input
-                      className="w-[180px] shrink-0 text-xs"
+                      className="w-45 shrink-0 text-xs"
                       value={child.label}
                       onChange={e => updateChild(idx, cIdx, 'label', e.target.value)}
                       placeholder={t('admin.menus.childLabelPlaceholder', '子菜单文本')}
@@ -400,33 +400,33 @@ export default function MenusPage() {
               ref={pickerRef}
               className="absolute left-0 top-full z-10 mt-1.5 max-h-[min(620px,70vh)] w-80 overflow-y-auto border border-border bg-popover shadow-lg"
             >
-              <div className="border-b border-border px-3 py-2 text-[11px] uppercase tracking-wide text-muted-foreground">
+              <div className="border-b border-border px-3 py-2 text-2xs uppercase tracking-wide text-muted-foreground">
                 {t('admin.menus.builtinPages', '内置页面')}
               </div>
               {BUILTIN_PAGES.map(p => (
                 <button
                   key={p.href}
                   onClick={() => addPick({ label: t(`admin.menus.builtin.${p.key}`, p.label), href: p.href, type: 'page' })}
-                  className="flex w-full cursor-pointer items-center justify-between bg-transparent px-3 py-2 text-left text-[13px] hover:bg-muted"
+                  className="flex w-full cursor-pointer items-center justify-between bg-transparent px-3 py-2 text-left text-xs-plus hover:bg-muted"
                 >
                   <span className="text-foreground">{t(`admin.menus.builtin.${p.key}`, p.label)}</span>
-                  <code className="text-[11px] text-muted-foreground">{p.href}</code>
+                  <code className="text-2xs text-muted-foreground">{p.href}</code>
                 </button>
               ))}
 
               {customPages.length > 0 && (
                 <>
-                  <div className="border-y border-border px-3 py-2 text-[11px] uppercase tracking-wide text-muted-foreground">
+                  <div className="border-y border-border px-3 py-2 text-2xs uppercase tracking-wide text-muted-foreground">
                     {t('admin.menus.customPages', '自定义页面')}
                   </div>
                   {customPages.map(p => (
                     <button
                       key={p.id}
                       onClick={() => addPick({ label: p.title, href: `/${p.slug}`, type: 'page' })}
-                      className="flex w-full cursor-pointer items-center justify-between bg-transparent px-3 py-2 text-left text-[13px] hover:bg-muted"
+                      className="flex w-full cursor-pointer items-center justify-between bg-transparent px-3 py-2 text-left text-xs-plus hover:bg-muted"
                     >
                       <span className="text-foreground">{p.title}</span>
-                      <code className="text-[11px] text-muted-foreground">/{p.slug}</code>
+                      <code className="text-2xs text-muted-foreground">/{p.slug}</code>
                     </button>
                   ))}
                 </>
@@ -434,21 +434,21 @@ export default function MenusPage() {
 
               {categories.length > 0 && (
                 <>
-                  <div className="border-y border-border px-3 py-2 text-[11px] uppercase tracking-wide text-muted-foreground">
+                  <div className="border-y border-border px-3 py-2 text-2xs uppercase tracking-wide text-muted-foreground">
                     {t('common.categories', '分类')}
                   </div>
                   {categories.map(c => (
                     <button
                       key={c.id}
                       onClick={() => addPick({ label: c.name, href: `/categories/${c.slug}`, type: 'category', category_id: c.id, slug: c.slug, icon: c.icon, count: c.count })}
-                      className="flex w-full cursor-pointer items-center justify-between bg-transparent px-3 py-2 text-left text-[13px] hover:bg-muted"
+                      className="flex w-full cursor-pointer items-center justify-between bg-transparent px-3 py-2 text-left text-xs-plus hover:bg-muted"
                     >
                       <span className="inline-flex items-center gap-2 text-foreground">
-                        {c.icon ? <i className={c.icon} style={{ fontSize: 14 }} /> : <Folder className="size-3.5 text-muted-foreground" />}
+                        {c.icon ? <i className={`${c.icon} text-sm`} /> : <Folder className="size-3.5 text-muted-foreground" />}
                         {c.name}
-                        <span className="text-[11px] text-muted-foreground">({c.count || 0})</span>
+                        <span className="text-2xs text-muted-foreground">({c.count || 0})</span>
                       </span>
-                      <code className="text-[11px] text-muted-foreground">/categories/{c.slug}</code>
+                      <code className="text-2xs text-muted-foreground">/categories/{c.slug}</code>
                     </button>
                   ))}
                 </>

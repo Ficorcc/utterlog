@@ -33,12 +33,12 @@ function BarChart({ data, labelKey, valueKey, barClass = 'bg-primary' }: { data:
   return (
     <div className="flex flex-col gap-1">
       {data.slice(0, 8).map((d, i) => (
-        <div key={i} className="flex items-center gap-1.5 text-[11px]">
+        <div key={i} className="flex items-center gap-1.5 text-2xs">
           <span className="w-2/5 shrink-0 truncate text-muted-foreground">{d[labelKey] || '-'}</span>
           <div className="h-4 w-1/2 shrink-0 overflow-hidden bg-muted">
             <div className={cn('h-full transition-[width] duration-500', barClass)} style={{ width: `${(d[valueKey] / max) * 100}%` }} />
           </div>
-          <span className="w-[10%] shrink-0 text-right text-[10px] font-semibold">{d[valueKey]}</span>
+          <span className="w-[10%] shrink-0 text-right text-3xs font-semibold">{d[valueKey]}</span>
         </div>
       ))}
     </div>
@@ -70,7 +70,7 @@ function IconStatList({ data, nameKey, valueKey, icon }: { data: any[]; nameKey:
           {icon(d)}
           <span className="flex-1 truncate">{d[nameKey] || '-'}</span>
           <span className="shrink-0 text-muted-foreground">{d[valueKey]}</span>
-          <div className="h-1 w-[60px] shrink-0 overflow-hidden rounded-sm bg-muted">
+          <div className="h-1 w-15 shrink-0 overflow-hidden rounded-sm bg-muted">
             <div className="h-full rounded-sm bg-primary" style={{ width: `${(d[valueKey] / max) * 100}%` }} />
           </div>
         </div>
@@ -142,7 +142,7 @@ export default function AnalyticsPage() {
               {onlineOpen && (
                 <>
                   <div onClick={() => setOnlineOpen(false)} className="fixed inset-0 z-40" />
-                  <div className="absolute right-0 top-full z-[41] mt-1.5 max-h-[360px] w-80 overflow-y-auto rounded-lg border border-border bg-card shadow-lg">
+                  <div className="absolute right-0 top-full z-[41] mt-1.5 max-h-90 w-80 overflow-y-auto rounded-lg border border-border bg-card shadow-lg">
                     <div className="border-b border-border px-3.5 py-2.5 text-xs font-semibold text-muted-foreground">
                       当前在线 {onlineUsers.length} 人
                     </div>
@@ -178,7 +178,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Summary stats overlay at bottom */}
-        <div className="absolute bottom-3 left-3 z-[1000] flex gap-4 rounded bg-background/70 px-4 py-2 backdrop-blur">
+        <div className="absolute bottom-3 left-3 z-[1000] flex gap-4 rounded bg-background/90 px-4 py-2">
           {[
             { label: '访问次数', value: Number(s.total_visits) || 0, cls: 'text-primary' },
             { label: '独立访客', value: Number(s.unique_ips) || 0, cls: 'text-emerald-600 dark:text-emerald-400' },
@@ -186,7 +186,7 @@ export default function AnalyticsPage() {
           ].map((card, i) => (
             <div key={i} className="flex items-baseline gap-1.5">
               <span className={cn('text-xl font-bold', card.cls)}>{card.value.toLocaleString()}</span>
-              <span className="text-[11px] text-muted-foreground">{card.label}</span>
+              <span className="text-2xs text-muted-foreground">{card.label}</span>
             </div>
           ))}
         </div>
@@ -198,11 +198,11 @@ export default function AnalyticsPage() {
       {/* Charts row */}
       <div className="mb-5 grid grid-cols-2 gap-3">
         <Card className="p-4">
-          <h3 className="mb-3 text-[13px] font-semibold text-foreground">热门页面</h3>
+          <h3 className="mb-3 text-xs-plus font-semibold text-foreground">热门页面</h3>
           <BarChart data={data?.top_pages || []} labelKey="path" valueKey="count" />
         </Card>
         <Card className="p-4">
-          <h3 className="mb-3 text-[13px] font-semibold text-foreground">来源</h3>
+          <h3 className="mb-3 text-xs-plus font-semibold text-foreground">来源</h3>
           <BarChart data={data?.top_referers || []} labelKey="host" valueKey="count" barClass="bg-violet-500" />
         </Card>
       </div>
@@ -210,19 +210,19 @@ export default function AnalyticsPage() {
       {/* Browser / OS / Device / Country */}
       <div className="mb-5 grid grid-cols-4 gap-3">
         <Card className="p-4">
-          <h3 className="mb-3 text-[13px] font-semibold text-foreground">浏览器</h3>
+          <h3 className="mb-3 text-xs-plus font-semibold text-foreground">浏览器</h3>
           <IconStatList data={data?.browsers || []} nameKey="name" valueKey="count" icon={(d) => <BrowserIcon name={d.name} size={16} />} />
         </Card>
         <Card className="p-4">
-          <h3 className="mb-3 text-[13px] font-semibold text-foreground">操作系统</h3>
+          <h3 className="mb-3 text-xs-plus font-semibold text-foreground">操作系统</h3>
           <IconStatList data={data?.os || []} nameKey="name" valueKey="count" icon={(d) => <OSIcon name={d.name} size={16} />} />
         </Card>
         <Card className="p-4">
-          <h3 className="mb-3 text-[13px] font-semibold text-foreground">设备</h3>
+          <h3 className="mb-3 text-xs-plus font-semibold text-foreground">设备</h3>
           <IconStatList data={data?.devices || []} nameKey="name" valueKey="count" icon={(d) => <DeviceIcon type={d.name} size={16} />} />
         </Card>
         <Card className="p-4">
-          <h3 className="mb-3 text-[13px] font-semibold text-foreground">国家/地区</h3>
+          <h3 className="mb-3 text-xs-plus font-semibold text-foreground">国家/地区</h3>
           <CountryRow data={data?.countries || []} />
         </Card>
       </div>
@@ -287,7 +287,7 @@ function PurgeDialog({ onClose }: { onClose: () => void }) {
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[calc(100vh-32px)] max-w-[540px] overflow-y-auto">
+      <DialogContent className="max-h-[calc(100vh-32px)] max-w-135 overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Brush className="size-4 text-primary" /> 数据清理
@@ -296,7 +296,7 @@ function PurgeDialog({ onClose }: { onClose: () => void }) {
 
         <div className="flex flex-col gap-4">
           {loading ? (
-            <div className="py-5 text-center text-[13px] text-muted-foreground">加载中…</div>
+            <div className="py-5 text-center text-xs-plus text-muted-foreground">加载中…</div>
           ) : (
             <>
               {/* Current stats */}
@@ -311,8 +311,8 @@ function PurgeDialog({ onClose }: { onClose: () => void }) {
                 <label className="flex cursor-pointer items-start gap-2">
                   <input type="checkbox" checked={purgeBots} onChange={(e) => setPurgeBots(e.target.checked)} className="mt-0.5 size-4 accent-primary" />
                   <div>
-                    <div className="text-[13px] font-medium text-foreground">清除爬虫记录</div>
-                    <div className="mt-0.5 text-[11px] text-muted-foreground">
+                    <div className="text-xs-plus font-medium text-foreground">清除爬虫记录</div>
+                    <div className="mt-0.5 text-2xs text-muted-foreground">
                       User-Agent 匹配 Googlebot / Ahrefs / curl / headless 等 70+ 种模式
                     </div>
                   </div>
@@ -321,8 +321,8 @@ function PurgeDialog({ onClose }: { onClose: () => void }) {
                 <label className="flex cursor-pointer items-start gap-2">
                   <input type="checkbox" checked={purgeDupes} onChange={(e) => setPurgeDupes(e.target.checked)} className="mt-0.5 size-4 accent-primary" />
                   <div>
-                    <div className="text-[13px] font-medium text-foreground">合并 30 秒内重复访问</div>
-                    <div className="mt-0.5 text-[11px] text-muted-foreground">
+                    <div className="text-xs-plus font-medium text-foreground">合并 30 秒内重复访问</div>
+                    <div className="mt-0.5 text-2xs text-muted-foreground">
                       同一访客刷新同一页面算一次；保留最早的一条
                     </div>
                   </div>
@@ -331,7 +331,7 @@ function PurgeDialog({ onClose }: { onClose: () => void }) {
                 <label className="flex items-start gap-2">
                   <input type="checkbox" checked={!!olderDays} onChange={(e) => setOlderDays(e.target.checked ? '90' : '')} className="mt-0.5 size-4 accent-primary" />
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 text-[13px] font-medium text-foreground">
+                    <div className="flex items-center gap-2 text-xs-plus font-medium text-foreground">
                       清除
                       <Input
                         type="number"
@@ -343,7 +343,7 @@ function PurgeDialog({ onClose }: { onClose: () => void }) {
                       />
                       天前的历史记录
                     </div>
-                    <div className="mt-0.5 text-[11px] text-muted-foreground">
+                    <div className="mt-0.5 text-2xs text-muted-foreground">
                       按建站时长保留近期数据，历史归档或直接丢弃
                     </div>
                   </div>
@@ -381,7 +381,7 @@ function StatBox({ label, value, valueClass }: { label: string; value: string; v
   return (
     <div className="rounded-md border border-border p-2.5 text-center">
       <div className={cn('text-lg font-bold text-foreground', valueClass)}>{value}</div>
-      <div className="mt-0.5 text-[11px] text-muted-foreground">{label}</div>
+      <div className="mt-0.5 text-2xs text-muted-foreground">{label}</div>
     </div>
   );
 }
@@ -425,15 +425,15 @@ function RecentVisitorsPanel() {
   return (
     <Card className="overflow-visible">
       <div className="flex items-center justify-between border-b border-border px-4 py-3">
-        <h3 className="flex items-center text-[13px] font-semibold text-foreground">
+        <h3 className="flex items-center text-xs-plus font-semibold text-foreground">
           <Users className="mr-1.5 size-3.5 text-primary" />
           最近访客
-          <span className="ml-2 text-[11px] font-normal text-muted-foreground">最近 7 天 · 上限 1000 条</span>
+          <span className="ml-2 text-2xs font-normal text-muted-foreground">最近 7 天 · 上限 1000 条</span>
         </h3>
         <span className="text-xs text-muted-foreground">共 {total} 条</span>
       </div>
 
-      <div className="relative min-h-[486px]">
+      <div className="relative min-h-121.5">
         <Table>
           <TableHeader>
             <TableRow>
@@ -469,12 +469,12 @@ function RecentVisitorsPanel() {
                       {v.author_name ? (
                         <span className="text-xs font-semibold text-primary">{v.author_name}</span>
                       ) : (
-                        <span className="text-[11px] text-muted-foreground">{v.ip_masked}</span>
+                        <span className="text-2xs text-muted-foreground">{v.ip_masked}</span>
                       )}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className="inline-block max-w-[150px] truncate align-middle">{v.path}</span>
+                    <span className="inline-block max-w-37.5 truncate align-middle">{v.path}</span>
                   </TableCell>
                   <TableCell>
                     {v.country_code ? (

@@ -229,13 +229,13 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
         <PlatformIcon className="size-4 text-primary" />
         {platformLabel} 同步
       </div>
-      <p className="text-sm text-muted-foreground" style={{ lineHeight: 1.7, marginBottom: 20 }}>
+      <p className="text-sm text-muted-foreground mb-5" style={{ lineHeight: 1.7 }}>
         授权一个 {platformLabel} 站点推送内容到 Utterlog。每个站点生成独立的 Site UUID + Token，装 <code>{meta.pluginName}</code> 插件后填入对应字段即可。Token <b>只显示一次</b>。
       </p>
 
       {/* Sites list */}
-      <div className="rounded-lg border border-border bg-card" style={{ marginBottom: 20 }}>
-        <div className="flex items-center justify-between border-b border-border" style={{ padding: '12px 16px' }}>
+      <div className="rounded-lg border border-border bg-card mb-5">
+        <div className="flex items-center justify-between border-b border-border py-3 px-4">
           <div className="text-sm font-semibold text-foreground">
             {t('admin.syncSites.authorizedSites', '已授权站点')} <span className="ml-1.5 font-normal text-muted-foreground">({sites.length})</span>
           </div>
@@ -245,11 +245,11 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground" style={{ padding: '30px 16px' }}>
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground py-8 px-4">
             <Loader2 className="size-4 animate-spin" /> {t('admin.common.loading', '加载中…')}
           </div>
         ) : sites.length === 0 ? (
-          <div className="text-center text-sm text-muted-foreground" style={{ padding: '40px 16px' }}>
+          <div className="text-center text-sm text-muted-foreground py-10 px-4">
             <div className="mb-2.5 flex justify-center text-muted-foreground">
               <PlatformIcon className="size-8" />
             </div>
@@ -278,7 +278,7 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
                       <span className="font-medium text-foreground">{s.label || t('admin.common.unnamedWrapped', '(未命名)')}</span>
                     </TableCell>
                     <TableCell>
-                      <span className="font-mono text-[11px]">
+                      <span className="font-mono text-2xs">
                         {uuid ? uuid.slice(0, 16) + '…' : <span className="text-muted-foreground">{t('admin.syncSites.noUuid', '(无 UUID)')}</span>}
                         {uuid && (
                           <button
@@ -293,10 +293,10 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
                       </span>
                     </TableCell>
                     <TableCell>
-                      <span className="inline-block max-w-[240px] truncate text-muted-foreground">{s.source_url || '—'}</span>
+                      <span className="inline-block max-w-60 truncate text-muted-foreground">{s.source_url || '—'}</span>
                     </TableCell>
                     <TableCell>
-                      <span className="text-[11px] text-muted-foreground">{s.last_seen_at ? fmtTime(s.last_seen_at, locale) : t('admin.common.never', '从未')}</span>
+                      <span className="text-2xs text-muted-foreground">{s.last_seen_at ? fmtTime(s.last_seen_at, locale) : t('admin.common.never', '从未')}</span>
                     </TableCell>
                     <TableCell>
                       <span className="block text-center">{s.recent_jobs || 0}</span>
@@ -316,16 +316,16 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
 
       {/* Active jobs — big progress cards for running/processing jobs */}
       {jobs.filter((j) => j.status === 'running' || j.status === 'processing').map((j) => (
-        <div key={'active-' + j.job_id} className="border-2 border-primary bg-primary/10" style={{ padding: '16px 20px', marginBottom: 16, borderRadius: 8 }}>
+        <div key={'active-' + j.job_id} className="border-2 border-primary bg-primary/10 py-4 px-5 mb-4 rounded-md">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2.5 text-sm font-semibold text-primary">
               <Loader2 className="size-4 animate-spin" />
               {t('admin.syncSites.job.running', '任务进行中')}
-              <span className="font-mono text-[11px] font-normal text-muted-foreground">
+              <span className="font-mono text-2xs font-normal text-muted-foreground">
                 {(j.job_id || '').slice(0, 16)}…
               </span>
             </div>
-            <div className="text-[11px] text-muted-foreground">
+            <div className="text-2xs text-muted-foreground">
               {t('admin.syncSites.job.elapsed', '已运行')} <b className="font-mono">{fmtElapsed(j.started_at)}</b>
             </div>
           </div>
@@ -336,12 +336,12 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
 
           {/* Media progress bar */}
           {j.media_total > 0 && (
-            <div style={{ marginBottom: 10 }}>
-              <div className="mb-1 flex justify-between text-[11px] text-muted-foreground">
+            <div className="mb-2.5">
+              <div className="mb-1 flex justify-between text-2xs text-muted-foreground">
                 <span>{t('admin.syncSites.job.mediaDownload', '媒体文件下载')}</span>
                 <span className="font-mono">{j.media_done} / {j.media_total} ({mediaPercent(j)}%)</span>
               </div>
-              <div className="border border-border bg-background" style={{ height: 6 }}>
+              <div className="border border-border bg-background h-1.5">
                 <div
                   className="h-full bg-primary"
                   style={{ width: mediaPercent(j) + '%', transition: 'width 0.4s ease' }}
@@ -352,13 +352,13 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
 
           {/* Posts rewritten */}
           {j.posts_rewritten > 0 && (
-            <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+            <div className="flex items-center gap-1 text-2xs text-muted-foreground">
               <SquarePen className="size-3" />
               {t('admin.syncSites.job.rewrittenLinks', '已改写 {count} 篇文章的链接', { count: j.posts_rewritten })}
             </div>
           )}
 
-          <div className="mt-2 text-[11px] text-muted-foreground">
+          <div className="mt-2 text-2xs text-muted-foreground">
             {t('admin.syncSites.job.autoRefresh', '自动刷新中 · 每 3 秒 · 完成后会自动停止')}
           </div>
         </div>
@@ -367,7 +367,7 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
       {/* Job history */}
       {jobs.length > 0 && (
         <div className="rounded-lg border border-border bg-card">
-          <div className="flex items-center gap-1.5 border-b border-border text-sm font-semibold text-foreground" style={{ padding: '12px 16px' }}>
+          <div className="flex items-center gap-1.5 border-b border-border text-sm font-semibold text-foreground py-3 px-4">
             <History className="size-4 text-primary" />
             {t('admin.syncSites.recentJobs', '最近同步任务')}
           </div>
@@ -388,7 +388,7 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
                 return (
                   <TableRow key={jid || `job-${index}`}>
                     <TableCell>
-                      <span className="font-mono text-[10px]">{jid ? jid.slice(0, 16) + '…' : '—'}</span>
+                      <span className="font-mono text-3xs">{jid ? jid.slice(0, 16) + '…' : '—'}</span>
                     </TableCell>
                     <TableCell>
                       <Badge className={cn(jobStatusBadge[j.status] || 'border-transparent bg-primary/15 text-primary')}>{j.status}</Badge>
@@ -399,15 +399,15 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
                     <TableCell className="text-right font-mono">{j.media_done}/{j.media_total}</TableCell>
                     <TableCell className="text-right font-mono">{j.posts_rewritten}</TableCell>
                     <TableCell>
-                      <span className="text-[11px] text-muted-foreground">{fmtTime(j.started_at, locale)}</span>
+                      <span className="text-2xs text-muted-foreground">{fmtTime(j.started_at, locale)}</span>
                     </TableCell>
                   </TableRow>
                 );
               })}
             </TableBody>
           </Table>
-          <div className="border-t border-border bg-muted text-right" style={{ padding: '8px 14px' }}>
-            <button type="button" onClick={refreshAll} className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground">
+          <div className="border-t border-border bg-muted text-right py-2 px-3.5">
+            <button type="button" onClick={refreshAll} className="inline-flex items-center gap-1 text-2xs text-muted-foreground hover:text-foreground">
               <RefreshCw className="size-3" /> {t('admin.common.refresh', '刷新')}
             </button>
           </div>
@@ -416,12 +416,12 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
 
       {/* Create site modal */}
       <Dialog open={createOpen} onOpenChange={(o) => !o && setCreateOpen(false)}>
-        <DialogContent className="max-w-[400px]">
+        <DialogContent className="max-w-100">
           <DialogHeader>
             <DialogTitle>{`新建 ${platformLabel} 同步授权`}</DialogTitle>
           </DialogHeader>
           <div>
-            <div style={{ marginBottom: 14 }}>
+            <div className="mb-3.5">
               <div className="mb-1.5 text-xs text-muted-foreground">{t('admin.syncSites.siteNamePrivate', '站点名称（自己记）')}</div>
               <Input
                 value={createForm.label}
@@ -429,14 +429,14 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
                 placeholder={t('admin.syncSites.siteNamePlaceholder', '例如：我的旧博客')}
               />
             </div>
-            <div style={{ marginBottom: 18 }}>
+            <div className="mb-4">
               <div className="mb-1.5 text-xs text-muted-foreground">源站地址（旧 {platformLabel} 博客 URL）</div>
               <Input
                 value={createForm.source_url}
                 onChange={(e) => setCreateForm((f) => ({ ...f, source_url: e.target.value }))}
                 placeholder={platform === 'typecho' ? 'https://your-old-typecho-site.com' : 'https://your-old-wp-site.com'}
               />
-              <div className="mt-1.5 text-[11px] text-muted-foreground">
+              <div className="mt-1.5 text-2xs text-muted-foreground">
                 server 扫文章内容里的图片 URL 时会匹配这个域名下的 <code>{meta.uploadsPath}</code> 路径。
               </div>
             </div>
@@ -450,51 +450,51 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
 
       {/* Created token — shown ONCE */}
       <Dialog open={!!created} onOpenChange={(o) => !o && setCreated(null)}>
-        <DialogContent className="max-w-[520px] max-h-[calc(100vh-32px)] overflow-y-auto">
+        <DialogContent className="max-w-130 max-h-[calc(100vh-32px)] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t('admin.syncSites.createdTitle', '授权已生成 · 请立即保存')}</DialogTitle>
           </DialogHeader>
           {created && (
             <div>
-              <div className="mb-[18px] flex items-start gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/10 text-xs leading-relaxed text-amber-700 dark:text-amber-300" style={{ padding: '10px 14px' }}>
+              <div className="mb-4 flex items-start gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/10 text-xs leading-relaxed text-amber-700 dark:text-amber-300 py-2.5 px-3.5">
                 <TriangleAlert className="mt-0.5 size-3.5 shrink-0" />
                 <span><b>{t('admin.syncSites.tokenOnce', 'Token 只显示这一次')}</b>。{t('admin.syncSites.tokenOnceHint', '关闭后无法再次查看，丢失需要重新生成。')}</span>
               </div>
 
-              <div style={{ marginBottom: 14 }}>
+              <div className="mb-3.5">
                 <div className="mb-1.5 text-xs text-muted-foreground">{t('admin.syncSites.siteName', '站点名称')}</div>
-                <div className="rounded-md border border-border bg-muted text-sm text-foreground" style={{ padding: '8px 12px' }}>
+                <div className="rounded-md border border-border bg-muted text-sm text-foreground py-2 px-3">
                   {created.label || t('admin.common.unnamedWrapped', '(未命名)')}
                 </div>
               </div>
 
-              <div style={{ marginBottom: 14 }}>
+              <div className="mb-3.5">
                 <div className="mb-1.5 flex justify-between text-xs text-muted-foreground">
                   <span>Site UUID</span>
-                  <button type="button" onClick={() => copy(created.site_uuid, 'uuid')} className="inline-flex items-center gap-1 text-[11px] text-primary hover:text-primary/80">
+                  <button type="button" onClick={() => copy(created.site_uuid, 'uuid')} className="inline-flex items-center gap-1 text-2xs text-primary hover:text-primary/80">
                     {copiedField === 'uuid' ? <Check className="size-3" /> : <Copy className="size-3" />}
                     {copiedField === 'uuid' ? t('admin.common.copied', '已复制') : t('admin.common.copy', '复制')}
                   </button>
                 </div>
-                <div className="break-all rounded-md border border-border bg-muted font-mono text-xs text-foreground" style={{ padding: '8px 12px' }}>
+                <div className="break-all rounded-md border border-border bg-muted font-mono text-xs text-foreground py-2 px-3">
                   {created.site_uuid}
                 </div>
               </div>
 
-              <div style={{ marginBottom: 18 }}>
+              <div className="mb-4">
                 <div className="mb-1.5 flex justify-between text-xs text-muted-foreground">
                   <span>Sync Token</span>
-                  <button type="button" onClick={() => copy(created.token, 'tok')} className="inline-flex items-center gap-1 text-[11px] text-primary hover:text-primary/80">
+                  <button type="button" onClick={() => copy(created.token, 'tok')} className="inline-flex items-center gap-1 text-2xs text-primary hover:text-primary/80">
                     {copiedField === 'tok' ? <Check className="size-3" /> : <Copy className="size-3" />}
                     {copiedField === 'tok' ? t('admin.common.copied', '已复制') : t('admin.common.copy', '复制')}
                   </button>
                 </div>
-                <div className="break-all rounded-md border border-primary/20 bg-primary/5 font-mono text-xs text-foreground" style={{ padding: '8px 12px' }}>
+                <div className="break-all rounded-md border border-primary/20 bg-primary/5 font-mono text-xs text-foreground py-2 px-3">
                   {created.token}
                 </div>
               </div>
 
-              <div className="mb-4 rounded-md border-l-[3px] border-emerald-600 bg-emerald-500/10 text-xs leading-relaxed text-emerald-700 dark:text-emerald-300" style={{ padding: '10px 14px' }}>
+              <div className="mb-4 rounded-md border-l-[3px] border-emerald-600 bg-emerald-500/10 text-xs leading-relaxed text-emerald-700 dark:text-emerald-300 py-2.5 px-3.5">
                 <b>{t('admin.syncSites.nextStep', '下一步')}</b>：在你的 {platformLabel} 后台装 <code>{meta.pluginName}</code> 插件，设置页填：
                 <br />
                 URL: <code>{window.location.origin}</code>

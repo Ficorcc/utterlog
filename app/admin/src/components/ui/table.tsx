@@ -21,7 +21,7 @@ export function Table({ columns, data, keyField = 'id', loading, emptyText, rowS
 
   if (!loading && data.length === 0) {
     return (
-      <div className="flex h-[200px] items-center justify-center text-sm text-muted-foreground">
+      <div className="flex h-50 items-center justify-center text-sm text-muted-foreground">
         {emptyText || t('admin.common.noData', '暂无数据')}
       </div>
     );
@@ -30,7 +30,7 @@ export function Table({ columns, data, keyField = 'id', loading, emptyText, rowS
   return (
     <div className="relative" style={{ minHeight: loading ? 100 : undefined }}>
       {loading && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-[1px]">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80">
           <Loader2 className="size-5 animate-spin text-primary" aria-hidden="true" />
         </div>
       )}

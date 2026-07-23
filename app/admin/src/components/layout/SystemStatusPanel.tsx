@@ -24,11 +24,11 @@ function Ring({ percent, size = 48, stroke = 4, color = 'var(--primary)', label,
           strokeDasharray={`${circ}`} strokeDashoffset={`${offset}`} strokeLinecap="round"
           style={{ transition: 'stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1)' }} />
       </svg>
-      <span style={{ fontSize: '10px', fontWeight: 600, marginTop: '-32px', position: 'relative' }}>
+      <span className="-mt-8 text-3xs font-semibold" style={{ position: 'relative' }}>
         {clampedPct % 1 === 0 ? clampedPct : clampedPct.toFixed(1)}%
       </span>
-      <span className="text-muted-foreground" style={{ fontSize: '9px', marginTop: '14px' }}>{label}</span>
-      {sub && <span className="text-muted-foreground" style={{ fontSize: '8px' }}>{sub}</span>}
+      <span className="mt-3.5 text-3xs text-muted-foreground">{label}</span>
+      {sub && <span className="text-3xs text-muted-foreground">{sub}</span>}
     </div>
   );
 }
@@ -75,13 +75,10 @@ export default function SystemStatusPanel({ isOpen }: { isOpen: boolean }) {
     <div className="border-t border-border" style={{ flexShrink: 0 }}>
       <button
         onClick={() => setExpanded(!expanded)}
-        className="text-muted-foreground"
+        className="bg-transparent text-xs text-muted-foreground w-full flex items-center gap-2 border-none cursor-pointer transition-all"
         style={{
-          width: '100%', display: 'flex', alignItems: 'center', gap: '8px',
           padding: isOpen ? '10px 12px' : '10px 0',
           justifyContent: isOpen ? 'flex-start' : 'center',
-          background: 'none', border: 'none', cursor: 'pointer',
-          fontSize: '12px', transition: 'all 0.15s',
         }}
       >
         {data == null ? (
@@ -97,10 +94,10 @@ export default function SystemStatusPanel({ isOpen }: { isOpen: boolean }) {
           />
         )}
         {isOpen && <span>{t('admin.system.status', '系统状态')}</span>}
-        {isOpen && <span className="text-muted-foreground" style={{ marginLeft: '4px', fontFamily: 'monospace', fontSize: '11px' }}>{clock}</span>}
+        {isOpen && <span className="ml-1 font-mono text-2xs text-muted-foreground">{clock}</span>}
         {isOpen && (
-          <ChevronDownIcon aria-hidden size={12} className="flex size-3 shrink-0 items-center justify-center" style={{
-            marginLeft: 'auto', transition: 'transform 0.2s',
+          <ChevronDownIcon aria-hidden size={12} className="ml-auto flex size-3 shrink-0 items-center justify-center" style={{
+            transition: 'transform 0.2s',
             transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
           }} />
         )}
@@ -109,11 +106,11 @@ export default function SystemStatusPanel({ isOpen }: { isOpen: boolean }) {
       <style>{`@keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:0.5; } }`}</style>
 
       {expanded && isOpen && data && (
-        <div style={{ padding: '0 12px 12px', animation: 'slideUp 0.2s ease-out' }}>
+        <div className="px-3 pb-3" style={{ animation: 'slideUp 0.2s ease-out' }}>
           <style>{`@keyframes slideUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }`}</style>
 
           {/* Ring charts 2x2 */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
+          <div className="mb-2.5" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
             <Ring percent={data.cpu?.percent || 0} color="#16a34a" label="CPU" sub={t('admin.system.cores', '{count} 核', { count: data.cpu?.cores || 0 })} />
             <Ring percent={memPct} color="#2563eb" label={t('admin.system.memory', '内存')} sub={`${data.memory?.used_gb || 0} / ${data.memory?.total_gb || 0} GB`} />
             <Ring percent={diskPct} color="#f59e0b" label={t('admin.system.disk', '磁盘')} sub={`${formatDisk(data.disk?.used)} / ${formatDisk(data.disk?.total)}`} />
@@ -121,7 +118,7 @@ export default function SystemStatusPanel({ isOpen }: { isOpen: boolean }) {
           </div>
 
           {/* Info rows */}
-          <div style={{ fontSize: '10px' }}>
+          <div className="text-3xs">
             <InfoRow label={t('admin.system.os', '系统')}>
               <OsValue label={data.server?.os} />
             </InfoRow>
@@ -197,7 +194,7 @@ function formatDisk(value?: string | number): string {
 
 function InfoRow({ label, value, children }: { label: string; value?: string; children?: ReactNode }) {
   return (
-    <div className="border-b border-border" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 0' }}>
+    <div className="border-b border-border py-1" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <span className="text-muted-foreground">{label}</span>
       <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
         {children ?? value}

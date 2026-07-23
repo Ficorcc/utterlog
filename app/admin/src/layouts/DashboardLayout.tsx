@@ -239,19 +239,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         <header
-          className="border-b border-border bg-card"
+          className="border-b border-border bg-card px-5"
           style={{
             height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '0 20px', flexShrink: 0,
+            flexShrink: 0,
           }}
         >
           {/* Left: current page icon + title (中文 + English) */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
             {PageIcon && <PageIcon className="size-3.5 shrink-0 text-primary" />}
             <h1
-              className="text-foreground"
+              className="m-0 text-sm font-semibold text-foreground"
               style={{
-                fontSize: 14, fontWeight: 600, margin: 0,
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
               }}
             >
@@ -259,9 +258,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </h1>
             {pageEn && (
               <span
-                className="text-muted-foreground"
+                className="text-xs font-normal text-muted-foreground"
                 style={{
-                  fontSize: 12, fontWeight: 400,
                   letterSpacing: '0.02em',
                   flexShrink: 0,
                 }}
@@ -271,9 +269,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             )}
             {pageBadge && (
               <span
-                className="text-muted-foreground"
+                className="text-xs font-normal text-muted-foreground"
                 style={{
-                  fontSize: 12, fontWeight: 400,
                   flexShrink: 0,
                   display: 'inline-flex', alignItems: 'center', gap: 4,
                 }}
@@ -302,7 +299,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             <NotificationBell />
 
-            <div className="bg-border" style={{ width: 1, height: 20, margin: '0 6px' }} />
+            <div className="bg-border mx-1.5" style={{ width: 1, height: 20 }} />
 
             {/* User menu (dropdown) */}
             <div ref={menuRef} style={{ position: 'relative' }}>
@@ -310,12 +307,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 type="button"
                 onClick={() => setMenuOpen((v) => !v)}
                 className={cn(
-                  'text-foreground transition-colors',
+                  'p-1.5 pr-2.5 text-sm text-foreground transition-colors',
                   menuOpen ? 'bg-muted' : 'hover:bg-muted',
                 )}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 8, padding: '5px 10px 5px 6px',
-                  fontSize: 14, border: 'none', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  border: 'none', cursor: 'pointer',
                 }}
               >
                 {user?.avatar ? (
@@ -328,10 +325,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}
                   >
-                    <User className="size-[11px] text-muted-foreground" />
+                    <User className="size-2.75 text-muted-foreground" />
                   </div>
                 )}
-                <span style={{ fontWeight: 500 }}>{user?.nickname || user?.username || t('admin.user.admin', '管理员')}</span>
+                <span className="font-medium">{user?.nickname || user?.username || t('admin.user.admin', '管理员')}</span>
                 {menuOpen
                   ? <ChevronUp className="ml-0.5 size-2.5 text-muted-foreground" />
                   : <ChevronDown className="ml-0.5 size-2.5 text-muted-foreground" />}
@@ -340,21 +337,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {menuOpen && (
                 <div
                   role="menu"
-                  className="border border-border bg-popover text-popover-foreground"
+                  className="border border-border bg-popover py-1 text-popover-foreground"
                   style={{
                     position: 'absolute', right: 0, top: 'calc(100% + 6px)',
                     minWidth: 180,
                     boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                     zIndex: 50,
-                    padding: '4px 0',
                   }}
                 >
-                  <div className="border-b border-border" style={{ padding: '8px 14px 10px' }}>
-                    <div className="text-foreground" style={{ fontSize: 14, fontWeight: 600 }}>
+                  <div className="border-b border-border pt-2 px-3.5 pb-2.5">
+                    <div className="text-sm font-semibold text-foreground">
                       {user?.nickname || user?.username}
                     </div>
                     {user?.email && (
-                      <div className="text-muted-foreground" style={{ fontSize: 11, marginTop: 2 }}>
+                      <div className="mt-0.5 text-2xs text-muted-foreground">
                         {user.email}
                       </div>
                     )}
@@ -363,7 +359,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <MenuItem icon={User} label={t('admin.user.profile', '个人资料')} onClick={() => go('/profile')} />
                   <MenuItem icon={Settings} label={t('admin.user.settings', '系统设置')} onClick={() => go('/settings')} />
 
-                  <div className="bg-border" style={{ height: 1, margin: '4px 0' }} />
+                  <div className="bg-border my-1" style={{ height: 1 }} />
 
                   <MenuItem icon={LogOut} label={t('admin.user.logout', '退出登录')} onClick={handleLogout} danger />
                 </div>
@@ -392,12 +388,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
             ) : wide ? (
               // Wide pages: full viewport width, normal scroll
-              <div style={{ padding: '24px 32px' }}>
+              <div className="px-8 py-6">
                 {children}
               </div>
             ) : (
               // Regular pages: centered with max-width
-              <div style={{ maxWidth: 1280, margin: '0 auto', padding: '24px 32px' }}>
+              <div className="mx-auto px-8 py-6" style={{ maxWidth: 1280 }}>
                 {children}
               </div>
             )}
@@ -417,12 +413,12 @@ function MenuItem({
       role="menuitem"
       onClick={onClick}
       className={cn(
-        'transition-colors hover:bg-muted',
+        'bg-transparent py-2.5 px-3.5 text-sm transition-colors hover:bg-muted',
         danger ? 'text-destructive' : 'text-foreground',
       )}
       style={{
         display: 'flex', alignItems: 'center', gap: 10, width: '100%',
-        padding: '9px 14px', fontSize: 14, border: 'none', background: 'none',
+        border: 'none',
         cursor: 'pointer', textAlign: 'left',
       }}
     >

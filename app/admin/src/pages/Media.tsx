@@ -147,14 +147,14 @@ export default function MediaPage() {
               {/* Source badge */}
               {file.source_type && (
                 <div className="absolute left-1 top-1">
-                  <span className="rounded-sm bg-black/60 px-1.5 py-px text-[10px] text-white">
+                  <span className="rounded-sm bg-black/60 px-1.5 py-px text-3xs text-white">
                     {{ music: t('admin.content.music', '音乐'), movies: t('admin.content.movies', '电影'), books: t('admin.content.books', '图书'), games: t('admin.content.games', '游戏'), goods: t('admin.content.goods', '好物') }[file.source_type as string] || file.source_type}
                   </span>
                 </div>
               )}
 
               {/* File info */}
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+              <div className="absolute inset-x-0 bottom-0 bg-black/60 p-2">
                 <p className="truncate text-xs text-white">{file.name}</p>
                 <p className="text-xs text-white/60">{(file.size / 1024).toFixed(1)} KB</p>
               </div>

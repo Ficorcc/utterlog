@@ -32,12 +32,12 @@ export default function RebuildStatsPanel() {
   };
 
   return (
-    <div className="rounded-lg border border-border bg-card" style={{ marginTop: 20, padding: '16px 18px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+    <div className="rounded-lg border border-border bg-card mt-5 py-4 px-4.5">
+      <div className="mb-1.5" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <RefreshCw className="size-4 text-primary" />
         <div className="text-sm font-semibold text-foreground">重建统计信息</div>
       </div>
-      <p className="text-xs text-muted-foreground" style={{ lineHeight: 1.7, marginBottom: 12 }}>
+      <p className="text-xs text-muted-foreground mb-3" style={{ lineHeight: 1.7 }}>
         从评论、关系表实时重算每篇文章的评论数、每个分类/标签的引用数、每篇文章的字数。
         WordPress 导入后、手动导入、或发现数字与实际对不上时，点一下。
       </p>
@@ -46,14 +46,14 @@ export default function RebuildStatsPanel() {
         {busy ? '重建中…' : '立即重建'}
       </Button>
       {result && (
-        <div className="text-xs text-muted-foreground" style={{ marginTop: 12, lineHeight: 1.7 }}>
+        <div className="text-xs text-muted-foreground mt-3" style={{ lineHeight: 1.7 }}>
           <div>分类/标签数量：更新 {result.meta_count_updated ?? 0} 行</div>
           <div>文章评论数：更新 {result.comment_count_updated ?? 0} 行</div>
           <div>文章字数：更新 {result.word_count_updated ?? 0} 行</div>
         </div>
       )}
       {err && (
-        <div className="text-xs text-destructive" style={{ marginTop: 12 }}>{err}</div>
+        <div className="text-xs text-destructive mt-3">{err}</div>
       )}
     </div>
   );

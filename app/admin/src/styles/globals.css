@@ -431,6 +431,34 @@ form,
   --font-serif: "Noto Serif SC", "Source Han Serif SC", "Georgia", ui-serif, serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   --font-logo: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+
+  /* Dense-UI text sizes — admin tables/badges/meta text sit between the
+     default xs(12)/sm(14)/xl(20)/2xl(24) steps. Named tokens instead of
+     arbitrary text-[Npx] brackets, values unchanged from prior usage. */
+  --text-4xs: 0.5625rem;     /* 9px */
+  --text-3xs: 0.625rem;      /* 10px */
+  --text-2xs: 0.6875rem;     /* 11px */
+  --text-xs-plus: 0.8125rem; /* 13px */
+  --text-sm-plus: 0.9375rem; /* 15px */
+  --text-xl-plus: 1.375rem;  /* 22px */
+
+  /* Update log terminal panel — dark-console status palette, unrelated
+     to the light/dark theme tokens above. Named instead of inline hex. */
+  --color-terminal-bg: #0a0e1a;
+  --color-terminal-header-bg: #0f1729;
+  --color-terminal-border: #1e293b;
+  --color-terminal-info: #60a5fa;
+  --color-terminal-success: #4ade80;
+  --color-terminal-error: #f87171;
+  --color-terminal-text: #cbd5e1;
+  --color-terminal-dim: #94a3b8;
+  --color-terminal-muted: #64748b;
+  --radius-terminal: 6px;
+
+  /* Markdown editor "insert download link" card — fixed brand accent,
+     unrelated to the semantic theme tokens above. */
+  --color-download-badge: #f5a623;
+  --color-download-icon: #1a1a1a;
 }
 
 /* ========================================
@@ -1494,7 +1522,7 @@ div:hover > .comment-hint { opacity: 0.75 !important; }
   padding: 16px 18px;
   border: 1px solid rgba(0, 82, 217, 0.18);
   border-left: 4px solid var(--moment-accent);
-  background: linear-gradient(135deg, rgba(0, 82, 217, 0.06), rgba(255, 255, 255, 0.95));
+  background: rgba(0, 82, 217, 0.04);
   color: var(--color-text);
 }
 
@@ -1544,7 +1572,7 @@ div:hover > .comment-hint { opacity: 0.75 !important; }
   margin: 16px 0;
   padding: 0;
   border: 1px solid var(--color-border);
-  background: linear-gradient(135deg, #fff 0%, var(--color-bg-soft, #f8fafc) 100%);
+  background: var(--color-bg-soft, #f8fafc);
   color: var(--color-text);
   text-decoration: none;
 }
@@ -1765,10 +1793,7 @@ div:hover > .comment-hint { opacity: 0.75 !important; }
   position: absolute;
   top: 0;
   bottom: 0;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    #60a5fa 50%,
-    transparent 100%);
+  background: #60a5fa;
   animation: upgradeLogProgressBar 1.5s linear infinite;
 }
 

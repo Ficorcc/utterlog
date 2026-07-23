@@ -12,10 +12,10 @@ interface ModalProps {
 }
 
 const sizeMap = {
-  sm: 'max-w-[400px]',
-  md: 'max-w-[520px]',
-  lg: 'max-w-[680px]',
-  xl: 'max-w-[860px]',
+  sm: 'max-w-100',
+  md: 'max-w-130',
+  lg: 'max-w-170',
+  xl: 'max-w-215',
 };
 
 export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalProps) {

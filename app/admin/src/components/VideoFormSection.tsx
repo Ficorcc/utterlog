@@ -331,7 +331,7 @@ export default function VideoFormSection({ initialMeta, initialEpisodes, onChang
                 <Input value={ep.video_url} onChange={(e: any) => updateEpisode(idx, { video_url: e.target.value })}
                   placeholder="主线视频 URL（mp4/m3u8/YouTube/Bilibili）" className="font-mono text-xs" />
                 <Input value={ep.platform} onChange={(e: any) => updateEpisode(idx, { platform: e.target.value })}
-                  placeholder="自动" className="text-[11px]" />
+                  placeholder="自动" className="text-2xs" />
                 <div className="flex justify-end gap-1">
                   <Button variant="outline" size="icon" className="size-8" disabled={idx === 0} onClick={() => moveEpisode(idx, -1)} title="上移">
                     <ChevronUp className="size-3" />
@@ -346,15 +346,15 @@ export default function VideoFormSection({ initialMeta, initialEpisodes, onChang
               </div>
 
               {/* 备线（alt_sources）—— 折叠展开 */}
-              <details style={{ marginTop: 8 }}>
-                <summary className="cursor-pointer text-[11px] text-muted-foreground">
+              <details className="mt-2">
+                <summary className="cursor-pointer text-2xs text-muted-foreground">
                   备用线路 ({ep.alt_sources.length})
                 </summary>
                 <div className="mt-2 flex flex-col gap-1.5 pl-3">
                   {ep.alt_sources.map((a, j) => (
                     <div key={j} className="grid gap-1.5" style={{ gridTemplateColumns: '120px 1fr 32px' }}>
                       <Input value={a.label} onChange={(e: any) => updateAlt(idx, j, { label: e.target.value })} placeholder="备线名称" className="text-xs" />
-                      <Input value={a.url} onChange={(e: any) => updateAlt(idx, j, { url: e.target.value })} placeholder="备线 URL" className="font-mono text-[11px]" />
+                      <Input value={a.url} onChange={(e: any) => updateAlt(idx, j, { url: e.target.value })} placeholder="备线 URL" className="font-mono text-2xs" />
                       <Button variant="outline" size="icon" className="size-8 text-destructive hover:text-destructive" onClick={() => deleteAlt(idx, j)} title="删除">
                         <X className="size-2.5" />
                       </Button>
@@ -385,7 +385,7 @@ export default function VideoFormSection({ initialMeta, initialEpisodes, onChang
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40"
           onClick={() => setBulkPasteOpen(false)}
         >
-          <div className="w-[600px] rounded-lg border border-border bg-card p-5" onClick={(e) => e.stopPropagation()}>
+          <div className="w-150 rounded-lg border border-border bg-card p-5" onClick={(e) => e.stopPropagation()}>
             <h3 className="mb-3 text-sm font-semibold text-foreground">批量粘贴剧集</h3>
             <p className="mb-2.5 text-xs leading-relaxed text-muted-foreground">
               每行一个 URL，自动按当前最大集号 +1 递增编号。<br/>

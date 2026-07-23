@@ -16,10 +16,10 @@ export default class ErrorBoundary extends Component<{ children: ReactNode }, { 
   render() {
     if (!this.state.error) return this.props.children;
     return (
-      <div style={{ padding: '64px 20px', textAlign: 'center' }}>
+      <div className="px-5 py-16 text-center">
         <TriangleAlert className="mx-auto size-10 text-destructive" />
-        <h1 style={{ fontSize: 18, margin: '16px 0 8px' }}>页面渲染出错</h1>
-        <p className="text-muted-foreground" style={{ fontSize: 13 }}>这个模块加载失败，其他功能不受影响。</p>
+        <h1 className="mb-2 mt-4 text-lg">页面渲染出错</h1>
+        <p className="text-xs-plus text-muted-foreground">这个模块加载失败，其他功能不受影响。</p>
         <Button className="mt-4" onClick={() => this.setState({ error: null })}>
           <RotateCcw className="size-4" /> 重试
         </Button>

@@ -214,26 +214,25 @@ export default function VisitorMap({ period }: { period: string }) {
   if (!mapboxToken) {
     return (
       <div
-        className="border border-border bg-muted text-muted-foreground"
+        className="border border-border bg-muted text-muted-foreground mb-5 p-6"
         style={{
-          marginBottom: '20px',
           height: '480px', display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center', gap: '10px',
-          textAlign: 'center', padding: '24px',
+          textAlign: 'center',
         }}
       >
         <Globe size={32} className="text-muted-foreground" />
-        <div className="text-foreground" style={{ fontSize: '14px', fontWeight: 500 }}>访客地图未启用</div>
-        <div style={{ fontSize: '12px', lineHeight: 1.7, maxWidth: '420px' }}>
-          在 <code className="bg-card" style={{ padding: '1px 6px', fontFamily: 'ui-monospace, monospace' }}>系统设置 → 第三方服务</code> 填写 Mapbox Token 后即可显示地图。免费 token：
-          <a href="https://account.mapbox.com/" target="_blank" rel="noreferrer" className="text-primary" style={{ marginLeft: 4 }}>account.mapbox.com</a>
+        <div className="text-foreground text-sm font-medium">访客地图未启用</div>
+        <div className="text-xs" style={{ lineHeight: 1.7, maxWidth: '420px' }}>
+          在 <code className="bg-card py-px px-1.5" style={{ fontFamily: 'ui-monospace, monospace' }}>系统设置 → 第三方服务</code> 填写 Mapbox Token 后即可显示地图。免费 token：
+          <a href="https://account.mapbox.com/" target="_blank" rel="noreferrer" className="text-primary ml-1">account.mapbox.com</a>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="analytics-visitor-map border border-border" style={{ marginBottom: '20px', position: 'relative' }}>
+    <div className="analytics-visitor-map border border-border mb-5" style={{ position: 'relative' }}>
       <style>{`
         .analytics-visitor-map .mapboxgl-ctrl-logo { display: none !important; }
         .analytics-visitor-map .mapboxgl-canvas { touch-action: none; }

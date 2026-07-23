@@ -60,7 +60,7 @@ function MshotCard({ url, children }: { url: string; children: React.ReactNode }
       {children}
       {show && (
         <div
-          className="w-[300px] overflow-hidden rounded-md border border-border bg-popover shadow-lg"
+          className="w-75 overflow-hidden rounded-md border border-border bg-popover shadow-lg"
           style={{ position: 'fixed', left: pos.x, top: pos.y, transform: 'translateY(-100%)', zIndex: 99999 }}
         >
           <div className="bg-muted" style={{ position: 'relative', width: '100%', height: '170px' }}>
@@ -68,7 +68,7 @@ function MshotCard({ url, children }: { url: string; children: React.ReactNode }
               style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
               onError={e => { (e.target as HTMLImageElement).parentElement!.style.display = 'none'; }} />
           </div>
-          <div className="flex items-center gap-1 border-t border-border px-3 py-2 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-1 border-t border-border px-3 py-2 text-2xs text-muted-foreground">
             <Globe className="size-2.5 shrink-0 opacity-50" />
             <span className="truncate">{url.replace(/^https?:\/\//, '').replace(/\/$/, '')}</span>
           </div>
@@ -81,7 +81,7 @@ function MshotCard({ url, children }: { url: string; children: React.ReactNode }
 function AuthorLink({ name, url }: { name: string; url: string }) {
   return (
     <MshotCard url={url}>
-      <a href={url} target="_blank" rel="noopener noreferrer" className="text-[13px] font-semibold text-primary no-underline">
+      <a href={url} target="_blank" rel="noopener noreferrer" className="text-xs-plus font-semibold text-primary no-underline">
         {name}
       </a>
     </MshotCard>
@@ -109,13 +109,13 @@ function ParentPopover({ parent, children }: { parent: any; children: React.Reac
       {children}
       {show && (
         <div
-          className="w-[280px] overflow-hidden rounded-md border border-border bg-popover shadow-lg"
+          className="w-70 overflow-hidden rounded-md border border-border bg-popover shadow-lg"
           style={{ position: 'fixed', left: pos.x, top: pos.y, transform: 'translateY(-100%)', zIndex: 99999 }}
         >
-          <div className="px-3 py-2.5 text-[13px] leading-relaxed text-foreground" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+          <div className="px-3 py-2.5 text-xs-plus leading-relaxed text-foreground" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
             {parent.content}
           </div>
-          <div className="flex justify-between border-t border-border px-3 pb-2 pt-1 text-[11px] text-muted-foreground">
+          <div className="flex justify-between border-t border-border px-3 pb-2 pt-1 text-2xs text-muted-foreground">
             <span>{parent.author}</span>
             {parent.created_at > 0 && <span>{formatDate(parent.created_at)}</span>}
           </div>
@@ -145,7 +145,7 @@ function CommentCell({ row }: { row: any }) {
     <div>
       <p
         ref={textRef}
-        className="whitespace-pre-wrap break-words text-[13px] text-foreground"
+        className="whitespace-pre-wrap break-words text-xs-plus text-foreground"
         style={{
           lineHeight,
           overflow: expanded ? 'visible' : 'hidden',
@@ -161,7 +161,7 @@ function CommentCell({ row }: { row: any }) {
       {(overflows || expanded) && (
         <button
           onClick={() => setExpanded(!expanded)}
-          className="mt-0.5 text-[11px] text-primary hover:underline"
+          className="mt-0.5 text-2xs text-primary hover:underline"
         >
           {expanded ? t('admin.common.collapse', '收起') : t('admin.common.expand', '展开')}
         </button>
@@ -370,7 +370,7 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
             {s.label}
             {s.count > 0 && (
               <span className={cn(
-                'absolute -right-1.5 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white',
+                'absolute -right-1.5 -top-1.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full px-1 text-3xs font-bold text-white',
                 s.key === 'spam' ? 'bg-amber-500' : 'bg-destructive',
               )}>
                 {s.count > 99 ? '99+' : s.count}
@@ -416,7 +416,7 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[220px]">
+              <TableHead className="w-55">
                 <label className="flex cursor-pointer items-center gap-1.5">
                   <input
                     type="checkbox"
@@ -426,14 +426,14 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
                   />
                   <span>{t('admin.comments.columns.author', '作者')}</span>
                   {selectedIds.size > 0 && (
-                    <span className="text-[11px] font-medium text-primary">{t('admin.common.selectedCount', '已选 {count}', { count: selectedIds.size })}</span>
+                    <span className="text-2xs font-medium text-primary">{t('admin.common.selectedCount', '已选 {count}', { count: selectedIds.size })}</span>
                   )}
                 </label>
               </TableHead>
-              <TableHead className="w-[300px]">{t('admin.comments.columns.comment', '评论')}</TableHead>
-              <TableHead className="w-[180px]">{t('admin.comments.columns.replyTo', '回复至')}</TableHead>
-              <TableHead className="w-[120px]">{t('admin.comments.columns.submittedAt', '提交于')}</TableHead>
-              <TableHead className="w-[140px]">{t('admin.common.actions', '操作')}</TableHead>
+              <TableHead className="w-75">{t('admin.comments.columns.comment', '评论')}</TableHead>
+              <TableHead className="w-45">{t('admin.comments.columns.replyTo', '回复至')}</TableHead>
+              <TableHead className="w-30">{t('admin.comments.columns.submittedAt', '提交于')}</TableHead>
+              <TableHead className="w-35">{t('admin.common.actions', '操作')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -473,15 +473,15 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
                           {row.url ? (
                             <AuthorLink name={row.author} url={row.url} />
                           ) : (
-                            <span className="text-[13px] font-semibold text-foreground">{row.author}</span>
+                            <span className="text-xs-plus font-semibold text-foreground">{row.author}</span>
                           )}
                           {row.geo?.country_code && (
                             <img src={`https://flagcdn.io/flags/1x1/${row.geo.country_code.toLowerCase()}.svg`} alt="" title={row.geo ? [row.geo.country, row.geo.province, row.geo.city].filter(Boolean).join(' · ') : ''} style={{ width: '14px', height: '14px', objectFit: 'cover', borderRadius: '50%' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                           )}
-                          {row.ip && <span className="text-[11px] text-muted-foreground">{formatIP(row.ip)}</span>}
+                          {row.ip && <span className="text-2xs text-muted-foreground">{formatIP(row.ip)}</span>}
                         </div>
                         {row.email && (
-                          <div className="text-[11px] text-muted-foreground">{row.email}</div>
+                          <div className="text-2xs text-muted-foreground">{row.email}</div>
                         )}
                       </div>
                     </div>
@@ -496,14 +496,14 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
                   <TableCell className="align-top">
                     <div className="text-xs">
                       {row.post_slug ? (
-                        <a href={commentPostUrl(row)} target="_blank" rel="noopener noreferrer" className="text-[13px] font-medium text-primary no-underline">
+                        <a href={commentPostUrl(row)} target="_blank" rel="noopener noreferrer" className="text-xs-plus font-medium text-primary no-underline">
                           {row.post_title || '-'}
-                          {row.post_comment_count > 0 && <sup className="ml-px text-[10px] font-normal text-muted-foreground">{row.post_comment_count}</sup>}
+                          {row.post_comment_count > 0 && <sup className="ml-px text-3xs font-normal text-muted-foreground">{row.post_comment_count}</sup>}
                         </a>
                       ) : (
-                        <span className="text-[13px] font-medium text-foreground">
+                        <span className="text-xs-plus font-medium text-foreground">
                           {row.post_title || '-'}
-                          {row.post_comment_count > 0 && <sup className="ml-px text-[10px] font-normal text-muted-foreground">{row.post_comment_count}</sup>}
+                          {row.post_comment_count > 0 && <sup className="ml-px text-3xs font-normal text-muted-foreground">{row.post_comment_count}</sup>}
                         </span>
                       )}
                     </div>
@@ -566,7 +566,7 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">{t('admin.common.totalItems', '共 {count} 条', { count: total })}</span>
             <Select value={perPage} onValueChange={(v) => { setPerPage(Number(v)); setPage(1); }}>
-              <SelectTrigger className="h-8 w-[110px] text-xs">
+              <SelectTrigger className="h-8 w-27.5 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -597,7 +597,7 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
       />
 
       <Dialog open={!!replyId} onOpenChange={(o) => !o && setReplyId(null)}>
-        <DialogContent className="max-w-[400px]">
+        <DialogContent className="max-w-100">
           <DialogHeader>
             <DialogTitle>{t('admin.comments.replyComment', '回复评论')}</DialogTitle>
           </DialogHeader>
@@ -619,7 +619,7 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
 
       {/* Edit dialog */}
       <Dialog open={!!editComment} onOpenChange={(o) => !o && setEditComment(null)}>
-        <DialogContent className="max-w-[400px]">
+        <DialogContent className="max-w-100">
           <DialogHeader>
             <DialogTitle>{t('admin.comments.editComment', '编辑评论')}</DialogTitle>
           </DialogHeader>

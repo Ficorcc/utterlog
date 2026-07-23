@@ -196,7 +196,7 @@ export default function Login() {
     <div className="flex min-h-screen items-center justify-center bg-background p-6">
       <form
         onSubmit={needTotp ? handle2FA : handleSubmit}
-        className="w-full max-w-[380px] rounded-md border border-border bg-card px-7 py-8"
+        className="w-full max-w-95 rounded-md border border-border bg-card px-7 py-8"
       >
         <div className="mb-7 text-center">
           <svg
@@ -247,7 +247,7 @@ export default function Login() {
               <>
                 <div className="mb-4 mt-5 flex items-center gap-3">
                   <div className="h-px flex-1 bg-border" />
-                  <span className="text-[11px] text-muted-foreground">{t('admin.login.or', '或')}</span>
+                  <span className="text-2xs text-muted-foreground">{t('admin.login.or', '或')}</span>
                   <div className="h-px flex-1 bg-border" />
                 </div>
                 <Button
@@ -269,7 +269,7 @@ export default function Login() {
             <div className="mb-6">
               <Label className="mb-1.5 block">
                 {t('admin.login.sixDigitCode', '6 位验证码')}
-                <span className="ml-1.5 text-[11px] font-normal text-muted-foreground">
+                <span className="ml-1.5 text-2xs font-normal text-muted-foreground">
                   {t('admin.login.authenticatorHint', '（Authenticator App 生成）')}
                 </span>
               </Label>
@@ -281,7 +281,7 @@ export default function Login() {
                 autoFocus
                 className="text-center font-mono text-xl tracking-[6px]"
               />
-              <p className="mt-1.5 text-[11px] text-muted-foreground">
+              <p className="mt-1.5 text-2xs text-muted-foreground">
                 {t('admin.login.recoveryCodeHint', '没有 App？使用 8 位备用恢复码')}
               </p>
             </div>
@@ -311,7 +311,7 @@ export default function Login() {
             className="fixed inset-0 z-50 bg-black/30"
           />
           <div
-            className="fixed left-1/2 top-1/2 z-[51] w-[380px] max-w-[90vw] -translate-x-1/2 -translate-y-1/2 rounded-md border border-border bg-card p-7 shadow-xl"
+            className="fixed left-1/2 top-1/2 z-[51] w-95 max-w-[90vw] -translate-x-1/2 -translate-y-1/2 rounded-md border border-border bg-card p-7 shadow-xl"
           >
             <h2 className="mb-1.5 text-base font-bold">{t('admin.login.forgotPassword', '找回密码')}</h2>
             <p className="mb-5 text-xs text-muted-foreground">
@@ -372,7 +372,7 @@ export default function Login() {
         <>
           <div className="fixed inset-0 z-50 bg-black/30" />
           <div
-            className="fixed left-1/2 top-1/2 z-[51] w-[380px] max-w-[90vw] -translate-x-1/2 -translate-y-1/2 rounded-md border border-border bg-card p-7 shadow-xl"
+            className="fixed left-1/2 top-1/2 z-[51] w-95 max-w-[90vw] -translate-x-1/2 -translate-y-1/2 rounded-md border border-border bg-card p-7 shadow-xl"
           >
             <h2 className="mb-1.5 text-base font-bold">{t('admin.login.resetPassword', '重置密码')}</h2>
             <p className="mb-5 text-xs text-muted-foreground">

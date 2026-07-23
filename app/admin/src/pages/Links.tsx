@@ -472,7 +472,7 @@ export default function LinksPage() {
               >
                 {g === 'all'
                   ? <Layers className="size-3.5" />
-                  : (groupCfg?.icon ? <i className={groupCfg.icon} style={{ fontSize: 14 }} /> : <Folder className="size-3.5" />)}
+                  : (groupCfg?.icon ? <i className={`${groupCfg.icon} text-sm`} /> : <Folder className="size-3.5" />)}
                 <span>{groupLabel(g)}</span>
                 <span className="text-xs font-normal text-muted-foreground">({count})</span>
               </button>
@@ -598,12 +598,12 @@ export default function LinksPage() {
               <TableRow>
                 <TableHead className="w-11">#</TableHead>
                 <TableHead className="w-12"></TableHead>
-                <TableHead className="w-[190px]">{t('admin.links.columns.name', '站点名称')}</TableHead>
+                <TableHead className="w-47.5">{t('admin.links.columns.name', '站点名称')}</TableHead>
                 <TableHead className="w-[28%]">{t('admin.links.columns.description', '描述')}</TableHead>
                 <TableHead className="w-[22%]">{t('admin.links.columns.url', '网址')}</TableHead>
-                <TableHead className="w-[20%]">RSS</TableHead>
-                <TableHead className="w-[88px]">{t('admin.links.columns.group', '分组')}</TableHead>
-                <TableHead className="w-[84px] text-right">{t('admin.common.actions', '操作')}</TableHead>
+                <TableHead className="w-1/5">RSS</TableHead>
+                <TableHead className="w-22">{t('admin.links.columns.group', '分组')}</TableHead>
+                <TableHead className="w-21 text-right">{t('admin.common.actions', '操作')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -655,7 +655,7 @@ export default function LinksPage() {
 
       {/* Create/Edit Modal */}
       <Dialog open={isModalOpen} onOpenChange={(o) => !o && setIsModalOpen(false)}>
-        <DialogContent className="max-h-[calc(100vh-32px)] max-w-[520px] overflow-y-auto">
+        <DialogContent className="max-h-[calc(100vh-32px)] max-w-130 overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingId ? t('admin.links.editLink', '编辑友链') : t('admin.links.addLink', '添加友链')}</DialogTitle>
           </DialogHeader>
@@ -703,7 +703,7 @@ export default function LinksPage() {
                   <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={avatarUploading} />
                 </label>
               </div>
-              <p className="mt-1 text-[11px] text-muted-foreground">{t('admin.links.logoHint', '不填写则自动获取站点 favicon')}</p>
+              <p className="mt-1 text-2xs text-muted-foreground">{t('admin.links.logoHint', '不填写则自动获取站点 favicon')}</p>
             </div>
             <div className="flex flex-col gap-1.5">
               <Label>{t('admin.links.rssUrl', 'RSS 地址')}</Label>
@@ -735,7 +735,7 @@ export default function LinksPage() {
 
       {/* Group Management Modal */}
       <Dialog open={showGroupModal} onOpenChange={(o) => { if (!o) { setShowGroupModal(false); setEditingGroup(null); } }}>
-        <DialogContent className="max-h-[calc(100vh-32px)] max-w-[860px] overflow-y-auto">
+        <DialogContent className="max-h-[calc(100vh-32px)] max-w-215 overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t('admin.links.groupManagement', '分类管理')}</DialogTitle>
           </DialogHeader>
@@ -758,7 +758,7 @@ export default function LinksPage() {
                       </span>
                       {isEditing ? (
                         <Input
-                          className="h-8 text-[13px]"
+                          className="h-8 text-xs-plus"
                           value={editingGroup?.new ?? ''}
                           onChange={e => setEditingGroup({ old: editingGroup?.old ?? group.key, new: e.target.value })}
                           onKeyDown={e => { if (e.key === 'Enter') renameGroup(group.key, editingGroup?.new ?? ''); if (e.key === 'Escape') setEditingGroup(null); }}
@@ -766,11 +766,11 @@ export default function LinksPage() {
                           autoFocus
                         />
                       ) : (
-                        <span className="text-[13px] font-medium text-foreground">{groupLabel(group.key)}</span>
+                        <span className="text-xs-plus font-medium text-foreground">{groupLabel(group.key)}</span>
                       )}
                       <div className="flex items-center gap-1.5">
-                        <span className="inline-flex w-[18px] shrink-0 justify-center text-primary">
-                          {group.icon ? <i className={group.icon} style={{ fontSize: 13 }} /> : <Folder className="size-3.5" />}
+                        <span className="inline-flex w-4.5 shrink-0 justify-center text-primary">
+                          {group.icon ? <i className={`${group.icon} text-xs-plus`} /> : <Folder className="size-3.5" />}
                         </span>
                         <Input
                           className="h-8 text-xs"
@@ -793,7 +793,7 @@ export default function LinksPage() {
                           <SelectItem value="compact">{t('admin.links.groupStyle.compact', '图标式')}</SelectItem>
                         </SelectContent>
                       </Select>
-                      <span className="text-right text-[11px] text-muted-foreground">{t('admin.links.countItems', '{count} 条', { count })}</span>
+                      <span className="text-right text-2xs text-muted-foreground">{t('admin.links.countItems', '{count} 条', { count })}</span>
                       {!isEditing && (
                         <span className="inline-flex justify-end gap-1.5">
                           <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" title={t('admin.common.edit', '编辑')} onClick={() => setEditingGroup({ old: group.key, new: group.name })}>
@@ -811,7 +811,7 @@ export default function LinksPage() {
                 })}
               </div>
             ) : (
-              <p className="py-4 text-center text-[13px] text-muted-foreground">{t('admin.links.noGroups', '暂无分类')}</p>
+              <p className="py-4 text-center text-xs-plus text-muted-foreground">{t('admin.links.noGroups', '暂无分类')}</p>
             )}
 
             {/* Add new group */}

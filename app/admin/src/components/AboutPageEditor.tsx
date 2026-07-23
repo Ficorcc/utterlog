@@ -106,6 +106,8 @@ const fieldRow: CSSProperties = {
 
 const fieldLabelCls = 'text-sm font-semibold text-muted-foreground';
 
+// paddingLeft/Right 22px 不在 4px 网格 / Tailwind 内置刻度上（20 与 24 之间无 token），
+// 保留内联避免改变按钮实际内边距。
 const aboutActionButtonStyle: CSSProperties = {
   minWidth: 210,
   paddingLeft: 22,
@@ -368,9 +370,9 @@ export default function AboutPageEditor({ open, onClose }: { open: boolean; onCl
               </p>
             </button>
           </div>
-          <div className="rounded-lg border border-border bg-muted p-[18px]">
+          <div className="rounded-lg border border-border bg-muted p-4">
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div className="flex size-[52px] items-center justify-center rounded-md border border-border bg-card text-primary">
+              <div className="flex size-13 items-center justify-center rounded-md border border-border bg-card text-primary">
                 <User className="size-5" />
               </div>
               <div>
@@ -405,7 +407,7 @@ export default function AboutPageEditor({ open, onClose }: { open: boolean; onCl
           这里是独立的 Markdown 内容。需要在「模板」里选择「自定义 Markdown」后，前台才会用这段内容作为关于页正文。
         </p>
         {config.mode !== 'markdown' && (
-          <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 10 }}>
+          <div className="mb-2.5" style={{ display: 'flex', justifyContent: 'flex-start' }}>
             <Button size="sm" variant="secondary" onClick={() => setConfig(prev => ({ ...prev, mode: 'markdown' }))}>
               <FileCode className="size-3" /> 切换为自定义 Markdown
             </Button>
@@ -432,7 +434,7 @@ export default function AboutPageEditor({ open, onClose }: { open: boolean; onCl
         minHeight: 0,
         overflow: 'hidden',
       }}>
-        <div className="border-r border-border" style={{ paddingRight: 14, minHeight: 0, overflowY: 'auto' }}>
+        <div className="border-r border-border pr-3.5" style={{ minHeight: 0, overflowY: 'auto' }}>
           <div style={{ display: 'grid', gap: 6 }}>
             {tabs.map(item => {
               const TabIcon = item.icon;
@@ -458,10 +460,10 @@ export default function AboutPageEditor({ open, onClose }: { open: boolean; onCl
           </div>
         </div>
         <div style={{ minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: 4 }}>
+          <div className="pr-1" style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
             {renderBody()}
           </div>
-          <div className="border-t border-border" style={{ flex: '0 0 auto', display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 18, marginTop: 18 }}>
+          <div className="border-t border-border flex-none flex justify-end gap-2 pt-4.5 mt-4.5">
             <Button variant="secondary" onClick={onClose} disabled={saving}>取消</Button>
             <SaveButton onClick={handleSave} loading={saving} />
           </div>

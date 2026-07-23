@@ -122,8 +122,8 @@ export default function UtterlogCenterPage() {
         <Card className="p-6">
           <div className="mb-5 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <Network className="size-[18px] text-primary" />
-              <h2 className="text-[15px] font-semibold text-foreground">网络状态</h2>
+              <Network className="size-4.5 text-primary" />
+              <h2 className="text-sm-plus font-semibold text-foreground">网络状态</h2>
             </div>
             <div className={cn(
               'rounded px-3 py-1 text-xs font-semibold',
@@ -145,19 +145,19 @@ export default function UtterlogCenterPage() {
                 'flex items-center justify-between py-2.5',
                 idx < 2 && 'border-b border-border',
               )}>
-                <span className="text-[13px] text-muted-foreground">{item.label}</span>
+                <span className="text-xs-plus text-muted-foreground">{item.label}</span>
                 <code className="font-mono text-xs text-foreground">{item.value}</code>
               </div>
             ))}
           </div>
 
-          <p className="mt-3.5 text-[11px] leading-relaxed text-muted-foreground">
+          <p className="mt-3.5 text-2xs leading-relaxed text-muted-foreground">
             站点安装后自动连接 id.utterlog.com 认证中心，基于唯一指纹自动注册，无需手动配置。
           </p>
 
           {networkStatus.connected && (
             <div className="mt-3.5">
-              <Button variant="outline" size="sm" className="min-w-[180px]" onClick={async () => {
+              <Button variant="outline" size="sm" className="min-w-45" onClick={async () => {
                 try { await networkApi.pushInfo(); toast.success('站点信息已推送'); } catch { toast.error('推送失败'); }
               }}>
                 手动推送站点信息
@@ -168,7 +168,7 @@ export default function UtterlogCenterPage() {
 
         {/* Content Sharing */}
         <Card className="p-6">
-          <h2 className="mb-1.5 text-[15px] font-semibold text-foreground">内容共享</h2>
+          <h2 className="mb-1.5 text-sm-plus font-semibold text-foreground">内容共享</h2>
           <p className="mb-5 text-xs text-muted-foreground">选择哪些内容可以被其他 Utterlog 站点订阅和发现</p>
 
           <div className="flex flex-col gap-4">
@@ -185,8 +185,8 @@ export default function UtterlogCenterPage() {
             ].map(item => (
               <div key={item.key} className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="text-[13px] font-medium text-foreground">{item.label}</div>
-                  <div className="mt-0.5 text-[11px] text-muted-foreground">{item.desc}</div>
+                  <div className="text-xs-plus font-medium text-foreground">{item.label}</div>
+                  <div className="mt-0.5 text-2xs text-muted-foreground">{item.desc}</div>
                 </div>
                 <Switch
                   checked={(shareSettings as any)[item.key] || false}
@@ -210,9 +210,9 @@ export default function UtterlogCenterPage() {
         <Card className="p-6">
           <div className="mb-4 flex items-center gap-2">
             <Globe className="size-4 text-primary" />
-            <h2 className="text-[15px] font-semibold text-foreground">Utterlog ID</h2>
+            <h2 className="text-sm-plus font-semibold text-foreground">Utterlog ID</h2>
             {utterlogBound && (
-              <span className="rounded bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">已绑定</span>
+              <span className="rounded bg-emerald-500/15 px-2 py-0.5 text-3xs font-semibold text-emerald-600 dark:text-emerald-400">已绑定</span>
             )}
           </div>
 
@@ -225,7 +225,7 @@ export default function UtterlogCenterPage() {
                   <div className="flex size-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">U</div>
                 )}
                 <div>
-                  <p className="text-[15px] font-semibold text-foreground">{utterlogId}</p>
+                  <p className="text-sm-plus font-semibold text-foreground">{utterlogId}</p>
                   <p className="text-xs text-muted-foreground">全网通用身份</p>
                 </div>
               </div>
@@ -240,7 +240,7 @@ export default function UtterlogCenterPage() {
             </div>
           ) : (
             <div>
-              <p className="mb-3.5 text-[13px] leading-relaxed text-muted-foreground">
+              <p className="mb-3.5 text-xs-plus leading-relaxed text-muted-foreground">
                 绑定 Utterlog ID 后，头像和昵称在所有 Utterlog 联盟站点间共享，使用统一身份评论和互动。
               </p>
               <Button className="w-full" disabled={bindingUtterlog} onClick={async () => {
@@ -272,7 +272,7 @@ export default function UtterlogCenterPage() {
         {/* Avatar Source */}
         {utterlogBound && (
           <Card className="p-6">
-            <h2 className="mb-1.5 text-[15px] font-semibold text-foreground">站点头像来源</h2>
+            <h2 className="mb-1.5 text-sm-plus font-semibold text-foreground">站点头像来源</h2>
             <p className="mb-4 text-xs text-muted-foreground">选择博客前端显示哪个头像</p>
 
             <div className="mb-3 flex gap-5">
@@ -280,7 +280,7 @@ export default function UtterlogCenterPage() {
                 <div className={cn('size-14 overflow-hidden rounded-full', avatarSource === 'gravatar' ? 'border-[3px] border-primary' : 'border-2 border-border')}>
                   {gravatarUrl && <img src={gravatarUrl} alt="" className="size-full object-cover" />}
                 </div>
-                <span className={cn('text-[11px]', avatarSource === 'gravatar' ? 'font-semibold text-primary' : 'text-muted-foreground')}>Gravatar</span>
+                <span className={cn('text-2xs', avatarSource === 'gravatar' ? 'font-semibold text-primary' : 'text-muted-foreground')}>Gravatar</span>
               </label>
               <label className="flex cursor-pointer flex-col items-center gap-2" onClick={async () => { setAvatarSource('utterlog'); await optionsApi.updateMany({ avatar_source: 'utterlog' }); toast.success('已切换'); }}>
                 <div className={cn('flex size-14 items-center justify-center overflow-hidden rounded-full bg-muted', avatarSource === 'utterlog' ? 'border-[3px] border-primary' : 'border-2 border-border')}>
@@ -290,10 +290,10 @@ export default function UtterlogCenterPage() {
                     <span className="text-lg font-bold text-muted-foreground">U</span>
                   )}
                 </div>
-                <span className={cn('text-[11px]', avatarSource === 'utterlog' ? 'font-semibold text-primary' : 'text-muted-foreground')}>Utterlog ID</span>
+                <span className={cn('text-2xs', avatarSource === 'utterlog' ? 'font-semibold text-primary' : 'text-muted-foreground')}>Utterlog ID</span>
               </label>
             </div>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-2xs text-muted-foreground">
               当前使用：{avatarSource === 'gravatar' ? 'Gravatar (邮箱头像)' : 'Utterlog ID (联盟头像)'}
             </p>
           </Card>
@@ -301,14 +301,14 @@ export default function UtterlogCenterPage() {
 
         {/* Quick Links */}
         <Card className="p-6">
-          <h2 className="mb-4 text-[15px] font-semibold text-foreground">快捷链接</h2>
+          <h2 className="mb-4 text-sm-plus font-semibold text-foreground">快捷链接</h2>
           <div className="flex flex-col gap-2.5">
             {quickLinks.map(link => {
               const LinkIcon = link.Icon;
               return (
                 <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-2.5 rounded-md border border-border px-3 py-2.5 text-[13px] text-muted-foreground transition-colors hover:border-primary">
-                  <LinkIcon className="size-[18px] text-primary" />
+                  className="flex items-center gap-2.5 rounded-md border border-border px-3 py-2.5 text-xs-plus text-muted-foreground transition-colors hover:border-primary">
+                  <LinkIcon className="size-4.5 text-primary" />
                   <span className="flex-1">{link.label}</span>
                   <ExternalLink className="size-3 text-muted-foreground" />
                 </a>

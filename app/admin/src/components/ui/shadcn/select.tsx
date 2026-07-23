@@ -37,7 +37,7 @@ export function SelectContent({
       <BaseSelect.Positioner sideOffset={4} className="z-50">
         <BaseSelect.Popup
           className={cn(
-            'max-h-96 min-w-[8rem] overflow-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md',
+            'max-h-96 min-w-32 overflow-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md',
             className,
           )}
           {...props}

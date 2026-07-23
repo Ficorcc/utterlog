@@ -15,6 +15,7 @@ import {
   CircleMinus, GitBranch, AtSign,
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
 
 /* ── toolbar shortcut helpers ──
  * 工具栏按钮上都加了 onMouseDown preventDefault，所以理论上 textarea
@@ -82,12 +83,12 @@ const toolbar: TBBtn[] = [
   { label: 'sep', icon: null, action: () => {} },
   {
     label: '粗体',
-    icon: <span style={{ fontSize: '13px', fontWeight: 700 }}>B</span>,
+    icon: <span className="text-xs-plus font-bold">B</span>,
     action: (ta, fn) => wrap(ta, '**', '**', fn, '粗体文本'),
   },
   {
     label: '斜体',
-    icon: <span style={{ fontSize: '13px', fontStyle: 'italic' }}>I</span>,
+    icon: <span className="text-xs-plus italic">I</span>,
     action: (ta, fn) => wrap(ta, '*', '*', fn, '斜体文本'),
   },
   { label: 'color', icon: null, action: () => {} },
@@ -124,7 +125,7 @@ const toolbar: TBBtn[] = [
   },
   {
     label: '分割线',
-    icon: <span style={{ fontSize: '12px', letterSpacing: '2px' }}>---</span>,
+    icon: <span className="text-xs" style={{ letterSpacing: '2px' }}>---</span>,
     action: (ta, fn) => {
       const { selectionStart: s, value, scrollTop } = ta;
       const next = value.slice(0, s) + '\n---\n' + value.slice(s);
@@ -267,7 +268,8 @@ function ToolbarDropdown({
   children,
   minWidth = 120,
   maxHeight,
-  style,
+  width,
+  className,
 }: {
   open: boolean;
   anchorRef: React.RefObject<HTMLElement | null>;
@@ -275,7 +277,8 @@ function ToolbarDropdown({
   children: ReactNode;
   minWidth?: number;
   maxHeight?: number;
-  style?: React.CSSProperties;
+  width?: number;
+  className?: string;
 }) {
   const menuRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
@@ -284,10 +287,10 @@ function ToolbarDropdown({
     const anchor = anchorRef.current;
     if (!anchor) return;
     const rect = anchor.getBoundingClientRect();
-    const width = style?.width && typeof style.width === 'number' ? style.width : minWidth;
-    const left = Math.min(Math.max(rect.left, 8), Math.max(8, window.innerWidth - width - 8));
+    const resolvedWidth = width ?? minWidth;
+    const left = Math.min(Math.max(rect.left, 8), Math.max(8, window.innerWidth - resolvedWidth - 8));
     setPos({ top: rect.bottom + 4, left });
-  }, [anchorRef, minWidth, style?.width]);
+  }, [anchorRef, minWidth, width]);
 
   useLayoutEffect(() => {
     if (open) updatePosition();
@@ -320,18 +323,14 @@ function ToolbarDropdown({
   return createPortal(
     <div
       ref={menuRef}
+      className={cn('fixed z-[10000] bg-card border border-border shadow-lg', className)}
       style={{
-        position: 'fixed',
         top: pos.top,
         left: pos.left,
-        zIndex: 10000,
         minWidth,
         maxHeight,
+        width,
         overflowY: maxHeight ? 'auto' : undefined,
-        background: 'var(--card)',
-        border: '1px solid var(--border)',
-        boxShadow: '0 8px 24px rgba(15, 23, 42, 0.16)',
-        ...style,
       }}
     >
       {children}
@@ -412,12 +411,12 @@ function ShortcodeRenderer({ content }: { content: string }) {
         }
         if (part.type === 'collapse') {
           return (
-            <details key={i} style={{ margin: '16px 0', border: '1px solid var(--border)', padding: '0' }}>
-              <summary style={{ padding: '12px 16px', cursor: 'pointer', fontWeight: 500, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <details key={i} className="my-4 p-0" style={{ border: '1px solid var(--border)' }}>
+              <summary className="py-3 px-4 text-sm font-medium" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <CircleMinus size={16} />
                 {part.attrs?.title || '点击展开'}
               </summary>
-              <div style={{ padding: '12px 16px', borderTop: '1px dashed var(--border)', fontSize: '14px', lineHeight: 1.7 }}>
+              <div className="py-3 px-4 text-sm" style={{ borderTop: '1px dashed var(--border)', lineHeight: 1.7 }}>
                 <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw, [rehypeSanitize, previewSanitizeSchema]]}>{renderableMarkdown(part.content)}</ReactMarkdown>
               </div>
             </details>
@@ -425,21 +424,15 @@ function ShortcodeRenderer({ content }: { content: string }) {
         }
         if (part.type === 'download') {
           return (
-            <div key={i} style={{
-              margin: '16px 0', padding: '16px 20px', background: '#1a1a1a', color: '#fff',
-              display: 'flex', alignItems: 'center', gap: '16px', borderRadius: 'var(--ctrl-radius)',
-            }}>
-              <div style={{ width: '44px', height: '44px', background: '#f5a623', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', flexShrink: 0 }}>
-                <Download size={18} style={{ color: '#1a1a1a' }} />
+            <div key={i} className="my-4 py-4 px-5 flex items-center gap-4 bg-download-icon text-white rounded-(--ctrl-radius)">
+              <div className="size-11 flex items-center justify-center rounded-full bg-download-badge shrink-0">
+                <Download size={18} className="text-download-icon" />
               </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '15px', fontWeight: 600 }}>{part.attrs?.title || '资源下载'}</div>
-                <div style={{ fontSize: '12px', opacity: 0.7, marginTop: '2px' }}>{part.attrs?.desc || ''}</div>
+              <div className="flex-1">
+                <div className="text-sm-plus font-semibold">{part.attrs?.title || '资源下载'}</div>
+                <div className="text-xs mt-0.5 opacity-70">{part.attrs?.desc || ''}</div>
               </div>
-              <a href={part.attrs?.url || '#'} target="_blank" rel="noopener noreferrer" style={{
-                padding: '8px 20px', background: '#f5a623', color: '#1a1a1a', fontWeight: 600,
-                fontSize: '13px', textDecoration: 'none', flexShrink: 0,
-              }}>
+              <a href={part.attrs?.url || '#'} target="_blank" rel="noopener noreferrer" className="py-2 px-5 text-xs-plus font-semibold bg-download-badge text-download-icon no-underline shrink-0">
                 立即下载体验
               </a>
             </div>
@@ -447,8 +440,8 @@ function ShortcodeRenderer({ content }: { content: string }) {
         }
         if (part.type === 'video') {
           return (
-            <div key={i} style={{ margin: '16px 0' }}>
-              <video controls style={{ width: '100%', maxHeight: '400px', background: '#000' }}>
+            <div key={i} className="my-4">
+              <video controls className="w-full bg-black max-h-100">
                 <source src={part.content} />
               </video>
             </div>
@@ -506,7 +499,7 @@ class PreviewErrorBoundary extends Component<{ children: ReactNode }, { error: s
   }
   render() {
     if (this.state.error) {
-      return <p style={{ color: 'var(--destructive)', fontSize: '12px' }}>预览渲染出错：{this.state.error}</p>;
+      return <p className="text-destructive text-xs">预览渲染出错：{this.state.error}</p>;
     }
     return this.props.children;
   }
@@ -618,15 +611,14 @@ export default function MarkdownEditor({
           occupies exactly one row (predictable height, body calculations
           stay correct) and scrolls sideways on narrow viewports instead
           of wrapping into 2–3 rows that used to push the body down. */}
-      <div style={{
+      <div className="py-1.5 px-4 bg-muted" style={{
         display: 'flex', alignItems: 'center', gap: '2px',
-        padding: '6px 16px', borderBottom: '1px solid var(--border)',
-        background: 'var(--muted)',
+        borderBottom: '1px solid var(--border)',
         flexShrink: 0, flexWrap: 'nowrap',
         overflowX: 'auto', overflowY: 'visible',
         whiteSpace: 'nowrap',
       }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--muted-foreground)', marginRight: '6px' }}>
+        <span className="text-xs text-muted-foreground mr-1.5" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
           <Eye size={14} /> Markdown
         </span>
         {/* Heading dropdown */}
@@ -637,23 +629,23 @@ export default function MarkdownEditor({
             title={t('admin.editor.toolbar.heading', '标题')}
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => toggleDropdown('heading')}
+            className="py-1.5 px-2 bg-transparent text-muted-foreground text-xs-plus font-bold"
             style={{
-              padding: '5px 7px', background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--muted-foreground)', display: 'flex', alignItems: 'center', gap: '2px',
-              fontSize: '13px', fontWeight: 700,
+              border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '2px',
             }}
           >
-            H<span style={{ fontSize: '9px', marginLeft: '1px' }}>▾</span>
+            H<span className="ml-px text-4xs">▾</span>
           </button>
           <ToolbarDropdown open={showHeadings} anchorRef={headingBtnRef} onClose={closeDropdowns} minWidth={80}>
               {[1, 2, 3, 4, 5, 6].map(n => (
                 <button key={n} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => {
                   if (taRef.current) linePrefix(taRef.current, '#'.repeat(n) + ' ', onChange);
                   setShowHeadings(false);
-                }} style={{
-                  display: 'block', width: '100%', padding: '6px 12px', textAlign: 'left',
-                  background: 'none', border: 'none', cursor: 'pointer',
-                  fontSize: `${18 - n * 2}px`, fontWeight: 600, color: 'var(--foreground)',
+                }} className="py-1.5 px-3 bg-transparent text-foreground font-semibold" style={{
+                  display: 'block', width: '100%', textAlign: 'left',
+                  border: 'none', cursor: 'pointer',
+                  fontSize: `${18 - n * 2}px`,
                 }}
                   onMouseEnter={e => (e.currentTarget.style.background = 'var(--muted)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'none')}
@@ -663,15 +655,14 @@ export default function MarkdownEditor({
               ))}
           </ToolbarDropdown>
         </div>
-        <span style={{ width: '1px', height: '16px', background: 'var(--border)', margin: '0 4px' }} />
+        <span className="bg-border mx-1" style={{ width: '1px', height: '16px' }} />
         {toolbar.map((btn, idx) =>
           btn.label === 'sep' ? (
-            <span key={`sep-${idx}`} style={{ width: '1px', height: '16px', background: 'var(--border)', margin: '0 4px' }} />
+            <span key={`sep-${idx}`} className="bg-border mx-1" style={{ width: '1px', height: '16px' }} />
           ) : btn.label === 'color' ? (
             <div key="color">
-              <button ref={colorBtnRef} type="button" title={t('admin.editor.toolbar.textColor', '字体颜色')} onMouseDown={(e) => e.preventDefault()} onClick={() => toggleDropdown('color')} style={{
-                padding: '5px 7px', background: 'none', border: 'none', cursor: 'pointer',
-                color: 'var(--muted-foreground)', display: 'flex', alignItems: 'center',
+              <button ref={colorBtnRef} type="button" title={t('admin.editor.toolbar.textColor', '字体颜色')} onMouseDown={(e) => e.preventDefault()} onClick={() => toggleDropdown('color')} className="py-1.5 px-2 bg-transparent text-muted-foreground" style={{
+                border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center',
               }}>
                 <Palette size={14} />
               </button>
@@ -680,9 +671,10 @@ export default function MarkdownEditor({
                 anchorRef={colorBtnRef}
                 onClose={closeDropdowns}
                 minWidth={180}
-                style={{ padding: '12px', borderRadius: '8px', width: 180 }}
+                width={180}
+                className="p-3"
               >
-                  <p style={{ fontSize: '11px', color: 'var(--muted-foreground)', marginBottom: '8px' }}>{t('admin.editor.chooseTextColor', '选择字体颜色')}</p>
+                  <p className="text-2xs text-muted-foreground mb-2">{t('admin.editor.chooseTextColor', '选择字体颜色')}</p>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px' }}>
                     {['#f43f5e', '#f97316', '#F59E0B', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#1a1a1a', '#6b7280'].map(color => (
                       <button key={color} type="button" onMouseDown={(ev) => ev.preventDefault()} onClick={() => {
@@ -690,23 +682,19 @@ export default function MarkdownEditor({
                           wrap(taRef.current, `[color=${color}]`, '[/color]', onChange, '彩色文本');
                         }
                         setShowColor(false);
-                      }} style={{
-                        width: '28px', height: '28px', borderRadius: '50%', border: '2px solid #fff',
-                        background: color, cursor: 'pointer', boxShadow: '0 0 0 1px rgba(0,0,0,0.1)',
-                      }} />
+                      }} className="size-7 rounded-full border-2 border-white cursor-pointer ring-1 ring-black/10" style={{ background: color }} />
                     ))}
                   </div>
-                  <div style={{ marginTop: '8px', display: 'flex', gap: '4px' }}>
-                    <input id="custom-color" type="color" defaultValue="#3b82f6" style={{ width: '28px', height: '28px', border: 'none', cursor: 'pointer', padding: 0 }} />
+                  <div className="mt-2" style={{ display: 'flex', gap: '4px' }}>
+                    <input id="custom-color" type="color" defaultValue="#3b82f6" className="p-0 size-7 border-none cursor-pointer" />
                     <button type="button" onMouseDown={(ev) => ev.preventDefault()} onClick={() => {
                       const el = document.getElementById('custom-color') as HTMLInputElement;
                       if (el && taRef.current) {
                         wrap(taRef.current, `[color=${el.value}]`, '[/color]', onChange, '彩色文本');
                       }
                       setShowColor(false);
-                    }} style={{
-                      flex: 1, fontSize: '11px', padding: '4px', background: 'var(--muted)',
-                      border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--foreground)',
+                    }} className="text-2xs p-1 bg-muted text-foreground" style={{
+                      flex: 1, border: '1px solid var(--border)', cursor: 'pointer',
                     }}>
                       {t('admin.editor.customColor', '自定义颜色')}
                     </button>
@@ -718,9 +706,10 @@ export default function MarkdownEditor({
               key={btn.label}
               type="button"
               title={toolbarLabel(btn.label)}
+              className="py-1.5 px-2 bg-transparent text-muted-foreground"
               style={{
-                padding: '5px 7px', background: 'none', border: 'none', cursor: 'pointer',
-                color: 'var(--muted-foreground)', transition: 'color 0.15s',
+                border: 'none', cursor: 'pointer',
+                transition: 'color 0.15s',
                 display: 'flex', alignItems: 'center',
               }}
               onMouseEnter={e => (e.currentTarget.style.color = 'var(--foreground)')}
@@ -741,9 +730,8 @@ export default function MarkdownEditor({
         )}
         {/* Code block language picker */}
         <div>
-          <button ref={codeLangBtnRef} type="button" title={t('admin.editor.toolbar.codeBlock', '代码块')} onMouseDown={(e) => e.preventDefault()} onClick={() => toggleDropdown('code')} style={{
-            padding: '5px 7px', background: 'none', border: 'none', cursor: 'pointer',
-            color: 'var(--muted-foreground)', display: 'flex', alignItems: 'center',
+          <button ref={codeLangBtnRef} type="button" title={t('admin.editor.toolbar.codeBlock', '代码块')} onMouseDown={(e) => e.preventDefault()} onClick={() => toggleDropdown('code')} className="py-1.5 px-2 bg-transparent text-muted-foreground" style={{
+            border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center',
           }}>
             <FileCode size={14} />
           </button>
@@ -763,10 +751,10 @@ export default function MarkdownEditor({
                     });
                   }
                   setShowCodeLang(false);
-                }} style={{
-                  display: 'block', width: '100%', padding: '5px 12px', textAlign: 'left',
-                  background: 'none', border: 'none', cursor: 'pointer',
-                  fontSize: '12px', fontFamily: 'monospace', color: 'var(--foreground)',
+                }} className="py-1.5 px-3 bg-transparent text-xs text-foreground" style={{
+                  display: 'block', width: '100%', textAlign: 'left',
+                  border: 'none', cursor: 'pointer',
+                  fontFamily: 'monospace',
                 }}
                   onMouseEnter={e => (e.currentTarget.style.background = 'var(--muted)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'none')}
@@ -778,14 +766,13 @@ export default function MarkdownEditor({
         </div>
         {/* Table grid picker */}
         <div>
-          <button ref={tableBtnRef} type="button" title={t('admin.editor.toolbar.table', '表格')} onMouseDown={(e) => e.preventDefault()} onClick={() => toggleDropdown('table')} style={{
-            padding: '5px 7px', background: 'none', border: 'none', cursor: 'pointer',
-            color: 'var(--muted-foreground)', display: 'flex', alignItems: 'center',
+          <button ref={tableBtnRef} type="button" title={t('admin.editor.toolbar.table', '表格')} onMouseDown={(e) => e.preventDefault()} onClick={() => toggleDropdown('table')} className="py-1.5 px-2 bg-transparent text-muted-foreground" style={{
+            border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center',
           }}>
             <TableIcon size={14} />
           </button>
-          <ToolbarDropdown open={showTable} anchorRef={tableBtnRef} onClose={closeDropdowns} minWidth={150} style={{ padding: '8px' }}>
-              <p style={{ fontSize: '11px', color: 'var(--muted-foreground)', marginBottom: '6px' }}>
+          <ToolbarDropdown open={showTable} anchorRef={tableBtnRef} onClose={closeDropdowns} minWidth={150} className="p-2">
+              <p className="text-2xs text-muted-foreground mb-1.5">
                 {tableHover.r > 0 ? `${tableHover.r} x ${tableHover.c}` : t('admin.editor.chooseTableSize', '选择表格大小')}
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '2px' }}>
@@ -816,46 +803,41 @@ export default function MarkdownEditor({
                         setShowTable(false);
                         setTableHover({ r: 0, c: 0 });
                       }}
-                      style={{
-                        width: '18px', height: '18px',
-                        border: '1px solid var(--border)',
-                        background: active ? 'var(--primary)' : 'var(--muted)',
-                        cursor: 'pointer', transition: 'background 0.1s',
-                      }}
+                      className="size-4.5 border border-border cursor-pointer transition-colors"
+                      style={{ background: active ? 'var(--primary)' : 'var(--muted)' }}
                     />
                   );
                 })}
               </div>
           </ToolbarDropdown>
         </div>
-        <span style={{ width: '1px', height: '16px', background: 'var(--border)', margin: '0 4px' }} />
+        <span className="bg-border mx-1" style={{ width: '1px', height: '16px' }} />
         {onImportMd && (
-          <button onClick={onImportMd} style={{
-            background: 'none', border: 'none', cursor: 'pointer',
-            color: 'var(--primary)', fontSize: '11px', padding: '4px 6px',
+          <button onClick={onImportMd} className="bg-transparent text-primary text-2xs py-1 px-1.5" style={{
+            border: 'none', cursor: 'pointer',
             display: 'flex', alignItems: 'center', gap: '4px',
           }}>
             <FileInput size={13} /> {t('admin.editor.importMd', '导入 .md')}
           </button>
         )}
-        <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <span className="ml-auto" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {(() => { const s = calcStats(value); return (
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: 'var(--muted-foreground)' }}>
+            <span className="text-2xs text-muted-foreground" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span>{t('admin.editor.stats.words', '{count} 字', { count: s.words })}</span>
               <span>{t('admin.editor.stats.paragraphs', '{count} 段', { count: s.paragraphs })}</span>
               <span>{t('admin.editor.stats.minutes', '{count} 分钟', { count: s.readingTime })}</span>
             </span>
           ); })()}
-          <span style={{ width: '1px', height: '16px', background: 'var(--border)' }} />
-          <a href="https://makeitdown.io" target="_blank" rel="noopener noreferrer" style={{
-            fontSize: '10px', color: 'var(--muted-foreground)', textDecoration: 'none',
+          <span className="bg-border" style={{ width: '1px', height: '16px' }} />
+          <a href="https://makeitdown.io" target="_blank" rel="noopener noreferrer" className="text-3xs text-muted-foreground" style={{
+            textDecoration: 'none',
             display: 'flex', alignItems: 'center', gap: '3px', opacity: 0.7,
           }}>
             MakeItDown <ExternalLink size={9} />
           </a>
-          <span style={{ width: '1px', height: '16px', background: 'var(--border)' }} />
-          <span style={{ fontSize: '11px', color: 'var(--muted-foreground)' }}>{t('admin.editor.preview', '预览')}</span>
-          <span style={{ fontSize: '11px', color: 'var(--muted-foreground)', opacity: 0.6 }}>{t('admin.editor.synced', '已同步')}</span>
+          <span className="bg-border" style={{ width: '1px', height: '16px' }} />
+          <span className="text-2xs text-muted-foreground">{t('admin.editor.preview', '预览')}</span>
+          <span className="text-2xs text-muted-foreground" style={{ opacity: 0.6 }}>{t('admin.editor.synced', '已同步')}</span>
         </span>
       </div>
 
@@ -876,17 +858,17 @@ export default function MarkdownEditor({
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={editorPlaceholder}
-            className="flex-1 w-full resize-none bg-transparent text-sm text-foreground font-mono leading-relaxed focus:outline-none placeholder:text-muted-foreground"
-            style={{ padding: '16px 20px', minHeight: 0, overflowY: 'auto' }}
+            className="flex-1 w-full resize-none bg-transparent text-sm text-foreground font-mono leading-relaxed focus:outline-none placeholder:text-muted-foreground py-4 px-5"
+            style={{ minHeight: 0, overflowY: 'auto' }}
             spellCheck={false}
           />
         </div>
 
         {/* right: preview */}
-        <div className="flex-1 flex flex-col" style={{ background: 'var(--muted)', minWidth: 0, minHeight: 0 }}>
+        <div className="flex-1 flex flex-col bg-muted" style={{ minWidth: 0, minHeight: 0 }}>
           <div
-            style={{ flex: 1, padding: '20px 24px', overflowY: 'auto', minHeight: 0 }}
-            className="blog-prose text-sm"
+            style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}
+            className="blog-prose text-sm py-5 px-6"
           >
             {value ? (
               <SafePreview value={value} />

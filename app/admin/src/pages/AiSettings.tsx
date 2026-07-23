@@ -67,11 +67,11 @@ function Section({
     <div className="mb-6">
       <div className="mb-3">
         <div className="flex items-center gap-2">
-          {Icon && <Icon className="size-[18px] text-muted-foreground" />}
+          {Icon && <Icon className="size-4.5 text-muted-foreground" />}
           <h3 className="text-base font-semibold text-foreground">{title}</h3>
         </div>
         {description && (
-          <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">{description}</p>
+          <p className="mt-1.5 text-xs-plus leading-relaxed text-muted-foreground">{description}</p>
         )}
       </div>
       <Card className="p-5">
@@ -505,7 +505,7 @@ export default function AiSettingsPage() {
         <TabsContent value="提供商">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Server className="size-[18px] text-muted-foreground" />
+              <Server className="size-4.5 text-muted-foreground" />
               <h2 className="text-base font-semibold text-foreground">{t('admin.aiSettings.providers.title', 'AI 提供商')}</h2>
             </div>
             <Button onClick={() => setEditing({ ...defaultProvider })}>
@@ -521,7 +521,7 @@ export default function AiSettingsPage() {
                     {p.is_default && <Badge>{t('admin.common.default', '默认')}</Badge>}
                     {p.type === 'image' && <Badge variant="secondary">{t('admin.aiSettings.provider.type.image', '图片')}</Badge>}
                     {p.type === 'embedding' && <Badge variant="secondary">{t('admin.aiSettings.provider.type.embedding', '向量')}</Badge>}
-                    {!p.is_active && <span className="text-[10px] text-muted-foreground">{t('admin.common.disabled', '已禁用')}</span>}
+                    {!p.is_active && <span className="text-3xs text-muted-foreground">{t('admin.common.disabled', '已禁用')}</span>}
                   </div>
                   <p className="mt-0.5 truncate text-xs text-muted-foreground">{p.model} · {p.endpoint}</p>
                 </div>
@@ -539,7 +539,7 @@ export default function AiSettingsPage() {
           </div>
 
           <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
-            <DialogContent className="max-h-[calc(100vh-32px)] max-w-[560px] overflow-y-auto">
+            <DialogContent className="max-h-[calc(100vh-32px)] max-w-140 overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{editing?.id ? t('admin.aiSettings.providers.edit', '编辑提供商') : t('admin.aiSettings.providers.add', '添加提供商')}</DialogTitle>
               </DialogHeader>
@@ -602,7 +602,7 @@ export default function AiSettingsPage() {
                   </div>
                   {testResult && (
                     <div className={cn(
-                      'rounded-md border px-3.5 py-2.5 text-[13px]',
+                      'rounded-md border px-3.5 py-2.5 text-xs-plus',
                       testResult.ok
                         ? 'border-emerald-500/20 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
                         : 'border-destructive/20 bg-destructive/10 text-destructive',
@@ -635,7 +635,7 @@ export default function AiSettingsPage() {
             description={t('admin.aiSettings.routing.description', '为每个 AI 功能单独指定一个 type=文本 的提供商。留空 = 使用默认提供商（即 type=文本 + is_default=true 的那条）。某个功能的指定提供商失败时会自动回退到默认链。')}
           >
             {purposes.length === 0 ? (
-              <p className="py-3 text-[13px] text-muted-foreground">
+              <p className="py-3 text-xs-plus text-muted-foreground">
                 {t('admin.aiSettings.routing.empty', '暂无可分配功能，请刷新页面或检查 Bun API 是否正常返回 purposes。')}
               </p>
             ) : (
@@ -659,7 +659,7 @@ export default function AiSettingsPage() {
                         label: `${p.name} · ${p.model}`,
                       })),
                     ]}
-                    triggerClassName="sm:max-w-[420px]"
+                    triggerClassName="sm:max-w-105"
                   />
                 );
               })
@@ -673,7 +673,7 @@ export default function AiSettingsPage() {
           <Section
             icon={MessageSquare}
             title={t('admin.aiSettings.chat.title', '前端聊天气泡')}
-            footer={<p className="mx-4 mt-2 text-[11px] leading-relaxed text-muted-foreground">{t('admin.aiSettings.chat.footer', '聊天气泡 = 全站浮动 AI 助手（首页 / 列表 / 归档等非文章页右下角圆形按钮）。文章详情页 AI 伴读在「文章设置」中单独控制。')}</p>}
+            footer={<p className="mx-4 mt-2 text-2xs leading-relaxed text-muted-foreground">{t('admin.aiSettings.chat.footer', '聊天气泡 = 全站浮动 AI 助手（首页 / 列表 / 归档等非文章页右下角圆形按钮）。文章详情页 AI 伴读在「文章设置」中单独控制。')}</p>}
           >
             <ToggleRow
               label={t('admin.aiSettings.chat.enableBubble', '启用聊天气泡')}
@@ -695,7 +695,7 @@ export default function AiSettingsPage() {
                 { value: 'right', label: t('admin.aiSettings.chat.positionRight', '右下角') },
                 { value: 'left', label: t('admin.aiSettings.chat.positionLeft', '左下角') },
               ]}
-              triggerClassName="sm:max-w-[240px]"
+              triggerClassName="sm:max-w-60"
             />
             <div>
               <Label className="mb-1.5 block">
@@ -714,7 +714,7 @@ export default function AiSettingsPage() {
           <div className="mb-6">
             <Card className="p-5">
               <div className="flex items-center gap-2">
-                <Zap className="size-[18px] text-muted-foreground" />
+                <Zap className="size-4.5 text-muted-foreground" />
                 <h3 className="text-base font-semibold text-foreground">{t('admin.aiSettings.posts.automationTitle', 'AI 自动化功能')}</h3>
               </div>
               <p className="mt-1.5 text-xs text-muted-foreground">{t('admin.aiSettings.posts.automationHint', '开启后，发布或更新文章时 AI 将自动执行对应任务')}</p>
@@ -738,8 +738,8 @@ export default function AiSettingsPage() {
                     >
                       <input type="checkbox" checked={active} onChange={e => updateConfig(item.key, String(e.target.checked))} className="hidden" />
                       <Icon className={cn('size-6', active ? 'text-primary' : 'text-muted-foreground')} />
-                      <div className={cn('text-[13px] font-semibold', active ? 'text-primary' : 'text-foreground')}>{item.label}</div>
-                      <div className="text-[11px] text-muted-foreground">{item.desc}</div>
+                      <div className={cn('text-xs-plus font-semibold', active ? 'text-primary' : 'text-foreground')}>{item.label}</div>
+                      <div className="text-2xs text-muted-foreground">{item.desc}</div>
                     </label>
                   );
                 })}
@@ -764,7 +764,7 @@ export default function AiSettingsPage() {
           {config.ai_summary_auto === 'true' && (
             <Section icon={AlignLeft} title={t('admin.aiSettings.posts.summarySettings', '摘要设置')}>
               <Field label={t('admin.aiSettings.posts.summaryMaxLength', '摘要最大长度')}>
-                <Input type="number" value={config.ai_summary_max_length} onChange={e => updateConfig('ai_summary_max_length', e.target.value)} className="sm:max-w-[240px]" />
+                <Input type="number" value={config.ai_summary_max_length} onChange={e => updateConfig('ai_summary_max_length', e.target.value)} className="sm:max-w-60" />
               </Field>
               {/* The 摘要提示词 textarea now lives in the
                   「自定义提示词」section below alongside Slug /
@@ -829,7 +829,7 @@ export default function AiSettingsPage() {
                   { value: 'title_only',     label: t('admin.aiSettings.posts.titleOnly', '仅标题') },
                   { value: 'subtle_caption', label: t('admin.aiSettings.posts.subtleCaption', '微妙文字') },
                 ]}
-                triggerClassName="sm:max-w-[240px]"
+                triggerClassName="sm:max-w-60"
               />
             </Section>
           )}
@@ -919,7 +919,7 @@ export default function AiSettingsPage() {
                 { value: 'local', label: t('admin.aiSettings.profile.storageLocal', '本地文件') },
                 { value: 's3', label: t('admin.aiSettings.profile.storageS3', 'S3/R2 云存储') },
               ]}
-              triggerClassName="sm:max-w-[240px]"
+              triggerClassName="sm:max-w-60"
             />
           </Section>
           {saveBar}
@@ -977,8 +977,8 @@ export default function AiSettingsPage() {
                 <Sparkles className="size-5" />
               </div>
               <div className="flex-1">
-                <h3 className="mb-1.5 text-[15px] font-semibold text-foreground">{t('admin.aiSettings.batch.allTitle', '一键生成全部 AI 数据')}</h3>
-                <p className="mb-3.5 text-[13px] leading-relaxed text-muted-foreground">
+                <h3 className="mb-1.5 text-sm-plus font-semibold text-foreground">{t('admin.aiSettings.batch.allTitle', '一键生成全部 AI 数据')}</h3>
+                <p className="mb-3.5 text-xs-plus leading-relaxed text-muted-foreground">
                   {t('admin.aiSettings.batch.allDescription', '为所有已发布文章批量生成 AI 摘要 + 陪读问题（跳过已有的）。任务后台异步运行，每项间隔 800ms 避免触发 AI 限流。')}
                 </p>
                 <BatchProgress job={batchJobs.all} />
@@ -1012,7 +1012,7 @@ export default function AiSettingsPage() {
           <Card className="mb-4 p-5">
             <div className="flex items-start gap-4">
               <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10">
-                <AlignLeft className="size-[17px] text-primary" />
+                <AlignLeft className="size-4.25 text-primary" />
               </div>
               <div className="flex-1">
                 <h3 className="mb-1 text-sm font-semibold text-foreground">{t('admin.aiSettings.batch.summaryTitle', '批量生成 AI 摘要')}</h3>
@@ -1043,7 +1043,7 @@ export default function AiSettingsPage() {
           <Card className="mb-4 p-5">
             <div className="flex items-start gap-4">
               <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10">
-                <CircleHelp className="size-[17px] text-primary" />
+                <CircleHelp className="size-4.25 text-primary" />
               </div>
               <div className="flex-1">
                 <h3 className="mb-1 text-sm font-semibold text-foreground">{t('admin.aiSettings.batch.questionsTitle', '批量生成陪读问题')}</h3>
@@ -1121,7 +1121,7 @@ function BatchProgress({ job }: { job: any }) {
         />
       </div>
       {job.last_error && (
-        <p className="mt-1.5 text-[11px] text-destructive">{job.last_error}</p>
+        <p className="mt-1.5 text-2xs text-destructive">{job.last_error}</p>
       )}
     </div>
   );

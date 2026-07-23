@@ -142,7 +142,7 @@ export default function PlaylistsPage() {
 
       <div className="flex gap-4">
         {/* Left: playlist list */}
-        <div className="w-[300px] shrink-0">
+        <div className="w-75 shrink-0">
           {loading ? (
             <LoadingState />
           ) : playlists.length === 0 ? (
@@ -162,7 +162,7 @@ export default function PlaylistsPage() {
                     <div className="min-w-0 flex-1">
                       <h3 className="mb-0.5 text-sm font-semibold text-foreground">
                         {p.title}
-                        {p.is_default && <span className="ml-1.5 rounded-sm bg-muted px-1 py-px text-[10px] text-primary">默认</span>}
+                        {p.is_default && <span className="ml-1.5 rounded-sm bg-muted px-1 py-px text-3xs text-primary">默认</span>}
                       </h3>
                       <p className="text-xs text-muted-foreground">{p.song_count || 0} 首</p>
                     </div>
@@ -182,7 +182,7 @@ export default function PlaylistsPage() {
           {activePlaylist ? (
             <div className="rounded-lg border border-border bg-card p-4">
               <div className="mb-3.5 flex items-center justify-between">
-                <h2 className="text-[15px] font-semibold text-foreground">{activePlaylist.title}</h2>
+                <h2 className="text-sm-plus font-semibold text-foreground">{activePlaylist.title}</h2>
                 <Button size="sm" onClick={loadAllMusic}><Plus className="size-4" />添加歌曲</Button>
               </div>
 
@@ -201,10 +201,10 @@ export default function PlaylistsPage() {
                       <span className="w-6 shrink-0 text-right text-xs text-muted-foreground">{i + 1}</span>
                       {s.cover_url && <img src={s.cover_url} alt="" className="size-9 shrink-0 rounded-sm object-cover" />}
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-[13px] font-medium text-foreground">{s.title}</p>
-                        <p className="text-[11px] text-muted-foreground">{s.artist || ''}</p>
+                        <p className="truncate text-xs-plus font-medium text-foreground">{s.title}</p>
+                        <p className="text-2xs text-muted-foreground">{s.artist || ''}</p>
                       </div>
-                      <span className="shrink-0 text-[11px] text-muted-foreground">
+                      <span className="shrink-0 text-2xs text-muted-foreground">
                         {{ netease: '网易云', tencent: 'QQ', kugou: '酷狗', local: '本地' }[s.platform as string] || s.platform || ''}
                       </span>
                       <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" onClick={() => removeSong(s.id)} title="移除"><X className="size-3.5" /></Button>
@@ -221,7 +221,7 @@ export default function PlaylistsPage() {
 
       {/* Create/Edit modal */}
       <Dialog open={showModal} onOpenChange={(o) => !o && setShowModal(false)}>
-        <DialogContent className="max-w-[400px]">
+        <DialogContent className="max-w-100">
           <DialogHeader>
             <DialogTitle>{editingId ? '编辑歌单' : '创建歌单'}</DialogTitle>
           </DialogHeader>
@@ -238,7 +238,7 @@ export default function PlaylistsPage() {
               <Label>描述</Label>
               <Textarea rows={2} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
             </div>
-            <label className="flex items-center gap-2 text-[13px]">
+            <label className="flex items-center gap-2 text-xs-plus">
               <input type="checkbox" checked={form.is_default} onChange={e => setForm({ ...form, is_default: e.target.checked })} className="size-4 cursor-pointer accent-primary" />
               <span className="text-muted-foreground">设为默认歌单</span>
             </label>
@@ -254,7 +254,7 @@ export default function PlaylistsPage() {
 
       {/* Import modal */}
       <Dialog open={showImport} onOpenChange={(o) => !o && setShowImport(false)}>
-        <DialogContent className="max-w-[400px]">
+        <DialogContent className="max-w-100">
           <DialogHeader>
             <DialogTitle>导入外部歌单</DialogTitle>
           </DialogHeader>
@@ -292,26 +292,26 @@ export default function PlaylistsPage() {
 
       {/* Add song picker modal */}
       <Dialog open={showAddSong} onOpenChange={(o) => !o && setShowAddSong(false)}>
-        <DialogContent className="max-w-[520px]">
+        <DialogContent className="max-w-130">
           <DialogHeader>
             <DialogTitle>添加歌曲到歌单</DialogTitle>
           </DialogHeader>
           <div>
             <Input placeholder="搜索已有歌曲…" value={searchKeyword} onChange={e => setSearchKeyword(e.target.value)} className="mb-3" />
-            <div className="max-h-[400px] overflow-auto">
+            <div className="max-h-100 overflow-auto">
               {filteredMusic.length === 0 ? (
-                <p className="py-6 text-center text-[13px] text-muted-foreground">
+                <p className="py-6 text-center text-xs-plus text-muted-foreground">
                   {allMusic.length === 0 ? '暂无歌曲，请先在音乐管理中添加' : '无匹配结果'}
                 </p>
               ) : filteredMusic.map((m: any) => (
                 <div key={m.id} className="flex items-center gap-2.5 border-b border-border px-1 py-2">
                   {m.cover_url && <img src={m.cover_url} alt="" className="size-8 shrink-0 rounded-sm object-cover" />}
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[13px] font-medium text-foreground">{m.title}</p>
-                    <p className="text-[11px] text-muted-foreground">{m.artist}</p>
+                    <p className="truncate text-xs-plus font-medium text-foreground">{m.title}</p>
+                    <p className="text-2xs text-muted-foreground">{m.artist}</p>
                   </div>
                   {songIds.has(m.id) ? (
-                    <span className="text-[11px] text-muted-foreground">已添加</span>
+                    <span className="text-2xs text-muted-foreground">已添加</span>
                   ) : (
                     <Button size="sm" onClick={() => addSongToPlaylist(m.id)}><Plus className="size-4" /></Button>
                   )}

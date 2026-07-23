@@ -264,7 +264,7 @@ export default function CreatePostPage() {
         </div>
 
         {/* Right sidebar */}
-        <div className="w-[280px] shrink-0 overflow-x-hidden overflow-y-auto border border-border bg-card">
+        <div className="w-70 shrink-0 overflow-x-hidden overflow-y-auto border border-border bg-card">
           {/* Publish */}
           <div className="border-b border-border p-4">
             <div className="mb-2 flex gap-1.5">
@@ -292,7 +292,7 @@ export default function CreatePostPage() {
 
           {/* Settings */}
           <div className="border-b border-border p-4">
-            <h3 className="mb-3.5 text-[13px] font-semibold text-foreground">{t('admin.postEditor.settings', '设置')}</h3>
+            <h3 className="mb-3.5 text-xs-plus font-semibold text-foreground">{t('admin.postEditor.settings', '设置')}</h3>
             <div className="flex flex-col gap-3.5">
               {/* Cover */}
               <div>
@@ -302,7 +302,7 @@ export default function CreatePostPage() {
                     <img src={coverUrl} alt="" className="h-20 w-full border border-border object-cover" />
                     <button
                       onClick={() => setCoverUrl('')}
-                      className="absolute right-1 top-1 flex size-[18px] items-center justify-center rounded bg-black/50 text-white"
+                      className="absolute right-1 top-1 flex size-4.5 items-center justify-center rounded bg-black/50 text-white"
                     >
                       <X className="size-3" />
                     </button>
@@ -356,7 +356,7 @@ export default function CreatePostPage() {
                   </Button>
                   <input ref={coverFileRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
                 </div>
-                <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">
+                <p className="mt-1 text-3xs leading-relaxed text-muted-foreground">
                   {t('admin.postEditor.coverHint', '如果这里有值，封面优先使用它；为空时自动回退到正文首图。')}
                 </p>
               </div>
@@ -371,7 +371,7 @@ export default function CreatePostPage() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-9 shrink-0 gap-1 px-2 text-[11px]"
+                    className="h-9 shrink-0 gap-1 px-2 text-2xs"
                     disabled={slugLoading}
                     onClick={async () => {
                       if (!title) return;
@@ -413,7 +413,7 @@ export default function CreatePostPage() {
                     variant="ghost"
                     size="sm"
                     disabled={tagsLoading}
-                    className="h-auto gap-1 p-0 text-[11px] text-primary hover:bg-transparent hover:text-primary/80"
+                    className="h-auto gap-1 p-0 text-2xs text-primary hover:bg-transparent hover:text-primary/80"
                     onClick={async () => {
                       if (!title && !content) { toast.error(t('admin.postEditor.toast.fillTitleOrContentFirst', '请先填写标题或内容')); return; }
                       setTagsLoading(true);
@@ -454,7 +454,7 @@ export default function CreatePostPage() {
 
           {/* Advanced */}
           <div className="border-b border-border p-4">
-            <h3 className="mb-3.5 text-[13px] font-semibold text-foreground">{t('admin.postEditor.advanced', '高级')}</h3>
+            <h3 className="mb-3.5 text-xs-plus font-semibold text-foreground">{t('admin.postEditor.advanced', '高级')}</h3>
             <div className="flex flex-col gap-3.5">
               {/* Excerpt */}
               <div>
@@ -466,7 +466,7 @@ export default function CreatePostPage() {
                     variant="ghost"
                     size="sm"
                     disabled={excerptLoading}
-                    className="h-auto gap-1 p-0 text-[11px] text-primary hover:bg-transparent hover:text-primary/80"
+                    className="h-auto gap-1 p-0 text-2xs text-primary hover:bg-transparent hover:text-primary/80"
                     onClick={async () => {
                       if (!content) { toast.error(t('admin.postEditor.toast.fillContentFirst', '请先填写内容')); return; }
                       setExcerptLoading(true);
@@ -513,16 +513,16 @@ export default function CreatePostPage() {
 
       {/* Content Insert Modal */}
       <Dialog open={!!insertType} onOpenChange={(o) => !o && setInsertType(null)}>
-        <DialogContent className="flex max-h-[70vh] w-[500px] max-w-[90vw] flex-col gap-0 p-0">
+        <DialogContent className="flex max-h-[70vh] w-125 max-w-[90vw] flex-col gap-0 p-0">
           <DialogHeader className="border-b border-border px-5 py-3.5">
             <DialogTitle className="text-sm">
               {t('admin.postEditor.insertType', '插入{type}', { type: insertType ?? '' })}
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 overflow-auto px-5 py-3">
-            {insertLoading && <p className="py-5 text-center text-[13px] text-muted-foreground">{t('admin.common.loading', '加载中…')}</p>}
+            {insertLoading && <p className="py-5 text-center text-xs-plus text-muted-foreground">{t('admin.common.loading', '加载中…')}</p>}
             {!insertLoading && insertItems.length === 0 && (
-              <p className="py-5 text-center text-[13px] text-muted-foreground">
+              <p className="py-5 text-center text-xs-plus text-muted-foreground">
                 {t('admin.postEditor.noInsertData', '暂无{type}数据，请先在对应页面添加', { type: insertType ?? '' })}
               </p>
             )}
@@ -552,15 +552,15 @@ export default function CreatePostPage() {
                   <img src={item.cover_url || item.image} alt="" className="size-10 shrink-0 object-cover" />
                 )}
                 <div className="min-w-0 flex-1">
-                  <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-medium">
+                  <div className="overflow-hidden text-ellipsis whitespace-nowrap text-xs-plus font-medium">
                     {item.title || item.content?.slice(0, 50)}
                   </div>
-                  <div className="mt-0.5 text-[11px] text-muted-foreground">
+                  <div className="mt-0.5 text-2xs text-muted-foreground">
                     {item.artist || item.author || item.platform || ''}
                     {item.rating ? ` · ${t('admin.postEditor.ratingValue', '{rating}分', { rating: item.rating })}` : ''}
                   </div>
                 </div>
-                <span className="shrink-0 text-[11px] text-primary">{t('admin.postEditor.insert', '插入')}</span>
+                <span className="shrink-0 text-2xs text-primary">{t('admin.postEditor.insert', '插入')}</span>
               </div>
             ))}
           </div>
@@ -569,9 +569,9 @@ export default function CreatePostPage() {
 
       {/* AI Processing Modal */}
       <Dialog open={showAiModal} onOpenChange={(o) => { if (!o && !aiProcessing) setShowAiModal(false); }}>
-        <DialogContent className="flex max-h-[80vh] w-[560px] max-w-[90vw] flex-col gap-0 p-0">
+        <DialogContent className="flex max-h-[80vh] w-140 max-w-[90vw] flex-col gap-0 p-0">
           <DialogHeader className="border-b border-border px-5 py-4">
-            <DialogTitle className="flex items-center gap-1.5 text-[15px]">
+            <DialogTitle className="flex items-center gap-1.5 text-sm-plus">
               <Sparkles className="size-4" /> {t('admin.postEditor.aiProcessArticle', 'AI 处理文章')}
             </DialogTitle>
           </DialogHeader>
@@ -612,7 +612,7 @@ export default function CreatePostPage() {
                     }}
                     className="flex flex-col items-center gap-1 rounded-md border border-border bg-muted p-2.5 text-xs font-medium text-foreground transition-colors hover:border-primary disabled:cursor-wait disabled:opacity-50"
                   >
-                    <Icon className="size-[18px]" />
+                    <Icon className="size-4.5" />
                     {item.label}
                   </button>
                 );
@@ -621,19 +621,19 @@ export default function CreatePostPage() {
           </div>
 
           {/* Result */}
-          <div className="min-h-[150px] flex-1 overflow-auto px-5 py-4">
+          <div className="min-h-37.5 flex-1 overflow-auto px-5 py-4">
             {aiProcessing && (
-              <div className="flex items-center justify-center gap-2 py-10 text-[13px] text-muted-foreground">
+              <div className="flex items-center justify-center gap-2 py-10 text-xs-plus text-muted-foreground">
                 <Loader2 className="size-4 animate-spin" /> {t('admin.postEditor.aiProcessing', 'AI 处理中…')}
               </div>
             )}
             {aiResult && !aiProcessing && (
-              <pre className="m-0 max-h-[300px] overflow-auto whitespace-pre-wrap break-words bg-muted p-3 font-mono text-xs leading-[1.7] text-foreground">
+              <pre className="m-0 max-h-75 overflow-auto whitespace-pre-wrap break-words bg-muted p-3 font-mono text-xs leading-[1.7] text-foreground">
                 {aiResult}
               </pre>
             )}
             {!aiResult && !aiProcessing && (
-              <p className="py-10 text-center text-[13px] text-muted-foreground">
+              <p className="py-10 text-center text-xs-plus text-muted-foreground">
                 {t('admin.postEditor.aiEmptyHint', '选择上方处理方式，AI 将处理你的文章内容')}
               </p>
             )}

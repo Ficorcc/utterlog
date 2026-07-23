@@ -20,7 +20,7 @@ export function DropdownMenuContent({
       <Menu.Positioner sideOffset={sideOffset} align={align} className="z-50">
         <Menu.Popup
           className={cn(
-            'min-w-[8rem] overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md',
+            'min-w-32 overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md',
             className,
           )}
           {...props}

@@ -141,18 +141,18 @@ export default function CategoriesPage() {
 
   // Category icon is user data — may be a FontAwesome class, inline SVG, or
   // image URL. Keep rendering all three; only the empty placeholder is Lucide.
-  const renderIcon = (icon: string, size = 18) => {
-    if (!icon) return <Folder className="text-muted-foreground" style={{ width: size, height: size }} />;
+  const renderIcon = (icon: string) => {
+    if (!icon) return <Folder className="text-muted-foreground size-4.5" />;
     if (icon.startsWith('fa-') || icon.startsWith('fa ')) {
-      return <i className={`${icon} text-primary`} style={{ fontSize: size }} />;
+      return <i className={`${icon} text-primary text-lg`} />;
     }
     if (icon.startsWith('<svg')) {
-      return <span style={{ width: size, height: size, display: 'inline-flex' }} dangerouslySetInnerHTML={{ __html: icon.replace(/<svg/, `<svg width="${size}" height="${size}"`) }} />;
+      return <span className="inline-flex size-4.5" dangerouslySetInnerHTML={{ __html: icon.replace(/<svg/, '<svg width="18" height="18"') }} />;
     }
     if (icon.startsWith('http') || icon.startsWith('/')) {
-      return <img src={icon} alt="" style={{ width: size, height: size, objectFit: 'contain' }} />;
+      return <img src={icon} alt="" className="size-4.5 object-contain" />;
     }
-    return <i className={`fa-sharp fa-light fa-${icon} text-primary`} style={{ fontSize: size }} />;
+    return <i className={`fa-sharp fa-light fa-${icon} text-primary text-lg`} />;
   };
 
   return (
@@ -222,7 +222,7 @@ export default function CategoriesPage() {
                       <Button type="button" variant="ghost" size="sm" onClick={() => setIconValue('')}>{t('admin.common.clear', '清除')}</Button>
                     )}
                   </div>
-                  <p className="text-[11px] text-muted-foreground">{t('admin.categories.iconHint', '支持 FontAwesome 类名、SVG 代码、PNG/GIF/JPG/WebP/AVIF')}</p>
+                  <p className="text-2xs text-muted-foreground">{t('admin.categories.iconHint', '支持 FontAwesome 类名、SVG 代码、PNG/GIF/JPG/WebP/AVIF')}</p>
                 </div>
               </div>
               <Input

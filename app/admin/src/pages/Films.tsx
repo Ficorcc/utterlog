@@ -134,7 +134,7 @@ export default function FilmsPage() {
                       <img src={row.cover_url} alt="" className="h-20 w-14 rounded object-cover" />
                     ) : (
                       <div className="flex h-20 w-14 items-center justify-center rounded bg-muted text-muted-foreground">
-                        <Clapperboard className="size-[18px]" />
+                        <Clapperboard className="size-4.5" />
                       </div>
                     )}
                   </TableCell>
@@ -143,7 +143,7 @@ export default function FilmsPage() {
                       {row.title}
                     </button>
                     {row.meta && (
-                      <div className="mt-1 flex gap-2 text-[11px] text-muted-foreground">
+                      <div className="mt-1 flex gap-2 text-2xs text-muted-foreground">
                         <span>{videoTypeLabel(row.meta)}</span>
                         {row.meta.region && <span>· {row.meta.region}</span>}
                         {row.meta.year && <span>· {row.meta.year}</span>}

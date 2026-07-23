@@ -146,7 +146,7 @@ export default function AICommentsQueuePage() {
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={cn(
-                '-mb-px inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-[13px]',
+                '-mb-px inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-xs-plus',
                 isActive
                   ? 'border-primary font-semibold text-primary'
                   : 'border-transparent font-normal text-muted-foreground hover:text-foreground',
@@ -156,7 +156,7 @@ export default function AICommentsQueuePage() {
               {t(tab.labelKey, tab.fallback)}
               {count > 0 && (
                 <span className={cn(
-                  'min-w-[18px] rounded-full px-1.5 text-center text-[11px] font-medium',
+                  'min-w-4.5 rounded-full px-1.5 text-center text-2xs font-medium',
                   isActive ? 'bg-primary text-primary-foreground' : tab.badge,
                 )}>{count}</span>
               )}
@@ -202,8 +202,8 @@ export default function AICommentsQueuePage() {
                 </div>
 
                 {/* Original comment */}
-                <div className="rounded-md bg-muted px-3 py-2.5 text-[13px] leading-relaxed text-foreground">
-                  <div className="mb-1 text-[11px] font-medium text-muted-foreground">{t('admin.aiComments.readerComment', '读者评论')}</div>
+                <div className="rounded-md bg-muted px-3 py-2.5 text-xs-plus leading-relaxed text-foreground">
+                  <div className="mb-1 text-2xs font-medium text-muted-foreground">{t('admin.aiComments.readerComment', '读者评论')}</div>
                   {row.comment_text}
                 </div>
 
@@ -228,13 +228,13 @@ export default function AICommentsQueuePage() {
 
                 {/* AI reply (editable in pending status) */}
                 {row.status === 'error' ? (
-                  <div className="rounded-md bg-destructive/10 px-3 py-2.5 text-[13px] text-destructive">
-                    <div className="mb-1 text-[11px] font-medium">{t('admin.aiComments.errorTitle', '错误')}</div>
+                  <div className="rounded-md bg-destructive/10 px-3 py-2.5 text-xs-plus text-destructive">
+                    <div className="mb-1 text-2xs font-medium">{t('admin.aiComments.errorTitle', '错误')}</div>
                     {row.error_msg || t('admin.aiComments.generateFailed', '生成失败')}
                   </div>
                 ) : (
                   <div className="rounded-md bg-primary/5 px-3 py-2.5">
-                    <div className="mb-1 flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+                    <div className="mb-1 flex items-center gap-1.5 text-2xs font-medium text-muted-foreground">
                       <Bot className="size-3.5" /> {t('admin.aiComments.generatedReply', 'AI 生成的回复')}
                     </div>
                     {isEditing ? (
@@ -242,10 +242,10 @@ export default function AICommentsQueuePage() {
                         value={editingText}
                         onChange={e => setEditingText(e.target.value)}
                         rows={4}
-                        className="text-[13px] leading-relaxed"
+                        className="text-xs-plus leading-relaxed"
                       />
                     ) : (
-                      <div className="whitespace-pre-wrap text-[13px] leading-relaxed text-foreground">
+                      <div className="whitespace-pre-wrap text-xs-plus leading-relaxed text-foreground">
                         {row.ai_reply || <span className="text-muted-foreground">{t('admin.common.emptyParentheses', '（空）')}</span>}
                       </div>
                     )}
@@ -305,7 +305,7 @@ export default function AICommentsQueuePage() {
                   )}
 
                   {row.processed_at > 0 && (
-                    <span className="ml-auto text-[11px] text-muted-foreground">
+                    <span className="ml-auto text-2xs text-muted-foreground">
                       {t('admin.aiComments.processedAt', '处理于 {time}', { time: formatDate(row.processed_at) })}
                     </span>
                   )}

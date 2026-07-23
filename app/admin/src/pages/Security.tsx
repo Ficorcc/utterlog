@@ -121,7 +121,7 @@ export default function SecurityPage() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                'inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 px-[18px] py-2.5 text-[13px] transition-colors',
+                'inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 px-4 py-2.5 text-xs-plus transition-colors',
                 isActive
                   ? 'border-primary font-semibold text-primary'
                   : 'border-transparent font-normal text-muted-foreground hover:text-foreground',
@@ -144,8 +144,8 @@ export default function SecurityPage() {
           </MetricGrid>
           <div className="grid grid-cols-2 gap-3">
             <Card className="p-4">
-              <h3 className="mb-2 text-[13px] font-semibold text-foreground">{t('admin.security.overview.defenseStatus', '防御状态')}</h3>
-              <div className="text-[13px]">
+              <h3 className="mb-2 text-xs-plus font-semibold text-foreground">{t('admin.security.overview.defenseStatus', '防御状态')}</h3>
+              <div className="text-xs-plus">
                 <div className="flex justify-between py-1.5">
                   <span>{t('admin.security.settings.ccDefense', 'CC 防御')}</span>
                   <span className={overview.cc_enabled ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive'}>{overview.cc_enabled ? t('admin.common.onDot', '● 开启') : t('admin.common.offDot', '● 关闭')}</span>
@@ -157,8 +157,8 @@ export default function SecurityPage() {
               </div>
             </Card>
             <Card className="p-4">
-              <h3 className="mb-2 text-[13px] font-semibold text-foreground">{t('admin.security.overview.stats', '统计')}</h3>
-              <div className="text-[13px]">
+              <h3 className="mb-2 text-xs-plus font-semibold text-foreground">{t('admin.security.overview.stats', '统计')}</h3>
+              <div className="text-xs-plus">
                 <div className="flex justify-between py-1.5"><span>{t('admin.security.overview.totalBans', '累计封禁')}</span><span>{overview.total_bans}</span></div>
                 <div className="flex justify-between py-1.5"><span>{t('admin.security.overview.totalEvents', '安全事件')}</span><span>{overview.total_events}</span></div>
               </div>
@@ -173,7 +173,7 @@ export default function SecurityPage() {
           <Card className="mb-4 flex items-end gap-2 p-4">
             <div className="flex-1"><Label className="mb-1 block text-xs text-muted-foreground">{t('admin.security.bans.ipAddress', 'IP 地址')}</Label><Input value={banIP} onChange={e => setBanIP(e.target.value)} placeholder="192.168.1.1" /></div>
             <div className="flex-1"><Label className="mb-1 block text-xs text-muted-foreground">{t('admin.security.bans.reason', '原因')}</Label><Input value={banReason} onChange={e => setBanReason(e.target.value)} placeholder={t('admin.common.optional', '可选')} /></div>
-            <div className="w-[100px]"><Label className="mb-1 block text-xs text-muted-foreground">{t('admin.security.bans.durationMinutes', '时长(分)')}</Label><Input value={banDuration} onChange={e => setBanDuration(e.target.value)} placeholder="60" /></div>
+            <div className="w-25"><Label className="mb-1 block text-xs text-muted-foreground">{t('admin.security.bans.durationMinutes', '时长(分)')}</Label><Input value={banDuration} onChange={e => setBanDuration(e.target.value)} placeholder="60" /></div>
             <Button onClick={handleBan}>{t('admin.security.bans.ban', '封禁')}</Button>
           </Card>
 
@@ -242,7 +242,7 @@ export default function SecurityPage() {
                     <TableCell className="font-medium">{typeof e.ip === 'string' ? e.ip : ''}</TableCell>
                     <TableCell><Badge variant="secondary">{typeof e.event_type === 'string' ? e.event_type : ''}</Badge></TableCell>
                     <TableCell>
-                      <span className="inline-block max-w-[200px] truncate text-muted-foreground">
+                      <span className="inline-block max-w-50 truncate text-muted-foreground">
                         {typeof e.detail === 'string' ? e.detail : ''}
                       </span>
                     </TableCell>
@@ -256,8 +256,8 @@ export default function SecurityPage() {
 
       {/* 防御设置 */}
       {activeTab === '防御设置' && (
-        <div className="max-w-[980px]">
-          <p className="mx-4 mb-[22px] text-xs leading-relaxed text-muted-foreground">
+        <div className="max-w-245">
+          <p className="mx-4 mb-6 text-xs leading-relaxed text-muted-foreground">
             {t('admin.security.settings.personalBlogHint', '个人博客建议保持默认：CC 防御和地域封锁默认关闭，只有被刷、临时私密访问或需要限制地区访问时再开启。')}
           </p>
 
@@ -277,7 +277,7 @@ export default function SecurityPage() {
                 label={t('admin.security.access.apiRateLimit', 'API 限流')}
                 hint={t('admin.security.access.apiRateLimitHint', '次/分钟，超出返回 429。')}
               >
-                <Input type="number" className="w-[120px]" value={String(accessOpts.rate_limit)} onChange={(e) => setAccessOpts({ ...accessOpts, rate_limit: toPositiveNumber(e.target.value, 60) })} />
+                <Input type="number" className="w-30" value={String(accessOpts.rate_limit)} onChange={(e) => setAccessOpts({ ...accessOpts, rate_limit: toPositiveNumber(e.target.value, 60) })} />
               </SettingRow>
             </CardContent>
           </Card>
@@ -298,13 +298,13 @@ export default function SecurityPage() {
                 label={t('admin.security.settings.ccLimit5s', '5 秒内最大请求')}
                 hint={t('admin.security.settings.ccLimit5sHint', '用于拦截瞬时高频刷新。')}
               >
-                <Input type="number" className="w-[120px]" value={String(settings.cc_limit_5s ?? 30)} onChange={(e) => setSettings({ ...settings, cc_limit_5s: toPositiveNumber(e.target.value, 30) })} />
+                <Input type="number" className="w-30" value={String(settings.cc_limit_5s ?? 30)} onChange={(e) => setSettings({ ...settings, cc_limit_5s: toPositiveNumber(e.target.value, 30) })} />
               </SettingRow>
               <SettingRow
                 label={t('admin.security.settings.ccLimit60s', '60 秒内最大请求')}
                 hint={t('admin.security.settings.ccLimit60sHint', '用于拦截持续高频请求。')}
               >
-                <Input type="number" className="w-[120px]" value={String(settings.cc_limit_60s ?? 120)} onChange={(e) => setSettings({ ...settings, cc_limit_60s: toPositiveNumber(e.target.value, 120) })} />
+                <Input type="number" className="w-30" value={String(settings.cc_limit_60s ?? 120)} onChange={(e) => setSettings({ ...settings, cc_limit_60s: toPositiveNumber(e.target.value, 120) })} />
               </SettingRow>
             </CardContent>
           </Card>
@@ -320,7 +320,7 @@ export default function SecurityPage() {
                 hint={t('admin.security.settings.geoProviderHint', '用于访客统计、评论归属地、GeoIP 封锁和服务器出口 IP 识别。')}
               >
                 <Select value={settings.ip_geo_provider || 'ipx'} onValueChange={(v) => setSettings({ ...settings, ip_geo_provider: v })}>
-                  <SelectTrigger className="w-[240px]"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="w-60"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="ipx">{t('admin.security.settings.geoProviderIpx', '国际默认源（国外更准确）')}</SelectItem>
                     <SelectItem value="cnip">{t('admin.security.settings.geoProviderCnip', '国内备用源（国内更准确）')}</SelectItem>
@@ -338,7 +338,7 @@ export default function SecurityPage() {
                 hint={t('admin.security.settings.geoModeHint', '个人博客通常建议使用黑名单，只封锁明确不希望访问的国家或地区。')}
               >
                 <Select value={settings.geo_mode || 'whitelist'} onValueChange={(v) => setSettings({ ...settings, geo_mode: v })}>
-                  <SelectTrigger className="w-[240px]"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="w-60"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="whitelist">{t('admin.security.settings.geoWhitelist', '白名单（只允许列表中的国家）')}</SelectItem>
                     <SelectItem value="blacklist">{t('admin.security.settings.geoBlacklist', '黑名单（封锁列表中的国家）')}</SelectItem>
@@ -350,7 +350,7 @@ export default function SecurityPage() {
                 hint={t('admin.security.settings.countryCodesHint', '逗号分隔，如 CN,HK,TW。')}
               >
                 <Input
-                  className="w-[240px]"
+                  className="w-60"
                   value={(settings.geo_countries || []).join(',')}
                   onChange={(e) => setSettings({
                     ...settings,

@@ -75,12 +75,7 @@ export default function VersionBadge({ variant = 'compact' }: Props) {
       <Link
         to="/settings#update"
         title={hasUpdate ? `有新版本：${info?.latest?.version}` : `当前版本：${current}`}
-        className="relative inline-flex items-center bg-primary font-semibold text-primary-foreground no-underline"
-        style={{
-          gap: 4,
-          fontSize: 9, padding: '1px 5px',
-          fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace",
-        }}
+        className="relative inline-flex items-center gap-1 bg-primary font-semibold font-mono text-4xs py-0.25 px-1.25 text-primary-foreground no-underline"
       >
         {shortVer}
         {hasUpdate && (
@@ -102,8 +97,7 @@ export default function VersionBadge({ variant = 'compact' }: Props) {
   return (
     <Link
       to="/settings#update"
-      className="flex items-center border border-border bg-card text-foreground no-underline transition-colors hover:border-primary"
-      style={{ gap: 12, padding: '12px 14px' }}
+      className="flex items-center gap-3 border border-border bg-card px-3.5 py-3 text-foreground no-underline transition-colors hover:border-primary"
     >
       <div
         className={cn(
@@ -115,17 +109,15 @@ export default function VersionBadge({ variant = 'compact' }: Props) {
         {hasUpdate ? <CircleArrowUp className="size-4" /> : <CircleCheck className="size-4" />}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 14, fontWeight: 600 }}>
+        <div className="text-sm font-semibold">
           版本与更新
           {hasUpdate && (
-            <span className="bg-destructive text-destructive-foreground" style={{
-              marginLeft: 8, fontSize: 10, padding: '1px 6px', fontWeight: 700,
-            }}>
+            <span className="ml-2 bg-destructive px-1.5 py-px text-3xs font-bold text-destructive-foreground">
               有新版本
             </span>
           )}
         </div>
-        <div className="text-muted-foreground" style={{ fontSize: 11, marginTop: 2 }}>
+        <div className="mt-0.5 text-2xs text-muted-foreground">
           当前 <code style={{ fontFamily: "ui-monospace,monospace" }}>{current}</code>
           {hasUpdate && info?.latest && (
             <> · 最新 <code className="text-primary" style={{ fontFamily: "ui-monospace,monospace" }}>{info.latest.version}</code></>
