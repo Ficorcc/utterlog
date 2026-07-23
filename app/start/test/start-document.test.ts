@@ -21,7 +21,7 @@ describe('TanStack Start document assets', () => {
     expect(startDocumentLinks(context()).map((link) => link.href)).toEqual([
       '/site.ico',
       'https://static.bluecdn.com',
-      'https://static.bluecdn.com/libs/fontawesome/7.3.0/css/all.min.css',
+      'https://static.bluecdn.com/libs/fontawesome/7.3.1/css/all.min.css',
       'https://static.bluecdn.com/fonts/noto-sans-sc.css',
       'https://static.bluecdn.com/fonts/alimama-fangyuanti.css',
       'https://static.bluecdn.com/fonts/luo.css',

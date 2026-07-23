@@ -40,7 +40,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){var l=document.createElement('link');l.rel='stylesheet';l.href='https://static.bluecdn.com/libs/fontawesome/7.3.0/css/all.min.css';l.crossOrigin='anonymous';document.head.appendChild(l);})();",
+              "(function(){var l=document.createElement('link');l.rel='stylesheet';l.href='https://static.bluecdn.com/libs/fontawesome/7.3.1/css/all.min.css';l.crossOrigin='anonymous';document.head.appendChild(l);})();",
           }}
         />
       </head>

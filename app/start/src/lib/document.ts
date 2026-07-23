@@ -10,7 +10,7 @@ export function startDocumentLinks(ctx: ThemeContextData | null | undefined): Do
   return [
     { rel: 'icon', href: ctx?.site.favicon || '/favicon.ico' },
     { rel: 'preconnect', href: 'https://static.bluecdn.com', crossOrigin: 'anonymous' },
-    { rel: 'stylesheet', href: 'https://static.bluecdn.com/libs/fontawesome/7.3.0/css/all.min.css' },
+    { rel: 'stylesheet', href: 'https://static.bluecdn.com/libs/fontawesome/7.3.1/css/all.min.css' },
     { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/noto-sans-sc.css' },
     { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/alimama-fangyuanti.css' },
     { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/luo.css' },
