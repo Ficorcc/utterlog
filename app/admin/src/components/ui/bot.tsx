@@ -78,8 +78,10 @@ const BotIcon = forwardRef<BotIconHandle, BotIconProps>(
             animate={controls}
             initial="normal"
             variants={{
-              normal: { y1: 13, y2: 15 },
+              normal: { x1: 15, x2: 15, y1: 13, y2: 15 },
               animate: {
+                x1: 15,
+                x2: 15,
                 y1: [13, 14, 13],
                 y2: [15, 14, 15],
                 transition: {
@@ -89,16 +91,16 @@ const BotIcon = forwardRef<BotIconHandle, BotIconProps>(
                 },
               },
             }}
-            x1={15}
-            x2={15}
           />
 
           <motion.line
             animate={controls}
             initial="normal"
             variants={{
-              normal: { y1: 13, y2: 15 },
+              normal: { x1: 9, x2: 9, y1: 13, y2: 15 },
               animate: {
+                x1: 9,
+                x2: 9,
                 y1: [13, 14, 13],
                 y2: [15, 14, 15],
                 transition: {
@@ -108,8 +110,6 @@ const BotIcon = forwardRef<BotIconHandle, BotIconProps>(
                 },
               },
             }}
-            x1={9}
-            x2={9}
           />
         </svg>
       </div>
