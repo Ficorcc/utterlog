@@ -16,6 +16,10 @@ function siteTitle(data: PublicPageData) {
   return ('ctx' in data && data.ctx?.site.title) || 'Utterlog';
 }
 
+function siteSubtitle(data: PublicPageData) {
+  return ('ctx' in data && data.ctx?.site.subtitle) || '';
+}
+
 function pageTitle(data: PublicPageData) {
   if (data.kind === 'post') return String(data.post?.seo?.title || data.post?.title || '文章');
   if (data.kind === 'category') return String(data.category?.name || '分类');
@@ -36,8 +40,10 @@ export function publicPageMeta(data: PublicPageData) {
   const description = data.kind === 'post'
     ? String(data.post?.seo?.description || data.post?.excerpt || '')
     : '';
+  const subtitle = siteSubtitle(data);
   return {
-    title: title ? `${title} - ${site}` : site,
+    // 无页面标题时（首页），补上站点副标题，与 __root 的 title 保持一致
+    title: title ? `${title} - ${site}` : (subtitle ? `${site} - ${subtitle}` : site),
     description,
   };
 }
