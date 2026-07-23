@@ -34,6 +34,36 @@ function analyticsKey(kind: string, value: string) {
   return `analytics:${kind}:${createHash('sha256').update(value).digest('hex')}`;
 }
 
+export type ReadVisitor = { ip: string; ua: string };
+
+export function readVisitorFromRequest(request: Request): ReadVisitor {
+  return { ip: requestIp(request), ua: request.headers.get('user-agent') || '' };
+}
+
+/**
+ * 文章阅读量的唯一写入口：文章详情页 SSR 读取时同步 +1，渲染出来的数字
+ * 就是这次访问之后的值。放在服务端而不是浏览器 /track 里，是因为 /track
+ * 要等页面渲染完才发出，当前这一屏永远看不到自己这次访问，叠上公开页
+ * 缓存后表现就是「数字长时间不动」。
+ *
+ * /track 那条链路继续负责访客明细、全站 PV 和文章日维度统计，不再碰
+ * view_count —— 两边各写各的字段，不会双计。
+ */
+export async function bumpPostViewOnRead(postId: number, visitor: ReadVisitor) {
+  if (!(postId > 0) || isBotUa(visitor.ua)) return false;
+  const dedupKey = analyticsKey('postread', `${visitor.ip}\0${visitor.ua}\0${postId}`);
+  if (await ephemeral.get(dedupKey)) return false;
+  await ephemeral.set(dedupKey, '1', PAGE_VIEW_DEDUP_SECONDS);
+  const updated = await exec(
+    `update ${table('posts')} set view_count=coalesce(view_count,0)+1 where id=$1 and type='post' and status='publish'`,
+    [postId],
+  ).catch((error) => {
+    console.error('[analytics] post view bump failed', error);
+    return null;
+  });
+  return Number((updated as { count?: number } | null)?.count || 0) > 0;
+}
+
 async function pageViewGate(identity: string, ip: string, path: string, now: number) {
   const identityBlockKey = analyticsKey('block:identity', identity);
   const ipBlockKey = analyticsKey('block:ip', ip);
@@ -243,27 +273,29 @@ export async function trackPageView(request: Request, input: Record<string, unkn
           [today, dimension, value, extra, uniqueInc],
         );
       }
-      if (trackedPostId > 0) {
-        await tx.unsafe(
-          `update ${table('posts')} set view_count=coalesce(view_count,0)+1 where id=$1 and type='post' and status='publish'`,
-          [trackedPostId],
-        );
-        const postVisitorRows = await tx.unsafe<{ inserted: boolean }[]>(
-          `insert into ${table('stats_visitor_post_dates')} (visitor_id, post_id, date) values ($1,$2,$3::date)
-           on conflict (visitor_id, post_id, date) do update set visitor_id=excluded.visitor_id returning (xmax=0) as inserted`,
-          [visitor, trackedPostId, today],
-        );
-        await tx.unsafe(
-          `insert into ${table('stats_post_daily')} (post_id, date, views, unique_visitors) values ($1,$2::date,1,$3)
-           on conflict (post_id, date) do update set views=${table('stats_post_daily')}.views+1,
-             unique_visitors=${table('stats_post_daily')}.unique_visitors+excluded.unique_visitors`,
-          [trackedPostId, today, postVisitorRows[0]?.inserted ? 1 : 0],
-        );
-      }
     });
   } catch (error) {
     console.error('[analytics] track write failed', error);
     return { tracked: false, reason: 'write_failed' };
+  }
+  // 文章日维度统计单独成事务：这几张表任一出问题（老库缺表 / 缺唯一索引）
+  // 都不该把访客明细和全站 PV 一起回滚掉。
+  if (trackedPostId > 0) {
+    await sql.begin(async (tx) => {
+      const postVisitorRows = await tx.unsafe<{ inserted: boolean }[]>(
+        `insert into ${table('stats_visitor_post_dates')} (visitor_id, post_id, date) values ($1,$2,$3::date)
+         on conflict (visitor_id, post_id, date) do update set visitor_id=excluded.visitor_id returning (xmax=0) as inserted`,
+        [visitor, trackedPostId, today],
+      );
+      await tx.unsafe(
+        `insert into ${table('stats_post_daily')} (post_id, date, views, unique_visitors) values ($1,$2::date,1,$3)
+         on conflict (post_id, date) do update set views=${table('stats_post_daily')}.views+1,
+           unique_visitors=${table('stats_post_daily')}.unique_visitors+excluded.unique_visitors`,
+        [trackedPostId, today, postVisitorRows[0]?.inserted ? 1 : 0],
+      );
+    }).catch((error) => {
+      console.error('[analytics] post daily stats write failed', error);
+    });
   }
   if (accessLogId && (!geo.country || !geo.latitude || !geo.longitude)) void enrichAccessGeo(accessLogId, ip);
   if (visitor) await ephemeral.set(`online:${visitor}`, JSON.stringify({ visitor_id: visitor, ip, path, ts: now,

@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { authenticateRequest } from '@backend/auth/session';
 import { getPostById } from '@backend/public-read';
 import { deletePost, PostServiceError, updatePost } from '@backend/services/posts';
+import { readVisitorFromRequest } from '@backend/services/tracking';
 import { apiFail, apiOk, withAdmin } from '../../../../server/http';
 
 function serviceError(error: unknown) {
@@ -12,7 +13,8 @@ function serviceError(error: unknown) {
 export const Route = createFileRoute('/api/v1/posts/$id')({ server: { handlers: {
   GET: async ({ request, params }) => {
     const session = await authenticateRequest(request).catch(() => null);
-    const post = await getPostById(Number(params.id), new URL(request.url).searchParams.get('track') === '1', Boolean(session));
+    const reader = new URL(request.url).searchParams.get('track') === '1' ? readVisitorFromRequest(request) : null;
+    const post = await getPostById(Number(params.id), reader, Boolean(session));
     return post ? apiOk(post) : apiFail(404, 'NOT_FOUND', '文章 not found');
   },
   PUT: ({ request, params }) => withAdmin(request, async () => {

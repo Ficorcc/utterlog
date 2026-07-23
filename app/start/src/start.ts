@@ -2,6 +2,7 @@ import { createMiddleware, createStart } from '@tanstack/react-start';
 import { config } from '@backend/config';
 import { authenticateRequest, type AuthSession } from '@backend/auth/session';
 import { dbReady } from '@backend/db/client';
+import { optionValue } from '@backend/db/options';
 import { installRedirect } from '@backend/http/install-redirect';
 import { requestIp } from '@backend/request-ip';
 import { brandingAssetResponse } from './server/branding-assets';
@@ -123,8 +124,21 @@ const personalizedPageNoCache = createMiddleware().server(async ({ next, pathnam
   });
 });
 
-// 公开内容页（文章 / 分类 / 标签 / 归档等）对匿名访客渲染一致，交给 CDN 短期
-// 缓存以避免每次请求都穿透回源。多重守卫确保不会把带身份的响应缓存给他人：
+// 固定链接结构决定哪些路径是文章详情页，而文章详情页不能进共享缓存。
+// 每个请求都查一次 options 太贵，缓存 30 秒即可 —— 改固定链接是低频操作。
+let permalinkCache: { value: string; expiresAt: number } | null = null;
+
+async function permalinkStructure() {
+  const now = Date.now();
+  if (permalinkCache && permalinkCache.expiresAt > now) return permalinkCache.value;
+  const value = await optionValue('permalink_structure', '/posts/%postname%').catch(() => '/posts/%postname%');
+  permalinkCache = { value, expiresAt: now + 30_000 };
+  return value;
+}
+
+// 公开内容页（分类 / 标签 / 归档等）对匿名访客渲染一致，交给 CDN 短期缓存以
+// 避免每次请求都穿透回源。文章详情页不在此列：阅读量在 SSR 同一请求里 +1，
+// 命中缓存会让计数停摆。多重守卫确保不会把带身份的响应缓存给他人：
 // 仅 GET/HEAD、200、匿名（无 session）、无 Set-Cookie、且未被上游设过缓存策略。
 const publicPageCache = createMiddleware().server(async ({ next, request, pathname, context }) => {
   const result = await next();
@@ -132,7 +146,7 @@ const publicPageCache = createMiddleware().server(async ({ next, request, pathna
   if (method !== 'GET' && method !== 'HEAD') return result;
   if (result.response.status !== 200) return result;
   if (context.session) return result;
-  if (!isPublicCacheablePage(pathname)) return result;
+  if (!isPublicCacheablePage(pathname, await permalinkStructure())) return result;
   const headers = new Headers(result.response.headers);
   if (headers.has('cache-control')) return result;
   if (headers.has('set-cookie')) return result;

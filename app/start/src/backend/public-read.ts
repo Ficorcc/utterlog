@@ -4,6 +4,7 @@ import { exec, intParam, many, nowUnix, one } from './db/helpers';
 import { optionValue } from './db/options';
 import { parsePermalinkPath } from './services/permalink';
 import { readOptionMap } from './services/options';
+import { bumpPostViewOnRead, type ReadVisitor } from './services/tracking';
 import { defaultWeatherLocation, fetchVisitorWeather, visitorWeatherLocation, type VisitorWeatherResponse } from './weather';
 
 type MetaType = 'category' | 'tag';
@@ -391,7 +392,7 @@ function footprintCountriesFrom(footprints: Record<string, any>[]) {
   return countries;
 }
 
-async function getPostBy(column: 'id' | 'display_id' | 'slug', value: string | number, _track = false, postOnly = false, authed = false) {
+async function getPostBy(column: 'id' | 'display_id' | 'slug', value: string | number, reader: ReadVisitor | null = null, postOnly = false, authed = false) {
   const typeSql = postOnly ? ` and type = 'post'` : '';
   const statusSql = authed ? '' : ` and status = 'publish'`;
   const post = await one<Record<string, unknown>>(
@@ -399,6 +400,11 @@ async function getPostBy(column: 'id' | 'display_id' | 'slug', value: string | n
     [value],
   ).catch(() => null);
   if (!post || (!authed && post.status !== 'publish')) return null;
+  // 阅读量在读取的同一请求里 +1，并把 +1 后的值返回给 SSR 渲染，
+  // 所以页面上的数字就是这次访问之后的值。
+  if (reader && post.status === 'publish' && post.type === 'post' && await bumpPostViewOnRead(Number(post.id), reader)) {
+    post.view_count = Number(post.view_count || 0) + 1;
+  }
   const metas = await many<Record<string, unknown>>(
     `select m.* from ${table('relationships')} r join ${table('metas')} m on m.id = r.meta_id where r.post_id = $1 order by m.type, m.name`,
     [post.id],
@@ -426,16 +432,16 @@ async function getPostBy(column: 'id' | 'display_id' | 'slug', value: string | n
   }, true);
 }
 
-export async function getPostBySlug(slug: string, track = false, authed = false) {
-  return getPostBy('slug', slug, track, false, authed);
+export async function getPostBySlug(slug: string, reader: ReadVisitor | null = null, authed = false) {
+  return getPostBy('slug', slug, reader, false, authed);
 }
 
-export async function getPostById(id: number, track = false, authed = false) {
-  return getPostBy('id', id, track, false, authed);
+export async function getPostById(id: number, reader: ReadVisitor | null = null, authed = false) {
+  return getPostBy('id', id, reader, false, authed);
 }
 
-export async function getPostByDisplayId(displayId: number, track = false, authed = false) {
-  return getPostBy('display_id', displayId, track, true, authed);
+export async function getPostByDisplayId(displayId: number, reader: ReadVisitor | null = null, authed = false) {
+  return getPostBy('display_id', displayId, reader, true, authed);
 }
 
 export async function listPostEpisodes(postId: number, authed = false) {
@@ -468,14 +474,14 @@ export async function getPostNavigation(postId: number) {
   return { prev, next };
 }
 
-export async function resolvePublicPostPath(pathname: string, track = false) {
+export async function resolvePublicPostPath(pathname: string, reader: ReadVisitor | null = null) {
   const structure = await optionValue('permalink_structure', '/posts/%postname%');
   if (!structure || structure === '/posts/%postname%') return null;
   const target = parsePermalinkPath(pathname, structure);
   if (!target) return null;
-  if (target.displayId) return getPostBy('display_id', target.displayId, track, true);
-  if (target.id) return getPostBy('id', target.id, track, true);
-  if (target.slug) return getPostBy('slug', target.slug, track, true);
+  if (target.displayId) return getPostBy('display_id', target.displayId, reader, true);
+  if (target.id) return getPostBy('id', target.id, reader, true);
+  if (target.slug) return getPostBy('slug', target.slug, reader, true);
   return null;
 }
 

@@ -17,6 +17,7 @@ import {
   searchPublicPosts,
 } from '@backend/public-read';
 import { requestIp } from '@backend/request-ip';
+import type { ReadVisitor } from '@backend/services/tracking';
 import { loadStartThemeContextDirect } from './theme';
 
 export type PublicPageRequest =
@@ -203,12 +204,8 @@ async function optionsFallback() {
   return safe(getOptionsMap(), {});
 }
 
-async function postBySlug(slug: string) {
-  return safe(getPostBySlug(slug, false), null);
-}
-
-async function homeRoute(ctx: ThemeContextData | null, page: number): Promise<PublicPageData> {
-  const ip = requestIp(new Request('https://utterlog.local', {
+function visitorIp() {
+  return requestIp(new Request('https://utterlog.local', {
     headers: {
       'eo-client-ip': getRequestHeader('eo-client-ip') || '',
       'true-client-ip': getRequestHeader('true-client-ip') || '',
@@ -217,6 +214,20 @@ async function homeRoute(ctx: ThemeContextData | null, page: number): Promise<Pu
       'cf-connecting-ip': getRequestHeader('cf-connecting-ip') || '',
     },
   }));
+}
+
+// 文章详情页的读取者身份：SSR 拿不到浏览器 localStorage 里的 visitor_id，
+// 用 IP + UA 做 30 秒去重的凭据即可。影视条目不计阅读量，reader 传 null。
+function postReader(): ReadVisitor {
+  return { ip: visitorIp(), ua: getRequestHeader('user-agent') || '' };
+}
+
+async function postBySlug(slug: string, reader: ReadVisitor | null = null) {
+  return safe(getPostBySlug(slug, reader), null);
+}
+
+async function homeRoute(ctx: ThemeContextData | null, page: number): Promise<PublicPageData> {
+  const ip = visitorIp();
   const [home, visitorWeather] = await Promise.all([
     safe(loadHomePageDataDirect(page), null),
     safe(getVisitorWeather(ip), null, 1200),
@@ -257,7 +268,7 @@ export const loadStartPublicPage = createServerFn({ method: 'GET' })
     }
 
     if (data.kind === 'post' || data.kind === 'film') {
-      const post = await postBySlug(data.slug);
+      const post = await postBySlug(data.slug, data.kind === 'post' ? postReader() : null);
       if (!post) return { kind: 'not-found', ctx, pathname: data.kind === 'film' ? `/films/${data.slug}` : `/posts/${data.slug}` };
       return { kind: 'post', ctx, post, options: ctx?.options || await optionsFallback() };
     }
@@ -373,7 +384,7 @@ export const loadStartPublicPage = createServerFn({ method: 'GET' })
       const segments = pathname.split('/').filter(Boolean).map(decodePathSegment);
       if (segments.length > 0) {
         const encodedPath = `/${segments.map((item) => encodeURIComponent(item)).join('/')}`;
-        const post = await safe(resolvePublicPostPath(encodedPath, false), null);
+        const post = await safe(resolvePublicPostPath(encodedPath, postReader()), null);
         if (post) return { kind: 'post', ctx, post, options: ctx?.options || await optionsFallback() };
       }
       return { kind: 'not-found', ctx, pathname };

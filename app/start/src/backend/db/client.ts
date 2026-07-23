@@ -200,6 +200,14 @@ export async function runCoreMigrations() {
   await sql.unsafe(`alter table ${table('users')} add column if not exists totp_backup_codes text default ''`);
   await sql.unsafe(`alter table ${table('media')} add column if not exists exif_data text default ''`);
   await sql.unsafe(`alter table ${table('comments')} add column if not exists is_ai_reply boolean not null default false`);
+  // access_logs 的这几列只存在于全新安装的 schema.sql，老库升上来一直没有补过。
+  // 缺任意一列，/track 的插入就会整条事务失败，访客明细和统计一起停摆。
+  await sql.unsafe(`alter table if exists ${table('access_logs')} add column if not exists ip_masked varchar(50) default ''`);
+  await sql.unsafe(`alter table if exists ${table('access_logs')} add column if not exists referer_host varchar(200) default ''`);
+  await sql.unsafe(`alter table if exists ${table('access_logs')} add column if not exists duration integer default 0`);
+  await sql.unsafe(`alter table if exists ${table('access_logs')} add column if not exists guid varchar(64) default ''`);
+  await sql.unsafe(`alter table if exists ${table('access_logs')} add column if not exists visitor_id varchar(64) default ''`);
+  await sql.unsafe(`alter table if exists ${table('access_logs')} add column if not exists fingerprint varchar(64) default ''`);
   await sql.unsafe(`create table if not exists ${table('ai_comment_queue')} (
     id serial primary key,
     comment_id integer not null references ${table('comments')}(id) on delete cascade,
