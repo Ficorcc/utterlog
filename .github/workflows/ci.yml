@@ -37,11 +37,14 @@ jobs:
             || sudo pg_createcluster 18 main --port 5432
           sudo pg_ctlcluster 18 main start || sudo pg_ctlcluster 18 main status
           sudo pg_isready -h 127.0.0.1 -p 5432
+          # 集成测试的 schema bootstrap 会 DROP/CREATE vector 扩展：需要 superuser，
+          # 且扩展要由测试角色自己创建，否则 owner 是 postgres，DROP 时报权限错。
           sudo -u postgres psql -v ON_ERROR_STOP=1 <<'SQL'
-          create role utterlog_test with login password 'utterlog_test';
+          create role utterlog_test with login superuser password 'utterlog_test';
           create database utterlog_test owner utterlog_test;
           SQL
-          sudo -u postgres psql -v ON_ERROR_STOP=1 -d utterlog_test -c 'create extension vector'
+          PGPASSWORD=utterlog_test psql -h 127.0.0.1 -U utterlog_test -d utterlog_test \
+            -v ON_ERROR_STOP=1 -c 'create extension vector'
 
       - name: Install Bun app deps
         run: bun install --frozen-lockfile
