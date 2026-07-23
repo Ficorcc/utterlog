@@ -30,7 +30,13 @@ jobs:
             | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
           sudo apt-get update
           sudo apt-get install -y postgresql-18 postgresql-18-pgvector
+          # runner 镜像设了 create_main_cluster=false，装包不会自动建 18/main；
+          # 预装的 PG16 集群又占着 5432（测试固定连这个端口），先移除再显式创建。
+          sudo pg_dropcluster 16 main --stop 2>/dev/null || true
+          sudo pg_lsclusters -h 2>/dev/null | awk '{print $1"/"$2}' | grep -qx '18/main' \
+            || sudo pg_createcluster 18 main --port 5432
           sudo pg_ctlcluster 18 main start || sudo pg_ctlcluster 18 main status
+          sudo pg_isready -h 127.0.0.1 -p 5432
           sudo -u postgres psql -v ON_ERROR_STOP=1 <<'SQL'
           create role utterlog_test with login password 'utterlog_test';
           create database utterlog_test owner utterlog_test;
