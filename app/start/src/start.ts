@@ -5,7 +5,7 @@ import { dbReady } from '@backend/db/client';
 import { installRedirect } from '@backend/http/install-redirect';
 import { requestIp } from '@backend/request-ip';
 import { brandingAssetResponse } from './server/branding-assets';
-import { isVisitorPersonalizedPage } from './server/cache-policy';
+import { isPublicCacheablePage, isVisitorPersonalizedPage } from './server/cache-policy';
 import { checkStartSecurity } from './server/security';
 
 export type StartRequestContext = {
@@ -123,6 +123,28 @@ const personalizedPageNoCache = createMiddleware().server(async ({ next, pathnam
   });
 });
 
+// 公开内容页（文章 / 分类 / 标签 / 归档等）对匿名访客渲染一致，交给 CDN 短期
+// 缓存以避免每次请求都穿透回源。多重守卫确保不会把带身份的响应缓存给他人：
+// 仅 GET/HEAD、200、匿名（无 session）、无 Set-Cookie、且未被上游设过缓存策略。
+const publicPageCache = createMiddleware().server(async ({ next, request, pathname, context }) => {
+  const result = await next();
+  const method = request.method.toUpperCase();
+  if (method !== 'GET' && method !== 'HEAD') return result;
+  if (result.response.status !== 200) return result;
+  if (context.session) return result;
+  if (!isPublicCacheablePage(pathname)) return result;
+  const headers = new Headers(result.response.headers);
+  if (headers.has('cache-control')) return result;
+  if (headers.has('set-cookie')) return result;
+  headers.set('cache-control', 'public, max-age=60, stale-while-revalidate=300');
+  headers.set('x-utterlog-cache', 'public');
+  return new Response(result.response.body, {
+    status: result.response.status,
+    statusText: result.response.statusText,
+    headers,
+  });
+});
+
 const installGuard = createMiddleware().server(async ({ next, request }) => {
   const redirect = await installRedirect(request, await dbReady());
   return redirect || next();
@@ -178,5 +200,5 @@ const authContext = createMiddleware().server(async ({ next, request }) => {
 });
 
 export const startInstance = createStart(() => ({
-  requestMiddleware: [errorBoundary, installGuard, brandingAssets, authContext, securityPolicy, cors, bodyLimit, apiNoCache, personalizedPageNoCache, securityHeaders],
+  requestMiddleware: [errorBoundary, installGuard, brandingAssets, authContext, securityPolicy, cors, bodyLimit, apiNoCache, publicPageCache, personalizedPageNoCache, securityHeaders],
 }));
