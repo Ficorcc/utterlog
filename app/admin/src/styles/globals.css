@@ -324,6 +324,12 @@ form,
   border-radius: 0 !important;
 }
 
+/* 侧边栏折叠开关：后台整体是直角风格，唯独这个悬浮圆形开关是特意保留的例外。
+   选择器特异性（0,1,0）高于上面的 `button`（0,0,1），才能压过它的 !important。 */
+.sidebar-toggle {
+  border-radius: 9999px !important;
+}
+
 /* Blue — Icons8 Office L 风格天蓝 */
 [data-color="blue"] {
   --color-primary: #5B9BD5;

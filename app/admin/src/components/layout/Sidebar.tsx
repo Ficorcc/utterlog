@@ -328,7 +328,7 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
         )}
         <button
           onClick={onToggle}
-          className="absolute z-10 flex items-center justify-center rounded-full border border-border bg-card text-muted-foreground"
+          className="sidebar-toggle absolute z-10 flex items-center justify-center rounded-full border border-border bg-card text-muted-foreground"
           style={{
             right: -12, top: '50%', transform: 'translateY(-50%)',
             width: 24, height: 24, cursor: 'pointer',
