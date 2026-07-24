@@ -320,9 +320,18 @@ export default function PostsPage() {
                       </span>
                     </TableCell>
                     <TableCell>
-                      {/* max-width keeps long titles from blowing up the auto-layout
+                      {/* 标题即「查看文章」入口，所以操作栏不再单列预览按钮。
+                          max-width keeps long titles from blowing up the auto-layout
                           table; ellipsis still kicks in past ~440px. */}
-                      <p className="min-w-0 max-w-110 truncate text-xs-plus font-medium text-foreground">{row.title}</p>
+                      <a
+                        href={postUrlOf(row)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={t('admin.common.preview', '预览')}
+                        className="block min-w-0 max-w-110 truncate text-xs-plus font-medium text-foreground no-underline hover:text-primary"
+                      >
+                        {row.title}
+                      </a>
                     </TableCell>
                     <TableCell>
                       {!cat ? (
@@ -342,7 +351,7 @@ export default function PostsPage() {
                         // fit however many tags this post has.
                         <div className="inline-flex items-center gap-1">
                           {tags.map((tag: any) => (
-                            <span key={tag.id} className="inline-block rounded border border-border bg-muted px-2 py-px text-2xs leading-relaxed text-muted-foreground">{tag.name}</span>
+                            <span key={tag.id} className="inline-block border border-border bg-muted px-2 py-px text-2xs leading-relaxed text-muted-foreground">{tag.name}</span>
                           ))}
                         </div>
                       )}
@@ -362,7 +371,6 @@ export default function PostsPage() {
                     <TableCell>
                       <div className="flex justify-end gap-1">
                         <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" title={t('admin.common.edit', '编辑')} onClick={() => navigate(`/posts/edit/${row.id}`)}><Pencil className="size-4" /></Button>
-                        <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground" title={t('admin.common.preview', '预览')} onClick={() => window.open(postUrlOf(row), '_blank', 'noopener,noreferrer')}><Eye className="size-4" /></Button>
                         <Button
                           variant="ghost"
                           size="icon"
