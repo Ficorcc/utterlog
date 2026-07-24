@@ -1,9 +1,8 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, type ReactNode } from 'react';
 import { useNavigate } from '@/lib/router';
 import {
-  FileText, MessageSquare, Eye, TrendingUp, FolderTree, Tags, Type, CalendarDays,
-  SquarePen, FolderOpen, Settings as SettingsIcon, BarChart3, Zap, ArrowRight, Plus,
-  Network,
+  FileText, MessageSquare, SquarePen, FolderOpen, Settings as SettingsIcon,
+  ArrowRight, Plus,
 } from 'lucide-react';
 
 function AnimatedNumber({ value }: { value: number }) {
@@ -30,7 +29,7 @@ function AnimatedNumber({ value }: { value: number }) {
   return <>{display.toLocaleString()}</>;
 }
 import api, { networkApi } from '@/lib/api';
-import { cn, formatRelativeTime } from '@/lib/utils';
+import { formatRelativeTime } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import { postUrlOf } from '@/lib/site';
 import { Button } from '@/components/ui/shadcn';
@@ -126,27 +125,27 @@ export default function DashboardPage() {
     categories: comment.post_categories || [],
   });
 
-  // 主卡只留每天会看的四项，占一行；分类 / 标签 / 字数 / 天数信息密度低，
-  // 收进下面一行小字摘要。
+  // 主指标只留每天会看的四项；分类 / 标签 / 字数 / 天数信息密度低，放第二行。
+  // 这里不再带图标和配色——整页只用一个主色加灰阶，指标靠字号分层级。
   const statCards = [
-    { title: t('admin.dashboard.stats.posts', '文章'), value: stats.posts, Icon: FileText, colorClass: 'text-primary', bgClass: 'bg-primary/10' },
-    { title: t('admin.dashboard.stats.comments', '评论'), value: stats.comments, Icon: MessageSquare, colorClass: 'text-amber-600', bgClass: 'bg-amber-600/10' },
-    { title: t('admin.dashboard.stats.views', '浏览量'), value: stats.views, Icon: Eye, colorClass: 'text-emerald-600', bgClass: 'bg-emerald-600/10' },
-    { title: t('admin.dashboard.stats.today', '今日访问'), value: stats.today, Icon: TrendingUp, colorClass: 'text-violet-500', bgClass: 'bg-violet-500/10' },
+    { title: t('admin.dashboard.stats.posts', '文章'), value: stats.posts },
+    { title: t('admin.dashboard.stats.comments', '评论'), value: stats.comments },
+    { title: t('admin.dashboard.stats.views', '浏览量'), value: stats.views },
+    { title: t('admin.dashboard.stats.today', '今日访问'), value: stats.today },
   ];
 
   const secondaryStats = [
-    { label: t('admin.dashboard.stats.categories', '分类'), value: stats.categories, Icon: FolderTree, href: '/posts/categories' },
-    { label: t('admin.dashboard.stats.tags', '标签'), value: stats.tags, Icon: Tags, href: '/posts/tags' },
-    { label: t('admin.dashboard.stats.words', '总字数'), value: new Intl.NumberFormat(locale || 'zh-CN', { notation: 'compact', maximumFractionDigits: 1 }).format(stats.words), Icon: Type },
-    { label: t('admin.dashboard.stats.days', '建站天数'), value: stats.days, Icon: CalendarDays },
+    { label: t('admin.dashboard.stats.categories', '分类'), value: stats.categories, href: '/posts/categories' },
+    { label: t('admin.dashboard.stats.tags', '标签'), value: stats.tags, href: '/posts/tags' },
+    { label: t('admin.dashboard.stats.words', '总字数'), value: new Intl.NumberFormat(locale || 'zh-CN', { notation: 'compact', maximumFractionDigits: 1 }).format(stats.words) },
+    { label: t('admin.dashboard.stats.days', '建站天数'), value: stats.days },
   ];
 
   // 待办：只显示有数的项；全为 0 时整行不渲染。
   const todoItems = [
-    { count: todo.pending_comments, label: t('admin.dashboard.todo.pendingComments', '条评论待审核'), Icon: MessageSquare, href: '/comments/pending', tone: 'text-amber-600 dark:text-amber-400' },
-    { count: todo.drafts, label: t('admin.dashboard.todo.drafts', '篇草稿未发布'), Icon: SquarePen, href: '/posts?status=draft', tone: 'text-muted-foreground' },
-    { count: todo.link_requests, label: t('admin.dashboard.todo.linkRequests', '条友链申请待处理'), Icon: Network, href: '/links', tone: 'text-primary' },
+    { count: todo.pending_comments, label: t('admin.dashboard.todo.pendingComments', '条评论待审核'), href: '/comments/pending' },
+    { count: todo.drafts, label: t('admin.dashboard.todo.drafts', '篇草稿未发布'), href: '/posts?status=draft' },
+    { count: todo.link_requests, label: t('admin.dashboard.todo.linkRequests', '条友链申请待处理'), href: '/links' },
   ].filter((item) => item.count > 0);
 
   const quickActions = [
@@ -156,11 +155,18 @@ export default function DashboardPage() {
     { label: t('admin.nav.settings', '设置'), Icon: SettingsIcon, href: '/settings' },
   ];
 
+  // 状态改成纯文字：列表里绝大多数是「已发布」，彩色底块只是噪音。
+  // 只有需要动作的状态（草稿 / 待审）才用主色点出来。
   const statusMap: Record<string, { text: string; cls: string }> = {
-    publish: { text: t('admin.status.published', '已发布'), cls: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' },
-    draft: { text: t('admin.status.draft', '草稿'), cls: 'bg-muted text-muted-foreground' },
-    pending: { text: t('admin.status.pending', '待审'), cls: 'bg-amber-500/15 text-amber-600 dark:text-amber-400' },
+    publish: { text: t('admin.status.published', '已发布'), cls: 'text-muted-foreground' },
+    draft: { text: t('admin.status.draft', '草稿'), cls: 'text-primary' },
+    pending: { text: t('admin.status.pending', '待审'), cls: 'text-primary' },
   };
+
+  // 区块标题：小号、字距略开、灰色——靠层级而不是彩色图标区分。
+  const SectionTitle = ({ children }: { children: ReactNode }) => (
+    <h2 className="text-2xs font-semibold uppercase tracking-[0.06em] text-muted-foreground">{children}</h2>
+  );
 
   const maxS = Math.max(...sparkline.map(s => s.visits), 1);
 
@@ -186,52 +192,46 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-7">
-      {/* 待办 —— 只在真有事情要处理时出现 */}
+      {/* 待办 —— 只在真有事情要处理时出现。用主色点一下，不铺底色。 */}
       {!loading && todoItems.length > 0 && (
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border border-border bg-card px-5 py-3 shadow-sm">
-          <span className="text-xs font-semibold text-muted-foreground">{t('admin.dashboard.todo.title', '待处理')}</span>
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-l-2 border-primary bg-muted/40 py-2.5 pl-4 pr-5">
+          <span className="text-2xs font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+            {t('admin.dashboard.todo.title', '待处理')}
+          </span>
           {todoItems.map((item) => (
             <button
               key={item.label}
               type="button"
               onClick={() => navigate(item.href)}
-              className="inline-flex items-center gap-1.5 bg-transparent text-xs-plus text-foreground hover:text-primary"
+              className="inline-flex items-baseline gap-1.5 bg-transparent text-xs text-muted-foreground hover:text-primary"
             >
-              <item.Icon className={cn('size-4', item.tone)} />
-              <span className="font-semibold">{item.count}</span>
-              <span className="text-muted-foreground">{item.label}</span>
+              <span className="text-sm font-semibold text-foreground">{item.count}</span>
+              <span>{item.label}</span>
             </button>
           ))}
         </div>
       )}
 
-      {/* Stat cards */}
-      <div className="flex flex-col gap-3">
-        <div className="grid grid-cols-4 gap-3">
+      {/* 指标区：主指标一行大数字，次要指标同容器第二行。整块只有一圈边框、
+          内部靠分隔线切分——比 8 张各带边框和阴影的卡片安静得多。 */}
+      <div className="border border-border bg-card">
+        <div className="grid grid-cols-4 divide-x divide-border">
           {statCards.map((c) => (
-            <div key={c.title} className="flex items-center gap-3.5 border border-border bg-card p-4 shadow-sm">
-              <div className={cn('flex size-10 items-center justify-center', c.bgClass)}>
-                <c.Icon className={cn('size-4.5', c.colorClass)} />
-              </div>
-              <div>
-                <p className="text-xl-plus font-bold text-foreground">
-                  {loading ? '—' : typeof c.value === 'number' ? <AnimatedNumber value={c.value} /> : c.value}
-                </p>
-                <p className="text-xs text-muted-foreground">{c.title}</p>
-              </div>
+            <div key={c.title} className="px-5 py-4">
+              <p className="text-2xs font-medium uppercase tracking-[0.06em] text-muted-foreground">{c.title}</p>
+              <p className="mt-1.5 text-2xl font-semibold tabular-nums leading-none text-foreground">
+                {loading ? '—' : typeof c.value === 'number' ? <AnimatedNumber value={c.value} /> : c.value}
+              </p>
             </div>
           ))}
         </div>
 
-        {/* 次要指标：四等分一条，跟上面的卡片同一套边框/底色，不然裸着一行
-            小字飘在卡片下面像没做完。可点的跳对应管理页。 */}
-        <div className="grid grid-cols-4 divide-x divide-border border border-border bg-card shadow-sm">
+        <div className="grid grid-cols-4 divide-x divide-border border-t border-border">
           {secondaryStats.map((s) => {
             const body = (
               <>
-                <s.Icon className="size-3.5 shrink-0 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">{s.label}</span>
-                <span className="text-xs-plus font-semibold text-foreground">{loading ? '—' : s.value}</span>
+                <span className="text-xs font-semibold tabular-nums text-foreground">{loading ? '—' : s.value}</span>
               </>
             );
             return s.href ? (
@@ -239,12 +239,12 @@ export default function DashboardPage() {
                 key={s.label}
                 type="button"
                 onClick={() => navigate(s.href!)}
-                className="inline-flex items-center justify-center gap-1.5 bg-transparent px-4 py-2.5 transition-colors hover:bg-muted/50 hover:text-primary"
+                className="flex items-baseline justify-between gap-2 bg-transparent px-5 py-2.5 transition-colors hover:bg-muted/40"
               >
                 {body}
               </button>
             ) : (
-              <span key={s.label} className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5">{body}</span>
+              <span key={s.label} className="flex items-baseline justify-between gap-2 px-5 py-2.5">{body}</span>
             );
           })}
         </div>
@@ -253,12 +253,9 @@ export default function DashboardPage() {
       {/* Trend + Quick actions */}
       <div className="grid grid-cols-[2fr_1fr] items-stretch gap-4">
         {/* Trend chart */}
-        <div className="flex flex-col rounded-lg border border-border bg-card p-5 pb-2.5 shadow-sm">
-          <div className="mb-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <BarChart3 className="size-3.75 text-primary" />
-              <h2 className="text-sm-plus font-semibold text-foreground">{t('admin.dashboard.trendTitle', '近 30 天访问趋势')}</h2>
-            </div>
+        <div className="flex flex-col border border-border bg-card p-5 pb-2.5">
+          <div className="mb-4 flex items-center justify-between">
+            <SectionTitle>{t('admin.dashboard.trendTitle', '近 30 天访问趋势')}</SectionTitle>
             <div className="flex items-center gap-4">
               <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
                 <span className="size-2.5 bg-primary" />{t('admin.dashboard.visitors', '访客')}
@@ -294,18 +291,22 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Quick actions */}
-        <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
-          <div className="mb-4 flex items-center gap-2">
-            <Zap className="size-3.75 text-primary" />
-            <h2 className="text-sm-plus font-semibold text-foreground">{t('admin.dashboard.quickActions', '快捷操作')}</h2>
+        {/* Quick actions —— 从 4 个大图标块改成一列可点的行，靠分隔线区分 */}
+        <div className="flex flex-col border border-border bg-card">
+          <div className="px-5 py-4">
+            <SectionTitle>{t('admin.dashboard.quickActions', '快捷操作')}</SectionTitle>
           </div>
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="flex flex-1 flex-col divide-y divide-border border-t border-border">
             {quickActions.map((a) => (
-              <button key={a.label} type="button" onClick={() => navigate(a.href)}
-                className="flex flex-col items-center gap-2.5 rounded-md border border-border bg-card p-5 transition-colors hover:border-primary hover:shadow-sm">
-                <a.Icon className="size-5.5 text-primary" />
-                <span className="text-xs-plus font-medium text-foreground">{a.label}</span>
+              <button
+                key={a.label}
+                type="button"
+                onClick={() => navigate(a.href)}
+                className="group flex flex-1 items-center gap-3 bg-transparent px-5 py-3 text-left transition-colors hover:bg-muted/40"
+              >
+                <a.Icon className="size-4 shrink-0 text-muted-foreground group-hover:text-primary" />
+                <span className="text-xs-plus text-foreground">{a.label}</span>
+                <ArrowRight className="ml-auto size-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
               </button>
             ))}
           </div>
@@ -315,12 +316,9 @@ export default function DashboardPage() {
       {/* Recent content */}
       <div className="grid grid-cols-2 gap-4">
         {/* Recent posts */}
-        <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="overflow-hidden border border-border bg-card">
           <div className="flex items-center justify-between border-b border-border px-5 py-4">
-            <div className="flex items-center gap-2">
-              <SquarePen className="size-3.75 text-primary" />
-              <h2 className="text-sm-plus font-semibold text-foreground">{t('admin.dashboard.recentPosts', '最近文章')}</h2>
-            </div>
+            <SectionTitle>{t('admin.dashboard.recentPosts', '最近文章')}</SectionTitle>
             <ViewAll to="/posts" label={t('admin.dashboard.viewAll', '全部')} />
           </div>
           {/* 加载态统一由 header 的 spinner 表示（见 usePageLoading） */}
@@ -349,7 +347,7 @@ export default function DashboardPage() {
                         {post.comment_count != null && ` · ${t('post.commentCount', '{count} 评论', { count: post.comment_count })}`}
                       </p>
                     </div>
-                    <span className={`rounded-md px-2 py-0.5 text-xs font-medium ${st.cls}`}>{st.text}</span>
+                    <span className={`shrink-0 text-xs ${st.cls}`}>{st.text}</span>
                   </div>
                 </div>
               );
@@ -358,12 +356,9 @@ export default function DashboardPage() {
         </div>
 
         {/* Recent comments */}
-        <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <div className="overflow-hidden border border-border bg-card">
           <div className="flex items-center justify-between border-b border-border px-5 py-4">
-            <div className="flex items-center gap-2">
-              <MessageSquare className="size-3.75 text-primary" />
-              <h2 className="text-sm-plus font-semibold text-foreground">{t('admin.dashboard.recentComments', '最新评论')}</h2>
-            </div>
+            <SectionTitle>{t('admin.dashboard.recentComments', '最新评论')}</SectionTitle>
             <ViewAll to="/comments" label={t('admin.dashboard.viewAll', '全部')} />
           </div>
           {loading ? null : recentComments.length === 0 ? (
@@ -403,7 +398,7 @@ export default function DashboardPage() {
         <button
           type="button"
           onClick={() => navigate('/utterlog')}
-          className="flex w-full items-center gap-3 border border-border bg-card px-5 py-3 text-left shadow-sm transition-colors hover:border-primary"
+          className="flex w-full items-center gap-3 border border-border bg-card px-5 py-3 text-left transition-colors hover:border-primary"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
             <path d="M12 0c9.601 0 12 2.399 12 12 0 9.601-2.399 12-12 12-9.601 0-12-2.399-12-12C0 2.399 2.399 0 12 0z" fill="var(--primary)" />
@@ -418,7 +413,7 @@ export default function DashboardPage() {
           </span>
         </button>
       ) : (
-      <div className="overflow-hidden border border-border bg-card shadow-sm">
+      <div className="overflow-hidden border border-border bg-card">
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <div className="flex items-center gap-2.5">
             <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
