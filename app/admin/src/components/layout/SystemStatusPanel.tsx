@@ -167,19 +167,6 @@ function LoadRing({ loadAvg, cores, label }: { loadAvg?: string | number[]; core
   );
 }
 
-function formatLoad(avg?: string): string {
-  if (!avg) return '0 / 0 / 0';
-  const parts = avg.trim().split(/\s+/);
-  return parts.slice(0, 3).join(' / ');
-}
-
-function formatMem(mb?: string): string {
-  if (!mb) return '0 MB';
-  const v = parseFloat(mb);
-  if (v >= 1024) return (v / 1024).toFixed(1) + ' GB';
-  return v.toFixed(1) + ' MB';
-}
-
 function formatDisk(value?: string | number): string {
   if (value === undefined || value === null || value === '') return '-';
   if (typeof value === 'number') {

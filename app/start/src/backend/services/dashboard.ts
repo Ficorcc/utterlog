@@ -10,10 +10,15 @@ import { appVersion, getCpuPercent, getHostUptimeLabel, getHostUptimeSeconds } f
 function diskStats(path = '/') {
   try {
     const stat = statfsSync(path);
-    const total = Number(stat.blocks) * Number(stat.bsize);
-    const free = Number(stat.bavail) * Number(stat.bsize);
-    const used = Math.max(0, total - free);
-    return { total, free, used, percent: total > 0 ? Math.round((used / total) * 100) : 0, path };
+    const blockSize = Number(stat.bsize);
+    const total = Number(stat.blocks) * blockSize;
+    // 跟 df 一个口径：已用取 blocks-bfree（真实占用），可用取 bavail（普通用户
+    // 可用，不含预留块）；百分比按 used/(used+avail) 算。若沿用 total-bavail，
+    // ext4 默认给 root 预留的那 5% 会被记成已用——这台机上就是凭空多出 4G。
+    const free = Number(stat.bavail) * blockSize;
+    const used = Math.max(0, (Number(stat.blocks) - Number(stat.bfree)) * blockSize);
+    const denominator = used + free;
+    return { total, free, used, percent: denominator > 0 ? Math.round((used / denominator) * 100) : 0, path };
   } catch {
     return { total: 0, free: 0, used: 0, percent: 0, path };
   }
