@@ -12,6 +12,7 @@ import { useNavigate, useLocation } from '@/lib/router';
 import Sidebar from '@/components/layout/Sidebar';
 import NotificationBell from '@/components/layout/NotificationBell';
 import { HouseIcon, type HouseIconHandle } from '@/components/ui/house';
+import Spinner from '@/components/ui/Spinner';
 import { useAuthStore } from '@/lib/store';
 import { useI18n } from '@/lib/i18n';
 import { getSiteOptions, loadSiteOptions } from '@/lib/site';
@@ -25,6 +26,15 @@ const PageBadgeContext = createContext<{ setPageBadge: (node: ReactNode) => void
 
 export function usePageBadge() {
   return useContext(PageBadgeContext);
+}
+
+// Page-level loading slot — pages call `setPageLoading(true/false)` and the
+// header shows one spinner just left of the 访问首页 button, instead of each
+// list painting its own spinner inside the table body.
+const PageLoadingContext = createContext<{ setPageLoading: (loading: boolean) => void }>({ setPageLoading: () => {} });
+
+export function usePageLoading() {
+  return useContext(PageLoadingContext);
 }
 
 // Route-to-title map — displayed in header + document.title.
@@ -140,9 +150,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [siteTitle, setSiteTitle] = useState('Utterlog');
   const [menuOpen, setMenuOpen] = useState(false);
   const [pageBadge, setPageBadge] = useState<ReactNode>(null);
+  const [pageLoading, setPageLoading] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const homeIconRef = useRef<HouseIconHandle>(null);
   const pageBadgeCtx = useMemo(() => ({ setPageBadge }), []);
+  const pageLoadingCtx = useMemo(() => ({ setPageLoading }), []);
 
   const pageMeta = resolveTitle(pathname);
   const pageTitle = t(pageKey(pageMeta), pageMeta.label);
@@ -151,7 +163,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   // Reset the badge slot whenever the route changes — pages that don't
   // set one shouldn't inherit the previous page's badge.
-  useEffect(() => { setPageBadge(null); }, [pathname]);
+  useEffect(() => { setPageBadge(null); setPageLoading(false); }, [pathname]);
 
   useEffect(() => {
     let active = true;
@@ -285,6 +297,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           {/* Right: actions + user */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            {/* 固定槽位：常驻占位，避免 loading 出现/消失时把右侧图标推来推去 */}
+            <span
+              className="inline-flex size-8.5 items-center justify-center text-muted-foreground"
+              role="status"
+              aria-live="polite"
+              aria-label={pageLoading ? t('common.loading', '加载中…') : undefined}
+            >
+              {pageLoading ? <Spinner inline size={16} /> : null}
+            </span>
+
             <a
               href={siteUrl}
               target="_blank"
@@ -382,6 +404,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             overflowY: fullWidth ? 'hidden' : 'scroll',
           }}
         >
+          <PageLoadingContext.Provider value={pageLoadingCtx}>
           <PageBadgeContext.Provider value={pageBadgeCtx}>
             {fullWidth ? (
               // Editor / chat / logs: fill the full viewport height, children handle internal scroll
@@ -389,8 +412,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {children}
               </div>
             ) : wide ? (
-              // Wide pages: full viewport width, normal scroll
-              <div className="px-8 py-6">
+              // Wide pages: roomier than the 1280 default so dense tables keep
+              // their rightmost columns, but still capped — unbounded width on
+              // an ultrawide monitor just spreads a list into sparse columns.
+              <div className="mx-auto px-8 py-6" style={{ maxWidth: 1600 }}>
                 {children}
               </div>
             ) : (
@@ -400,6 +425,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
             )}
           </PageBadgeContext.Provider>
+          </PageLoadingContext.Provider>
         </main>
       </div>
     </div>

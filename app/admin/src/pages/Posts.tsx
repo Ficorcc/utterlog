@@ -8,13 +8,14 @@ import { useNavigate } from '@/lib/router';
 import { postsApi, optionsApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 import {
-  Button, Input, Label, Badge, Pagination, ConfirmDialog, Card, Spinner,
+  Button, Input, Label, Badge, Pagination, ConfirmDialog, Card,
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
   Dialog, DialogContent, DialogHeader, DialogTitle,
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@/components/ui/shadcn';
 import { cn, formatDate } from '@/lib/utils';
 import { usePostsToolbar } from '@/layouts/PostsLayout';
+import { usePageLoading } from '@/layouts/DashboardLayout';
 import { useI18n } from '@/lib/i18n';
 import { invalidateSiteOptions, loadSiteOptions, postUrlOf } from '@/lib/site';
 
@@ -43,6 +44,7 @@ const statusBadge: Record<string, string> = {
 export default function PostsPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
+  const { setPageLoading } = usePageLoading();
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -79,6 +81,12 @@ export default function PostsPage() {
   };
 
   useEffect(() => { fetchPosts(); }, [page, status, perPage, orderDir]);
+
+  // 加载态上报给 header 的统一 spinner；离开本页时清掉，别让它一直转。
+  useEffect(() => {
+    setPageLoading(loading);
+    return () => setPageLoading(false);
+  }, [loading, setPageLoading]);
 
   // Hydrate the settings popup the first time it opens — cheap enough
   // to re-fetch each open so stale admin tabs can't save over newer
@@ -274,21 +282,19 @@ export default function PostsPage() {
                   </span>
                 </button>
               </TableHead>
-              <TableHead className="w-35">{t('common.categories', '分类')}</TableHead>
+              <TableHead className="w-28">{t('common.categories', '分类')}</TableHead>
               <TableHead>{t('admin.posts.columns.keywords', '关键词')}</TableHead>
               <TableHead className="w-40">{t('admin.posts.columns.time', '时间')}</TableHead>
               <TableHead className="w-25">{t('admin.posts.columns.viewsComments', '浏览/评论')}</TableHead>
-              <TableHead className="w-18">{t('admin.posts.columns.status', '状态')}</TableHead>
+              <TableHead className="w-24 whitespace-nowrap">{t('admin.posts.columns.status', '状态')}</TableHead>
               <TableHead className="w-47.5 text-right">{t('admin.posts.columns.actions', '操作')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={9} className="py-10 text-center">
-                  <Spinner />
-                </TableCell>
-              </TableRow>
+              // 加载态由 header 的统一 spinner 表示（见 usePageLoading），
+              // 这里留空，避免表格中间再闪一个圈。
+              null
             ) : posts.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={9} className="py-10 text-center text-sm text-muted-foreground">
@@ -350,8 +356,8 @@ export default function PostsPage() {
                         <span className="inline-flex items-center gap-0.5"><MessageSquare className="size-4" />{row.comment_count || 0}</span>
                       </span>
                     </TableCell>
-                    <TableCell>
-                      <Badge className={cn(statusBadge[row.status])}>{statusLabel(row.status)}</Badge>
+                    <TableCell className="whitespace-nowrap">
+                      <Badge className={cn('whitespace-nowrap', statusBadge[row.status])}>{statusLabel(row.status)}</Badge>
                     </TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-1">
