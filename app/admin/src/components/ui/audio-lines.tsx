@@ -71,6 +71,7 @@ const AudioLinesIcon = forwardRef<AudioLinesIconHandle, AudioLinesIconProps>(
         >
           <path d="M2 10v3" />
           <motion.path
+            initial="normal"
             animate={controls}
             d="M6 6v11"
             variants={{
@@ -85,6 +86,7 @@ const AudioLinesIcon = forwardRef<AudioLinesIconHandle, AudioLinesIconProps>(
             }}
           />
           <motion.path
+            initial="normal"
             animate={controls}
             d="M10 3v18"
             variants={{
@@ -99,6 +101,7 @@ const AudioLinesIcon = forwardRef<AudioLinesIconHandle, AudioLinesIconProps>(
             }}
           />
           <motion.path
+            initial="normal"
             animate={controls}
             d="M14 8v7"
             variants={{
@@ -113,6 +116,7 @@ const AudioLinesIcon = forwardRef<AudioLinesIconHandle, AudioLinesIconProps>(
             }}
           />
           <motion.path
+            initial="normal"
             animate={controls}
             d="M18 5v13"
             variants={{

@@ -2,7 +2,8 @@ import { useEffect, useState, useRef, type ReactNode } from 'react';
 import { useNavigate } from '@/lib/router';
 import {
   FileText, MessageSquare, SquarePen, FolderOpen, Settings as SettingsIcon,
-  ArrowRight, Plus,
+  ArrowRight, Plus, Eye, TrendingUp, FolderTree, Tags, Type, CalendarDays,
+  BarChart3, Zap, type LucideIcon,
 } from 'lucide-react';
 
 function AnimatedNumber({ value }: { value: number }) {
@@ -126,19 +127,19 @@ export default function DashboardPage() {
   });
 
   // 主指标只留每天会看的四项；分类 / 标签 / 字数 / 天数信息密度低，放第二行。
-  // 这里不再带图标和配色——整页只用一个主色加灰阶，指标靠字号分层级。
+  // 图标统一走主色、只做小尺寸线性图标——不再是彩色方块底，但也不至于全无标识。
   const statCards = [
-    { title: t('admin.dashboard.stats.posts', '文章'), value: stats.posts },
-    { title: t('admin.dashboard.stats.comments', '评论'), value: stats.comments },
-    { title: t('admin.dashboard.stats.views', '浏览量'), value: stats.views },
-    { title: t('admin.dashboard.stats.today', '今日访问'), value: stats.today },
+    { title: t('admin.dashboard.stats.posts', '文章'), value: stats.posts, Icon: FileText },
+    { title: t('admin.dashboard.stats.comments', '评论'), value: stats.comments, Icon: MessageSquare },
+    { title: t('admin.dashboard.stats.views', '浏览量'), value: stats.views, Icon: Eye },
+    { title: t('admin.dashboard.stats.today', '今日访问'), value: stats.today, Icon: TrendingUp },
   ];
 
   const secondaryStats = [
-    { label: t('admin.dashboard.stats.categories', '分类'), value: stats.categories, href: '/posts/categories' },
-    { label: t('admin.dashboard.stats.tags', '标签'), value: stats.tags, href: '/posts/tags' },
-    { label: t('admin.dashboard.stats.words', '总字数'), value: new Intl.NumberFormat(locale || 'zh-CN', { notation: 'compact', maximumFractionDigits: 1 }).format(stats.words) },
-    { label: t('admin.dashboard.stats.days', '建站天数'), value: stats.days },
+    { label: t('admin.dashboard.stats.categories', '分类'), value: stats.categories, Icon: FolderTree, href: '/posts/categories' },
+    { label: t('admin.dashboard.stats.tags', '标签'), value: stats.tags, Icon: Tags, href: '/posts/tags' },
+    { label: t('admin.dashboard.stats.words', '总字数'), value: new Intl.NumberFormat(locale || 'zh-CN', { notation: 'compact', maximumFractionDigits: 1 }).format(stats.words), Icon: Type },
+    { label: t('admin.dashboard.stats.days', '建站天数'), value: stats.days, Icon: CalendarDays },
   ];
 
   // 待办：只显示有数的项；全为 0 时整行不渲染。
@@ -163,9 +164,13 @@ export default function DashboardPage() {
     pending: { text: t('admin.status.pending', '待审'), cls: 'text-primary' },
   };
 
-  // 区块标题：小号、字距略开、灰色——靠层级而不是彩色图标区分。
-  const SectionTitle = ({ children }: { children: ReactNode }) => (
-    <h2 className="text-2xs font-semibold uppercase tracking-[0.06em] text-muted-foreground">{children}</h2>
+  // 区块标题：小号主色线性图标 + 深色标题。图标统一 14px、只用主色，
+  // 不再是每个区块一种颜色。
+  const SectionTitle = ({ icon: Icon, children }: { icon: LucideIcon; children: ReactNode }) => (
+    <h2 className="flex items-center gap-2 text-xs-plus font-semibold text-foreground">
+      <Icon className="size-3.5 shrink-0 text-primary" />
+      {children}
+    </h2>
   );
 
   const maxS = Math.max(...sparkline.map(s => s.visits), 1);
@@ -218,8 +223,11 @@ export default function DashboardPage() {
         <div className="grid grid-cols-4 divide-x divide-border">
           {statCards.map((c) => (
             <div key={c.title} className="px-5 py-4">
-              <p className="text-2xs font-medium uppercase tracking-[0.06em] text-muted-foreground">{c.title}</p>
-              <p className="mt-1.5 text-2xl font-semibold tabular-nums leading-none text-foreground">
+              <div className="flex items-center gap-1.5">
+                <c.Icon className="size-3.5 shrink-0 text-primary" />
+                <p className="text-xs font-medium text-muted-foreground">{c.title}</p>
+              </div>
+              <p className="mt-2 text-2xl font-semibold tabular-nums leading-none text-foreground">
                 {loading ? '—' : typeof c.value === 'number' ? <AnimatedNumber value={c.value} /> : c.value}
               </p>
             </div>
@@ -230,7 +238,10 @@ export default function DashboardPage() {
           {secondaryStats.map((s) => {
             const body = (
               <>
-                <span className="text-xs text-muted-foreground">{s.label}</span>
+                <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <s.Icon className="size-3.5 shrink-0" />
+                  {s.label}
+                </span>
                 <span className="text-xs font-semibold tabular-nums text-foreground">{loading ? '—' : s.value}</span>
               </>
             );
@@ -255,7 +266,7 @@ export default function DashboardPage() {
         {/* Trend chart */}
         <div className="flex flex-col border border-border bg-card p-5 pb-2.5">
           <div className="mb-4 flex items-center justify-between">
-            <SectionTitle>{t('admin.dashboard.trendTitle', '近 30 天访问趋势')}</SectionTitle>
+            <SectionTitle icon={BarChart3}>{t('admin.dashboard.trendTitle', '近 30 天访问趋势')}</SectionTitle>
             <div className="flex items-center gap-4">
               <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
                 <span className="size-2.5 bg-primary" />{t('admin.dashboard.visitors', '访客')}
@@ -294,7 +305,7 @@ export default function DashboardPage() {
         {/* Quick actions —— 从 4 个大图标块改成一列可点的行，靠分隔线区分 */}
         <div className="flex flex-col border border-border bg-card">
           <div className="px-5 py-4">
-            <SectionTitle>{t('admin.dashboard.quickActions', '快捷操作')}</SectionTitle>
+            <SectionTitle icon={Zap}>{t('admin.dashboard.quickActions', '快捷操作')}</SectionTitle>
           </div>
           <div className="flex flex-1 flex-col divide-y divide-border border-t border-border">
             {quickActions.map((a) => (
@@ -318,7 +329,7 @@ export default function DashboardPage() {
         {/* Recent posts */}
         <div className="overflow-hidden border border-border bg-card">
           <div className="flex items-center justify-between border-b border-border px-5 py-4">
-            <SectionTitle>{t('admin.dashboard.recentPosts', '最近文章')}</SectionTitle>
+            <SectionTitle icon={SquarePen}>{t('admin.dashboard.recentPosts', '最近文章')}</SectionTitle>
             <ViewAll to="/posts" label={t('admin.dashboard.viewAll', '全部')} />
           </div>
           {/* 加载态统一由 header 的 spinner 表示（见 usePageLoading） */}
@@ -358,7 +369,7 @@ export default function DashboardPage() {
         {/* Recent comments */}
         <div className="overflow-hidden border border-border bg-card">
           <div className="flex items-center justify-between border-b border-border px-5 py-4">
-            <SectionTitle>{t('admin.dashboard.recentComments', '最新评论')}</SectionTitle>
+            <SectionTitle icon={MessageSquare}>{t('admin.dashboard.recentComments', '最新评论')}</SectionTitle>
             <ViewAll to="/comments" label={t('admin.dashboard.viewAll', '全部')} />
           </div>
           {loading ? null : recentComments.length === 0 ? (

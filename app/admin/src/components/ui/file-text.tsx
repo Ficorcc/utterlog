@@ -86,6 +86,7 @@ const FILE_TEXT = forwardRef<FileTextIconHandle, FileTextIconProps>(
           <path d="M14 2v4a2 2 0 0 0 2 2h4" />
 
           <motion.path
+            initial="normal"
             d="M10 9H8"
             stroke="currentColor"
             strokeWidth="2"
@@ -107,6 +108,7 @@ const FILE_TEXT = forwardRef<FileTextIconHandle, FileTextIconProps>(
             }}
           />
           <motion.path
+            initial="normal"
             d="M16 13H8"
             stroke="currentColor"
             strokeWidth="2"
@@ -128,6 +130,7 @@ const FILE_TEXT = forwardRef<FileTextIconHandle, FileTextIconProps>(
             }}
           />
           <motion.path
+            initial="normal"
             d="M16 17H8"
             stroke="currentColor"
             strokeWidth="2"

@@ -97,6 +97,7 @@ const SlidersHorizontalIcon = forwardRef<
           y2="4"
         />
         <motion.line
+          initial="normal"
           animate={controls}
           transition={DEFAULT_TRANSITION}
           variants={{
@@ -114,6 +115,7 @@ const SlidersHorizontalIcon = forwardRef<
         />
 
         <motion.line
+          initial="normal"
           animate={controls}
           transition={DEFAULT_TRANSITION}
           variants={{
@@ -131,6 +133,7 @@ const SlidersHorizontalIcon = forwardRef<
         />
 
         <motion.line
+          initial="normal"
           animate={controls}
           transition={DEFAULT_TRANSITION}
           variants={{
@@ -148,6 +151,7 @@ const SlidersHorizontalIcon = forwardRef<
         />
 
         <motion.line
+          initial="normal"
           animate={controls}
           transition={DEFAULT_TRANSITION}
           variants={{
@@ -165,6 +169,7 @@ const SlidersHorizontalIcon = forwardRef<
         />
 
         <motion.line
+          initial="normal"
           animate={controls}
           transition={DEFAULT_TRANSITION}
           variants={{
@@ -182,6 +187,7 @@ const SlidersHorizontalIcon = forwardRef<
         />
 
         <motion.line
+          initial="normal"
           animate={controls}
           transition={DEFAULT_TRANSITION}
           variants={{
@@ -201,6 +207,7 @@ const SlidersHorizontalIcon = forwardRef<
         />
 
         <motion.line
+          initial="normal"
           animate={controls}
           transition={DEFAULT_TRANSITION}
           variants={{
@@ -220,6 +227,7 @@ const SlidersHorizontalIcon = forwardRef<
         />
 
         <motion.line
+          initial="normal"
           animate={controls}
           transition={DEFAULT_TRANSITION}
           variants={{
