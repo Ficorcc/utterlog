@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://utterlog.io/icon.svg" width="80" height="80" alt="Utterlog" />
+<img src="https://raw.githubusercontent.com/utterlog/utterlog/main/app/start/src/web/public/favicon.svg" width="80" height="80" alt="Utterlog" />
 
 # Utterlog
 
@@ -13,7 +13,7 @@
 [![License](https://img.shields.io/github/license/utterlog/utterlog?style=flat-square)](LICENSE)
 [![Bun](https://img.shields.io/badge/Bun-1.4-black?style=flat-square&logo=bun)](https://bun.sh)
 [![React](https://img.shields.io/badge/React-19-149eca?style=flat-square&logo=react)](https://react.dev)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-4169e1?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-19-4169e1?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org)
 
 [官网](https://utterlog.io) · [安装指南](INSTALL.md) · [部署文档](deploy/README.md) · [更新日志](CHANGELOG.md)
 
