@@ -5,12 +5,13 @@ import {
   GalleryVerticalEnd, Music, ListMusic, Film, Video, BookOpen, Gamepad2,
   ShoppingBag, LineChart, ShieldCheck, Palette, Plug, Wrench, Database,
   Settings, User, Globe, Sparkles, ScrollText, SlidersHorizontal, Pencil,
-  Clock, Ban, Trash2, UserPen, Home, ChevronUp, ChevronDown, LogOut,
+  Clock, Ban, Trash2, UserPen, ChevronUp, ChevronDown, LogOut,
   type LucideIcon,
 } from 'lucide-react';
 import { useNavigate, useLocation } from '@/lib/router';
 import Sidebar from '@/components/layout/Sidebar';
 import NotificationBell from '@/components/layout/NotificationBell';
+import { HouseIcon, type HouseIconHandle } from '@/components/ui/house';
 import { useAuthStore } from '@/lib/store';
 import { useI18n } from '@/lib/i18n';
 import { getSiteOptions, loadSiteOptions } from '@/lib/site';
@@ -140,6 +141,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [menuOpen, setMenuOpen] = useState(false);
   const [pageBadge, setPageBadge] = useState<ReactNode>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const homeIconRef = useRef<HouseIconHandle>(null);
   const pageBadgeCtx = useMemo(() => ({ setPageBadge }), []);
 
   const pageMeta = resolveTitle(pathname);
@@ -288,13 +290,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               target="_blank"
               rel="noopener noreferrer"
               title={t('admin.header.visitSite', '访问首页')}
-              className="text-muted-foreground transition-colors hover:bg-muted hover:text-primary"
-              style={{
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                width: 34, height: 34, textDecoration: 'none',
-              }}
+              // 与 NotificationBell 共用同一套 header 图标按钮样式：34×34 盒子、
+              // 16px 图标、同一组 hover 配色。改一处记得改另一处。
+              className="inline-flex size-8.5 items-center justify-center text-muted-foreground no-underline transition-colors hover:bg-muted hover:text-primary"
+              onMouseEnter={() => homeIconRef.current?.startAnimation()}
+              onMouseLeave={() => homeIconRef.current?.stopAnimation()}
             >
-              <Home className="size-3.5" />
+              <HouseIcon ref={homeIconRef} aria-hidden size={16} className="flex size-4 items-center justify-center" />
             </a>
 
             <NotificationBell />

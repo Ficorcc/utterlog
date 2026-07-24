@@ -1,6 +1,7 @@
 
-import { useState, useEffect } from 'react';
-import { Bell, MessageSquare, ChevronRight } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { MessageSquare, ChevronRight } from 'lucide-react';
+import { BellIcon, type BellIconHandle } from '@/components/ui/bell';
 import { Link } from '@/lib/router';
 import api from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
@@ -15,6 +16,7 @@ export default function NotificationBell() {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [pendingComments, setPendingComments] = useState(0);
+  const bellRef = useRef<BellIconHandle>(null);
 
   useEffect(() => {
     // Header counts do not gate the page. Delay the first poll so the active
@@ -85,10 +87,18 @@ export default function NotificationBell() {
 
   return (
     <div style={{ position: 'relative', display: 'inline-flex' }}>
-      <button onClick={handleOpen} className="relative inline-flex items-center justify-center rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground">
-        <Bell className="size-4.5" />
+      {/* 与 DashboardLayout 的「访问首页」按钮共用同一套 header 图标按钮样式：
+          34×34 盒子、16px 图标、同一组 hover 配色。改一处记得改另一处。 */}
+      <button
+        onClick={handleOpen}
+        title={t('admin.notification.title', '通知')}
+        className="relative inline-flex size-8.5 items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-primary"
+        onMouseEnter={() => bellRef.current?.startAnimation()}
+        onMouseLeave={() => bellRef.current?.stopAnimation()}
+      >
+        <BellIcon ref={bellRef} aria-hidden size={16} className="flex size-4 items-center justify-center" />
         {(unread + pendingComments) > 0 && (
-          <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-3xs font-semibold text-destructive-foreground">
+          <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-3xs font-semibold text-destructive-foreground">
             {(unread + pendingComments) > 99 ? '99+' : unread + pendingComments}
           </span>
         )}
