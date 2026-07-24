@@ -302,7 +302,7 @@ export default function MomentsPage() {
                 <span
                   key={tag}
                   className={cn(
-                    'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs-plus text-muted-foreground transition-colors',
+                    'inline-flex items-center gap-1.5 border px-3 py-1 text-xs-plus text-muted-foreground transition-colors',
                     isEditing ? 'border-primary bg-card' : 'border-border bg-muted',
                   )}
                 >

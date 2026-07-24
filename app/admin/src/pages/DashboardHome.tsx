@@ -420,21 +420,25 @@ export default function DashboardPage() {
               <path d="M17.008 17.29H11.44a5.57 5.57 0 0 1-5.562-5.567A5.57 5.57 0 0 1 11.44 6.16a5.57 5.57 0 0 1 5.567 5.563Z" fill="white" />
             </svg>
             <h2 className="text-sm-plus font-semibold text-foreground">{t('admin.dashboard.community', 'Utterlog 社区')}</h2>
-            <span className={`rounded-full px-2 py-0.5 text-2xs font-semibold ${networkConnected ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-muted text-muted-foreground'}`}>
+            {/* 直角，跟「已发布」那类状态徽章一致；rounded-full 只留给头像、
+                开关和数字计数气泡。 */}
+            <span className={`px-2 py-0.5 text-2xs font-semibold ${networkConnected ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-muted text-muted-foreground'}`}>
               {networkConnected ? t('admin.common.connected', '已连接') : t('admin.common.disconnected', '未连接')}
             </span>
           </div>
           <ViewAll to="/utterlog" label={networkConnected ? t('admin.common.manage', '管理') : t('admin.common.connect', '连接')} />
         </div>
 
+        {/* 不再撑最小高度：两栏都空时（刚连上、还没有动态）原来会留出
+            200px 空白，看起来像加载失败。 */}
         {(
-          <div className="grid min-h-50 grid-cols-2">
+          <div className="grid grid-cols-2">
             <div className="border-r border-border">
               <div className="border-b border-border px-5 py-3">
                 <span className="text-xs font-semibold text-muted-foreground">{t('admin.dashboard.networkActivity', '网络动态')}</span>
               </div>
               {networkActivity.length === 0 ? (
-                <div className="px-5 py-8 text-center text-xs-plus text-muted-foreground">{t('admin.dashboard.noNetworkActivity', '暂无社区动态')}</div>
+                <div className="px-5 py-6 text-center text-xs-plus text-muted-foreground">{t('admin.dashboard.noNetworkActivity', '暂无社区动态')}</div>
               ) : (
                 networkActivity.map((item, idx) => (
                   <div key={idx} className={`px-5 py-2.5 ${idx < networkActivity.length - 1 ? 'border-b border-border' : ''}`}>
@@ -452,7 +456,7 @@ export default function DashboardPage() {
                 <span className="text-xs font-semibold text-muted-foreground">{t('admin.dashboard.newSites', '新加入站点')}</span>
               </div>
               {networkSites.length === 0 ? (
-                <div className="px-5 py-8 text-center text-xs-plus text-muted-foreground">{t('admin.dashboard.noNewSites', '暂无新站点')}</div>
+                <div className="px-5 py-6 text-center text-xs-plus text-muted-foreground">{t('admin.dashboard.noNewSites', '暂无新站点')}</div>
               ) : (
                 networkSites.map((site, idx) => (
                   <div key={idx} className={`flex items-center gap-2.5 px-5 py-2.5 ${idx < networkSites.length - 1 ? 'border-b border-border' : ''}`}>
