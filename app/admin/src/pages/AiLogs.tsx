@@ -4,16 +4,23 @@ import api from '@/lib/api';
 import { formatWithAdminTimeZone } from '@/lib/timezone';
 import { MetricCard, MetricGrid } from '@/components/ui';
 import {
-  Card, Pagination, Spinner,
+  Card, Pagination,
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
 } from '@/components/ui/shadcn';
+import { usePageLoading } from '@/layouts/DashboardLayout';
 
 export default function AiLogsPage() {
   const [stats, setStats] = useState<any>(null);
   const [logs, setLogs] = useState<any[]>([]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const { setPageLoading } = usePageLoading();
   const [loading, setLoading] = useState(true);
+  // 加载态上报给 header 的统一 spinner；离开本页时清掉。
+  useEffect(() => {
+    setPageLoading(loading);
+    return () => setPageLoading(false);
+  }, [loading, setPageLoading]);
 
   useEffect(() => {
     loadStats();
@@ -97,11 +104,8 @@ export default function AiLogsPage() {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={5} className="py-10 text-center">
-                  <Spinner />
-                </TableCell>
-              </TableRow>
+              // 加载态统一由 header 的 spinner 表示（见 usePageLoading）
+              null
             ) : logs.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="py-10 text-center text-sm text-muted-foreground">

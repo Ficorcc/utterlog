@@ -11,10 +11,11 @@ import {
   Save, Loader2, type LucideIcon,
 } from 'lucide-react';
 import {
-  Badge, Button, ConfirmDialog, Card, Switch, Spinner, Label, Textarea,
+  Badge, Button, ConfirmDialog, Card, Switch, Label, Textarea,
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/shadcn';
+import { usePageLoading } from '@/layouts/DashboardLayout';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import AboutPageEditor from '@/components/AboutPageEditor';
@@ -127,7 +128,13 @@ export default function PagesPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const [pages, setPages] = useState<any[]>([]);
+  const { setPageLoading } = usePageLoading();
   const [loading, setLoading] = useState(true);
+  // 加载态上报给 header 的统一 spinner；离开本页时清掉。
+  useEffect(() => {
+    setPageLoading(loading);
+    return () => setPageLoading(false);
+  }, [loading, setPageLoading]);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [builtinStatus, setBuiltinStatus] = useState<Record<string, boolean>>({});
   const [editingKey, setEditingKey] = useState<string | null>(null);
@@ -335,9 +342,8 @@ export default function PagesPage() {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={5} className="py-10 text-center"><Spinner /></TableCell>
-              </TableRow>
+              // 加载态统一由 header 的 spinner 表示（见 usePageLoading）
+              null
             ) : tableRows.map((row) => {
               const Icon = row.kind === 'builtin' ? row.page.icon : FileText;
               return (

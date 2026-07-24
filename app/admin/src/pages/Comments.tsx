@@ -6,7 +6,7 @@ import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Globe, Star, Pencil, MessageSquare, Ban, Trash2, Check, Search, Save } from 'lucide-react';
 import {
-  Button, Input, Label, Textarea, Card, Spinner, Pagination, ConfirmDialog,
+  Button, Input, Label, Textarea, Card, Pagination, ConfirmDialog,
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
@@ -14,6 +14,7 @@ import {
 import { cn, formatDate } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import { postUrlOf } from '@/lib/site';
+import { usePageLoading } from '@/layouts/DashboardLayout';
 
 const defaultAvatar = 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=64';
 
@@ -174,7 +175,13 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
   const { t } = useI18n();
   const navigate = useNavigate();
   const [comments, setComments] = useState<any[]>([]);
+  const { setPageLoading } = usePageLoading();
   const [loading, setLoading] = useState(true);
+  // 加载态上报给 header 的统一 spinner；离开本页时清掉。
+  useEffect(() => {
+    setPageLoading(loading);
+    return () => setPageLoading(false);
+  }, [loading, setPageLoading]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -438,11 +445,8 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={5} className="py-10 text-center">
-                  <Spinner />
-                </TableCell>
-              </TableRow>
+              // 加载态统一由 header 的 spinner 表示（见 usePageLoading）
+              null
             ) : comments.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="py-10 text-center text-sm text-muted-foreground">

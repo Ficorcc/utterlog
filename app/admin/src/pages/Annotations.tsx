@@ -4,9 +4,10 @@ import { useNavigate } from '@/lib/router';
 import toast from 'react-hot-toast';
 import { annotationsApi } from '@/lib/api';
 import {
-  Button, Card, Pagination, ConfirmDialog, Spinner,
+  Button, Card, Pagination, ConfirmDialog,
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
 } from '@/components/ui/shadcn';
+import { usePageLoading } from '@/layouts/DashboardLayout';
 import { formatDate } from '@/lib/utils';
 
 interface AdminAnnotation {
@@ -32,7 +33,13 @@ export default function AnnotationsPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [perPage] = useState(30);
+  const { setPageLoading } = usePageLoading();
   const [loading, setLoading] = useState(true);
+  // 加载态上报给 header 的统一 spinner；离开本页时清掉。
+  useEffect(() => {
+    setPageLoading(loading);
+    return () => setPageLoading(false);
+  }, [loading, setPageLoading]);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [batchDeleteOpen, setBatchDeleteOpen] = useState(false);
@@ -163,11 +170,8 @@ export default function AnnotationsPage() {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={5} className="py-10 text-center">
-                  <Spinner />
-                </TableCell>
-              </TableRow>
+              // 加载态统一由 header 的 spinner 表示（见 usePageLoading）
+              null
             ) : items.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="py-10 text-center text-sm text-muted-foreground">
