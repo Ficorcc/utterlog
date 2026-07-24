@@ -87,13 +87,10 @@ git add app/start/assets/schema.sql
 首次在服务器运行标准安装器，之后可从开发机同步已验证的源码和构建产物：
 
 ```bash
-export UTTERLOG_SSH_KEY="$HOME/.ssh/your-key.pem"
-export UTTERLOG_DEPLOY_HOST='<your-server-ip>'
-export UTTERLOG_DEPLOY_PATH='/opt/utterlog'
-export UTTERLOG_APP_URL='https://blog.example.com'
-
-make deploy-utterlog-dry
-make deploy-utterlog
+make deploy-utterlog-dry   # 本地完整校验，不同步
+make deploy-utterlog       # 构建、同步、安装依赖、重启、健康检查
 ```
 
-详细参数见 [deploy/utterlog/README.md](./deploy/utterlog/README.md)。远程同步会保留服务器 `.env`、`uploads/` 和 `content/`。
+需要先 export 的 `UTTERLOG_*` 环境变量、脚本 flag 和运维命令，见
+[deploy/utterlog/README.md](./deploy/utterlog/README.md)——那里是这套流程的唯一来源。
+远程同步会保留服务器 `.env`、`uploads/` 和 `content/`。

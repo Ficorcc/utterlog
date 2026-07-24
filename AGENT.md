@@ -80,7 +80,7 @@ The independent `community/`, `id/`, and `wordpress-plugin/` projects live outsi
 | 域名 | 用途 | 仓库 | 服务 |
 |---|---|---|---|
 | **用户自己的博客** | 个人站 | `utterlog/utterlog`（本仓库） | Bun + systemd + PostgreSQL |
-| **utterlog.io** | 程序发布站 + install.sh / update.sh 分发 | `utterlog/utterlog-landing`（私有） | 静态 |
+| **utterlog.io** | 程序发布站 + install.sh 分发 | `utterlog/utterlog-landing`（私有） | 静态 |
 | **utterlog.com** | 去中心化网络中心站（Network Hub） | `../utterlog-others/community/` | utterlog-hub :8091 + utterlog-web :3001 |
 | **id.utterlog.com** | Utterlog ID 账号中心（OAuth） | `../utterlog-others/id/` | utterlog-id :8090 |
 | **docs.utterlog.io** | 文档 | `utterlog/utterlog-docs`（私有） | 静态 |
@@ -109,15 +109,18 @@ The independent `community/`, `id/`, and `wordpress-plugin/` projects live outsi
 |---|---|---|
 | **Renascent** | 当前重点 | 学术极简风格，文字驱动首页 + 文章页深度重构（文章编号 / 元信息侧栏 / 目录 / 上下篇 / 相关 / 评论） |
 | **Azure** | 历史主主题 | 蓝 `#0052D9`；改 Azure 时只改 Azure 文件 |
-| **Flux** | 实验 | 绿 `#00C767`，Stripe Link 风格；HomePage/PostPage/PostCard 待独立实现 |
+| **Flux** | 实验 | 绿 `#00C767`，Stripe Link 风格 |
+| **Nebula** | 暗色科技 | 电紫强调 + 深蓝表面 + 玻璃质感卡片 |
 | **Utterlog** | 旗舰参考 | 默认基线 |
-| **Chred** | 备选 | — |
+
+内置主题清单的真源是 `app/shared/blog-theme.ts` 的 `BLOG_THEME_NAMES`（上表五个）。
+**Chred 已废弃**，`blog-theme.ts` 把老站点的 `chred` 映射回 Azure + 红色强调。
 
 注册位置：`app/start/src/web/lib/theme.ts`（前端组件映射 + theme.json 清单）+ `app/start/src/backend/blog-themes.ts`（后端枚举）。
 
 主题切换：admin → `/admin/themes` → 调用 TanStack Start revalidate 接口清缓存 → 立即生效。
 上传 zip：admin 解压到 `content/themes/<name>/`，激活后写 options。
-`:root` 默认 CSS 变量已固定为 Azure 蓝，`[data-theme="steel"]` 兜底映射到 Azure，避免 localStorage 残留导致灰色。
+`:root` 默认 CSS 变量已固定为 Azure 蓝，`[data-color="steel"]` 兜底映射到 Azure，避免 localStorage 残留导致灰色。（`data-theme` 承载主题名如 `[data-theme="Azure"]`，`data-color` 承载配色，两者不要混。）
 
 **写代码注意**：注释只能提"当前主题"或泛指，**不要写"和某主题保持一致"**。
 
@@ -232,7 +235,7 @@ gh release create vX.Y.Z --notes "..."
 **版本策略**：
 
 - `1.0.0`：历史合并归档（`RELEASE_HISTORY.md`）
-- Bun 重写后版本重新从 `1.x` 编号（当前 `1.3.x`），语义化递增
+- Bun 重写后版本重新从 `1.x` 编号（当前 `1.4.x`），语义化递增
 - `1.x.y` patch：同功能线修复 / 小优化
 - `1.x.0` minor：完整新功能或主题能力
 - 破坏性大改进进入下一个大版本
@@ -255,15 +258,10 @@ gh release create vX.Y.Z --notes "..."
 ## 11. 用户安装路径
 
 ```bash
-# 一行安装（已有反代）
 curl -fsSL https://raw.githubusercontent.com/utterlog/utterlog/main/install.sh | sudo bash
-
-# 指定公开域名（TLS 由已有反向代理管理）
-curl -fsSL https://raw.githubusercontent.com/utterlog/utterlog/main/install.sh | sudo DOMAIN=blog.x.com bash
-
-# 复用宿主机 PostgreSQL（1Panel / 宝塔常见）
-curl -fsSL https://...install.sh | sudo DB_HOST=db.internal DB_PASSWORD=... bash
 ```
+
+`DOMAIN=` / `DB_HOST=` 等变体和完整安装说明见 [INSTALL.md](INSTALL.md)，不在此重复。
 
 `install.sh` 自动：clone/快进更新 → 安装 Bun 与主机依赖 → 生成随机 `DB_PASSWORD`、`JWT_SECRET` → 找空闲端口（默认 9260，被占顺延）→ 准备 PostgreSQL → Bun 校验和构建 → 安装 systemd 服务 → 健康检查。
 
@@ -304,19 +302,23 @@ curl -fsSL https://...install.sh | sudo DB_HOST=db.internal DB_PASSWORD=... bash
 
 ### Server 路由（`app/start/src/backend/routes/`）
 
+HTTP 路由本身在 `app/start/src/routes/api/**`（TanStack `createFileRoute`，由
+`routeTree.gen.ts` 自动注册）；下面这些是被路由调用的服务实现。
+
 | 模块 | 文件 |
 |---|---|
-| 路由注册 / 网关 | `index.ts` `api.ts` |
-| 认证 / 安全 | `auth.ts` `security.ts` |
-| 内容 CRUD | `content.ts` |
-| 安装 / 升级 | `install.ts` |
-| 评论 / 互动 | `footprints.ts` |
+| CORS origin 匹配 | `index.ts` |
+| Feed / robots / sitemap / llms | `content.ts` |
 | AI | `ai.ts` |
 | 备份 / 维护 | `backup.ts` |
-| 网络 / 联邦 | `telegram.ts` |
-| 第三方 | `coding.ts` |
-| WordPress 兼容 | `compat.ts` |
+| Telegram 推送 | `telegram.ts` |
+| 第三方（GitHub 贡献） | `coding.ts` |
+| WordPress 兼容 / 站点同步 | `compat.ts` |
 | 插件 / 扩展 | `extensions.ts` |
+
+认证、安全、安装、评论、足迹、文章等业务逻辑在
+`app/start/src/backend/services/`（26 个文件，含 `auth.ts` `security.ts`
+`install.ts` `comments.ts` `footprints.ts` `posts.ts` `tracking.ts` 等）。
 
 ### 前后端关键路径
 
@@ -325,13 +327,15 @@ curl -fsSL https://...install.sh | sudo DB_HOST=db.internal DB_PASSWORD=... bash
 | Server 入口 | `app/start/src/backend/index.ts` |
 | Server 配置 / 启动配置校验 | `app/start/src/backend/config.ts` |
 | DB 客户端 / helpers / options | `app/start/src/backend/db/{client,helpers,options}.ts` |
-| Auth（JWT / 中间件 / 重置） | `app/start/src/backend/auth/{jwt,middleware,password-reset}.ts` |
+| Auth（JWT / 会话 / 重置） | `app/start/src/backend/auth/{jwt,session,password-reset}.ts` |
 | 邮件 | `app/start/src/backend/email.ts` + `app/start/src/backend/email/comment-reply-unsubscribe.ts` |
 | GeoIP | `app/start/src/backend/geoip.ts` |
 | Bot 检测 | `app/start/src/backend/bot-detect.ts` |
 | Analytics rollup | `app/start/src/backend/analytics/rollup.ts` |
-| Web 渲染（SSR / router / 独立渲染 / page runner / 安装门控） | `app/start/src/backend/web/{render,render-standalone,router,page-runner,install-gate}.tsx` |
-| HTTP 工具（response / security / validation / public-url） | `app/start/src/backend/http/{response,security,validation,public-url}.ts` |
+| SSR 请求入口（Bun 网关 → Start server bundle） | `app/start/src/backend/web/start.ts` |
+| Start 中间件链（CORS / 安全 / 缓存策略 / 认证上下文） | `app/start/src/start.ts` + `app/start/src/server/{cache-policy,security}.ts` |
+| HTTP 工具（安装重定向 / 校验 / public-url） | `app/start/src/backend/http/{install-redirect,validation,public-url}.ts` |
+| 静态响应 | `app/start/src/backend/static/response.ts` |
 | Cache（revalidate / tagged） | `app/start/src/backend/cache/{revalidate,tagged}.ts` |
 | 媒体（storage / favicon） | `app/start/src/backend/media/{storage,favicon}.ts` |
 | Telegram | `app/start/src/backend/telegram.ts` |
@@ -339,7 +343,7 @@ curl -fsSL https://...install.sh | sudo DB_HOST=db.internal DB_PASSWORD=... bash
 | Sync worker | `app/start/src/backend/sync/worker.ts` |
 | 系统（host / metrics） | `app/start/src/backend/system/{host,metrics}.ts` |
 | 主题注册（后端枚举 / 旧 option 迁移） | `app/start/src/backend/blog-themes.ts` + `app/start/src/backend/blog-theme-options.ts` |
-| Admin 入口 | `app/admin/src/main.tsx` + `app/admin/src/App.tsx` |
+| Admin 入口 | `app/admin/src/router.tsx` + `app/admin/src/routes/`（TanStack Router） |
 | Admin API 客户端 | `app/admin/src/lib/api.ts` |
 | Admin 设计 token / 全局样式 | `app/admin/src/styles/globals.css` |
 | Admin 通用 UI | `app/admin/src/components/ui/*` |
