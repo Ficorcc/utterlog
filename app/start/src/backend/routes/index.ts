@@ -12,7 +12,3 @@ export function matchCorsOrigin(origin: string | undefined, corsOrigin: string, 
   const allowed = configured.length > 0 ? configured : [appOrigin].filter(Boolean);
   return allowed.includes(origin) ? origin : undefined;
 }
-
-export function configuredCorsOrigin(origin: string | undefined, corsOrigin: string, appUrl: string) {
-  return matchCorsOrigin(origin, corsOrigin, appUrl);
-}

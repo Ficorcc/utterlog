@@ -48,12 +48,3 @@ export async function handleStartRequest(request: Request): Promise<Response | n
     return null;
   }
 }
-
-export function isStartApiRequest(request: Request) {
-  const pathname = new URL(request.url).pathname;
-  return pathname === '/api' || pathname.startsWith('/api/');
-}
-
-export async function handleStartApiRequest(request: Request) {
-  return isStartApiRequest(request) ? handleStartRequest(request) : null;
-}

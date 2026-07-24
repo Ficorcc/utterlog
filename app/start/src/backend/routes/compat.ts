@@ -1,38 +1,18 @@
 import { decodeJwt, jwtVerify, SignJWT } from 'jose';
-import {
-  generateAuthenticationOptions,
-  generateRegistrationOptions,
-  verifyAuthenticationResponse,
-  verifyRegistrationResponse,
-  type AuthenticationResponseJSON,
-  type RegistrationResponseJSON,
-} from '@simplewebauthn/server';
-import { createHash, createHmac, randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
-import { cp, mkdir, rm } from 'node:fs/promises';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { mkdir, rm } from 'node:fs/promises';
 import { isIP } from 'node:net';
-import { tmpdir } from 'node:os';
-import { basename, dirname, extname, join, posix } from 'node:path';
-import { signAccessToken, signRefreshToken, verifyAccessToken } from '../auth/jwt';
+import { dirname, join, posix } from 'node:path';
 import { config, table } from '../config';
 import { exec, intParam, many, nowUnix, one, pageParams } from '../db/helpers';
 import { optionValue, saveOption } from '../db/options';
-import { sendConfiguredEmail } from '../email';
 import { assertPublicHttpUrl, normalizePublicHttpUrl } from '../http/public-url';
-import { publicStorageUrl, putStorageObject, storageSettings, storeUploadedBytes } from '../media/storage';
-import { runtimePaths } from '../paths';
 import { ephemeral } from '../store/ephemeral';
 import { appVersion } from '../system/metrics';
-import { defaultWeatherLocation, fetchVisitorWeather, visitorWeatherLocation } from '../weather';
 import { runSyncFinishWorker } from '../sync/worker';
-import { lookupGeoIp, normalizeGeoProvider, publicIpForGeo } from '../geoip';
 import { sendFollowTelegram } from '../telegram';
 import { botSqlPattern } from '../bot-detect';
-
-function safeId(id: unknown) {
-  const clean = String(id || '').trim();
-  return /^[a-zA-Z0-9_-]{1,80}$/.test(clean) ? clean : '';
-}
 
 function parseJsonOption<T>(value: string, fallback: T): T {
   try {
@@ -40,66 +20,6 @@ function parseJsonOption<T>(value: string, fallback: T): T {
   } catch {
     return fallback;
   }
-}
-
-function base64urlToBuffer(value: string) {
-  const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
-  return Buffer.from(base64.padEnd(base64.length + ((4 - base64.length % 4) % 4), '='), 'base64');
-}
-
-function bufferToBase64url(value: Uint8Array | Buffer) {
-  return Buffer.from(value).toString('base64url');
-}
-
-async function webAuthnRp() {
-  const configured = (await optionValue('site_url', config.appUrl)).trim() || config.appUrl;
-  const appURL = configured.replace(/\/+$/, '') || 'http://localhost:9260';
-  const parsed = new URL(appURL);
-  return { origin: appURL, rpID: parsed.hostname };
-}
-
-function webAuthnUserId(userId: number) {
-  const buf = Buffer.alloc(8);
-  buf.writeBigUInt64BE(BigInt(userId));
-  return buf;
-}
-
-async function siteOwner() {
-  return one<{ id: number; username: string; email: string; nickname: string | null; avatar: string | null; role: string }>(
-    `select id, username, email, nickname, avatar, role from ${table('users')} where role = 'admin' order by id asc limit 1`,
-  );
-}
-
-function avatarHash(email: string) {
-  return createHash('md5').update(email.trim().toLowerCase()).digest('hex');
-}
-
-async function displayAvatarForEmail(email: string) {
-  const hash = avatarHash(email);
-  return (await optionValue('avatar_source', 'gravatar')) === 'utterlog'
-    ? `https://id.utterlog.com/avatar/${hash}`
-    : `https://gravatar.bluecdn.com/avatar/${hash}?s=128&d=mp`;
-}
-
-async function issueCompatTokens(user: { id: number; username: string; email: string; nickname: string | null; role: string; avatar?: string | null }) {
-  const data = { username: user.username, email: user.email, role: user.role, nickname: user.nickname || user.username };
-  const access = await signAccessToken(user.id, data);
-  const avatar = await displayAvatarForEmail(user.email);
-  return {
-    access_token: access.token,
-    refresh_token: await signRefreshToken(user.id),
-    expires_in: 86400,
-    expires_at: access.expiresAt,
-    token_type: 'Bearer',
-    user: {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      nickname: user.nickname || user.username,
-      avatar,
-      role: user.role,
-    },
-  };
 }
 
 async function signFederationToken(user: { id: number; username: string; email: string; nickname: string | null; avatar?: string | null }) {
@@ -132,11 +52,6 @@ async function verifyFederationTokenLocal(token: string) {
 }
 
 
-function htmlEscape(value: string) {
-  return value.replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch] || ch));
-}
-
-
 async function runCommand(cmd: string[]) {
   const proc = Bun.spawn(cmd, { stdout: 'pipe', stderr: 'pipe', env: { ...process.env, PGPASSWORD: config.dbPassword } });
   const [stdout, stderr, code] = await Promise.all([
@@ -146,15 +61,6 @@ async function runCommand(cmd: string[]) {
   ]);
   return { code, stdout, stderr };
 }
-
-async function restoreExtractedFiles(root: string) {
-  const uploadsRoot = join(root, 'uploads');
-  const contentRoot = join(root, 'content');
-  if (existsSync(uploadsRoot)) await cp(uploadsRoot, config.uploadDir, { recursive: true, force: true });
-  if (existsSync(contentRoot)) await cp(contentRoot, config.contentDir, { recursive: true, force: true });
-}
-
-
 
 function simpleSlug(input: unknown) {
   return String(input || '')
@@ -1819,78 +1725,6 @@ export async function listSyncJobsPayload(platformValue: unknown, searchParams: 
     [platform, limit],
   ).catch(() => []);
   return { jobs: rows };
-}
-
-const base32Alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-
-function base32Encode(buf: Buffer) {
-  let bits = 0;
-  let value = 0;
-  let output = '';
-  for (const byte of buf) {
-    value = (value << 8) | byte;
-    bits += 8;
-    while (bits >= 5) {
-      output += base32Alphabet[(value >>> (bits - 5)) & 31];
-      bits -= 5;
-    }
-  }
-  if (bits > 0) output += base32Alphabet[(value << (5 - bits)) & 31];
-  return output;
-}
-
-function base32Decode(secret: string) {
-  let bits = 0;
-  let value = 0;
-  const out: number[] = [];
-  for (const ch of secret.replace(/=+$/g, '').toUpperCase()) {
-    const idx = base32Alphabet.indexOf(ch);
-    if (idx < 0) continue;
-    value = (value << 5) | idx;
-    bits += 5;
-    if (bits >= 8) {
-      out.push((value >>> (bits - 8)) & 255);
-      bits -= 8;
-    }
-  }
-  return Buffer.from(out);
-}
-
-function totpCode(secret: string, step = Math.floor(Date.now() / 1000 / 30)) {
-  const counter = Buffer.alloc(8);
-  counter.writeBigUInt64BE(BigInt(step));
-  const hmac = createHmac('sha1', base32Decode(secret)).update(counter).digest();
-  const offset = hmac[hmac.length - 1] & 0xf;
-  const code = ((hmac.readUInt32BE(offset) & 0x7fffffff) % 1_000_000).toString().padStart(6, '0');
-  return code;
-}
-
-function verifyTotp(secret: string, code: string) {
-  const normalized = code.replace(/\s+/g, '');
-  const step = Math.floor(Date.now() / 1000 / 30);
-  return [-1, 0, 1].some((delta) => totpCode(secret, step + delta) === normalized);
-}
-
-async function generateTotpBackupCodes() {
-  const codes = Array.from({ length: 8 }, () => randomBytes(5).toString('hex'));
-  const hashes = await Promise.all(codes.map((code) => Bun.password.hash(code, { algorithm: 'bcrypt' })));
-  return { codes, hashes };
-}
-
-async function consumeTotpBackupCode(userId: number, backupCodesJson: string | null | undefined, code: string) {
-  const hashes = parseJsonOption<string[]>(String(backupCodesJson || '[]'), []);
-  if (!hashes.length) return false;
-  for (let i = 0; i < hashes.length; i++) {
-    const matched = await Bun.password.verify(code, hashes[i]).catch(() => false);
-    if (!matched) continue;
-    const next = [...hashes.slice(0, i), ...hashes.slice(i + 1)];
-    await exec(
-      `update ${table('users')} set totp_backup_codes = $1, updated_at = $2 where id = $3`,
-      [JSON.stringify(next), nowUnix(), userId],
-    ).catch(() => {});
-    return true;
-  }
-  return false;
 }
 
 function compareSemver(a: string, b: string) {

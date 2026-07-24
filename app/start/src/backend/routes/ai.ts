@@ -21,11 +21,6 @@ function parseJsonOption<T>(value: string, fallback: T): T {
   }
 }
 
-function safeId(id: unknown) {
-  const n = typeof id === 'number' ? id : Number.parseInt(String(id || ''), 10);
-  return Number.isFinite(n) && n > 0 ? Math.trunc(n) : 0;
-}
-
 function safeSessionId(id: unknown) {
   const value = String(id || '').trim();
   return /^[A-Za-z0-9:_-]{1,120}$/.test(value) ? value : '';
