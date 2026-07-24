@@ -37,7 +37,7 @@ export function SelectContent({
       <BaseSelect.Positioner sideOffset={4} className="z-50">
         <BaseSelect.Popup
           className={cn(
-            'max-h-96 min-w-32 overflow-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md',
+            'max-h-96 min-w-32 overflow-auto border border-border bg-popover p-1 text-popover-foreground shadow-md',
             className,
           )}
           {...props}
@@ -56,7 +56,7 @@ export const SelectItem = React.forwardRef<
   <BaseSelect.Item
     ref={ref}
     className={cn(
-      'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none',
+      'relative flex w-full cursor-default select-none items-center py-1.5 pl-8 pr-2 text-sm outline-none',
       'data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className,
     )}

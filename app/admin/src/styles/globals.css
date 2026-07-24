@@ -324,6 +324,20 @@ form,
   border-radius: 0 !important;
 }
 
+/* Tailwind 的圆角工具类同样压平。上面那条按元素选择器覆盖不到 <div>/<span>
+   （shadcn 的 Card 就是普通 div、Badge 是 span），逐个文件删 class 又会散落
+   140 多处、以后新写的还会漏。这里只压「有限圆角」那几个，rounded-full 不动，
+   头像、开关、状态圆点、侧边栏折叠按钮仍然是圆的。 */
+.rounded,
+.rounded-sm,
+.rounded-md,
+.rounded-lg,
+.rounded-xl,
+.rounded-2xl,
+.rounded-3xl {
+  border-radius: 0 !important;
+}
+
 /* 侧边栏折叠开关：后台整体是直角风格，唯独这个悬浮圆形开关是特意保留的例外。
    选择器特异性（0,1,0）高于上面的 `button`（0,0,1），才能压过它的 !important。 */
 .sidebar-toggle {
