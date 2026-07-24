@@ -1270,27 +1270,6 @@ div:hover > .comment-hint { opacity: 0.75 !important; }
 ::-webkit-scrollbar-thumb { background: var(--color-text-dim); border-radius: 1px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-text-sub); }
 
-/* ========================================
-   Code Highlighting
-   ======================================== */
-.hljs { color: #3c3836; background: #F8F5F1; }
-.hljs-comment, .hljs-quote { color: #928374; font-style: italic; }
-.hljs-keyword, .hljs-selector-tag, .hljs-addition { color: #9d0006; }
-.hljs-number, .hljs-string, .hljs-meta .hljs-meta-string, .hljs-literal, .hljs-doctag, .hljs-regexp { color: #b57614; }
-.hljs-title, .hljs-section, .hljs-name, .hljs-selector-id, .hljs-selector-class { color: #DA7756; }
-.hljs-attribute, .hljs-tag .hljs-attr, .hljs-variable, .hljs-template-variable, .hljs-class .hljs-title, .hljs-type { color: #427b58; }
-.hljs-symbol, .hljs-bullet, .hljs-subst, .hljs-meta, .hljs-meta .hljs-keyword, .hljs-selector-attr, .hljs-selector-pseudo, .hljs-link { color: #af3a03; }
-.hljs-built_in, .hljs-deletion { color: #076678; }
-.hljs-formula { background: #F5F0EB; }
-.hljs-emphasis { font-style: italic; }
-.hljs-strong { font-weight: bold; }
-
-[data-color="dark"] .hljs { color: #e5e7eb; background: #1e2130; }
-[data-color="dark"] .hljs-comment, [data-color="dark"] .hljs-quote { color: #6b7280; }
-[data-color="dark"] .hljs-keyword { color: #f87171; }
-[data-color="dark"] .hljs-string, [data-color="dark"] .hljs-number { color: #fbbf24; }
-[data-color="dark"] .hljs-title, [data-color="dark"] .hljs-section { color: #60a5fa; }
-[data-color="dark"] .hljs-attribute, [data-color="dark"] .hljs-type { color: #34d399; }
 
 /* ========================================
    Animations
@@ -1539,38 +1518,6 @@ html[data-img-effect="fade"] :where(
   transition: filter var(--img-effect-duration) linear, transform .6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 2. pixel — 10×10 mosaic of dark tiles lifting off the image in a
-      randomised order. The img itself doesn't animate; instead its
-      LazyImage wrapper mounts a <div class="pixel-overlay"> with 100
-      `.pixel-tile` children. Each tile's `--delay` variable
-      (randomized in JS) staggers when it fades to transparent.
-      Pure-CSS fallback for non-LazyImage imgs: no overlay, image
-      shows with no animation. */
-.pixel-overlay {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  grid-template-rows: repeat(10, 1fr);
-  pointer-events: none;
-  z-index: 2;
-}
-.pixel-tile {
-  background: rgba(0, 0, 0, 0.9);
-  /* Each tile's fade animation duration tracks the admin's
-     Settings → 图片处理 → 动画时长 (was previously hard-coded 500ms).
-     The per-tile stagger stays at 50ms × --delay because CSS calc()
-     can't multiply two durations or convert a duration to a number,
-     so we can't make the stagger proportional without JS. 50ms is a
-     reasonable spread regardless of the per-tile duration: at the
-     default 500ms a tile-by-tile reveal still feels coordinated, and
-     at 200ms (snappy) or 1500ms (slow) the pattern is still legible. */
-  animation: pixel-reveal var(--img-effect-duration) forwards;
-  animation-delay: calc(var(--delay, 0) * 0.05s);
-}
-@keyframes pixel-reveal {
-  to { background: transparent; }
-}
 /* Image itself just renders immediately when `pixel` is active —
    the overlay handles the whole visual reveal. */
 html[data-img-effect="pixel"] :where([data-blog-image] img, img[data-blog-image]) {

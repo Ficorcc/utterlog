@@ -394,15 +394,6 @@
   gap: 28px;
 }
 
-[data-theme="Nebula"] .nebula-hero-title {
-  margin: 0;
-  font-family: var(--nebula-font-display);
-  font-size: clamp(56px, 9vw, 128px);
-  line-height: 1;
-  font-weight: 500;
-  letter-spacing: -0.03em;
-  color: var(--color-text-main);
-}
 
 /* 描述：radial-gradient + background-clip: text 形成中心白→边缘冷蓝灰的渐变文字。
    text-wrap: balance 让多行长度更均衡。 */
@@ -777,56 +768,11 @@
   background: var(--color-primary-hover);
 }
 
-/* ─── /search 搜索结果页的搜索表单 —— 跟 header 弹出搜索框保持一致样式 ───
-   组件 inline 写死浅色 + 直角，这里用 !important 翻深 + 圆角 999px 胶囊化 */
-[data-theme="Nebula"] .search-page-form .search-page-leading {
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--color-text-sub);
-  font-size: 14px;
-  z-index: 2;
-  pointer-events: none;
-}
-[data-theme="Nebula"] .search-page-form .search-page-input {
-  height: 44px !important;
-  padding: 0 18px 0 40px !important;
-  border-radius: 999px !important;
-  background: var(--nebula-tile) !important;
-  border: 1px solid rgba(255, 255, 255, 0.06) !important;
-  color: var(--color-text-main) !important;
-  font-family: var(--nebula-font-body) !important;
-  font-size: 14px !important;
-  outline: none !important;
-  box-sizing: border-box !important;
-  transition: border-color 0.2s ease;
-}
-[data-theme="Nebula"] .search-page-form .search-page-input:focus {
-  border-color: var(--color-primary) !important;
-}
-[data-theme="Nebula"] .search-page-form .search-page-input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
-}
-[data-theme="Nebula"] .search-page-form .search-page-submit {
-  height: 44px !important;
-  padding: 0 22px !important;
-  border-radius: 999px !important;
-  background: var(--color-primary) !important;
-  color: var(--nebula-navy-deep) !important;
-  font-family: var(--nebula-font-display) !important;
-  font-size: 14px !important;
-  font-weight: 500 !important;
-  border: 0 !important;
-  cursor: pointer !important;
-  transition: background 0.2s ease;
-}
-[data-theme="Nebula"] .search-page-form .search-page-submit:hover {
-  background: var(--color-primary-hover) !important;
-}
+
+
+
+
+
 
 [data-theme="Nebula"] .nebula-icon-button.active {
   color: var(--color-primary);
@@ -972,71 +918,12 @@
   padding-top: 32px;
 }
 
-[data-theme="Nebula"] .nebula-stat-strip {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
 
-[data-theme="Nebula"] .nebula-stat-item {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 18px 20px;
-  border-radius: var(--nebula-radius-lg);
-  background-color: var(--nebula-tile);
-  border: 1px solid var(--nebula-border-blue-soft);
-  color: var(--color-text-main);
-  text-decoration: none;
-  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
-  min-height: 86px;
-}
 
-/* 第一行：序号 + 标签 inline */
-[data-theme="Nebula"] .nebula-stat-head {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 10px;
-}
 
-[data-theme="Nebula"] .nebula-stat-item:hover {
-  transform: translateY(-2px);
-  background-color: color-mix(in srgb, var(--color-focus-ring) 12%, var(--nebula-tile));
-  border-color: var(--nebula-border-blue);
-  box-shadow: 0 34px 84px -30px color-mix(in srgb, var(--color-focus-ring) 35%, transparent);
-}
 
-[data-theme="Nebula"] .nebula-stat-no {
-  font-family: var(--nebula-font-mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  color: var(--color-focus-ring);
-}
 
-[data-theme="Nebula"] .nebula-stat-item strong {
-  font-family: var(--nebula-font-display);
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--color-text-sub);
-}
 
-[data-theme="Nebula"] .nebula-stat-item em {
-  margin-top: auto;
-  font-style: normal;
-  font-family: var(--nebula-font-display);
-  font-size: 26px;
-  font-weight: 500;
-  color: var(--color-text-main);
-  line-height: 1.1;
-  letter-spacing: 0;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-}
 
 /* ---- Category strip ---- */
 [data-theme="Nebula"] .nebula-category-strip {
@@ -1199,18 +1086,7 @@
   white-space: nowrap;
 }
 
-/* 查看全部 → 推到行尾，z-index 高于水印 */
-[data-theme="Nebula"] .nebula-section-more {
-  margin-left: auto;
-  color: var(--color-text-sub);
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  position: relative;
-  z-index: 1;
-}
 
-[data-theme="Nebula"] .nebula-section-more:hover { color: var(--color-primary-hover); }
 
 /* ============================================================ */
 /* Post list / Post card                                          */
@@ -1334,23 +1210,8 @@
   overflow: hidden;
 }
 
-[data-theme="Nebula"] .nebula-card-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  font-family: var(--nebula-font-mono);
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.4);
-  margin-top: 4px;
-}
 
-[data-theme="Nebula"] .nebula-card-meta span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
 
-[data-theme="Nebula"] .nebula-card-meta i { color: var(--color-focus-ring); }
 
 [data-theme="Nebula"] .nebula-card-arrow {
   width: 40px;
@@ -2233,54 +2094,11 @@
   border-top: 1px solid var(--color-border);
 }
 
-/* ── Author 卡片：唯一一处作者展示 ── */
-[data-theme="Nebula"] .nebula-post-author {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-top: 32px;
-  padding: 20px;
-  border-radius: var(--nebula-radius-lg);
-  background: var(--nebula-tile);
-  border: 1px solid var(--color-border);
-}
 
-[data-theme="Nebula"] .nebula-post-author-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
 
-[data-theme="Nebula"] .nebula-post-author-avatar--fallback {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--nebula-tile-elevated);
-  color: var(--color-text-main);
-  font-size: 22px;
-  font-weight: 600;
-}
 
-[data-theme="Nebula"] .nebula-post-author-meta {
-  min-width: 0;
-}
 
-[data-theme="Nebula"] .nebula-post-author-meta strong {
-  display: block;
-  font-family: var(--nebula-font-display);
-  font-size: 16px;
-  color: var(--color-text-main);
-  font-weight: 500;
-}
 
-[data-theme="Nebula"] .nebula-post-author-meta p {
-  margin: 4px 0 0;
-  font-size: 13px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.55);
-}
 
 [data-theme="Nebula"] .nebula-tags {
   display: flex;
@@ -3054,27 +2872,7 @@
   color: rgba(225, 231, 238, 0.7) !important;
 }
 
-[data-theme="Nebula"] .nebula-reader-button {
-  position: fixed;
-  right: 24px;
-  bottom: 24px;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: var(--color-focus-ring);
-  color: var(--color-bg-main);
-  border: 0;
-  font-size: 18px;
-  cursor: pointer;
-  box-shadow: var(--nebula-shadow-tile);
-  z-index: 30;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
 
-[data-theme="Nebula"] .nebula-reader-button:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--nebula-shadow-tile-hover);
-}
 
 /* ============================================================ */
 /* Footer                                                         */
@@ -3960,11 +3758,7 @@
 [data-theme="Nebula"] input::placeholder,
 [data-theme="Nebula"] textarea::placeholder {
   color: rgba(255, 255, 255, 0.35);
-}
-
-/* CommentList 空态图标硬编码 #ddd，深色下太亮 */
-[data-theme="Nebula"] .blog-empty-comments i,
-[data-theme="Nebula"] .nebula-comments .fa-couch {
+}[data-theme="Nebula"] .nebula-comments .fa-couch {
   color: rgba(255, 255, 255, 0.18) !important;
 }
 
@@ -4584,28 +4378,18 @@
 [data-theme="Nebula"] .action-btn.danger:hover {
   background: rgba(178, 38, 30, 0.18) !important;
 }
-[data-theme="Nebula"] .btn-danger {
-  background-color: #b3261e;
-  color: var(--color-text-main);
-}
-[data-theme="Nebula"] .btn-danger:hover {
-  background-color: #d44438;
-}
+
+
 
 /* ---- 通用按钮 ---- */
 /* btn-primary 在 sky 蓝底上写 #fff 对比度差，改 navy-deep */
 [data-theme="Nebula"] .btn-primary {
   color: var(--nebula-navy-deep);
-}
-[data-theme="Nebula"] .action-btn,
-[data-theme="Nebula"] .btn-secondary {
+}[data-theme="Nebula"] .btn-secondary {
   border-radius: 8px;
-}
-[data-theme="Nebula"] .btn,
+}[data-theme="Nebula"] .btn,
 [data-theme="Nebula"] .btn-primary,
-[data-theme="Nebula"] .btn-secondary,
-[data-theme="Nebula"] .btn-danger,
-[data-theme="Nebula"] .btn-ghost {
+[data-theme="Nebula"] .btn-secondary {
   border-radius: 8px;
 }
 
@@ -4628,11 +4412,7 @@
     linear-gradient(90deg, rgba(168, 199, 250, 0.04) 1px, transparent 1px);
   border-bottom-color: var(--color-border);
 }
-[data-theme="Nebula"] .coding-eyebrow {
-  background: rgba(128, 207, 255, 0.08);
-  color: var(--color-text-sub);
-  border-color: var(--nebula-border-blue-soft);
-}
+
 [data-theme="Nebula"] .coding-hero-title em,
 [data-theme="Nebula"] .coding-section-head h3 em {
   color: var(--color-primary); /* 原 #8f2f24 burgundy → 天蓝 */
@@ -4701,61 +4481,14 @@
   border-color: rgba(128, 207, 255, 0.18) !important;
 }
 
-/* ---- highlight.js 配色（globals.css 内 .hljs-* 是 Gruvbox light）---- */
-[data-theme="Nebula"] .hljs {
-  color: var(--color-text-main);
-  background: var(--nebula-input);
-}
-[data-theme="Nebula"] .hljs-comment,
-[data-theme="Nebula"] .hljs-quote {
-  color: rgba(225, 231, 238, 0.42);
-  font-style: italic;
-}
-[data-theme="Nebula"] .hljs-keyword,
-[data-theme="Nebula"] .hljs-selector-tag,
-[data-theme="Nebula"] .hljs-addition {
-  color: var(--color-primary);
-}
-[data-theme="Nebula"] .hljs-number,
-[data-theme="Nebula"] .hljs-string,
-[data-theme="Nebula"] .hljs-meta .hljs-meta-string,
-[data-theme="Nebula"] .hljs-literal,
-[data-theme="Nebula"] .hljs-doctag,
-[data-theme="Nebula"] .hljs-regexp {
-  color: var(--color-primary-hover);
-}
-[data-theme="Nebula"] .hljs-title,
-[data-theme="Nebula"] .hljs-section,
-[data-theme="Nebula"] .hljs-name,
-[data-theme="Nebula"] .hljs-selector-id,
-[data-theme="Nebula"] .hljs-selector-class {
-  color: var(--color-text-sub);
-}
-[data-theme="Nebula"] .hljs-attribute,
-[data-theme="Nebula"] .hljs-tag .hljs-attr,
-[data-theme="Nebula"] .hljs-variable,
-[data-theme="Nebula"] .hljs-template-variable,
-[data-theme="Nebula"] .hljs-class .hljs-title,
-[data-theme="Nebula"] .hljs-type {
-  color: #6dd58c;
-}
-[data-theme="Nebula"] .hljs-symbol,
-[data-theme="Nebula"] .hljs-bullet,
-[data-theme="Nebula"] .hljs-subst,
-[data-theme="Nebula"] .hljs-meta,
-[data-theme="Nebula"] .hljs-meta .hljs-keyword,
-[data-theme="Nebula"] .hljs-selector-attr,
-[data-theme="Nebula"] .hljs-selector-pseudo,
-[data-theme="Nebula"] .hljs-link {
-  color: #ffb683;
-}
-[data-theme="Nebula"] .hljs-built_in,
-[data-theme="Nebula"] .hljs-deletion {
-  color: #f2b8b5;
-}
-[data-theme="Nebula"] .hljs-formula {
-  background: var(--nebula-tile);
-}
+
+
+
+
+
+
+
+
 
 /* ---- code-block-wrapper（PostContent 渲染的代码块外层）---- */
 /* globals: border-radius:0; collapsed::after 用 #1d1f21 渐变兜底
@@ -5237,17 +4970,7 @@
   [data-theme="Nebula"] .dice-modal-content { padding: 20px; gap: 18px; }
 }
 
-/* 友链页右上角"骰子 / +" 方形按钮 —— 跟 Header dice 视觉一致 */
-[data-theme="Nebula"] .links-action-btn {
-  border: 1px solid rgba(128, 207, 255, 0.25) !important;
-  background: rgba(128, 207, 255, 0.04) !important;
-  color: rgba(225, 231, 238, 0.75) !important;
-}
-[data-theme="Nebula"] .links-action-btn:hover {
-  border-color: var(--color-focus-ring) !important;
-  background: rgba(128, 207, 255, 0.12) !important;
-  color: var(--color-focus-ring) !important;
-}
+
 
 /* ── 申请友链弹窗暗色适配 —— 用结构选择器代替 inline-style 字符串匹配
    ── inline JS handlers (onFocus/onBlur/onMouseEnter) 设的颜色浏览器
@@ -5789,9 +5512,7 @@
   border-radius: 15px;
   color: var(--color-text-main);
 }
-[data-theme="Nebula"] .card-hover:hover {
-  border-color: var(--nebula-border-blue);
-}
+
 
 /* ---- badge：globals 默认浅色 ---- */
 [data-theme="Nebula"] .badge {
@@ -5822,10 +5543,6 @@
   [data-theme="Nebula"] .nebula-nav { display: none; }
 
   [data-theme="Nebula"] .nebula-menu-button { display: inline-flex; }
-
-  [data-theme="Nebula"] .nebula-stat-strip {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 
   /* TOC 在窄屏由独立媒体查询控制（display:none），这里无需再处理 */
 
@@ -5889,14 +5606,7 @@
     aspect-ratio: 4 / 3;
   }
 
-  [data-theme="Nebula"] .nebula-post-author {
-    padding: 16px;
-  }
 
-  [data-theme="Nebula"] .nebula-post-author-avatar {
-    width: 44px;
-    height: 44px;
-  }
 
   [data-theme="Nebula"] .nebula-hero {
     padding: 56px 16px 64px;
@@ -5913,9 +5623,6 @@
     font-size: 26px;
   }
 
-  [data-theme="Nebula"] .nebula-stat-strip {
-    grid-template-columns: 1fr;
-  }
 
   [data-theme="Nebula"] .nebula-post-card {
     grid-template-columns: 1fr;
