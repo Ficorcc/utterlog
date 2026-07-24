@@ -38,11 +38,15 @@ jobs:
           sudo apt-get update
           # 未发布的主版本只在 -pgdg-testing 里，组件名就是主版本号，因此只会引入
           # 这一个大版本，不会把其它 PGDG 包也拉到 testing 版本。
-          if ! apt-cache show "postgresql-${PG_MAJOR}" >/dev/null 2>&1; then
+          # 用 policy 的 Candidate 判断：主源的 postgresql-${PG_MAJOR}-pgvector 依赖
+          # postgresql-${PG_MAJOR}，会让 `apt-cache show` 对装不了的包名也返回成功。
+          candidate="$(apt-cache policy "postgresql-${PG_MAJOR}" 2>/dev/null | awk '/Candidate:/ {print $2; exit}')"
+          if [ -z "$candidate" ] || [ "$candidate" = '(none)' ]; then
             echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg] https://apt.postgresql.org/pub/repos/apt ${codename}-pgdg-testing ${PG_MAJOR}" \
               | sudo tee /etc/apt/sources.list.d/pgdg-testing.list >/dev/null
             sudo apt-get update
           fi
+          apt-cache policy "postgresql-${PG_MAJOR}"
           sudo apt-get install -y "postgresql-${PG_MAJOR}" "postgresql-${PG_MAJOR}-pgvector"
           # runner 镜像设了 create_main_cluster=false，装包不会自动建 ${PG_MAJOR}/main；
           # 预装的 PG16 集群又占着 5432（测试固定连这个端口），先移除再显式创建。

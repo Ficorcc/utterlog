@@ -116,6 +116,14 @@ valid_ident() {
   [[ "$1" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]
 }
 
+# apt 里 postgresql-<major> 是否真的可安装。`apt-cache show` 不行——只要有别的
+# 包依赖这个名字，它就返回成功；要看 policy 的 Candidate 才准。
+pg_has_candidate() {
+  local candidate
+  candidate="$(apt-cache policy "postgresql-$1" 2>/dev/null | awk '/Candidate:/ {print $2; exit}')"
+  [ -n "$candidate" ] && [ "$candidate" != '(none)' ]
+}
+
 install_local_postgres() {
   command -v apt-get >/dev/null 2>&1 || die "Automatic PostgreSQL ${PG_MAJOR} installation currently supports Debian/Ubuntu. Configure an external PostgreSQL ${PG_MAJOR} + pgvector instance and rerun with --skip-db-setup."
   local codename
@@ -128,11 +136,13 @@ install_local_postgres() {
   apt-get update -qq
   # 未发布的主版本（当前的 19）只在 -pgdg-testing 里，且组件名就是主版本号，
   # 所以只会引入这一个大版本的包，不会把其它 PGDG 包也拉到 testing 版本。
-  if ! apt-cache show "postgresql-${PG_MAJOR}" >/dev/null 2>&1; then
+  # 注意用 policy 判断而不是 `apt-cache show`：主源里的 postgresql-19-pgvector
+  # 依赖 postgresql-19，这会让 `show` 对一个装不了的包名也返回成功。
+  if ! pg_has_candidate "$PG_MAJOR"; then
     log "PostgreSQL ${PG_MAJOR} is not in the PGDG main suite; enabling ${codename}-pgdg-testing"
     printf 'deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt %s-pgdg-testing %s\n' "$codename" "$PG_MAJOR" > /etc/apt/sources.list.d/pgdg-testing.list
     apt-get update -qq
-    apt-cache show "postgresql-${PG_MAJOR}" >/dev/null 2>&1 \
+    pg_has_candidate "$PG_MAJOR" \
       || die "PostgreSQL ${PG_MAJOR} is unavailable for ${codename} in both PGDG suites. Set PG_MAJOR to a released major (for example PG_MAJOR=18) and rerun."
   fi
   apt-get install -y "postgresql-${PG_MAJOR}" "postgresql-client-${PG_MAJOR}" "postgresql-${PG_MAJOR}-pgvector" >/dev/null
