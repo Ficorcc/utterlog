@@ -3,7 +3,7 @@ import { useNavigate } from '@/lib/router';
 import {
   FileText, MessageSquare, Eye, TrendingUp, FolderTree, Tags, Type, CalendarDays,
   SquarePen, FolderOpen, Settings as SettingsIcon, BarChart3, Zap, ArrowRight, Plus,
-  Globe, Network,
+  Network,
 } from 'lucide-react';
 
 function AnimatedNumber({ value }: { value: number }) {
@@ -33,10 +33,11 @@ import api, { networkApi } from '@/lib/api';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import { postUrlOf } from '@/lib/site';
-import { Spinner } from '@/components/ui';
 import { Button } from '@/components/ui/shadcn';
+import { usePageLoading } from '@/layouts/DashboardLayout';
 
 interface Stats { posts: number; comments: number; links: number; views: number; today: number; words: number; days: number; categories: number; tags: number }
+interface Todo { pending_comments: number; drafts: number; link_requests: number }
 interface RecentPost { id: number; display_id?: number; title: string; slug: string; status: string; created_at: string; published_at?: string | null; view_count?: number; comment_count?: number; categories?: { id: number; name: string; slug: string; icon?: string }[] }
 interface NetworkActivity { type: string; site: string; site_name: string; title: string; content_type: string; created_at: string }
 interface NetworkSite { name: string; url: string; logo: string; description: string }
@@ -50,10 +51,18 @@ function CatIcon({ icon, className }: { icon?: string; className?: string }) {
 export default function DashboardPage() {
   const { locale, t } = useI18n();
   const navigate = useNavigate();
+  const { setPageLoading } = usePageLoading();
   const [stats, setStats] = useState<Stats>({ posts: 0, comments: 0, links: 0, views: 0, today: 0, words: 0, days: 0, categories: 0, tags: 0 });
+  const [todo, setTodo] = useState<Todo>({ pending_comments: 0, drafts: 0, link_requests: 0 });
   const [recentPosts, setRecentPosts] = useState<RecentPost[]>([]);
   const [recentComments, setRecentComments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // 加载态上报给 header 的统一 spinner；离开本页时清掉。
+  useEffect(() => {
+    setPageLoading(loading);
+    return () => setPageLoading(false);
+  }, [loading, setPageLoading]);
   const [sparkline, setSparkline] = useState<{ date: string; visits: number; visitors: number; weekday: string }[]>([]);
   const [networkConnected, setNetworkConnected] = useState(false);
   const [networkActivity, setNetworkActivity] = useState<NetworkActivity[]>([]);
@@ -72,6 +81,11 @@ export default function DashboardPage() {
         views: d.total_views || 0, today: d.today_visits || 0,
         words: d.total_words || 0, days: d.days || 0,
         categories: d.categories || 0, tags: d.tags || 0,
+      });
+      setTodo({
+        pending_comments: d.todo?.pending_comments || 0,
+        drafts: d.todo?.drafts || 0,
+        link_requests: d.todo?.link_requests || 0,
       });
       const trendMap: Record<string, { visits: number; visitors: number }> = {};
       for (const tr of (d.trend || [])) {
@@ -112,16 +126,28 @@ export default function DashboardPage() {
     categories: comment.post_categories || [],
   });
 
+  // 主卡只留每天会看的四项，占一行；分类 / 标签 / 字数 / 天数信息密度低，
+  // 收进下面一行小字摘要。
   const statCards = [
     { title: t('admin.dashboard.stats.posts', '文章'), value: stats.posts, Icon: FileText, colorClass: 'text-primary', bgClass: 'bg-primary/10' },
     { title: t('admin.dashboard.stats.comments', '评论'), value: stats.comments, Icon: MessageSquare, colorClass: 'text-amber-600', bgClass: 'bg-amber-600/10' },
     { title: t('admin.dashboard.stats.views', '浏览量'), value: stats.views, Icon: Eye, colorClass: 'text-emerald-600', bgClass: 'bg-emerald-600/10' },
     { title: t('admin.dashboard.stats.today', '今日访问'), value: stats.today, Icon: TrendingUp, colorClass: 'text-violet-500', bgClass: 'bg-violet-500/10' },
-    { title: t('admin.dashboard.stats.categories', '分类'), value: stats.categories, Icon: FolderTree, colorClass: 'text-sky-500', bgClass: 'bg-sky-500/10' },
-    { title: t('admin.dashboard.stats.tags', '标签'), value: stats.tags, Icon: Tags, colorClass: 'text-pink-500', bgClass: 'bg-pink-500/10' },
-    { title: t('admin.dashboard.stats.words', '总字数'), value: new Intl.NumberFormat(locale || 'zh-CN', { notation: 'compact', maximumFractionDigits: 1 }).format(stats.words), Icon: Type, colorClass: 'text-orange-500', bgClass: 'bg-orange-500/10' },
-    { title: t('admin.dashboard.stats.days', '建站天数'), value: stats.days, Icon: CalendarDays, colorClass: 'text-indigo-500', bgClass: 'bg-indigo-500/10' },
   ];
+
+  const secondaryStats = [
+    { label: t('admin.dashboard.stats.categories', '分类'), value: stats.categories, Icon: FolderTree, href: '/posts/categories' },
+    { label: t('admin.dashboard.stats.tags', '标签'), value: stats.tags, Icon: Tags, href: '/posts/tags' },
+    { label: t('admin.dashboard.stats.words', '总字数'), value: new Intl.NumberFormat(locale || 'zh-CN', { notation: 'compact', maximumFractionDigits: 1 }).format(stats.words), Icon: Type },
+    { label: t('admin.dashboard.stats.days', '建站天数'), value: stats.days, Icon: CalendarDays },
+  ];
+
+  // 待办：只显示有数的项；全为 0 时整行不渲染。
+  const todoItems = [
+    { count: todo.pending_comments, label: t('admin.dashboard.todo.pendingComments', '条评论待审核'), Icon: MessageSquare, href: '/comments/pending', tone: 'text-amber-600 dark:text-amber-400' },
+    { count: todo.drafts, label: t('admin.dashboard.todo.drafts', '篇草稿未发布'), Icon: SquarePen, href: '/posts?status=draft', tone: 'text-muted-foreground' },
+    { count: todo.link_requests, label: t('admin.dashboard.todo.linkRequests', '条友链申请待处理'), Icon: Network, href: '/links', tone: 'text-primary' },
+  ].filter((item) => item.count > 0);
 
   const quickActions = [
     { label: t('admin.dashboard.quick.writePost', '写文章'), Icon: SquarePen, href: '/posts/create' },
@@ -160,21 +186,62 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-7">
+      {/* 待办 —— 只在真有事情要处理时出现 */}
+      {!loading && todoItems.length > 0 && (
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border border-border bg-card px-5 py-3 shadow-sm">
+          <span className="text-xs font-semibold text-muted-foreground">{t('admin.dashboard.todo.title', '待处理')}</span>
+          {todoItems.map((item) => (
+            <button
+              key={item.label}
+              type="button"
+              onClick={() => navigate(item.href)}
+              className="inline-flex items-center gap-1.5 bg-transparent text-xs-plus text-foreground hover:text-primary"
+            >
+              <item.Icon className={cn('size-4', item.tone)} />
+              <span className="font-semibold">{item.count}</span>
+              <span className="text-muted-foreground">{item.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Stat cards */}
-      <div className="grid grid-cols-4 gap-3">
-        {statCards.map((c) => (
-          <div key={c.title} className="flex items-center gap-3.5 rounded-lg border border-border bg-card p-4 shadow-sm">
-            <div className={cn('flex size-10 items-center justify-center rounded-md', c.bgClass)}>
-              <c.Icon className={cn('size-4.5', c.colorClass)} />
+      <div className="flex flex-col gap-3">
+        <div className="grid grid-cols-4 gap-3">
+          {statCards.map((c) => (
+            <div key={c.title} className="flex items-center gap-3.5 border border-border bg-card p-4 shadow-sm">
+              <div className={cn('flex size-10 items-center justify-center', c.bgClass)}>
+                <c.Icon className={cn('size-4.5', c.colorClass)} />
+              </div>
+              <div>
+                <p className="text-xl-plus font-bold text-foreground">
+                  {loading ? '—' : typeof c.value === 'number' ? <AnimatedNumber value={c.value} /> : c.value}
+                </p>
+                <p className="text-xs text-muted-foreground">{c.title}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-xl-plus font-bold text-foreground">
-                {loading ? '—' : typeof c.value === 'number' ? <AnimatedNumber value={c.value} /> : c.value}
-              </p>
-              <p className="text-xs text-muted-foreground">{c.title}</p>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        {/* 次要指标：一行小字，可点的跳到对应管理页 */}
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 px-1 text-xs text-muted-foreground">
+          {secondaryStats.map((s) => {
+            const body = (
+              <>
+                <s.Icon className="size-3.5" />
+                <span>{s.label}</span>
+                <span className="font-semibold text-foreground">{loading ? '—' : s.value}</span>
+              </>
+            );
+            return s.href ? (
+              <button key={s.label} type="button" onClick={() => navigate(s.href!)} className="inline-flex items-center gap-1.5 bg-transparent hover:text-primary">
+                {body}
+              </button>
+            ) : (
+              <span key={s.label} className="inline-flex items-center gap-1.5">{body}</span>
+            );
+          })}
+        </div>
       </div>
 
       {/* Trend + Quick actions */}
@@ -250,7 +317,8 @@ export default function DashboardPage() {
             </div>
             <ViewAll to="/posts" label={t('admin.dashboard.viewAll', '全部')} />
           </div>
-          {loading ? <Spinner /> : recentPosts.length === 0 ? (
+          {/* 加载态统一由 header 的 spinner 表示（见 usePageLoading） */}
+          {loading ? null : recentPosts.length === 0 ? (
             <div className="px-5 py-12 text-center">
               <p className="mb-4 text-sm text-muted-foreground">{t('admin.dashboard.noPosts', '暂无文章')}</p>
               <Button onClick={() => navigate('/posts/create')}>
@@ -292,7 +360,7 @@ export default function DashboardPage() {
             </div>
             <ViewAll to="/comments" label={t('admin.dashboard.viewAll', '全部')} />
           </div>
-          {loading ? <Spinner /> : recentComments.length === 0 ? (
+          {loading ? null : recentComments.length === 0 ? (
             <div className="px-5 py-12 text-center text-sm text-muted-foreground">{t('admin.dashboard.noComments', '暂无评论')}</div>
           ) : (
             recentComments.map((comment, idx) => (
@@ -324,8 +392,27 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Community panel */}
-      <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+      {/* 未连接社区时只留一条窄提示——原来的整块空态 + CTA 在概览页上太占版面 */}
+      {!networkConnected ? (
+        <button
+          type="button"
+          onClick={() => navigate('/utterlog')}
+          className="flex w-full items-center gap-3 border border-border bg-card px-5 py-3 text-left shadow-sm transition-colors hover:border-primary"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
+            <path d="M12 0c9.601 0 12 2.399 12 12 0 9.601-2.399 12-12 12-9.601 0-12-2.399-12-12C0 2.399 2.399 0 12 0z" fill="var(--primary)" />
+            <path d="M17.008 17.29H11.44a5.57 5.57 0 0 1-5.562-5.567A5.57 5.57 0 0 1 11.44 6.16a5.57 5.57 0 0 1 5.567 5.563Z" fill="white" />
+          </svg>
+          <span className="text-xs-plus font-medium text-foreground">{t('admin.dashboard.joinNetwork', '加入 Utterlog 去中心化网络')}</span>
+          <span className="hidden text-xs text-muted-foreground sm:inline">
+            {t('admin.dashboard.networkDescription', '连接到 Utterlog 社区，与其他独立博客互相订阅、共享内容、交流互动')}
+          </span>
+          <span className="ml-auto inline-flex shrink-0 items-center gap-1 text-xs font-medium text-primary">
+            {t('admin.common.connect', '连接')} <ArrowRight className="size-3.5" />
+          </span>
+        </button>
+      ) : (
+      <div className="overflow-hidden border border-border bg-card shadow-sm">
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <div className="flex items-center gap-2.5">
             <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
@@ -340,18 +427,7 @@ export default function DashboardPage() {
           <ViewAll to="/utterlog" label={networkConnected ? t('admin.common.manage', '管理') : t('admin.common.connect', '连接')} />
         </div>
 
-        {!networkConnected ? (
-          <div className="px-5 py-10 text-center">
-            <Globe className="mx-auto mb-4 size-10 text-muted-foreground" />
-            <p className="mb-2 text-sm font-medium text-foreground">{t('admin.dashboard.joinNetwork', '加入 Utterlog 去中心化网络')}</p>
-            <p className="mx-auto mb-5 max-w-md text-xs-plus text-muted-foreground">
-              {t('admin.dashboard.networkDescription', '连接到 Utterlog 社区，与其他独立博客互相订阅、共享内容、交流互动')}
-            </p>
-            <Button onClick={() => navigate('/utterlog')}>
-              <Network className="size-4" />{t('admin.dashboard.goConnect', '前往连接')}
-            </Button>
-          </div>
-        ) : (
+        {(
           <div className="grid min-h-50 grid-cols-2">
             <div className="border-r border-border">
               <div className="border-b border-border px-5 py-3">
@@ -396,6 +472,7 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }

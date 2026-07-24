@@ -72,7 +72,7 @@ export async function systemStatusPayload() {
 export async function adminStatsPayload() {
   const timeZone = await siteTimeZone();
   const today = await siteDate();
-  const [archive, links, media, categories, tags, todayVisits, trend] = await Promise.all([
+  const [archive, links, media, categories, tags, todayVisits, trend, todo] = await Promise.all([
     archiveStatsPayload(),
     one<{ count: string }>(`select count(*)::text as count from ${table('links')}`).catch(() => null),
     one<{ count: string }>(`select count(*)::text as count from ${table('media')}`).catch(() => null),
@@ -91,11 +91,24 @@ export async function adminStatsPayload() {
        where created_at >= extract(epoch from ((($2::date - 29))::timestamp at time zone $1))::bigint
        group by date order by date asc`, [timeZone, today],
     ).catch(() => []),
+    // 概览页顶部「待办」用：只有非零项才会显示出来。友链申请走 status=0
+    // （前台 /links/apply 写入），已通过的是 status=1。
+    one<{ pending_comments: string; drafts: string; link_requests: string }>(
+      `select
+         (select count(*) from ${table('comments')} where status = 'pending')::text as pending_comments,
+         (select count(*) from ${table('posts')} where type = 'post' and status = 'draft' and deleted_at = 0)::text as drafts,
+         (select count(*) from ${table('links')} where status = 0)::text as link_requests`,
+    ).catch(() => null),
   ]);
   return { posts: archive.post_count, comments: archive.comment_count, links: Number(links?.count || 0),
     media: Number(media?.count || 0), categories: Number(categories?.count || 0), tags: Number(tags?.count || 0),
     total_views: archive.total_views, today_visits: Number(todayVisits?.count || 0), total_words: archive.word_count,
-    days: archive.days, trend };
+    days: archive.days, trend,
+    todo: {
+      pending_comments: Number(todo?.pending_comments || 0),
+      drafts: Number(todo?.drafts || 0),
+      link_requests: Number(todo?.link_requests || 0),
+    } };
 }
 
 /**
