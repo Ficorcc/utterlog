@@ -1,14 +1,8 @@
 export { Button } from './button';
 export { SaveButton } from './save-button';
 export { Input } from './input';
-export { Textarea } from './textarea';
-export { Select } from './select';
 export { Modal } from './modal';
-export { Table, Pagination } from './table';
-export { Badge } from './badge';
 export { ConfirmDialog } from './confirm-dialog';
-export { EmptyState } from './empty-state';
-export { Toggle } from './toggle';
 export { CoverInput } from './CoverInput';
 export { default as Spinner } from './Spinner';
 export {

@@ -16,9 +16,6 @@ export { Tabs, TabsList, TabsTrigger, TabsContent } from './tabs';
 export {
   Select, SelectValue, SelectTrigger, SelectContent, SelectItem,
 } from './select';
-export {
-  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator,
-} from './dropdown-menu';
 export { Spinner, LoadingState } from './spinner';
 export { EmptyState } from './empty-state';
 export { Pagination } from './pagination';

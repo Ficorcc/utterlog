@@ -251,19 +251,6 @@ export const optionsApi = {
   },
 };
 
-// Import API
-export const importApi = {
-  typecho: (data: { host: string; database: string; username: string; password: string; prefix: string }) =>
-    api.post('/import/typecho', data),
-  wordpress: (file: File) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    return api.post('/import/wordpress', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-  },
-};
-
 // Moments API
 export const momentsApi = {
   list: (params?: any) => api.get('/moments', { params: fullListParams(params) }),
@@ -347,11 +334,6 @@ export const playlistsApi = {
   addSong: (id: number, musicId: number) => api.post(`/playlists/${id}/songs`, { music_id: musicId }),
   removeSong: (id: number, musicId: number) => api.delete(`/playlists/${id}/songs`, { data: { music_id: musicId } }),
   import: (server: string, playlistId: string, title: string) => api.post("/playlists/import", { server, playlist_id: playlistId, title }),
-};
-
-// RSS API
-export const rssApi = {
-  parse: (url: string) => api.get('/rss/parse', { params: { url } }),
 };
 
 // Utterlog Network API

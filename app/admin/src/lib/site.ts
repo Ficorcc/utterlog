@@ -62,10 +62,6 @@ export function getSiteUrl(): string {
   return cached?.site_url || '';
 }
 
-export function getSiteTitle(): string {
-  return cached?.site_title || 'Utterlog';
-}
-
 /** Read the already-loaded options without issuing another request. */
 export function getSiteOptions() {
   return cached;
@@ -105,6 +101,3 @@ export const postUrlOf = (post: PostLike | string) => {
   if (typeof post === 'string') return siteUrlOf(`/posts/${post}`);
   return siteUrlOf(buildPostPermalink(post, getPermalinkStructure()));
 };
-export const pageUrlOf = (slug: string) => siteUrlOf(`/pages/${slug}`);
-export const momentsUrl = () => siteUrlOf('/moments');
-export const siteHomeUrl = () => siteUrlOf('/');
