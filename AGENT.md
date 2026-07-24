@@ -84,7 +84,7 @@ The independent `community/`, `id/`, and `wordpress-plugin/` projects live outsi
 | **utterlog.com** | 去中心化网络中心站（Network Hub） | `../utterlog-others/community/` | utterlog-hub :8091 + utterlog-web :3001 |
 | **id.utterlog.com** | Utterlog ID 账号中心（OAuth） | `../utterlog-others/id/` | utterlog-id :8090 |
 | **docs.utterlog.io** | 文档 | `utterlog/utterlog-docs`（私有） | 静态 |
-| **demo.utterlog.io** | 在线演示 | 本仓库部署的一个实例 | 同博客 |
+| ~~demo.utterlog.io~~ | 在线演示 — **尚未上线**（无 DNS 记录），组织 profile 里的入口已撤下 | 本仓库部署的一个实例 | 同博客 |
 
 > 不要混淆：用户的博客 ≠ utterlog.com。utterlog.com 是 Network Hub。
 
