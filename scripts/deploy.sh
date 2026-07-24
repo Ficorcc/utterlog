@@ -138,14 +138,19 @@ install_local_postgres() {
   # 所以只会引入这一个大版本的包，不会把其它 PGDG 包也拉到 testing 版本。
   # 注意用 policy 判断而不是 `apt-cache show`：主源里的 postgresql-19-pgvector
   # 依赖 postgresql-19，这会让 `show` 对一个装不了的包名也返回成功。
+  local apt_target=()
   if ! pg_has_candidate "$PG_MAJOR"; then
     log "PostgreSQL ${PG_MAJOR} is not in the PGDG main suite; enabling ${codename}-pgdg-testing"
     printf 'deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt %s-pgdg-testing %s\n' "$codename" "$PG_MAJOR" > /etc/apt/sources.list.d/pgdg-testing.list
     apt-get update -qq
     pg_has_candidate "$PG_MAJOR" \
       || die "PostgreSQL ${PG_MAJOR} is unavailable for ${codename} in both PGDG suites. Set PG_MAJOR to a released major (for example PG_MAJOR=18) and rerun."
+    # PGDG 的 testing 套件是 NotAutomatic（优先级 100），apt 会宁可从 main 取旧的
+    # libpq5，导致 postgresql-client-N 的 libpq5 (>= N~beta) 依赖无法满足。用 -t
+    # 把该套件提到目标优先级，共享库才会跟着一起升。
+    apt_target=(-t "${codename}-pgdg-testing")
   fi
-  apt-get install -y "postgresql-${PG_MAJOR}" "postgresql-client-${PG_MAJOR}" "postgresql-${PG_MAJOR}-pgvector" >/dev/null
+  apt-get install -y "${apt_target[@]}" "postgresql-${PG_MAJOR}" "postgresql-client-${PG_MAJOR}" "postgresql-${PG_MAJOR}-pgvector" >/dev/null
   systemctl enable --now postgresql
 }
 
