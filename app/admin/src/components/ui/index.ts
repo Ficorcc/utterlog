@@ -10,7 +10,6 @@ export { ConfirmDialog } from './confirm-dialog';
 export { EmptyState } from './empty-state';
 export { Toggle } from './toggle';
 export { CoverInput } from './CoverInput';
-export { SettingsTabs } from './settings-tabs';
 export { default as Spinner } from './Spinner';
 export {
   AdminToolbar,
