@@ -5,11 +5,27 @@
 ## 环境要求
 
 - 64 位 Linux，使用 systemd
-- Debian/Ubuntu 可由脚本自动安装 PostgreSQL 18 + pgvector
-- 其他发行版需先准备 PostgreSQL 18 + pgvector，或使用外部数据库
+- Debian/Ubuntu 可由脚本自动安装 PostgreSQL 19 + pgvector
+- 其他发行版需先准备 PostgreSQL 19 + pgvector，或使用外部数据库
 - root 或 sudo 权限
 
 Bun 1.4、Git、PostgreSQL 客户端等主机依赖由安装脚本补齐。
+
+### PostgreSQL 版本
+
+安装器默认装 **PostgreSQL 19**。它目前仍是 beta：服务端包只在 PGDG 的
+`-pgdg-testing` 套件里（脚本会按需自动启用，组件按主版本号限定，不会影响其它
+PGDG 包），且 **PostgreSQL 官方不建议在生产环境使用 beta**——从 beta 升到正式版
+有可能需要 dump/restore，而不是 `pg_upgrade`。
+
+要装上一个正式版，安装前设 `PG_MAJOR`：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/utterlog/utterlog/main/install.sh \
+  | sudo PG_MAJOR=18 bash
+```
+
+该变量只影响本机自动安装的 PostgreSQL；用外部数据库时无效。
 
 ## 一行安装
 
@@ -29,7 +45,7 @@ curl -fsSL https://raw.githubusercontent.com/utterlog/utterlog/main/install.sh \
 1. 克隆到 `/opt/utterlog`，已有安装则对当前分支执行快进更新。
 2. 安装 Bun 1.4+ 和主机依赖。
 3. 创建 `.env`，生成数据库密码和 JWT 密钥，选择空闲端口。
-4. 准备本机 PostgreSQL 18 + pgvector，或验证 `.env` 中的外部数据库。
+4. 准备本机 PostgreSQL（默认 19，见上）+ pgvector，或验证 `.env` 中的外部数据库。
 5. 安装依赖，执行类型检查、构建、测试和 API 覆盖审计。
 6. 安装并启动 `utterlog-app.service` 与后台更新任务。
 7. 访问健康检查接口，确认服务可用。

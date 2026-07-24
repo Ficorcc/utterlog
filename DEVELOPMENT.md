@@ -7,7 +7,7 @@
 | 工具 | 版本 | 用途 |
 |---|---|---|
 | Bun | 1.4.0+ | 运行时、包管理、测试与构建 |
-| PostgreSQL | 18 + pgvector | 本地或外部数据库 |
+| PostgreSQL | 19 + pgvector | 本地或外部数据库（18 亦可）|
 
 项目只维护根目录 `bun.lock`，不要在 workspace 下生成独立锁文件。
 

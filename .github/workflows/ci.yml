@@ -8,6 +8,9 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+  # 与 scripts/deploy.sh 的 PG_MAJOR 默认值保持一致。19 仍是 beta，服务端包只在
+  # PGDG 的 -pgdg-testing 套件（组件名即主版本号），扩展包在 main。
+  PG_MAJOR: '19'
 
 jobs:
   app:
@@ -21,22 +24,31 @@ jobs:
         with:
           bun-version: 1.4.0
 
-      - name: Install PostgreSQL 18 and pgvector
+      - name: Install PostgreSQL and pgvector
         run: |
+          codename="$(. /etc/os-release && echo "$VERSION_CODENAME")"
           sudo install -d /usr/share/postgresql-common/pgdg
           curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
             | sudo gpg --dearmor --yes -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg
-          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg] https://apt.postgresql.org/pub/repos/apt $(. /etc/os-release && echo "$VERSION_CODENAME")-pgdg main" \
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg] https://apt.postgresql.org/pub/repos/apt ${codename}-pgdg main" \
             | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
           sudo apt-get update
-          sudo apt-get install -y postgresql-18 postgresql-18-pgvector
-          # runner 镜像设了 create_main_cluster=false，装包不会自动建 18/main；
+          # 未发布的主版本只在 -pgdg-testing 里，组件名就是主版本号，因此只会引入
+          # 这一个大版本，不会把其它 PGDG 包也拉到 testing 版本。
+          if ! apt-cache show "postgresql-${PG_MAJOR}" >/dev/null 2>&1; then
+            echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg] https://apt.postgresql.org/pub/repos/apt ${codename}-pgdg-testing ${PG_MAJOR}" \
+              | sudo tee /etc/apt/sources.list.d/pgdg-testing.list >/dev/null
+            sudo apt-get update
+          fi
+          sudo apt-get install -y "postgresql-${PG_MAJOR}" "postgresql-${PG_MAJOR}-pgvector"
+          # runner 镜像设了 create_main_cluster=false，装包不会自动建 ${PG_MAJOR}/main；
           # 预装的 PG16 集群又占着 5432（测试固定连这个端口），先移除再显式创建。
           sudo pg_dropcluster 16 main --stop 2>/dev/null || true
-          sudo pg_lsclusters -h 2>/dev/null | awk '{print $1"/"$2}' | grep -qx '18/main' \
-            || sudo pg_createcluster 18 main --port 5432
-          sudo pg_ctlcluster 18 main start || sudo pg_ctlcluster 18 main status
+          sudo pg_lsclusters -h 2>/dev/null | awk '{print $1"/"$2}' | grep -qx "${PG_MAJOR}/main" \
+            || sudo pg_createcluster "${PG_MAJOR}" main --port 5432
+          sudo pg_ctlcluster "${PG_MAJOR}" main start || sudo pg_ctlcluster "${PG_MAJOR}" main status
           sudo pg_isready -h 127.0.0.1 -p 5432
+          psql --version
           # 集成测试的 schema bootstrap 会 DROP/CREATE vector 扩展：需要 superuser，
           # 且扩展要由测试角色自己创建，否则 owner 是 postgres，DROP 时报权限错。
           sudo -u postgres psql -v ON_ERROR_STOP=1 <<'SQL'

@@ -54,13 +54,13 @@ Utterlog 面向独立作者和个人站长，把博客运营需要的东西收�
 | 路由与数据 | TanStack Router、TanStack Query |
 | 运行时 | Bun 1.4 |
 | 语言与构建 | TypeScript、Vite |
-| 数据库 | PostgreSQL 18 + pgvector |
+| 数据库 | PostgreSQL 19 + pgvector（`PG_MAJOR=18` 可装上一个正式版） |
 | 存储 | 本地磁盘或 S3 / Cloudflare R2 |
 | 部署 | Bun + systemd，Nginx / Caddy / 1Panel / 宝塔反代 |
 
 ## 快速开始
 
-一行安装（64 位 Linux + systemd，脚本自动补齐 Bun、PostgreSQL 18 + pgvector）：
+一行安装（64 位 Linux + systemd，脚本自动补齐 Bun、PostgreSQL 19 + pgvector）：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/utterlog/utterlog/main/install.sh | sudo bash

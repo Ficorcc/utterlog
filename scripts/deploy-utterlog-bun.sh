@@ -8,7 +8,7 @@
 #   运行时（示例拓扑）：
 #     - app  = systemd `utterlog-app`，host Bun 跑 app/start/src/backend/index.ts
 #              监听 .env 里的 HOST/PORT（默认 127.0.0.1:9260）
-#     - db   = host PostgreSQL 18（.env 里 DB_HOST=127.0.0.1 DB_PORT=5432）
+#     - db   = host PostgreSQL 19（.env 里 DB_HOST=127.0.0.1 DB_PORT=5432）
 #     - 对外 = 反代（如 Caddy/Nginx）→ 本机 Bun 端口
 #
 #   用法：

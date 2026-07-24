@@ -92,7 +92,7 @@ The independent `community/`, `id/`, and `wordpress-plugin/` projects live outsi
 
 ## 7. 数据库
 
-- PG 18 (pgvector)：本博客库 `utterlog`、Hub 库 `utterlog_hub`、ID 库 `utterlog_id`
+- PG 19 (pgvector)：本博客库 `utterlog`、Hub 库 `utterlog_hub`、ID 库 `utterlog_id`
 - 表前缀 `ul_`（env `DB_PREFIX`），id-center 用 `uid_`
 - pgvector 用于语义搜索（embedding 自动生成）
 - `app/start/assets/schema.sql` 是真理之源；改 schema 后 `bash scripts/dump-schema.sh` 重新导出，commit 进库
@@ -273,7 +273,7 @@ curl -fsSL https://raw.githubusercontent.com/utterlog/utterlog/main/install.sh |
 
 - 默认安装目录 `/opt/utterlog`，服务名 `utterlog-app`，监听 `127.0.0.1:9260`。
 - 公开流量由站长已有的 Nginx、Caddy 或面板反向代理接入。
-- PostgreSQL 18 + pgvector 可安装在同一主机或使用外部实例；不依赖 Redis。
+- PostgreSQL 19 + pgvector 可安装在同一主机或使用外部实例；不依赖 Redis。安装器默认装 19，`PG_MAJOR=18` 可退回上一个正式版。
 - `.env`、`uploads/`、`content/`、`backup/` 是运行时数据，部署和升级不得覆盖。
 - 真实域名、IP、SSH 私钥、数据库密码、API Key 和 OAuth Secret 一律不得提交到仓库。
 - 部署示例必须使用占位符，不得写入维护者或用户的基础设施信息。

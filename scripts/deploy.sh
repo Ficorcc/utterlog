@@ -12,7 +12,10 @@ for arg in "$@"; do
       printf '%s\n' \
         'Usage: sudo bash scripts/deploy.sh [--no-build] [--skip-db-setup]' \
         '' \
-        'Installs Bun host prerequisites, configures PostgreSQL and systemd, builds and starts Utterlog.'
+        'Installs Bun host prerequisites, configures PostgreSQL and systemd, builds and starts Utterlog.' \
+        '' \
+        'Environment:' \
+        '  PG_MAJOR   PostgreSQL major to install locally (default 19; set 18 for the last GA release)'
       exit 0
       ;;
     *) printf 'Unknown argument: %s\n' "$arg" >&2; exit 2 ;;
@@ -33,6 +36,10 @@ ROOT="${UTTERLOG_INSTALL_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
 APP_USER="${UTTERLOG_SERVICE_USER:-utterlog}"
 APP_GROUP="${UTTERLOG_SERVICE_GROUP:-$APP_USER}"
 SERVICE="${UTTERLOG_SERVICE:-utterlog-app}"
+# PostgreSQL 主版本号。19 目前是 beta，服务端包只在 PGDG 的 -pgdg-testing
+# 套件里（组件名就是主版本号），扩展包仍在 main。设 PG_MAJOR=18 可退回上一个
+# 正式版。安装器会自己判断该不该加 testing 源，不用手工配。
+PG_MAJOR="${PG_MAJOR:-19}"
 UPDATE_REQUEST_FILE="${UTTERLOG_UPDATE_REQUEST_FILE:-$ROOT/.runtime/update.request}"
 ENV_FILE="$ROOT/.env"
 
@@ -110,15 +117,25 @@ valid_ident() {
 }
 
 install_local_postgres() {
-  command -v apt-get >/dev/null 2>&1 || die 'Automatic PostgreSQL 18 installation currently supports Debian/Ubuntu. Configure an external PostgreSQL 18 + pgvector instance and rerun with --skip-db-setup.'
+  command -v apt-get >/dev/null 2>&1 || die "Automatic PostgreSQL ${PG_MAJOR} installation currently supports Debian/Ubuntu. Configure an external PostgreSQL ${PG_MAJOR} + pgvector instance and rerun with --skip-db-setup."
   local codename
   codename="$(. /etc/os-release && printf '%s' "${VERSION_CODENAME:-}")"
   [ -n "$codename" ] || die 'Cannot determine Debian/Ubuntu codename.'
   install -d -m 0755 /usr/share/postgresql-common/pgdg
   curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
   printf 'deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt %s-pgdg main\n' "$codename" > /etc/apt/sources.list.d/pgdg.list
+  rm -f /etc/apt/sources.list.d/pgdg-testing.list
   apt-get update -qq
-  apt-get install -y postgresql-18 postgresql-client-18 postgresql-18-pgvector >/dev/null
+  # 未发布的主版本（当前的 19）只在 -pgdg-testing 里，且组件名就是主版本号，
+  # 所以只会引入这一个大版本的包，不会把其它 PGDG 包也拉到 testing 版本。
+  if ! apt-cache show "postgresql-${PG_MAJOR}" >/dev/null 2>&1; then
+    log "PostgreSQL ${PG_MAJOR} is not in the PGDG main suite; enabling ${codename}-pgdg-testing"
+    printf 'deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt %s-pgdg-testing %s\n' "$codename" "$PG_MAJOR" > /etc/apt/sources.list.d/pgdg-testing.list
+    apt-get update -qq
+    apt-cache show "postgresql-${PG_MAJOR}" >/dev/null 2>&1 \
+      || die "PostgreSQL ${PG_MAJOR} is unavailable for ${codename} in both PGDG suites. Set PG_MAJOR to a released major (for example PG_MAJOR=18) and rerun."
+  fi
+  apt-get install -y "postgresql-${PG_MAJOR}" "postgresql-client-${PG_MAJOR}" "postgresql-${PG_MAJOR}-pgvector" >/dev/null
   systemctl enable --now postgresql
 }
 
@@ -135,7 +152,7 @@ setup_database() {
 
   if [ "$db_host" = 127.0.0.1 ] || [ "$db_host" = localhost ]; then
     if ! command -v pg_isready >/dev/null 2>&1 || ! pg_isready -h "$db_host" -p "$db_port" >/dev/null 2>&1; then
-      log 'Installing local PostgreSQL 18 + pgvector'
+      log "Installing local PostgreSQL ${PG_MAJOR} + pgvector"
       install_local_postgres
     fi
     id postgres >/dev/null 2>&1 || die 'Local PostgreSQL service user is missing.'
