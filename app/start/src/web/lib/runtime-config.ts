@@ -10,7 +10,3 @@ export function publicApiBase() {
   }
   return '/api/v1';
 }
-
-export function publicSiteHost() {
-  return typeof window === 'undefined' ? '' : window.location.host;
-}

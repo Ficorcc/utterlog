@@ -25,14 +25,6 @@ function normalizeXUrl(url: string) {
     .replace(/^https?:\/\/mobile\.twitter\.com\//i, 'https://twitter.com/');
 }
 
-function parseXPost(url: string) {
-  const match = normalizeXUrl(url).match(/^https?:\/\/(?:www\.|mobile\.)?twitter\.com\/([^/?#]+)\/status(?:es)?\/(\d+)/i);
-  return {
-    user: match?.[1] || '',
-    statusId: match?.[2] || '',
-  };
-}
-
 function ensureTwitterWidgetsScript() {
   const existing = document.querySelector<HTMLScriptElement>(`script[src="${TWITTER_WIDGET_SCRIPT}"]`);
   if (existing) return existing;

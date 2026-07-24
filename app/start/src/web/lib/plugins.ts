@@ -42,20 +42,6 @@ const pluginRegistry: Record<string, PluginManifest> = {
 };
 
 /**
- * 获取所有已注册的插件
- */
-export function getAllPlugins(): Record<string, PluginManifest> {
-  return pluginRegistry;
-}
-
-/**
- * 获取指定插件的 manifest
- */
-export function getPlugin(name: string): PluginManifest | undefined {
-  return pluginRegistry[name];
-}
-
-/**
  * 解析 active_plugins 选项值为数组
  */
 export function parseActivePlugins(raw: string | undefined): string[] {

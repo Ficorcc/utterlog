@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { momentsApi, mediaApi, geoApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { useThemeContext } from '@/lib/theme-context';
-import { datePartsInTimeZone, formatDateInTimeZone, formatDateTimeInTimeZone } from '@/lib/timezone';
+import { datePartsInTimeZone } from '@/lib/timezone';
 import PageTitle from '@/components/blog/PageTitle';
 import Lightbox from '@/components/blog/Lightbox';
 import ResilientImage from '@/components/blog/ResilientImage';
@@ -18,15 +18,6 @@ let momentsPageCache: {
   tags: string[];
   fetchedAt: number;
 } | null = null;
-
-function formatTime(ts: number, timeZone: string) {
-  if (!ts) return null;
-  const parts = datePartsInTimeZone(ts, timeZone);
-  const month = formatDateInTimeZone(ts, 'zh-CN', { month: 'long' }, timeZone);
-  const day = parts.day;
-  const time = formatDateTimeInTimeZone(ts, 'zh-CN', { hour: '2-digit', minute: '2-digit' }, timeZone);
-  return { month, day, time };
-}
 
 function relativeTime(ts: number) {
   if (!ts) return '';

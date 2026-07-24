@@ -41,12 +41,6 @@ const osMap: Record<string, string> = {
 const osFaMap: Record<string, string> = {
 };
 
-const deviceFaMap: Record<string, string> = {
-  desktop: 'fa-solid fa-desktop',
-  mobile: 'fa-solid fa-mobile-screen',
-  tablet: 'fa-solid fa-tablet-screen-button',
-};
-
 function normalize(name: string): string {
   return (name || '').toLowerCase().trim();
 }
@@ -75,11 +69,4 @@ export function OSIcon({ name, size = 16 }: { name: string; size?: number }) {
     return <i className={fa} style={{ fontSize: size - 2, color: 'var(--color-text-dim)' }} />;
   }
   return <i className="fa-regular fa-microchip" style={{ fontSize: size - 2, color: 'var(--color-text-dim)' }} />;
-}
-
-/** 设备图标 */
-export function DeviceIcon({ type, size = 16 }: { type: string; size?: number }) {
-  const key = normalize(type);
-  const fa = deviceFaMap[key] || 'fa-solid fa-desktop';
-  return <i className={fa} style={{ fontSize: size - 2, color: 'var(--color-text-dim)' }} />;
 }

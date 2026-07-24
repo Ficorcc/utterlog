@@ -151,10 +151,6 @@ export function getThemeManifest(themeName: string): ThemeManifest {
 
 export const DEFAULT_THEME = DEFAULT_BLOG_THEME;
 
-export function getAllManifests(): Record<string, ThemeManifest> {
-  return manifestRegistry;
-}
-
 export function getAvailableThemes(): string[] {
   return Object.keys(themeRegistry);
 }

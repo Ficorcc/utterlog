@@ -144,11 +144,6 @@ function parseUA(ua?: string): { os: string; osVer: string; browser: string; bro
   return { os, osVer, browser, browserVer };
 }
 
-// 取主版本号 "147.0.7727.56" → "147"
-function majorVer(ver: string): string {
-  return ver.split('.')[0] || ver;
-}
-
 function buildCommentTree(comments: Comment[]): Comment[] {
   const map = new Map<number, Comment>();
   const roots: Comment[] = [];
@@ -232,9 +227,7 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
   const { timeZone } = useThemeContext();
   // Prefer Client Hints (accurate) over UA parsing (frozen versions)
   const os = comment.os_name || ua.os;
-  const osVer = comment.os_version || ua.osVer;
   const browser = comment.browser_name || ua.browser;
-  const browserVer = comment.browser_version || ua.browserVer;
   const isReply = depth > 0;
 
   const handleEditSubmit = async () => {

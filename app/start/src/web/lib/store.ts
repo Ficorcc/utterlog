@@ -232,19 +232,6 @@ export const useThemeStore = create<ThemeState>()(
   )
 );
 
-// Sidebar state
-interface SidebarState {
-  isOpen: boolean;
-  toggle: () => void;
-  close: () => void;
-}
-
-export const useSidebarStore = create<SidebarState>((set) => ({
-  isOpen: true,
-  toggle: () => set((state) => ({ isOpen: !state.isOpen })),
-  close: () => set({ isOpen: false }),
-}));
-
 // Global music player state
 export interface GlobalSong {
   id: string; title: string; artist: string; cover: string; url: string;

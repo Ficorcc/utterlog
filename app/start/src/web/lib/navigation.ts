@@ -25,12 +25,6 @@ export function usePathname() {
   return typeof window === 'undefined' ? '/' : window.location.pathname;
 }
 
-export function useSearchParams() {
-  const searchParams = useContext(SearchParamsContext);
-  if (searchParams) return searchParams;
-  return new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search);
-}
-
 export function useRouter() {
   return {
     push: (href: string) => { if (typeof window !== 'undefined') window.location.assign(href); },

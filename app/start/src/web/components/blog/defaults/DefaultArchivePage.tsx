@@ -17,25 +17,9 @@ function timeAgo(ts: number | string): string {
   return `${Math.floor(diff / 31536000)} 年前`;
 }
 
-const MODULE_COLORS = [
-  '#E8A735', '#2196F3', '#4CAF50', '#FF5722', '#9C27B0',
-  '#00BCD4', '#FF9800', '#607D8B', '#E91E63', '#3F51B5',
-];
-
 function getCatIcon(name: string, icon?: string) {
   if (icon && (icon.startsWith('fa-') || icon.startsWith('fa '))) return icon;
   return 'fa-sharp fa-light fa-folder';
-}
-
-function renderCatIcon(icon: string | undefined, size = 18) {
-  const cls = getCatIcon('', icon);
-  if (icon && icon.startsWith('<svg')) {
-    return <span style={{ width: size, height: size, display: 'inline-flex' }} dangerouslySetInnerHTML={{ __html: icon.replace(/<svg/, `<svg width="${size}" height="${size}"`) }} />;
-  }
-  if (icon && (icon.startsWith('http') || icon.startsWith('/'))) {
-    return <img src={icon} alt="" style={{ width: size, height: size, objectFit: 'contain' }} />;
-  }
-  return <i className={cls} style={{ fontSize: size, color: '#fff' }} />;
 }
 
 function getLatestPostPerCategory(posts: any[], categories: any[]): Record<number, any> {
