@@ -223,22 +223,28 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* 次要指标：一行小字，可点的跳到对应管理页 */}
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 px-1 text-xs text-muted-foreground">
+        {/* 次要指标：四等分一条，跟上面的卡片同一套边框/底色，不然裸着一行
+            小字飘在卡片下面像没做完。可点的跳对应管理页。 */}
+        <div className="grid grid-cols-4 divide-x divide-border border border-border bg-card shadow-sm">
           {secondaryStats.map((s) => {
             const body = (
               <>
-                <s.Icon className="size-3.5" />
-                <span>{s.label}</span>
-                <span className="font-semibold text-foreground">{loading ? '—' : s.value}</span>
+                <s.Icon className="size-3.5 shrink-0 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">{s.label}</span>
+                <span className="text-xs-plus font-semibold text-foreground">{loading ? '—' : s.value}</span>
               </>
             );
             return s.href ? (
-              <button key={s.label} type="button" onClick={() => navigate(s.href!)} className="inline-flex items-center gap-1.5 bg-transparent hover:text-primary">
+              <button
+                key={s.label}
+                type="button"
+                onClick={() => navigate(s.href!)}
+                className="inline-flex items-center justify-center gap-1.5 bg-transparent px-4 py-2.5 transition-colors hover:bg-muted/50 hover:text-primary"
+              >
                 {body}
               </button>
             ) : (
-              <span key={s.label} className="inline-flex items-center gap-1.5">{body}</span>
+              <span key={s.label} className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5">{body}</span>
             );
           })}
         </div>
