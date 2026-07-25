@@ -6,7 +6,6 @@ import { exec, nowUnix, one } from '../db/helpers';
 import { optionValue } from '../db/options';
 import { lookupGeoIp } from '../geoip';
 import { requestIp } from '../request-ip';
-import { parsePermalinkPath } from './permalink';
 import { ephemeral } from '../store/ephemeral';
 
 export { requestIp };
@@ -43,17 +42,24 @@ export function readVisitorFromRequest(request: Request): ReadVisitor {
 /**
  * 文章阅读量的唯一写入口：文章详情页 SSR 读取时同步 +1，渲染出来的数字
  * 就是这次访问之后的值。放在服务端而不是浏览器 /track 里，是因为 /track
- * 要等页面渲染完才发出，当前这一屏永远看不到自己这次访问，叠上公开页
- * 缓存后表现就是「数字长时间不动」。
+ * 要等页面渲染完才发出，当前这一屏永远看不到自己这次访问。
  *
- * /track 那条链路继续负责访客明细、全站 PV 和文章日维度统计，不再碰
- * view_count —— 两边各写各的字段，不会双计。
+ * 口径是「页面加载量」，跟 PV 一样：点进来算一次，刷新一次算一次，同一个
+ * 人反复看也一次次累加，不做时间窗口去重 —— 站长要的就是这篇文章被打开
+ * 过多少次。唯一挡掉的是爬虫 UA。想看「多少人看过」用 unique_visitors，
+ * 那一列仍然按 (读者, 文章, 天) 去重。
+ *
+ * 之所以敢不去重：站内指向文章的链接一律走 PostLink（prefetch 默认关），
+ * 鼠标划过不会触发 loader；公开页也没挂 CDN 缓存。所以一次 +1 就对应一次
+ * 真实的页面加载。往后要给文章链接开预取的话，这里得跟着重新考虑。
+ *
+ * 累计数（posts.view_count）和按天明细（stats_post_daily）都只从这里写，
+ * 同一次判定写两处，所以两个数字必然对得上：按天明细求和等于本站自己数
+ * 出来的阅读量，view_count 在此之上还含 WordPress 等外站导入时带进来的
+ * 历史基线。/track 不再碰任何文章维度的统计，只负责访客明细和全站 PV。
  */
 export async function bumpPostViewOnRead(postId: number, visitor: ReadVisitor) {
   if (!(postId > 0) || isBotUa(visitor.ua)) return false;
-  const dedupKey = analyticsKey('postread', `${visitor.ip}\0${visitor.ua}\0${postId}`);
-  if (await ephemeral.get(dedupKey)) return false;
-  await ephemeral.set(dedupKey, '1', PAGE_VIEW_DEDUP_SECONDS);
   const updated = await exec(
     `update ${table('posts')} set view_count=coalesce(view_count,0)+1 where id=$1 and type='post' and status='publish'`,
     [postId],
@@ -61,7 +67,39 @@ export async function bumpPostViewOnRead(postId: number, visitor: ReadVisitor) {
     console.error('[analytics] post view bump failed', error);
     return null;
   });
-  return Number((updated as { count?: number } | null)?.count || 0) > 0;
+  if (!(Number((updated as { count?: number } | null)?.count || 0) > 0)) return false;
+  await recordPostReadDaily(postId, `${visitor.ip}\0${visitor.ua}`);
+  return true;
+}
+
+/**
+ * 按天明细跟着累计数一起落库。views 和累计数同步 +1（每次加载都算），
+ * unique_visitors 则按 (读者, 文章, 天) 去重，所以同一个人今天刷十次是
+ * views +10、unique_visitors +1。
+ *
+ * SSR 阶段拿不到浏览器 localStorage 里的 visitor_id（那是 /track 才有的
+ * 东西），所以读者身份按 ip+ua 的哈希算 —— 换来的是不依赖 JS，装了拦截
+ * 插件的访问也照样算进来。
+ *
+ * 明细写失败不回滚累计数：卡片上的数字比一张统计表更要紧，老库缺表
+ * 或缺唯一索引时不该把阅读量一起拖掉。
+ */
+async function recordPostReadDaily(postId: number, readerKey: string) {
+  const date = await siteDate();
+  const visitorKey = createHash('sha256').update(readerKey).digest('hex').slice(0, 40);
+  const firstToday = await one<{ inserted: boolean }>(
+    `insert into ${table('stats_visitor_post_dates')} (visitor_id, post_id, date) values ($1,$2,$3::date)
+     on conflict (visitor_id, post_id, date) do update set visitor_id=excluded.visitor_id returning (xmax=0) as inserted`,
+    [visitorKey, postId, date],
+  ).catch(() => null);
+  await exec(
+    `insert into ${table('stats_post_daily')} (post_id, date, views, unique_visitors) values ($1,$2::date,1,$3)
+     on conflict (post_id, date) do update set views=${table('stats_post_daily')}.views+1,
+       unique_visitors=${table('stats_post_daily')}.unique_visitors+excluded.unique_visitors`,
+    [postId, date, firstToday?.inserted ? 1 : 0],
+  ).catch((error) => {
+    console.error('[analytics] post daily stats write failed', error);
+  });
 }
 
 async function pageViewGate(identity: string, ip: string, path: string, now: number) {
@@ -155,31 +193,6 @@ async function siteDate(value = new Date()) {
   }
 }
 
-async function postIdFromTrackedPath(path: string) {
-  const template = await optionValue('permalink_structure', '/posts/%postname%');
-  const parsed = parsePermalinkPath(path, template);
-  if (parsed?.id) return parsed.id;
-  if (parsed?.displayId) {
-    const row = await one<{ id: number }>(
-      `select id from ${table('posts')} where display_id = $1 and type = 'post' and status = 'publish' limit 1`, [parsed.displayId],
-    ).catch(() => null);
-    if (row?.id) return row.id;
-  }
-  if (parsed?.slug) {
-    const row = await one<{ id: number }>(
-      `select id from ${table('posts')} where slug = $1 and type = 'post' and status = 'publish' limit 1`, [parsed.slug],
-    ).catch(() => null);
-    if (row?.id) return row.id;
-  }
-  const slugMatch = path.match(/^\/posts\/([^/?#]+)/);
-  if (slugMatch) {
-    const slug = decodeURIComponent(slugMatch[1]);
-    const row = await one<{ id: number }>(`select id from ${table('posts')} where slug = $1 and type = 'post' limit 1`, [slug]).catch(() => null);
-    if (row?.id) return row.id;
-  }
-  return Number(path.match(/^\/(?:p|post)\/(\d+)(?:[/?#]|$)/)?.[1] || 0);
-}
-
 async function enrichAccessGeo(logId: number, ip: string) {
   if (!logId) return;
   try {
@@ -235,7 +248,6 @@ export async function trackPageView(request: Request, input: Record<string, unkn
     ['browser', parsed.browser || 'Unknown', ''], ['os', parsed.os || 'Unknown', ''], ['device', parsed.device || 'Unknown', ''],
   ];
   if (geo.countryName || geo.country) dimensions.push(['country', geo.countryName || geo.country, geo.country || '']);
-  const trackedPostId = Number(input.post_id || await postIdFromTrackedPath(path) || 0);
   let accessLogId = 0;
   try {
     await sql.begin(async (tx) => {
@@ -277,25 +289,6 @@ export async function trackPageView(request: Request, input: Record<string, unkn
   } catch (error) {
     console.error('[analytics] track write failed', error);
     return { tracked: false, reason: 'write_failed' };
-  }
-  // 文章日维度统计单独成事务：这几张表任一出问题（老库缺表 / 缺唯一索引）
-  // 都不该把访客明细和全站 PV 一起回滚掉。
-  if (trackedPostId > 0) {
-    await sql.begin(async (tx) => {
-      const postVisitorRows = await tx.unsafe<{ inserted: boolean }[]>(
-        `insert into ${table('stats_visitor_post_dates')} (visitor_id, post_id, date) values ($1,$2,$3::date)
-         on conflict (visitor_id, post_id, date) do update set visitor_id=excluded.visitor_id returning (xmax=0) as inserted`,
-        [visitor, trackedPostId, today],
-      );
-      await tx.unsafe(
-        `insert into ${table('stats_post_daily')} (post_id, date, views, unique_visitors) values ($1,$2::date,1,$3)
-         on conflict (post_id, date) do update set views=${table('stats_post_daily')}.views+1,
-           unique_visitors=${table('stats_post_daily')}.unique_visitors+excluded.unique_visitors`,
-        [trackedPostId, today, postVisitorRows[0]?.inserted ? 1 : 0],
-      );
-    }).catch((error) => {
-      console.error('[analytics] post daily stats write failed', error);
-    });
   }
   if (accessLogId && (!geo.country || !geo.latitude || !geo.longitude)) void enrichAccessGeo(accessLogId, ip);
   if (visitor) await ephemeral.set(`online:${visitor}`, JSON.stringify({ visitor_id: visitor, ip, path, ts: now,

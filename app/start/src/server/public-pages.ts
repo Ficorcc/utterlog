@@ -217,7 +217,8 @@ function visitorIp() {
 }
 
 // 文章详情页的读取者身份：SSR 拿不到浏览器 localStorage 里的 visitor_id，
-// 用 IP + UA 做 30 秒去重的凭据即可。影视条目不计阅读量，reader 传 null。
+// 用 IP + UA 代替。阅读量本身每次加载都 +1，这个身份只用来算独立访客。
+// 影视条目不计阅读量，reader 传 null。
 function postReader(): ReadVisitor {
   return { ip: visitorIp(), ua: getRequestHeader('user-agent') || '' };
 }

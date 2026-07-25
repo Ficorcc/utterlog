@@ -8,6 +8,7 @@ import {
   isCommentReplyOptedOut,
 } from '../email/comment-reply-unsubscribe';
 import { storeUploadedBytes } from '../media/storage';
+import { siteTotalViews } from '../services/analytics';
 import { callAiText } from './ai';
 
 function parseJsonOption<T>(value: string, fallback: T): T {
@@ -228,10 +229,11 @@ export async function processTelegramWebhookRequest(request: Request) {
     const [posts, comments, views] = await Promise.all([
       one<{ count: string }>(`select count(*)::text as count from ${table('posts')} where type='post' and deleted_at = 0`).catch(() => null),
       one<{ count: string }>(`select count(*)::text as count from ${table('comments')} where status='approved'`).catch(() => null),
-      one<{ count: string }>(`select coalesce(sum(view_count),0)::text as count from ${table('posts')} where deleted_at = 0`).catch(() => null),
+      // 全站浏览量跟后台概览同一个口径，别再用 sum(posts.view_count)。
+      siteTotalViews().catch(() => 0),
     ]);
     await telegramApi('sendMessage', botToken, { chat_id: chatId,
-      text: `数据报告\n\n文章: ${posts?.count || 0}\n评论: ${comments?.count || 0}\n浏览: ${views?.count || 0}` }).catch(() => {});
+      text: `数据报告\n\n文章: ${posts?.count || 0}\n评论: ${comments?.count || 0}\n浏览: ${views}` }).catch(() => {});
     return null;
   }
   if (text.startsWith('/ai ')) {

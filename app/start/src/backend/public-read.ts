@@ -4,6 +4,7 @@ import { exec, intParam, many, nowUnix, one } from './db/helpers';
 import { optionValue } from './db/options';
 import { parsePermalinkPath } from './services/permalink';
 import { readOptionMap } from './services/options';
+import { siteTotalViews } from './services/analytics';
 import { bumpPostViewOnRead, type ReadVisitor } from './services/tracking';
 import { defaultWeatherLocation, fetchVisitorWeather, visitorWeatherLocation, type VisitorWeatherResponse } from './weather';
 
@@ -214,7 +215,7 @@ export async function listMetas(type: MetaType, includeEmpty = false) {
 }
 
 export async function archiveStatsPayload() {
-  const [posts, comments, words, firstPost, accessViews, storedViews, heatmap, archives] = await Promise.all([
+  const [posts, comments, words, firstPost, totalViews, heatmap, archives] = await Promise.all([
     one<{ count: string }>(
       `select count(*)::text as count from ${table('posts')} where status = 'publish' and type = 'post'`,
     ).catch(() => null),
@@ -229,8 +230,7 @@ export async function archiveStatsPayload() {
       `select coalesce(min(extract(epoch from coalesce(published_at, to_timestamp(created_at)))::bigint), 0)::text as first_at
        from ${table('posts')} where status = 'publish' and type = 'post'`,
     ).catch(() => null),
-    one<{ count: string }>(`select count(*)::text as count from ${table('access_logs')}`).catch(() => null),
-    one<{ total: string }>(`select coalesce(total_views,0)::text as total from ${table('stats_global')} where id = 1`).catch(() => null),
+    siteTotalViews(),
     many<{ date: string; count: number }>(
       `select to_char(coalesce(published_at, to_timestamp(created_at)), 'YYYY-MM-DD') as date,
               count(*)::int as count
@@ -257,7 +257,7 @@ export async function archiveStatsPayload() {
     comment_count: Number(comments?.count || 0),
     word_count: Number(words?.total || 0),
     days,
-    total_views: Math.max(Number(accessViews?.count || 0), Number(storedViews?.total || 0)),
+    total_views: totalViews,
     heatmap,
     archives,
   };

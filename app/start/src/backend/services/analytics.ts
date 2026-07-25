@@ -65,6 +65,48 @@ async function rollupWindow(period: AnalyticsPeriod) {
     cutoffDate: await siteDate(new Date(cutoffUnix * 1000)) };
 }
 
+/**
+ * 全站累计浏览量的唯一口径。stats_global 是 /track 一次次累加出来的权威值，
+ * 但升级前没有这张表的老库可能还是 0，这时退回 access_logs 的行数兜底。
+ *
+ * 别再用 sum(posts.view_count) 充当这个指标：那是文章阅读量，还含外站导入
+ * 带进来的历史基线，跟「全站被访问了多少次」不是一回事。
+ */
+export async function siteTotalViews() {
+  const [stored, logged] = await Promise.all([
+    one<{ total: string }>(`select coalesce(total_views,0)::text as total from ${table('stats_global')} where id = 1`).catch(() => null),
+    one<{ count: string }>(`select count(*)::text as count from ${table('access_logs')}`).catch(() => null),
+  ]);
+  return Math.max(Number(stored?.total || 0), Number(logged?.count || 0));
+}
+
+/**
+ * 文章阅读排行 / 趋势：读 stats_post_daily，也就是 bumpPostViewOnRead 按天
+ * 写下的那份明细，跟文章卡片上的数字同源。period 走统计页那套时间窗口。
+ */
+export async function analyticsPostViews(period: AnalyticsPeriod, limit = 20) {
+  const startUnix = await periodStart(period);
+  const params: unknown[] = [];
+  let dateWhere = '';
+  if (startUnix > 0) {
+    params.push(await siteDate(new Date(startUnix * 1000)));
+    dateWhere = `where d.date >= $${params.length}::date`;
+  }
+  params.push(Math.min(100, Math.max(1, Math.floor(limit))));
+  const rows = await many<{ id: number; title: string; slug: string; display_id: number; views: string; unique_visitors: string; view_count: string }>(
+    `select p.id, coalesce(p.title,'') as title, coalesce(p.slug,'') as slug, coalesce(p.display_id,0) as display_id,
+            coalesce(sum(d.views),0)::text as views, coalesce(sum(d.unique_visitors),0)::text as unique_visitors,
+            coalesce(p.view_count,0)::text as view_count
+     from ${table('stats_post_daily')} d join ${table('posts')} p on p.id = d.post_id
+     ${dateWhere}
+     group by p.id, p.title, p.slug, p.display_id, p.view_count
+     order by sum(d.views) desc, p.id desc limit $${params.length}`, params,
+  ).catch(() => []);
+  return rows.map((row) => ({ id: Number(row.id), title: row.title, slug: row.slug,
+    display_id: Number(row.display_id || 0), views: Number(row.views || 0),
+    unique_visitors: Number(row.unique_visitors || 0), total_views: Number(row.view_count || 0) }));
+}
+
 async function visitsForPeriod(period: AnalyticsPeriod, global: { views: string; uniques: string } | null) {
   if (period === 'all' && global) return Number(global.views || 0);
   if (!['year', '365d'].includes(period)) {

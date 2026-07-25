@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { analyticsBreakdown, analyticsGeoIp, analyticsLogs, analyticsMap, analyticsPeriod, AnalyticsServiceError, analyticsVisitors, onlineVisitors, requestIp } from '@backend/services/analytics';
+import { analyticsBreakdown, analyticsGeoIp, analyticsLogs, analyticsMap, analyticsPeriod, analyticsPostViews, AnalyticsServiceError, analyticsVisitors, onlineVisitors, requestIp } from '@backend/services/analytics';
 import { apiFail, apiOk, apiPaginated, withAdmin } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/analytics/$action')({ server: { handlers: {
@@ -17,6 +17,9 @@ export const Route = createFileRoute('/api/v1/analytics/$action')({ server: { ha
       if (params.action === 'logs') {
         const result = await analyticsLogs({ page: Number(query.get('page') || 1), perPage: Number(query.get('per_page') || 20) });
         return apiPaginated(result.rows, result.meta);
+      }
+      if (params.action === 'posts') {
+        return apiOk({ posts: await analyticsPostViews(analyticsPeriod(query.get('period')), Number(query.get('limit') || 20)) });
       }
       if (params.action === 'geoip') return apiOk(await analyticsGeoIp(query.get('ip') || requestIp(request), query.get('provider') || ''));
       if (params.action === 'map') return apiOk(await analyticsMap(analyticsPeriod(query.get('period'))));
