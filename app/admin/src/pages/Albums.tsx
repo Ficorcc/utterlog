@@ -14,6 +14,7 @@ import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
   Textarea,
 } from '@/components/ui/shadcn';
+import { RowAction } from '@/components/ui/row-actions';
 import { cn } from '@/lib/utils';
 
 interface Album {
@@ -190,16 +191,15 @@ export default function AlbumsPage() {
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-muted-foreground">{album.photo_count} 张照片</span>
                   <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon-sm" className={cn(album.status === 'private' ? 'text-amber-600 hover:text-amber-600 dark:text-amber-400 dark:hover:text-amber-400' : 'text-muted-foreground hover:text-foreground')}
-                      onClick={() => toggleStatus(album)}
+                    <RowAction
+                      icon={album.status === 'public' ? EyeOff : Eye}
+                      tone="warning"
+                      active={album.status === 'private'}
                       title={album.status === 'public' ? '设为私有' : '公开'}
-                    >
-                      {album.status === 'public' ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                    </Button>
-                    <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary" onClick={() => openEdit(album)} title="编辑"><Pencil className="size-4" /></Button>
-                    <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(album.id)} title="删除"><Trash2 className="size-4" /></Button>
+                      onClick={() => toggleStatus(album)}
+                    />
+                    <RowAction icon={Pencil} title="编辑" onClick={() => openEdit(album)} />
+                    <RowAction icon={Trash2} tone="danger" title="删除" onClick={() => setDeleteId(album.id)} />
                   </div>
                 </div>
               </div>

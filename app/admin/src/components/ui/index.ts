@@ -6,6 +6,7 @@ export { Input } from './input';
 export { Modal } from './modal';
 export { ConfirmDialog } from './confirm-dialog';
 export { CoverInput } from './CoverInput';
+export { RowAction, RowActionGroup, RowActions, rowActionPresets, type RowActionTone } from './row-actions';
 export { default as Spinner } from './Spinner';
 export {
   AdminToolbar,
@@ -16,5 +17,4 @@ export {
   MetricCard,
   MetricGrid,
   RatingStars,
-  RowActions,
 } from './admin-shared';

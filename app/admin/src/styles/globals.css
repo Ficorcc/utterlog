@@ -78,6 +78,22 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* 阴影只保留两档（§9.1），全部收敛到这里。
+     Tailwind 默认的 shadow-lg 是 `0 10px 15px -3px rgb(0 0 0/.1)`、
+     shadow-xl 更是 20px 扩散 —— 浮层用它们会明显发灰发脏。站内 13 处
+     下拉/弹窗/对话框都写着 shadow-lg|xl，与其逐个改调用点，不如把档位
+     本身压到规范值：sm/md 走 level 1，lg/xl/2xl 走 level 2，再重的没有。
+
+     写字面值而不是 var(--shadow-1)：那两个变量定义在文件后面的 :root 里，
+     @theme inline 是编译期指令，引用后定义的变量解析不出来。 */
+  --shadow-2xs: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.10);
+  --shadow-xl: 0 4px 12px rgba(0, 0, 0, 0.10);
+  --shadow-2xl: 0 4px 12px rgba(0, 0, 0, 0.10);
 }
 
 /* Scrollbar: reserve space, track matches background, thumb hidden until scroll */
@@ -729,7 +745,7 @@ body {
 
 /* Archive category card — background icon hover */
 .archive-cat-card { transition: box-shadow 0.3s ease; }
-.archive-cat-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.archive-cat-card:hover { box-shadow: var(--shadow-2); }
 .archive-cat-card:hover > i:first-child {
   transform: translateY(-50%) scale(1.25);
   opacity: 0.1;

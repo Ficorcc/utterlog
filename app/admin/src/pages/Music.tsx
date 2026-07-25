@@ -15,6 +15,7 @@ import {
   Textarea,
 } from '@/components/ui/shadcn';
 import { CoverInput, RatingStars } from '@/components/ui';
+import { RowAction } from '@/components/ui/row-actions';
 import { ImportUrlModal } from '@/components/ui/import-url-modal';
 import { cn } from '@/lib/utils';
 
@@ -239,11 +240,15 @@ export default function MusicPage() {
                   {{ netease: '网易云', tencent: 'QQ', kugou: '酷狗', kuwo: '酷我', baidu: '百度', local: '本地' }[item.platform as string] || item.platform || '本地'}
                 </span>
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground" onClick={() => toggleVisibility(item)} title={item.status === 'publish' ? '隐藏' : '显示'}>
-                    {item.status === 'publish' ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
-                  </Button>
-                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary" onClick={() => openEdit(item)} title="编辑"><Pencil className="size-4" /></Button>
-                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(item.id)} title="删除"><Trash2 className="size-4" /></Button>
+                  <RowAction
+                    icon={item.status === 'publish' ? Eye : EyeOff}
+                    tone="warning"
+                    active={item.status !== 'publish'}
+                    title={item.status === 'publish' ? '隐藏' : '显示'}
+                    onClick={() => toggleVisibility(item)}
+                  />
+                  <RowAction icon={Pencil} title="编辑" onClick={() => openEdit(item)} />
+                  <RowAction icon={Trash2} tone="danger" title="删除" onClick={() => setDeleteId(item.id)} />
                 </div>
               </div>
             </div>

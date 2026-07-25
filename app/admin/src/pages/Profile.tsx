@@ -6,6 +6,7 @@ import {
   Button, Input, Label, Textarea, Card, Badge, ConfirmDialog,
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/shadcn';
+import { RowAction } from '@/components/ui/row-actions';
 import {
   Globe, Plus, QrCode, Eraser, X, ShieldCheck, ShieldOff,
   TriangleAlert, Copy, KeyRound, Fingerprint, Trash2, Save, Loader2,
@@ -768,15 +769,12 @@ export default function ProfilePage() {
                       {pk.last_used_at > 0 && <> · {t('admin.profile.passkeyLastUsed', '最后使用 {date}', { date: formatWithAdminTimeZone(new Date(pk.last_used_at * 1000), locale || 'zh-CN', { year: 'numeric', month: 'short', day: 'numeric' }) })}</>}
                     </p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    className="text-muted-foreground hover:text-destructive"
-                    onClick={() => setDeletePasskeyId(pk.id)}
+                  <RowAction
+                    icon={Trash2}
+                    tone="danger"
                     title={t('admin.common.delete', '删除')}
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
+                    onClick={() => setDeletePasskeyId(pk.id)}
+                  />
                 </div>
               ))}
             </div>

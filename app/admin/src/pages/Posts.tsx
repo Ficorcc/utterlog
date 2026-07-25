@@ -13,6 +13,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@/components/ui/shadcn';
+import { RowAction } from '@/components/ui/row-actions';
 import { cn, formatDate } from '@/lib/utils';
 import { usePostsToolbar } from '@/layouts/PostsLayout';
 import { usePageLoading } from '@/layouts/DashboardLayout';
@@ -370,22 +371,21 @@ export default function PostsPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary" title={t('admin.common.edit', '编辑')} onClick={() => navigate(`/posts/edit/${row.id}`)}><Pencil className="size-4" /></Button>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          className={cn('hover:text-primary', row.status === 'draft' ? 'text-primary' : 'text-muted-foreground')}
+                        <RowAction icon={Pencil} title={t('admin.common.edit', '编辑')} onClick={() => navigate(`/posts/edit/${row.id}`)} />
+                        <RowAction
+                          icon={FileText}
+                          active={row.status === 'draft'}
                           title={row.status === 'draft' ? t('admin.posts.action.publishDraft', '取消草稿（发布）') : t('admin.posts.action.moveToDrafts', '移至草稿箱')}
                           onClick={() => togglePostStatus(row)}
-                        ><FileText className="size-4" /></Button>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          className={cn('hover:text-amber-600 dark:hover:text-amber-400', row.status === 'private' ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground')}
+                        />
+                        <RowAction
+                          icon={EyeOff}
+                          tone="warning"
+                          active={row.status === 'private'}
                           title={row.status === 'private' ? t('admin.posts.action.publishPrivate', '取消私密（发布）') : t('admin.posts.action.setPrivate', '设为私密')}
                           onClick={() => togglePostPrivate(row)}
-                        ><EyeOff className="size-4" /></Button>
-                        <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(row.id)}><Trash2 className="size-4" /></Button>
+                        />
+                        <RowAction icon={Trash2} tone="danger" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(row.id)} />
                       </div>
                     </TableCell>
                   </TableRow>

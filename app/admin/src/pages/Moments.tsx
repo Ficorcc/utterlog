@@ -14,6 +14,7 @@ import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
   Textarea,
 } from '@/components/ui/shadcn';
+import { RowAction } from '@/components/ui/row-actions';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import { usePageBadge } from '@/layouts/DashboardLayout';
@@ -395,8 +396,8 @@ export default function MomentsPage() {
                   </div>
                 </div>
                 <div className="ml-3 flex shrink-0 gap-1">
-                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary" onClick={() => openEdit(m)} title={t('admin.common.edit', '编辑')}><Pencil className="size-4" /></Button>
-                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(m.id)} title={t('admin.common.delete', '删除')}><Trash2 className="size-4" /></Button>
+                  <RowAction icon={Pencil} title={t('admin.common.edit', '编辑')} onClick={() => openEdit(m)} />
+                  <RowAction icon={Trash2} tone="danger" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(m.id)} />
                 </div>
               </div>
             </div>

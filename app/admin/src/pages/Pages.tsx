@@ -15,6 +15,7 @@ import {
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/shadcn';
+import { RowAction } from '@/components/ui/row-actions';
 import { usePageLoading } from '@/layouts/DashboardLayout';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
@@ -367,24 +368,16 @@ export default function PagesPage() {
                     <div className="flex justify-end gap-1">
                       {row.kind === 'builtin' ? (
                         (row.page.contentKey || row.page.settingsKey) ? (
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            className="text-muted-foreground hover:text-foreground"
+                          <RowAction
+                            icon={Pencil}
                             title={row.page.settingsKey === 'coding' ? '配置 Coding' : row.page.key === 'page_about' ? '编辑关于页' : t('admin.pages.editContent', '编辑内容')}
                             onClick={() => row.page.settingsKey === 'coding' ? openCodingSettings() : openContentEditor(row.page.contentKey!)}
-                          >
-                            <Pencil className="size-4" />
-                          </Button>
+                          />
                         ) : null
                       ) : (
                         <>
-                          <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground" title={t('admin.common.edit', '编辑')} onClick={() => navigate(`/pages/edit/${row.page.id}`)}>
-                            <Pencil className="size-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(row.page.id)}>
-                            <Trash2 className="size-4" />
-                          </Button>
+                          <RowAction icon={Pencil} title={t('admin.common.edit', '编辑')} onClick={() => navigate(`/pages/edit/${row.page.id}`)} />
+                          <RowAction icon={Trash2} tone="danger" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(row.page.id)} />
                         </>
                       )}
                     </div>

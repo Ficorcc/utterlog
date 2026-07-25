@@ -5,6 +5,7 @@ import { pluginsApi, type ExtensionManifest } from '@/lib/api';
 import {
   Button, Badge, Card, ConfirmDialog, EmptyState, LoadingState,
 } from '@/components/ui/shadcn';
+import { RowAction } from '@/components/ui/row-actions';
 import { cn } from '@/lib/utils';
 
 export default function Plugins() {
@@ -198,15 +199,13 @@ export default function Plugins() {
                   )}
 
                   {!plugin.builtin && (
-                    <Button
-                      variant="ghost"
-                      size="icon-xs"
-                      className=".5 text-muted-foreground hover:text-destructive"
-                      onClick={() => setDeleteId(plugin.id)}
+                    <RowAction
+                      icon={Trash2}
+                      tone="danger"
+                      size="xs"
                       title="删除"
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
+                      onClick={() => setDeleteId(plugin.id)}
+                    />
                   )}
                 </div>
               </div>

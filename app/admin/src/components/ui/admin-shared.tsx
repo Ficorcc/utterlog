@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Pencil, Trash2, Star, Loader2, Plus } from 'lucide-react';
 import { Button as ShadcnButton } from './shadcn/button';
+import { RowActions } from './row-actions';
 import { Card } from './shadcn/card';
 import { cn } from '@/lib/utils';
 
@@ -72,29 +73,6 @@ export function EmptyPanel({ title = '暂无内容', actionText, onAction }: Emp
   );
 }
 
-interface RowActionsProps {
-  onEdit?: () => void;
-  onDelete?: () => void;
-  editTitle?: string;
-  deleteTitle?: string;
-}
-
-export function RowActions({ onEdit, onDelete, editTitle = '编辑', deleteTitle = '删除' }: RowActionsProps) {
-  return (
-    <div className="flex justify-end gap-1">
-      {onEdit && (
-        <ShadcnButton variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground" title={editTitle} onClick={onEdit}>
-          <Pencil className="size-4" />
-        </ShadcnButton>
-      )}
-      {onDelete && (
-        <ShadcnButton variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" title={deleteTitle} onClick={onDelete}>
-          <Trash2 className="size-4" />
-        </ShadcnButton>
-      )}
-    </div>
-  );
-}
 
 interface RatingStarsProps {
   value: number;

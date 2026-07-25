@@ -6,6 +6,7 @@ import {
   Button, Card, ConfirmDialog,
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
 } from '@/components/ui/shadcn';
+import { RowAction } from '@/components/ui/row-actions';
 
 export default function BackupPage() {
   const [stats, setStats] = useState<any>(null);
@@ -140,14 +141,12 @@ export default function BackupPage() {
                       <a href={b.url} download>
                         <Button variant="outline" size="sm"><Download /> 下载</Button>
                       </a>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-muted-foreground hover:text-destructive"
+                      <RowAction
+                        icon={Trash2}
+                        tone="danger"
+                        title="删除备份"
                         onClick={() => setDeleteBackupName(b.filename)}
-                      >
-                        <Trash2 />
-                      </Button>
+                      />
                     </div>
                   </TableCell>
                 </TableRow>

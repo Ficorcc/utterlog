@@ -5,6 +5,7 @@ import {
   ChevronUp, ChevronDown, Trash2, Lock, LayoutGrid, ListTree, CornerDownRight, Folder, Loader2,
 } from 'lucide-react';
 import { Button, Card, Input, EmptyState, LoadingState } from '@/components/ui/shadcn';
+import { RowAction } from '@/components/ui/row-actions';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 
@@ -348,17 +349,11 @@ export default function MenusPage() {
               />
               {!isFixedHeroSidebar && (
                 <>
-                  <Button type="button" variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground" onClick={() => setPickerOpen({ target: idx })} title={t('admin.menus.addChildFromExisting', '从已有页面添加子菜单')}>
-                    <ListTree className="size-4" />
-                  </Button>
-                  <Button type="button" variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground" onClick={() => addChild(idx)} title={t('admin.menus.addBlankChild', '添加空白子菜单')}>
-                    <CornerDownRight className="size-4" />
-                  </Button>
+                  <RowAction icon={ListTree} onClick={() => setPickerOpen({ target: idx })} title={t('admin.menus.addChildFromExisting', '从已有页面添加子菜单')} />
+                  <RowAction icon={CornerDownRight} onClick={() => addChild(idx)} title={t('admin.menus.addBlankChild', '添加空白子菜单')} />
                 </>
               )}
-              <Button type="button" variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" onClick={() => removeItem(idx)} title={t('admin.common.delete', '删除')}>
-                <Trash2 className="size-4" />
-              </Button>
+              <RowAction icon={Trash2} tone="danger" onClick={() => removeItem(idx)} title={t('admin.common.delete', '删除')} />
             </div>
 
             {!isFixedHeroSidebar && !!item.children?.length && (
@@ -377,9 +372,7 @@ export default function MenusPage() {
                       onChange={e => updateChild(idx, cIdx, 'href', e.target.value)}
                       placeholder="/path"
                     />
-                    <Button type="button" variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" onClick={() => removeChild(idx, cIdx)} title={t('admin.common.delete', '删除')}>
-                      <Trash2 className="size-4" />
-                    </Button>
+                    <RowAction icon={Trash2} tone="danger" onClick={() => removeChild(idx, cIdx)} title={t('admin.common.delete', '删除')} />
                   </div>
                 ))}
               </div>

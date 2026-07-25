@@ -7,6 +7,7 @@ import {
   Button, Card, Pagination, ConfirmDialog,
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
 } from '@/components/ui/shadcn';
+import { RowAction } from '@/components/ui/row-actions';
 import { usePageLoading } from '@/layouts/DashboardLayout';
 import { formatDate } from '@/lib/utils';
 
@@ -234,15 +235,12 @@ export default function AnnotationsPage() {
                     <span className="text-xs text-muted-foreground">{formatDate(row.created_at)}</span>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="text-muted-foreground hover:text-destructive"
+                    <RowAction
+                      icon={Trash2}
+                      tone="danger"
                       title="删除"
                       onClick={() => setDeleteId(row.id)}
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
+                    />
                   </TableCell>
                 </TableRow>
               ))

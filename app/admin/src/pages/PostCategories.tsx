@@ -9,6 +9,7 @@ import {
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/shadcn';
+import { RowAction } from '@/components/ui/row-actions';
 import { usePostsToolbar } from '@/layouts/PostsLayout';
 import { useI18n } from '@/lib/i18n';
 
@@ -187,8 +188,8 @@ export default function CategoriesPage() {
                   <TableCell className="text-muted-foreground">{row.count ?? 0}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground" onClick={() => openEdit(row)}><Pencil className="size-4" /></Button>
-                      <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(row.id)}><Trash2 className="size-4" /></Button>
+                      <RowAction icon={Pencil} title={t('admin.common.edit', '编辑')} onClick={() => openEdit(row)} />
+                      <RowAction icon={Trash2} tone="danger" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(row.id)} />
                     </div>
                   </TableCell>
                 </TableRow>

@@ -10,6 +10,7 @@ import {
 // shared-component pass (used across Videos/Books/Games/Goods/Movies).
 import { CoverInput } from '@/components/ui';
 import { ImportUrlModal } from '@/components/ui/import-url-modal';
+import { RowAction } from '@/components/ui/row-actions';
 
 function getEmbedUrl(url: string): string {
   if (!url) return '';
@@ -131,8 +132,8 @@ export default function VideosPage() {
                   {item.comment && <p className="mt-1 text-2xs text-muted-foreground">{item.comment}</p>}
                 </div>
                 <div className="flex shrink-0 gap-1">
-                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground" onClick={() => openEdit(item)}><Pencil className="size-4" /></Button>
-                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(item.id)}><Trash2 className="size-4" /></Button>
+                  <RowAction icon={Pencil} title="编辑" onClick={() => openEdit(item)} />
+                  <RowAction icon={Trash2} tone="danger" title="删除" onClick={() => setDeleteId(item.id)} />
                 </div>
               </div>
             </Card>

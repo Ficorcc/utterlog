@@ -13,6 +13,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@/components/ui/shadcn';
+import { RowAction } from '@/components/ui/row-actions';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import { usePageBadge } from '@/layouts/DashboardLayout';
@@ -641,8 +642,8 @@ export default function LinksPage() {
                     <TableCell><span className="block truncate text-xs text-muted-foreground">{groupLabel(link.group_name || DEFAULT_GROUP_KEY)}</span></TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground" title={t('admin.common.edit', '编辑')} onClick={() => openEdit(link)}><Pencil className="size-4" /></Button>
-                        <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(link.id)}><Trash2 className="size-4" /></Button>
+                        <RowAction icon={Pencil} title={t('admin.common.edit', '编辑')} onClick={() => openEdit(link)} />
+                        <RowAction icon={Trash2} tone="danger" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(link.id)} />
                       </div>
                     </TableCell>
                   </TableRow>
@@ -796,13 +797,9 @@ export default function LinksPage() {
                       <span className="text-right text-2xs text-muted-foreground">{t('admin.links.countItems', '{count} 条', { count })}</span>
                       {!isEditing && (
                         <span className="inline-flex justify-end gap-1.5">
-                          <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary" title={t('admin.common.edit', '编辑')} onClick={() => setEditingGroup({ old: group.key, new: group.name })}>
-                            <Pencil className="size-3.5" />
-                          </Button>
+                          <RowAction icon={Pencil} title={t('admin.common.edit', '编辑')} onClick={() => setEditingGroup({ old: group.key, new: group.name })} />
                           {group.key !== DEFAULT_GROUP_KEY && (
-                            <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" title={t('admin.common.delete', '删除')} onClick={() => deleteGroup(group.key)}>
-                              <Trash2 className="size-3.5" />
-                            </Button>
+                            <RowAction icon={Trash2} tone="danger" title={t('admin.common.delete', '删除')} onClick={() => deleteGroup(group.key)} />
                           )}
                         </span>
                       )}

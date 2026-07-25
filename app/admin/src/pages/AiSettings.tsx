@@ -15,6 +15,7 @@ import {
   Tabs, TabsList, TabsTrigger, TabsContent,
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@/components/ui/shadcn';
+import { RowAction } from '@/components/ui/row-actions';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/lib/store';
 import { useI18n } from '@/lib/i18n';
@@ -526,8 +527,8 @@ export default function AiSettingsPage() {
                   <p className="mt-0.5 truncate text-xs text-muted-foreground">{p.model} · {p.endpoint}</p>
                 </div>
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary" title={t('admin.common.edit', '编辑')} onClick={() => setEditing(p)}><Pencil className="size-4" /></Button>
-                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" title={t('admin.common.delete', '删除')} onClick={() => setDeleteProviderId(p.id!)}><Trash2 className="size-4" /></Button>
+                  <RowAction icon={Pencil} title={t('admin.common.edit', '编辑')} onClick={() => setEditing(p)} />
+                  <RowAction icon={Trash2} tone="danger" title={t('admin.common.delete', '删除')} onClick={() => setDeleteProviderId(p.id!)} />
                 </div>
               </Card>
             ))}

@@ -3,6 +3,7 @@ import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Plus, Globe, Trash2 } from 'lucide-react';
 import { Button, Input, Card, LoadingState, EmptyState, ConfirmDialog } from '@/components/ui/shadcn';
+import { RowAction } from '@/components/ui/row-actions';
 import { cn } from '@/lib/utils';
 
 export default function FollowsPage() {
@@ -135,15 +136,12 @@ export default function FollowsPage() {
 
                 {/* Actions */}
                 {activeTab === 'following' && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-muted-foreground hover:text-destructive"
+                  <RowAction
+                    icon={Trash2}
+                    tone="danger"
                     title="取消关注"
                     onClick={() => setUnfollowTarget(siteUrl)}
-                  >
-                    <Trash2 />
-                  </Button>
+                  />
                 )}
               </Card>
             );

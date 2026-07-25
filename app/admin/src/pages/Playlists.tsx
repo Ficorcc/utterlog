@@ -14,6 +14,7 @@ import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
   Textarea,
 } from '@/components/ui/shadcn';
+import { RowAction } from '@/components/ui/row-actions';
 import { cn } from '@/lib/utils';
 
 export default function PlaylistsPage() {
@@ -167,8 +168,9 @@ export default function PlaylistsPage() {
                       <p className="text-xs text-muted-foreground">{p.song_count || 0} 首</p>
                     </div>
                     <div className="flex shrink-0 gap-0.5">
-                      <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary" onClick={(e) => { e.stopPropagation(); openEdit(p); }} title="编辑"><Pencil className="size-3.5" /></Button>
-                      <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteId(p.id); }} title="删除"><Trash2 className="size-3.5" /></Button>
+                      {/* 卡片整体可点击，这两个按钮必须 stopPropagation */}
+                      <RowAction icon={Pencil} title="编辑" onClick={(e) => { e.stopPropagation(); openEdit(p); }} />
+                      <RowAction icon={Trash2} tone="danger" title="删除" onClick={(e) => { e.stopPropagation(); setDeleteId(p.id); }} />
                     </div>
                   </div>
                 </div>
@@ -207,7 +209,7 @@ export default function PlaylistsPage() {
                       <span className="shrink-0 text-2xs text-muted-foreground">
                         {{ netease: '网易云', tencent: 'QQ', kugou: '酷狗', local: '本地' }[s.platform as string] || s.platform || ''}
                       </span>
-                      <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" onClick={() => removeSong(s.id)} title="移除"><X className="size-3.5" /></Button>
+                      <RowAction icon={X} tone="danger" title="移除" onClick={() => removeSong(s.id)} />
                     </div>
                   ))}
                 </div>
