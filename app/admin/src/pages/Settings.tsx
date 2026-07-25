@@ -744,16 +744,27 @@ export default function SettingsPage() {
     <div className="w-full">
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as string)} className="mb-7">
-        <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 overflow-x-auto rounded-none border-b border-border bg-transparent p-0 text-muted-foreground">
+        {/* 选中态直接由 activeTab 判断，不依赖组件库的属性 —— 之前写的
+            data-[selected]: 与 Base UI 实际输出的 aria-selected 对不上，
+            激活样式一直没生效。窄屏横向滚动而不是换行，九个 tab 换行会把
+            表单顶下去半屏。 */}
+        <TabsList className="flex h-auto w-full flex-nowrap justify-start gap-0.5 overflow-x-auto rounded-none border-b border-border bg-transparent p-0 text-muted-foreground [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {tabs.map((tab) => {
             const Icon = tab.icon;
+            const selected = activeTab === tab.id;
             return (
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
-                className="h-10 gap-1.5 rounded-none border-b-2 border-transparent px-4 text-sm font-normal text-muted-foreground hover:bg-muted hover:text-foreground data-[selected]:border-primary data-[selected]:bg-transparent data-[selected]:font-semibold data-[selected]:text-primary data-[selected]:shadow-none"
+                className={cn(
+                  'group relative h-11 shrink-0 gap-1.5 rounded-t-md border-b-2 border-transparent px-3.5',
+                  'text-xs-plus font-normal transition-colors',
+                  selected
+                    ? 'border-primary bg-transparent font-semibold text-primary shadow-none'
+                    : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+                )}
               >
-                <Icon className="size-4" />
+                <Icon className={cn('size-4 transition-colors', selected ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground')} />
                 <span>{tab.label}</span>
               </TabsTrigger>
             );
