@@ -1330,8 +1330,16 @@ div:hover > .comment-hint { opacity: 0.75 !important; }
    layer is purely structural now — the blur/fade is keyed off
    `data-loaded` on the <img> itself, single source of truth. */
 :where([data-blog-image] img, img[data-blog-image]) {
-  will-change: opacity, transform, filter, clip-path;
   backface-visibility: hidden;
+}
+
+/* will-change 只挂在「还没完成加载动画」的图上，加载完就撤掉。
+   之前是无条件挂在每张 blog 图片上且从不移除 —— 首页几十张卡片图会各
+   自长期占一个合成层，白拿一堆 GPU 内存（浏览器文档明确说 will-change
+   不该长期留着）。加载完的图不再有 opacity / filter 过渡要跑，留着没有
+   收益；hover 缩放那点 transform 交给 .cover-zoom 自己的 transition 就够。 */
+:where(img[data-blog-image][data-loaded="0"], [data-blog-image] img[data-loaded="0"]) {
+  will-change: opacity, filter;
 }
 
 /* Soft background while the image is still downloading. Sits on the

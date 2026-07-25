@@ -2,6 +2,51 @@ import type { CSSProperties, ImgHTMLAttributes } from 'react';
 
 const DEFAULT_RANDOM_TEMPLATE = 'https://img.et/800/600?type=landscape&r={id}';
 
+/** 图片效果的默认动画时长，与 globals.css 的 `:root { --img-effect-duration }` 对齐。 */
+export const DEFAULT_IMG_EFFECT_DURATION = 500;
+
+/**
+ * 选项值来自 API 时是字符串（"true"/"false"），历史默认是 bool true。
+ * 空值一律回落到 fallback，其余按「只有明确的否才是关」处理。
+ */
+function asBool(value: unknown, fallback = true): boolean {
+  if (value === undefined || value === null || value === '') return fallback;
+  if (typeof value === 'boolean') return value;
+  const s = String(value).toLowerCase();
+  return !(s === 'false' || s === '0' || s === 'no' || s === 'off');
+}
+
+export interface ImageEffectOptions {
+  image_display_effect?: string;
+  image_display_duration?: string | number;
+  image_lazy_load?: string | boolean;
+  image_lightbox?: string | boolean;
+}
+
+/**
+ * 把「图片处理」那几个后台选项解析成 <html> 上的属性值。
+ *
+ * 这份解析同时喂给 SSR（routes/__root.tsx 直接渲染到 <html>）和客户端
+ * （ImageEffects.tsx 在选项变化后重写），两边必须得出同一个结果 ——
+ * 否则 hydration 时属性一变，CSS 选择器跟着抖一下，图片会闪。
+ *
+ * 尤其重要的是 `data-img-effect` 必须在 SSR 就写出去：fade 的规则挂在
+ * `html[data-img-effect="fade"]` 下，等 useEffect 才补属性的话，首屏
+ * 图片会先按无效果渲染（边下边显示），JS 一 hydrate 才突然套上
+ * blur(20px)，用户看到的是「图出来了 → 糊掉 → 再清晰」。
+ */
+export function imageEffectAttrs(options: ImageEffectOptions | undefined) {
+  const effect = (options?.image_display_effect || 'fade').toString().trim() || 'fade';
+  const parsed = parseInt(String(options?.image_display_duration ?? '').trim(), 10);
+  const duration = Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_IMG_EFFECT_DURATION;
+  return {
+    effect,
+    duration,
+    lazy: asBool(options?.image_lazy_load, true),
+    lightbox: asBool(options?.image_lightbox, true),
+  };
+}
+
 /**
  * Resolve a fallback random-cover URL for a post that has no cover_url.
  *

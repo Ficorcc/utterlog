@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { imageEffectAttrs } from '@/lib/blog-image';
 
 // Applies the admin-configured image display effect to every blog
 // image and tracks load state for the global fade-in. Reads
@@ -15,8 +16,11 @@ import { useEffect } from 'react';
 //     across all blog images when [data-img-lazy="0"] (lazy disabled)
 //
 // Three responsibilities:
-//   1. Stamp <html data-img-effect=…>, --img-effect-duration,
-//      data-img-lazy, data-img-lightbox so consumers can react.
+//   1. Keep <html data-img-effect=…>, --img-effect-duration,
+//      data-img-lazy, data-img-lightbox in sync. routes/__root.tsx
+//      已经在 SSR 就把这四个值写到 <html> 上了（首屏必须有，否则 fade
+//      规则晚一步生效会让图片闪一下），这里只负责选项变更后的重写 ——
+//      两边共用 imageEffectAttrs() 保证算出同一个结果。
 //   2. Track load state on every <img data-blog-image> via event
 //      delegation: flip `data-loaded` to "1" on `load`, and on mount
 //      sweep already-`complete` images so the hydration race doesn't
@@ -42,35 +46,20 @@ interface Props {
   lightbox?: string | boolean | undefined;
 }
 
-// Defaults to ON for both — the historical behaviour was "lazy load
-// always on, lightbox always on", and we don't want admins who never
-// visited 图片处理 to see a regression.
-function asBool(v: unknown, fallback = true): boolean {
-  if (v === undefined || v === null || v === '') return fallback;
-  if (typeof v === 'boolean') return v;
-  const s = String(v).toLowerCase();
-  return !(s === 'false' || s === '0' || s === 'no' || s === 'off');
-}
-
 export default function ImageEffects({ effect, durationMs, lazyLoad, lightbox }: Props) {
   useEffect(() => {
     const root = document.documentElement;
-    const value = (effect || 'fade').toString().trim() || 'fade';
+    // 与 SSR 同一份解析（含 lazy / lightbox 默认 ON、时长回落 500ms），
+    // 所以正常情况下这几行写进去的值跟 HTML 里已有的一模一样，不会引起
+    // 属性抖动；只有后台改了选项、ctx 更新时才真正变。
+    const { effect: value, duration, lazy: lazyOn, lightbox: lightboxOn } = imageEffectAttrs({
+      image_display_effect: effect,
+      image_display_duration: durationMs,
+      image_lazy_load: lazyLoad,
+      image_lightbox: lightbox,
+    });
     root.dataset.imgEffect = value;
-
-    const raw = (durationMs ?? '').toString().trim();
-    const d = parseInt(raw, 10);
-    // Fallback 500ms matches both globals.css `:root { --img-effect-duration: 500ms }`
-    // and the historical hard-coded LazyImage fade. Admin form pre-fills 300 when
-    // the field is empty, but if the user never visits Settings → 图片处理 the
-    // DB key stays unset and we land here.
-    root.style.setProperty('--img-effect-duration', `${Number.isFinite(d) && d > 0 ? d : 500}ms`);
-
-    // Surface the lazy / lightbox toggles. Default to ON (true) when
-    // unset so a brand-new install behaves like the historical hard-
-    // coded code that always lazy-loaded and always opened lightbox.
-    const lazyOn = asBool(lazyLoad, true);
-    const lightboxOn = asBool(lightbox, true);
+    root.style.setProperty('--img-effect-duration', `${duration}ms`);
     root.dataset.imgLazy = lazyOn ? '1' : '0';
     root.dataset.imgLightbox = lightboxOn ? '1' : '0';
 

@@ -481,11 +481,17 @@
   display: block;
   overflow: hidden;
   background: var(--renascent-soft);
-}[data-theme="Renascent"] .renascent-article-cover img {
-  transition: transform 200ms ease;
-}[data-theme="Renascent"] .renascent-post-card:hover .renascent-card-cover img {
-  transform: scale(1.025);
 }
+/* 这里原先有两条规则，都已删除：
+   1. `.renascent-article-cover img { transition: transform 200ms ease }`
+      —— 文章封面本身没有 hover 缩放（没挂 .cover-zoom），这条 transition
+      没有任何用途，却因为特异性 (0,2,1) 高于 globals.css 的 fade 规则
+      (0,1,1)，把 filter / opacity 的过渡一起覆盖掉了 —— 封面图的
+      blur(20px) → blur(0) 变成瞬间跳变，完全没有淡入。
+   2. `.renascent-post-card:hover .renascent-card-cover img` 是死代码：
+      Renascent 的 PostCard 是纯文字卡片，不渲染 .renascent-card-cover。
+   要给封面加 hover 缩放的话，用全局 .cover-zoom 包一层，它已经处理了
+   与 fade 共存的 transition 合并。 */
 
 
 [data-theme="Renascent"] .renascent-card-kicker {

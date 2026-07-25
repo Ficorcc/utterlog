@@ -8,6 +8,7 @@ import {
   createRootRoute,
 } from '@tanstack/react-router';
 import { blogThemeAccentAttr } from '@shared/blog-theme';
+import { imageEffectAttrs } from '@/lib/blog-image';
 import type { ThemeContextData } from '@/lib/theme-context';
 import { getThemeComponents } from '@/lib/theme';
 import { DefaultNotFoundPage } from '@/components/blog/defaults';
@@ -60,6 +61,10 @@ function RootComponent() {
 
 function RootDocument({ children, ctx }: Readonly<{ children: ReactNode; ctx: ThemeContextData | null }>) {
   const accent = blogThemeAccentAttr(ctx?.theme.accent || 'blue');
+  // 图片效果的属性必须跟着首屏 HTML 一起出去，不能等 ImageEffects 的
+  // useEffect —— fade 规则挂在 html[data-img-effect="fade"] 下，晚一步
+  // 补属性首屏图片就会「先清晰后糊再清晰」。详见 imageEffectAttrs。
+  const img = imageEffectAttrs(ctx?.options);
   return (
     <html
       suppressHydrationWarning
@@ -67,6 +72,10 @@ function RootDocument({ children, ctx }: Readonly<{ children: ReactNode; ctx: Th
       data-theme={ctx?.theme.name}
       data-accent={accent || undefined}
       data-timezone={ctx?.timeZone || 'UTC'}
+      data-img-effect={img.effect}
+      data-img-lazy={img.lazy ? '1' : '0'}
+      data-img-lightbox={img.lightbox ? '1' : '0'}
+      style={{ '--img-effect-duration': `${img.duration}ms` } as React.CSSProperties}
     >
       <head>
         <HeadContent />

@@ -27,16 +27,15 @@ function LazyCardImage({ src, alt }: { src: string; alt: string }) {
   return (
     <div ref={ref} style={{ position: 'absolute', inset: 0 }}>
       {inView && src && (
-        // Prev/next covers and related-card thumbnails deliberately
-        // hard-code the classic blur→sharp fade regardless of the
-        // admin's image_display_effect choice — a scattered pixel or
-        // blinds reveal here looked aggressive in the footer. No
-        // `data-blog-image` = escapes the global effect selector,
-        // but the parent .cover-zoom still triggers the hover scale
-        // because the rule targets img regardless of data attr when
-        // we add a data-blog-image stamp; here we keep the inline
-        // transition since this <img> is intentionally outside the
-        // global system to preserve the hard-coded blur→sharp.
+        // 上/下篇封面和相关文章缩略图固定用经典的 blur→sharp，不跟随
+        // 后台的 image_display_effect —— pixel / blinds 那类效果放在页脚
+        // 这几张小图上太吵。做法是内联 opacity + filter，内联优先级最高，
+        // 盖住 globals.css 里按 data-img-effect 分支的规则。
+        //
+        // 注意 data-blog-image 是**有**的（下面就是）：ImageEffects 需要它
+        // 来做 loaded 兜底和 IntersectionObserver，.cover-zoom 的 hover 缩放
+        // 也靠它选中。这里只是用内联 style 覆盖效果分支，不是脱离全局系统。
+        // 过渡时长读 --img-effect-duration，所以后台的动画时长依然生效。
         <img
           src={src}
           alt={alt}
@@ -53,7 +52,11 @@ function LazyCardImage({ src, alt }: { src: string; alt: string }) {
             // globals.css for .cover-zoom is otherwise overridden and
             // the hover looks "卡顿" — same root cause as the fade
             // shorthand bug fixed earlier.
-            transition: 'opacity 0.5s ease-in-out, filter 0.5s linear, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+            // 时长读 --img-effect-duration（<html> 上由 SSR 写入、后台「图片处理
+            // → 动画时长」可调），别再硬编码 0.5s —— 内联 style 覆盖一切，
+            // 硬编码等于让这几张图无视后台设置。transform 保持 0.6s：那是
+            // hover 缩放，跟图片加载动画无关。
+            transition: 'opacity var(--img-effect-duration, 500ms) ease-in-out, filter var(--img-effect-duration, 500ms) linear, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
           }}
         />
       )}

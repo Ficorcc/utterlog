@@ -166,19 +166,22 @@
   min-height: 80px;
   overflow: hidden;
 }
-[data-theme="Utterlog"] .post-prev-next-link:hover .post-prev-next-cover img { transform: scale(1.05); }
 [data-theme="Utterlog"] .post-prev-next-link.next { text-align: right; }
 [data-theme="Utterlog"] .post-prev-next-cover {
   position: absolute;
   inset: 0;
   z-index: 0;
 }
+/* hover 缩放由全局 .cover-zoom 提供（容器已挂该 class），这里不要再声明
+   `transition: transform` —— 那条特异性 (0,2,1) 比 globals.css 的 fade
+   规则 (0,1,1) 高，transition 又是简写，会把 filter / opacity 的过渡一起
+   抹掉，封面图的 blur→sharp 就变成瞬间跳变。同理原先那条 hover
+   scale(1.05) 也删了，统一用 .cover-zoom 的 1.04。 */
 [data-theme="Utterlog"] .post-prev-next-cover img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.3s;
 }
 [data-theme="Utterlog"] .post-prev-next-cover::after {
   content: '';
@@ -300,15 +303,13 @@
   overflow: hidden;
   background: var(--color-bg-soft);
 }
+/* 同 .post-prev-next-cover：transition / hover scale 都交给全局
+   .cover-zoom，主题里再声明只会覆盖掉 fade 的 filter 过渡。 */
 [data-theme="Utterlog"] .post-related-card-cover img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.3s ease;
-}
-[data-theme="Utterlog"] .post-related-card:hover .post-related-card-cover img {
-  transform: scale(1.04);
 }
 [data-theme="Utterlog"] .post-related-card-date {
   position: absolute;

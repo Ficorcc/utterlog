@@ -1040,8 +1040,12 @@
      配合 PostCard 里 500ms min-display 保证用户至少看半秒 spinner。 */
   transition: opacity 0.18s ease;
 }
-[data-theme="Azure"] .azure-post-card-cover-loader.loaded,
-[data-theme="Azure"] .azure-post-card-cover img[data-loaded="1"] + .azure-post-card-cover-loader {
+/* 只认 JS 挂上来的 .loaded —— 它要求「图片就绪 + 500ms 最小展示」两个
+   条件都满足（见 PostCard.tsx 的 showLoader）。原先这里还有一条
+   `img[data-loaded="1"] + &` 的兄弟选择器，只看图片就绪，缓存命中时会
+   抢在 500ms 定时器之前把 spinner 抹掉 —— 等于把最小展示时间架空了，
+   spinner 一闪而过。两个条件是矛盾的，留 JS 那个。 */
+[data-theme="Azure"] .azure-post-card-cover-loader.loaded {
   opacity: 0;
 }
 [data-theme="Azure"] .azure-post-card-excerpt {
