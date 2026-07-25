@@ -60,15 +60,12 @@ function LazyCardImage({ src, alt }: { src: string; alt: string }) {
           }}
         />
       )}
+      {/* 图没到位时垫一块浅灰底。这里原先还放了个转圈 svg，已经去掉：
+          转圈表达「还没加载好」，而这些缩略图基本都命中缓存，圆圈只是
+          噪音，还会在图已经画好之后才被 React 摘掉、白闪一下。真正的
+          加载反馈是上面那张图的 opacity + blur 淡入。 */}
       {(!inView || !loaded) && (
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg-soft)' }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--color-text-dim)">
-            <path d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" opacity=".25"/>
-            <path d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z">
-              <animateTransform attributeName="transform" type="rotate" dur="0.75s" values="0 12 12;360 12 12" repeatCount="indefinite"/>
-            </path>
-          </svg>
-        </div>
+        <div style={{ position: 'absolute', inset: 0, background: 'var(--color-bg-soft)' }} />
       )}
     </div>
   );

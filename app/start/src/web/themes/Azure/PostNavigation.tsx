@@ -4,7 +4,6 @@ import { useEffect, useState, useRef } from 'react';
 import Link from '@/components/AppLink';
 import PostLink from '@/components/blog/PostLink';
 import SharedFadeCover from '@/components/blog/FadeCover';
-import LoadingSpinner from '@/components/blog/LoadingSpinner';
 import { randomCoverUrl } from '@/lib/blog-image';
 import { useThemeContext } from '@/lib/theme-context';
 import { formatDateInTimeZone } from '@/lib/timezone';
@@ -73,10 +72,12 @@ function LazyCardImage({ src, alt }: { src: string; alt: string }) {
           }}
         />
       )}
+      {/* 图没到位时垫一块浅灰底。这里原先还放了个 LoadingSpinner，已经去掉：
+          转圈表达「还没加载好」，而这些缩略图基本都命中缓存，圆圈只是
+          噪音，还会在图已经画好之后才被 React 摘掉、白闪一下。真正的
+          加载反馈是上面那张图的 opacity + blur 淡入。 */}
       {(!inView || !loaded) && (
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg-soft)' }}>
-          <LoadingSpinner size={20} />
-        </div>
+        <div style={{ position: 'absolute', inset: 0, background: 'var(--color-bg-soft)' }} />
       )}
     </div>
   );
