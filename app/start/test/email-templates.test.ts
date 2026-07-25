@@ -60,9 +60,12 @@ describe('邮件模板', () => {
     expect(html).toContain(`gravatar.bluecdn.com/avatar/${md5}`);
     expect(html).toContain('d=mp');   // 没注册过的邮箱也要有默认图，不能是破图
     expect(html).toContain('border-radius:999px');
-    // 两行：先称呼收件人，再说明谁回复了哪篇
-    expect(html).toContain('你好 <b>织梦岁月</b>，</div>');
-    expect(html).toContain('<b>西风</b> 回复了你在《GitShow');
+    // 两行：称呼和主句合成一行，文章标题单独一行。标题不进主句是关键 ——
+    // 塞进去的话长标题会把「回复了你的评论」挤到下一行。
+    expect(html).toContain('你好 <b>织梦岁月</b>，<b>西风</b> 回复了你的评论</div>');
+    expect(html).toContain('文章：《GitShow：把 GitHub 账号变成一个自托管个人主页》》'.replace('》》','》'));
+    // 主句里不再夹标题
+    expect(html).not.toContain('回复了你在《');
 
     // 没有回复者邮箱时不渲染空头像格
     const noAvatar = commentReplyEmail(site, {

@@ -251,9 +251,11 @@ ${time ? `<td align="right" style="font-size:12px;line-height:1.8;color:#aebbcb;
 </tr></table>`;
   };
 
+  // 标题单独成行、降为附属信息：文章标题长度不可控，塞进主句里会把
+  // 「回复了你的评论」挤到第三行去，读的人要一路扫到最后才知道发生了什么。
   const body = `<div style="margin:0 0 4px;">
-<div style="font-size:15px;line-height:1.7;color:${TEXT};">你好 <b>${htmlEscape(input.recipientName)}</b>，</div>
-<div style="font-size:15px;line-height:1.7;color:${TEXT};"><b>${htmlEscape(input.replierName)}</b> 回复了你在《${htmlEscape(input.postTitle)}》的评论</div>
+<div style="font-size:15px;line-height:1.7;color:${TEXT};">你好 <b>${htmlEscape(input.recipientName)}</b>，<b>${htmlEscape(input.replierName)}</b> 回复了你的评论</div>
+<div style="font-size:13px;line-height:1.7;color:${MUTED};margin-top:4px;">文章：《${htmlEscape(input.postTitle)}》</div>
 </div>
 ${label('你说的是：', input.originalAt)}
 ${quote(input.originalContent, '#c8d3e0', '', MUTED)}
