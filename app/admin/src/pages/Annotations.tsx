@@ -236,8 +236,8 @@ export default function AnnotationsPage() {
                   <TableCell>
                     <Button
                       variant="ghost"
-                      size="icon"
-                      className="size-8 text-muted-foreground hover:text-destructive"
+                      size="icon-sm"
+                      className="text-muted-foreground hover:text-destructive"
                       title="删除"
                       onClick={() => setDeleteId(row.id)}
                     >

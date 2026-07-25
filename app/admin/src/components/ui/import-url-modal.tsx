@@ -1,4 +1,5 @@
 
+import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { Button, Input, Modal } from '@/components/ui';
 import api from '@/lib/api';
@@ -60,7 +61,8 @@ export function ImportUrlModal({ isOpen, onClose, onImport, type, platforms }: I
         />
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
           <Button variant="secondary" onClick={onClose}>{t('admin.common.cancel', '取消')}</Button>
-          <Button onClick={handleImport} loading={loading}>{t('admin.import.parseButton', '解析导入')}</Button>
+          <Button onClick={handleImport} disabled={loading}>
+          {loading && <Loader2 className="animate-spin" />}{t('admin.import.parseButton', '解析导入')}</Button>
         </div>
       </div>
     </Modal>

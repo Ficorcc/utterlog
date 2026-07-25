@@ -526,8 +526,8 @@ export default function AiSettingsPage() {
                   <p className="mt-0.5 truncate text-xs text-muted-foreground">{p.model} · {p.endpoint}</p>
                 </div>
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" title={t('admin.common.edit', '编辑')} onClick={() => setEditing(p)}><Pencil className="size-4" /></Button>
-                  <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" title={t('admin.common.delete', '删除')} onClick={() => setDeleteProviderId(p.id!)}><Trash2 className="size-4" /></Button>
+                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary" title={t('admin.common.edit', '编辑')} onClick={() => setEditing(p)}><Pencil className="size-4" /></Button>
+                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" title={t('admin.common.delete', '删除')} onClick={() => setDeleteProviderId(p.id!)}><Trash2 className="size-4" /></Button>
                 </div>
               </Card>
             ))}

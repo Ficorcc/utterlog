@@ -22,7 +22,12 @@ const buttonVariants = cva(
         default: 'h-10 px-4 py-2',
         sm: 'h-9 rounded-md px-3',
         lg: 'h-11 rounded-md px-6',
+        // 三档方形图标按钮。icon(40px) 给页面顶部的主操作；表格行里 40px 会
+        // 把行撑高，所以有了 icon-sm(32px) —— 加这一档之前，站内有 60 处在
+        // 各自写 className="size-8" 去压默认尺寸。icon-xs(28px) 给密集列表。
         icon: 'h-10 w-10',
+        'icon-sm': 'h-8 w-8',
+        'icon-xs': 'h-7 w-7',
       },
     },
     defaultVariants: { variant: 'default', size: 'default' },

@@ -167,8 +167,8 @@ export default function PlaylistsPage() {
                       <p className="text-xs text-muted-foreground">{p.song_count || 0} 首</p>
                     </div>
                     <div className="flex shrink-0 gap-0.5">
-                      <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" onClick={(e) => { e.stopPropagation(); openEdit(p); }} title="编辑"><Pencil className="size-3.5" /></Button>
-                      <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteId(p.id); }} title="删除"><Trash2 className="size-3.5" /></Button>
+                      <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary" onClick={(e) => { e.stopPropagation(); openEdit(p); }} title="编辑"><Pencil className="size-3.5" /></Button>
+                      <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteId(p.id); }} title="删除"><Trash2 className="size-3.5" /></Button>
                     </div>
                   </div>
                 </div>
@@ -207,7 +207,7 @@ export default function PlaylistsPage() {
                       <span className="shrink-0 text-2xs text-muted-foreground">
                         {{ netease: '网易云', tencent: 'QQ', kugou: '酷狗', local: '本地' }[s.platform as string] || s.platform || ''}
                       </span>
-                      <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" onClick={() => removeSong(s.id)} title="移除"><X className="size-3.5" /></Button>
+                      <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" onClick={() => removeSong(s.id)} title="移除"><X className="size-3.5" /></Button>
                     </div>
                   ))}
                 </div>

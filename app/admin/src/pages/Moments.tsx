@@ -395,8 +395,8 @@ export default function MomentsPage() {
                   </div>
                 </div>
                 <div className="ml-3 flex shrink-0 gap-1">
-                  <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" onClick={() => openEdit(m)} title={t('admin.common.edit', '编辑')}><Pencil className="size-4" /></Button>
-                  <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(m.id)} title={t('admin.common.delete', '删除')}><Trash2 className="size-4" /></Button>
+                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary" onClick={() => openEdit(m)} title={t('admin.common.edit', '编辑')}><Pencil className="size-4" /></Button>
+                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(m.id)} title={t('admin.common.delete', '删除')}><Trash2 className="size-4" /></Button>
                 </div>
               </div>
             </div>

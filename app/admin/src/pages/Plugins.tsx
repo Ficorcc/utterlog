@@ -200,8 +200,8 @@ export default function Plugins() {
                   {!plugin.builtin && (
                     <Button
                       variant="ghost"
-                      size="icon"
-                      className="size-7.5 text-muted-foreground hover:text-destructive"
+                      size="icon-xs"
+                      className=".5 text-muted-foreground hover:text-destructive"
                       onClick={() => setDeleteId(plugin.id)}
                       title="删除"
                     >

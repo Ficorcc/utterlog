@@ -459,7 +459,7 @@ export default function ProfilePage() {
                 {link.qr !== undefined || link.name === '微信' ? (
                   <>
                     <input type="file" accept="image/*" className="hidden" ref={el => { if (el) el.dataset.idx = String(idx); }} onChange={e => handleSocialQr(e, idx)} />
-                    <Button type="button" variant="outline" size="icon" className="size-8 shrink-0 text-muted-foreground" onClick={() => {
+                    <Button type="button" variant="outline" size="icon-sm" className="shrink-0 text-muted-foreground" onClick={() => {
                       const inp = document.querySelector(`input[data-idx="${idx}"]`) as HTMLInputElement;
                       inp?.click();
                     }} title={t('admin.profile.uploadQr', '上传二维码')}>
@@ -468,11 +468,11 @@ export default function ProfilePage() {
                   </>
                 ) : null}
                 {defaultSocialNames.includes(link.name) ? (
-                  <Button type="button" variant="outline" size="icon" className="size-8 shrink-0 text-muted-foreground" onClick={() => setSocialLinks(prev => prev.map((s, i) => i === idx ? { ...s, url: '', qr: undefined } : s))} title={t('admin.profile.clear', '清空')}>
+                  <Button type="button" variant="outline" size="icon-sm" className="shrink-0 text-muted-foreground" onClick={() => setSocialLinks(prev => prev.map((s, i) => i === idx ? { ...s, url: '', qr: undefined } : s))} title={t('admin.profile.clear', '清空')}>
                     <Eraser className="size-3.5" />
                   </Button>
                 ) : (
-                  <Button type="button" variant="outline" size="icon" className="size-8 shrink-0 text-muted-foreground hover:text-destructive" onClick={() => setSocialLinks(prev => prev.filter((_, i) => i !== idx))}>
+                  <Button type="button" variant="outline" size="icon-sm" className="shrink-0 text-muted-foreground hover:text-destructive" onClick={() => setSocialLinks(prev => prev.filter((_, i) => i !== idx))}>
                     <X className="size-3.5" />
                   </Button>
                 )}
@@ -770,8 +770,8 @@ export default function ProfilePage() {
                   </div>
                   <Button
                     variant="ghost"
-                    size="icon"
-                    className="size-8 text-muted-foreground hover:text-destructive"
+                    size="icon-sm"
+                    className="text-muted-foreground hover:text-destructive"
                     onClick={() => setDeletePasskeyId(pk.id)}
                     title={t('admin.common.delete', '删除')}
                   >

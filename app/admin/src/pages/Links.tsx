@@ -641,8 +641,8 @@ export default function LinksPage() {
                     <TableCell><span className="block truncate text-xs text-muted-foreground">{groupLabel(link.group_name || DEFAULT_GROUP_KEY)}</span></TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground" title={t('admin.common.edit', '编辑')} onClick={() => openEdit(link)}><Pencil className="size-4" /></Button>
-                        <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(link.id)}><Trash2 className="size-4" /></Button>
+                        <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground" title={t('admin.common.edit', '编辑')} onClick={() => openEdit(link)}><Pencil className="size-4" /></Button>
+                        <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(link.id)}><Trash2 className="size-4" /></Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -749,10 +749,10 @@ export default function LinksPage() {
                   return (
                     <div key={group.key} className="grid items-center gap-2 bg-muted px-3 py-2" style={{ gridTemplateColumns: '84px minmax(140px, 1fr) minmax(260px, 1.5fr) 132px 64px auto' }}>
                       <span className="inline-flex gap-1.5">
-                        <Button type="button" variant="ghost" size="icon" className="size-7 text-muted-foreground hover:text-foreground" title={t('admin.common.moveUp', '上移')} disabled={index === 0} onClick={() => moveGroup(group.key, -1)}>
+                        <Button type="button" variant="ghost" size="icon-xs" className="text-muted-foreground hover:text-foreground" title={t('admin.common.moveUp', '上移')} disabled={index === 0} onClick={() => moveGroup(group.key, -1)}>
                           <ChevronUp className="size-3" />
                         </Button>
-                        <Button type="button" variant="ghost" size="icon" className="size-7 text-muted-foreground hover:text-foreground" title={t('admin.common.moveDown', '下移')} disabled={index === existingGroups.length - 1} onClick={() => moveGroup(group.key, 1)}>
+                        <Button type="button" variant="ghost" size="icon-xs" className="text-muted-foreground hover:text-foreground" title={t('admin.common.moveDown', '下移')} disabled={index === existingGroups.length - 1} onClick={() => moveGroup(group.key, 1)}>
                           <ChevronDown className="size-3" />
                         </Button>
                       </span>
@@ -796,11 +796,11 @@ export default function LinksPage() {
                       <span className="text-right text-2xs text-muted-foreground">{t('admin.links.countItems', '{count} 条', { count })}</span>
                       {!isEditing && (
                         <span className="inline-flex justify-end gap-1.5">
-                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" title={t('admin.common.edit', '编辑')} onClick={() => setEditingGroup({ old: group.key, new: group.name })}>
+                          <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary" title={t('admin.common.edit', '编辑')} onClick={() => setEditingGroup({ old: group.key, new: group.name })}>
                             <Pencil className="size-3.5" />
                           </Button>
                           {group.key !== DEFAULT_GROUP_KEY && (
-                            <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" title={t('admin.common.delete', '删除')} onClick={() => deleteGroup(group.key)}>
+                            <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" title={t('admin.common.delete', '删除')} onClick={() => deleteGroup(group.key)}>
                               <Trash2 className="size-3.5" />
                             </Button>
                           )}

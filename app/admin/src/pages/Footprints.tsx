@@ -404,13 +404,13 @@ export default function FootprintsPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" onClick={() => openEdit(item)} title={t('admin.footprints.editFootprint', '配置足迹')}>
+                        <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary" onClick={() => openEdit(item)} title={t('admin.footprints.editFootprint', '配置足迹')}>
                           <Pencil className="size-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground" onClick={() => navigate(`/posts/edit/${item.post_id}`)} title={t('admin.footprints.editPost', '编辑文章')}>
+                        <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground" onClick={() => navigate(`/posts/edit/${item.post_id}`)} title={t('admin.footprints.editPost', '编辑文章')}>
                           <FilePen className="size-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground" onClick={() => window.open(`/footprints?keyword=${encodeURIComponent(locationLabel(item))}`, '_blank', 'noopener,noreferrer')} title={t('admin.footprints.viewOnSite', '前台查看')}>
+                        <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground" onClick={() => window.open(`/footprints?keyword=${encodeURIComponent(locationLabel(item))}`, '_blank', 'noopener,noreferrer')} title={t('admin.footprints.viewOnSite', '前台查看')}>
                           <ExternalLink className="size-4" />
                         </Button>
                       </div>

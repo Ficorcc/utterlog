@@ -333,13 +333,13 @@ export default function VideoFormSection({ initialMeta, initialEpisodes, onChang
                 <Input value={ep.platform} onChange={(e: any) => updateEpisode(idx, { platform: e.target.value })}
                   placeholder="自动" className="text-2xs" />
                 <div className="flex justify-end gap-1">
-                  <Button variant="outline" size="icon" className="size-8" disabled={idx === 0} onClick={() => moveEpisode(idx, -1)} title="上移">
+                  <Button variant="outline" size="icon-sm" disabled={idx === 0} onClick={() => moveEpisode(idx, -1)} title="上移">
                     <ChevronUp className="size-3" />
                   </Button>
-                  <Button variant="outline" size="icon" className="size-8" disabled={idx === episodes.length - 1} onClick={() => moveEpisode(idx, 1)} title="下移">
+                  <Button variant="outline" size="icon-sm" disabled={idx === episodes.length - 1} onClick={() => moveEpisode(idx, 1)} title="下移">
                     <ChevronDown className="size-3" />
                   </Button>
-                  <Button variant="outline" size="icon" className="size-8 text-destructive hover:text-destructive" onClick={() => deleteEpisode(idx)} title="删除">
+                  <Button variant="outline" size="icon-sm" className="text-destructive hover:text-destructive" onClick={() => deleteEpisode(idx)} title="删除">
                     <Trash2 className="size-3" />
                   </Button>
                 </div>
@@ -355,7 +355,7 @@ export default function VideoFormSection({ initialMeta, initialEpisodes, onChang
                     <div key={j} className="grid gap-1.5" style={{ gridTemplateColumns: '120px 1fr 32px' }}>
                       <Input value={a.label} onChange={(e: any) => updateAlt(idx, j, { label: e.target.value })} placeholder="备线名称" className="text-xs" />
                       <Input value={a.url} onChange={(e: any) => updateAlt(idx, j, { url: e.target.value })} placeholder="备线 URL" className="font-mono text-2xs" />
-                      <Button variant="outline" size="icon" className="size-8 text-destructive hover:text-destructive" onClick={() => deleteAlt(idx, j)} title="删除">
+                      <Button variant="outline" size="icon-sm" className="text-destructive hover:text-destructive" onClick={() => deleteAlt(idx, j)} title="删除">
                         <X className="size-2.5" />
                       </Button>
                     </div>

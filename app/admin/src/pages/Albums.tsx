@@ -192,15 +192,14 @@ export default function AlbumsPage() {
                   <div className="flex gap-1">
                     <Button
                       variant="ghost"
-                      size="icon"
-                      className={cn('size-8', album.status === 'private' ? 'text-amber-600 hover:text-amber-600 dark:text-amber-400 dark:hover:text-amber-400' : 'text-muted-foreground hover:text-foreground')}
+                      size="icon-sm" className={cn(album.status === 'private' ? 'text-amber-600 hover:text-amber-600 dark:text-amber-400 dark:hover:text-amber-400' : 'text-muted-foreground hover:text-foreground')}
                       onClick={() => toggleStatus(album)}
                       title={album.status === 'public' ? '设为私有' : '公开'}
                     >
                       {album.status === 'public' ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                     </Button>
-                    <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" onClick={() => openEdit(album)} title="编辑"><Pencil className="size-4" /></Button>
-                    <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(album.id)} title="删除"><Trash2 className="size-4" /></Button>
+                    <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary" onClick={() => openEdit(album)} title="编辑"><Pencil className="size-4" /></Button>
+                    <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(album.id)} title="删除"><Trash2 className="size-4" /></Button>
                   </div>
                 </div>
               </div>

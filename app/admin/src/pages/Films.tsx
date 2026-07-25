@@ -157,8 +157,8 @@ export default function FilmsPage() {
                   <TableCell className="text-muted-foreground">{row.published_at ? formatDate(row.published_at) : '—'}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground" onClick={() => navigate(`/films/edit/${row.id}`)}><Pencil className="size-4" /></Button>
-                      <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(row.id)}><Trash2 className="size-4" /></Button>
+                      <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground" onClick={() => navigate(`/films/edit/${row.id}`)}><Pencil className="size-4" /></Button>
+                      <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(row.id)}><Trash2 className="size-4" /></Button>
                     </div>
                   </TableCell>
                 </TableRow>

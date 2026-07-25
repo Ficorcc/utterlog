@@ -239,7 +239,7 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
           <div className="text-sm font-semibold text-foreground">
             {t('admin.syncSites.authorizedSites', '已授权站点')} <span className="ml-1.5 font-normal text-muted-foreground">({sites.length})</span>
           </div>
-          <Button size="icon" className="size-8" title={t('admin.syncSites.newAuthorization', '新建授权')} onClick={() => setCreateOpen(true)}>
+          <Button size="icon-sm" title={t('admin.syncSites.newAuthorization', '新建授权')} onClick={() => setCreateOpen(true)}>
             <Plus className="size-4" />
           </Button>
         </div>

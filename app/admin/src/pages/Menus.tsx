@@ -312,7 +312,7 @@ export default function MenusPage() {
               <div className="flex-1 text-xs text-muted-foreground">
                 {t('admin.menus.fixedAllHint', '固定分类 tab，前台始终显示，不写入菜单配置。')}
               </div>
-              <Button type="button" variant="outline" size="icon" className="size-8" disabled title={t('admin.menus.fixedCannotDelete', '固定项不可删除')}>
+              <Button type="button" variant="outline" size="icon-sm" disabled title={t('admin.menus.fixedCannotDelete', '固定项不可删除')}>
                 <Lock className="size-3" />
               </Button>
             </div>
@@ -348,15 +348,15 @@ export default function MenusPage() {
               />
               {!isFixedHeroSidebar && (
                 <>
-                  <Button type="button" variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground" onClick={() => setPickerOpen({ target: idx })} title={t('admin.menus.addChildFromExisting', '从已有页面添加子菜单')}>
+                  <Button type="button" variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground" onClick={() => setPickerOpen({ target: idx })} title={t('admin.menus.addChildFromExisting', '从已有页面添加子菜单')}>
                     <ListTree className="size-4" />
                   </Button>
-                  <Button type="button" variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground" onClick={() => addChild(idx)} title={t('admin.menus.addBlankChild', '添加空白子菜单')}>
+                  <Button type="button" variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground" onClick={() => addChild(idx)} title={t('admin.menus.addBlankChild', '添加空白子菜单')}>
                     <CornerDownRight className="size-4" />
                   </Button>
                 </>
               )}
-              <Button type="button" variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" onClick={() => removeItem(idx)} title={t('admin.common.delete', '删除')}>
+              <Button type="button" variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" onClick={() => removeItem(idx)} title={t('admin.common.delete', '删除')}>
                 <Trash2 className="size-4" />
               </Button>
             </div>
@@ -377,7 +377,7 @@ export default function MenusPage() {
                       onChange={e => updateChild(idx, cIdx, 'href', e.target.value)}
                       placeholder="/path"
                     />
-                    <Button type="button" variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" onClick={() => removeChild(idx, cIdx)} title={t('admin.common.delete', '删除')}>
+                    <Button type="button" variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" onClick={() => removeChild(idx, cIdx)} title={t('admin.common.delete', '删除')}>
                       <Trash2 className="size-4" />
                     </Button>
                   </div>

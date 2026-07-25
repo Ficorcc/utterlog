@@ -126,7 +126,7 @@ export default function FooterIconsEditor({
     <div className="mt-6 rounded-lg border border-border bg-card p-5">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="m-0 text-sm font-semibold text-foreground">{title}</h3>
-        <Button variant="outline" size="icon" className="size-8" onClick={addRow} title="添加">
+        <Button variant="outline" size="icon-sm" onClick={addRow} title="添加">
           <Plus className="size-3.5" />
         </Button>
       </div>
@@ -186,17 +186,17 @@ export default function FooterIconsEditor({
               />
               {/* Actions — 统一正方形，与预览框同尺寸 */}
               <div className="flex gap-1">
-                <Button variant="outline" size="icon" className="size-7" onClick={() => handleUploadClick(i)}
+                <Button variant="outline" size="icon-xs" onClick={() => handleUploadClick(i)}
                   disabled={uploadingIdx === i} title="上传图片作为图标">
                   {uploadingIdx === i ? <Loader2 className="size-3.5 animate-spin" /> : <Upload className="size-3.5" />}
                 </Button>
-                <Button variant="outline" size="icon" className="size-7" onClick={() => moveRow(i, -1)} disabled={i === 0} title="上移">
+                <Button variant="outline" size="icon-xs" onClick={() => moveRow(i, -1)} disabled={i === 0} title="上移">
                   <ChevronUp className="size-3.5" />
                 </Button>
-                <Button variant="outline" size="icon" className="size-7" onClick={() => moveRow(i, 1)} disabled={i === items.length - 1} title="下移">
+                <Button variant="outline" size="icon-xs" onClick={() => moveRow(i, 1)} disabled={i === items.length - 1} title="下移">
                   <ChevronDown className="size-3.5" />
                 </Button>
-                <Button variant="outline" size="icon" className="size-7 text-destructive hover:text-destructive" onClick={() => removeRow(i)} title="删除">
+                <Button variant="outline" size="icon-xs" className="text-destructive hover:text-destructive" onClick={() => removeRow(i)} title="删除">
                   <Trash2 className="size-3.5" />
                 </Button>
               </div>

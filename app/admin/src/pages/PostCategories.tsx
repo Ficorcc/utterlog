@@ -187,8 +187,8 @@ export default function CategoriesPage() {
                   <TableCell className="text-muted-foreground">{row.count ?? 0}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground" onClick={() => openEdit(row)}><Pencil className="size-4" /></Button>
-                      <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(row.id)}><Trash2 className="size-4" /></Button>
+                      <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground" onClick={() => openEdit(row)}><Pencil className="size-4" /></Button>
+                      <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(row.id)}><Trash2 className="size-4" /></Button>
                     </div>
                   </TableCell>
                 </TableRow>

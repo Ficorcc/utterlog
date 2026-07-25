@@ -131,8 +131,8 @@ export default function VideosPage() {
                   {item.comment && <p className="mt-1 text-2xs text-muted-foreground">{item.comment}</p>}
                 </div>
                 <div className="flex shrink-0 gap-1">
-                  <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground" onClick={() => openEdit(item)}><Pencil className="size-4" /></Button>
-                  <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(item.id)}><Trash2 className="size-4" /></Button>
+                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground" onClick={() => openEdit(item)}><Pencil className="size-4" /></Button>
+                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(item.id)}><Trash2 className="size-4" /></Button>
                 </div>
               </div>
             </Card>

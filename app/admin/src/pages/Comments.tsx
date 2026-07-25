@@ -524,38 +524,38 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
                       {/* Approved: featured + edit + reply + spam + delete */}
                       {row.status === 'approved' && (
                         <>
-                          <Button variant="ghost" size="icon" className={cn('size-8', row.featured ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400')} title={row.featured ? t('admin.comments.unfeature', '取消精选') : t('admin.comments.feature', '设为精选')} onClick={() => toggleFeatured(row.id, row.featured)}>
+                          <Button variant="ghost" size="icon-sm" className={cn(row.featured ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400')} title={row.featured ? t('admin.comments.unfeature', '取消精选') : t('admin.comments.feature', '设为精选')} onClick={() => toggleFeatured(row.id, row.featured)}>
                             <Star className={cn('size-4', row.featured && 'fill-current')} />
                           </Button>
-                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" title={t('admin.common.edit', '编辑')} onClick={() => setEditComment({ ...row })}><Pencil className="size-4" /></Button>
-                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" title={t('admin.comments.reply', '回复')} onClick={() => { setReplyId(row.id); setReplyContent(''); }}><MessageSquare className="size-4" /></Button>
-                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400" title={t('admin.comments.markSpam', '标记垃圾')} onClick={() => handleStatusChange(row.id, 'spam')}><Ban className="size-4" /></Button>
-                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(row.id)}><Trash2 className="size-4" /></Button>
+                          <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary" title={t('admin.common.edit', '编辑')} onClick={() => setEditComment({ ...row })}><Pencil className="size-4" /></Button>
+                          <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary" title={t('admin.comments.reply', '回复')} onClick={() => { setReplyId(row.id); setReplyContent(''); }}><MessageSquare className="size-4" /></Button>
+                          <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400" title={t('admin.comments.markSpam', '标记垃圾')} onClick={() => handleStatusChange(row.id, 'spam')}><Ban className="size-4" /></Button>
+                          <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(row.id)}><Trash2 className="size-4" /></Button>
                         </>
                       )}
                       {/* Pending: approve + edit + spam + delete */}
                       {row.status === 'pending' && (
                         <>
-                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400" title={t('admin.comments.approve', '通过')} onClick={async () => { try { await commentsApi.approve(row.id); removeFromList(row.id); fetchCounts(); toast.success(t('admin.comments.toast.approved', '已通过')); } catch { toast.error(t('admin.common.operationFailed', '操作失败')); } }}><Check className="size-4" /></Button>
-                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" title={t('admin.common.edit', '编辑')} onClick={() => setEditComment({ ...row })}><Pencil className="size-4" /></Button>
-                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400" title={t('admin.comments.moveToSpam', '垃圾箱')} onClick={() => { handleStatusChange(row.id, 'spam'); fetchCounts(); }}><Ban className="size-4" /></Button>
-                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(row.id)}><Trash2 className="size-4" /></Button>
+                          <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400" title={t('admin.comments.approve', '通过')} onClick={async () => { try { await commentsApi.approve(row.id); removeFromList(row.id); fetchCounts(); toast.success(t('admin.comments.toast.approved', '已通过')); } catch { toast.error(t('admin.common.operationFailed', '操作失败')); } }}><Check className="size-4" /></Button>
+                          <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary" title={t('admin.common.edit', '编辑')} onClick={() => setEditComment({ ...row })}><Pencil className="size-4" /></Button>
+                          <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400" title={t('admin.comments.moveToSpam', '垃圾箱')} onClick={() => { handleStatusChange(row.id, 'spam'); fetchCounts(); }}><Ban className="size-4" /></Button>
+                          <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(row.id)}><Trash2 className="size-4" /></Button>
                         </>
                       )}
                       {/* Spam: approve + edit + delete */}
                       {row.status === 'spam' && (
                         <>
-                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400" title={t('admin.comments.restoreApproved', '恢复通过')} onClick={async () => { try { await commentsApi.approve(row.id); removeFromList(row.id); fetchCounts(); toast.success(t('admin.comments.toast.restored', '已恢复')); } catch { toast.error(t('admin.common.operationFailed', '操作失败')); } }}><Check className="size-4" /></Button>
-                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" title={t('admin.common.edit', '编辑')} onClick={() => setEditComment({ ...row })}><Pencil className="size-4" /></Button>
-                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" title={t('admin.comments.permanentDelete', '永久删除')} onClick={() => setDeleteId(row.id)}><Trash2 className="size-4" /></Button>
+                          <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400" title={t('admin.comments.restoreApproved', '恢复通过')} onClick={async () => { try { await commentsApi.approve(row.id); removeFromList(row.id); fetchCounts(); toast.success(t('admin.comments.toast.restored', '已恢复')); } catch { toast.error(t('admin.common.operationFailed', '操作失败')); } }}><Check className="size-4" /></Button>
+                          <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary" title={t('admin.common.edit', '编辑')} onClick={() => setEditComment({ ...row })}><Pencil className="size-4" /></Button>
+                          <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" title={t('admin.comments.permanentDelete', '永久删除')} onClick={() => setDeleteId(row.id)}><Trash2 className="size-4" /></Button>
                         </>
                       )}
                       {/* Trash: restore + edit + delete */}
                       {row.status === 'trash' && (
                         <>
-                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400" title={t('admin.comments.restore', '恢复')} onClick={async () => { try { await commentsApi.approve(row.id); removeFromList(row.id); fetchCounts(); toast.success(t('admin.comments.toast.restored', '已恢复')); } catch { toast.error(t('admin.common.operationFailed', '操作失败')); } }}><Check className="size-4" /></Button>
-                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" title={t('admin.common.edit', '编辑')} onClick={() => setEditComment({ ...row })}><Pencil className="size-4" /></Button>
-                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" title={t('admin.comments.permanentDelete', '永久删除')} onClick={() => setDeleteId(row.id)}><Trash2 className="size-4" /></Button>
+                          <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400" title={t('admin.comments.restore', '恢复')} onClick={async () => { try { await commentsApi.approve(row.id); removeFromList(row.id); fetchCounts(); toast.success(t('admin.comments.toast.restored', '已恢复')); } catch { toast.error(t('admin.common.operationFailed', '操作失败')); } }}><Check className="size-4" /></Button>
+                          <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary" title={t('admin.common.edit', '编辑')} onClick={() => setEditComment({ ...row })}><Pencil className="size-4" /></Button>
+                          <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" title={t('admin.comments.permanentDelete', '永久删除')} onClick={() => setDeleteId(row.id)}><Trash2 className="size-4" /></Button>
                         </>
                       )}
                     </div>

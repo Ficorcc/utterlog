@@ -369,8 +369,8 @@ export default function PagesPage() {
                         (row.page.contentKey || row.page.settingsKey) ? (
                           <Button
                             variant="ghost"
-                            size="icon"
-                            className="size-8 text-muted-foreground hover:text-foreground"
+                            size="icon-sm"
+                            className="text-muted-foreground hover:text-foreground"
                             title={row.page.settingsKey === 'coding' ? '配置 Coding' : row.page.key === 'page_about' ? '编辑关于页' : t('admin.pages.editContent', '编辑内容')}
                             onClick={() => row.page.settingsKey === 'coding' ? openCodingSettings() : openContentEditor(row.page.contentKey!)}
                           >
@@ -379,10 +379,10 @@ export default function PagesPage() {
                         ) : null
                       ) : (
                         <>
-                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground" title={t('admin.common.edit', '编辑')} onClick={() => navigate(`/pages/edit/${row.page.id}`)}>
+                          <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground" title={t('admin.common.edit', '编辑')} onClick={() => navigate(`/pages/edit/${row.page.id}`)}>
                             <Pencil className="size-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(row.page.id)}>
+                          <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(row.page.id)}>
                             <Trash2 className="size-4" />
                           </Button>
                         </>

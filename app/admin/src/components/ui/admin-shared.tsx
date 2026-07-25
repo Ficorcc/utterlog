@@ -83,12 +83,12 @@ export function RowActions({ onEdit, onDelete, editTitle = '编辑', deleteTitle
   return (
     <div className="flex justify-end gap-1">
       {onEdit && (
-        <ShadcnButton variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground" title={editTitle} onClick={onEdit}>
+        <ShadcnButton variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground" title={editTitle} onClick={onEdit}>
           <Pencil className="size-4" />
         </ShadcnButton>
       )}
       {onDelete && (
-        <ShadcnButton variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" title={deleteTitle} onClick={onDelete}>
+        <ShadcnButton variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" title={deleteTitle} onClick={onDelete}>
           <Trash2 className="size-4" />
         </ShadcnButton>
       )}

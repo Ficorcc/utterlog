@@ -239,11 +239,11 @@ export default function MusicPage() {
                   {{ netease: '网易云', tencent: 'QQ', kugou: '酷狗', kuwo: '酷我', baidu: '百度', local: '本地' }[item.platform as string] || item.platform || '本地'}
                 </span>
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground" onClick={() => toggleVisibility(item)} title={item.status === 'publish' ? '隐藏' : '显示'}>
+                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground" onClick={() => toggleVisibility(item)} title={item.status === 'publish' ? '隐藏' : '显示'}>
                     {item.status === 'publish' ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
                   </Button>
-                  <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" onClick={() => openEdit(item)} title="编辑"><Pencil className="size-4" /></Button>
-                  <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(item.id)} title="删除"><Trash2 className="size-4" /></Button>
+                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary" onClick={() => openEdit(item)} title="编辑"><Pencil className="size-4" /></Button>
+                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(item.id)} title="删除"><Trash2 className="size-4" /></Button>
                 </div>
               </div>
             </div>

@@ -1,6 +1,7 @@
 import { AlertTriangle } from 'lucide-react';
 import { Dialog, DialogContent } from './shadcn/dialog';
-import { Button } from './button';
+import { Loader2 } from 'lucide-react';
+import { Button } from './shadcn/button';
 import { useI18n } from '@/lib/i18n';
 
 // Adapter: legacy ConfirmDialog (isOpen/onClose/onConfirm/loading) rendered
@@ -33,7 +34,11 @@ export function ConfirmDialog({
           <p className="mt-2 text-sm text-muted-foreground">{message}</p>
           <div className="mt-5 flex justify-center gap-2.5">
             <Button variant="secondary" onClick={onClose} disabled={loading}>{cancelText || t('admin.common.cancel', '取消')}</Button>
-            <Button variant="danger" onClick={onConfirm} loading={loading}>{confirmText || t('admin.common.confirm', '确认')}</Button>
+            {/* shadcn Button 没有 loading prop —— 转圈图标自己渲染，跟 SaveButton 一个写法 */}
+            <Button variant="destructive" onClick={onConfirm} disabled={loading}>
+              {loading && <Loader2 className="animate-spin" />}
+              {confirmText || t('admin.common.confirm', '确认')}
+            </Button>
           </div>
         </div>
       </DialogContent>
