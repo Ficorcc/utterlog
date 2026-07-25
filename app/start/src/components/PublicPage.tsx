@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Link } from '@tanstack/react-router';
+import { Link, rootRouteId, useLoaderData } from '@tanstack/react-router';
 import { getThemeComponents } from '@/lib/theme';
 import PageTitle from '@/components/blog/PageTitle';
 import PostLink from '@/components/blog/PostLink';
@@ -14,6 +14,7 @@ import {
 import { datePartsInTimeZone, formatMonthDayInTimeZone } from '@/lib/timezone';
 import { postDateInput } from '@/lib/post-date';
 import ImageEffects from '@/components/blog/ImageEffects';
+import type { ThemeContextData } from '@/lib/theme-context';
 import type { PublicPageData } from '../server/public-pages';
 import { StartThemeShell } from './StartThemeShell';
 
@@ -42,21 +43,21 @@ const filmTabs = [
   { key: 'doc', label: '纪录片' },
 ];
 
-function Shell({ data, children }: { data: PublicPageData; children: React.ReactNode }) {
+function Shell({ ctx, children }: { ctx: ThemeContextData | null; children: React.ReactNode }) {
   const content = (
     <Suspense fallback={<div style={{ minHeight: '60vh' }} aria-hidden="true" />}>
       {children}
-      {'ctx' in data && data.ctx ? (
+      {ctx ? (
         <ImageEffects
-          effect={data.ctx.options.image_display_effect}
-          durationMs={data.ctx.options.image_display_duration}
-          lazyLoad={data.ctx.options.image_lazy_load}
-          lightbox={data.ctx.options.image_lightbox}
+          effect={ctx.options.image_display_effect}
+          durationMs={ctx.options.image_display_duration}
+          lazyLoad={ctx.options.image_lazy_load}
+          lightbox={ctx.options.image_lightbox}
         />
       ) : null}
     </Suspense>
   );
-  if ('ctx' in data && data.ctx) return <StartThemeShell ctx={data.ctx}>{content}</StartThemeShell>;
+  if (ctx) return <StartThemeShell ctx={ctx}>{content}</StartThemeShell>;
   return <main className="start-shell">{content}</main>;
 }
 
@@ -217,47 +218,51 @@ function DateArchive({ data }: { data: Extract<PublicPageData, { kind: 'date' }>
 }
 
 export function PublicPage({ data }: { data: PublicPageData }) {
+  // 完整 ThemeContext 只从 __root 的 loader 取一次。页面 loader 不再返回
+  // 一份 —— 两个 loader 各带一份的话，menus / categories / tags /
+  // archiveStats / options 会被整份序列化两遍，注水脚本直接翻倍。
+  const ctx = useLoaderData({ from: rootRouteId }) as ThemeContextData | null;
   return (
-    <Shell data={data}>
+    <Shell ctx={ctx}>
       {(() => {
-        if (data.kind === 'home' && data.ctx) {
-          const theme = getThemeComponents(data.ctx.theme.name);
-          return <theme.HomePage posts={data.posts} page={data.page} totalPages={data.totalPages} categories={data.categories} archiveStats={data.archiveStats} latestMoment={data.latestMoment} latestComments={data.latestComments} perPage={data.perPage} />;
+        if (data.kind === 'home' && ctx) {
+          const theme = getThemeComponents(ctx.theme.name);
+          return <theme.HomePage posts={data.posts} page={data.page} totalPages={data.totalPages} categories={ctx.categories} archiveStats={ctx.archiveStats} latestMoment={data.latestMoment} latestComments={data.latestComments} perPage={data.perPage} />;
         }
-        if (data.kind === 'post' && data.ctx) {
-          const theme = getThemeComponents(data.ctx.theme.name);
-          return <theme.PostPage post={data.post} options={data.options} />;
+        if (data.kind === 'post' && ctx) {
+          const theme = getThemeComponents(ctx.theme.name);
+          return <theme.PostPage post={data.post} options={ctx.options} />;
         }
-        if (data.kind === 'archives') {
-          const theme = getThemeComponents(data.ctx.theme.name);
+        if (data.kind === 'archives' && ctx) {
+          const theme = getThemeComponents(ctx.theme.name);
           const Component = theme.ArchivePage || DefaultArchivePage;
-          return <Component posts={data.posts} categories={data.ctx.categories} tags={data.ctx.tags} stats={data.ctx.archiveStats} timeZone={data.ctx.timeZone} />;
+          return <Component posts={data.posts} categories={ctx.categories} tags={ctx.tags} stats={ctx.archiveStats} timeZone={ctx.timeZone} />;
         }
-        if (data.kind === 'categories') {
-          const theme = getThemeComponents(data.ctx.theme.name);
+        if (data.kind === 'categories' && ctx) {
+          const theme = getThemeComponents(ctx.theme.name);
           const Component = theme.CategoriesPage || DefaultCategoriesPage;
-          return <Component categories={data.ctx.categories} />;
+          return <Component categories={ctx.categories} />;
         }
-        if (data.kind === 'category') {
-          const theme = getThemeComponents(data.ctx.theme.name);
+        if (data.kind === 'category' && ctx) {
+          const theme = getThemeComponents(ctx.theme.name);
           const Component = theme.CategoryPage || DefaultCategoryPage;
-          return <Component category={data.category} posts={data.posts} timeZone={data.ctx.timeZone} />;
+          return <Component category={data.category} posts={data.posts} timeZone={ctx.timeZone} />;
         }
-        if (data.kind === 'tags') {
-          const theme = getThemeComponents(data.ctx.theme.name);
+        if (data.kind === 'tags' && ctx) {
+          const theme = getThemeComponents(ctx.theme.name);
           const Component = theme.TagsPage || DefaultTagsPage;
-          return <Component tags={data.ctx.tags} />;
+          return <Component tags={ctx.tags} />;
         }
-        if (data.kind === 'tag') {
-          const theme = getThemeComponents(data.ctx.theme.name);
+        if (data.kind === 'tag' && ctx) {
+          const theme = getThemeComponents(ctx.theme.name);
           const Component = theme.TagPage || DefaultTagPage;
-          return <Component tag={data.tag} posts={data.posts} timeZone={data.ctx.timeZone} />;
+          return <Component tag={data.tag} posts={data.posts} timeZone={ctx.timeZone} />;
         }
         if (data.kind === 'about') return <AboutContent />;
         if (data.kind === 'coding') return <CodingPage data={data.data} timeZone={data.timeZone} />;
-        if (data.kind === 'footprints') return <FootprintsClient initialRows={data.rows} options={data.options} />;
+        if (data.kind === 'footprints') return <FootprintsClient initialRows={data.rows} options={ctx?.options || {}} />;
         if (data.kind === 'moments') return <MomentsClient initialLoaded initialMoments={data.moments} initialTags={data.tags} initialFetchedAt={data.fetchedAt} />;
-        if (data.kind === 'client' && data.page === 'links') return <LinksClient initialLinks={data.items || []} initialOptions={data.ctx?.options || {}} />;
+        if (data.kind === 'client' && data.page === 'links') return <LinksClient initialLinks={data.items || []} initialOptions={ctx?.options || {}} />;
         if (data.kind === 'client' && data.page === 'feeds') return <FeedsClient />;
         if (data.kind === 'client' && data.page === 'albums') return <AlbumsClient initialAlbums={data.items || []} />;
         if (data.kind === 'client' && data.page === 'music') return <MusicClient initialItems={data.items || []} />;
@@ -265,7 +270,7 @@ export function PublicPage({ data }: { data: PublicPageData }) {
         if (data.kind === 'search') return <SearchPage data={data} />;
         if (data.kind === 'films') return <FilmsPage data={data} />;
         if (data.kind === 'date') return <DateArchive data={data} />;
-        if (data.kind === 'not-found' && data.ctx) return <DefaultNotFoundPage />;
+        if (data.kind === 'not-found' && ctx) return <DefaultNotFoundPage />;
         if (data.kind === 'post') return (
           <article className="start-article">
             <Link to="/" className="text-link">返回首页</Link>

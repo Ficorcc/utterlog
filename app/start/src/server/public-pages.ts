@@ -104,24 +104,41 @@ function dataOf<T>(response: unknown, fallback: T): T {
   return value === undefined ? response as T : value as T;
 }
 
-export type PublicPageData =
-  | { kind: 'not-found'; ctx: ThemeContextData | null; pathname: string }
-  | { kind: 'home'; ctx: ThemeContextData | null; posts: any[]; page: number; totalPages: number; categories: any[]; archiveStats: Record<string, any>; latestMoment: any | null; latestComments: any[]; perPage: number }
-  | { kind: 'post'; ctx: ThemeContextData | null; post: any; options: Record<string, string> }
-  | { kind: 'archives'; ctx: ThemeContextData; posts: any[] }
-  | { kind: 'categories'; ctx: ThemeContextData }
-  | { kind: 'category'; ctx: ThemeContextData; category: any; posts: any[] }
-  | { kind: 'tags'; ctx: ThemeContextData }
-  | { kind: 'tag'; ctx: ThemeContextData; tag: any; posts: any[] }
-  | { kind: 'about'; ctx: ThemeContextData | null }
-  | { kind: 'coding'; ctx: ThemeContextData | null; data: any; timeZone: string }
-  | { kind: 'footprints'; ctx: ThemeContextData | null; rows: any[]; options: Record<string, string> }
-  | { kind: 'moments'; ctx: ThemeContextData | null; moments: any[]; tags: string[]; fetchedAt: number }
-  | { kind: 'client'; ctx: ThemeContextData | null; page: 'links' | 'feeds' | 'albums' | 'music'; items?: any[] }
-  | { kind: 'shelf'; ctx: ThemeContextData | null; shelf: 'movies' | 'books' | 'games' | 'goods'; items: any[] }
-  | { kind: 'search'; ctx: ThemeContextData | null; query: string; results: any[]; mode: string; total: number; timeZone: string }
-  | { kind: 'films'; ctx: ThemeContextData | null; items: any[]; total: number; page: number; perPage: number; totalPages: number; filters: Record<string, string> }
-  | { kind: 'date'; ctx: ThemeContextData | null; posts: any[]; year: number; month?: number; day?: number; timeZone: string };
+/**
+ * head() 生成 <title> 需要的最小站点信息。
+ *
+ * 这里只带 title / subtitle，是因为完整的 ThemeContext 已经由 __root 的
+ * loader 提供了。两个 loader 各返回一份 ctx 的话，SSR 会把 menus、
+ * categories、tags、archiveStats（含整年 heatmap）、options 整份序列化
+ * 两遍 —— 实测文章页 101.6 KB 的 HTML 里有 79.3 KB 是注水脚本，而真实
+ * DOM 只有 259 个元素。gzip 能把重复内容压得很小，但浏览器解析这 79 KB
+ * 并构建两份对象的开销压不掉，那正是 hydration 卡顿的来源。
+ *
+ * 客户端组件要用完整 ctx 的，从 __root 的 loaderData 读（见 PublicPage）。
+ * head() 拿不到别的路由的 loaderData，所以才在这里留一份最小副本。
+ */
+export type PublicPageSite = { title: string; subtitle: string };
+
+export type PublicPageBody =
+  | { kind: 'not-found'; pathname: string }
+  | { kind: 'home'; posts: any[]; page: number; totalPages: number; latestMoment: any | null; latestComments: any[]; perPage: number }
+  | { kind: 'post'; post: any }
+  | { kind: 'archives'; posts: any[] }
+  | { kind: 'categories' }
+  | { kind: 'category'; category: any; posts: any[] }
+  | { kind: 'tags' }
+  | { kind: 'tag'; tag: any; posts: any[] }
+  | { kind: 'about' }
+  | { kind: 'coding'; data: any; timeZone: string }
+  | { kind: 'footprints'; rows: any[] }
+  | { kind: 'moments'; moments: any[]; tags: string[]; fetchedAt: number }
+  | { kind: 'client'; page: 'links' | 'feeds' | 'albums' | 'music'; items?: any[] }
+  | { kind: 'shelf'; shelf: 'movies' | 'books' | 'games' | 'goods'; items: any[] }
+  | { kind: 'search'; query: string; results: any[]; mode: string; total: number; timeZone: string }
+  | { kind: 'films'; items: any[]; total: number; page: number; perPage: number; totalPages: number; filters: Record<string, string> }
+  | { kind: 'date'; posts: any[]; year: number; month?: number; day?: number; timeZone: string };
+
+export type PublicPageData = PublicPageBody & { site: PublicPageSite };
 
 function normalizePath(pathname: string) {
   const raw = pathname || '/';
@@ -227,7 +244,7 @@ async function postBySlug(slug: string, reader: ReadVisitor | null = null) {
   return safe(getPostBySlug(slug, reader), null);
 }
 
-async function homeRoute(ctx: ThemeContextData | null, page: number): Promise<PublicPageData> {
+async function homeRoute(ctx: ThemeContextData | null, page: number): Promise<PublicPageBody> {
   const ip = visitorIp();
   const [home, visitorWeather] = await Promise.all([
     safe(loadHomePageDataDirect(page), null),
@@ -235,20 +252,16 @@ async function homeRoute(ctx: ThemeContextData | null, page: number): Promise<Pu
   ]);
   if (ctx) ctx.visitorWeather = visitorWeather;
   return {
-    kind: 'home',
-    ctx,
-    posts: home?.posts || [],
+    kind: 'home', posts: home?.posts || [],
     page: home?.page || page,
     totalPages: home?.totalPages || 1,
-    categories: home?.categories || ctx?.categories || [],
-    archiveStats: home?.archiveStats || ctx?.archiveStats || {},
     latestMoment: home?.latestMoment || null,
     latestComments: home?.latestComments || [],
     perPage: home?.perPage || 10,
   };
 }
 
-async function dateRoute(ctx: ThemeContextData | null, year: number, month?: number, day?: number): Promise<PublicPageData> {
+async function dateRoute(ctx: ThemeContextData | null, year: number, month?: number, day?: number): Promise<PublicPageBody> {
   const options = ctx?.options || await optionsFallback();
   const timeZone = ctx?.timeZone || resolveSiteTimeZone(options);
   const res = await safe(listPosts({ perPage: 500, status: 'publish' }), emptyPostList(1, 500));
@@ -256,13 +269,20 @@ async function dateRoute(ctx: ThemeContextData | null, year: number, month?: num
     const parts = datePartsInTimeZone(postDateInput(post), timeZone);
     return parts.year === year && (month == null || parts.month === month) && (day == null || parts.day === day);
   });
-  return { kind: 'date', ctx, posts, year, month, day, timeZone };
+  return { kind: 'date', posts, year, month, day, timeZone };
 }
 
 export const loadStartPublicPage = createServerFn({ method: 'GET' })
   .validator(validatePublicPageRequest)
   .handler(async ({ data }): Promise<PublicPageData> => {
     const ctx = await themeCtx();
+    const body = await resolvePublicPage(ctx, data);
+    // 只带回 head() 需要的两个字段。完整 ctx 由 __root 的 loader 负责，
+    // 这里再返一份的话整个 ThemeContext 会被序列化两遍（详见 PublicPageSite）。
+    return { ...body, site: { title: ctx?.site.title || 'Utterlog', subtitle: ctx?.site.subtitle || '' } };
+  });
+
+async function resolvePublicPage(ctx: ThemeContextData | null, data: PublicPageRequest): Promise<PublicPageBody> {
 
     if (data.kind === 'home') {
       return homeRoute(ctx, Math.max(1, Number(data.page) || 1));
@@ -270,89 +290,86 @@ export const loadStartPublicPage = createServerFn({ method: 'GET' })
 
     if (data.kind === 'post' || data.kind === 'film') {
       const post = await postBySlug(data.slug, data.kind === 'post' ? postReader() : null);
-      if (!post) return { kind: 'not-found', ctx, pathname: data.kind === 'film' ? `/films/${data.slug}` : `/posts/${data.slug}` };
-      return { kind: 'post', ctx, post, options: ctx?.options || await optionsFallback() };
+      if (!post) return { kind: 'not-found', pathname: data.kind === 'film' ? `/films/${data.slug}` : `/posts/${data.slug}` };
+      return { kind: 'post', post };
     }
 
     if (data.kind === 'archives') {
-      if (!ctx) return { kind: 'not-found', ctx, pathname: '/archives' };
+      if (!ctx) return { kind: 'not-found', pathname: '/archives' };
       const res = await safe(listPosts({ perPage: 500, status: 'publish' }), emptyPostList(1, 500));
-      return { kind: 'archives', ctx, posts: dataOf<any[]>(res, []) };
+      return { kind: 'archives', posts: dataOf<any[]>(res, []) };
     }
 
     if (data.kind === 'categories') {
-      if (!ctx) return { kind: 'not-found', ctx, pathname: '/categories' };
-      return { kind: 'categories', ctx };
+      if (!ctx) return { kind: 'not-found', pathname: '/categories' };
+      return { kind: 'categories' };
     }
     if (data.kind === 'category') {
-      if (!ctx) return { kind: 'not-found', ctx, pathname: `/categories/${data.slug}` };
+      if (!ctx) return { kind: 'not-found', pathname: `/categories/${data.slug}` };
       const category = matchBySlugOrName(ctx.categories, data.slug);
-      if (!category) return { kind: 'not-found', ctx, pathname: `/categories/${data.slug}` };
+      if (!category) return { kind: 'not-found', pathname: `/categories/${data.slug}` };
       const res = await safe(listPosts({ perPage: 500, categoryId: category.id, status: 'publish' }), emptyPostList(1, 500));
-      return { kind: 'category', ctx, category, posts: dataOf<any[]>(res, []) };
+      return { kind: 'category', category, posts: dataOf<any[]>(res, []) };
     }
 
     if (data.kind === 'tags') {
-      if (!ctx) return { kind: 'not-found', ctx, pathname: '/tags' };
-      return { kind: 'tags', ctx };
+      if (!ctx) return { kind: 'not-found', pathname: '/tags' };
+      return { kind: 'tags' };
     }
     if (data.kind === 'tag') {
-      if (!ctx) return { kind: 'not-found', ctx, pathname: `/tags/${data.slug}` };
+      if (!ctx) return { kind: 'not-found', pathname: `/tags/${data.slug}` };
       const tag = matchBySlugOrName(ctx.tags, data.slug, true);
-      if (!tag) return { kind: 'not-found', ctx, pathname: `/tags/${data.slug}` };
+      if (!tag) return { kind: 'not-found', pathname: `/tags/${data.slug}` };
       const res = await safe(listPosts({ perPage: 500, tagId: tag.id, status: 'publish' }), emptyPostList(1, 500));
-      return { kind: 'tag', ctx, tag, posts: dataOf<any[]>(res, []) };
+      return { kind: 'tag', tag, posts: dataOf<any[]>(res, []) };
     }
 
     if (data.kind === 'search') {
       const query = String(data.query || '').trim();
       const options = ctx?.options || await optionsFallback();
       const timeZone = ctx?.timeZone || resolveSiteTimeZone(options);
-      if (!query) return { kind: 'search', ctx, query, results: [], mode: '', total: 0, timeZone };
+      if (!query) return { kind: 'search', query, results: [], mode: '', total: 0, timeZone };
       const body = await safe(searchPublicPosts(query, 20), { results: [] as any[], total: 0, mode: 'keyword' });
       const results = body.results || [];
-      return { kind: 'search', ctx, query, results, mode: body.mode || '', total: body.total || results.length, timeZone };
+      return { kind: 'search', query, results, mode: body.mode || '', total: body.total || results.length, timeZone };
     }
 
-    if (data.kind === 'about') return { kind: 'about', ctx };
+    if (data.kind === 'about') return { kind: 'about' };
 
     if (data.kind === 'coding') {
       const coding = await safe(codingPayload(false), {}, 10_000);
-      return { kind: 'coding', ctx, data: coding, timeZone: ctx?.timeZone || 'UTC' };
+      return { kind: 'coding', data: coding, timeZone: ctx?.timeZone || 'UTC' };
     }
 
     if (data.kind === 'footprints') {
-      const [options, footprints] = await Promise.all([
-        optionsFallback(),
-        safe(listPublicFootprints(), []),
-      ]);
-      return { kind: 'footprints', ctx, rows: footprints, options };
+      const footprints = await safe(listPublicFootprints(), []);
+      return { kind: 'footprints', rows: footprints };
     }
 
     if (data.kind === 'moments') {
       const res = await safe(listMoments({ perPage: 50 }), emptyMomentList(1, 50));
       const body = dataOf<any>(res, []);
       const moments = Array.isArray(body) ? body : body.moments || [];
-      return { kind: 'moments', ctx, moments, tags: momentTags(moments), fetchedAt: Date.now() };
+      return { kind: 'moments', moments, tags: momentTags(moments), fetchedAt: Date.now() };
     }
 
     if (data.kind === 'links') {
       const res = await safe(listPublicContent('links', { perPage: 500 }), emptyContentList(1, 500));
-      return { kind: 'client', ctx, page: 'links', items: dataOf<any[]>(res, []) };
+      return { kind: 'client', page: 'links', items: dataOf<any[]>(res, []) };
     }
-    if (data.kind === 'feeds') return { kind: 'client', ctx, page: 'feeds' };
+    if (data.kind === 'feeds') return { kind: 'client', page: 'feeds' };
     if (data.kind === 'albums') {
       const res = await safe(listPublicContent('albums', { perPage: 500 }), emptyContentList(1, 500));
-      return { kind: 'client', ctx, page: 'albums', items: dataOf<any[]>(res, []) };
+      return { kind: 'client', page: 'albums', items: dataOf<any[]>(res, []) };
     }
     if (data.kind === 'music') {
       const res = await safe(listPublicContent('music', { perPage: 100 }), emptyContentList(1, 100));
-      return { kind: 'client', ctx, page: 'music', items: dataOf<any[]>(res, []) };
+      return { kind: 'client', page: 'music', items: dataOf<any[]>(res, []) };
     }
 
     if (data.kind === 'shelf') {
       const res = await safe(listPublicContent(data.shelf, { perPage: 60 }), emptyContentList(1, 60));
-      return { kind: 'shelf', ctx, shelf: data.shelf, items: dataOf<any[]>(res, []) };
+      return { kind: 'shelf', shelf: data.shelf, items: dataOf<any[]>(res, []) };
     }
 
     if (data.kind === 'films') {
@@ -373,7 +390,7 @@ export const loadStartPublicPage = createServerFn({ method: 'GET' })
       }), emptyPostList(page, perPage));
       const items = dataOf<any[]>(res, []);
       const total = (res as any)?.pagination?.total ?? (res as any)?.total ?? items.length;
-      return { kind: 'films', ctx, items, total, page, perPage, totalPages: Math.max(1, Math.ceil(total / perPage)), filters };
+      return { kind: 'films', items, total, page, perPage, totalPages: Math.max(1, Math.ceil(total / perPage)), filters };
     }
 
     if (data.kind === 'date') {
@@ -386,10 +403,10 @@ export const loadStartPublicPage = createServerFn({ method: 'GET' })
       if (segments.length > 0) {
         const encodedPath = `/${segments.map((item) => encodeURIComponent(item)).join('/')}`;
         const post = await safe(resolvePublicPostPath(encodedPath, postReader()), null);
-        if (post) return { kind: 'post', ctx, post, options: ctx?.options || await optionsFallback() };
+        if (post) return { kind: 'post', post };
       }
-      return { kind: 'not-found', ctx, pathname };
+      return { kind: 'not-found', pathname };
     }
 
-    return { kind: 'not-found', ctx, pathname: '/' };
-  });
+  return { kind: 'not-found', pathname: '/' };
+}

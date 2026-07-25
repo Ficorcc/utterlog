@@ -12,12 +12,14 @@ const pageTitles: Partial<Record<PublicPageData['kind'], string>> = {
   films: '影视',
 };
 
+// site 是页面 loader 专门为 head() 留的最小副本 —— 完整 ThemeContext 在
+// __root 的 loaderData 里，而 head() 拿不到别的路由的 loaderData。
 function siteTitle(data: PublicPageData) {
-  return ('ctx' in data && data.ctx?.site.title) || 'Utterlog';
+  return data.site?.title || 'Utterlog';
 }
 
 function siteSubtitle(data: PublicPageData) {
-  return ('ctx' in data && data.ctx?.site.subtitle) || '';
+  return data.site?.subtitle || '';
 }
 
 function pageTitle(data: PublicPageData) {
