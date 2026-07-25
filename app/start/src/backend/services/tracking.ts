@@ -102,6 +102,30 @@ async function recordPostReadDaily(postId: number, readerKey: string) {
   });
 }
 
+/**
+ * 全站浏览量：公开页每渲染一次 +1，口径跟文章阅读量完全一致 —— 打开算一次、
+ * 刷新算一次，不去重也不限流，只挡爬虫 UA。
+ *
+ * 从 /track 挪到 SSR 这一侧的原因有两个：一是浏览器上报要等 JS 跑起来，关了
+ * JS 或被拦截插件挡掉的访问统统漏计；二是 /track 那条链路带 30 秒去重和频率
+ * 封禁，同一个人连刷十次只算一次，跟「刷新就 +1」的口径对不上。
+ *
+ * 不 await：页脚那个数字是前端单独请求 /archive/stats 拿的，不参与本次 SSR
+ * 渲染，没必要让一次计数写入拖慢首屏。写失败只打日志。
+ *
+ * 唯一访客数（total_uniques）仍由 /track 负责 —— 那个要靠浏览器 localStorage
+ * 里的 visitor_id 才能去重，服务端拿不到。
+ */
+export function bumpSiteViewOnRender(ua: string) {
+  if (isBotUa(ua)) return;
+  void exec(
+    `update ${table('stats_global')} set total_views = total_views + 1, updated_at = $1 where id = 1`,
+    [nowUnix()],
+  ).catch((error) => {
+    console.error('[analytics] site view bump failed', error);
+  });
+}
+
 async function pageViewGate(identity: string, ip: string, path: string, now: number) {
   const identityBlockKey = analyticsKey('block:identity', identity);
   const ipBlockKey = analyticsKey('block:ip', ip);
@@ -265,8 +289,11 @@ export async function trackPageView(request: Request, input: Record<string, unkn
           geo.region, geo.city, geo.latitude, geo.longitude, now, visitorId, fingerprint],
       );
       accessLogId = Number(accessRows[0]?.id || 0);
+      // total_views 已改由 SSR 渲染时累加（见 bumpSiteViewOnRender），这里只
+      // 记唯一访客 —— 那个要靠浏览器的 visitor_id 去重，服务端拿不到。两边
+      // 各写各的字段，不会双计。
       await tx.unsafe(
-        `update ${table('stats_global')} set total_views=total_views+1, total_uniques=total_uniques+$2,
+        `update ${table('stats_global')} set total_uniques=total_uniques+$2,
          first_event_at=case when first_event_at=0 then $1 else first_event_at end, updated_at=$1 where id=1`, [now, uniqueInc],
       );
       await tx.unsafe(

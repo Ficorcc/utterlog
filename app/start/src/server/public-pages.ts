@@ -17,7 +17,7 @@ import {
   searchPublicPosts,
 } from '@backend/public-read';
 import { requestIp } from '@backend/request-ip';
-import type { ReadVisitor } from '@backend/services/tracking';
+import { bumpSiteViewOnRender, type ReadVisitor } from '@backend/services/tracking';
 import { loadStartThemeContextDirect } from './theme';
 
 export type PublicPageRequest =
@@ -276,6 +276,10 @@ export const loadStartPublicPage = createServerFn({ method: 'GET' })
   .validator(validatePublicPageRequest)
   .handler(async ({ data }): Promise<PublicPageData> => {
     const ctx = await themeCtx();
+    // 全站浏览量：每渲染一次公开页 +1，跟文章阅读量同一个口径（刷新也算）。
+    // 放在这里而不是中间件，是因为这个 server fn 就是所有公开页的唯一入口，
+    // API 请求和静态资源根本走不到，不用再费劲排除。
+    bumpSiteViewOnRender(getRequestHeader('user-agent') || '');
     const body = await resolvePublicPage(ctx, data);
     // 只带回 head() 需要的两个字段。完整 ctx 由 __root 的 loader 负责，
     // 这里再返一份的话整个 ThemeContext 会被序列化两遍（详见 PublicPageSite）。
