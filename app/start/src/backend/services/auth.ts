@@ -7,6 +7,7 @@ import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../auth/j
 import { authenticateRequest } from '../auth/session';
 import { createPasswordResetToken, hashPasswordResetToken } from '../auth/password-reset';
 import { sendConfiguredEmail } from '../email';
+import { emailSite, passwordResetEmail, verifyCodeEmail } from '../email/templates';
 import { ephemeral } from '../store/ephemeral';
 
 export class AuthServiceError extends Error {
@@ -256,14 +257,19 @@ export async function sendProfileVerificationCode(request: Request) {
   if (!user?.email) throw new AuthServiceError(400, 'BAD_REQUEST', '用户邮箱不存在');
   const code = String(randomInt(100000, 1000000));
   await ephemeral.set(`email_code:${userId}`, code, 300);
-  await sendConfiguredEmail(user.email, 'Utterlog 验证码', `<p>你的验证码是：<strong>${code}</strong></p><p>5 分钟内有效。</p>`);
+  const codeSite = await emailSite();
+  await sendConfiguredEmail(user.email, `${codeSite.title} 验证码`,
+    verifyCodeEmail(codeSite, { code, purpose: '登录', expireMins: 5 }));
   return { sent: true };
 }
 
 export async function forgotPassword(input: unknown) {
   const { email } = parseInput(forgotPasswordSchema, input);
   const normalizedEmail = email.toLowerCase();
-  const user = await one<{ id: number }>(`select id from ${table('users')} where lower(email) = $1`, [normalizedEmail]).catch(() => null);
+  // 顺带取昵称/用户名：重置邮件正文要称呼收件人（"Hi 西风，点击下方按钮…"）。
+  const user = await one<{ id: number; nickname: string | null; username: string | null }>(
+    `select id, nickname, username from ${table('users')} where lower(email) = $1`, [normalizedEmail],
+  ).catch(() => null);
   if (user) {
     const token = createPasswordResetToken();
     const resetUrl = `${config.appUrl.replace(/\/+$/, '')}/admin/reset-password?token=${token}`;
@@ -271,8 +277,13 @@ export async function forgotPassword(input: unknown) {
       `update ${table('users')} set reset_token = $1, reset_token_expires_at = $2, updated_at = $3 where id = $4`,
       [hashPasswordResetToken(token), nowUnix() + 3600, nowUnix(), user.id],
     );
-    await sendConfiguredEmail(normalizedEmail, 'Utterlog 密码重置链接',
-      `<p>你正在重置 Utterlog 管理账号密码。</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>链接 1 小时内有效。</p>`).catch(() => {});
+    const resetSite = await emailSite();
+    await sendConfiguredEmail(normalizedEmail, `${resetSite.title} 密码重置链接`,
+      passwordResetEmail(resetSite, {
+        userName: user.nickname || user.username || '',
+        resetUrl,
+        expireMins: 60,
+      })).catch(() => {});
   }
   return { sent: true };
 }

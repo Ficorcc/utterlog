@@ -4,6 +4,7 @@ import { exec, many, nowUnix, one } from '../db/helpers';
 import { optionValue } from '../db/options';
 import { sendConfiguredEmail } from '../email';
 import { commentReplyUnsubscribeUrl, isCommentReplyOptedOut } from '../email/comment-reply-unsubscribe';
+import { commentReplyEmail, emailSite } from '../email/templates';
 
 export type AdminCommentAction = 'approve' | 'delete' | 'spam' | 'trash';
 
@@ -134,10 +135,6 @@ export async function approveAdminComment(id: number) {
   return updateAdminComment(id, { status: 'approved' });
 }
 
-function htmlEscape(value: string) {
-  return value.replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch] || ch));
-}
-
 export async function adminCommentPendingCounts() {
   const [pending, spam] = await Promise.all([
     one<{ count: string }>(`select count(*)::text as count from ${table('comments')} where status = 'pending'`),
@@ -194,16 +191,19 @@ export async function replyToAdminComment(parentId: number, userId: number, inpu
     const siteUrl = (await optionValue('site_url', config.appUrl)).replace(/\/+$/, '');
     const postUrl = `${siteUrl}/posts/${encodeURIComponent(post?.slug || String(parent.post_id))}#comment-${id}`;
     const unsubscribe = await commentReplyUnsubscribeUrl(siteUrl, recipient);
+    const site = await emailSite();
     await sendConfiguredEmail(
       recipient,
       `你的评论收到了回复 - ${siteTitle}`,
-      `<div style="font:14px/1.7 -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;color:#0d1a2d">
-        <p>${htmlEscape(parent.author_name || '你好')}，你在《${htmlEscape(post?.title || '')}》下的评论收到了回复。</p>
-        <blockquote style="margin:12px 0;padding:10px 14px;background:#f5f7fa;border-left:3px solid #cdd5df;color:#5a6b7f">${htmlEscape(String(parent.content || '').slice(0, 300))}</blockquote>
-        <div style="margin:12px 0;padding:12px 14px;background:#fff;border:1px solid #e5eaf0">${htmlEscape(content.slice(0, 500))}</div>
-        <p><a href="${htmlEscape(postUrl)}">查看回复</a></p>
-        <p style="font-size:12px;color:#8ea0b4">不想再收到回复通知？<a href="${htmlEscape(unsubscribe)}">点击此处退订</a>。</p>
-      </div>`,
+      commentReplyEmail(site, {
+        recipientName: parent.author_name || '你好',
+        replierName: admin.nickname || admin.username || '博主',
+        postTitle: post?.title || '',
+        originalContent: String(parent.content || '').slice(0, 300),
+        replyContent: content.slice(0, 500),
+        postUrl,
+        unsubscribeUrl: unsubscribe,
+      }),
     ).catch(() => {});
   }
   return { id };

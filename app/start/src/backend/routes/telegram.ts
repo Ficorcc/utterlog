@@ -9,6 +9,7 @@ import {
 } from '../email/comment-reply-unsubscribe';
 import { storeUploadedBytes } from '../media/storage';
 import { siteTotalViews } from '../services/analytics';
+import { commentReplyEmail, emailSite } from '../email/templates';
 import { callAiText } from './ai';
 
 function parseJsonOption<T>(value: string, fallback: T): T {
@@ -132,16 +133,20 @@ async function publishTelegramCommentReply(commentId: number, content: string) {
     const siteUrl = (await optionValue('site_url', config.appUrl)).replace(/\/+$/, '');
     const postUrl = `${siteUrl}/posts/${encodeURIComponent(post?.slug || String(parent.post_id))}#comment-${inserted?.id || ''}`;
     const unsubscribe = await commentReplyUnsubscribeUrl(siteUrl, recipient);
+    const site = await emailSite();
     await sendConfiguredEmail(
       recipient,
       `你的评论收到了回复 - ${siteTitle}`,
-      `<div style="font:14px/1.7 -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;color:#0d1a2d">
-        <p>${htmlEscape(parent.author_name || '你好')}，你在《${htmlEscape(post?.title || '')}》下的评论收到了回复。</p>
-        <blockquote style="margin:12px 0;padding:10px 14px;background:#f5f7fa;border-left:3px solid #cdd5df;color:#5a6b7f">${htmlEscape(String(parent.content || '').slice(0, 300))}</blockquote>
-        <div style="margin:12px 0;padding:12px 14px;background:#fff;border:1px solid #e5eaf0">${htmlEscape(reply.slice(0, 500))}</div>
-        <p><a href="${htmlEscape(postUrl)}">查看回复</a></p>
-        <p style="font-size:12px;color:#8ea0b4">不想再收到回复通知？<a href="${htmlEscape(unsubscribe)}">点击此处退订</a>。</p>
-      </div>`,
+      commentReplyEmail(site, {
+        recipientName: parent.author_name || '你好',
+        // 跟入库时写的作者名保持一致（见上面的 insert），别用站点名。
+        replierName: admin?.nickname || admin?.username || 'Admin',
+        postTitle: post?.title || '',
+        originalContent: String(parent.content || '').slice(0, 300),
+        replyContent: reply.slice(0, 500),
+        postUrl,
+        unsubscribeUrl: unsubscribe,
+      }),
     ).catch(() => {});
   }
   return inserted?.id || 0;

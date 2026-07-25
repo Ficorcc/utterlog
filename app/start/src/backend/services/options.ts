@@ -2,6 +2,7 @@ import { table } from '../config';
 import { exec, many, nowUnix, one } from '../db/helpers';
 import { optionValue } from '../db/options';
 import { sendConfiguredEmail } from '../email';
+import { emailSite, noticeEmail } from '../email/templates';
 import { resolveFaviconUrl } from '../media/favicon';
 
 const sensitiveSuffixes = ['_api_key', '_secret', '_token', '_pass', '_password', '_access_key', '_secret_key'];
@@ -59,7 +60,13 @@ export async function sendTestEmail(userId: number, input: Record<string, unknow
     to = String(user?.email || '').trim();
   }
   if (!to) throw new OptionServiceError(400, 'VALIDATION_ERROR', '测试收件人不能为空，请先填写管理员邮箱或当前用户邮箱');
-  const siteName = await optionValue('site_title', 'Utterlog');
-  await sendConfiguredEmail(to, `${siteName} - 测试邮件`, '<p>如果你收到这封邮件，说明 Utterlog 邮件服务已配置成功。</p>');
+  const site = await emailSite();
+  await sendConfiguredEmail(to, `${site.title} - 测试邮件`, noticeEmail(site, {
+    heading: '邮件服务配置成功',
+    lines: ['如果你收到这封邮件，说明 Utterlog 的邮件发送通道已经可以正常工作。',
+            '这封信同时也是模板样式的预览 —— 通知类邮件都会长这个样子。'],
+    actionUrl: site.url,
+    actionLabel: '访问站点',
+  }));
   return { sent: true, message: `测试邮件已发送到 ${to}`, to };
 }

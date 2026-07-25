@@ -3,6 +3,7 @@ import { exec, many, nowUnix, one } from '../db/helpers';
 import { optionValue } from '../db/options';
 import { lookupGeoIp } from '../geoip';
 import { sendConfiguredEmail } from '../email';
+import { emailSite, newCommentEmail } from '../email/templates';
 import { aiAuditFailAction, auditCommentContent, enqueueAiCommentReply } from '../ai/comments';
 import { sendCommentModerationTelegram } from '../telegram';
 import { PublicWriteError } from './public-write';
@@ -169,15 +170,23 @@ export async function createPublicComment(input: unknown, request: PublicComment
     const siteTitle = await optionValue('site_title', 'Utterlog');
     const siteUrl = (await optionValue('site_url', config.appUrl)).replace(/\/+$/, '');
     if (admin?.email) {
+      const site = await emailSite();
       await sendConfiguredEmail(
         admin.email,
         `新评论 - ${post.title}`,
-        `<div style="font:14px/1.7 -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;color:#0d1a2d">
-          <p>${htmlEscape(String(body.author_name || body.author || body.name || '访客'))} 在《${htmlEscape(post.title)}》发表了新评论。</p>
-          <p>状态：${htmlEscape(status)}</p>
-          <blockquote style="margin:12px 0;padding:10px 14px;background:#f5f7fa;border-left:3px solid #cdd5df;color:#5a6b7f">${htmlEscape(content.slice(0, 500))}</blockquote>
-          <p><a href="${htmlEscape(`${siteUrl}/admin/comments`)}">进入 ${htmlEscape(siteTitle)} 后台审核</a></p>
-        </div>`,
+        newCommentEmail(site, {
+          author: String(body.author_name || body.author || body.name || '访客'),
+          postTitle: post.title,
+          content: content.slice(0, 500),
+          status,
+          email: String(body.author_email || body.email || ''),
+          url: String(body.author_url || body.url || ''),
+          ip: request.ip || '',
+          ipLocation: [geo?.city, geo?.province, geo?.country].filter(Boolean).join(' · '),
+          countryCode: geo?.country_code || '',
+          postUrl: `${siteUrl}/posts/${encodeURIComponent(post.slug || String(postId))}#comment-${id}`,
+          manageUrl: `${siteUrl}/admin/comments`,
+        }),
       ).catch(() => {});
     }
   }
