@@ -2,7 +2,7 @@ import { mkdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { config } from '../config';
 import { optimizeBrandingLogo } from '../media/branding';
-import { buildFaviconIco, clearBrandingFaviconFiles } from '../media/favicon';
+import { buildFaviconIco, buildFaviconPngs, clearBrandingFaviconFiles } from '../media/favicon';
 import { brandingExts, mediaExt } from '../media/storage';
 
 type BrandingPurpose = 'logo' | 'dark-logo' | 'favicon';
@@ -31,10 +31,22 @@ export async function storeBrandingUpload(file: File, purposeValue: unknown) {
 
   if (purpose === 'favicon') {
     try {
-      const ico = await buildFaviconIco(bytes, ext);
+      // ico 给浏览器标签页，PNG 那套给 iOS 主屏和 PWA（manifest 引用 192/512）。
+      // 两者从同一张原图渲染，一次上传全部更新，不会出现 ico 换了而主屏图标
+      // 还是旧的。
+      const [ico, pngs] = await Promise.all([
+        buildFaviconIco(bytes, ext),
+        buildFaviconPngs(bytes, ext).catch(() => []),
+      ]);
       clearBrandingFaviconFiles(dir, rmSync);
       await Bun.write(join(dir, 'favicon.ico'), ico);
-      return { url: '/favicon.ico', filename: 'favicon.ico', purpose };
+      await Promise.all(pngs.map((png) => Bun.write(join(dir, png.name), png.bytes)));
+      return {
+        url: '/favicon.ico',
+        filename: 'favicon.ico',
+        purpose,
+        generated: ['favicon.ico', ...pngs.map((png) => png.name)],
+      };
     } catch (err) {
       throw new BrandingUploadError(err instanceof Error ? err.message : 'Favicon 转换失败');
     }

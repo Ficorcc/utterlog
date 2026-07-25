@@ -20,6 +20,9 @@ describe('TanStack Start document assets', () => {
   test('loads shared fonts before the active theme stylesheet', () => {
     expect(startDocumentLinks(context()).map((link) => link.href)).toEqual([
       '/site.ico',
+      // iOS 主屏图标和 PWA manifest：固定路径，与 favicon 一同由后台上传生成
+      '/apple-touch-icon.png',
+      '/site.webmanifest',
       'https://static.bluecdn.com',
       'https://static.bluecdn.com/libs/fontawesome/7.3.1/css/all.min.css',
       'https://static.bluecdn.com/fonts/noto-sans-sc.css',
