@@ -3,9 +3,9 @@ import { cn } from '@/lib/utils';
 
 export const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    // 直角：Card 是普通 <div>，globals.css 那条 !important 规则只覆盖
-    // button/input/select/textarea/form/.card/[data-slot=card]，落不到这里。
-    <div ref={ref} className={cn('border border-border bg-card text-card-foreground shadow-sm', className)} {...props} />
+    // 纯描边，不加阴影：边框和阴影二选一，两个都上会显脏。设置页是密集表单、
+    // 卡片一个接一个堆叠，叠在一起的阴影尤其糊；描边在浅灰背景上边界更清楚。
+    <div ref={ref} className={cn('rounded-lg border border-border bg-card text-card-foreground', className)} {...props} />
   ),
 );
 Card.displayName = 'Card';

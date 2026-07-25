@@ -7,8 +7,10 @@
  * Coexists with the legacy --color-* tokens during migration.
  * ============================================================ */
 :root {
-  /* Admin surfaces use a square-corner visual language. */
-  --radius: 0;
+  /* 圆角基准。派生出 sm=4 / md=6 / lg=8 / xl=12，都落在 6~8px 这档，
+     不会出现 16px 以上的大圆角。rounded-full 不受影响，头像、开关、
+     状态圆点仍然是正圆。 */
+  --radius: 8px;
   --background: #ffffff;
   --foreground: #0a0a0a;
   --card: #ffffff;
@@ -270,11 +272,12 @@ body {
   --shadow-1: 0 1px 3px rgba(0,0,0,0.08);
   --shadow-2: 0 4px 12px rgba(0,0,0,0.10);
 
-  /* Radius — 全局直角（§9 设计 Token） */
-  --radius-sm: 0;
-  --radius-md: 0;
-  --radius-lg: 0;
-  --radius-hero: 0;
+  /* Radius（§9 设计 Token）。注意这几个名字跟 shadcn 那套 --radius-* 重名，
+     实际零引用，保留只为兼容旧样式；新代码一律用 Tailwind 的 rounded-*。 */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-hero: 12px;
 
   /* =========================================================
      Admin component sizing tokens (legacy aliases — prefer
@@ -307,41 +310,20 @@ body {
 }
 
 /* ============================================================
- * Direct-corner controls
+ * 圆角
  * ------------------------------------------------------------
- * Tailwind rounded utilities read --radius, while legacy controls
- * use --ctrl-radius / --card-radius. Keep the explicit selectors as
- * a guard for native controls and any inline/component styles.
+ * 这里原先有两条 `border-radius: 0 !important` 把全站压成直角 —— 一条按元素
+ * （button/input/select/textarea/form/.card/[role=dialog]），一条按 Tailwind
+ * 的具名圆角类。现已移除，改为统一走 --radius(8px) 派生的 sm/md/lg/xl。
+ *
+ * 留一条注记：当初加 !important 是为了不用逐个文件删 140 多处 class，现在方向
+ * 反过来了，那些 class 正好直接生效，不需要任何改动。
  * ============================================================ */
-button,
-input,
-select,
-textarea,
-form,
-.card,
-[role='dialog'],
-[data-slot='card'] {
-  border-radius: 0 !important;
-}
 
-/* Tailwind 的圆角工具类同样压平。上面那条按元素选择器覆盖不到 <div>/<span>
-   （shadcn 的 Card 就是普通 div、Badge 是 span），逐个文件删 class 又会散落
-   140 多处、以后新写的还会漏。这里只压「有限圆角」那几个，rounded-full 不动，
-   头像、开关、状态圆点、侧边栏折叠按钮仍然是圆的。 */
-.rounded,
-.rounded-sm,
-.rounded-md,
-.rounded-lg,
-.rounded-xl,
-.rounded-2xl,
-.rounded-3xl {
-  border-radius: 0 !important;
-}
-
-/* 侧边栏折叠开关：后台整体是直角风格，唯独这个悬浮圆形开关是特意保留的例外。
-   选择器特异性（0,1,0）高于上面的 `button`（0,0,1），才能压过它的 !important。 */
+/* 侧边栏折叠开关是正圆，不跟着 --radius 走。原先这条要靠特异性压过全局的
+   `border-radius: 0 !important`，那条规则已移除，这里的 !important 也就不需要了。 */
 .sidebar-toggle {
-  border-radius: 9999px !important;
+  border-radius: 9999px;
 }
 
 /* Blue — Icons8 Office L 风格天蓝 */
