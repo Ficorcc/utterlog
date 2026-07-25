@@ -1088,6 +1088,42 @@ div:hover > .comment-hint { opacity: 0.75 !important; }
   font-size: 13px;
 }
 
+/* ────────────────────────────────────────────────────────────────
+   顶部导航进度条 —— components/blog/NavigationProgress.tsx 渲染，
+   点击站内链接后 router 跑 loader 的那段时间显示。宽度由组件用行内
+   style 驱动（逼近式进度，见组件注释），这里只负责外观和过渡。
+
+   z-index 要压过所有 sticky header 和全屏 modal（Azure 的搜索弹窗是
+   1000001，灯箱 .vi-overlay 是 1000000）—— 进度条只有 2px 高、不吃
+   事件，压在最上面不挡任何东西，但导航反馈必须始终可见。
+   ──────────────────────────────────────────────────────────────── */
+.nav-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000002;
+  height: 2px;
+  background: var(--color-primary);
+  pointer-events: none;
+}
+/* 加载中：宽度每 120ms 变一次，transition 时长要略长于 tick 间隔，
+   否则两次 tick 之间会看出台阶。 */
+.nav-progress--loading {
+  transition: width 160ms linear;
+}
+/* 收尾：先用 140ms 推到满格，再淡出。opacity 的 delay 等于宽度动画
+   时长，所以用户先看到「走满」，再看到消失，而不是两件事同时发生。 */
+.nav-progress--done {
+  transition: width 140ms ease-out, opacity 180ms ease-in 140ms;
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-progress--loading,
+  .nav-progress--done {
+    transition: none;
+  }
+}
+
 /* Lightbox — ViewImage-inspired layout: backdrop with soft frosted
    blur, image zone that slides in from above on open / down on close,
    a bottom toolbar with prev/next/close + image counter, and a thin
