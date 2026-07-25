@@ -1,9 +1,13 @@
 "use client";
 
-import type { Variants } from "motion/react";
-import { motion, useAnimation } from "motion/react";
 import type { HTMLAttributes } from "react";
-import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -17,30 +21,18 @@ interface BellIconProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 // 摆铃：绕顶部悬挂点左右摇，幅度递减后停住。
-const ICON_VARIANTS: Variants = {
-  normal: {
-    rotate: 0,
-  },
-  animate: {
-    rotate: [0, -12, 10, -6, 3, 0],
-    transition: {
-      duration: 0.6,
-      ease: "easeInOut",
-    },
-  },
-};
-
+// 关键帧在 globals.css 的 icon-swing-damped / .icon-anim-swing-damped。
 const BellIcon = forwardRef<BellIconHandle, BellIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
-    const controls = useAnimation();
+    const [animating, setAnimating] = useState(false);
     const isControlledRef = useRef(false);
 
     useImperativeHandle(ref, () => {
       isControlledRef.current = true;
 
       return {
-        startAnimation: () => controls.start("animate"),
-        stopAnimation: () => controls.start("normal"),
+        startAnimation: () => setAnimating(true),
+        stopAnimation: () => setAnimating(false),
       };
     });
 
@@ -49,10 +41,10 @@ const BellIcon = forwardRef<BellIconHandle, BellIconProps>(
         if (isControlledRef.current) {
           onMouseEnter?.(e);
         } else {
-          controls.start("animate");
+          setAnimating(true);
         }
       },
-      [controls, onMouseEnter]
+      [onMouseEnter]
     );
 
     const handleMouseLeave = useCallback(
@@ -60,10 +52,10 @@ const BellIcon = forwardRef<BellIconHandle, BellIconProps>(
         if (isControlledRef.current) {
           onMouseLeave?.(e);
         } else {
-          controls.start("normal");
+          setAnimating(false);
         }
       },
-      [controls, onMouseLeave]
+      [onMouseLeave]
     );
 
     return (
@@ -73,8 +65,8 @@ const BellIcon = forwardRef<BellIconHandle, BellIconProps>(
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <motion.svg
-          animate={controls}
+        <svg
+          className={animating ? "icon-anim-swing-damped" : undefined}
           fill="none"
           height={size}
           stroke="currentColor"
@@ -82,14 +74,13 @@ const BellIcon = forwardRef<BellIconHandle, BellIconProps>(
           strokeLinejoin="round"
           strokeWidth="2"
           style={{ transformOrigin: "12px 3px" }}
-          variants={ICON_VARIANTS}
           viewBox="0 0 24 24"
           width={size}
           xmlns="http://www.w3.org/2000/svg"
         >
           <path d="M10.268 21a2 2 0 0 0 3.464 0" />
           <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
-        </motion.svg>
+        </svg>
       </div>
     );
   }

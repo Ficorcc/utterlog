@@ -1,8 +1,13 @@
 "use client";
 
-import { motion, useAnimation } from "motion/react";
 import type { HTMLAttributes } from "react";
-import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -15,17 +20,19 @@ interface BotIconProps extends HTMLAttributes<HTMLDivElement> {
   size?: number;
 }
 
+// 眨眼：原来动的是两条 <line> 的 y1/y2 端点，CSS 动不了 SVG 几何属性，
+// 降级成绕眼睛中心的 scaleY 压扁（globals.css 的 icon-blink / .icon-anim-blink）。
 const BotIcon = forwardRef<BotIconHandle, BotIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
-    const controls = useAnimation();
+    const [animating, setAnimating] = useState(false);
     const isControlledRef = useRef(false);
 
     useImperativeHandle(ref, () => {
       isControlledRef.current = true;
 
       return {
-        startAnimation: () => controls.start("animate"),
-        stopAnimation: () => controls.start("normal"),
+        startAnimation: () => setAnimating(true),
+        stopAnimation: () => setAnimating(false),
       };
     });
 
@@ -34,10 +41,10 @@ const BotIcon = forwardRef<BotIconHandle, BotIconProps>(
         if (isControlledRef.current) {
           onMouseEnter?.(e);
         } else {
-          controls.start("animate");
+          setAnimating(true);
         }
       },
-      [controls, onMouseEnter]
+      [onMouseEnter]
     );
 
     const handleMouseLeave = useCallback(
@@ -45,11 +52,13 @@ const BotIcon = forwardRef<BotIconHandle, BotIconProps>(
         if (isControlledRef.current) {
           onMouseLeave?.(e);
         } else {
-          controls.start("normal");
+          setAnimating(false);
         }
       },
-      [controls, onMouseLeave]
+      [onMouseLeave]
     );
+
+    const eyeClassName = animating ? "icon-anim-blink" : undefined;
 
     return (
       <div
@@ -74,42 +83,22 @@ const BotIcon = forwardRef<BotIconHandle, BotIconProps>(
           <path d="M2 14h2" />
           <path d="M20 14h2" />
 
-          <motion.line
-            animate={controls}
-            initial="normal"
-            variants={{
-              normal: { x1: 15, x2: 15, y1: 13, y2: 15 },
-              animate: {
-                x1: 15,
-                x2: 15,
-                y1: [13, 14, 13],
-                y2: [15, 14, 15],
-                transition: {
-                  duration: 0.5,
-                  ease: "easeInOut",
-                  delay: 0.2,
-                },
-              },
-            }}
+          <line
+            className={eyeClassName}
+            style={{ transformOrigin: "15px 14px" }}
+            x1={15}
+            x2={15}
+            y1={13}
+            y2={15}
           />
 
-          <motion.line
-            animate={controls}
-            initial="normal"
-            variants={{
-              normal: { x1: 9, x2: 9, y1: 13, y2: 15 },
-              animate: {
-                x1: 9,
-                x2: 9,
-                y1: [13, 14, 13],
-                y2: [15, 14, 15],
-                transition: {
-                  duration: 0.5,
-                  ease: "easeInOut",
-                  delay: 0.2,
-                },
-              },
-            }}
+          <line
+            className={eyeClassName}
+            style={{ transformOrigin: "9px 14px" }}
+            x1={9}
+            x2={9}
+            y1={13}
+            y2={15}
           />
         </svg>
       </div>

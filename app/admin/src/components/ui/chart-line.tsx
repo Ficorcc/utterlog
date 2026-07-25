@@ -1,9 +1,13 @@
 "use client";
 
-import type { Variants } from "motion/react";
-import { motion, useAnimation } from "motion/react";
 import type { HTMLAttributes } from "react";
-import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -16,33 +20,24 @@ interface ChartLineIconProps extends HTMLAttributes<HTMLDivElement> {
   size?: number;
 }
 
-const VARIANTS: Variants = {
-  normal: {
-    pathLength: 1,
-    opacity: 1,
-  },
-  animate: {
-    pathLength: [0, 1],
-    opacity: [0, 1],
-    transition: {
-      delay: 0.15,
-      duration: 0.3,
-      opacity: { delay: 0.1 },
-    },
-  },
-};
+// 原 motion variants: pathLength [0, 1] + opacity [0, 1]，delay 0.15、duration 0.3。
+// CSS 版靠 path 上的 pathLength="1" 把路径长度归一化，再用 stroke-dasharray:1 +
+// icon-draw（globals.css）把 stroke-dashoffset 从 1 拉到 0，等价于描线动画。
+// backwards 让 delay 期间保持起始帧（不可见），和 motion 的延迟表现一致。
+const ANIMATE_CLASS =
+  "[stroke-dasharray:1] animate-[icon-draw_0.3s_ease-out_0.15s_backwards] motion-reduce:animate-none";
 
 const ChartLineIcon = forwardRef<ChartLineIconHandle, ChartLineIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
-    const controls = useAnimation();
+    const [animating, setAnimating] = useState(false);
     const isControlledRef = useRef(false);
 
     useImperativeHandle(ref, () => {
       isControlledRef.current = true;
 
       return {
-        startAnimation: () => controls.start("animate"),
-        stopAnimation: () => controls.start("normal"),
+        startAnimation: () => setAnimating(true),
+        stopAnimation: () => setAnimating(false),
       };
     });
 
@@ -51,10 +46,10 @@ const ChartLineIcon = forwardRef<ChartLineIconHandle, ChartLineIconProps>(
         if (isControlledRef.current) {
           onMouseEnter?.(e);
         } else {
-          controls.start("animate");
+          setAnimating(true);
         }
       },
-      [controls, onMouseEnter]
+      [onMouseEnter]
     );
 
     const handleMouseLeave = useCallback(
@@ -62,10 +57,10 @@ const ChartLineIcon = forwardRef<ChartLineIconHandle, ChartLineIconProps>(
         if (isControlledRef.current) {
           onMouseLeave?.(e);
         } else {
-          controls.start("normal");
+          setAnimating(false);
         }
       },
-      [controls, onMouseLeave]
+      [onMouseLeave]
     );
 
     return (
@@ -87,10 +82,10 @@ const ChartLineIcon = forwardRef<ChartLineIconHandle, ChartLineIconProps>(
           xmlns="http://www.w3.org/2000/svg"
         >
           <path d="M3 3v16a2 2 0 0 0 2 2h16" />
-          <motion.path
-            animate={controls}
+          <path
+            className={animating ? ANIMATE_CLASS : undefined}
             d="m7 13 3-3 4 4 5-5"
-            variants={VARIANTS}
+            pathLength={1}
           />
         </svg>
       </div>

@@ -1,9 +1,13 @@
 "use client";
 
-import type { Variants } from "motion/react";
-import { motion, useAnimation } from "motion/react";
 import type { HTMLAttributes } from "react";
-import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -16,34 +20,23 @@ interface LinkIconProps extends HTMLAttributes<HTMLDivElement> {
   size?: number;
 }
 
-const PATH_VARIANTS: Variants = {
-  initial: { pathLength: 1, pathOffset: 0, rotate: 0 },
-  animate: {
-    pathLength: [1, 0.97, 1, 0.97, 1],
-    pathOffset: [0, 0.05, 0, 0.05, 0],
-    rotate: [0, -5, 0],
-    transition: {
-      rotate: {
-        duration: 0.5,
-      },
-      duration: 1,
-      times: [0, 0.2, 0.4, 0.6, 1],
-      ease: "easeInOut",
-    },
-  },
-};
+// 原 motion variants: pathLength [1, .97, 1, .97, 1] + pathOffset [0, .05, …]
+// 的"链子被拽了两下"，叠加 rotate [0, -5, 0]。前者是路径变形，CSS 做不到，
+// 只保留后者：两段链子各绕自身包围盒中心拧一下（icon-tilt + .icon-origin-self）。
+const PATH_ANIMATE_CLASS =
+  "icon-origin-self animate-[icon-tilt_0.5s_ease-in-out] motion-reduce:animate-none";
 
 const LinkIcon = forwardRef<LinkIconHandle, LinkIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
-    const controls = useAnimation();
+    const [animating, setAnimating] = useState(false);
     const isControlledRef = useRef(false);
 
     useImperativeHandle(ref, () => {
       isControlledRef.current = true;
 
       return {
-        startAnimation: () => controls.start("animate"),
-        stopAnimation: () => controls.start("normal"),
+        startAnimation: () => setAnimating(true),
+        stopAnimation: () => setAnimating(false),
       };
     });
 
@@ -52,10 +45,10 @@ const LinkIcon = forwardRef<LinkIconHandle, LinkIconProps>(
         if (isControlledRef.current) {
           onMouseEnter?.(e);
         } else {
-          controls.start("animate");
+          setAnimating(true);
         }
       },
-      [controls, onMouseEnter]
+      [onMouseEnter]
     );
 
     const handleMouseLeave = useCallback(
@@ -63,10 +56,10 @@ const LinkIcon = forwardRef<LinkIconHandle, LinkIconProps>(
         if (isControlledRef.current) {
           onMouseLeave?.(e);
         } else {
-          controls.start("normal");
+          setAnimating(false);
         }
       },
-      [controls, onMouseLeave]
+      [onMouseLeave]
     );
     return (
       <div
@@ -86,15 +79,13 @@ const LinkIcon = forwardRef<LinkIconHandle, LinkIconProps>(
           width={size}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <motion.path
-            animate={controls}
+          <path
+            className={animating ? PATH_ANIMATE_CLASS : undefined}
             d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
-            variants={PATH_VARIANTS}
           />
-          <motion.path
-            animate={controls}
+          <path
+            className={animating ? PATH_ANIMATE_CLASS : undefined}
             d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
-            variants={PATH_VARIANTS}
           />
         </svg>
       </div>

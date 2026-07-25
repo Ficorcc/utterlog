@@ -1,9 +1,14 @@
 "use client";
 
-import { motion, useAnimation } from "motion/react";
 import type React from "react";
 import type { HTMLAttributes } from "react";
-import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -16,17 +21,31 @@ interface FileTextIconProps extends HTMLAttributes<HTMLDivElement> {
   size?: number;
 }
 
+// 原 motion variants:
+//  - svg: scale 1 → 1.05，0.3s easeOut，hover 期间一直保持 → 用 transition 实现，
+//    移出时同一条 transition 平滑回落（.icon-transform-snap 是已有的共用类）。
+//  - 三条正文线: pathLength [1, 0, 1]，duration 0.7，delay 依次 0.3 / 0.5 / 0.7
+//    → pathLength="1" 把长度归一化，stroke-dasharray:1 + icon-redraw 把
+//    stroke-dashoffset 拉到 1 再拉回 0，等价于"擦掉再写回"。
+const SVG_CLASS = "icon-transform-snap";
+const LINE_1_ANIMATE =
+  "[stroke-dasharray:1] animate-[icon-redraw_0.7s_ease-in-out_0.3s_both] motion-reduce:animate-none";
+const LINE_2_ANIMATE =
+  "[stroke-dasharray:1] animate-[icon-redraw_0.7s_ease-in-out_0.5s_both] motion-reduce:animate-none";
+const LINE_3_ANIMATE =
+  "[stroke-dasharray:1] animate-[icon-redraw_0.7s_ease-in-out_0.7s_both] motion-reduce:animate-none";
+
 const FILE_TEXT = forwardRef<FileTextIconHandle, FileTextIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
-    const controls = useAnimation();
+    const [animating, setAnimating] = useState(false);
     const isControlledRef = useRef(false);
 
     useImperativeHandle(ref, () => {
       isControlledRef.current = true;
 
       return {
-        startAnimation: () => controls.start("animate"),
-        stopAnimation: () => controls.start("normal"),
+        startAnimation: () => setAnimating(true),
+        stopAnimation: () => setAnimating(false),
       };
     });
 
@@ -35,10 +54,10 @@ const FILE_TEXT = forwardRef<FileTextIconHandle, FileTextIconProps>(
         if (isControlledRef.current) {
           onMouseEnter?.(e);
         } else {
-          controls.start("animate");
+          setAnimating(true);
         }
       },
-      [controls, onMouseEnter]
+      [onMouseEnter]
     );
 
     const handleMouseLeave = useCallback(
@@ -46,10 +65,10 @@ const FILE_TEXT = forwardRef<FileTextIconHandle, FileTextIconProps>(
         if (isControlledRef.current) {
           onMouseLeave?.(e);
         } else {
-          controls.start("normal");
+          setAnimating(false);
         }
       },
-      [controls, onMouseLeave]
+      [onMouseLeave]
     );
 
     return (
@@ -59,25 +78,14 @@ const FILE_TEXT = forwardRef<FileTextIconHandle, FileTextIconProps>(
         onMouseLeave={handleMouseLeave}
         {...props}
       >
-        <motion.svg
-          animate={controls}
+        <svg
+          className={cn(SVG_CLASS, animating && "icon-scale-up")}
           fill="none"
           height={size}
-          initial="normal"
           stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth="2"
-          variants={{
-            normal: { scale: 1 },
-            animate: {
-              scale: 1.05,
-              transition: {
-                duration: 0.3,
-                ease: "easeOut",
-              },
-            },
-          }}
           viewBox="0 0 24 24"
           width={size}
           xmlns="http://www.w3.org/2000/svg"
@@ -85,73 +93,28 @@ const FILE_TEXT = forwardRef<FileTextIconHandle, FileTextIconProps>(
           <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
           <path d="M14 2v4a2 2 0 0 0 2 2h4" />
 
-          <motion.path
-            initial="normal"
+          <path
+            className={animating ? LINE_1_ANIMATE : undefined}
             d="M10 9H8"
+            pathLength={1}
             stroke="currentColor"
             strokeWidth="2"
-            variants={{
-              normal: {
-                pathLength: 1,
-                x1: 8,
-                x2: 10,
-              },
-              animate: {
-                pathLength: [1, 0, 1],
-                x1: [8, 10, 8],
-                x2: [10, 10, 10],
-                transition: {
-                  duration: 0.7,
-                  delay: 0.3,
-                },
-              },
-            }}
           />
-          <motion.path
-            initial="normal"
+          <path
+            className={animating ? LINE_2_ANIMATE : undefined}
             d="M16 13H8"
+            pathLength={1}
             stroke="currentColor"
             strokeWidth="2"
-            variants={{
-              normal: {
-                pathLength: 1,
-                x1: 8,
-                x2: 16,
-              },
-              animate: {
-                pathLength: [1, 0, 1],
-                x1: [8, 16, 8],
-                x2: [16, 16, 16],
-                transition: {
-                  duration: 0.7,
-                  delay: 0.5,
-                },
-              },
-            }}
           />
-          <motion.path
-            initial="normal"
+          <path
+            className={animating ? LINE_3_ANIMATE : undefined}
             d="M16 17H8"
+            pathLength={1}
             stroke="currentColor"
             strokeWidth="2"
-            variants={{
-              normal: {
-                pathLength: 1,
-                x1: 8,
-                x2: 16,
-              },
-              animate: {
-                pathLength: [1, 0, 1],
-                x1: [8, 16, 8],
-                x2: [16, 16, 16],
-                transition: {
-                  duration: 0.7,
-                  delay: 0.7,
-                },
-              },
-            }}
           />
-        </motion.svg>
+        </svg>
       </div>
     );
   }

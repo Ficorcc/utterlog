@@ -1,9 +1,13 @@
 "use client";
 
-import type { Variants } from "motion/react";
-import { motion, useAnimation } from "motion/react";
 import type { HTMLAttributes } from "react";
-import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -16,37 +20,25 @@ interface MonitorCheckIconProps extends HTMLAttributes<HTMLDivElement> {
   size?: number;
 }
 
-const CHECK_VARIANTS: Variants = {
-  normal: {
-    pathLength: 1,
-    opacity: 1,
-    transition: {
-      duration: 0.3,
-    },
-  },
-  animate: {
-    pathLength: [0, 1],
-    opacity: [0, 1],
-    transition: {
-      pathLength: { duration: 0.4, ease: "easeInOut" },
-      opacity: { duration: 0.4, ease: "easeInOut" },
-    },
-  },
-};
+// 原 motion variants: 勾选路径 pathLength [0, 1] + opacity [0, 1]，0.4s easeInOut。
+// CSS 版靠 pathLength="1" 把路径长度归一化，再用 stroke-dasharray:1 +
+// icon-draw（globals.css 已有，chart-line 也在用）把 stroke-dashoffset 从 1 拉到 0。
+const CHECK_ANIMATE_CLASS =
+  "[stroke-dasharray:1] animate-[icon-draw_0.4s_ease-in-out] motion-reduce:animate-none";
 
 const MonitorCheckIcon = forwardRef<
   MonitorCheckIconHandle,
   MonitorCheckIconProps
 >(({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
-  const controls = useAnimation();
+  const [animating, setAnimating] = useState(false);
   const isControlledRef = useRef(false);
 
   useImperativeHandle(ref, () => {
     isControlledRef.current = true;
 
     return {
-      startAnimation: () => controls.start("animate"),
-      stopAnimation: () => controls.start("normal"),
+      startAnimation: () => setAnimating(true),
+      stopAnimation: () => setAnimating(false),
     };
   });
 
@@ -55,10 +47,10 @@ const MonitorCheckIcon = forwardRef<
       if (isControlledRef.current) {
         onMouseEnter?.(e);
       } else {
-        controls.start("animate");
+        setAnimating(true);
       }
     },
-    [controls, onMouseEnter]
+    [onMouseEnter]
   );
 
   const handleMouseLeave = useCallback(
@@ -66,10 +58,10 @@ const MonitorCheckIcon = forwardRef<
       if (isControlledRef.current) {
         onMouseLeave?.(e);
       } else {
-        controls.start("normal");
+        setAnimating(false);
       }
     },
-    [controls, onMouseLeave]
+    [onMouseLeave]
   );
 
   return (
@@ -93,12 +85,10 @@ const MonitorCheckIcon = forwardRef<
         <rect height="14" rx="2" width="20" x="2" y="3" />
         <path d="M12 17v4" />
         <path d="M8 21h8" />
-        <motion.path
-          animate={controls}
+        <path
+          className={animating ? CHECK_ANIMATE_CLASS : undefined}
           d="m9 10 2 2 4-4"
-          initial="normal"
-          style={{ transformOrigin: "center" }}
-          variants={CHECK_VARIANTS}
+          pathLength={1}
         />
       </svg>
     </div>

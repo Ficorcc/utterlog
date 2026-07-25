@@ -1,9 +1,13 @@
 "use client";
 
-import type { Variants } from "motion/react";
-import { motion, useAnimation } from "motion/react";
 import type { HTMLAttributes } from "react";
-import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -16,28 +20,16 @@ interface PlugZapIconProps extends HTMLAttributes<HTMLDivElement> {
   size?: number;
 }
 
-const ZAP_VARIANT: Variants = {
-  normal: { opacity: 1 },
-  animate: {
-    opacity: [1, 0.4, 1],
-    transition: {
-      duration: 1,
-      repeat: Number.POSITIVE_INFINITY,
-      ease: "easeInOut",
-    },
-  },
-};
-
 const PlugZapIcon = forwardRef<PlugZapIconHandle, PlugZapIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
-    const controls = useAnimation();
+    const [animating, setAnimating] = useState(false);
     const isControlledRef = useRef(false);
 
     useImperativeHandle(ref, () => {
       isControlledRef.current = true;
       return {
-        startAnimation: () => controls.start("animate"),
-        stopAnimation: () => controls.start("normal"),
+        startAnimation: () => setAnimating(true),
+        stopAnimation: () => setAnimating(false),
       };
     });
 
@@ -46,10 +38,10 @@ const PlugZapIcon = forwardRef<PlugZapIconHandle, PlugZapIconProps>(
         if (isControlledRef.current) {
           onMouseEnter?.(e);
         } else {
-          controls.start("animate");
+          setAnimating(true);
         }
       },
-      [controls, onMouseEnter]
+      [onMouseEnter]
     );
 
     const handleMouseLeave = useCallback(
@@ -57,10 +49,10 @@ const PlugZapIcon = forwardRef<PlugZapIconHandle, PlugZapIconProps>(
         if (isControlledRef.current) {
           onMouseLeave?.(e);
         } else {
-          controls.start("normal");
+          setAnimating(false);
         }
       },
-      [controls, onMouseLeave]
+      [onMouseLeave]
     );
 
     return (
@@ -85,11 +77,10 @@ const PlugZapIcon = forwardRef<PlugZapIconHandle, PlugZapIconProps>(
           <path d="m2 22 3-3" />
           <path d="M7.5 13.5 10 11" />
           <path d="M10.5 16.5 13 14" />
-          <motion.path
-            animate={controls}
+          {/* 闪电循环明暗呼吸：opacity 1 → 0.4 → 1，无限循环 */}
+          <path
+            className={cn(animating && "icon-anim-pulse")}
             d="m18 3-4 4h6l-4 4"
-            initial="normal"
-            variants={ZAP_VARIANT}
           />
         </svg>
       </div>

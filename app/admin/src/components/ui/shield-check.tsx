@@ -1,9 +1,13 @@
 "use client";
 
-import type { Variants } from "motion/react";
-import { motion, useAnimation } from "motion/react";
 import type { HTMLAttributes } from "react";
-import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -16,38 +20,24 @@ interface ShieldCheckIconProps extends HTMLAttributes<HTMLDivElement> {
   size?: number;
 }
 
-const PATH_VARIANTS: Variants = {
-  normal: {
-    opacity: 1,
-    pathLength: 1,
-    scale: 1,
-    transition: {
-      duration: 0.3,
-      opacity: { duration: 0.1 },
-    },
-  },
-  animate: {
-    opacity: [0, 1],
-    pathLength: [0, 1],
-    scale: [0.5, 1],
-    transition: {
-      duration: 0.4,
-      opacity: { duration: 0.1 },
-    },
-  },
-};
+// 原 motion variants: 勾选路径 opacity [0, 1] + pathLength [0, 1] + scale [.5, 1]，
+// 0.4s。CSS 版用 pathLength="1" + stroke-dasharray:1 还原描线，配合 icon-draw-pop
+// 把描线、淡入、放大三件事放进同一条 keyframes；缩放中心用 .icon-origin-self
+// （fill-box 中心），和 motion 绕自身包围盒中心缩放一致。
+const CHECK_ANIMATE_CLASS =
+  "icon-origin-self [stroke-dasharray:1] animate-[icon-draw-pop_0.4s_ease-out] motion-reduce:animate-none";
 
 const ShieldCheckIcon = forwardRef<ShieldCheckIconHandle, ShieldCheckIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
-    const controls = useAnimation();
+    const [animating, setAnimating] = useState(false);
     const isControlledRef = useRef(false);
 
     useImperativeHandle(ref, () => {
       isControlledRef.current = true;
 
       return {
-        startAnimation: () => controls.start("animate"),
-        stopAnimation: () => controls.start("normal"),
+        startAnimation: () => setAnimating(true),
+        stopAnimation: () => setAnimating(false),
       };
     });
 
@@ -56,10 +46,10 @@ const ShieldCheckIcon = forwardRef<ShieldCheckIconHandle, ShieldCheckIconProps>(
         if (isControlledRef.current) {
           onMouseEnter?.(e);
         } else {
-          controls.start("animate");
+          setAnimating(true);
         }
       },
-      [controls, onMouseEnter]
+      [onMouseEnter]
     );
 
     const handleMouseLeave = useCallback(
@@ -67,10 +57,10 @@ const ShieldCheckIcon = forwardRef<ShieldCheckIconHandle, ShieldCheckIconProps>(
         if (isControlledRef.current) {
           onMouseLeave?.(e);
         } else {
-          controls.start("normal");
+          setAnimating(false);
         }
       },
-      [controls, onMouseLeave]
+      [onMouseLeave]
     );
 
     return (
@@ -92,11 +82,10 @@ const ShieldCheckIcon = forwardRef<ShieldCheckIconHandle, ShieldCheckIconProps>(
           xmlns="http://www.w3.org/2000/svg"
         >
           <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
-          <motion.path
-            animate={controls}
+          <path
+            className={animating ? CHECK_ANIMATE_CLASS : undefined}
             d="m9 12 2 2 4-4"
-            initial="normal"
-            variants={PATH_VARIANTS}
+            pathLength={1}
           />
         </svg>
       </div>

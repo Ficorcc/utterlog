@@ -1,9 +1,13 @@
 "use client";
 
-import type { Transition } from "motion/react";
-import { motion, useAnimation } from "motion/react";
 import type { HTMLAttributes } from "react";
-import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -16,24 +20,17 @@ interface GaugeIconProps extends HTMLAttributes<HTMLDivElement> {
   size?: number;
 }
 
-const DEFAULT_TRANSITION: Transition = {
-  type: "spring",
-  stiffness: 160,
-  damping: 17,
-  mass: 1,
-};
-
 const GaugeIcon = forwardRef<GaugeIconHandle, GaugeIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
-    const controls = useAnimation();
+    const [isAnimating, setIsAnimating] = useState(false);
     const isControlledRef = useRef(false);
 
     useImperativeHandle(ref, () => {
       isControlledRef.current = true;
 
       return {
-        startAnimation: () => controls.start("animate"),
-        stopAnimation: () => controls.start("normal"),
+        startAnimation: () => setIsAnimating(true),
+        stopAnimation: () => setIsAnimating(false),
       };
     });
 
@@ -42,10 +39,10 @@ const GaugeIcon = forwardRef<GaugeIconHandle, GaugeIconProps>(
         if (isControlledRef.current) {
           onMouseEnter?.(e);
         } else {
-          controls.start("animate");
+          setIsAnimating(true);
         }
       },
-      [controls, onMouseEnter]
+      [onMouseEnter]
     );
 
     const handleMouseLeave = useCallback(
@@ -53,10 +50,10 @@ const GaugeIcon = forwardRef<GaugeIconHandle, GaugeIconProps>(
         if (isControlledRef.current) {
           onMouseLeave?.(e);
         } else {
-          controls.start("normal");
+          setIsAnimating(false);
         }
       },
-      [controls, onMouseLeave]
+      [onMouseLeave]
     );
 
     return (
@@ -77,18 +74,12 @@ const GaugeIcon = forwardRef<GaugeIconHandle, GaugeIconProps>(
           width={size}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <motion.path
-            animate={controls}
+          <path
+            className={cn(
+              "icon-gauge-needle",
+              isAnimating && "icon-gauge-needle--on"
+            )}
             d="m12 14 4-4"
-            transition={DEFAULT_TRANSITION}
-            variants={{
-              animate: { translateX: 0.5, translateY: 3, rotate: 72 },
-              normal: {
-                translateX: 0,
-                rotate: 0,
-                translateY: 0,
-              },
-            }}
           />
           <path d="M3.34 19a10 10 0 1 1 17.32 0" />
         </svg>

@@ -1,9 +1,13 @@
 "use client";
 
-import type { Transition, Variants } from "motion/react";
-import { motion, useAnimation } from "motion/react";
 import type { HTMLAttributes } from "react";
-import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -16,35 +20,31 @@ interface LoaderIconProps extends HTMLAttributes<HTMLDivElement> {
   size?: number;
 }
 
-const G_VARIANTS: Variants = {
-  normal: { rotate: 0 },
-  animate: {
-    rotate: 360,
-    transition: {
-      repeat: Number.POSITIVE_INFINITY,
-      duration: 0.8,
-      ease: "linear",
-    },
-  },
-};
-
-const DEFAULT_TRANSITION: Transition = {
-  type: "spring",
-  stiffness: 50,
-  damping: 10,
-};
+// 匀速无限自转，动效是 globals.css 里的 @keyframes icon-spin。
+// 停止时直接回到 0 度（原来的 spring 回弹 CSS 端没有等价写法）。
+const ANIMATION_CLASS = "icon-anim-spin";
 
 const LoaderIcon = forwardRef<LoaderIconHandle, LoaderIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
-    const controls = useAnimation();
+    const [animating, setAnimating] = useState(false);
+    // 连续 hover 时 className 没变化，CSS 动画不会重放 ——
+    // runId 每次 start 自增并当作 <g> 的 key，靠重挂载重放动画。
+    const [runId, setRunId] = useState(0);
     const isControlledRef = useRef(false);
+
+    const startAnimation = useCallback(() => {
+      setAnimating(true);
+      setRunId((n) => n + 1);
+    }, []);
+
+    const stopAnimation = useCallback(() => {
+      setAnimating(false);
+    }, []);
 
     useImperativeHandle(ref, () => {
       isControlledRef.current = true;
-      return {
-        startAnimation: () => controls.start("animate"),
-        stopAnimation: () => controls.start("normal"),
-      };
+
+      return { startAnimation, stopAnimation };
     });
 
     const handleMouseEnter = useCallback(
@@ -52,10 +52,10 @@ const LoaderIcon = forwardRef<LoaderIconHandle, LoaderIconProps>(
         if (isControlledRef.current) {
           onMouseEnter?.(e);
         } else {
-          controls.start("animate");
+          startAnimation();
         }
       },
-      [controls, onMouseEnter]
+      [startAnimation, onMouseEnter]
     );
 
     const handleMouseLeave = useCallback(
@@ -63,10 +63,10 @@ const LoaderIcon = forwardRef<LoaderIconHandle, LoaderIconProps>(
         if (isControlledRef.current) {
           onMouseLeave?.(e);
         } else {
-          controls.start("normal");
+          stopAnimation();
         }
       },
-      [controls, onMouseLeave]
+      [stopAnimation, onMouseLeave]
     );
 
     return (
@@ -87,11 +87,10 @@ const LoaderIcon = forwardRef<LoaderIconHandle, LoaderIconProps>(
           width={size}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <motion.g
-            animate={controls}
+          <g
+            className={animating ? ANIMATION_CLASS : undefined}
+            key={runId}
             style={{ transformOrigin: "12px 12px" }}
-            transition={DEFAULT_TRANSITION}
-            variants={G_VARIANTS}
           >
             <path d="M12 2v4" />
             <path d="m16.2 7.8 2.9-2.9" />
@@ -101,7 +100,7 @@ const LoaderIcon = forwardRef<LoaderIconHandle, LoaderIconProps>(
             <path d="m4.9 19.1 2.9-2.9" />
             <path d="M2 12h4" />
             <path d="m4.9 4.9 2.9 2.9" />
-          </motion.g>
+          </g>
         </svg>
       </div>
     );

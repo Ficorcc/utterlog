@@ -1,9 +1,13 @@
 "use client";
 
-import type { Variants } from "motion/react";
-import { motion, useAnimation } from "motion/react";
 import type { HTMLAttributes } from "react";
-import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -16,41 +20,19 @@ interface GalleryVerticalEndIconProps extends HTMLAttributes<HTMLDivElement> {
   size?: number;
 }
 
-const PATH_VARIANTS: Variants = {
-  normal: {
-    translateY: 0,
-    opacity: 1,
-    transition: {
-      type: "tween",
-      stiffness: 200,
-      damping: 13,
-    },
-  },
-  animate: (i: number) => ({
-    translateY: [2 * i, 0],
-    opacity: [0, 1],
-    transition: {
-      delay: 0.25 * (2 - i),
-      type: "tween",
-      stiffness: 200,
-      damping: 13,
-    },
-  }),
-};
-
 const GalleryVerticalEndIcon = forwardRef<
   GalleryVerticalEndIconHandle,
   GalleryVerticalEndIconProps
 >(({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
-  const controls = useAnimation();
+  const [isAnimating, setIsAnimating] = useState(false);
   const isControlledRef = useRef(false);
 
   useImperativeHandle(ref, () => {
     isControlledRef.current = true;
 
     return {
-      startAnimation: () => controls.start("animate"),
-      stopAnimation: () => controls.start("normal"),
+      startAnimation: () => setIsAnimating(true),
+      stopAnimation: () => setIsAnimating(false),
     };
   });
 
@@ -59,10 +41,10 @@ const GalleryVerticalEndIcon = forwardRef<
       if (isControlledRef.current) {
         onMouseEnter?.(e);
       } else {
-        controls.start("animate");
+        setIsAnimating(true);
       }
     },
-    [controls, onMouseEnter]
+    [onMouseEnter]
   );
 
   const handleMouseLeave = useCallback(
@@ -70,10 +52,10 @@ const GalleryVerticalEndIcon = forwardRef<
       if (isControlledRef.current) {
         onMouseLeave?.(e);
       } else {
-        controls.start("normal");
+        setIsAnimating(false);
       }
     },
-    [controls, onMouseLeave]
+    [onMouseLeave]
   );
 
   return (
@@ -84,6 +66,7 @@ const GalleryVerticalEndIcon = forwardRef<
       {...props}
     >
       <svg
+        className={cn(isAnimating && "icon-stack-run")}
         fill="none"
         height={size}
         stroke="currentColor"
@@ -94,18 +77,8 @@ const GalleryVerticalEndIcon = forwardRef<
         width={size}
         xmlns="http://www.w3.org/2000/svg"
       >
-        <motion.path
-          animate={controls}
-          custom={1}
-          d="M7 2h10"
-          variants={PATH_VARIANTS}
-        />
-        <motion.path
-          animate={controls}
-          custom={2}
-          d="M5 6h14"
-          variants={PATH_VARIANTS}
-        />
+        <path d="M7 2h10" />
+        <path d="M5 6h14" />
         <rect height="12" rx="2" width="18" x="3" y="10" />
       </svg>
     </div>

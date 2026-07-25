@@ -1,9 +1,13 @@
 "use client";
 
-import type { Variants } from "motion/react";
-import { motion, useAnimation } from "motion/react";
 import type { HTMLAttributes } from "react";
-import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -16,29 +20,16 @@ interface ContrastIconProps extends HTMLAttributes<HTMLDivElement> {
   size?: number;
 }
 
-const PATH_VARIANT: Variants = {
-  normal: { rotate: 0 },
-  animate: {
-    rotate: 180,
-    transformOrigin: "left center",
-    transition: {
-      type: "spring",
-      stiffness: 80,
-      damping: 12,
-    },
-  },
-};
-
 const ContrastIcon = forwardRef<ContrastIconHandle, ContrastIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
-    const controls = useAnimation();
+    const [isAnimating, setIsAnimating] = useState(false);
     const isControlledRef = useRef(false);
 
     useImperativeHandle(ref, () => {
       isControlledRef.current = true;
       return {
-        startAnimation: () => controls.start("animate"),
-        stopAnimation: () => controls.start("normal"),
+        startAnimation: () => setIsAnimating(true),
+        stopAnimation: () => setIsAnimating(false),
       };
     });
 
@@ -47,10 +38,10 @@ const ContrastIcon = forwardRef<ContrastIconHandle, ContrastIconProps>(
         if (isControlledRef.current) {
           onMouseEnter?.(e);
         } else {
-          controls.start("animate");
+          setIsAnimating(true);
         }
       },
-      [controls, onMouseEnter]
+      [onMouseEnter]
     );
 
     const handleMouseLeave = useCallback(
@@ -58,10 +49,10 @@ const ContrastIcon = forwardRef<ContrastIconHandle, ContrastIconProps>(
         if (isControlledRef.current) {
           onMouseLeave?.(e);
         } else {
-          controls.start("normal");
+          setIsAnimating(false);
         }
       },
-      [controls, onMouseLeave]
+      [onMouseLeave]
     );
 
     return (
@@ -83,11 +74,12 @@ const ContrastIcon = forwardRef<ContrastIconHandle, ContrastIconProps>(
           xmlns="http://www.w3.org/2000/svg"
         >
           <circle cx="12" cy="12" r="10" />
-          <motion.path
-            animate={controls}
+          <path
+            className={cn(
+              "icon-contrast-half",
+              isAnimating && "icon-contrast-half--on"
+            )}
             d="M12 18a6 6 0 0 0 0-12v12z"
-            initial="normal"
-            variants={PATH_VARIANT}
           />
         </svg>
       </div>

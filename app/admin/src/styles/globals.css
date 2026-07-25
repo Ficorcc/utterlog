@@ -1704,3 +1704,457 @@ div:hover > .comment-hint { opacity: 0.75 !important; }
   0%   { background-position: -40% 0; }
   100% { background-position: 140% 0; }
 }
+
+/* ============================================================
+ * 动画图标 keyframes（icon-* 前缀）
+ * ============================================================
+ *  components/ui/ 下的图标原本用 motion 运行时（压缩后 36.5 KB）做 hover 动效，
+ *  现在改成纯 CSS，整个 motion 不再进后台首屏。
+ *  组件只通过 Tailwind 任意值语法引用，例如
+ *    animate-[icon-nudge-x_0.5s_ease-in-out]
+ *  位移量、方向这类差异走 CSS 变量传参，一条 keyframes 尽量多个图标共用。
+ */
+
+/* 轻推：先往一个方向挪一点再弹回原位，位移量与方向由 --icon-nudge 决定
+   （正负号即方向）。chevron-down / chevron-left / chevron-right 共用。 */
+@keyframes icon-nudge-x {
+  0%   { transform: translateX(0); }
+  40%  { transform: translateX(var(--icon-nudge, 2px)); }
+  100% { transform: translateX(0); }
+}
+@keyframes icon-nudge-y {
+  0%   { transform: translateY(0); }
+  40%  { transform: translateY(var(--icon-nudge, 2px)); }
+  100% { transform: translateY(0); }
+}
+
+/* 描线：配合 path 上的 pathLength="1" 与 stroke-dasharray:1，
+   把 stroke-dashoffset 从 1 拉到 0，等于把整条线"画"出来。
+   代替 motion 的 pathLength 动画（chart-line）。 */
+@keyframes icon-draw {
+  from { stroke-dashoffset: 1; opacity: 0; }
+  to   { stroke-dashoffset: 0; opacity: 1; }
+}
+
+/* 鼓掌：底座先歪着停半拍再回正；上盖来回拍一下。支点由组件用
+   transform-origin 指定（clap）。 */
+@keyframes icon-clap-base {
+  0%, 50% { transform: rotate(-10deg); }
+  100%    { transform: rotate(0deg); }
+}
+@keyframes icon-clap-hand {
+  0%   { transform: rotate(0deg); }
+  30%  { transform: rotate(-10deg); }
+  60%  { transform: rotate(16deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* ============================================================
+ * 图标动效 —— 纯 CSS 实现（替代 motion 运行时）
+ * ============================================================
+ *  components/ui/*.tsx 的图标原本靠 motion 的 variants 驱动 hover 动效，
+ *  为了让 36.5 KB 的 motion 运行时不再进后台首屏，改成「组件切 className
+ *  + 这里的 keyframes / transition」。命名统一 icon- 前缀，多个图标共用
+ *  同一条 keyframes，不要按图标名一个个造。
+ */
+
+/* 共用：transform 过渡。spring 带一点点回弹，snap 快而干脆 */
+.icon-transform-spring {
+  transition: transform 600ms cubic-bezier(0.34, 1.32, 0.6, 1);
+}
+.icon-transform-snap {
+  transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* SVG 子元素默认绕 viewBox 原点做 transform，加这个才是绕自身包围盒中心 */
+.icon-origin-self {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* 旋转半圈（settings 齿轮） */
+.icon-rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* 沿 X 轴平移 --icon-dx 个用户单位（sliders-horizontal 的滑块手柄） */
+.icon-translate-x {
+  transform: translateX(var(--icon-dx, 0px));
+}
+
+/* 循环明暗呼吸（plug-zap 的闪电） */
+@keyframes icon-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+.icon-anim-pulse {
+  animation: icon-pulse 1s ease-in-out infinite;
+}
+
+/* 轻微上浮再落回（sparkles 主星） */
+@keyframes icon-bob {
+  0%        { transform: translateY(0); }
+  25%       { transform: translateY(-1px); }
+  50%, 100% { transform: translateY(0); }
+}
+.icon-anim-bob {
+  animation: icon-bob 1s ease-in-out;
+}
+
+/* 闪一下、灭掉、结尾再亮起（sparkles 四周的小星星，延迟 1s 与主星错开）。
+   注意别叫 icon-blink，那个名字被 bot 的眨眼动效占了。 */
+@keyframes icon-twinkle {
+  0%   { opacity: 0; }
+  16%  { opacity: 1; }
+  34%  { opacity: 0; }
+  84%  { opacity: 0; }
+  100% { opacity: 1; }
+}
+.icon-anim-twinkle {
+  animation: icon-twinkle 2s ease-in-out 1s forwards;
+}
+
+/* 小幅抖动：位移 + 极小角度（square-pen 的笔） */
+@keyframes icon-jiggle {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  33%  { transform: translate(-1px, 1.5px) rotate(0.5deg); }
+  66%  { transform: translate(1.5px, -1px) rotate(-0.5deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+.icon-anim-jiggle {
+  animation: icon-jiggle 600ms ease-in-out;
+}
+
+/* 填充开关：hover 时填成 currentColor，离开淡回镂空（sparkles 主星） */
+.icon-fill-toggle {
+  fill: none;
+  transition: fill 500ms ease;
+}
+.icon-fill-toggle-on {
+  fill: currentColor;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .icon-anim-pulse,
+  .icon-anim-bob,
+  .icon-anim-twinkle,
+  .icon-anim-jiggle {
+    animation: none;
+  }
+  .icon-transform-spring,
+  .icon-transform-snap,
+  .icon-fill-toggle {
+    transition: none;
+  }
+}
+
+/* ============================================================
+ * 图标动效 —— 纯 CSS 版（替代 motion 运行时）
+ * ============================================================
+ *  components/ui/*.tsx 里的图标只切换 class，不再引入 motion，
+ *  后台首屏因此不用加载 36.5 KB 的动画运行时。
+ *  命名统一 icon- 前缀；keyframes 尽量多图标复用。
+ */
+
+/* 淡入 —— 供"多元素依次出现"类动效复用 */
+@keyframes icon-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* 上浮淡入 —— 起始位移由 --icon-rise-y 控制，同一条 keyframes
+   可被不同元素以不同距离复用 */
+@keyframes icon-rise-in {
+  from { opacity: 0; transform: translateY(var(--icon-rise-y, 2px)); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* contrast —— 半圆以左边缘中点为轴翻 180°；
+   cubic-bezier 末段过冲，模拟原 spring(stiffness 80 / damping 12) 的回弹 */
+.icon-contrast-half {
+  transform-box: fill-box;
+  transform-origin: left center;
+  transition: transform 0.5s cubic-bezier(0.34, 1.35, 0.64, 1);
+}
+.icon-contrast-half--on { transform: rotate(180deg); }
+
+/* disc-3 —— 两段唱片弧线绕盘心（viewBox 坐标 12,12）转 90° */
+.icon-disc3-arcs {
+  transform-box: view-box;
+  transform-origin: 12px 12px;
+  transition: transform 0.4s ease-in-out;
+}
+.icon-disc3-arcs--on { transform: rotate(90deg); }
+
+/* gauge —— 指针下沉并右摆 72°，同样用过冲曲线模拟 spring */
+.icon-gauge-needle {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.5s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+.icon-gauge-needle--on { transform: translate(0.5px, 3px) rotate(72deg); }
+
+/* gallery-thumbnails —— 底部四条缩略图指示线从左到右依次淡入 */
+.icon-thumbs-run > path {
+  animation: icon-fade-in 0.2s ease-out backwards;
+}
+.icon-thumbs-run > path:nth-of-type(1) { animation-delay: 0.15s; }
+.icon-thumbs-run > path:nth-of-type(2) { animation-delay: 0.3s; }
+.icon-thumbs-run > path:nth-of-type(3) { animation-delay: 0.45s; }
+.icon-thumbs-run > path:nth-of-type(4) { animation-delay: 0.6s; }
+
+/* gallery-vertical-end —— 顶部两条横线自下往上、由内到外依次浮现 */
+.icon-stack-run > path {
+  animation: icon-rise-in 0.35s ease-out backwards;
+}
+.icon-stack-run > path:nth-of-type(1) { --icon-rise-y: 2px; animation-delay: 0.25s; }
+.icon-stack-run > path:nth-of-type(2) { --icon-rise-y: 4px; animation-delay: 0s; }
+
+/* 用户偏好减少动效 → 直接到位，不做过渡 */
+@media (prefers-reduced-motion: reduce) {
+  .icon-contrast-half,
+  .icon-disc3-arcs,
+  .icon-gauge-needle { transition: none; }
+  .icon-thumbs-run > path,
+  .icon-stack-run > path { animation: none; }
+}
+
+/* ============================================================
+ * 图标动效 —— 纯 CSS 关键帧（取代 motion 运行时）
+ * ============================================================
+ *  app/admin/src/components/ui/*.tsx 里的图标原本用 motion 的 variants
+ *  驱动，为了不把 motion 运行时（压缩后 36.5 KB）拉进后台首屏，统一改成
+ *  「组件切 className + 这里的 @keyframes」。
+ *  约定：类名与 keyframes 一律 icon- 前缀；效果相同的图标共用同一条，
+ *  不要一个图标造一条。
+ */
+
+/* 绕悬挂点左右摇、幅度逐次衰减到停 —— bell。
+   与本文件下方那条 icon-swing（等幅、慢一倍）不是一个效果，别合并。
+   转轴由使用方通过 transform-origin 指定。 */
+@keyframes icon-swing-damped {
+  0%   { transform: rotate(0deg); }
+  20%  { transform: rotate(-12deg); }
+  40%  { transform: rotate(10deg); }
+  60%  { transform: rotate(-6deg); }
+  80%  { transform: rotate(3deg); }
+  100% { transform: rotate(0deg); }
+}
+.icon-anim-swing-damped { animation: icon-swing-damped 0.6s ease-in-out; }
+
+/* 左右摆 + 轻微抬起放大 —— book-text */
+@keyframes icon-wobble {
+  0%   { transform: translateY(0) rotate(0deg) scale(1); }
+  20%  { transform: translateY(-2px) rotate(-8deg) scale(1.04); }
+  50%  { transform: translateY(-1px) rotate(8deg) scale(1.02); }
+  80%  { transform: translateY(0) rotate(-8deg) scale(1); }
+  100% { transform: translateY(0) rotate(0deg) scale(1); }
+}
+.icon-anim-wobble { animation: icon-wobble 0.6s ease-in-out; }
+
+/* 眨眼：纵向压扁再弹回 —— bot 的两只眼睛。
+   原动效改的是 <line> 的 y1/y2 端点，CSS 动不了 SVG 几何属性，降级成 scaleY。
+   transform-origin 各元素不同，写在组件的内联 style 上。 */
+@keyframes icon-blink {
+  0%   { transform: scaleY(1); }
+  50%  { transform: scaleY(0.12); }
+  100% { transform: scaleY(1); }
+}
+.icon-anim-blink {
+  transform-box: view-box;
+  animation: icon-blink 0.5s ease-in-out 0.2s;
+}
+
+/* 跳两下并放大，停在放大态（配合 .icon-anim-settle 回落） —— cart */
+@keyframes icon-hop {
+  0%   { transform: translateY(0) scale(1); }
+  11%  { transform: translateY(0) scale(1.04); }
+  33%  { transform: translateY(-5px) scale(1.1); }
+  56%  { transform: translateY(0) scale(1.1); }
+  78%  { transform: translateY(-5px) scale(1.1); }
+  100% { transform: translateY(0) scale(1.1); }
+}
+.icon-anim-hop { animation: icon-hop 0.9s ease-in-out forwards; }
+
+/* 两条纯 transition 的底座，具体 transform 值写在组件内联 style 上：
+   - shift：位移到目标位（boxes 三块方块散开）
+   - settle：会「停在放大态」的图标撤掉动画类后平滑回落，而不是硬切；
+     cart 与下方 message-* 共用这一条，别再重复定义。 */
+.icon-anim-shift { transition: transform 0.26s cubic-bezier(0.4, 0, 0.2, 1); }
+.icon-anim-settle { transition: transform 0.2s ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  .icon-anim-swing-damped,
+  .icon-anim-wobble,
+  .icon-anim-blink,
+  .icon-anim-hop { animation: none; }
+  .icon-anim-shift,
+  .icon-anim-settle { transition: none; }
+}
+
+/* ============================================================
+ * 动画图标 —— 纯 CSS 版动效
+ * ============================================================
+ *  components/ui/ 下的图标原先靠 motion(framer-motion 后继)的
+ *  useAnimation + variants 驱动，只为 hover 时的一点微动效，就把
+ *  36.5 KB 运行时拉进后台首屏。现在改成组件切 className，动效由
+ *  下面这几条 keyframes 承担 —— 多个图标共用一条，不要按图标新增。
+ *
+ *  组件侧约定：animating 为 true 时挂上 .icon-anim-*，同时给动画
+ *  元素换一个 key 强制重挂载 —— 重复加同一个类 CSS 动画是不会重放
+ *  的，换 key 才能保证连续 hover 每次都动。
+ * ============================================================ */
+
+/* 轻微上弹再落回：house */
+@keyframes icon-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-2.5px) scale(1.06); }
+}
+
+/* 左右摇一下并微微放大：message-circle / message-square。
+   scale 收在 1.05 而不是回到 1 —— 对应原 variants 里 hover 期间
+   保持放大的效果，中途 1.08 是模拟原来 spring 的过冲。 */
+@keyframes icon-wiggle {
+  0%   { transform: rotate(0deg) scale(1); }
+  33%  { transform: rotate(-7deg) scale(1.08); }
+  66%  { transform: rotate(7deg) scale(1.04); }
+  100% { transform: rotate(0deg) scale(1.05); }
+}
+
+/* 先回撤再向前顶一下：play */
+@keyframes icon-nudge {
+  0%   { transform: translateX(0) rotate(0deg); }
+  20%  { transform: translateX(-1px) rotate(-10deg); }
+  50%  { transform: translateX(2px) rotate(0deg); }
+  100% { transform: translateX(0) rotate(0deg); }
+}
+
+/* 匀速自转：loader */
+@keyframes icon-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.icon-anim-bounce { animation: icon-bounce 0.5s ease-in-out; }
+.icon-anim-wiggle { animation: icon-wiggle 0.5s ease-in-out forwards; }
+.icon-anim-nudge  { animation: icon-nudge 0.5s ease-in-out; }
+.icon-anim-spin   { animation: icon-spin 0.8s linear infinite; }
+
+/* message-* 停在 scale(1.05)，撤销 hover 时的平滑回落复用上面已有的
+   .icon-anim-settle（同一条 transform transition，别重复定义）。 */
+
+@media (prefers-reduced-motion: reduce) {
+  .icon-anim-bounce,
+  .icon-anim-wiggle,
+  .icon-anim-nudge,
+  .icon-anim-spin { animation: none; }
+}
+
+/* ============================================================
+ * 动效图标 —— 纯 CSS 版（替代 motion 运行时）
+ * ============================================================
+ *  组件内只切换 class，不再引入 motion。keyframes 一律 icon- 前缀，
+ *  多个图标共用同一条，别按图标名新建。
+ */
+
+/* translateX: [-6, 0]，spring(stiffness 200, damping 13) 的近似 ——
+   ζ≈0.46 欠阻尼，回到 0 之前有约 20% 的过冲。 */
+@keyframes icon-slide-in-x {
+  0%   { transform: translateX(-6px); }
+  40%  { transform: translateX(1.2px); }
+  65%  { transform: translateX(-0.4px); }
+  85%  { transform: translateX(0.12px); }
+  100% { transform: translateX(0); }
+}
+
+/* rotate: [0, 12, -14, 4, 0]，times [0, .42, .68, .88, 1] 的等价写法。
+   转轴由使用方通过 transform-origin / transform-box 指定。 */
+@keyframes icon-swing {
+  0%   { transform: rotate(0deg); }
+  42%  { transform: rotate(12deg); }
+  68%  { transform: rotate(-14deg); }
+  88%  { transform: rotate(4deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.icon-anim-slide-in-x {
+  animation: icon-slide-in-x 0.6s ease-out 0.1s both;
+}
+
+.icon-anim-swing {
+  animation: icon-swing 1.05s ease-in-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .icon-anim-slide-in-x,
+  .icon-anim-swing {
+    animation: none;
+  }
+}
+
+/* ============================================================
+ * 图标动效 —— 纯 CSS 版（原来带路径动画的那一组）
+ * ============================================================
+ *  audio-lines / file-text / link / map-pin / monitor-check / shield-check
+ *  原本靠 motion 改 d、pathLength、pathOffset。CSS 改不了路径几何：
+ *  - 描线（pathLength 0→1）可以用 pathLength="1" + stroke-dasharray:1 +
+ *    stroke-dashoffset 等价还原，直接复用上面已有的 icon-draw；
+ *  - d 在两个形状之间插值、pathOffset 抖动这类还原不了的，按约定降级成
+ *    scale / rotate / translateY 的轻微动效。
+ *  组件侧一律用 Tailwind 任意值引用，例如
+ *    animate-[icon-tilt_0.5s_ease-in-out] motion-reduce:animate-none
+ */
+
+/* 绕 viewBox 中心做 transform。.icon-origin-self 用的 fill-box 对
+   包围盒宽度为 0 的竖线不可靠（audio-lines 的竖条），那种情况用这个。 */
+.icon-origin-viewbox {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+}
+
+/* hover 期间保持的轻微放大，回落复用已有的 .icon-transform-snap（file-text） */
+.icon-scale-up {
+  transform: scale(1.05);
+}
+
+/* 均衡器竖条：原动效是 d 在两个高度之间来回插值（M6 6v11 ⇄ M6 10v3），
+   降级成绕 viewBox 中心的 scaleY —— 四组 d 的中点都落在 y≈12，缩放中心
+   和原动效几乎重合。目标比例 = 目标高度 / 原高度，由 --icon-bar-scale 传入，
+   各条竖条的周期不同，写在 animate-[] 里（audio-lines）。 */
+@keyframes icon-bar-pulse {
+  0%, 100% { transform: scaleY(1); }
+  50%      { transform: scaleY(var(--icon-bar-scale, 0.5)); }
+}
+
+/* 擦掉再写回，对应 pathLength [1, 0, 1]；同样要求元素带 pathLength="1"
+   和 stroke-dasharray:1（file-text 的三条正文线靠 delay 依次错开）。 */
+@keyframes icon-redraw {
+  0%   { stroke-dashoffset: 0; }
+  50%  { stroke-dashoffset: 1; }
+  100% { stroke-dashoffset: 0; }
+}
+
+/* 描线 + 淡入 + 从一半大小放大，对应 pathLength/opacity/scale 同时跑的
+   勾选动效（shield-check）。map-pin 的圆点复用同一条但不加
+   stroke-dasharray —— 没有虚线图案时 stroke-dashoffset 不产生效果，
+   于是只剩淡入 + 放大，正好是 pathLength/pathOffset 还原不了时的降级。 */
+@keyframes icon-draw-pop {
+  0%   { stroke-dashoffset: 1; opacity: 0; transform: scale(0.5); }
+  25%  { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 1; transform: scale(1); }
+}
+
+/* 小幅回摆 rotate [0, -5, 0]：link 的两段链子各绕自身中心拧一下。
+   比 icon-swing / icon-swing-damped 轻一个量级，不是同一个效果。 */
+@keyframes icon-tilt {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(-5deg); }
+}
+
+/* 抬起并停在半空 y: [0, -5, -3]、times [0, .6, 1]：map-pin 悬停时的抬升。
+   停住靠 forwards，移出 hover 后的回落交给 .icon-transform-snap。 */
+@keyframes icon-lift {
+  0%   { transform: translateY(0); }
+  60%  { transform: translateY(-5px); }
+  100% { transform: translateY(-3px); }
+}
