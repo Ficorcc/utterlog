@@ -116,6 +116,7 @@ import { Route as ApiV1PlaylistsImportRouteImport } from './routes/api/v1/playli
 import { Route as ApiV1PassportIdentifyRouteImport } from './routes/api/v1/passport/identify'
 import { Route as ApiV1PasskeysIdRouteImport } from './routes/api/v1/passkeys/$id'
 import { Route as ApiV1OptionsTestEmailRouteImport } from './routes/api/v1/options/test-email'
+import { Route as ApiV1OptionsTestCredentialRouteImport } from './routes/api/v1/options/test-credential'
 import { Route as ApiV1NotificationsUnreadCountRouteImport } from './routes/api/v1/notifications/unread-count'
 import { Route as ApiV1NotificationsStreamRouteImport } from './routes/api/v1/notifications/stream'
 import { Route as ApiV1NotificationsReadAllRouteImport } from './routes/api/v1/notifications/read-all'
@@ -753,6 +754,12 @@ const ApiV1OptionsTestEmailRoute = ApiV1OptionsTestEmailRouteImport.update({
   path: '/test-email',
   getParentRoute: () => ApiV1OptionsRoute,
 } as any)
+const ApiV1OptionsTestCredentialRoute =
+  ApiV1OptionsTestCredentialRouteImport.update({
+    id: '/test-credential',
+    path: '/test-credential',
+    getParentRoute: () => ApiV1OptionsRoute,
+  } as any)
 const ApiV1NotificationsUnreadCountRoute =
   ApiV1NotificationsUnreadCountRouteImport.update({
     id: '/api/v1/notifications/unread-count',
@@ -1398,6 +1405,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/notifications/read-all': typeof ApiV1NotificationsReadAllRoute
   '/api/v1/notifications/stream': typeof ApiV1NotificationsStreamRoute
   '/api/v1/notifications/unread-count': typeof ApiV1NotificationsUnreadCountRoute
+  '/api/v1/options/test-credential': typeof ApiV1OptionsTestCredentialRoute
   '/api/v1/options/test-email': typeof ApiV1OptionsTestEmailRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/passport/identify': typeof ApiV1PassportIdentifyRoute
@@ -1606,6 +1614,7 @@ export interface FileRoutesByTo {
   '/api/v1/notifications/read-all': typeof ApiV1NotificationsReadAllRoute
   '/api/v1/notifications/stream': typeof ApiV1NotificationsStreamRoute
   '/api/v1/notifications/unread-count': typeof ApiV1NotificationsUnreadCountRoute
+  '/api/v1/options/test-credential': typeof ApiV1OptionsTestCredentialRoute
   '/api/v1/options/test-email': typeof ApiV1OptionsTestEmailRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/passport/identify': typeof ApiV1PassportIdentifyRoute
@@ -1815,6 +1824,7 @@ export interface FileRoutesById {
   '/api/v1/notifications/read-all': typeof ApiV1NotificationsReadAllRoute
   '/api/v1/notifications/stream': typeof ApiV1NotificationsStreamRoute
   '/api/v1/notifications/unread-count': typeof ApiV1NotificationsUnreadCountRoute
+  '/api/v1/options/test-credential': typeof ApiV1OptionsTestCredentialRoute
   '/api/v1/options/test-email': typeof ApiV1OptionsTestEmailRoute
   '/api/v1/passkeys/$id': typeof ApiV1PasskeysIdRoute
   '/api/v1/passport/identify': typeof ApiV1PassportIdentifyRoute
@@ -2025,6 +2035,7 @@ export interface FileRouteTypes {
     | '/api/v1/notifications/read-all'
     | '/api/v1/notifications/stream'
     | '/api/v1/notifications/unread-count'
+    | '/api/v1/options/test-credential'
     | '/api/v1/options/test-email'
     | '/api/v1/passkeys/$id'
     | '/api/v1/passport/identify'
@@ -2233,6 +2244,7 @@ export interface FileRouteTypes {
     | '/api/v1/notifications/read-all'
     | '/api/v1/notifications/stream'
     | '/api/v1/notifications/unread-count'
+    | '/api/v1/options/test-credential'
     | '/api/v1/options/test-email'
     | '/api/v1/passkeys/$id'
     | '/api/v1/passport/identify'
@@ -2441,6 +2453,7 @@ export interface FileRouteTypes {
     | '/api/v1/notifications/read-all'
     | '/api/v1/notifications/stream'
     | '/api/v1/notifications/unread-count'
+    | '/api/v1/options/test-credential'
     | '/api/v1/options/test-email'
     | '/api/v1/passkeys/$id'
     | '/api/v1/passport/identify'
@@ -3460,6 +3473,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1OptionsTestEmailRouteImport
       parentRoute: typeof ApiV1OptionsRoute
     }
+    '/api/v1/options/test-credential': {
+      id: '/api/v1/options/test-credential'
+      path: '/test-credential'
+      fullPath: '/api/v1/options/test-credential'
+      preLoaderRoute: typeof ApiV1OptionsTestCredentialRouteImport
+      parentRoute: typeof ApiV1OptionsRoute
+    }
     '/api/v1/notifications/unread-count': {
       id: '/api/v1/notifications/unread-count'
       path: '/api/v1/notifications/unread-count'
@@ -4247,10 +4267,12 @@ const ApiV1CategoriesRouteWithChildren = ApiV1CategoriesRoute._addFileChildren(
 )
 
 interface ApiV1OptionsRouteChildren {
+  ApiV1OptionsTestCredentialRoute: typeof ApiV1OptionsTestCredentialRoute
   ApiV1OptionsTestEmailRoute: typeof ApiV1OptionsTestEmailRoute
 }
 
 const ApiV1OptionsRouteChildren: ApiV1OptionsRouteChildren = {
+  ApiV1OptionsTestCredentialRoute: ApiV1OptionsTestCredentialRoute,
   ApiV1OptionsTestEmailRoute: ApiV1OptionsTestEmailRoute,
 }
 

@@ -13,7 +13,7 @@ import {
   GitBranch, MapPin, LocateFixed, Minimize2, ImageOff, CloudUpload, Bird,
   ExternalLink, Loader2, Plug, Link as LinkIcon, Megaphone, Users, User,
   HardDrive, Cloud, Brush, BookOpen, Film, Music, Zap, Images, Lightbulb,
-  RefreshCw, Save, type LucideIcon,
+  RefreshCw, Save, CheckCircle2, XCircle, type LucideIcon,
 } from 'lucide-react';
 import api from '@/lib/api';
 import { cn } from '@/lib/utils';
@@ -128,6 +128,65 @@ function InputRow({ label, hint, type = 'text', placeholder, register, last }: {
         <Input type={type} placeholder={placeholder} {...(register || {})} />
       )}
     </Row>
+  );
+}
+
+/**
+ * 凭据测试按钮。点一下拿当前输入框里的值去打对方的官方接口，回来的是真实
+ * 校验结果 —— 只看格式没意义，key 拼对了但被吊销、配额用尽、限制了来源，
+ * 格式都是对的。
+ *
+ * 输入框留空时后端会退回已保存的那份，所以可以用来验证线上正在生效的配置，
+ * 不必先把 key 粘出来。
+ */
+function CredentialTestRow({ field, label, getValue, last }: {
+  field: string;
+  label: string;
+  getValue: () => string;
+  last?: boolean;
+}) {
+  const { t } = useI18n();
+  const [testing, setTesting] = useState(false);
+  const [result, setResult] = useState<{ ok: boolean; message: string; detail?: string } | null>(null);
+
+  const run = async () => {
+    setTesting(true);
+    setResult(null);
+    try {
+      const r: any = await api.post('/options/test-credential', { field, value: getValue() });
+      const data = r?.data ?? r;
+      setResult({ ok: !!data?.ok, message: String(data?.message || ''), detail: data?.detail });
+    } catch (e: any) {
+      // 后端用 apiFail 返回的校验错误（比如没填）也走这里
+      const msg = e?.response?.data?.message || e?.message || t('admin.settings.services.testFailed', '测试失败');
+      setResult({ ok: false, message: String(msg) });
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  return (
+    <div className={cn('flex flex-wrap items-center gap-2 py-2', !last && 'border-b border-border')}>
+      <Button type="button" variant="outline" size="sm" onClick={run} disabled={testing}>
+        {testing ? <Loader2 className="animate-spin" /> : <Plug />}
+        {testing
+          ? t('admin.settings.services.testing', '测试中…')
+          : t('admin.settings.services.test', '测试连接')}
+      </Button>
+      {result && (
+        <span className={cn('inline-flex items-center gap-1.5 text-xs-plus',
+          result.ok ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive')}>
+          {result.ok ? <CheckCircle2 className="size-4" /> : <XCircle className="size-4" />}
+          <span>{result.message}</span>
+          {result.detail && <span className="text-muted-foreground">— {result.detail}</span>}
+        </span>
+      )}
+      {!result && !testing && (
+        <span className="text-2xs text-muted-foreground">
+          {t('admin.settings.services.testHint', '会真实调用 {label} 接口校验，留空则测已保存的值', { label })}
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -679,7 +738,7 @@ export default function SettingsPage() {
     icon: LucideIcon;
     description: string;
     footerHint?: string;
-    fields: Array<{ name: string; label: string; type?: string; placeholder?: string; hint?: string }>;
+    fields: Array<{ name: string; label: string; type?: string; placeholder?: string; hint?: string; testable?: boolean }>;
   }> = [
     {
       title: t('admin.settings.services.mapbox.section', 'Mapbox'),
@@ -687,7 +746,7 @@ export default function SettingsPage() {
       description: t('admin.settings.services.mapbox.description', '全站统一 Mapbox 配置。数据统计访客地图和前台足迹地图都会从这里读取。'),
       footerHint: t('admin.settings.services.mapbox.footer', 'Mapbox public token 通常以 pk. 开头，可在 account.mapbox.com 创建。旧版足迹设置里的 token 会自动兼容并同步到这里。'),
       fields: [
-        { name: 'mapbox_access_token', label: t('admin.settings.services.mapbox.token', 'Mapbox Token'), type: 'password', placeholder: 'pk.eyJ1...' },
+        { name: 'mapbox_access_token', label: t('admin.settings.services.mapbox.token', 'Mapbox Token'), type: 'password', placeholder: 'pk.eyJ1...' , testable: true},
         { name: 'mapbox_api_url', label: t('admin.settings.services.mapbox.apiUrl', 'Mapbox API 地址'), placeholder: 'https://api.mapbox.com', hint: t('admin.settings.services.mapbox.apiUrlHint', '一般保持默认。只有自建代理或特殊网络环境才需要修改。') },
       ],
     },
@@ -697,7 +756,7 @@ export default function SettingsPage() {
       description: t('admin.settings.services.github.description', '全站统一 GitHub Token。Coding 页面读取公开项目时可不填；填写后用于服务端贡献统计和提升 GitHub API 速率。'),
       footerHint: t('admin.settings.services.github.footer', '建议只授予最小只读权限。Token 只保存在服务端，不会输出到前台；公开页面不会因为配置 Token 自动混入私有仓库。'),
       fields: [
-        { name: 'github_access_token', label: t('admin.settings.services.github.token', 'GitHub Token'), type: 'password', placeholder: 'github_pat_...' },
+        { name: 'github_access_token', label: t('admin.settings.services.github.token', 'GitHub Token'), type: 'password', placeholder: 'github_pat_...' , testable: true},
       ],
     },
     {
@@ -705,7 +764,7 @@ export default function SettingsPage() {
       icon: MapPin,
       description: t('admin.settings.services.google.description', '预留给后续地理编码、地图或地址服务使用。当前足迹地理编码仍使用足迹页配置的临时服务。'),
       fields: [
-        { name: 'google_maps_api_key', label: t('admin.settings.services.google.apiKey', 'Google Maps API Key'), type: 'password', placeholder: 'AIza...' },
+        { name: 'google_maps_api_key', label: t('admin.settings.services.google.apiKey', 'Google Maps API Key'), type: 'password', placeholder: 'AIza...' , testable: true},
       ],
     },
     {
@@ -714,7 +773,7 @@ export default function SettingsPage() {
       description: t('admin.settings.services.amap.description', '用于国内经纬度反查城市名、地址解析等地理编码能力。后续说说位置和足迹地理编码可从这里读取。'),
       footerHint: t('admin.settings.services.amap.footer', '填写高德开放平台 Web 服务 Key。建议只给服务端接口使用，不在前台公开输出。'),
       fields: [
-        { name: 'amap_api_key', label: t('admin.settings.services.amap.apiKey', '高德地图 Web 服务 Key'), type: 'password', placeholder: 'AMap Web Service Key' },
+        { name: 'amap_api_key', label: t('admin.settings.services.amap.apiKey', '高德地图 Web 服务 Key'), type: 'password', placeholder: 'AMap Web Service Key' , testable: true},
       ],
     },
     {
@@ -723,7 +782,7 @@ export default function SettingsPage() {
       description: t('admin.settings.services.tencent.description', '用于国内逆地址解析、城市名识别和后续位置服务。可作为 Mapbox 的国内兜底服务。'),
       footerHint: t('admin.settings.services.tencent.footer', '填写腾讯位置服务 WebService API Key。建议只给服务端接口使用，不在前台公开输出。'),
       fields: [
-        { name: 'tencent_maps_api_key', label: t('admin.settings.services.tencent.apiKey', '腾讯位置服务 Key'), type: 'password', placeholder: 'Tencent Location Service Key' },
+        { name: 'tencent_maps_api_key', label: t('admin.settings.services.tencent.apiKey', '腾讯位置服务 Key'), type: 'password', placeholder: 'Tencent Location Service Key' , testable: true},
       ],
     },
     {
@@ -731,7 +790,7 @@ export default function SettingsPage() {
       icon: Minimize2,
       description: t('admin.settings.services.tinypng.description', '集中保存 TinyPNG Key。当前上传压缩仍走系统内置编码器，TinyPNG 在线压缩接入后会直接读取这里。'),
       fields: [
-        { name: 'tinypng_api_key', label: t('admin.settings.services.tinypng.apiKey', 'TinyPNG API Key'), type: 'password', placeholder: 'TinyPNG API Key' },
+        { name: 'tinypng_api_key', label: t('admin.settings.services.tinypng.apiKey', 'TinyPNG API Key'), type: 'password', placeholder: 'TinyPNG API Key' , testable: true},
       ],
     },
   ];
@@ -1724,15 +1783,24 @@ export default function SettingsPage() {
                   footerHint={section.footerHint}
                 >
                   {section.fields.map((field, index) => (
-                    <InputRow
-                      key={field.name}
-                      label={field.label}
-                      type={field.type}
-                      register={register(field.name)}
-                      placeholder={field.placeholder}
-                      hint={field.hint}
-                      last={index === section.fields.length - 1}
-                    />
+                    <div key={field.name}>
+                      <InputRow
+                        label={field.label}
+                        type={field.type}
+                        register={register(field.name)}
+                        placeholder={field.placeholder}
+                        hint={field.hint}
+                        last={index === section.fields.length - 1 && !field.testable}
+                      />
+                      {field.testable && (
+                        <CredentialTestRow
+                          field={field.name}
+                          label={field.label}
+                          getValue={() => String(watch(field.name) || '')}
+                          last={index === section.fields.length - 1}
+                        />
+                      )}
+                    </div>
                   ))}
                 </SettingsSection>
               ))}
