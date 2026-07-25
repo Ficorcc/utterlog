@@ -158,8 +158,9 @@ export async function replyToAdminComment(parentId: number, userId: number, inpu
     author_email: string | null;
     content: string;
     role: string | null;
+    created_at: number;
   }>(
-    `select c.post_id, c.author_name, c.author_email, c.content, coalesce(u.role,'') as role
+    `select c.post_id, c.author_name, c.author_email, c.content, c.created_at, coalesce(u.role,'') as role
      from ${table('comments')} c left join ${table('users')} u on u.id = c.user_id where c.id = $1`,
     [parentId],
   );
@@ -198,6 +199,10 @@ export async function replyToAdminComment(parentId: number, userId: number, inpu
       commentReplyEmail(site, {
         recipientName: parent.author_name || '你好',
         replierName: admin.nickname || admin.username || '博主',
+        replierEmail: admin.email || '',
+        recipientEmail: recipient,
+        originalAt: Number(parent.created_at || 0),
+        replyAt: now,
         postTitle: post?.title || '',
         originalContent: String(parent.content || '').slice(0, 300),
         replyContent: content.slice(0, 500),

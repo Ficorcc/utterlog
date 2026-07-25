@@ -96,8 +96,9 @@ async function publishTelegramCommentReply(commentId: number, content: string) {
     author_email: string | null;
     content: string;
     role: string | null;
+    created_at: number;
   }>(
-    `select c.post_id, c.author_name, c.author_email, c.content, coalesce(u.role, '') as role
+    `select c.post_id, c.author_name, c.author_email, c.content, c.created_at, coalesce(u.role, '') as role
      from ${table('comments')} c left join ${table('users')} u on u.id = c.user_id where c.id = $1`,
     [commentId],
   );
@@ -141,6 +142,10 @@ async function publishTelegramCommentReply(commentId: number, content: string) {
         recipientName: parent.author_name || '你好',
         // 跟入库时写的作者名保持一致（见上面的 insert），别用站点名。
         replierName: admin?.nickname || admin?.username || 'Admin',
+        replierEmail: admin?.email || '',
+        recipientEmail: recipient,
+        originalAt: Number(parent.created_at || 0),
+        replyAt: now,
         postTitle: post?.title || '',
         originalContent: String(parent.content || '').slice(0, 300),
         replyContent: reply.slice(0, 500),

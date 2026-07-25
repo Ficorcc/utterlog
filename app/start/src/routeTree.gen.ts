@@ -148,6 +148,7 @@ import { Route as ApiV1FederationTokenRouteImport } from './routes/api/v1/federa
 import { Route as ApiV1FederationMetadataRouteImport } from './routes/api/v1/federation/metadata'
 import { Route as ApiV1FederationFollowRouteImport } from './routes/api/v1/federation/follow'
 import { Route as ApiV1CommentsPendingCountRouteImport } from './routes/api/v1/comments/pending-count'
+import { Route as ApiV1CommentsModerateRouteImport } from './routes/api/v1/comments/moderate'
 import { Route as ApiV1CommentsFederatedRouteImport } from './routes/api/v1/comments/federated'
 import { Route as ApiV1CommentsBatchRouteImport } from './routes/api/v1/comments/batch'
 import { Route as ApiV1CommentsIdRouteImport } from './routes/api/v1/comments/$id'
@@ -918,6 +919,11 @@ const ApiV1CommentsPendingCountRoute =
     path: '/api/v1/comments/pending-count',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiV1CommentsModerateRoute = ApiV1CommentsModerateRouteImport.update({
+  id: '/api/v1/comments/moderate',
+  path: '/api/v1/comments/moderate',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1CommentsFederatedRoute = ApiV1CommentsFederatedRouteImport.update({
   id: '/api/v1/comments/federated',
   path: '/api/v1/comments/federated',
@@ -1359,6 +1365,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRouteWithChildren
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
   '/api/v1/comments/federated': typeof ApiV1CommentsFederatedRoute
+  '/api/v1/comments/moderate': typeof ApiV1CommentsModerateRoute
   '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
   '/api/v1/federation/follow': typeof ApiV1FederationFollowRoute
   '/api/v1/federation/metadata': typeof ApiV1FederationMetadataRoute
@@ -1566,6 +1573,7 @@ export interface FileRoutesByTo {
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRouteWithChildren
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
   '/api/v1/comments/federated': typeof ApiV1CommentsFederatedRoute
+  '/api/v1/comments/moderate': typeof ApiV1CommentsModerateRoute
   '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
   '/api/v1/federation/follow': typeof ApiV1FederationFollowRoute
   '/api/v1/federation/metadata': typeof ApiV1FederationMetadataRoute
@@ -1774,6 +1782,7 @@ export interface FileRoutesById {
   '/api/v1/comments/$id': typeof ApiV1CommentsIdRouteWithChildren
   '/api/v1/comments/batch': typeof ApiV1CommentsBatchRoute
   '/api/v1/comments/federated': typeof ApiV1CommentsFederatedRoute
+  '/api/v1/comments/moderate': typeof ApiV1CommentsModerateRoute
   '/api/v1/comments/pending-count': typeof ApiV1CommentsPendingCountRoute
   '/api/v1/federation/follow': typeof ApiV1FederationFollowRoute
   '/api/v1/federation/metadata': typeof ApiV1FederationMetadataRoute
@@ -1983,6 +1992,7 @@ export interface FileRouteTypes {
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
     | '/api/v1/comments/federated'
+    | '/api/v1/comments/moderate'
     | '/api/v1/comments/pending-count'
     | '/api/v1/federation/follow'
     | '/api/v1/federation/metadata'
@@ -2190,6 +2200,7 @@ export interface FileRouteTypes {
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
     | '/api/v1/comments/federated'
+    | '/api/v1/comments/moderate'
     | '/api/v1/comments/pending-count'
     | '/api/v1/federation/follow'
     | '/api/v1/federation/metadata'
@@ -2397,6 +2408,7 @@ export interface FileRouteTypes {
     | '/api/v1/comments/$id'
     | '/api/v1/comments/batch'
     | '/api/v1/comments/federated'
+    | '/api/v1/comments/moderate'
     | '/api/v1/comments/pending-count'
     | '/api/v1/federation/follow'
     | '/api/v1/federation/metadata'
@@ -2598,6 +2610,7 @@ export interface RootRouteChildren {
   ApiV1CommentsIdRoute: typeof ApiV1CommentsIdRouteWithChildren
   ApiV1CommentsBatchRoute: typeof ApiV1CommentsBatchRoute
   ApiV1CommentsFederatedRoute: typeof ApiV1CommentsFederatedRoute
+  ApiV1CommentsModerateRoute: typeof ApiV1CommentsModerateRoute
   ApiV1CommentsPendingCountRoute: typeof ApiV1CommentsPendingCountRoute
   ApiV1FederationFollowRoute: typeof ApiV1FederationFollowRoute
   ApiV1FederationMetadataRoute: typeof ApiV1FederationMetadataRoute
@@ -3671,6 +3684,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1CommentsPendingCountRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/comments/moderate': {
+      id: '/api/v1/comments/moderate'
+      path: '/api/v1/comments/moderate'
+      fullPath: '/api/v1/comments/moderate'
+      preLoaderRoute: typeof ApiV1CommentsModerateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/comments/federated': {
       id: '/api/v1/comments/federated'
       path: '/api/v1/comments/federated'
@@ -4501,6 +4521,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1CommentsIdRoute: ApiV1CommentsIdRouteWithChildren,
   ApiV1CommentsBatchRoute: ApiV1CommentsBatchRoute,
   ApiV1CommentsFederatedRoute: ApiV1CommentsFederatedRoute,
+  ApiV1CommentsModerateRoute: ApiV1CommentsModerateRoute,
   ApiV1CommentsPendingCountRoute: ApiV1CommentsPendingCountRoute,
   ApiV1FederationFollowRoute: ApiV1FederationFollowRoute,
   ApiV1FederationMetadataRoute: ApiV1FederationMetadataRoute,

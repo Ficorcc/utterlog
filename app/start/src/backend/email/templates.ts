@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { config } from '../config';
 import { optionValue } from '../db/options';
 
@@ -26,21 +27,38 @@ export function htmlEscape(value: string) {
     .replace(/'/g, '&#39;');
 }
 
-export type EmailSite = { title: string; url: string; logo: string };
+export type EmailSite = { title: string; url: string; logo: string; timeZone: string };
 
 /** 站点信息，模板外壳的品牌区要用。 */
 export async function emailSite(): Promise<EmailSite> {
-  const [title, url, logo] = await Promise.all([
+  const [title, url, logo, timeZone] = await Promise.all([
     optionValue('site_title', 'Utterlog'),
     optionValue('site_url', config.appUrl),
     optionValue('site_logo', ''),
+    optionValue('site_timezone', 'UTC'),
   ]);
+  const siteUrl = (url || config.appUrl).replace(/\/+$/, '');
   return {
     title: (title || 'Utterlog').trim(),
-    url: (url || config.appUrl).replace(/\/+$/, ''),
-    logo: (logo || '').trim(),
+    url: siteUrl,
+    logo: absoluteUrl((logo || '').trim(), siteUrl),
+    timeZone: (timeZone || 'UTC').trim() || 'UTC',
   };
 }
+
+/**
+ * 后台的 logo 常填成 `/logo.png` 这样的站内相对路径，网页里没问题，但邮件
+ * 客户端没有「当前站点」这个基准，相对路径一律加载失败 —— 收件人看到的是
+ * 一个破图。这里统一补成绝对地址；填的本来就是完整 URL 就原样返回。
+ */
+function absoluteUrl(value: string, siteUrl: string) {
+  if (!value) return '';
+  if (/^(https?:)?\/\//i.test(value) || value.startsWith('data:')) return value;
+  return `${siteUrl}/${value.replace(/^\/+/, '')}`;
+}
+
+/** 仅供测试：emailSite 要读数据库，单测里只想验路径补全这一段。 */
+export const absoluteUrlForTest = absoluteUrl;
 
 const BRAND = '#0052d9';
 const TEXT = '#0d1a2d';
@@ -49,18 +67,28 @@ const DIM = '#8ea0b4';
 const SOFT_BG = '#f5f7fa';
 const LINE = '#e1e6eb';
 
-/** 品牌区：logo 有就用 logo，没有就用站点名首字做方块。 */
-function brand(site: EmailSite) {
+/**
+ * 品牌区：logo 有就用 logo，没有就用站点名首字做方块。
+ *
+ * badge 是右上角的可选状态标签。放这里而不是跟在正文标题后面，是因为标题
+ * 长度不可控 —— 文章标题一长就换行，徽章会被挤到第二行孤零零地吊着。
+ * 右上角是固定位置，多长的标题都不影响。
+ *
+ * aria-hidden 只加在 logo 和站点名那两格：让邮件预览片段和读屏从正文开始，
+ * 不要先念一遍站点名（原 Go 模板的处理）。但徽章带的是状态信息，读屏用户
+ * 也需要，所以它那一格不隐藏。
+ */
+function brand(site: EmailSite, badge = '') {
   const mark = site.logo
-    ? `<img src="${htmlEscape(site.logo)}" alt="" width="32" height="32" style="display:block;border-radius:2px;">`
-    : `<div style="width:32px;height:32px;background:${BRAND};color:#fff;font-weight:700;font-size:15px;line-height:32px;text-align:center;">${htmlEscape([...site.title][0] || 'U')}</div>`;
-  // aria-hidden + user-select:none：让邮件预览片段和读屏从正文开始，
-  // 不要先念一遍站点名。原 Go 模板就是这么处理的。
-  return `<table aria-hidden="true" role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:24px;user-select:none;-webkit-user-select:none;"><tr>
-<td width="40" valign="middle">${mark}</td>
-<td valign="middle" style="padding-left:10px;">
+    ? `<img src="${htmlEscape(site.logo)}" alt="" width="32" height="32" style="display:block;border-radius:4px;">`
+    : `<div style="width:32px;height:32px;background:${BRAND};color:#fff;font-weight:700;font-size:15px;line-height:32px;text-align:center;border-radius:4px;">${htmlEscape([...site.title][0] || 'U')}</div>`;
+  // logo 在最左、站点名紧跟其后，徽章留在右上角固定位置（标题多长都不挤）。
+  return `<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:24px;"><tr>
+<td aria-hidden="true" width="32" valign="middle" style="user-select:none;-webkit-user-select:none;">${mark}</td>
+<td aria-hidden="true" valign="middle" style="padding-left:10px;user-select:none;-webkit-user-select:none;">
 <span style="font-size:18px;font-weight:700;color:${BRAND};letter-spacing:-0.3px;">${htmlEscape(site.title)}</span>
 </td>
+${badge ? `<td valign="middle" align="right" style="white-space:nowrap;padding-left:10px;">${badge}</td>` : ''}
 </tr></table>
 <div style="height:1px;background:${LINE};margin:24px 0;"></div>`;
 }
@@ -79,13 +107,13 @@ function footerWithUnsub(unsubscribeUrl: string) {
 }
 
 /** 统一外壳：灰底 + 600px 白卡片。所有模板都从这里出。 */
-function shell(site: EmailSite, body: string, footer = POWERED) {
+function shell(site: EmailSite, body: string, footer = POWERED, badge = '') {
   return `<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><title>${htmlEscape(site.title)}</title></head>
 <body style="margin:0;padding:0;background:#f4f6f9;font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;color:${TEXT};">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:40px 20px;"><tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.04);border-radius:4px;overflow:hidden;"><tr><td style="padding:40px 40px 36px;">
-${brand(site)}
+${brand(site, badge)}
 ${body}
 ${footer}
 </td></tr></table>
@@ -100,8 +128,45 @@ function button(href: string, label: string, primary = true) {
   return `<a target="_blank" rel="noopener noreferrer" href="${htmlEscape(href)}" style="display:inline-block;padding:10px 26px;font-size:13px;font-weight:500;text-decoration:none;margin:14px 6px 0 0;${style}">${htmlEscape(label)}</a>`;
 }
 
-function quote(content: string, accent = '#c8d3e0') {
-  return `<div style="background:${SOFT_BG};border-left:3px solid ${accent};padding:14px 16px;margin:8px 0 16px;font-size:13px;line-height:1.7;color:${MUTED};">${htmlEscape(content)}</div>`;
+/** 审核按钮：实心色块，跟状态徽章同一套配色，一眼分得清通过和垃圾。 */
+function actionButton(href: string, label: string, color: string) {
+  return `<a target="_blank" rel="noopener noreferrer" href="${htmlEscape(href)}" style="display:inline-block;padding:10px 22px;font-size:13px;font-weight:600;text-decoration:none;color:#fff;background:${color};border-radius:4px;margin:14px 6px 0 0;">${label}</a>`;
+}
+
+function quote(content: string, accent = '#c8d3e0', postedAt = '', color = MUTED) {
+  return `<div style="background:${SOFT_BG};border-left:3px solid ${accent};padding:14px 16px;margin:8px 0 16px;font-size:13px;line-height:1.7;color:${color};">${htmlEscape(content)}${
+    postedAt ? `<div style="font-size:11px;color:#aebbcb;line-height:1.4;margin-top:8px;text-align:right;">${htmlEscape(postedAt)}</div>` : ''}</div>`;
+}
+
+/**
+ * Gravatar 头像地址。走 gravatar.bluecdn.com 镜像 —— 全站其它地方
+ * （analytics / tracking 的在线访客、评论作者）用的都是这个域，保持一致。
+ * d=mp 让没注册过 Gravatar 的邮箱也能拿到一张默认头像，不会是破图。
+ */
+export function gravatarUrl(email: string, size = 80) {
+  const normalized = String(email || '').trim().toLowerCase();
+  if (!normalized) return '';
+  return `https://gravatar.bluecdn.com/avatar/${createHash('md5').update(normalized).digest('hex')}?s=${size}&d=mp`;
+}
+
+/**
+ * 邮件里的时间戳。统一在模板内格式化（而不是让每个调用点自己拼字符串）——
+ * 之前 newCommentEmail 的 postedAt 就是因为要调用方自己传，实际发信时被漏掉了，
+ * 线上邮件一直没有时间。传 unix 秒，按站点时区渲染成 2026-07-25 19:40。
+ */
+export function formatEmailTime(unix: number | undefined, timeZone: string) {
+  const seconds = Number(unix || 0);
+  if (!seconds) return '';
+  try {
+    const parts = new Intl.DateTimeFormat('zh-CN', {
+      timeZone: timeZone || 'UTC', year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hour12: false,
+    }).formatToParts(new Date(seconds * 1000));
+    const get = (type: string) => parts.find((part) => part.type === type)?.value || '';
+    return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}`;
+  } catch {
+    return new Date(seconds * 1000).toISOString().slice(0, 16).replace('T', ' ');
+  }
 }
 
 /** 国旗 + IP 归属，新评论/密码重置里标注来源用。 */
@@ -158,46 +223,116 @@ ${source}
 export function commentReplyEmail(site: EmailSite, input: {
   recipientName: string; replierName: string; postTitle: string;
   originalContent: string; replyContent: string; postUrl: string; unsubscribeUrl?: string;
+  /** 回复者邮箱，头像以 20px 小图挂在「XX 的回复：」的昵称前面。 */
+  replierEmail?: string;
+  /** 收件人邮箱，头像放卡片右上角，标明这封信是发给谁的。 */
+  recipientEmail?: string;
+  /** 原评论和回复各自的 unix 时间戳，渲染在对应标签行的右端。 */
+  originalAt?: number;
+  replyAt?: number;
 }) {
-  const body = `<p style="font-size:15px;line-height:1.7;color:${TEXT};margin:0 0 16px;">
-你好 <b>${htmlEscape(input.recipientName)}</b>，<b>${htmlEscape(input.replierName)}</b> 回复了你在《${htmlEscape(input.postTitle)}》的评论
-</p>
-<p style="font-size:13px;line-height:1.8;color:${MUTED};margin:20px 0 6px;">你说的是：</p>
-${quote(input.originalContent)}
-<p style="font-size:13px;line-height:1.8;color:${MUTED};margin:0 0 6px;">${htmlEscape(input.replierName)} 的回复：</p>
-<div style="background:${SOFT_BG};border-left:3px solid ${BRAND};padding:14px 16px;margin:8px 0 16px;font-size:13px;line-height:1.7;color:${TEXT};">${htmlEscape(input.replyContent)}</div>
+  // 收件人（原评论者）头像放卡片右上角，回复者头像缩小挂在「XX 的回复：」
+  // 的昵称前 —— 引用块不再单独占一列头像，正文就能占满宽度。
+  const recipientAvatar = gravatarUrl(input.recipientEmail || '', 64);
+  const headerAvatar = recipientAvatar
+    ? `<img src="${htmlEscape(recipientAvatar)}" alt="" width="32" height="32" style="display:block;border-radius:999px;">`
+    : '';
+  const replierAvatar = gravatarUrl(input.replierEmail || '', 40);
+
+  // 标签行：左边说明文字（可带小头像），右边时间靠右。
+  const label = (text: string, at: number | undefined, avatarUrl = '') => {
+    const time = formatEmailTime(at, site.timeZone);
+    const icon = avatarUrl
+      ? `<img src="${htmlEscape(avatarUrl)}" alt="" width="20" height="20" style="display:inline-block;border-radius:999px;vertical-align:-5px;margin-right:6px;">`
+      : '';
+    return `<table cellpadding="0" cellspacing="0" width="100%" style="margin:18px 0 2px;"><tr>
+<td align="left" style="font-size:13px;line-height:1.8;color:${MUTED};">${icon}${text}</td>
+${time ? `<td align="right" style="font-size:12px;line-height:1.8;color:#aebbcb;white-space:nowrap;padding-left:10px;">${htmlEscape(time)}</td>` : ''}
+</tr></table>`;
+  };
+
+  const body = `<div style="margin:0 0 4px;">
+<div style="font-size:15px;line-height:1.7;color:${TEXT};">你好 <b>${htmlEscape(input.recipientName)}</b>，</div>
+<div style="font-size:15px;line-height:1.7;color:${TEXT};"><b>${htmlEscape(input.replierName)}</b> 回复了你在《${htmlEscape(input.postTitle)}》的评论</div>
+</div>
+${label('你说的是：', input.originalAt)}
+${quote(input.originalContent, '#c8d3e0', '', MUTED)}
+${label(`${htmlEscape(input.replierName)} 的回复：`, input.replyAt, replierAvatar)}
+${quote(input.replyContent, BRAND, '', TEXT)}
 ${button(input.postUrl, '查看完整回复')}`;
-  return shell(site, body, footerWithUnsub(input.unsubscribeUrl || ''));
+  return shell(site, body, footerWithUnsub(input.unsubscribeUrl || ''), headerAvatar);
+}
+
+/**
+ * 评论状态徽章。颜色按状态分：通过=绿、待审=橙、垃圾=红，其余走中性灰。
+ * 邮件客户端对 border-radius 支持良好，但 flex / gap 一律不能用，所以是
+ * inline-block + padding 的老写法。
+ */
+function statusBadge(status: string) {
+  const value = String(status || '').trim();
+  if (!value) return '';
+  // 用 Unicode 符号而不是图标字体或 SVG —— 邮件客户端对 @font-face 和内联
+  // SVG 的支持都不可靠，纯文本符号是唯一到处都渲染得出来的。
+  // aria-label 带中文状态名，读屏不会只念一个"对号"。
+  const marks: Record<string, { icon: string; color: string; background: string; label: string }> = {
+    approved: { icon: '✓', color: '#0f7b3f', background: '#e6f5ec', label: '已通过' },
+    pending: { icon: '⋯', color: '#9a6412', background: '#fdf3e2', label: '待审核' },
+    spam: { icon: '🗑', color: '#b42318', background: '#fdecea', label: '垃圾评论' },
+    trash: { icon: '✕', color: '#5a6b7f', background: '#eef1f5', label: '已删除' },
+  };
+  const mark = marks[value.toLowerCase()];
+  // 未知状态回退成文字标签，总比什么都不显示强
+  if (!mark) {
+    return `<span style="display:inline-block;padding:4px 10px;font-size:11px;font-weight:600;line-height:1.4;color:#5a6b7f;background:#eef1f5;border-radius:4px;">${htmlEscape(value)}</span>`;
+  }
+  return `<span role="img" aria-label="${htmlEscape(mark.label)}" title="${htmlEscape(mark.label)}" style="display:inline-block;width:28px;height:28px;line-height:28px;text-align:center;font-size:15px;font-weight:700;color:${mark.color};background:${mark.background};border-radius:4px;">${mark.icon}</span>`;
 }
 
 export function newCommentEmail(site: EmailSite, input: {
   author: string; postTitle: string; content: string; postUrl: string; manageUrl: string;
   status?: string; email?: string; url?: string; ip?: string; ipLocation?: string;
-  countryCode?: string; postedAt?: string;
+  countryCode?: string; postedAt?: number;
+  /** 一键审核链接（见 email/comment-moderation.ts）。点开是确认页，不是直接生效。 */
+  approveUrl?: string;
+  spamUrl?: string;
 }) {
   const meta = input.ip
     ? `<td valign="middle" align="right" style="font-size:11px;color:${DIM};line-height:1.4;white-space:nowrap;padding-left:10px;">${flag(input.countryCode || '')}${htmlEscape(input.ip)}${input.ipLocation ? `<span style="color:#aebbcb;"> · ${htmlEscape(input.ipLocation)}</span>` : ''}</td>`
     : '';
+  // 昵称本身就是通往访客网址的链接，邮箱紧跟其后 —— 网址不再单独占一行：
+  // 完整 URL 又长又没人读，点昵称就能过去，省下来的一行让卡片紧凑不少。
+  const nameHtml = input.url
+    ? `<a target="_blank" rel="noopener noreferrer" href="${htmlEscape(input.url)}" style="color:${TEXT};font-weight:600;text-decoration:none;">${htmlEscape(input.author)}</a>`
+    : `<b style="color:${TEXT};font-weight:600;">${htmlEscape(input.author)}</b>`;
+  const emailHtml = input.email
+    ? `<a target="_blank" rel="noopener noreferrer" href="mailto:${htmlEscape(input.email)}" style="font-size:12px;font-weight:400;color:${DIM};text-decoration:none;">${htmlEscape(input.email)}</a>`
+    : '';
+  // 访客头像放昵称前面，单独占一格。22px 是跟 14px 昵称的行高对齐出来的 ——
+  // 再大会把这一行撑高、跟右侧的 IP 归属错位。方角（4px 圆角）跟状态徽章
+  // 统一，不用圆形。没有邮箱就整格不渲染，昵称直接顶格。
+  const visitorAvatar = gravatarUrl(input.email || '', 44);
+  const avatarCell = visitorAvatar
+    ? `<td width="30" valign="middle" style="padding-right:8px;"><img src="${htmlEscape(visitorAvatar)}" alt="" width="22" height="22" style="display:block;border-radius:4px;"></td>`
+    : '';
   const body = `<p style="font-size:15px;line-height:1.7;color:${TEXT};margin:0 0 16px;">
-<b>${htmlEscape(input.author)}</b> 在《${htmlEscape(input.postTitle)}》发表了新评论${input.status ? `（${htmlEscape(input.status)}）` : ''}
+<b>${htmlEscape(input.author)}</b> 在《${htmlEscape(input.postTitle)}》发表了新评论
 </p>
 <div style="background:${SOFT_BG};border-left:3px solid ${BRAND};padding:14px 16px;margin:16px 0;color:${TEXT};">
 <table cellpadding="0" cellspacing="0" width="100%" style="margin:0;"><tr>
-<td valign="middle" align="left" style="font-size:14px;line-height:1.4;">
-${input.url
-    ? `<a target="_blank" rel="noopener noreferrer" href="${htmlEscape(input.url)}" style="color:${TEXT};font-weight:600;text-decoration:none;">${htmlEscape(input.author)}</a>`
-    : `<b style="color:${TEXT};font-weight:600;">${htmlEscape(input.author)}</b>`}
+${avatarCell}
+<td valign="middle" align="left" style="font-size:14px;line-height:1.5;">
+${nameHtml}${emailHtml ? `&nbsp;&nbsp;${emailHtml}` : ''}
 </td>
 ${meta}
 </tr></table>
-${input.email ? `<div style="font-size:12px;color:${DIM};line-height:1.7;margin-top:4px;"><a target="_blank" rel="noopener noreferrer" href="mailto:${htmlEscape(input.email)}" style="color:${DIM};text-decoration:none;">${htmlEscape(input.email)}</a></div>` : ''}
-${input.url ? `<div style="font-size:12px;color:${DIM};line-height:1.7;word-break:break-all;"><a target="_blank" rel="noopener noreferrer" href="${htmlEscape(input.url)}" style="color:${DIM};text-decoration:none;">${htmlEscape(input.url)}</a></div>` : ''}
 <div style="height:1px;background:#dfe5ec;margin:12px 0;"></div>
 <div style="font-size:13px;line-height:1.8;color:${TEXT};">${htmlEscape(input.content)}</div>
-${input.postedAt ? `<div style="font-size:11px;color:#aebbcb;line-height:1.4;margin-top:10px;text-align:right;">${htmlEscape(input.postedAt)}</div>` : ''}
+${(() => { const at = formatEmailTime(input.postedAt, site.timeZone);
+  return at ? `<div style="font-size:11px;color:#aebbcb;line-height:1.4;margin-top:10px;text-align:right;">${htmlEscape(at)}</div>` : ''; })()}
 </div>
+${input.approveUrl ? actionButton(input.approveUrl, '✓ 通过', '#0f7b3f') : ''}${input.spamUrl ? actionButton(input.spamUrl, '🗑 标记垃圾', '#b42318') : ''}
 ${button(input.postUrl, '查看文章')}${button(input.manageUrl, '管理评论', false)}`;
-  return shell(site, body);
+  return shell(site, body, POWERED, statusBadge(input.status || ''));
 }
 
 /** 通用单段落邮件（测试邮件等没有专属模板的场景）。 */

@@ -3,6 +3,7 @@ import { exec, many, nowUnix, one } from '../db/helpers';
 import { optionValue } from '../db/options';
 import { lookupGeoIp } from '../geoip';
 import { sendConfiguredEmail } from '../email';
+import { commentModerationUrl } from '../email/comment-moderation';
 import { emailSite, newCommentEmail } from '../email/templates';
 import { aiAuditFailAction, auditCommentContent, enqueueAiCommentReply } from '../ai/comments';
 import { sendCommentModerationTelegram } from '../telegram';
@@ -171,6 +172,11 @@ export async function createPublicComment(input: unknown, request: PublicComment
     const siteUrl = (await optionValue('site_url', config.appUrl)).replace(/\/+$/, '');
     if (admin?.email) {
       const site = await emailSite();
+      // 一键审核链接：点开是确认页，确认后才生效（防邮件网关预取时误操作）
+      const [approveUrl, spamUrl] = await Promise.all([
+        commentModerationUrl(siteUrl, id, 'approve').catch(() => ''),
+        commentModerationUrl(siteUrl, id, 'spam').catch(() => ''),
+      ]);
       await sendConfiguredEmail(
         admin.email,
         `新评论 - ${post.title}`,
@@ -184,6 +190,9 @@ export async function createPublicComment(input: unknown, request: PublicComment
           ip: request.ip || '',
           ipLocation: [geo?.city, geo?.province, geo?.country].filter(Boolean).join(' · '),
           countryCode: geo?.country_code || '',
+          postedAt: now,
+          approveUrl,
+          spamUrl,
           postUrl: `${siteUrl}/posts/${encodeURIComponent(post.slug || String(postId))}#comment-${id}`,
           manageUrl: `${siteUrl}/admin/comments`,
         }),
