@@ -7,10 +7,9 @@
  * Coexists with the legacy --color-* tokens during migration.
  * ============================================================ */
 :root {
-  /* 圆角基准。派生出 sm=4 / md=6 / lg=8 / xl=12，都落在 6~8px 这档，
-     不会出现 16px 以上的大圆角。rounded-full 不受影响，头像、开关、
-     状态圆点仍然是正圆。 */
-  --radius: 8px;
+  /* 后台是直角视觉语言：卡片、按钮、输入框、下拉、对话框一律不带圆角。
+     rounded-full 不受影响 —— 头像、开关、状态圆点、侧边栏折叠按钮仍是正圆。 */
+  --radius: 0;
   --background: #ffffff;
   --foreground: #0a0a0a;
   --card: #ffffff;
@@ -74,10 +73,12 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  /* 四档都写死 0，不用 calc —— xl 是「基准 + 4px」，只把基准归零它还会剩
+     4px 圆角；sm/md 的「基准 - 4px」则会算出负值，浏览器当无效值处理。 */
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
 
   /* 阴影只保留两档（§9.1），全部收敛到这里。
      Tailwind 默认的 shadow-lg 是 `0 10px 15px -3px rgb(0 0 0/.1)`、
@@ -288,12 +289,12 @@ body {
   --shadow-1: 0 1px 3px rgba(0,0,0,0.08);
   --shadow-2: 0 4px 12px rgba(0,0,0,0.10);
 
-  /* Radius（§9 设计 Token）。注意这几个名字跟 shadcn 那套 --radius-* 重名，
-     实际零引用，保留只为兼容旧样式；新代码一律用 Tailwind 的 rounded-*。 */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-hero: 12px;
+  /* Radius（§9 设计 Token）。跟 shadcn 那套 --radius-* 重名、实际零引用，
+     保留只为兼容旧样式；新代码一律用 Tailwind 的 rounded-*。同为直角。 */
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-hero: 0;
 
   /* =========================================================
      Admin component sizing tokens (legacy aliases — prefer
@@ -326,18 +327,39 @@ body {
 }
 
 /* ============================================================
- * 圆角
+ * 直角
  * ------------------------------------------------------------
- * 这里原先有两条 `border-radius: 0 !important` 把全站压成直角 —— 一条按元素
- * （button/input/select/textarea/form/.card/[role=dialog]），一条按 Tailwind
- * 的具名圆角类。现已移除，改为统一走 --radius(8px) 派生的 sm/md/lg/xl。
+ * --radius 及四个档位都已归零，Tailwind 的 rounded-* 工具类因此自动是直角。
+ * 下面两条兜底针对变量管不到的地方：原生控件的浏览器默认圆角、组件库内联的
+ * border-radius、以及第三方 UI 自带的样式。
  *
- * 留一条注记：当初加 !important 是为了不用逐个文件删 140 多处 class，现在方向
- * 反过来了，那些 class 正好直接生效，不需要任何改动。
+ * rounded-full 刻意不在名单里 —— 头像、开关滑块、状态圆点、侧边栏折叠按钮
+ * 都要保持正圆。逐个文件删 rounded-* class 也能达到同样效果，但那是 140 多处，
+ * 且以后新写的还会漏，靠这两条兜住更省事。
  * ============================================================ */
+button,
+input,
+select,
+textarea,
+form,
+[role='dialog'] {
+  border-radius: 0;
+}
 
-/* 侧边栏折叠开关是正圆，不跟着 --radius 走。原先这条要靠特异性压过全局的
-   `border-radius: 0 !important`，那条规则已移除，这里的 !important 也就不需要了。 */
+/* 具名圆角工具类压平。不含 rounded-full，正圆元素不受影响。 */
+.rounded,
+.rounded-sm,
+.rounded-md,
+.rounded-lg,
+.rounded-xl,
+.rounded-2xl,
+.rounded-3xl {
+  border-radius: 0;
+}
+
+
+/* 侧边栏折叠开关保持正圆。上面按元素的那条会命中它（是个 button），所以这里
+   要靠类选择器的特异性 (0,1,0) 压过元素选择器 (0,0,1)，不需要 !important。 */
 .sidebar-toggle {
   border-radius: 9999px;
 }
