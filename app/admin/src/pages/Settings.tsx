@@ -132,61 +132,59 @@ function InputRow({ label, hint, type = 'text', placeholder, register, last }: {
 }
 
 /**
- * 凭据测试按钮。点一下拿当前输入框里的值去打对方的官方接口，回来的是真实
- * 校验结果 —— 只看格式没意义，key 拼对了但被吊销、配额用尽、限制了来源，
- * 格式都是对的。
+ * 凭据测试。跟输入框同行，结果显示在下方一行小字里。
  *
- * 输入框留空时后端会退回已保存的那份，所以可以用来验证线上正在生效的配置，
- * 不必先把 key 粘出来。
+ * 点一下拿当前输入框的值去打对方官方接口，回来的是真实校验结果 —— 只看格式
+ * 没意义，key 拼对了但被吊销、配额用尽、限制了来源，格式都是对的。输入框留空
+ * 时后端退回已保存的那份，可以用来验证线上正在生效的配置。
+ *
+ * GitHub 和 TinyPNG 会在挂载时自动查一次用量：这两家把额度放在响应头里
+ * （x-ratelimit-remaining / compression-count），顺手就能拿到，不用用户先点。
+ * 其余几家的配额只在各自控制台，接口不返回，就只能等用户主动点测试。
  */
-function CredentialTestRow({ field, label, getValue, last }: {
-  field: string;
-  label: string;
-  getValue: () => string;
-  last?: boolean;
-}) {
+const AUTO_USAGE_FIELDS = new Set(['github_access_token', 'tinypng_api_key']);
+
+function CredentialTest({ field, getValue }: { field: string; getValue: () => string }) {
   const { t } = useI18n();
   const [testing, setTesting] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; message: string; detail?: string } | null>(null);
 
-  const run = async () => {
-    setTesting(true);
-    setResult(null);
+  const run = async (silent = false) => {
+    if (!silent) setTesting(true);
     try {
-      const r: any = await api.post('/options/test-credential', { field, value: getValue() });
+      const r: any = await api.post('/options/test-credential', { field, value: silent ? '' : getValue() });
       const data = r?.data ?? r;
       setResult({ ok: !!data?.ok, message: String(data?.message || ''), detail: data?.detail });
     } catch (e: any) {
-      // 后端用 apiFail 返回的校验错误（比如没填）也走这里
+      // 自动查用量失败就安静收场，别在用户没动手时弹一行红字
+      if (silent) return;
       const msg = e?.response?.data?.message || e?.message || t('admin.settings.services.testFailed', '测试失败');
       setResult({ ok: false, message: String(msg) });
     } finally {
-      setTesting(false);
+      if (!silent) setTesting(false);
     }
   };
 
+  useEffect(() => {
+    if (AUTO_USAGE_FIELDS.has(field)) void run(true);
+    // 只在挂载时查一次，避免每次输入都打外部接口
+  }, [field]);
+
   return (
-    <div className={cn('flex flex-wrap items-center gap-2 py-2', !last && 'border-b border-border')}>
-      <Button type="button" variant="outline" size="sm" onClick={run} disabled={testing}>
+    <>
+      <Button type="button" variant="outline" size="sm" className="shrink-0" onClick={() => run()} disabled={testing}>
         {testing ? <Loader2 className="animate-spin" /> : <Plug />}
-        {testing
-          ? t('admin.settings.services.testing', '测试中…')
-          : t('admin.settings.services.test', '测试连接')}
+        {testing ? t('admin.settings.services.testing', '测试中') : t('admin.settings.services.test', '测试')}
       </Button>
       {result && (
-        <span className={cn('inline-flex items-center gap-1.5 text-xs-plus',
-          result.ok ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive')}>
-          {result.ok ? <CheckCircle2 className="size-4" /> : <XCircle className="size-4" />}
-          <span>{result.message}</span>
-          {result.detail && <span className="text-muted-foreground">— {result.detail}</span>}
+        <span className={cn('inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-xs',
+          result.ok ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive')}
+          title={[result.message, result.detail].filter(Boolean).join(' — ')}>
+          {result.ok ? <CheckCircle2 className="size-3.5" /> : <XCircle className="size-3.5" />}
+          <span className="max-w-52 truncate">{result.detail || result.message}</span>
         </span>
       )}
-      {!result && !testing && (
-        <span className="text-2xs text-muted-foreground">
-          {t('admin.settings.services.testHint', '会真实调用 {label} 接口校验，留空则测已保存的值', { label })}
-        </span>
-      )}
-    </div>
+    </>
   );
 }
 
@@ -602,7 +600,7 @@ export default function SettingsPage() {
       'image_lazy_load', 'image_lightbox',
     ],
     services: [
-      'mapbox_access_token', 'mapbox_api_url',
+      'mapbox_access_token',
       'github_access_token',
       'google_maps_api_key', 'amap_api_key', 'tencent_maps_api_key',
       'tinypng_api_key',
@@ -744,10 +742,9 @@ export default function SettingsPage() {
       title: t('admin.settings.services.mapbox.section', 'Mapbox'),
       icon: Map,
       description: t('admin.settings.services.mapbox.description', '全站统一 Mapbox 配置。数据统计访客地图和前台足迹地图都会从这里读取。'),
-      footerHint: t('admin.settings.services.mapbox.footer', 'Mapbox public token 通常以 pk. 开头，可在 account.mapbox.com 创建。旧版足迹设置里的 token 会自动兼容并同步到这里。'),
+      footerHint: t('admin.settings.services.mapbox.footer', 'Mapbox public token 通常以 pk. 开头，可在 account.mapbox.com 创建。旧版足迹设置里的 token 会自动兼容并同步到这里。API 地址默认走 api.mapbox.com，自建代理需要改动时联系维护者。'),
       fields: [
         { name: 'mapbox_access_token', label: t('admin.settings.services.mapbox.token', 'Mapbox Token'), type: 'password', placeholder: 'pk.eyJ1...' , testable: true},
-        { name: 'mapbox_api_url', label: t('admin.settings.services.mapbox.apiUrl', 'Mapbox API 地址'), placeholder: 'https://api.mapbox.com', hint: t('admin.settings.services.mapbox.apiUrlHint', '一般保持默认。只有自建代理或特殊网络环境才需要修改。') },
       ],
     },
     {
@@ -1783,24 +1780,28 @@ export default function SettingsPage() {
                   footerHint={section.footerHint}
                 >
                   {section.fields.map((field, index) => (
-                    <div key={field.name}>
-                      <InputRow
-                        label={field.label}
-                        type={field.type}
-                        register={register(field.name)}
-                        placeholder={field.placeholder}
-                        hint={field.hint}
-                        last={index === section.fields.length - 1 && !field.testable}
-                      />
-                      {field.testable && (
-                        <CredentialTestRow
-                          field={field.name}
-                          label={field.label}
-                          getValue={() => String(watch(field.name) || '')}
-                          last={index === section.fields.length - 1}
+                    <Row
+                      key={field.name}
+                      label={field.label}
+                      hint={field.hint}
+                      last={index === section.fields.length - 1}
+                    >
+                      {/* 输入框和测试按钮同行：按钮单独占一行会把本来就长的
+                          第三方服务页拉得更长，而且它和输入框是一件事。 */}
+                      <div className="flex w-full items-center gap-2">
+                        <Input
+                          type={field.type}
+                          placeholder={field.placeholder}
+                          {...register(field.name)}
                         />
-                      )}
-                    </div>
+                        {field.testable && (
+                          <CredentialTest
+                            field={field.name}
+                            getValue={() => String(watch(field.name) || '')}
+                          />
+                        )}
+                      </div>
+                    </Row>
                   ))}
                 </SettingsSection>
               ))}
