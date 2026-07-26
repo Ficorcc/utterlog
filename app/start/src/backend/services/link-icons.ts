@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import sharp from 'sharp';
 import { normalizeSiteHost } from '@shared/link-match';
 import { config, table } from '../config';
+import { icoToPng, isIco } from '../media/ico-decode';
 import { exec, many, nowUnix } from '../db/helpers';
 import { assertPublicHttpUrl } from '../http/public-url';
 import { invalidateFriendLinks } from './friend-links';
@@ -131,7 +132,11 @@ async function fetchSiteIcon(siteUrl: string): Promise<Buffer | null> {
       const icon = await fetchWithLimit(target, MAX_ICON_BYTES, 'image/*');
       // 有的站点 404 页面返回 200 + HTML，扔进 sharp 只会报错，先按类型挡一道
       if (icon.contentType && !/image|octet-stream/i.test(icon.contentType)) continue;
-      const webp = await sharp(icon.bytes, { animated: false, failOn: 'error', limitInputPixels: 40_000_000 })
+      // sharp 不认 ICO，得先把里面最大的那张剥出来 —— /favicon.ico 是最主要的
+      // 回退路径，不解这一层等于这条路径全废
+      const decoded = isIco(icon.bytes) ? await icoToPng(icon.bytes) : icon.bytes;
+      if (!decoded) continue;
+      const webp = await sharp(decoded, { animated: false, failOn: 'error', limitInputPixels: 40_000_000 })
         .resize({ width: ICON_SIZE, height: ICON_SIZE, fit: 'inside', withoutEnlargement: true })
         .webp({ quality: 82, alphaQuality: 90, effort: 4 })
         .toBuffer();

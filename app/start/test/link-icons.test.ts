@@ -1,5 +1,7 @@
 import { describe, expect, test } from 'bun:test';
+import sharp from 'sharp';
 import { extractIconCandidates } from '../src/backend/services/link-icons';
+import { icoToPng, isIco } from '../src/backend/media/ico-decode';
 import { assertPublicHttpUrl, normalizePublicHttpUrl } from '../src/backend/http/public-url';
 
 /**
@@ -107,5 +109,158 @@ describe('从 HTML 里挑图标', () => {
     for (const html of ['', '<link', '<link rel=icon>', '<link rel="icon" href="">', '<link rel="icon" href="::::">']) {
       expect(() => extractIconCandidates(html, base)).not.toThrow();
     }
+  });
+});
+
+describe('ICO 解码', () => {
+  // sharp（libvips）不支持 ICO 输入，而 /favicon.ico 是抓不到 <link rel=icon>
+  // 时唯一的回退路径 —— 不自己解开这一层，那条路径就是 100% 失败。
+
+  /** 造一个内嵌 PNG 的 ico。 */
+  async function makePngIco(size: number) {
+    const png = await sharp({
+      create: { width: size, height: size, channels: 4, background: { r: 20, g: 120, b: 200, alpha: 1 } },
+    }).png().toBuffer();
+    const header = Buffer.alloc(6);
+    header.writeUInt16LE(0, 0);
+    header.writeUInt16LE(1, 2);
+    header.writeUInt16LE(1, 4);
+    const entry = Buffer.alloc(16);
+    entry[0] = size === 256 ? 0 : size;
+    entry[1] = size === 256 ? 0 : size;
+    entry.writeUInt16LE(1, 4);
+    entry.writeUInt16LE(32, 6);
+    entry.writeUInt32LE(png.length, 8);
+    entry.writeUInt32LE(22, 12);
+    return Buffer.concat([header, entry, png]);
+  }
+
+  /** 造一个内嵌 32 位 BMP 的 ico —— GitHub、百度用的就是这种。 */
+  function makeBmpIco(size: number) {
+    const rowSize = size * 4;
+    const dib = Buffer.alloc(40 + rowSize * size + Math.floor((size + 31) / 32) * 4 * size);
+    dib.writeUInt32LE(40, 0);
+    dib.writeInt32LE(size, 4);
+    dib.writeInt32LE(size * 2, 8);   // ICO 里高度是两倍：颜色 + AND 蒙版
+    dib.writeUInt16LE(1, 12);
+    dib.writeUInt16LE(32, 14);
+    for (let i = 0; i < size * size; i++) {
+      const at = 40 + i * 4;
+      dib[at] = 200; dib[at + 1] = 120; dib[at + 2] = 20; dib[at + 3] = 255;  // BGRA
+    }
+    const header = Buffer.alloc(6);
+    header.writeUInt16LE(1, 2);
+    header.writeUInt16LE(1, 4);
+    const entry = Buffer.alloc(16);
+    entry[0] = size; entry[1] = size;
+    entry.writeUInt32LE(dib.length, 8);
+    entry.writeUInt32LE(22, 12);
+    return Buffer.concat([header, entry, dib]);
+  }
+
+  test('认得出 ICO，也不会把 PNG 误判成 ICO', async () => {
+    expect(isIco(await makePngIco(32))).toBe(true);
+    expect(isIco(makeBmpIco(32))).toBe(true);
+    const plainPng = await sharp({ create: { width: 8, height: 8, channels: 4, background: '#fff' } }).png().toBuffer();
+    expect(isIco(plainPng)).toBe(false);
+    expect(isIco(Buffer.from('<!DOCTYPE html>'))).toBe(false);
+    expect(isIco(Buffer.alloc(0))).toBe(false);
+  });
+
+  test('内嵌 PNG 的 ico 能解出来', async () => {
+    const png = await icoToPng(await makePngIco(48));
+    expect(png).not.toBeNull();
+    const meta = await sharp(png!).metadata();
+    expect(meta.width).toBe(48);
+  });
+
+  test('内嵌 BMP 的 ico 能解出来，且颜色没有 BGR/RGB 弄反', async () => {
+    const png = await icoToPng(makeBmpIco(32));
+    expect(png).not.toBeNull();
+    const { data } = await sharp(png!).raw().toBuffer({ resolveWithObject: true });
+    // 写进去的是 BGRA(200,120,20)，读出来应该是 RGB(20,120,200)
+    expect([data[0], data[1], data[2]]).toEqual([20, 120, 200]);
+  });
+
+  test('多张时取最大的那张', async () => {
+    const small = await sharp({ create: { width: 16, height: 16, channels: 4, background: '#f00' } }).png().toBuffer();
+    const large = await sharp({ create: { width: 64, height: 64, channels: 4, background: '#0f0' } }).png().toBuffer();
+    const header = Buffer.alloc(6);
+    header.writeUInt16LE(1, 2);
+    header.writeUInt16LE(2, 4);
+    const dirSize = 6 + 32;
+    const e1 = Buffer.alloc(16);
+    e1[0] = 16; e1[1] = 16;
+    e1.writeUInt32LE(small.length, 8);
+    e1.writeUInt32LE(dirSize, 12);
+    const e2 = Buffer.alloc(16);
+    e2[0] = 64; e2[1] = 64;
+    e2.writeUInt32LE(large.length, 8);
+    e2.writeUInt32LE(dirSize + small.length, 12);
+    const png = await icoToPng(Buffer.concat([header, e1, e2, small, large]));
+    expect((await sharp(png!).metadata()).width).toBe(64);
+  });
+
+  test('8 位调色板的老 ico 也要能解 —— 友链里就有这种 16x16 图标', async () => {
+    const size = 16;
+    const palette = Buffer.alloc(256 * 4);
+    palette[0] = 200; palette[1] = 120; palette[2] = 20; palette[3] = 0;   // 索引 0 = BGRA
+    const rowSize = Math.floor((size * 8 + 31) / 32) * 4;
+    const maskRow = Math.floor((size + 31) / 32) * 4;
+    const dib = Buffer.alloc(40 + palette.length + rowSize * size + maskRow * size);
+    dib.writeUInt32LE(40, 0);
+    dib.writeInt32LE(size, 4);
+    dib.writeInt32LE(size * 2, 8);
+    dib.writeUInt16LE(1, 12);
+    dib.writeUInt16LE(8, 14);        // 8 位索引色
+    dib.writeUInt32LE(256, 32);      // 调色板项数
+    palette.copy(dib, 40);
+    // 像素全指向索引 0；AND 蒙版留 0 表示不透明
+    const header = Buffer.alloc(6);
+    header.writeUInt16LE(1, 2);
+    header.writeUInt16LE(1, 4);
+    const entry = Buffer.alloc(16);
+    entry[0] = size; entry[1] = size;
+    entry.writeUInt32LE(dib.length, 8);
+    entry.writeUInt32LE(22, 12);
+
+    const png = await icoToPng(Buffer.concat([header, entry, dib]));
+    expect(png).not.toBeNull();
+    const { data } = await sharp(png!).raw().toBuffer({ resolveWithObject: true });
+    expect([data[0], data[1], data[2]]).toEqual([20, 120, 200]);
+  });
+
+  test('调色板索引越界时返回 null，不读到 buffer 外面去', async () => {
+    const size = 4;
+    const rowSize = Math.floor((size * 8 + 31) / 32) * 4;
+    const dib = Buffer.alloc(40 + 4 * 4 + rowSize * size);   // 只给 4 个调色板项
+    dib.writeUInt32LE(40, 0);
+    dib.writeInt32LE(size, 4);
+    dib.writeInt32LE(size * 2, 8);
+    dib.writeUInt16LE(1, 12);
+    dib.writeUInt16LE(8, 14);
+    dib.writeUInt32LE(4, 32);
+    dib.fill(0xff, 40 + 16);          // 像素全指向索引 255，远超 4 项
+    const header = Buffer.alloc(6);
+    header.writeUInt16LE(1, 2);
+    header.writeUInt16LE(1, 4);
+    const entry = Buffer.alloc(16);
+    entry[0] = size; entry[1] = size;
+    entry.writeUInt32LE(dib.length, 8);
+    entry.writeUInt32LE(22, 12);
+    expect(await icoToPng(Buffer.concat([header, entry, dib]))).toBeNull();
+  });
+
+  test('损坏和越界的 ico 返回 null，不抛异常', async () => {
+    const truncated = (await makePngIco(32)).subarray(0, 20);
+    expect(await icoToPng(truncated)).toBeNull();
+    // 目录项声称的数据远超文件长度
+    const evil = Buffer.alloc(22);
+    evil.writeUInt16LE(1, 2);
+    evil.writeUInt16LE(1, 4);
+    evil.writeUInt32LE(0xffffff, 14);
+    evil.writeUInt32LE(0xffffff, 18);
+    expect(await icoToPng(evil)).toBeNull();
+    expect(await icoToPng(Buffer.from('not an ico at all'))).toBeNull();
   });
 });
