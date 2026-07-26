@@ -269,7 +269,7 @@ export default function VideoFormSection({ initialMeta, initialEpisodes, onChang
       <h3 className={sectionTitleCls}>
         <span className="flex items-center gap-1.5"><Clapperboard className="size-4" /> 影视元数据</span>
         <Button variant="secondary" size="sm" onClick={() => setImportOpen(true)}>
-          <CloudDownload className="size-3" /> 链接导入（豆瓣 / NeoDB）
+          <CloudDownload /> 链接导入（豆瓣 / NeoDB）
         </Button>
       </h3>
       <div className="mb-4 grid grid-cols-3 gap-3">
@@ -308,10 +308,10 @@ export default function VideoFormSection({ initialMeta, initialEpisodes, onChang
         <span className="flex items-center gap-1.5"><ListOrdered className="size-4" /> 剧集列表（{episodes.length} 集）</span>
         <span className="inline-flex gap-2">
           <Button variant="secondary" size="sm" onClick={() => setBulkPasteOpen(true)}>
-            <ClipboardPaste className="size-3" /> 批量粘贴
+            <ClipboardPaste /> 批量粘贴
           </Button>
           <Button size="sm" onClick={addEpisode}>
-            <Plus className="size-3" /> 添加一集
+            <Plus /> 添加一集
           </Button>
         </span>
       </h3>
@@ -334,13 +334,13 @@ export default function VideoFormSection({ initialMeta, initialEpisodes, onChang
                   placeholder="自动" className="text-2xs" />
                 <div className="flex justify-end gap-1">
                   <Button variant="outline" size="icon-sm" disabled={idx === 0} onClick={() => moveEpisode(idx, -1)} title="上移">
-                    <ChevronUp className="size-3" />
+                    <ChevronUp />
                   </Button>
                   <Button variant="outline" size="icon-sm" disabled={idx === episodes.length - 1} onClick={() => moveEpisode(idx, 1)} title="下移">
-                    <ChevronDown className="size-3" />
+                    <ChevronDown />
                   </Button>
                   <Button variant="outline" size="icon-sm" className="text-destructive hover:text-destructive" onClick={() => deleteEpisode(idx)} title="删除">
-                    <Trash2 className="size-3" />
+                    <Trash2 />
                   </Button>
                 </div>
               </div>
@@ -356,12 +356,12 @@ export default function VideoFormSection({ initialMeta, initialEpisodes, onChang
                       <Input value={a.label} onChange={(e: any) => updateAlt(idx, j, { label: e.target.value })} placeholder="备线名称" className="text-xs" />
                       <Input value={a.url} onChange={(e: any) => updateAlt(idx, j, { url: e.target.value })} placeholder="备线 URL" className="font-mono text-2xs" />
                       <Button variant="outline" size="icon-sm" className="text-destructive hover:text-destructive" onClick={() => deleteAlt(idx, j)} title="删除">
-                        <X className="size-2.5" />
+                        <X />
                       </Button>
                     </div>
                   ))}
                   <Button variant="secondary" size="sm" onClick={() => addAltSource(idx)} className="self-start">
-                    <Plus className="size-2.5" /> 加一条备线
+                    <Plus /> 加一条备线
                   </Button>
                 </div>
               </details>

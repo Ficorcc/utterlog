@@ -4,6 +4,8 @@ import toast from 'react-hot-toast';
 import api, { optionsApi } from '@/lib/api';
 import {
   Button,
+  Callout,
+  Card,
   Dialog, DialogContent, DialogHeader, DialogTitle,
   EmptyState,
   Input,
@@ -13,7 +15,8 @@ import {
   Switch,
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
 } from '@/components/ui/shadcn';
-import { RowAction } from '@/components/ui/row-actions';
+import { RowAction, RowActionGroup } from '@/components/ui/row-actions';
+import { DialogActions } from '@/components/ui';
 import {
   SlidersHorizontal, ExternalLink, RefreshCw, CircleAlert, Map, Key,
   Search, X, Pencil, FilePen, LocateFixed, Loader2,
@@ -280,7 +283,7 @@ export default function FootprintsPage() {
 
   const renderSettingsButton = () => (
     <Button type="button" variant="outline" size="icon" title={t('admin.footprints.settings', '足迹设置')} onClick={() => setSettingsOpen(true)}>
-      <SlidersHorizontal className="size-4" />
+      <SlidersHorizontal />
     </Button>
   );
 
@@ -297,65 +300,69 @@ export default function FootprintsPage() {
         </div>
         <div className="flex flex-wrap justify-end gap-2">
           <Button variant="outline" size="icon" title={t('admin.footprints.frontPage', '前台足迹页')} onClick={openPublicPage}>
-            <ExternalLink className="size-4" />
+            <ExternalLink />
           </Button>
           {renderSettingsButton()}
           <Button size="icon" title={t('admin.common.refresh', '刷新')} onClick={() => fetchFootprints()} disabled={loading}>
-            {loading ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
+            {loading ? <Loader2 className="animate-spin" /> : <RefreshCw />}
           </Button>
         </div>
       </div>
 
       {!enabled && (
-        <div className="mb-3.5 flex items-center gap-2.5 rounded-lg border border-border border-l-[3px] border-l-amber-500 bg-card p-3.5">
-          <CircleAlert className="size-4 shrink-0 text-amber-600 dark:text-amber-400" />
-          <span className="flex-1 text-sm text-muted-foreground">
-            {t('admin.footprints.disabledHint', '足迹功能未启用，前台足迹页会显示关闭提示。')}
-          </span>
-          {renderSettingsButton()}
-        </div>
+        <Callout tone="warning" icon={<CircleAlert />} className="mb-3.5 items-center">
+          <div className="flex items-center gap-2.5">
+            <span className="flex-1">
+              {t('admin.footprints.disabledHint', '足迹功能未启用，前台足迹页会显示关闭提示。')}
+            </span>
+            {renderSettingsButton()}
+          </div>
+        </Callout>
       )}
 
       {enabled && !hasMapboxToken && (
-        <div className="mb-3.5 flex items-center gap-2.5 rounded-lg border border-border border-l-[3px] border-l-primary bg-card p-3.5">
-          <Map className="size-4 shrink-0 text-primary" />
-          <span className="flex-1 text-sm text-muted-foreground">
-            {t('admin.footprints.noTokenHint', '尚未配置 Mapbox Token，前台地图不会渲染，只会显示足迹时间线。')}
-          </span>
-          {renderSettingsButton()}
-        </div>
+        <Callout tone="info" icon={<Map />} className="mb-3.5 items-center">
+          <div className="flex items-center gap-2.5">
+            <span className="flex-1">
+              {t('admin.footprints.noTokenHint', '尚未配置 Mapbox Token，前台地图不会渲染，只会显示足迹时间线。')}
+            </span>
+            {renderSettingsButton()}
+          </div>
+        </Callout>
       )}
 
-      <form onSubmit={onSearch} className="mb-4 flex items-center gap-2.5 rounded-lg border border-border bg-card p-3.5">
-        <div className="min-w-45 flex-1">
-          <Input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder={t('admin.footprints.searchPlaceholder', '搜索城市、国家')}
-          />
-        </div>
-        <Button type="submit" size="icon" className="shrink-0" title={t('admin.footprints.search', '搜索')}>
-          <Search className="size-4" />
-        </Button>
-        {keyword && (
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            className="shrink-0"
-            title={t('admin.common.reset', '重置')}
-            onClick={() => {
-              setQuery('');
-              setKeyword('');
-              fetchFootprints('');
-            }}
-          >
-            <X className="size-4" />
+      <Card className="mb-4 p-3.5">
+        <form onSubmit={onSearch} className="flex items-center gap-2.5">
+          <div className="min-w-45 flex-1">
+            <Input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder={t('admin.footprints.searchPlaceholder', '搜索城市、国家')}
+            />
+          </div>
+          <Button type="submit" size="icon" className="shrink-0" title={t('admin.footprints.search', '搜索')}>
+            <Search />
           </Button>
-        )}
-      </form>
+          {keyword && (
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="shrink-0"
+              title={t('admin.common.reset', '重置')}
+              onClick={() => {
+                setQuery('');
+                setKeyword('');
+                fetchFootprints('');
+              }}
+            >
+              <X />
+            </Button>
+          )}
+        </form>
+      </Card>
 
-      <div className="overflow-hidden rounded-lg border border-border">
+      <Card className="overflow-hidden">
         {loading ? (
           <LoadingState label={t('common.loading', '加载中…')} />
         ) : rows.length === 0 ? (
@@ -372,7 +379,7 @@ export default function FootprintsPage() {
                 <TableHead>{t('admin.footprints.columns.post', '文章')}</TableHead>
                 <TableHead className="w-45">{t('admin.footprints.columns.place', '地点')}</TableHead>
                 <TableHead className="w-37.5">{t('admin.footprints.columns.date', '访问日期')}</TableHead>
-                <TableHead className="w-22.5 text-right">{t('admin.posts.columns.actions', '操作')}</TableHead>
+                <TableHead className="w-22.5 text-right">{t('admin.common.actions', '操作')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -381,13 +388,15 @@ export default function FootprintsPage() {
                 return (
                   <TableRow key={item.id}>
                     <TableCell>
-                      <button
+                      {/* 当链接用，所以走 link 变体；表格行里不能带按钮的高度和内边距。 */}
+                      <Button
                         type="button"
+                        variant="link"
                         onClick={() => navigate(`/posts/edit/${item.post_id}`)}
-                        className="text-left font-medium text-primary hover:underline"
+                        className="h-auto justify-start p-0 font-medium"
                       >
                         {item.title || t('admin.posts.untitled', '未命名文章')}
-                      </button>
+                      </Button>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -404,11 +413,11 @@ export default function FootprintsPage() {
                       <span className="text-xs text-muted-foreground">{formatDate(item.visited_at || item.created_at || '')}</span>
                     </TableCell>
                     <TableCell>
-                      <div className="flex justify-end gap-1">
+                      <RowActionGroup>
                         <RowAction icon={Pencil} title={t('admin.footprints.editFootprint', '配置足迹')} onClick={() => openEdit(item)} />
                         <RowAction icon={FilePen} title={t('admin.footprints.editPost', '编辑文章')} onClick={() => navigate(`/posts/edit/${item.post_id}`)} />
                         <RowAction icon={ExternalLink} title={t('admin.footprints.viewOnSite', '前台查看')} onClick={() => window.open(`/footprints?keyword=${encodeURIComponent(locationLabel(item))}`, '_blank', 'noopener,noreferrer')} />
-                      </div>
+                      </RowActionGroup>
                     </TableCell>
                   </TableRow>
                 );
@@ -416,7 +425,7 @@ export default function FootprintsPage() {
             </TableBody>
           </Table>
         )}
-      </div>
+      </Card>
 
       <Dialog open={settingsOpen} onOpenChange={(o) => !o && setSettingsOpen(false)}>
         <DialogContent className="max-h-[calc(100vh-32px)] max-w-170 overflow-y-auto">
@@ -424,7 +433,7 @@ export default function FootprintsPage() {
             <DialogTitle>{t('admin.footprints.settings', '足迹设置')}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4">
-            <div className="rounded-lg border border-border bg-card p-3.5">
+            <Card className="p-3.5">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex-1">
                   <span className="text-sm text-foreground">{t('admin.settings.footprint.enable', '启用足迹功能')}</span>
@@ -435,21 +444,22 @@ export default function FootprintsPage() {
                   onCheckedChange={(checked) => updateSettingsForm({ footprint_enabled: checked })}
                 />
               </div>
-            </div>
+            </Card>
 
-            <div className="rounded-md border border-border bg-muted p-3.5 text-xs leading-relaxed text-muted-foreground">
-              <Key className="mr-1.5 inline size-3.5 align-[-2px] text-primary" />
+            <Callout tone="info" icon={<Key className="text-primary" />}>
               {hasMapboxToken
                 ? t('admin.settings.footprint.mapboxConfiguredHint', 'Mapbox Token 已在系统设置 → 第三方服务中配置。')
                 : t('admin.settings.footprint.mapboxMovedHint', 'Mapbox Token 已移动到系统设置 → 第三方服务。配置后足迹地图和统计地图会共用同一个 Token。')}
-              <button
+              {/* 当链接用，走 link 变体；夹在正文里所以不要按钮的高度和内边距。 */}
+              <Button
                 type="button"
+                variant="link"
                 onClick={() => { window.location.href = '/admin/settings#services'; }}
-                className="ml-2.5 text-xs font-semibold text-primary"
+                className="ml-2.5 h-auto p-0 text-xs font-semibold"
               >
                 {t('admin.common.goToSettings', '前往设置')}
-              </button>
-            </div>
+              </Button>
+            </Callout>
 
             <div className="grid gap-3" style={{ gridTemplateColumns: '1fr 140px' }}>
               <div className="flex flex-col gap-1.5">
@@ -497,14 +507,13 @@ export default function FootprintsPage() {
               </p>
             </div>
 
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setSettingsOpen(false)}>
-                {t('admin.common.cancel', '取消')}
-              </Button>
-              <Button type="button" onClick={saveSettings} disabled={settingsSaving}>
-                {settingsSaving && <Loader2 className="size-4 animate-spin" />}{t('admin.common.save', '保存')}
-              </Button>
-            </div>
+            <DialogActions
+              onCancel={() => setSettingsOpen(false)}
+              onSubmit={saveSettings}
+              submitting={settingsSaving}
+              submitText={t('admin.common.save', '保存')}
+              cancelText={t('admin.common.cancel', '取消')}
+            />
           </div>
         </DialogContent>
       </Dialog>
@@ -542,7 +551,7 @@ export default function FootprintsPage() {
             />
           </div>
           <Button type="button" variant="outline" onClick={geocode} disabled={geocoding} className="w-full">
-            {geocoding ? <Loader2 className="size-4 animate-spin" /> : <LocateFixed className="size-4" />}
+            {geocoding ? <Loader2 className="animate-spin" /> : <LocateFixed />}
             {t('admin.footprint.geocode', '获取坐标')}
           </Button>
           <div className="grid grid-cols-2 gap-3">
@@ -571,14 +580,13 @@ export default function FootprintsPage() {
               onChange={(event) => updateForm({ visited_at: event.target.value })}
             />
           </div>
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => setEditing(null)}>
-              {t('admin.common.cancel', '取消')}
-            </Button>
-            <Button type="button" onClick={saveEdit} disabled={saving}>
-              {saving && <Loader2 className="size-4 animate-spin" />}{t('admin.common.save', '保存')}
-            </Button>
-          </div>
+          <DialogActions
+            onCancel={() => setEditing(null)}
+            onSubmit={saveEdit}
+            submitting={saving}
+            submitText={t('admin.common.save', '保存')}
+            cancelText={t('admin.common.cancel', '取消')}
+          />
         </DialogContent>
       </Dialog>
     </div>

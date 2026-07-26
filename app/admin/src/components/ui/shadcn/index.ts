@@ -1,6 +1,7 @@
 export { Button, buttonVariants, type ButtonProps } from './button';
 export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './card';
 export { Input } from './input';
+export { Checkbox } from './checkbox';
 export { Label } from './label';
 export { Textarea } from './textarea';
 export { Badge, badgeVariants, type BadgeProps } from './badge';
@@ -18,5 +19,6 @@ export {
 } from './select';
 export { Spinner, LoadingState } from './spinner';
 export { EmptyState } from './empty-state';
+export { Callout } from './callout';
 export { Pagination } from './pagination';
 export { ConfirmDialog } from './confirm-dialog';

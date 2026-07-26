@@ -7,7 +7,6 @@ import { installRedirect } from '@backend/http/install-redirect';
 import { requestIp } from '@backend/request-ip';
 import { brandingAssetResponse } from './server/branding-assets';
 import { isPublicCacheablePage, isVisitorPersonalizedPage } from './server/cache-policy';
-import { checkStartSecurity } from './server/security';
 
 export type StartRequestContext = {
   session: AuthSession | null;
@@ -168,11 +167,6 @@ const brandingAssets = createMiddleware().server(async ({ next, request }) => {
   return await brandingAssetResponse(request) || next();
 });
 
-const securityPolicy = createMiddleware().server(async ({ next, request, context }) => {
-  const blocked = await checkStartSecurity(request, context.clientIp, context.session);
-  return blocked || next();
-});
-
 const errorBoundary = createMiddleware().server(async ({ next, context }) => {
   try {
     return await next();
@@ -214,5 +208,5 @@ const authContext = createMiddleware().server(async ({ next, request }) => {
 });
 
 export const startInstance = createStart(() => ({
-  requestMiddleware: [errorBoundary, installGuard, brandingAssets, authContext, securityPolicy, cors, bodyLimit, apiNoCache, publicPageCache, personalizedPageNoCache, securityHeaders],
+  requestMiddleware: [errorBoundary, installGuard, brandingAssets, authContext, cors, bodyLimit, apiNoCache, publicPageCache, personalizedPageNoCache, securityHeaders],
 }));

@@ -835,7 +835,6 @@ async function cleanupDatabase() {
      ) sub where fp.id = sub.id and fp.visit_count is distinct from sub.c`,
   );
   result.expired_tokens_deleted = await execChanged(`delete from ${table('federation_tokens')} where expires_at > 0 and expires_at < $1`, [nowUnix()]);
-  result.expired_bans_deleted = await execChanged(`delete from ${table('ip_bans')} where expires_at > 0 and expires_at < $1`, [nowUnix()]);
   result.total = Object.values(result).reduce((sum, n) => sum + Number(n || 0), 0);
   return result;
 }

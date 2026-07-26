@@ -7,7 +7,7 @@ import {
   AdminToolbar,
   Button,
   ConfirmDialog,
-  DialogFooter,
+  DialogActions,
   EmptyPanel,
   Input,
   LoadingState,
@@ -114,7 +114,7 @@ export default function goodsPage() {
             <label className="block text-xs-plus font-medium mb-1.5 text-muted-foreground">评价</label>
             <Textarea rows={3} value={form.comment || ''} onChange={(e) => setForm({...form, comment: e.target.value})} />
           </div>
-          <DialogFooter onCancel={() => setIsModalOpen(false)} onSubmit={onSubmit} submitting={submitting} submitText={editingId ? '保存' : '添加'} />
+          <DialogActions onCancel={() => setIsModalOpen(false)} onSubmit={onSubmit} submitting={submitting} submitText={editingId ? '保存' : '添加'} />
         </div>
       </Modal>
 

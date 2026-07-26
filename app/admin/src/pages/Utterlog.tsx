@@ -24,7 +24,6 @@ export default function UtterlogCenterPage() {
   // Avatar source
   const [avatarSource, setAvatarSource] = useState('gravatar');
   const [gravatarUrl, setGravatarUrl] = useState('');
-  const [localAvatar, setLocalAvatar] = useState('');
 
   // Content sharing
   const [shareSettings, setShareSettings] = useState({
@@ -61,7 +60,6 @@ export default function UtterlogCenterPage() {
     api.get('/profile').then((r: any) => {
       const d = r.data || r;
       if (d.gravatar_url) setGravatarUrl(d.gravatar_url);
-      if (d.avatar) setLocalAvatar(d.avatar);
       if (d.utterlog_avatar) setUtterlogAvatar(d.utterlog_avatar);
       if (d.utterlog_id) { setUtterlogId(d.utterlog_id); setUtterlogBound(true); }
       if (d.avatar_source) setAvatarSource(d.avatar_source);
@@ -122,7 +120,7 @@ export default function UtterlogCenterPage() {
         <Card className="p-6">
           <div className="mb-5 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <Network className="size-4.5 text-primary" />
+              <Network className="size-4 text-primary" />
               <h2 className="text-sm-plus font-semibold text-foreground">网络状态</h2>
             </div>
             <div className={cn(
@@ -234,7 +232,7 @@ export default function UtterlogCenterPage() {
                   <ExternalLink className="size-3.5" /> ID 中心管理
                 </a>
                 <Button variant="destructive" size="sm" onClick={() => setConfirmUnbind(true)}>
-                  <Unlink className="size-3.5" /> 解绑
+                  <Unlink /> 解绑
                 </Button>
               </div>
             </div>
@@ -308,7 +306,7 @@ export default function UtterlogCenterPage() {
               return (
                 <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer"
                   className="flex items-center gap-2.5 rounded-md border border-border px-3 py-2.5 text-xs-plus text-muted-foreground transition-colors hover:border-primary">
-                  <LinkIcon className="size-4.5 text-primary" />
+                  <LinkIcon className="size-4 text-primary" />
                   <span className="flex-1">{link.label}</span>
                   <ExternalLink className="size-3 text-muted-foreground" />
                 </a>

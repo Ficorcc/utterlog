@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef, createContext, useContext, useMemo, type ReactNode } from 'react';
+import { useState, useEffect, useRef, useCallback, createContext, useContext, useMemo, type ReactNode } from 'react';
 import {
   Gauge, SquarePen, Plus, Folder, Tag, MonitorPlay, FileText, FilePlus,
   MessageCircle, MapPin, MessagesSquare, Bot, Users, Link as LinkIcon, Images,
   GalleryVerticalEnd, Music, ListMusic, Film, Video, BookOpen, Gamepad2,
-  ShoppingBag, LineChart, ShieldCheck, Palette, Plug, Wrench, Database,
+  ShoppingBag, LineChart, Palette, Plug, Wrench, Database,
   Settings, User, Globe, Sparkles, ScrollText, SlidersHorizontal, Pencil,
   Clock, Ban, Trash2, UserPen, ChevronUp, ChevronDown, LogOut,
   type LucideIcon,
@@ -69,7 +69,6 @@ const pageTitleMap: Record<string, PageMeta> = {
   '/games':          { label: '游戏管理',      en: 'Games',           icon: Gamepad2 },
   '/goods':          { label: '好物管理',      en: 'Goods',           icon: ShoppingBag },
   '/analytics':      { label: '数据统计',      en: 'Analytics',       icon: LineChart },
-  '/security':       { label: '安全设置',      en: 'Security',        icon: ShieldCheck },
   '/themes':         { label: '主题管理',      en: 'Themes',          icon: Palette },
   '/plugins':        { label: '插件管理',      en: 'Plugins',         icon: Plug },
   '/tools':          { label: '工具',          en: 'Tools',           icon: Wrench },
@@ -149,11 +148,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [siteUrl, setSiteUrl] = useState(() => resolveVisitSiteUrl());
   const [siteTitle, setSiteTitle] = useState('Utterlog');
   const [menuOpen, setMenuOpen] = useState(false);
-  const [pageBadge, setPageBadge] = useState<ReactNode>(null);
+  // badge 连同「是哪个路由设的」一起存，渲染时按当前 pathname 校验。
+  //
+  // 不能靠 useEffect 在路由变化时重置：React 的 effect 是子先父后，页面组件
+  // 刚 setPageBadge，父组件的 reset 立刻把它清成 null；而页面那个 effect 的
+  // deps 是 [total, t] 之类，列表为空时 total 恒为 0 不再变化，effect 不重跑，
+  // badge 就永远不出现了。
+  const [pageBadge, setPageBadgeState] = useState<{ path: string; node: ReactNode } | null>(null);
   const [pageLoading, setPageLoading] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const homeIconRef = useRef<HouseIconHandle>(null);
-  const pageBadgeCtx = useMemo(() => ({ setPageBadge }), []);
+  const pathnameRef = useRef(pathname);
+  pathnameRef.current = pathname;
+  const setPageBadge = useCallback((node: ReactNode) => {
+    setPageBadgeState(node ? { path: pathnameRef.current, node } : null);
+  }, []);
+  const visibleBadge = pageBadge && pageBadge.path === pathname ? pageBadge.node : null;
+  const pageBadgeCtx = useMemo(() => ({ setPageBadge }), [setPageBadge]);
   const pageLoadingCtx = useMemo(() => ({ setPageLoading }), []);
 
   const pageMeta = resolveTitle(pathname);
@@ -161,9 +172,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pageEn = locale === 'zh-CN' ? pageMeta.en : '';
   const PageIcon = pageMeta.icon;
 
-  // Reset the badge slot whenever the route changes — pages that don't
-  // set one shouldn't inherit the previous page's badge.
-  useEffect(() => { setPageBadge(null); setPageLoading(false); }, [pathname]);
+  // badge 的失效由上面的 path 校验兜住，这里只需清加载态。
+  useEffect(() => { setPageLoading(false); }, [pathname]);
 
   useEffect(() => {
     let active = true;
@@ -281,7 +291,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 · {pageEn}
               </span>
             )}
-            {pageBadge && (
+            {visibleBadge && (
               <span
                 className="text-xs font-normal text-muted-foreground"
                 style={{
@@ -290,7 +300,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 }}
               >
                 <span aria-hidden="true">·</span>
-                {pageBadge}
+                {visibleBadge}
               </span>
             )}
           </div>

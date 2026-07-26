@@ -8,15 +8,16 @@ import { useNavigate } from '@/lib/router';
 import { postsApi, optionsApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 import {
-  Button, Input, Label, Badge, Pagination, ConfirmDialog, Card,
+  Button, Input, Label, Badge, Pagination, ConfirmDialog, Card, Checkbox,
+  EmptyState, LoadingState,
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
   Dialog, DialogContent, DialogHeader, DialogTitle,
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@/components/ui/shadcn';
-import { RowAction } from '@/components/ui/row-actions';
+import { RowAction, RowActionGroup } from '@/components/ui/row-actions';
 import { cn, formatDate } from '@/lib/utils';
 import { usePostsToolbar } from '@/layouts/PostsLayout';
-import { usePageLoading } from '@/layouts/DashboardLayout';
+import { usePageBadge } from '@/layouts/DashboardLayout';
 import { useI18n } from '@/lib/i18n';
 import { invalidateSiteOptions, loadSiteOptions, postUrlOf } from '@/lib/site';
 
@@ -45,7 +46,7 @@ const statusBadge: Record<string, string> = {
 export default function PostsPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
-  const { setPageLoading } = usePageLoading();
+  const { setPageBadge } = usePageBadge();
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -58,7 +59,6 @@ export default function PostsPage() {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [perPage, setPerPage] = useState(20);
   const [orderDir, setOrderDir] = useState<'desc' | 'asc'>('desc');
-  const [batchAction, setBatchAction] = useState('');
   const [confirmBatchDelete, setConfirmBatchDelete] = useState(false);
 
   // Settings popup — holds the postlist-specific options the user
@@ -83,11 +83,13 @@ export default function PostsPage() {
 
   useEffect(() => { fetchPosts(); }, [page, status, perPage, orderDir]);
 
-  // 加载态上报给 header 的统一 spinner；离开本页时清掉，别让它一直转。
+  // 列表总数统一放在 header badge（五个列表页同一落位），表格页脚只留
+  // 每页条数 + 翻页。
   useEffect(() => {
-    setPageLoading(loading);
-    return () => setPageLoading(false);
-  }, [loading, setPageLoading]);
+    setPageBadge(<span>{t('admin.posts.totalPosts', '共 {total} 篇文章', { total })}</span>);
+    return () => setPageBadge(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [total, t]);
 
   // Hydrate the settings popup the first time it opens — cheap enough
   // to re-fetch each open so stale admin tabs can't save over newer
@@ -142,29 +144,24 @@ export default function PostsPage() {
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleting(true);
-    try { await postsApi.delete(deleteId); toast.success(t('admin.posts.toast.deleteSuccess', '删除成功')); fetchPosts(); }
-    catch { toast.error(t('admin.posts.toast.deleteFailed', '删除失败')); }
+    try { await postsApi.delete(deleteId); toast.success(t('admin.common.deleteSuccess', '删除成功')); fetchPosts(); }
+    catch { toast.error(t('admin.common.deleteFailed', '删除失败')); }
     finally { setDeleting(false); setDeleteId(null); }
   };
 
-  const handleBatchAction = async () => {
-    if (!batchAction || selected.size === 0) return;
+  // 批量操作条：直接按钮触发（与 Comments 同一种交互），不再走
+  // 「下拉选动作 + 执行」两步。
+  const runBatchStatus = async (next: 'draft' | 'private' | 'publish') => {
     const ids = Array.from(selected);
-
-    if (batchAction === 'delete') {
-      setConfirmBatchDelete(true);
-      return;
-    } else if (['draft', 'private', 'publish'].includes(batchAction)) {
-      try {
-        for (const id of ids) await postsApi.update(id, { status: batchAction });
-        toast.success(t('admin.posts.toast.batchMoved', '已将 {count} 篇文章移至{target}', {
-          count: ids.length,
-          target: batchAction === 'draft' ? t('admin.posts.target.drafts', '草稿箱') : statusLabel(batchAction),
-        }));
-        fetchPosts();
-      } catch { toast.error(t('admin.posts.toast.batchActionFailed', '批量操作失败')); }
-    }
-    setBatchAction('');
+    if (ids.length === 0) return;
+    try {
+      for (const id of ids) await postsApi.update(id, { status: next });
+      toast.success(t('admin.posts.toast.batchMoved', '已将 {count} 篇文章移至{target}', {
+        count: ids.length,
+        target: next === 'draft' ? t('admin.posts.target.drafts', '草稿箱') : statusLabel(next),
+      }));
+      fetchPosts();
+    } catch { toast.error(t('admin.posts.toast.batchActionFailed', '批量操作失败')); }
   };
 
   const handleBatchDelete = async () => {
@@ -174,7 +171,6 @@ export default function PostsPage() {
       for (const id of ids) await postsApi.delete(id);
       toast.success(t('admin.posts.toast.batchDeleted', '已删除 {count} 篇文章', { count: ids.length }));
       setSelected(new Set());
-      setBatchAction('');
       setConfirmBatchDelete(false);
       fetchPosts();
     } catch { toast.error(t('admin.posts.toast.batchDeleteFailed', '批量删除失败')); }
@@ -218,7 +214,8 @@ export default function PostsPage() {
             </Button>
           ))}
         </div>
-        <Button variant="outline" size="icon" title={t('admin.posts.newPost', '新建文章')} onClick={() => navigate('/posts/create')}>
+        {/* 主操作（新建）实心，次要操作 outline —— 五个列表页同一套强调级 */}
+        <Button size="icon" title={t('admin.posts.newPost', '新建文章')} aria-label={t('admin.posts.newPost', '新建文章')} onClick={() => navigate('/posts/create')}>
           <Plus />
         </Button>
         {/* 文章设置移到新建文章之后、搜索框之前 —— 与新建动作贴近，
@@ -242,28 +239,25 @@ export default function PostsPage() {
   return (
     <div>
       <Card className="overflow-hidden">
-        {/* Batch action bar */}
+        {/* 批量操作条：贴在表格上沿，选中才出现（Posts / Comments 同一形态） */}
         {selected.size > 0 && (
-          <div className="flex items-center gap-2.5 border-b border-border bg-muted px-4 py-2.5">
-            <span className="text-sm text-muted-foreground">{t('admin.posts.selectedCount', '已选 {count} 项', { count: selected.size })}</span>
-            <Select value={batchAction} onValueChange={(v) => setBatchAction((v as string) ?? '')}>
-              <SelectTrigger className="h-8 w-30 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">{t('admin.posts.batchAction', '批量操作')}</SelectItem>
-                <SelectItem value="draft">{t('admin.posts.batchMoveDraft', '移到草稿箱')}</SelectItem>
-                <SelectItem value="private">{t('admin.posts.batchMovePrivate', '移到私密')}</SelectItem>
-                <SelectItem value="publish">{t('admin.posts.batchSetPublished', '设为已发布')}</SelectItem>
-                <SelectItem value="delete">{t('admin.common.delete', '删除')}</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="secondary" size="sm" onClick={handleBatchAction} disabled={!batchAction}>
-              {t('admin.posts.execute', '执行')}
+          <div className="flex flex-wrap items-center gap-2 border-b border-border bg-muted px-4 py-2">
+            <span className="text-xs text-muted-foreground">{t('admin.posts.selectedCount', '已选 {count} 项', { count: selected.size })}</span>
+            <Button size="sm" variant="outline" onClick={() => runBatchStatus('draft')}>
+              <FileText /> {t('admin.posts.batchMoveDraft', '移到草稿箱')}
             </Button>
-            <button onClick={() => setSelected(new Set())} className="ml-auto text-xs text-muted-foreground hover:text-foreground">
+            <Button size="sm" variant="outline" onClick={() => runBatchStatus('private')}>
+              <EyeOff /> {t('admin.posts.batchMovePrivate', '移到私密')}
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => runBatchStatus('publish')}>
+              <Eye /> {t('admin.posts.batchSetPublished', '设为已发布')}
+            </Button>
+            <Button size="sm" variant="destructive" onClick={() => setConfirmBatchDelete(true)}>
+              <Trash2 /> {t('admin.common.delete', '删除')}
+            </Button>
+            <Button size="sm" variant="ghost" className="ml-auto" onClick={() => setSelected(new Set())}>
               {t('admin.posts.cancelSelection', '取消选择')}
-            </button>
+            </Button>
           </div>
         )}
 
@@ -271,7 +265,7 @@ export default function PostsPage() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-10">
-                <input type="checkbox" checked={posts.length > 0 && selected.size === posts.length} onChange={toggleAll} className="size-4 cursor-pointer align-middle accent-primary" />
+                <Checkbox checked={posts.length > 0 && selected.size === posts.length} onChange={toggleAll} className="align-middle" />
               </TableHead>
               <TableHead className="w-18">{t('admin.posts.columns.number', '编号')}</TableHead>
               <TableHead>
@@ -288,18 +282,20 @@ export default function PostsPage() {
               <TableHead className="w-40">{t('admin.posts.columns.time', '时间')}</TableHead>
               <TableHead className="w-25">{t('admin.posts.columns.viewsComments', '浏览/评论')}</TableHead>
               <TableHead className="w-24 whitespace-nowrap">{t('admin.posts.columns.status', '状态')}</TableHead>
-              <TableHead className="w-47.5 text-right">{t('admin.posts.columns.actions', '操作')}</TableHead>
+              <TableHead className="w-40 text-right">{t('admin.common.actions', '操作')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              // 加载态由 header 的统一 spinner 表示（见 usePageLoading），
-              // 这里留空，避免表格中间再闪一个圈。
-              null
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={9} className="p-0">
+                  <LoadingState label={t('common.loading', '加载中…')} />
+                </TableCell>
+              </TableRow>
             ) : posts.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={9} className="py-10 text-center text-sm text-muted-foreground">
-                  {t('admin.posts.empty', '暂无文章')}
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={9} className="p-0">
+                  <EmptyState title={t('admin.posts.empty', '暂无文章')} />
                 </TableCell>
               </TableRow>
             ) : (
@@ -313,7 +309,7 @@ export default function PostsPage() {
                 return (
                   <TableRow key={row.id}>
                     <TableCell>
-                      <input type="checkbox" checked={selected.has(row.id)} onChange={() => toggleSelect(row.id)} className="size-4 cursor-pointer align-middle accent-primary" />
+                      <Checkbox checked={selected.has(row.id)} onChange={() => toggleSelect(row.id)} className="align-middle" />
                     </TableCell>
                     <TableCell>
                       <span className="text-2xs text-muted-foreground" title={t('admin.posts.internalId', '内部 ID: {id}', { id: row.id })}>
@@ -370,7 +366,7 @@ export default function PostsPage() {
                       <Badge className={cn('whitespace-nowrap', statusBadge[row.status])}>{statusLabel(row.status)}</Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex justify-end gap-1">
+                      <RowActionGroup>
                         <RowAction icon={Pencil} title={t('admin.common.edit', '编辑')} onClick={() => navigate(`/posts/edit/${row.id}`)} />
                         <RowAction
                           icon={FileText}
@@ -386,7 +382,7 @@ export default function PostsPage() {
                           onClick={() => togglePostPrivate(row)}
                         />
                         <RowAction icon={Trash2} tone="danger" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(row.id)} />
-                      </div>
+                      </RowActionGroup>
                     </TableCell>
                   </TableRow>
                 );
@@ -395,24 +391,20 @@ export default function PostsPage() {
           </TableBody>
         </Table>
 
+        {/* 表格页脚：每页条数在左、翻页在右（Posts / Comments 同一落位） */}
         <div className="flex items-center justify-between border-t border-border px-4 py-2">
-          <span className="text-xs text-muted-foreground">
-            {t('admin.posts.totalPosts', '共 {total} 篇文章', { total })}
-          </span>
-          <div className="flex items-center gap-2">
-            <Select value={perPage} onValueChange={(v) => { setPerPage(Number(v)); setPage(1); }}>
-              <SelectTrigger className="h-8 w-27.5 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={10}>{t('admin.posts.perPage', '{count} 条/页', { count: 10 })}</SelectItem>
-                <SelectItem value={20}>{t('admin.posts.perPage', '{count} 条/页', { count: 20 })}</SelectItem>
-                <SelectItem value={50}>{t('admin.posts.perPage', '{count} 条/页', { count: 50 })}</SelectItem>
-                <SelectItem value={100}>{t('admin.posts.perPage', '{count} 条/页', { count: 100 })}</SelectItem>
-              </SelectContent>
-            </Select>
-            <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
-          </div>
+          <Select value={perPage} onValueChange={(v) => { setPerPage(Number(v)); setPage(1); }}>
+            <SelectTrigger className="h-8 w-27.5 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={10}>{t('admin.posts.perPage', '{count} 条/页', { count: 10 })}</SelectItem>
+              <SelectItem value={20}>{t('admin.posts.perPage', '{count} 条/页', { count: 20 })}</SelectItem>
+              <SelectItem value={50}>{t('admin.posts.perPage', '{count} 条/页', { count: 50 })}</SelectItem>
+              <SelectItem value={100}>{t('admin.posts.perPage', '{count} 条/页', { count: 100 })}</SelectItem>
+            </SelectContent>
+          </Select>
+          <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
       </Card>
 

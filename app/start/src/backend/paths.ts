@@ -12,6 +12,9 @@ export const runtimePaths = {
   schemaFile: pathEnv('SCHEMA_FILE', join(assetsDir, 'schema.sql')),
   installerFavicon: pathEnv('INSTALLER_FAVICON', join(assetsDir, 'installer', 'favicon.svg')),
   builtinLocaleDir: pathEnv('BUILTIN_LOCALE_DIR', join(assetsDir, 'i18n', 'locales')),
+  // 站长自己放的翻译覆盖包。这里带 UTTERLOG_ 前缀是因为它是对外承诺的部署配置
+  // （locales/README.md 一直这么写），跟本文件其它面向构建产物的内部路径不同。
+  customLocaleDir: pathEnv('UTTERLOG_LOCALE_DIR', 'locales'),
   builtinThemesDir: pathEnv('BUILTIN_THEMES_DIR', 'app/start/src/web/themes'),
   builtinPluginsDir: pathEnv('BUILTIN_PLUGINS_DIR', 'app/start/src/web/plugins'),
   builtinPublicThemesDir: pathEnv('BUILTIN_PUBLIC_THEMES_DIR', 'app/start/src/web/public/themes'),

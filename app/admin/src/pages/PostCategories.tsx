@@ -5,13 +5,15 @@ import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form';
 import { Plus, Folder, FolderOpen, CloudUpload, Pencil, Trash2 } from 'lucide-react';
 import {
-  Button, Input, Label, Textarea, EmptyState, ConfirmDialog, Card,
+  Button, buttonVariants, Input, Label, Textarea, EmptyState, LoadingState, ConfirmDialog, Card,
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/shadcn';
-import { RowAction } from '@/components/ui/row-actions';
+import { RowAction, RowActionGroup } from '@/components/ui/row-actions';
 import { usePostsToolbar } from '@/layouts/PostsLayout';
 import { useI18n } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
+import { SELECT_CLS } from './settings/shared';
 
 export default function CategoriesPage() {
   const { t } = useI18n();
@@ -97,8 +99,8 @@ export default function CategoriesPage() {
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    try { await categoriesApi.delete(deleteId); toast.success(t('admin.posts.toast.deleteSuccess', '删除成功')); fetchCategories(); }
-    catch { toast.error(t('admin.posts.toast.deleteFailed', '删除失败')); }
+    try { await categoriesApi.delete(deleteId); toast.success(t('admin.common.deleteSuccess', '删除成功')); fetchCategories(); }
+    catch { toast.error(t('admin.common.deleteFailed', '删除失败')); }
     finally { setDeleteId(null); }
   };
 
@@ -158,7 +160,9 @@ export default function CategoriesPage() {
 
   return (
     <div>
-      {categories.length === 0 && !loading ? (
+      {loading ? (
+        <LoadingState label={t('common.loading', '加载中…')} />
+      ) : categories.length === 0 ? (
         <EmptyState
           title={t('admin.categories.emptyTitle', '暂无分类')}
           description={t('admin.categories.emptyDescription', '创建您的第一个文章分类')}
@@ -175,7 +179,7 @@ export default function CategoriesPage() {
                 <TableHead className="w-56">Slug</TableHead>
                 <TableHead>{t('admin.common.description', '描述')}</TableHead>
                 <TableHead className="w-20">{t('admin.categories.postCount', '文章数')}</TableHead>
-                <TableHead className="w-24">{t('admin.posts.columns.actions', '操作')}</TableHead>
+                <TableHead className="w-22.5 text-right">{t('admin.common.actions', '操作')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -187,10 +191,10 @@ export default function CategoriesPage() {
                   <TableCell className="max-w-0 truncate text-muted-foreground" title={row.description || ''}>{row.description || '—'}</TableCell>
                   <TableCell className="text-muted-foreground">{row.count ?? 0}</TableCell>
                   <TableCell>
-                    <div className="flex gap-1">
+                    <RowActionGroup>
                       <RowAction icon={Pencil} title={t('admin.common.edit', '编辑')} onClick={() => openEdit(row)} />
                       <RowAction icon={Trash2} tone="danger" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(row.id)} />
-                    </div>
+                    </RowActionGroup>
                   </TableCell>
                 </TableRow>
               ))}
@@ -215,12 +219,12 @@ export default function CategoriesPage() {
                 </div>
                 <div className="flex flex-1 flex-col gap-1.5">
                   <div className="flex gap-1.5">
-                    <label className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-input bg-background px-2.5 py-1 text-xs font-medium shadow-sm hover:bg-accent">
-                      <CloudUpload className="size-3" /> {t('admin.cover.uploadImage', '上传图片')}
+                    <label className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'cursor-pointer')}>
+                      <CloudUpload /> {t('admin.cover.uploadImage', '上传图片')}
                       <input ref={fileRef} type="file" accept=".svg,.png,.gif,.jpg,.jpeg,.webp,.avif,.ico" className="hidden" onChange={handleIconUpload} />
                     </label>
                     {iconValue && (
-                      <Button type="button" variant="ghost" size="sm" onClick={() => setIconValue('')}>{t('admin.common.clear', '清除')}</Button>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => setIconValue('')}>{t('admin.common.clear', '清空')}</Button>
                     )}
                   </div>
                   <p className="text-2xs text-muted-foreground">{t('admin.categories.iconHint', '支持 FontAwesome 类名、SVG 代码、PNG/GIF/JPG/WebP/AVIF')}</p>
@@ -246,7 +250,7 @@ export default function CategoriesPage() {
             </div>
             <div className="flex flex-col gap-1.5">
               <Label>{t('admin.categories.parent', '父分类')}</Label>
-              <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" {...register('parent_id')}>
+              <select className={SELECT_CLS} {...register('parent_id')}>
                 <option value="">{t('admin.common.none', '无')}</option>
                 {categories.filter(c => c.id !== editingId).map((cat) => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>

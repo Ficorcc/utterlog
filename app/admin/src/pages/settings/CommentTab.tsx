@@ -7,9 +7,8 @@
 
 import { MessagesSquare, ArrowDownWideNarrow, Shield, ShieldCheck, Bot } from 'lucide-react';
 import type { UseFormRegister, UseFormSetValue, UseFormWatch } from 'react-hook-form';
-import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
-import { SettingsSection, InputRow, SelectRow, RadioRow, SwitchRow } from './shared';
+import { SettingsSection, InputRow, SelectRow, RadioRow, RadioCardRow, Row, SwitchRow } from './shared';
 
 export default function CommentTab({ t, register, watch, setValue }: {
   t: ReturnType<typeof useI18n>['t'];
@@ -44,31 +43,25 @@ export default function CommentTab({ t, register, watch, setValue }: {
         />
       </SettingsSection>
 
-      {/* 人机验证：保留自定义 3 列图标 radio 卡片（非表单式 UI），
-          只把子输入转成 InputRow 保持风格一致 */}
+      {/* 人机验证：验证方式是「N 选一」的卡片，走共享的 RadioCardRow；
+          外面套 Row 让它跟本页其它设置项共用同一套左标签栅格 */}
       <SettingsSection title={t('admin.settings.comment.captcha.section', '人机验证')} icon={Shield}>
-        <div className={cn('px-3.5 pb-2.5 pt-3.5', watch('comment_captcha_mode') === 'pow' && 'border-b border-border')}>
-          <div className="mb-2.5 text-sm font-medium text-foreground">{t('admin.settings.comment.captcha.method', '验证方式')}</div>
-          <div className="flex gap-2.5">
-            {([
+        <Row
+          label={t('admin.settings.comment.captcha.method', '验证方式')}
+          column
+          last={watch('comment_captcha_mode') !== 'pow'}
+        >
+          <RadioCardRow
+            className="w-full"
+            value={watch('comment_captcha_mode')}
+            register={register('comment_captcha_mode')}
+            options={[
               { value: 'off', label: t('admin.common.off', '关闭'), desc: t('admin.settings.comment.captcha.offDesc', '不验证') },
               { value: 'pow', label: t('admin.settings.comment.captcha.pow', 'PoW 验证'), desc: t('admin.settings.comment.captcha.powDesc', '点击计算') },
               { value: 'image', label: t('admin.settings.comment.captcha.image', '图片验证码'), desc: t('admin.settings.comment.captcha.imageDesc', '输入字符') },
-            ] as const).map(opt => {
-              const active = watch('comment_captcha_mode') === opt.value;
-              return (
-                <label key={opt.value} className={cn(
-                  'flex flex-1 cursor-pointer flex-col items-center gap-1 rounded-md border px-2 py-3 transition-colors',
-                  active ? 'border-primary bg-primary/5' : 'border-border bg-transparent',
-                )}>
-                  <input type="radio" value={opt.value} {...register('comment_captcha_mode')} className="hidden" />
-                  <span className={cn('text-xs-plus font-semibold', active ? 'text-primary' : 'text-foreground')}>{opt.label}</span>
-                  <span className="text-2xs text-muted-foreground">{opt.desc}</span>
-                </label>
-              );
-            })}
-          </div>
-        </div>
+            ]}
+          />
+        </Row>
         {watch('comment_captcha_mode') === 'pow' && (
           <InputRow
             label={t('admin.settings.comment.captcha.difficulty', '验证难度')}

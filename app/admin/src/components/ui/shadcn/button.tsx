@@ -28,6 +28,10 @@ const buttonVariants = cva(
         icon: 'h-10 w-10',
         'icon-sm': 'h-8 w-8',
         'icon-xs': 'h-7 w-7',
+        // 改图标尺寸要在 Button 上写 [&_svg]:size-3，不能给图标本身加
+        // className="size-3" —— base 的 [&_svg]:size-4 是后代选择器，
+        // 特异性 (0,1,1) 压过 .size-3 的 (0,1,0)，那样写不生效。
+        // 站内曾有 71 处这么写的死 class，已清理。
       },
     },
     defaultVariants: { variant: 'default', size: 'default' },

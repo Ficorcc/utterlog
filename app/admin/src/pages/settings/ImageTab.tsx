@@ -7,12 +7,12 @@
  */
 
 import { Input, Switch } from '@/components/ui/shadcn';
-import { ExternalLink, Expand, FileImage, Hourglass, Lightbulb, RefreshCw } from 'lucide-react';
+import { ExternalLink, Expand, FileImage, Hourglass, Lightbulb, RefreshCw, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import type { UseFormRegister, UseFormSetValue, UseFormWatch } from 'react-hook-form';
 import {
-  InputRow, Panel, SelectRow, SettingsSection, SwitchRow, SELECT_CLS,
+  InputRow, Panel, RadioCardRow, Row, SelectRow, SettingsSection, SwitchRow, SELECT_CLS,
 } from './shared';
 
 type T = ReturnType<typeof useI18n>['t'];
@@ -61,45 +61,38 @@ export default function ImageTab({ t, register, watch, setValue }: {
 
       <Panel
         title={t('admin.settings.image.random.section', '随机图片 API')}
+        description={t('admin.settings.image.random.description', '文章没有特色图片时，自动从 API 获取随机封面')}
         action={<Switch checked={!!watch('random_image_enabled')} onCheckedChange={(v: boolean) => setValue('random_image_enabled', v, { shouldDirty: true })} />}
       >
-        <p className="mb-5 text-xs text-muted-foreground">{t('admin.settings.image.random.description', '文章没有特色图片时，自动从 API 获取随机封面')}</p>
         <ImgEtBuilder register={register} watch={watch} setValue={setValue} />
       </Panel>
 
-      <Panel title={t('admin.settings.image.display.section', '图片显示效果')}>
-        <p className="-mt-3 mb-5 text-xs text-muted-foreground">{t('admin.settings.image.display.description', '前端文章特色图片和正文图片的加载动画效果')}</p>
-        <div className="grid gap-y-6">
-          <div>
-            <label className="mb-2 block text-xs-plus font-medium text-muted-foreground">{t('admin.settings.image.display.effect', '显示效果')}</label>
-            <div className="grid grid-cols-4 gap-2.5">
-              {[
-                { value: 'fade',  label: t('admin.settings.image.display.fade', '淡入'),    desc: t('admin.settings.image.display.fadeDesc', '模糊渐变透明') },
-                { value: 'pixel', label: t('admin.settings.image.display.pixel', '像素化'),  desc: t('admin.settings.image.display.pixelDesc', '马赛克块消散') },
-                { value: 'scale', label: t('admin.settings.image.display.scale', '缩放'),    desc: t('admin.settings.image.display.scaleDesc', '从小放到正常') },
-                { value: 'none',  label: t('admin.settings.image.display.none', '无'),      desc: t('admin.settings.image.display.noneDesc', '直接显示') },
-              ].map(effect => {
-                const active = watch('image_display_effect', 'fade') === effect.value;
-                return (
-                  <label key={effect.value} className={cn(
-                    'cursor-pointer rounded-md border px-2.5 py-3 text-center transition-colors',
-                    active ? 'border-primary bg-primary/5' : 'border-border bg-transparent',
-                  )}>
-                    <input type="radio" value={effect.value} {...register('image_display_effect')} className="hidden" />
-                    <p className={cn('text-xs-plus font-semibold', active ? 'text-primary' : 'text-foreground')}>{effect.label}</p>
-                    <p className="mt-0.5 text-2xs text-muted-foreground">{effect.desc}</p>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="block text-xs-plus font-medium text-muted-foreground">{t('admin.settings.image.display.duration', '动画时长 (ms)')}</label>
-            <Input type="number" {...register('image_display_duration')} placeholder="300" />
-          </div>
-        </div>
-      </Panel>
+      <SettingsSection
+        title={t('admin.settings.image.display.section', '图片显示效果')}
+        icon={Sparkles}
+        description={t('admin.settings.image.display.description', '前端文章特色图片和正文图片的加载动画效果')}
+      >
+        <Row label={t('admin.settings.image.display.effect', '显示效果')} column>
+          <RadioCardRow
+            className="w-full"
+            value={watch('image_display_effect', 'fade')}
+            register={register('image_display_effect')}
+            options={[
+              { value: 'fade',  label: t('admin.settings.image.display.fade', '淡入'),    desc: t('admin.settings.image.display.fadeDesc', '模糊渐变透明') },
+              { value: 'pixel', label: t('admin.settings.image.display.pixel', '像素化'),  desc: t('admin.settings.image.display.pixelDesc', '马赛克块消散') },
+              { value: 'scale', label: t('admin.settings.image.display.scale', '缩放'),    desc: t('admin.settings.image.display.scaleDesc', '从小放到正常') },
+              { value: 'none',  label: t('admin.settings.image.display.none', '无'),      desc: t('admin.settings.image.display.noneDesc', '直接显示') },
+            ]}
+          />
+        </Row>
+        <InputRow
+          label={t('admin.settings.image.display.duration', '动画时长 (ms)')}
+          type="number"
+          register={register('image_display_duration')}
+          placeholder="300"
+          last
+        />
+      </SettingsSection>
 
       <SettingsSection title={t('admin.settings.image.lazy.section', '懒加载')} icon={Hourglass} description={t('admin.settings.image.lazy.description', '图片进入可视区域时才加载，提升页面加载速度。关闭后图片在页面打开时立即下载（适合幻灯片、长截图归档等场景）')}>
         <SwitchRow label={t('admin.settings.image.lazy.enable', '启用懒加载')} name="image_lazy_load" watch={watch} setValue={setValue} last />
@@ -186,7 +179,7 @@ function ImgEtBuilder({ register, watch, setValue }: { register: any; watch: any
     <div className="flex flex-col gap-3.5">
       {/* Service preset selector */}
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-muted-foreground">{t('admin.settings.image.random.service', '服务')}</label>
+        <label className="mb-1.5 block text-xs-plus font-medium text-foreground">{t('admin.settings.image.random.service', '服务')}</label>
         <div className="flex items-center gap-1.5">
           <button
             type="button"
@@ -207,35 +200,35 @@ function ImgEtBuilder({ register, watch, setValue }: { register: any; watch: any
       {/* Params grid (only enabled when img.et is selected) */}
       <div className="grid grid-cols-3 gap-3">
         <div className="space-y-1">
-          <label className="block text-xs font-medium text-muted-foreground">{t('admin.settings.image.random.width', '宽度 (px)')}</label>
+          <label className="block text-xs-plus font-medium text-foreground">{t('admin.settings.image.random.width', '宽度 (px)')}</label>
           <Input type="number" value={parsed.width} onChange={(e) => update({ width: e.target.value })} min={100} max={4096} />
         </div>
         <div className="space-y-1">
-          <label className="block text-xs font-medium text-muted-foreground">{t('admin.settings.image.random.height', '高度 (px)')}</label>
+          <label className="block text-xs-plus font-medium text-foreground">{t('admin.settings.image.random.height', '高度 (px)')}</label>
           <Input type="number" value={parsed.height} onChange={(e) => update({ height: e.target.value })} min={100} max={4096} />
         </div>
         <div className="space-y-1">
-          <label className="block text-xs font-medium text-muted-foreground">{t('admin.settings.image.random.outputFormat', '输出格式 format')}</label>
+          <label className="block text-xs-plus font-medium text-foreground">{t('admin.settings.image.random.outputFormat', '输出格式 format')}</label>
           <select value={parsed.format} onChange={(e) => update({ format: e.target.value })} className={SELECT_CLS}>
             {formatOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </div>
 
         <div className="space-y-1">
-          <label className="block text-xs font-medium text-muted-foreground">{t('admin.settings.image.random.type', '类型 type')}</label>
+          <label className="block text-xs-plus font-medium text-foreground">{t('admin.settings.image.random.type', '类型 type')}</label>
           <select value={parsed.type} onChange={(e) => update({ type: e.target.value })} className={SELECT_CLS}>
             {typeOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </div>
         <div className="space-y-1">
-          <label className="block text-xs font-medium text-muted-foreground">
+          <label className="block text-xs-plus font-medium text-foreground">
             {t('admin.settings.image.random.fixedR', '固定 r')}
             <span className="ml-1 font-normal text-muted-foreground">{t('admin.settings.image.random.fixedRHint', '（按规则锁定图片）')}</span>
           </label>
           <Input type="text" value={parsed.r} onChange={(e) => update({ r: e.target.value })} placeholder={t('admin.common.empty', '留空')} />
         </div>
         <div className="space-y-1">
-          <label className="block text-xs font-medium text-muted-foreground">
+          <label className="block text-xs-plus font-medium text-foreground">
             {t('admin.settings.image.random.positionS', '多图位置 s')}
             <span className="ml-1 font-normal text-muted-foreground">{t('admin.settings.image.random.positionSHint', '（0/1/2/...）')}</span>
           </label>
@@ -245,7 +238,7 @@ function ImgEtBuilder({ register, watch, setValue }: { register: any; watch: any
 
       {/* Raw URL input + preview */}
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
+        <label className="mb-1.5 block text-xs-plus font-medium text-foreground">
           {t('admin.settings.image.random.finalUrl', '最终 API 地址')}
           <span className="ml-1.5 text-2xs font-normal text-muted-foreground">
             {t('admin.settings.image.random.finalUrlHint', '（可直接编辑；改上方参数会覆盖）')}
@@ -261,7 +254,7 @@ function ImgEtBuilder({ register, watch, setValue }: { register: any; watch: any
       {/* Preview */}
       <div>
         <div className="mb-1.5 flex items-center justify-between">
-          <label className="text-sm font-medium text-muted-foreground">{t('admin.common.preview', '预览')}</label>
+          <label className="text-xs-plus font-medium text-foreground">{t('admin.common.preview', '预览')}</label>
           <button
             type="button"
             onClick={() => setValue('random_image_api', currentUrl + (currentUrl.includes('?') ? '&' : '?') + '_=' + Date.now(), { shouldDirty: true })}

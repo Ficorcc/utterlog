@@ -127,7 +127,7 @@ export default function FooterIconsEditor({
       <div className="mb-3 flex items-center justify-between">
         <h3 className="m-0 text-sm font-semibold text-foreground">{title}</h3>
         <Button variant="outline" size="icon-sm" onClick={addRow} title="添加">
-          <Plus className="size-3.5" />
+          <Plus />
         </Button>
       </div>
       <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
@@ -188,16 +188,16 @@ export default function FooterIconsEditor({
               <div className="flex gap-1">
                 <Button variant="outline" size="icon-xs" onClick={() => handleUploadClick(i)}
                   disabled={uploadingIdx === i} title="上传图片作为图标">
-                  {uploadingIdx === i ? <Loader2 className="size-3.5 animate-spin" /> : <Upload className="size-3.5" />}
+                  {uploadingIdx === i ? <Loader2 className="animate-spin" /> : <Upload />}
                 </Button>
                 <Button variant="outline" size="icon-xs" onClick={() => moveRow(i, -1)} disabled={i === 0} title="上移">
-                  <ChevronUp className="size-3.5" />
+                  <ChevronUp />
                 </Button>
                 <Button variant="outline" size="icon-xs" onClick={() => moveRow(i, 1)} disabled={i === items.length - 1} title="下移">
-                  <ChevronDown className="size-3.5" />
+                  <ChevronDown />
                 </Button>
                 <Button variant="outline" size="icon-xs" className="text-destructive hover:text-destructive" onClick={() => removeRow(i)} title="删除">
-                  <Trash2 className="size-3.5" />
+                  <Trash2 />
                 </Button>
               </div>
             </div>

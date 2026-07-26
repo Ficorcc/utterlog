@@ -127,7 +127,7 @@ export default function GeneralTab({
             const val = watch(item.field);
             return (
               <div key={item.field} className="flex flex-col gap-2">
-                <label className="text-xs font-medium text-muted-foreground">{item.label}</label>
+                <label className="text-xs-plus font-medium text-foreground">{item.label}</label>
                 <div className={cn(
                   'flex h-20 items-center justify-center overflow-hidden rounded-md border border-border',
                   item.purpose === 'dark-logo' ? 'bg-neutral-900' : 'bg-muted',
@@ -144,7 +144,7 @@ export default function GeneralTab({
                     className="inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-md border border-input bg-background transition-colors hover:bg-accent hover:text-accent-foreground"
                     title={t('admin.common.uploadImage', '上传图片')}
                   >
-                    <CloudUpload className="size-3.5" />
+                    <CloudUpload className="size-4" />
                     <input type="file" accept=".png,.jpg,.jpeg,.gif,.webp,.avif,.ico,.svg" className="hidden" onChange={(e) => handleBrandingUpload(e, item.purpose, item.field)} />
                   </label>
                 </div>

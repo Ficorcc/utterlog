@@ -6,9 +6,11 @@ import toast from 'react-hot-toast';
 import {
   Button, Input, Textarea, Label, Switch,
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+  Dialog, DialogContent, DialogHeader, DialogTitle, LoadingState,
 } from '@/components/ui/shadcn';
+import { SaveButton } from '@/components/ui/save-button';
 import {
-  Loader2, Sparkles, PenLine, UploadCloud, X,
+  Loader2, Sparkles, PenLine, CloudUpload, X,
   WandSparkles, Briefcase, Smile, Shrink, Expand, AlignLeft,
 } from 'lucide-react';
 import api from '@/lib/api';
@@ -19,6 +21,25 @@ import MarkdownEditor from '@/components/editor/MarkdownEditor';
 import { adminDateYMDHM } from '@/lib/timezone';
 import FootprintEditor, { type FootprintFormValue, normalizeFootprintsForPayload } from '@/components/FootprintEditor';
 import VideoFormSection from '@/components/VideoFormSection';
+
+// 右栏顶部动作按钮共用的布局：等分一行、允许收缩到内容以下、内边距压窄。
+// PostCreate / PostEdit 两个编辑页保持同一串类名。
+const SIDEBAR_ACTION_CLS = 'min-w-0 flex-1 px-2';
+
+// 「标签 + Switch」一行的统一写法，两个编辑页保持同一段 JSX。
+function ToggleRow({ id, label, checked, onCheckedChange }: {
+  id: string;
+  label: string;
+  checked: boolean;
+  onCheckedChange: (value: boolean) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <Label htmlFor={id} className="cursor-pointer text-xs font-normal text-foreground">{label}</Label>
+      <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} />
+    </div>
+  );
+}
 
 // Convert a backend date (RFC3339 string, unix int seconds, or ISO-ish)
 // into the "YYYY-MM-DDTHH:mm" shape that <input type="datetime-local">
@@ -242,25 +263,21 @@ export default function EditPostPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center" style={{ height: 'calc(100vh - 100px)' }}>
-        <Loader2 className="size-6 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <LoadingState label={t('admin.common.loading', '加载中…')} />;
   }
 
   return (
     <>
-      <div className="flex" style={{ height: 'calc(100vh - 80px)' }}>
+      <div className="flex h-[calc(100vh-80px)] gap-0">
         {/* Editor area */}
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden border border-r-0 border-border">
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={t('admin.postEditor.titlePlaceholder', '在此输入标题…')}
-            className="border-0 border-b border-border bg-transparent px-5 py-3.5 text-lg font-semibold text-foreground outline-none"
+            className="border-0 border-b border-border bg-transparent px-5 py-3.5 text-lg font-semibold text-foreground outline-none placeholder:text-muted-foreground"
           />
-          <input ref={mdFileRef} type="file" accept=".md,.markdown,.txt" style={{ display: 'none' }} onChange={handleMdUpload} />
+          <input ref={mdFileRef} type="file" accept=".md,.markdown,.txt" className="hidden" onChange={handleMdUpload} />
           {postType === 'video' ? (
             <div className="flex-1 overflow-auto bg-muted p-4">
               <VideoFormSection
@@ -321,15 +338,16 @@ export default function EditPostPage() {
         </div>
 
         {/* Right sidebar — same as create page */}
-        <div className="w-70 shrink-0 overflow-y-auto overflow-x-hidden border border-border bg-card">
+        <div className="w-70 shrink-0 overflow-x-hidden overflow-y-auto border border-border bg-card">
           {/* Publish */}
           <div className="border-b border-border p-4">
             <div className="mb-2 flex gap-1.5">
-              <Button onClick={() => handleSave()} disabled={submitting} className="min-w-0 flex-1 px-2">
-                {submitting && <Loader2 className="size-4 animate-spin" />}
-                {t('admin.common.save', '保存')}
-              </Button>
-              <Button variant="outline" onClick={() => navigate(backTarget)} className="min-w-0 flex-1 px-2">
+              <SaveButton
+                className={SIDEBAR_ACTION_CLS}
+                loading={submitting}
+                onClick={() => handleSave()}
+              />
+              <Button variant="outline" onClick={() => navigate(backTarget)} className={SIDEBAR_ACTION_CLS}>
                 {t('admin.common.back', '返回')}
               </Button>
             </div>
@@ -337,9 +355,9 @@ export default function EditPostPage() {
               <Button
                 variant="outline"
                 onClick={() => setShowAiModal(true)}
-                className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                className="w-full gap-1.5 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
               >
-                <Sparkles className="size-3.5" /> {t('admin.postEditor.aiProcessArticle', 'AI 处理文章')}
+                <Sparkles /> {t('admin.postEditor.aiProcessArticle', 'AI 处理文章')}
               </Button>
             )}
           </div>
@@ -350,7 +368,7 @@ export default function EditPostPage() {
             <div className="flex flex-col gap-3.5">
               {/* Cover */}
               <div>
-                <Label className="mb-1.5 block text-xs text-muted-foreground">{t('admin.postEditor.coverUrl', '自定义封面图 URL')}</Label>
+                <Label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t('admin.postEditor.coverUrl', '自定义封面图 URL')}</Label>
                 {coverUrl && (
                   <div className="relative mb-1.5">
                     <img src={coverUrl} alt="" className="h-20 w-full border border-border object-cover" />
@@ -366,6 +384,7 @@ export default function EditPostPage() {
                   <Input value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)} placeholder={t('admin.postEditor.coverPlaceholder', '留空自动回退为正文首图')} className="flex-1 text-xs" />
                   {aiFlags.image && (
                     <Button
+                      type="button"
                       variant="outline"
                       size="icon"
                       disabled={coverAiLoading}
@@ -397,11 +416,12 @@ export default function EditPostPage() {
                       }}
                     >
                       {coverAiLoading
-                        ? <Loader2 className="size-3.5 animate-spin" />
-                        : <Sparkles className="size-3.5" />}
+                        ? <Loader2 className="animate-spin" />
+                        : <Sparkles />}
                     </Button>
                   )}
                   <Button
+                    type="button"
                     variant="outline"
                     size="icon"
                     className="shrink-0"
@@ -409,31 +429,43 @@ export default function EditPostPage() {
                     title={coverUploading ? t('admin.media.uploading', '上传中…') : t('admin.postEditor.uploadCover', '上传封面')}
                   >
                     {coverUploading
-                      ? <Loader2 className="size-3.5 animate-spin" />
-                      : <UploadCloud className="size-3.5" />}
+                      ? <Loader2 className="animate-spin" />
+                      : <CloudUpload />}
                   </Button>
-                  <input ref={coverFileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleCoverUpload} />
+                  <input ref={coverFileRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
                 </div>
               </div>
+
               {/* Slug */}
               <div>
-                <Label className="mb-1.5 block text-xs text-muted-foreground">{t('admin.postEditor.slug', '别名 (Slug)')}</Label>
+                <Label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t('admin.postEditor.slug', '别名 (Slug)')}</Label>
                 <div className="flex gap-1.5">
                   <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder={t('admin.postEditor.slugPlaceholderShort', '留空自动分配')} className="flex-1 text-xs" />
                   {aiFlags.slug && (
-                    <Button variant="outline" disabled={slugLoading} className="h-10 shrink-0 gap-1 px-2 text-2xs" onClick={async () => {
-                      if (!title) return; setSlugLoading(true);
-                      try { const r: any = await api.post('/ai/slug', { title, content }); if (r.success && r.data?.slug) { setSlug(r.data.slug); toast.success(t('admin.postEditor.toast.slugGenerated', 'Slug 已生成')); } } catch { toast.error(t('admin.postEditor.toast.aiUnavailable', 'AI 服务不可用')); }
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="shrink-0 gap-1 px-2 text-2xs"
+                    disabled={slugLoading}
+                    onClick={async () => {
+                      if (!title) { toast.error(t('admin.postEditor.toast.fillTitleFirst', '请先填写标题')); return; }
+                      setSlugLoading(true);
+                      try {
+                        const r: any = await api.post('/ai/slug', { title, content });
+                        if (r.success && r.data?.slug) { setSlug(r.data.slug); toast.success(t('admin.postEditor.toast.slugGenerated', 'Slug 已生成')); }
+                      } catch { toast.error(t('admin.postEditor.toast.aiUnavailable', 'AI 服务不可用')); }
                       setSlugLoading(false);
-                    }}>
-                      {slugLoading ? <Loader2 className="size-3 animate-spin" /> : <Sparkles className="size-3" />} AI
-                    </Button>
+                    }}
+                  >
+                    {slugLoading ? <Loader2 className="animate-spin" /> : <Sparkles />} AI
+                  </Button>
                   )}
                 </div>
               </div>
+
               {/* Category */}
               <div>
-                <Label className="mb-1.5 block text-xs text-muted-foreground">{t('admin.postEditor.category', '分类')}</Label>
+                <Label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t('admin.postEditor.category', '分类')}</Label>
                 <Select value={categoryId === '' ? '' : String(categoryId)} onValueChange={(v) => setCategoryId(v ? Number(v) : '')}>
                   <SelectTrigger className="text-xs">
                     <SelectValue />
@@ -444,25 +476,40 @@ export default function EditPostPage() {
                   </SelectContent>
                 </Select>
               </div>
+
               {/* Tags */}
               <div>
                 <div className="mb-1.5 flex items-center justify-between">
-                  <Label className="text-xs text-muted-foreground">{t('admin.postEditor.tags', '标签')}</Label>
+                  <Label className="text-xs font-medium text-muted-foreground">{t('admin.postEditor.tags', '标签')}</Label>
                   {aiFlags.keywords && (
-                    <Button variant="ghost" disabled={tagsLoading} className="h-auto gap-1 p-0 text-2xs text-primary hover:bg-transparent hover:text-primary/80" onClick={async () => {
-                      if (!title && !content) return; setTagsLoading(true);
-                      try { const r: any = await api.post('/ai/tags', { title, content: content.slice(0, 1000) }); if (r.data?.tags) { setTagInput(Array.isArray(r.data.tags) ? r.data.tags.join(', ') : r.data.tags); toast.success(t('admin.postEditor.toast.tagsGenerated', '标签已生成')); } } catch { toast.error(t('admin.postEditor.toast.aiUnavailable', 'AI 服务不可用')); }
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    disabled={tagsLoading}
+                    className="h-auto gap-1 p-0 text-2xs text-primary hover:bg-transparent hover:text-primary/80"
+                    onClick={async () => {
+                      if (!title && !content) { toast.error(t('admin.postEditor.toast.fillTitleOrContentFirst', '请先填写标题或内容')); return; }
+                      setTagsLoading(true);
+                      try {
+                        const r: any = await api.post('/ai/tags', { title, content: content.slice(0, 1000) });
+                        if (r.data?.tags) {
+                          setTagInput(Array.isArray(r.data.tags) ? r.data.tags.join(', ') : r.data.tags);
+                          toast.success(t('admin.postEditor.toast.tagsGenerated', '标签已生成'));
+                        }
+                      } catch { toast.error(t('admin.postEditor.toast.aiUnavailable', 'AI 服务不可用')); }
                       setTagsLoading(false);
-                    }}>
-                      {tagsLoading ? <Loader2 className="size-2.5 animate-spin" /> : <Sparkles className="size-2.5" />} {t('admin.postEditor.aiExtract', 'AI 提取')}
-                    </Button>
+                    }}
+                  >
+                    {tagsLoading ? <Loader2 className="animate-spin" /> : <Sparkles />} {t('admin.postEditor.aiExtract', 'AI 提取')}
+                  </Button>
                   )}
                 </div>
                 <Input value={tagInput} onChange={(e) => setTagInput(e.target.value)} placeholder="Tag1, Tag2" className="text-xs" />
               </div>
+
               {/* Publish time */}
               <div>
-                <Label className="mb-1.5 block text-xs text-muted-foreground">{t('admin.postEditor.publishTime', '发布时间')}</Label>
+                <Label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t('admin.postEditor.publishTime', '发布时间')}</Label>
                 <Input type="datetime-local" value={publishAt} onChange={(e) => setPublishAt(e.target.value)} className="text-xs" />
               </div>
 
@@ -481,38 +528,59 @@ export default function EditPostPage() {
           <div className="border-b border-border p-4">
             <h3 className="mb-3.5 text-xs-plus font-semibold text-foreground">{t('admin.postEditor.advanced', '高级')}</h3>
             <div className="flex flex-col gap-3.5">
+              {/* Excerpt */}
               <div>
                 <div className="mb-1.5 flex items-center justify-between">
-                  <Label className="text-xs text-muted-foreground">{t('admin.postEditor.excerpt', '摘要')}</Label>
+                  <Label className="text-xs font-medium text-muted-foreground">{t('admin.postEditor.excerpt', '摘要')}</Label>
                   {aiFlags.summary && (
-                    <Button variant="ghost" disabled={excerptLoading} className="h-auto gap-1 p-0 text-2xs text-primary hover:bg-transparent hover:text-primary/80" onClick={async () => {
-                      if (!content) { toast.error(t('admin.postEditor.toast.fillContentFirst', '请先填写内容')); return; } setExcerptLoading(true);
-                      try { const r: any = await api.post('/ai/summary', { title, content }); if (r.success && r.data?.summary) { setExcerpt(r.data.summary); toast.success(t('admin.postEditor.toast.excerptGenerated', '摘要已生成')); } } catch { toast.error(t('admin.postEditor.toast.aiUnavailable', 'AI 服务不可用')); }
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    disabled={excerptLoading}
+                    className="h-auto gap-1 p-0 text-2xs text-primary hover:bg-transparent hover:text-primary/80"
+                    onClick={async () => {
+                      if (!content) { toast.error(t('admin.postEditor.toast.fillContentFirst', '请先填写内容')); return; }
+                      setExcerptLoading(true);
+                      try {
+                        const r: any = await api.post('/ai/summary', { title, content });
+                        if (r.success && r.data?.summary) { setExcerpt(r.data.summary); toast.success(t('admin.postEditor.toast.excerptGenerated', '摘要已生成')); }
+                      } catch { toast.error(t('admin.postEditor.toast.aiUnavailable', 'AI 服务不可用')); }
                       setExcerptLoading(false);
-                    }}>
-                      {excerptLoading ? <Loader2 className="size-2.5 animate-spin" /> : <Sparkles className="size-2.5" />} {t('admin.postEditor.aiGenerate', 'AI 生成')}
-                    </Button>
+                    }}
+                  >
+                    {excerptLoading ? <Loader2 className="animate-spin" /> : <Sparkles />} {t('admin.postEditor.aiGenerate', 'AI 生成')}
+                  </Button>
                   )}
                 </div>
                 <Textarea value={excerpt} onChange={(e) => setExcerpt(e.target.value)} placeholder={t('admin.postEditor.excerptPlaceholder', '留空自动截取')} rows={3} className="resize-y text-xs" />
               </div>
-              <div className="flex flex-col gap-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-foreground">{t('admin.postEditor.allowComments', '允许评论')}</span>
-                  <Switch checked={allowComment} onCheckedChange={setAllowComment} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-foreground">{t('admin.postEditor.allowRss', '允许本文出现在 RSS 聚合')}</span>
-                  <Switch checked={allowRss} onCheckedChange={setAllowRss} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-foreground">{t('admin.postEditor.pinned', '置顶文章')}</span>
-                  <Switch checked={pinned} onCheckedChange={setPinned} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-foreground">{t('admin.postEditor.privatePost', '私密文章')}</span>
-                  <Switch checked={status === 'private'} onCheckedChange={(v) => setStatus(v ? 'private' : 'publish')} />
-                </div>
+
+              {/* Toggles */}
+              <div className="flex flex-col gap-3">
+                <ToggleRow
+                  id="allowComment"
+                  label={t('admin.postEditor.allowComments', '允许评论')}
+                  checked={allowComment}
+                  onCheckedChange={setAllowComment}
+                />
+                <ToggleRow
+                  id="allowRss"
+                  label={t('admin.postEditor.allowRss', '允许本文出现在 RSS 聚合')}
+                  checked={allowRss}
+                  onCheckedChange={setAllowRss}
+                />
+                <ToggleRow
+                  id="pinned"
+                  label={t('admin.postEditor.pinned', '置顶文章')}
+                  checked={pinned}
+                  onCheckedChange={setPinned}
+                />
+                <ToggleRow
+                  id="privatePost"
+                  label={t('admin.postEditor.privatePost', '私密文章')}
+                  checked={status === 'private'}
+                  onCheckedChange={(v) => setStatus(v ? 'private' : 'publish')}
+                />
                 {status === 'private' && (
                   <Input value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t('admin.postEditor.passwordPlaceholder', '输入访问密码')} className="text-xs" />
                 )}
@@ -523,71 +591,70 @@ export default function EditPostPage() {
       </div>
 
       {/* Content Insert Modal */}
-      {insertType && (
-        <>
-          <div onClick={() => setInsertType(null)} className="fixed inset-0 z-50 bg-black/30" />
-          <div className="fixed left-1/2 top-1/2 z-[51] flex max-h-[70vh] w-125 max-w-[90vw] flex-col border border-border bg-card shadow-lg" style={{ transform: 'translate(-50%,-50%)' }}>
-            <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
-              <h3 className="text-sm font-semibold">{t('admin.postEditor.insertType', '插入{type}', { type: insertType })}</h3>
-              <button onClick={() => setInsertType(null)} className="text-muted-foreground hover:text-foreground">
-                <X className="size-4" />
-              </button>
-            </div>
-            <div className="flex-1 overflow-auto px-5 py-3">
-              {insertLoading && <p className="py-5 text-center text-xs-plus text-muted-foreground">{t('admin.common.loading', '加载中…')}</p>}
-              {!insertLoading && insertItems.length === 0 && <p className="py-5 text-center text-xs-plus text-muted-foreground">{t('admin.common.noData', '暂无数据')}</p>}
-              {insertItems.map((item: any) => (
-                <div key={item.id} onClick={() => {
-                  let md = '';
-                  if (insertType === '音乐') {
-                    md = '\n[music platform="' + (item.platform || 'netease') + '" id="' + (item.platform_id || item.id || '') + '" title="' + (item.title || '') + '" artist="' + (item.artist || '') + '" cover="' + (item.cover_url || '') + '"][/music]\n';
-                  } else if (insertType === '图书') {
-                    md = '\n> **' + (item.title || '') + '**' + (item.author ? ' - ' + item.author : '') + '\n';
-                  } else if (insertType === '电影') {
-                    md = '\n> **' + (item.title || '') + '**' + (item.rating ? ' ' + item.rating + '/5' : '') + '\n';
-                  } else if (insertType === '说说') {
-                    md = '\n[moment id="' + item.id + '"][/moment]\n';
-                  }
-                  if (md) setContent(content + md);
-                  setInsertType(null);
-                  toast.success(t('admin.postEditor.toast.inserted', '已插入'));
-                }} className="flex cursor-pointer items-center gap-3 border-b border-border px-3 py-2.5 transition-colors hover:bg-muted">
-                  {(item.cover_url || item.image) && <img src={item.cover_url || item.image} alt="" className="size-10 shrink-0 object-cover" />}
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-xs-plus font-medium">{item.title || item.content?.slice(0, 50)}</div>
-                    <div className="mt-0.5 text-2xs text-muted-foreground">{item.artist || item.author || ''}</div>
-                  </div>
-                  <span className="shrink-0 text-2xs text-primary">{t('admin.postEditor.insert', '插入')}</span>
+      <Dialog open={!!insertType} onOpenChange={(o) => !o && setInsertType(null)}>
+        <DialogContent className="flex max-h-[70vh] w-125 max-w-[90vw] flex-col gap-0 p-0">
+          <DialogHeader className="border-b border-border px-5 py-4">
+            <DialogTitle className="text-sm">
+              {t('admin.postEditor.insertType', '插入{type}', { type: insertType ?? '' })}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-auto px-5 py-3">
+            {insertLoading && <p className="py-5 text-center text-xs-plus text-muted-foreground">{t('admin.common.loading', '加载中…')}</p>}
+            {!insertLoading && insertItems.length === 0 && <p className="py-5 text-center text-xs-plus text-muted-foreground">{t('admin.common.noData', '暂无数据')}</p>}
+            {insertItems.map((item: any) => (
+              <div key={item.id} onClick={() => {
+                let md = '';
+                if (insertType === '音乐') {
+                  md = '\n[music platform="' + (item.platform || 'netease') + '" id="' + (item.platform_id || item.id || '') + '" title="' + (item.title || '') + '" artist="' + (item.artist || '') + '" cover="' + (item.cover_url || '') + '"][/music]\n';
+                } else if (insertType === '图书') {
+                  md = '\n> **' + (item.title || '') + '**' + (item.author ? ' - ' + item.author : '') + '\n';
+                } else if (insertType === '电影') {
+                  md = '\n> **' + (item.title || '') + '**' + (item.rating ? ' ' + item.rating + '/5' : '') + '\n';
+                } else if (insertType === '说说') {
+                  md = '\n[moment id="' + item.id + '"][/moment]\n';
+                }
+                if (md) setContent(content + md);
+                setInsertType(null);
+                toast.success(t('admin.postEditor.toast.inserted', '已插入'));
+              }} className="flex cursor-pointer items-center gap-3 border-b border-border px-3 py-2.5 transition-colors hover:bg-muted">
+                {(item.cover_url || item.image) && <img src={item.cover_url || item.image} alt="" className="size-10 shrink-0 object-cover" />}
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-xs-plus font-medium">{item.title || item.content?.slice(0, 50)}</div>
+                  <div className="mt-0.5 text-2xs text-muted-foreground">{item.artist || item.author || ''}</div>
                 </div>
-              ))}
-            </div>
+                <span className="shrink-0 text-2xs text-primary">{t('admin.postEditor.insert', '插入')}</span>
+              </div>
+            ))}
           </div>
-        </>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* AI Processing Modal — same as create page */}
-      {showAiModal && (
-        <>
-          <div onClick={() => { if (!aiProcessing) setShowAiModal(false); }} className="fixed inset-0 z-50 bg-black/30" />
-          <div className="fixed left-1/2 top-1/2 z-[51] flex max-h-[80vh] w-140 max-w-[90vw] flex-col border border-border bg-card shadow-lg" style={{ transform: 'translate(-50%,-50%)' }}>
-            <div className="flex items-center justify-between border-b border-border px-5 py-4">
-              <h3 className="flex items-center gap-1.5 text-sm-plus font-semibold"><Sparkles className="size-4" /> {t('admin.postEditor.aiProcessArticle', 'AI 处理文章')}</h3>
-              <button onClick={() => setShowAiModal(false)} className="text-muted-foreground hover:text-foreground">
-                <X className="size-4" />
-              </button>
-            </div>
-            <div className="border-b border-border px-5 py-4">
-              <p className="mb-3 text-xs text-muted-foreground">{t('admin.postEditor.aiProcessShortHint', '选择 AI 处理方式')}</p>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { key: 'polish', label: t('admin.postEditor.aiAction.polish', '润色优化'), Icon: WandSparkles, prompt: 'Proofread and lightly polish this Markdown article. Preserve facts, meaning, tone, language, code blocks, links, images, front matter, technical terms, and version numbers. Fix only clear grammar, spelling, punctuation, spacing, and structure issues. Do not add or remove information. Output only the complete Markdown:' },
-                  { key: 'formal', label: t('admin.postEditor.aiAction.formal', '正式风格'), Icon: Briefcase, prompt: 'Rewrite this article in a clear, professional tone. Preserve all facts, meaning, structure, links, images, code blocks, technical terms, and the original language. Do not invent information. Output only the complete Markdown:' },
-                  { key: 'casual', label: t('admin.postEditor.aiAction.casual', '轻松风格'), Icon: Smile, prompt: 'Rewrite this article in a natural, friendly, conversational tone. Preserve all facts, meaning, structure, links, images, code blocks, technical terms, and the original language. Do not invent information. Output only the complete Markdown:' },
-                  { key: 'concise', label: t('admin.postEditor.aiAction.concise', '精简压缩'), Icon: Shrink, prompt: 'Shorten this article while preserving its core facts, conclusions, necessary context, links, images, code blocks, and the original language. Remove repetition, not essential information. Output only the complete Markdown:' },
-                  { key: 'expand', label: t('admin.postEditor.aiAction.expand', '扩展丰富'), Icon: Expand, prompt: 'Expand this article only where useful by clarifying existing ideas and adding practical detail without inventing facts. Preserve the original language and all existing links, images, code blocks, and technical terms. Output only the complete Markdown:' },
-                  { key: 'format', label: t('admin.postEditor.aiAction.format', '智能排版'), Icon: AlignLeft, prompt: 'Reformat this article for readability in Markdown without changing its meaning or removing information. Add a clear H2/H3 hierarchy only where the structure is implied, use lists for parallel items, tables for genuine comparisons, and blockquotes for existing quotations. Preserve front matter, links, images, code blocks, HTML, technical terms, and the original language. Output only the complete Markdown:' },
-                ].map(item => (
-                  <button key={item.key} disabled={aiProcessing} onClick={async () => {
+      {/* 处理中也允许关闭：/ai/polish 没有超时，卡住时把用户锁在模态里没有逃生出口。
+          关掉只是不看结果，请求继续跑完自然丢弃。 */}
+      <Dialog open={showAiModal} onOpenChange={setShowAiModal}>
+        <DialogContent className="flex max-h-[80vh] w-140 max-w-[90vw] flex-col gap-0 p-0">
+          <DialogHeader className="border-b border-border px-5 py-4">
+            <DialogTitle className="flex items-center gap-1.5 text-sm-plus">
+              <Sparkles className="size-4" /> {t('admin.postEditor.aiProcessArticle', 'AI 处理文章')}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="border-b border-border px-5 py-4">
+            <p className="mb-3 text-xs text-muted-foreground">{t('admin.postEditor.aiProcessShortHint', '选择 AI 处理方式')}</p>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { key: 'polish', label: t('admin.postEditor.aiAction.polish', '润色优化'), Icon: WandSparkles, prompt: 'Proofread and lightly polish this Markdown article. Preserve facts, meaning, tone, language, code blocks, links, images, front matter, technical terms, and version numbers. Fix only clear grammar, spelling, punctuation, spacing, and structure issues. Do not add or remove information. Output only the complete Markdown:' },
+                { key: 'formal', label: t('admin.postEditor.aiAction.formal', '正式风格'), Icon: Briefcase, prompt: 'Rewrite this article in a clear, professional tone. Preserve all facts, meaning, structure, links, images, code blocks, technical terms, and the original language. Do not invent information. Output only the complete Markdown:' },
+                { key: 'casual', label: t('admin.postEditor.aiAction.casual', '轻松风格'), Icon: Smile, prompt: 'Rewrite this article in a natural, friendly, conversational tone. Preserve all facts, meaning, structure, links, images, code blocks, technical terms, and the original language. Do not invent information. Output only the complete Markdown:' },
+                { key: 'concise', label: t('admin.postEditor.aiAction.concise', '精简压缩'), Icon: Shrink, prompt: 'Shorten this article while preserving its core facts, conclusions, necessary context, links, images, code blocks, and the original language. Remove repetition, not essential information. Output only the complete Markdown:' },
+                { key: 'expand', label: t('admin.postEditor.aiAction.expand', '扩展丰富'), Icon: Expand, prompt: 'Expand this article only where useful by clarifying existing ideas and adding practical detail without inventing facts. Preserve the original language and all existing links, images, code blocks, and technical terms. Output only the complete Markdown:' },
+                { key: 'format', label: t('admin.postEditor.aiAction.format', '智能排版'), Icon: AlignLeft, prompt: 'Reformat this article for readability in Markdown without changing its meaning or removing information. Add a clear H2/H3 hierarchy only where the structure is implied, use lists for parallel items, tables for genuine comparisons, and blockquotes for existing quotations. Preserve front matter, links, images, code blocks, HTML, technical terms, and the original language. Output only the complete Markdown:' },
+              ].map(item => (
+                <button
+                  key={item.key}
+                  disabled={aiProcessing}
+                  onClick={async () => {
                     if (!content.trim()) { toast.error(t('admin.postEditor.toast.fillContentFirst', '请先填写内容')); return; }
                     setAiProcessing(true); setAiResult('');
                     try {
@@ -596,28 +663,64 @@ export default function EditPostPage() {
                       else toast.error(t('admin.postEditor.toast.processFailed', '处理失败'));
                     } catch { toast.error(t('admin.postEditor.toast.aiUnavailable', 'AI 服务不可用')); }
                     setAiProcessing(false);
-                  }} className="flex flex-col items-center gap-1 border border-border bg-muted px-2 py-2.5 text-xs font-medium text-foreground transition-colors hover:border-primary disabled:cursor-wait disabled:opacity-50">
-                    <item.Icon className="size-4.5" />
-                    {item.label}
-                  </button>
-                ))}
-              </div>
+                  }}
+                  className="flex flex-col items-center gap-1 border border-border bg-muted p-2.5 text-xs font-medium text-foreground transition-colors hover:border-primary disabled:cursor-wait disabled:opacity-50"
+                >
+                  <item.Icon className="size-4.5" />
+                  {item.label}
+                </button>
+              ))}
             </div>
-            <div className="min-h-37.5 flex-1 overflow-auto px-5 py-4">
-              {aiProcessing && <div className="flex items-center justify-center gap-2 py-10 text-xs-plus text-muted-foreground"><Loader2 className="size-4 animate-spin" /> {t('admin.postEditor.aiProcessing', 'AI 处理中…')}</div>}
-              {aiResult && !aiProcessing && <pre className="m-0 max-h-75 overflow-auto bg-muted p-3 font-mono text-xs leading-relaxed" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{aiResult}</pre>}
-              {!aiResult && !aiProcessing && <p className="py-10 text-center text-xs-plus text-muted-foreground">{t('admin.postEditor.chooseProcessMode', '选择处理方式')}</p>}
-            </div>
-            {aiResult && !aiProcessing && (
-              <div className="flex justify-end gap-2 border-t border-border px-5 py-3">
-                <Button variant="secondary" onClick={() => { navigator.clipboard.writeText(aiResult); toast.success(t('admin.postEditor.toast.copiedShort', '已复制')); }}>{t('admin.common.copy', '复制')}</Button>
-                <Button variant="secondary" onClick={() => { setContent(content + '\n\n' + aiResult); setShowAiModal(false); setAiResult(''); toast.success(t('admin.postEditor.toast.appendedShort', '已追加')); }}>{t('admin.postEditor.append', '追加')}</Button>
-                <Button onClick={() => { setContent(aiResult); setShowAiModal(false); setAiResult(''); toast.success(t('admin.postEditor.toast.replacedShort', '已替换')); }}>{t('admin.postEditor.replaceContent', '替换内容')}</Button>
+          </div>
+
+          {/* Result */}
+          <div className="min-h-37.5 flex-1 overflow-auto px-5 py-4">
+            {aiProcessing && (
+              <div className="flex items-center justify-center gap-2 py-10 text-xs-plus text-muted-foreground">
+                <Loader2 className="size-4 animate-spin" /> {t('admin.postEditor.aiProcessing', 'AI 处理中…')}
               </div>
             )}
+            {aiResult && !aiProcessing && (
+              <pre className="m-0 max-h-75 overflow-auto whitespace-pre-wrap break-words bg-muted p-3 font-mono text-xs leading-relaxed text-foreground">
+                {aiResult}
+              </pre>
+            )}
+            {!aiResult && !aiProcessing && (
+              <p className="py-10 text-center text-xs-plus text-muted-foreground">
+                {t('admin.postEditor.chooseProcessMode', '选择处理方式')}
+              </p>
+            )}
           </div>
-        </>
-      )}
+
+          {/* Actions */}
+          {aiResult && !aiProcessing && (
+            <div className="flex justify-end gap-2 border-t border-border px-5 py-3">
+              <Button variant="outline" onClick={() => {
+                navigator.clipboard.writeText(aiResult);
+                toast.success(t('admin.postEditor.toast.copiedShort', '已复制'));
+              }}>
+                {t('admin.common.copy', '复制')}
+              </Button>
+              <Button variant="outline" onClick={() => {
+                setContent(content + '\n\n' + aiResult);
+                setShowAiModal(false);
+                setAiResult('');
+                toast.success(t('admin.postEditor.toast.appendedShort', '已追加'));
+              }}>
+                {t('admin.postEditor.append', '追加')}
+              </Button>
+              <Button onClick={() => {
+                setContent(aiResult);
+                setShowAiModal(false);
+                setAiResult('');
+                toast.success(t('admin.postEditor.toast.replacedShort', '已替换'));
+              }}>
+                {t('admin.postEditor.replaceContent', '替换内容')}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

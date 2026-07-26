@@ -5,6 +5,7 @@ import { momentsApi, optionsApi, mediaApi, geoApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 import {
   Button,
+  Card,
   ConfirmDialog,
   Dialog, DialogContent, DialogHeader, DialogTitle,
   EmptyState,
@@ -14,10 +15,11 @@ import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
   Textarea,
 } from '@/components/ui/shadcn';
-import { RowAction } from '@/components/ui/row-actions';
+import { RowAction, RowActionGroup } from '@/components/ui/row-actions';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import { usePageBadge } from '@/layouts/DashboardLayout';
+import { AdminToolbar } from '@/components/ui';
 
 export default function MomentsPage() {
   const { t } = useI18n();
@@ -194,8 +196,8 @@ export default function MomentsPage() {
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    try { await momentsApi.delete(deleteId); toast.success(t('admin.posts.toast.deleteSuccess', '删除成功')); fetchData(); }
-    catch { toast.error(t('admin.posts.toast.deleteFailed', '删除失败')); }
+    try { await momentsApi.delete(deleteId); toast.success(t('admin.common.deleteSuccess', '删除成功')); fetchData(); }
+    catch { toast.error(t('admin.common.deleteFailed', '删除失败')); }
     finally { setDeleteId(null); }
   };
 
@@ -237,62 +239,64 @@ export default function MomentsPage() {
 
   return (
     <div>
-      <div className="mb-5 flex flex-wrap items-center gap-3">
-        {/* Left: 关键词 + 发布（正方形 icon-only） */}
-        <div className="flex items-center gap-1.5">
-          <Button
-            variant={showTagManager ? 'default' : 'outline'}
-            size="icon"
-            title={t('admin.posts.columns.keywords', '关键词')}
-            aria-label={t('admin.posts.columns.keywords', '关键词')}
-            onClick={() => setShowTagManager(!showTagManager)}
-          >
-            <Hash className="size-4" />
-          </Button>
-          <Button
-            size="icon"
-            title={t('admin.moments.publish', '发布')}
-            aria-label={t('admin.moments.publish', '发布')}
-            onClick={openCreate}
-          >
-            <Plus className="size-4" />
-          </Button>
-        </div>
-
-        {/* Right: 搜索框 + 🔍 + ✕ */}
-        <div className="ml-auto flex items-center gap-1.5">
-          <Input
-            placeholder={t('admin.moments.searchPlaceholder', '检索内容 / 位置 / 关键词')}
-            value={search}
-            onChange={(e: any) => setSearch(e.target.value)}
-            className="w-56"
-          />
-          <Button
-            variant="outline"
-            size="icon"
-            title={t('common.search', '搜索')}
-            aria-label={t('common.search', '搜索')}
-            onClick={() => { /* 即时搜索：按钮仅作视觉锚点 */ }}
-          >
-            <Search className="size-4" />
-          </Button>
-          {search && (
+      <AdminToolbar
+        meta={
+          <div className="flex items-center gap-1.5">
+            <Button
+              variant={showTagManager ? 'default' : 'outline'}
+              size="icon"
+              title={t('admin.posts.columns.keywords', '关键词')}
+              aria-label={t('admin.posts.columns.keywords', '关键词')}
+              onClick={() => setShowTagManager(!showTagManager)}
+            >
+              <Hash />
+            </Button>
+            {/* 主操作（发布）实心，次要操作 outline —— 五个列表页同一套强调级 */}
+            <Button
+              size="icon"
+              title={t('admin.moments.publish', '发布')}
+              aria-label={t('admin.moments.publish', '发布')}
+              onClick={openCreate}
+            >
+              <Plus />
+            </Button>
+          </div>
+        }
+        actions={
+          <div className="flex items-center gap-1.5">
+            <Input
+              placeholder={t('admin.moments.searchPlaceholder', '检索内容 / 位置 / 关键词')}
+              value={search}
+              onChange={(e: any) => setSearch(e.target.value)}
+              className="w-56"
+            />
             <Button
               variant="outline"
               size="icon"
-              title={t('admin.common.clear', '清空')}
-              aria-label={t('admin.common.clear', '清空')}
-              onClick={() => setSearch('')}
+              title={t('common.search', '搜索')}
+              aria-label={t('common.search', '搜索')}
+              onClick={() => { /* 即时搜索：按钮仅作视觉锚点 */ }}
             >
-              <X className="size-4" />
+              <Search />
             </Button>
-          )}
-        </div>
-      </div>
+            {search && (
+              <Button
+                variant="outline"
+                size="icon"
+                title={t('admin.common.clear', '清空')}
+                aria-label={t('admin.common.clear', '清空')}
+                onClick={() => setSearch('')}
+              >
+                <X />
+              </Button>
+            )}
+          </div>
+        }
+      />
 
       {/* Tag Manager */}
       {showTagManager && (
-        <div className="mb-4 rounded-lg border border-border bg-card p-5">
+        <Card className="mb-4 p-5">
           <h3 className="mb-4 text-sm font-semibold text-foreground">{t('admin.moments.tagManagerTitle', '说说关键词管理')}</h3>
           <p className="mb-4 text-xs text-muted-foreground">{t('admin.moments.tagManagerHint', '管理前台说说发布时可选的关键词标签，发布后显示在卡片右上角')}</p>
           <div className="mb-4 flex flex-wrap gap-2">
@@ -360,7 +364,7 @@ export default function MomentsPage() {
             />
             <Button variant="outline" onClick={addTag}>{t('admin.common.add', '添加')}</Button>
           </div>
-        </div>
+        </Card>
       )}
 
       {loading ? (
@@ -372,7 +376,7 @@ export default function MomentsPage() {
       ) : (
         <div className="flex flex-col gap-3">
           {filteredMoments.map((m) => (
-            <div key={m.id} className="rounded-lg border border-border bg-card px-5 py-4">
+            <Card key={m.id} className="px-5 py-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{m.content}</p>
@@ -395,12 +399,12 @@ export default function MomentsPage() {
                     {m.visibility !== 'public' && <><span>&middot;</span><span>{m.visibility === 'private' ? t('admin.moments.visibility.private', '仅自己') : t('admin.moments.visibility.unlisted', '不公开')}</span></>}
                   </div>
                 </div>
-                <div className="ml-3 flex shrink-0 gap-1">
+                <RowActionGroup className="ml-3 shrink-0">
                   <RowAction icon={Pencil} title={t('admin.common.edit', '编辑')} onClick={() => openEdit(m)} />
                   <RowAction icon={Trash2} tone="danger" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(m.id)} />
-                </div>
+                </RowActionGroup>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       )}

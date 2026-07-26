@@ -303,8 +303,8 @@ export default function MenusPage() {
           <div className="border border-border bg-muted p-3">
             <div className="flex items-center gap-2">
               <div className="flex flex-col gap-0.5 opacity-35">
-                <Button type="button" variant="outline" size="icon" className="size-6" disabled><ChevronUp className="size-3" /></Button>
-                <Button type="button" variant="outline" size="icon" className="size-6" disabled><ChevronDown className="size-3" /></Button>
+                <Button type="button" variant="outline" size="icon-xs" disabled><ChevronUp /></Button>
+                <Button type="button" variant="outline" size="icon-xs" disabled><ChevronDown /></Button>
               </div>
               <div className="inline-flex min-h-9 w-50 shrink-0 items-center gap-2 border border-border bg-card px-3 text-sm text-foreground">
                 <LayoutGrid className="size-4 text-primary" />
@@ -314,7 +314,7 @@ export default function MenusPage() {
                 {t('admin.menus.fixedAllHint', '固定分类 tab，前台始终显示，不写入菜单配置。')}
               </div>
               <Button type="button" variant="outline" size="icon-sm" disabled title={t('admin.menus.fixedCannotDelete', '固定项不可删除')}>
-                <Lock className="size-3" />
+                <Lock />
               </Button>
             </div>
           </div>
@@ -328,11 +328,11 @@ export default function MenusPage() {
           <div key={idx} className="border border-border p-3">
             <div className="flex items-center gap-2">
               <div className="flex flex-col gap-0.5">
-                <Button type="button" variant="outline" size="icon" className="size-6" onClick={() => moveItem(idx, -1)} disabled={idx === 0}>
-                  <ChevronUp className="size-3" />
+                <Button type="button" variant="outline" size="icon-xs" onClick={() => moveItem(idx, -1)} disabled={idx === 0}>
+                  <ChevronUp />
                 </Button>
-                <Button type="button" variant="outline" size="icon" className="size-6" onClick={() => moveItem(idx, 1)} disabled={idx === items.length - 1}>
-                  <ChevronDown className="size-3" />
+                <Button type="button" variant="outline" size="icon-xs" onClick={() => moveItem(idx, 1)} disabled={idx === items.length - 1}>
+                  <ChevronDown />
                 </Button>
               </div>
               <Input

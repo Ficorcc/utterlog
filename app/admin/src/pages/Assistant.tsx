@@ -299,7 +299,7 @@ export default function AiChatPage() {
         {/* Memory compress button */}
         <div className="shrink-0 border-t border-border py-2 px-3">
           <Button variant="outline" size="sm" className="w-full text-muted-foreground" onClick={compressMemory}>
-            <Shrink className="size-3.5" /> 整理 Memory
+            <Shrink /> 整理 Memory
           </Button>
         </div>
       </div>

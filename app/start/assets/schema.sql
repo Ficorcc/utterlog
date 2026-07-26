@@ -44,8 +44,6 @@ ALTER TABLE IF EXISTS ONLY public.ul_ai_conversations DROP CONSTRAINT IF EXISTS 
 DROP INDEX IF EXISTS public.idx_users_status;
 DROP INDEX IF EXISTS public.idx_users_role;
 DROP INDEX IF EXISTS public.idx_users_email;
-DROP INDEX IF EXISTS public.idx_sec_events_ip;
-DROP INDEX IF EXISTS public.idx_sec_events_created;
 DROP INDEX IF EXISTS public.idx_rss_subs_user;
 DROP INDEX IF EXISTS public.idx_relationships_post;
 DROP INDEX IF EXISTS public.idx_relationships_meta;
@@ -93,10 +91,6 @@ DROP INDEX IF EXISTS public.idx_links_sync_provenance;
 DROP INDEX IF EXISTS public.idx_links_status;
 DROP INDEX IF EXISTS public.idx_links_order;
 DROP INDEX IF EXISTS public.idx_links_group;
-DROP INDEX IF EXISTS public.idx_ip_rep_score;
-DROP INDEX IF EXISTS public.idx_ip_rep_ip;
-DROP INDEX IF EXISTS public.idx_ip_bans_ip;
-DROP INDEX IF EXISTS public.idx_ip_bans_expires;
 DROP INDEX IF EXISTS public.idx_goods_created;
 DROP INDEX IF EXISTS public.idx_goods_category;
 DROP INDEX IF EXISTS public.idx_goods_author;
@@ -138,7 +132,6 @@ ALTER TABLE IF EXISTS ONLY public.ul_videos DROP CONSTRAINT IF EXISTS ul_videos_
 ALTER TABLE IF EXISTS ONLY public.ul_users DROP CONSTRAINT IF EXISTS ul_users_username_key;
 ALTER TABLE IF EXISTS ONLY public.ul_users DROP CONSTRAINT IF EXISTS ul_users_pkey;
 ALTER TABLE IF EXISTS ONLY public.ul_users DROP CONSTRAINT IF EXISTS ul_users_email_key;
-ALTER TABLE IF EXISTS ONLY public.ul_security_events DROP CONSTRAINT IF EXISTS ul_security_events_pkey;
 ALTER TABLE IF EXISTS ONLY public.ul_rss_subscriptions DROP CONSTRAINT IF EXISTS ul_rss_subscriptions_user_id_feed_url_key;
 ALTER TABLE IF EXISTS ONLY public.ul_rss_subscriptions DROP CONSTRAINT IF EXISTS ul_rss_subscriptions_pkey;
 ALTER TABLE IF EXISTS ONLY public.ul_relationships DROP CONSTRAINT IF EXISTS ul_relationships_pkey;
@@ -159,10 +152,6 @@ ALTER TABLE IF EXISTS ONLY public.ul_moments DROP CONSTRAINT IF EXISTS ul_moment
 ALTER TABLE IF EXISTS ONLY public.ul_metas DROP CONSTRAINT IF EXISTS ul_metas_pkey;
 ALTER TABLE IF EXISTS ONLY public.ul_media DROP CONSTRAINT IF EXISTS ul_media_pkey;
 ALTER TABLE IF EXISTS ONLY public.ul_links DROP CONSTRAINT IF EXISTS ul_links_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_ip_reputation DROP CONSTRAINT IF EXISTS ul_ip_reputation_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_ip_reputation DROP CONSTRAINT IF EXISTS ul_ip_reputation_ip_key;
-ALTER TABLE IF EXISTS ONLY public.ul_ip_bans DROP CONSTRAINT IF EXISTS ul_ip_bans_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_ip_bans DROP CONSTRAINT IF EXISTS ul_ip_bans_ip_key;
 ALTER TABLE IF EXISTS ONLY public.ul_goods DROP CONSTRAINT IF EXISTS ul_goods_pkey;
 ALTER TABLE IF EXISTS ONLY public.ul_games DROP CONSTRAINT IF EXISTS ul_games_pkey;
 ALTER TABLE IF EXISTS ONLY public.ul_followers DROP CONSTRAINT IF EXISTS ul_followers_user_id_follower_id_key;
@@ -188,7 +177,6 @@ ALTER TABLE IF EXISTS ONLY public.migrations DROP CONSTRAINT IF EXISTS migration
 ALTER TABLE IF EXISTS ONLY public.migrations DROP CONSTRAINT IF EXISTS migrations_migration_key;
 ALTER TABLE IF EXISTS public.ul_videos ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.ul_users ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_security_events ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.ul_rss_subscriptions ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.ul_posts ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.ul_post_meta ALTER COLUMN id DROP DEFAULT;
@@ -203,8 +191,6 @@ ALTER TABLE IF EXISTS public.ul_moments ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.ul_metas ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.ul_media ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.ul_links ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_ip_reputation ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_ip_bans ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.ul_goods ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.ul_games ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.ul_followers ALTER COLUMN id DROP DEFAULT;
@@ -226,8 +212,6 @@ DROP SEQUENCE IF EXISTS public.ul_videos_id_seq;
 DROP TABLE IF EXISTS public.ul_videos;
 DROP SEQUENCE IF EXISTS public.ul_users_id_seq;
 DROP TABLE IF EXISTS public.ul_users;
-DROP SEQUENCE IF EXISTS public.ul_security_events_id_seq;
-DROP TABLE IF EXISTS public.ul_security_events;
 DROP SEQUENCE IF EXISTS public.ul_rss_subscriptions_id_seq;
 DROP TABLE IF EXISTS public.ul_rss_subscriptions;
 DROP TABLE IF EXISTS public.ul_relationships;
@@ -259,10 +243,6 @@ DROP SEQUENCE IF EXISTS public.ul_media_id_seq;
 DROP TABLE IF EXISTS public.ul_media;
 DROP SEQUENCE IF EXISTS public.ul_links_id_seq;
 DROP TABLE IF EXISTS public.ul_links;
-DROP SEQUENCE IF EXISTS public.ul_ip_reputation_id_seq;
-DROP TABLE IF EXISTS public.ul_ip_reputation;
-DROP SEQUENCE IF EXISTS public.ul_ip_bans_id_seq;
-DROP TABLE IF EXISTS public.ul_ip_bans;
 DROP SEQUENCE IF EXISTS public.ul_goods_id_seq;
 DROP TABLE IF EXISTS public.ul_goods;
 DROP SEQUENCE IF EXISTS public.ul_games_id_seq;
@@ -1014,77 +994,6 @@ ALTER SEQUENCE public.ul_goods_id_seq OWNED BY public.ul_goods.id;
 
 
 --
--- Name: ul_ip_bans; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.ul_ip_bans (
-    id integer NOT NULL,
-    ip character varying(50) NOT NULL,
-    reason character varying(500) DEFAULT ''::character varying,
-    ban_type character varying(20) DEFAULT 'manual'::character varying,
-    duration integer DEFAULT 0,
-    expires_at integer DEFAULT 0,
-    created_at integer DEFAULT 0
-);
-
-
---
--- Name: ul_ip_bans_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.ul_ip_bans_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: ul_ip_bans_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.ul_ip_bans_id_seq OWNED BY public.ul_ip_bans.id;
-
-
---
--- Name: ul_ip_reputation; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.ul_ip_reputation (
-    id integer NOT NULL,
-    ip character varying(50) NOT NULL,
-    score integer DEFAULT 0,
-    request_count integer DEFAULT 0,
-    last_seen integer DEFAULT 0,
-    country character varying(10) DEFAULT ''::character varying,
-    risk_level character varying(20) DEFAULT 'safe'::character varying,
-    updated_at integer DEFAULT 0
-);
-
-
---
--- Name: ul_ip_reputation_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.ul_ip_reputation_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: ul_ip_reputation_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.ul_ip_reputation_id_seq OWNED BY public.ul_ip_reputation.id;
-
-
---
 -- Name: ul_links; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1674,40 +1583,6 @@ ALTER SEQUENCE public.ul_rss_subscriptions_id_seq OWNED BY public.ul_rss_subscri
 
 
 --
--- Name: ul_security_events; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.ul_security_events (
-    id integer NOT NULL,
-    ip character varying(50) NOT NULL,
-    event_type character varying(30) NOT NULL,
-    detail text DEFAULT ''::text,
-    score_delta integer DEFAULT 0,
-    created_at integer DEFAULT 0
-);
-
-
---
--- Name: ul_security_events_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.ul_security_events_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: ul_security_events_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.ul_security_events_id_seq OWNED BY public.ul_security_events.id;
-
-
---
 -- Name: ul_users; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1919,20 +1794,6 @@ ALTER TABLE ONLY public.ul_goods ALTER COLUMN id SET DEFAULT nextval('public.ul_
 
 
 --
--- Name: ul_ip_bans id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.ul_ip_bans ALTER COLUMN id SET DEFAULT nextval('public.ul_ip_bans_id_seq'::regclass);
-
-
---
--- Name: ul_ip_reputation id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.ul_ip_reputation ALTER COLUMN id SET DEFAULT nextval('public.ul_ip_reputation_id_seq'::regclass);
-
-
---
 -- Name: ul_links id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -2028,13 +1889,6 @@ ALTER TABLE ONLY public.ul_posts ALTER COLUMN id SET DEFAULT nextval('public.ul_
 --
 
 ALTER TABLE ONLY public.ul_rss_subscriptions ALTER COLUMN id SET DEFAULT nextval('public.ul_rss_subscriptions_id_seq'::regclass);
-
-
---
--- Name: ul_security_events id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.ul_security_events ALTER COLUMN id SET DEFAULT nextval('public.ul_security_events_id_seq'::regclass);
 
 
 --
@@ -2228,38 +2082,6 @@ ALTER TABLE ONLY public.ul_goods
 
 
 --
--- Name: ul_ip_bans ul_ip_bans_ip_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.ul_ip_bans
-    ADD CONSTRAINT ul_ip_bans_ip_key UNIQUE (ip);
-
-
---
--- Name: ul_ip_bans ul_ip_bans_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.ul_ip_bans
-    ADD CONSTRAINT ul_ip_bans_pkey PRIMARY KEY (id);
-
-
---
--- Name: ul_ip_reputation ul_ip_reputation_ip_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.ul_ip_reputation
-    ADD CONSTRAINT ul_ip_reputation_ip_key UNIQUE (ip);
-
-
---
--- Name: ul_ip_reputation ul_ip_reputation_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.ul_ip_reputation
-    ADD CONSTRAINT ul_ip_reputation_pkey PRIMARY KEY (id);
-
-
---
 -- Name: ul_links ul_links_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2417,14 +2239,6 @@ ALTER TABLE ONLY public.ul_rss_subscriptions
 
 ALTER TABLE ONLY public.ul_rss_subscriptions
     ADD CONSTRAINT ul_rss_subscriptions_user_id_feed_url_key UNIQUE (user_id, feed_url);
-
-
---
--- Name: ul_security_events ul_security_events_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.ul_security_events
-    ADD CONSTRAINT ul_security_events_pkey PRIMARY KEY (id);
 
 
 --
@@ -2730,34 +2544,6 @@ CREATE INDEX idx_goods_category ON public.ul_goods USING btree (category);
 --
 
 CREATE INDEX idx_goods_created ON public.ul_goods USING btree (created_at DESC);
-
-
---
--- Name: idx_ip_bans_expires; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_ip_bans_expires ON public.ul_ip_bans USING btree (expires_at);
-
-
---
--- Name: idx_ip_bans_ip; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_ip_bans_ip ON public.ul_ip_bans USING btree (ip);
-
-
---
--- Name: idx_ip_rep_ip; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_ip_rep_ip ON public.ul_ip_reputation USING btree (ip);
-
-
---
--- Name: idx_ip_rep_score; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_ip_rep_score ON public.ul_ip_reputation USING btree (score DESC);
 
 
 --
@@ -3087,20 +2873,6 @@ CREATE INDEX idx_relationships_post ON public.ul_relationships USING btree (post
 --
 
 CREATE INDEX idx_rss_subs_user ON public.ul_rss_subscriptions USING btree (user_id);
-
-
---
--- Name: idx_sec_events_created; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_sec_events_created ON public.ul_security_events USING btree (created_at DESC);
-
-
---
--- Name: idx_sec_events_ip; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_sec_events_ip ON public.ul_security_events USING btree (ip);
 
 
 --

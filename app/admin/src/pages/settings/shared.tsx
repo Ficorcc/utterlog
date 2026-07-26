@@ -8,29 +8,18 @@
  */
 
 import { type ReactNode, useEffect, useState } from 'react';
-import { optionsApi } from '@/lib/api';
-import toast from 'react-hot-toast';
 import {
-  Button, Card, ConfirmDialog, Input, Textarea, Switch, Spinner,
-  Tabs, TabsList, TabsTrigger,
+  Button, Card, Input, Textarea, Switch,
 } from '@/components/ui/shadcn';
 import {
-  Globe, Search, Mail, Send, MessagesSquare, Database, Image as ImageIcon,
-  Key, CloudDownload, Info, Shield, ShieldCheck, Code, Bot, Tag, AtSign,
-  ArrowDownWideNarrow, FileImage, Hourglass, Expand, Bell, UserCog, Map,
-  GitBranch, MapPin, LocateFixed, Minimize2, ImageOff, CloudUpload, Bird,
-  ExternalLink, Loader2, Plug, Link as LinkIcon, Megaphone, Users, User,
-  HardDrive, Cloud, Brush, BookOpen, Film, Music, Zap, Images, Lightbulb,
-  RefreshCw, Save, CheckCircle2, XCircle, type LucideIcon,
+  Image as ImageIcon,
+  ImageOff,
+  Loader2, Plug,
+  CheckCircle2, XCircle, type LucideIcon,
 } from 'lucide-react';
 import api from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
-import { invalidateSiteOptions, loadSiteOptions } from '@/lib/site';
-import { setAdminTimeZone } from '@/lib/timezone';
-import { useForm } from 'react-hook-form';
-import SystemUpdatePanel from '@/components/SystemUpdatePanel';
-import { TimezoneCombobox } from '@/components/TimezoneCombobox';
 
 // Native <select> styled like the shadcn Input so it stays compatible
 // with react-hook-form register() (Base UI Select can't take register).
@@ -42,6 +31,44 @@ export const SELECT_CLS =
 // Local layout helpers — replicate the old FormC section/row look with shadcn
 // semantic tokens so both light/dark themes work out of the box.
 // ---------------------------------------------------------------------------
+
+/**
+ * 分组标题（图标 + 14px 标题 + 说明 + 右侧动作），画在卡片外面。
+ *
+ * 唯一一份：SettingsSection、Panel 和「自己渲染卡片」的 UpdateTab 都用它。
+ * 之前这三条路各写一套标题，同一页会同时出现「14px 带图标」和「13px 无
+ * 图标」两种分组标题。
+ */
+export function SectionHeading({
+  title, icon: Icon, description, inlineDescription, action,
+}: {
+  title?: string;
+  icon?: LucideIcon;
+  description?: string;
+  inlineDescription?: boolean;
+  action?: ReactNode;
+}) {
+  if (!title && !description && !action) return null;
+  return (
+    <div className="flex items-start justify-between gap-3 px-4 pb-2.5">
+      <div className="min-w-0">
+        <div className="flex min-w-0 items-center gap-2">
+          {Icon && <Icon className="size-4 shrink-0 text-primary" />}
+          {title && <h3 className="text-sm font-semibold tracking-wide text-foreground">{title}</h3>}
+          {inlineDescription && description && (
+            <p className="min-w-0 truncate text-xs text-muted-foreground">{description}</p>
+          )}
+        </div>
+        {!inlineDescription && description && (
+          <p className={cn('mt-1.5 text-xs leading-relaxed text-muted-foreground', Icon && 'pl-6')}>
+            {description}
+          </p>
+        )}
+      </div>
+      {action && <div className="shrink-0">{action}</div>}
+    </div>
+  );
+}
 
 export function SettingsSection({
   title, icon: Icon, description, inlineDescription, footerHint, children,
@@ -56,20 +83,12 @@ export function SettingsSection({
   return (
     <section className="mb-6">
       {title && (
-        <div className="px-4 pb-2.5">
-          <div className={cn('flex items-center gap-2', inlineDescription && 'min-w-0')}>
-            {Icon && <Icon className="size-3.5 shrink-0 text-primary" />}
-            <h3 className="text-sm font-semibold tracking-wide text-foreground">{title}</h3>
-            {inlineDescription && description && (
-              <p className="min-w-0 truncate text-xs text-muted-foreground">{description}</p>
-            )}
-          </div>
-          {!inlineDescription && description && (
-            <p className={cn('mt-1.5 text-xs leading-relaxed text-muted-foreground', Icon && 'pl-6')}>
-              {description}
-            </p>
-          )}
-        </div>
+        <SectionHeading
+          title={title}
+          icon={Icon}
+          description={description}
+          inlineDescription={inlineDescription}
+        />
       )}
       <Card className="overflow-hidden">{children}</Card>
       {footerHint && (
@@ -79,29 +98,36 @@ export function SettingsSection({
   );
 }
 
-// A simple padded Card panel for blocks that aren't built from labelled rows.
-export function Panel({ title, action, children, className }: {
+/**
+ * 内部「不是设置项列表」的卡片容器：进度条、卡片选择器、URL 构建器这类
+ * 块。设置项一行行排的用 SettingsSection，别用这个。
+ *
+ * 标题排版跟 SettingsSection 完全对齐（标题在卡片外、14px、可带图标和说明）
+ * —— 之前 Panel 的标题是 13px 且画在卡片里面，同一页会同时出现两种分组
+ * 标题的长相。
+ *
+ * description 做成槽位而不是让调用处自己写 <p>：原先四处各写一个负边距
+ * （-mt-3 / -mt-4 / mb-5）去抵消标题的下边距，值还各不相同。
+ */
+export function Panel({ title, icon: Icon, description, action, children, className }: {
   title?: string;
+  icon?: LucideIcon;
+  description?: string;
   action?: ReactNode;
   children: ReactNode;
   className?: string;
 }) {
   return (
-    <Card className={cn('mb-6 p-6', className)}>
-      {(title || action) && (
-        <div className={cn('flex items-center justify-between', action ? 'mb-2' : 'mb-5')}>
-          {title && <h3 className="text-xs-plus font-semibold tracking-wide text-foreground">{title}</h3>}
-          {action}
-        </div>
-      )}
-      {children}
-    </Card>
+    <section className="mb-6">
+      <SectionHeading title={title} icon={Icon} description={description} action={action} />
+      <Card className={cn('p-6', className)}>{children}</Card>
+    </section>
   );
 }
 
 export function Row({ label, hint, last, align = 'left', column, children }: {
   label?: string;
-  hint?: string;
+  hint?: ReactNode;
   last?: boolean;
   align?: 'left' | 'right';
   column?: boolean;
@@ -122,7 +148,7 @@ export function Row({ label, hint, last, align = 'left', column, children }: {
 
 export function InputRow({ label, hint, type = 'text', placeholder, register, last }: {
   label: string;
-  hint?: string;
+  hint?: ReactNode;
   type?: string;
   placeholder?: string;
   register?: any;
@@ -198,7 +224,7 @@ export function CredentialTest({ field, getValue }: { field: string; getValue: (
 
 export function SelectRow({ label, hint, register, options, last }: {
   label: string;
-  hint?: string;
+  hint?: ReactNode;
   register?: any;
   options: { value: string; label: string }[];
   last?: boolean;
@@ -214,7 +240,7 @@ export function SelectRow({ label, hint, register, options, last }: {
 
 export function TextareaRow({ label, hint, rows = 3, placeholder, register, last }: {
   label: string;
-  hint?: string;
+  hint?: ReactNode;
   rows?: number;
   placeholder?: string;
   register?: any;
@@ -229,7 +255,7 @@ export function TextareaRow({ label, hint, rows = 3, placeholder, register, last
 
 export function RadioRow({ label, hint, options, register, last }: {
   label: string;
-  hint?: string;
+  hint?: ReactNode;
   options: ReadonlyArray<{ value: string; label: string }>;
   register: any;
   last?: boolean;
@@ -248,9 +274,59 @@ export function RadioRow({ label, hint, options, register, last }: {
   );
 }
 
+/**
+ * 「N 选一」的卡片式 radio。
+ *
+ * ImageTab 显示效果 / MediaTab 存储方式 / EmailTab 服务商 / CommentTab
+ * 人机验证各抄了一份，卡片内边距 p-4 / px-2.5 py-3 / px-2 py-3、图标
+ * 22px / 20px 三档都不一样。这里定死一套：卡片 p-4、图标 20px、选中态
+ * 描边 + 5% 底色。
+ *
+ * 原生 radio 藏在 label 里而不是换成受控组件：register() 要拿到真实的
+ * input 才能把值收进 react-hook-form。
+ */
+export function RadioCardRow({ label, value, options, register, className }: {
+  label?: string;
+  value: string;
+  options: ReadonlyArray<{ value: string; label: string; desc?: string; icon?: LucideIcon }>;
+  register: any;
+  className?: string;
+}) {
+  return (
+    <div className={className}>
+      {label && <div className="mb-2 text-xs-plus font-medium text-foreground">{label}</div>}
+      <div className="flex gap-2.5">
+        {options.map((opt) => {
+          const Icon = opt.icon;
+          const active = value === opt.value;
+          return (
+            <label
+              key={opt.value}
+              className={cn(
+                'flex min-w-0 flex-1 cursor-pointer flex-col items-center gap-1 border p-4 text-center transition-colors',
+                // input 用 sr-only 而不是 hidden：display:none 的控件不参与 tab
+                // 顺序，键盘完全选不了；sr-only 只是视觉隐藏，焦点环画在卡片上。
+                'has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2',
+                active ? 'border-primary bg-primary/5' : 'border-border bg-transparent',
+              )}
+            >
+              <input type="radio" value={opt.value} {...register} className="sr-only" />
+              {Icon && <Icon className={cn('mb-1 size-5', active ? 'text-primary' : 'text-muted-foreground')} />}
+              <span className={cn('text-xs-plus font-semibold', active ? 'text-primary' : 'text-foreground')}>
+                {opt.label}
+              </span>
+              {opt.desc && <span className="text-2xs text-muted-foreground">{opt.desc}</span>}
+            </label>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function SwitchRow({ label, hint, name, watch, setValue, last }: {
   label: string;
-  hint?: string;
+  hint?: ReactNode;
   name: string;
   watch: any;
   setValue: any;

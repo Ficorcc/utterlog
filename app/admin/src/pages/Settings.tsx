@@ -1,20 +1,27 @@
 
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { optionsApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 import {
-  Button, Card, ConfirmDialog, Input, Textarea, Switch, Spinner,
+  Button, ConfirmDialog, Spinner,
   Tabs, TabsList, TabsTrigger,
 } from '@/components/ui/shadcn';
 import {
-  Globe, Search, Mail, Send, MessagesSquare, Database, Image as ImageIcon,
-  Key, CloudDownload, Info, Shield, ShieldCheck, Code, Bot, Tag, AtSign,
-  ArrowDownWideNarrow, FileImage, Hourglass, Expand, Bell, UserCog, Map,
-  GitBranch, MapPin, LocateFixed, Minimize2, ImageOff, CloudUpload, Bird,
-  ExternalLink, Loader2, Plug, Link as LinkIcon, Megaphone, Users, User,
-  HardDrive, Cloud, Brush, BookOpen, Film, Music, Zap, Images, Lightbulb,
-  RefreshCw, Save, CheckCircle2, XCircle, type LucideIcon,
+  Loader2,
+  Save,
 } from 'lucide-react';
+// tab 头的图标走动画版：hover 整个 tab 时由 AnimatedIcon 命令式驱动。
+import { AnimatedIcon } from '@/components/ui/animated-icon';
+import type { AnimatedIcon as AnimatedIconType } from '@/components/ui/animated-icon';
+import { GlobeIcon } from '@/components/ui/globe';
+import { SearchIcon } from '@/components/ui/search';
+import { MailIcon } from '@/components/ui/mail';
+import { SendIcon } from '@/components/ui/send';
+import { MessagesSquareIcon } from '@/components/ui/messages-square';
+import { DatabaseIcon } from '@/components/ui/database';
+import { ImageIcon as AnimatedImageIcon } from '@/components/ui/image';
+import { KeyIcon } from '@/components/ui/key';
+import { CloudDownloadIcon } from '@/components/ui/cloud-download';
 import api from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
@@ -98,29 +105,18 @@ const TAB_FIELDS: Record<string, string[]> = {
     'github_access_token',
     'google_maps_api_key', 'amap_api_key', 'tencent_maps_api_key',
     'tinypng_api_key',
+    'ip_geo_provider',
   ],
 };
 
 
-import {
-  AUTO_USAGE_FIELDS,
-  BrandingPreview,
-  CredentialTest,
-  InputRow,
-  Panel,
-  RadioRow,
-  Row,
-  SELECT_CLS,
-  SelectRow,
-  SettingsSection,
-  SwitchRow,
-  TextareaRow,
-} from './settings/shared';
 export default function SettingsPage() {
   const { t, reload: reloadI18n } = useI18n();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<string>(initialTabFromHash);
+  // tab 头图标的动画由这个驱动：热区是整个 tab，不是那 16px 图标本身。
+  const [hoveredTab, setHoveredTab] = useState<string | null>(null);
   const [locales, setLocales] = useState<{ locale: string; name: string; native_name: string; source?: string }[]>([
     { locale: 'zh-CN', name: 'Chinese (Simplified)', native_name: '简体中文' },
     { locale: 'en-US', name: 'English', native_name: 'English' },
@@ -297,6 +293,7 @@ export default function SettingsPage() {
         amap_api_key: s.amap_api_key || '',
         tencent_maps_api_key: s.tencent_maps_api_key || '',
         tinypng_api_key: s.tinypng_api_key || '',
+        ip_geo_provider: s.ip_geo_provider || 'ipx',
         // S3/R2
         s3_endpoint: s.s3_endpoint || '',
         s3_region: s.s3_region || '',
@@ -317,9 +314,7 @@ export default function SettingsPage() {
         utterlog_share_posts: s.utterlog_share_posts ?? true,
         utterlog_share_moments: s.utterlog_share_moments ?? false,
         utterlog_share_comments: s.utterlog_share_comments ?? false,
-        // 安全
-        require_login: s.require_login ?? false,
-        rate_limit: s.rate_limit || 60,
+        // 安全（require_login / rate_limit 随安全中心一并下线，中间件已移除）
         two_factor_enabled: s.two_factor_enabled ?? false,
         two_factor_code: '',
       });
@@ -457,16 +452,16 @@ export default function SettingsPage() {
 
   // useMemo：这个字面量只随语言变化，但组件每次重渲染（切 tab、输入任何
   // 一个字段）都会重建它。
-  const tabs: { id: string; label: string; icon: LucideIcon }[] = useMemo(() => [
-    { id: 'general', label: t('admin.settings.tabs.general', '常规设置'), icon: Globe },
-    { id: 'seo', label: t('admin.settings.tabs.seo', 'SEO 与 AI'), icon: Search },
-    { id: 'email', label: t('admin.settings.tabs.email', '邮件设置'), icon: Mail },
-    { id: 'telegram', label: 'Telegram', icon: Send },
-    { id: 'comment', label: t('admin.settings.tabs.comment', '评论设置'), icon: MessagesSquare },
-    { id: 'media', label: t('admin.settings.tabs.media', '存储设置'), icon: Database },
-    { id: 'image', label: t('admin.settings.tabs.image', '图片处理'), icon: ImageIcon },
-    { id: 'services', label: t('admin.settings.tabs.services', '第三方服务'), icon: Key },
-    { id: 'update', label: t('admin.settings.tabs.update', '系统更新'), icon: CloudDownload },
+  const tabs: { id: string; label: string; icon: AnimatedIconType }[] = useMemo(() => [
+    { id: 'general', label: t('admin.settings.tabs.general', '常规设置'), icon: GlobeIcon },
+    { id: 'seo', label: t('admin.settings.tabs.seo', 'SEO 与 AI'), icon: SearchIcon },
+    { id: 'email', label: t('admin.settings.tabs.email', '邮件设置'), icon: MailIcon },
+    { id: 'telegram', label: 'Telegram', icon: SendIcon },
+    { id: 'comment', label: t('admin.settings.tabs.comment', '评论设置'), icon: MessagesSquareIcon },
+    { id: 'media', label: t('admin.settings.tabs.media', '存储设置'), icon: DatabaseIcon },
+    { id: 'image', label: t('admin.settings.tabs.image', '图片处理'), icon: AnimatedImageIcon },
+    { id: 'services', label: t('admin.settings.tabs.services', '第三方服务'), icon: KeyIcon },
+    { id: 'update', label: t('admin.settings.tabs.update', '系统更新'), icon: CloudDownloadIcon },
   ], [t]);
 
   if (loading) {
@@ -483,12 +478,13 @@ export default function SettingsPage() {
             表单顶下去半屏。 */}
         <TabsList className="flex h-auto w-full flex-nowrap justify-start gap-0.5 overflow-x-auto rounded-none border-b border-border bg-transparent p-0 text-muted-foreground [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {tabs.map((tab) => {
-            const Icon = tab.icon;
             const selected = activeTab === tab.id;
             return (
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
+                onMouseEnter={() => setHoveredTab(tab.id)}
+                onMouseLeave={() => setHoveredTab(null)}
                 className={cn(
                   'group relative h-11 shrink-0 gap-1.5 rounded-t-md border-b-2 border-transparent px-3.5',
                   'text-xs-plus font-normal transition-colors',
@@ -497,7 +493,12 @@ export default function SettingsPage() {
                     : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
                 )}
               >
-                <Icon className={cn('size-4 transition-colors', selected ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground')} />
+                <AnimatedIcon
+                  icon={tab.icon}
+                  hovered={hoveredTab === tab.id}
+                  size={16}
+                  className={cn('flex size-4 shrink-0 items-center justify-center transition-colors', selected ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground')}
+                />
                 <span>{tab.label}</span>
               </TabsTrigger>
             );

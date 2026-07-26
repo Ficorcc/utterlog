@@ -105,7 +105,6 @@ import { Route as ApiV1SocialActionRouteImport } from './routes/api/v1/social/$a
 import { Route as ApiV1SetupTestDbRouteImport } from './routes/api/v1/setup/test-db'
 import { Route as ApiV1SetupStatusRouteImport } from './routes/api/v1/setup/status'
 import { Route as ApiV1SetupSaveRouteImport } from './routes/api/v1/setup/save'
-import { Route as ApiV1SecurityActionRouteImport } from './routes/api/v1/security/$action'
 import { Route as ApiV1SearchRebuildRouteImport } from './routes/api/v1/search/rebuild'
 import { Route as ApiV1RssParseRouteImport } from './routes/api/v1/rss/parse'
 import { Route as ApiV1ProfileSendCodeRouteImport } from './routes/api/v1/profile/send-code'
@@ -697,11 +696,6 @@ const ApiV1SetupStatusRoute = ApiV1SetupStatusRouteImport.update({
 const ApiV1SetupSaveRoute = ApiV1SetupSaveRouteImport.update({
   id: '/api/v1/setup/save',
   path: '/api/v1/setup/save',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1SecurityActionRoute = ApiV1SecurityActionRouteImport.update({
-  id: '/api/v1/security/$action',
-  path: '/api/v1/security/$action',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1SearchRebuildRoute = ApiV1SearchRebuildRouteImport.update({
@@ -1416,7 +1410,6 @@ export interface FileRoutesByFullPath {
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
   '/api/v1/rss/parse': typeof ApiV1RssParseRoute
   '/api/v1/search/rebuild': typeof ApiV1SearchRebuildRoute
-  '/api/v1/security/$action': typeof ApiV1SecurityActionRoute
   '/api/v1/setup/save': typeof ApiV1SetupSaveRoute
   '/api/v1/setup/status': typeof ApiV1SetupStatusRoute
   '/api/v1/setup/test-db': typeof ApiV1SetupTestDbRoute
@@ -1625,7 +1618,6 @@ export interface FileRoutesByTo {
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
   '/api/v1/rss/parse': typeof ApiV1RssParseRoute
   '/api/v1/search/rebuild': typeof ApiV1SearchRebuildRoute
-  '/api/v1/security/$action': typeof ApiV1SecurityActionRoute
   '/api/v1/setup/save': typeof ApiV1SetupSaveRoute
   '/api/v1/setup/status': typeof ApiV1SetupStatusRoute
   '/api/v1/setup/test-db': typeof ApiV1SetupTestDbRoute
@@ -1835,7 +1827,6 @@ export interface FileRoutesById {
   '/api/v1/profile/send-code': typeof ApiV1ProfileSendCodeRoute
   '/api/v1/rss/parse': typeof ApiV1RssParseRoute
   '/api/v1/search/rebuild': typeof ApiV1SearchRebuildRoute
-  '/api/v1/security/$action': typeof ApiV1SecurityActionRoute
   '/api/v1/setup/save': typeof ApiV1SetupSaveRoute
   '/api/v1/setup/status': typeof ApiV1SetupStatusRoute
   '/api/v1/setup/test-db': typeof ApiV1SetupTestDbRoute
@@ -2046,7 +2037,6 @@ export interface FileRouteTypes {
     | '/api/v1/profile/send-code'
     | '/api/v1/rss/parse'
     | '/api/v1/search/rebuild'
-    | '/api/v1/security/$action'
     | '/api/v1/setup/save'
     | '/api/v1/setup/status'
     | '/api/v1/setup/test-db'
@@ -2255,7 +2245,6 @@ export interface FileRouteTypes {
     | '/api/v1/profile/send-code'
     | '/api/v1/rss/parse'
     | '/api/v1/search/rebuild'
-    | '/api/v1/security/$action'
     | '/api/v1/setup/save'
     | '/api/v1/setup/status'
     | '/api/v1/setup/test-db'
@@ -2464,7 +2453,6 @@ export interface FileRouteTypes {
     | '/api/v1/profile/send-code'
     | '/api/v1/rss/parse'
     | '/api/v1/search/rebuild'
-    | '/api/v1/security/$action'
     | '/api/v1/setup/save'
     | '/api/v1/setup/status'
     | '/api/v1/setup/test-db'
@@ -2663,7 +2651,6 @@ export interface RootRouteChildren {
   ApiV1PluginsUploadRoute: typeof ApiV1PluginsUploadRoute
   ApiV1ProfileSendCodeRoute: typeof ApiV1ProfileSendCodeRoute
   ApiV1RssParseRoute: typeof ApiV1RssParseRoute
-  ApiV1SecurityActionRoute: typeof ApiV1SecurityActionRoute
   ApiV1SetupSaveRoute: typeof ApiV1SetupSaveRoute
   ApiV1SetupStatusRoute: typeof ApiV1SetupStatusRoute
   ApiV1SetupTestDbRoute: typeof ApiV1SetupTestDbRoute
@@ -3394,13 +3381,6 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/setup/save'
       fullPath: '/api/v1/setup/save'
       preLoaderRoute: typeof ApiV1SetupSaveRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/security/$action': {
-      id: '/api/v1/security/$action'
-      path: '/api/v1/security/$action'
-      fullPath: '/api/v1/security/$action'
-      preLoaderRoute: typeof ApiV1SecurityActionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/search/rebuild': {
@@ -4583,7 +4563,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1PluginsUploadRoute: ApiV1PluginsUploadRoute,
   ApiV1ProfileSendCodeRoute: ApiV1ProfileSendCodeRoute,
   ApiV1RssParseRoute: ApiV1RssParseRoute,
-  ApiV1SecurityActionRoute: ApiV1SecurityActionRoute,
   ApiV1SetupSaveRoute: ApiV1SetupSaveRoute,
   ApiV1SetupStatusRoute: ApiV1SetupStatusRoute,
   ApiV1SetupTestDbRoute: ApiV1SetupTestDbRoute,

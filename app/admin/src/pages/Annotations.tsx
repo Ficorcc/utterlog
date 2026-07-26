@@ -4,11 +4,12 @@ import { useNavigate } from '@/lib/router';
 import toast from 'react-hot-toast';
 import { annotationsApi } from '@/lib/api';
 import {
-  Button, Card, Pagination, ConfirmDialog,
+  Button, Callout, Card, Checkbox, EmptyState, Pagination, ConfirmDialog,
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
 } from '@/components/ui/shadcn';
-import { RowAction } from '@/components/ui/row-actions';
+import { RowAction, RowActionGroup } from '@/components/ui/row-actions';
 import { usePageLoading } from '@/layouts/DashboardLayout';
+import { useI18n } from '@/lib/i18n';
 import { formatDate } from '@/lib/utils';
 
 interface AdminAnnotation {
@@ -29,6 +30,7 @@ interface AdminAnnotation {
 const defaultAvatar = 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=64';
 
 export default function AnnotationsPage() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [items, setItems] = useState<AdminAnnotation[]>([]);
   const [total, setTotal] = useState(0);
@@ -47,12 +49,12 @@ export default function AnnotationsPage() {
 
   // Same tab structure as Comments page for consistency
   const statusTabs = [
-    { key: '', label: '全部', path: '/comments' },
-    { key: 'pending', label: '待审核', path: '/comments/pending' },
-    { key: 'mine', label: '我的', path: '/comments/mine' },
-    { key: 'spam', label: '垃圾', path: '/comments/spam' },
-    { key: 'trash', label: '回收站', path: '/comments/trash' },
-    { key: 'annotations', label: '段落点评', path: '/comments/annotations' },
+    { key: '', label: t('admin.common.all', '全部'), path: '/comments' },
+    { key: 'pending', label: t('admin.annotations.pending', '待审核'), path: '/comments/pending' },
+    { key: 'mine', label: t('admin.annotations.mine', '我的'), path: '/comments/mine' },
+    { key: 'spam', label: t('admin.annotations.spam', '垃圾'), path: '/comments/spam' },
+    { key: 'trash', label: t('admin.annotations.trash', '回收站'), path: '/comments/trash' },
+    { key: 'annotations', label: t('admin.annotations.title', '段落点评'), path: '/comments/annotations' },
   ];
 
   const fetchList = async () => {
@@ -64,7 +66,7 @@ export default function AnnotationsPage() {
       const meta = r.data?.meta || r.meta;
       setTotal(meta?.total || 0);
     } catch {
-      toast.error('加载失败');
+      toast.error(t('admin.common.loadFailed', '加载失败'));
     } finally {
       setLoading(false);
     }
@@ -88,7 +90,7 @@ export default function AnnotationsPage() {
     setDeleteId(null);
     try {
       await annotationsApi.remove(id);
-      toast.success('已删除');
+      toast.success(t('admin.common.deleted', '已删除'));
       fetchList();
     } catch { toast.error('删除失败'); }
   };
@@ -122,131 +124,119 @@ export default function AnnotationsPage() {
           ))}
         </div>
         {selectedIds.size > 0 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setBatchDeleteOpen(true)}
-            className="border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive"
-          >
-            <Trash2 className="size-4" />
+          <Button variant="destructive" size="sm" onClick={() => setBatchDeleteOpen(true)}>
+            <Trash2 />
             删除所选 ({selectedIds.size})
           </Button>
         )}
       </div>
 
       {/* Info banner about storage */}
-      <div className="mb-4 flex items-start gap-2 rounded-md border border-border bg-muted px-3.5 py-2.5 text-xs leading-relaxed text-muted-foreground">
-        <Info className="mt-0.5 size-4 shrink-0" />
-        <span>
-          段落点评存储在 <code className="rounded bg-card px-1.5 py-px text-2xs">ul_annotations</code> 表
-          （post_id + block_id 定位到具体段落，支持 Utterlog 联盟身份和本地 admin 两种发表来源）。
-          此处为只读查看和删除；点评本身不需审核，需要身份验证才能发表。
-        </span>
-      </div>
+      <Callout tone="info" icon={<Info />} className="mb-4">
+        {t('admin.annotations.storedIn', '段落点评存储在')} <code className="bg-card px-1.5 py-px text-2xs">ul_annotations</code> 表
+        （post_id + block_id 定位到具体段落，支持 Utterlog 联盟身份和本地 admin 两种发表来源）。
+        此处为只读查看和删除；点评本身不需审核，需要身份验证才能发表。
+      </Callout>
 
       {/* Table */}
       <Card className="overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-50">
-                <label className="flex cursor-pointer items-center gap-1.5">
-                  <input
-                    type="checkbox"
-                    checked={items.length > 0 && selectedIds.size === items.length}
-                    onChange={toggleSelectAll}
-                    className="size-4 cursor-pointer accent-primary"
-                  />
-                  <span>作者</span>
-                  {selectedIds.size > 0 && (
-                    <span className="text-2xs font-medium text-primary">已选 {selectedIds.size}</span>
-                  )}
-                </label>
-              </TableHead>
-              <TableHead>点评内容</TableHead>
-              <TableHead className="w-55">所在文章</TableHead>
-              <TableHead className="w-35">时间</TableHead>
-              <TableHead className="w-25" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              // 加载态统一由 header 的 spinner 表示（见 usePageLoading）
-              null
-            ) : items.length === 0 ? (
+        {!loading && items.length === 0 ? (
+          <EmptyState title="暂无段落点评" />
+        ) : (
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={5} className="py-10 text-center text-sm text-muted-foreground">
-                  暂无段落点评
-                </TableCell>
+                <TableHead className="w-50">
+                  <label className="flex cursor-pointer items-center gap-1.5">
+                    <Checkbox
+                      checked={items.length > 0 && selectedIds.size === items.length}
+                      onChange={toggleSelectAll}
+                    />
+                    <span>{t('admin.common.author', '作者')}</span>
+                    {selectedIds.size > 0 && (
+                      <span className="text-2xs font-medium text-primary">已选 {selectedIds.size}</span>
+                    )}
+                  </label>
+                </TableHead>
+                <TableHead>{t('admin.annotations.content', '点评内容')}</TableHead>
+                <TableHead className="w-55">{t('admin.annotations.inPost', '所在文章')}</TableHead>
+                <TableHead className="w-35">{t('admin.common.time', '时间')}</TableHead>
+                <TableHead className="w-22.5 text-right">{t('admin.common.actions', '操作')}</TableHead>
               </TableRow>
-            ) : (
-              items.map((row: AdminAnnotation) => (
-                <TableRow key={row.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.has(row.id)}
-                        onChange={() => toggleSelect(row.id)}
-                        className="size-4 shrink-0 cursor-pointer accent-primary"
-                      />
-                      <img
-                        src={row.user_avatar || defaultAvatar}
-                        alt=""
-                        className="size-8 shrink-0 bg-muted object-cover"
-                        style={{ clipPath: 'url(#squircle)' }}
-                        onError={e => { (e.target as HTMLImageElement).src = defaultAvatar; }}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate text-xs-plus font-medium text-foreground">
-                          {row.user_name}
-                          {row.utterlog_id && (
-                            <Globe className="ml-1.5 inline-block size-2.5 text-primary" aria-label="Utterlog Network" />
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                // 加载态统一由 header 的 spinner 表示（见 usePageLoading）
+                null
+              ) : (
+                items.map((row: AdminAnnotation) => (
+                  <TableRow key={row.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          checked={selectedIds.has(row.id)}
+                          onChange={() => toggleSelect(row.id)}
+                        />
+                        <img
+                          src={row.user_avatar || defaultAvatar}
+                          alt=""
+                          className="size-8 shrink-0 bg-muted object-cover"
+                          style={{ clipPath: 'url(#squircle)' }}
+                          onError={e => { (e.target as HTMLImageElement).src = defaultAvatar; }}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-xs-plus font-medium text-foreground">
+                            {row.user_name}
+                            {row.utterlog_id && (
+                              <Globe className="ml-1.5 inline-block size-2.5 text-primary" aria-label="Utterlog Network" />
+                            )}
+                          </div>
+                          {row.user_site && (
+                            <div className="truncate text-2xs text-muted-foreground">
+                              <a href={row.user_site} target="_blank" rel="noopener noreferrer" className="text-inherit">
+                                {row.user_site.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                              </a>
+                            </div>
                           )}
                         </div>
-                        {row.user_site && (
-                          <div className="truncate text-2xs text-muted-foreground">
-                            <a href={row.user_site} target="_blank" rel="noopener noreferrer" className="text-inherit">
-                              {row.user_site.replace(/^https?:\/\//, '').replace(/\/$/, '')}
-                            </a>
-                          </div>
-                        )}
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <p className="m-0 break-words text-xs-plus leading-relaxed text-foreground">{row.content}</p>
-                    <div className="mt-1 flex items-center gap-1 text-2xs text-muted-foreground">
-                      <Anchor className="size-3.5" />
-                      段落 <code className="bg-muted px-1.5 py-px text-3xs">{row.block_id}</code>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <a
-                      href={`/posts/${row.post_slug}#${row.block_id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block truncate text-xs-plus text-primary no-underline"
-                    >
-                      {row.post_title || `#${row.post_id}`}
-                    </a>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-xs text-muted-foreground">{formatDate(row.created_at)}</span>
-                  </TableCell>
-                  <TableCell>
-                    <RowAction
-                      icon={Trash2}
-                      tone="danger"
-                      title="删除"
-                      onClick={() => setDeleteId(row.id)}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                    </TableCell>
+                    <TableCell>
+                      <p className="m-0 break-words text-xs-plus leading-relaxed text-foreground">{row.content}</p>
+                      <div className="mt-1 flex items-center gap-1 text-2xs text-muted-foreground">
+                        <Anchor className="size-3.5" />
+                        {t('admin.common.paragraph', '段落')} <code className="bg-muted px-1.5 py-px text-3xs">{row.block_id}</code>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <a
+                        href={`/posts/${row.post_slug}#${row.block_id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block truncate text-xs-plus text-primary no-underline"
+                      >
+                        {row.post_title || `#${row.post_id}`}
+                      </a>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-xs text-muted-foreground">{formatDate(row.created_at)}</span>
+                    </TableCell>
+                    <TableCell>
+                      <RowActionGroup>
+                        <RowAction
+                          icon={Trash2}
+                          tone="danger"
+                          title="删除"
+                          onClick={() => setDeleteId(row.id)}
+                        />
+                      </RowActionGroup>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        )}
       </Card>
 
       {/* Pagination */}

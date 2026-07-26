@@ -9,7 +9,7 @@ import {
   Tags, ScrollText, Pencil, Save, Loader2, type LucideIcon,
 } from 'lucide-react';
 import {
-  Button, Input, Label, Textarea, Badge, Card, LoadingState,
+  Button, Input, Label, Textarea, Badge, Callout, Card, LoadingState,
   Switch, EmptyState, ConfirmDialog,
   Dialog, DialogContent, DialogHeader, DialogTitle,
   Tabs, TabsList, TabsTrigger, TabsContent,
@@ -68,7 +68,7 @@ function Section({
     <div className="mb-6">
       <div className="mb-3">
         <div className="flex items-center gap-2">
-          {Icon && <Icon className="size-4.5 text-muted-foreground" />}
+          {Icon && <Icon className="size-4 text-muted-foreground" />}
           <h3 className="text-base font-semibold text-foreground">{title}</h3>
         </div>
         {description && (
@@ -87,7 +87,7 @@ function Section({
 function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (
     <div>
-      <Label className="mb-1.5 block">{label}</Label>
+      <Label className="mb-1.5 block text-xs-plus text-foreground">{label}</Label>
       {children}
       {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
     </div>
@@ -131,7 +131,7 @@ function ToggleRow({
   return (
     <div className="flex items-start justify-between gap-4">
       <div className="min-w-0">
-        <Label className="block">{label}</Label>
+        <Label className="block text-xs-plus text-foreground">{label}</Label>
         {hint && <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{hint}</p>}
       </div>
       <Switch checked={checked} onCheckedChange={onCheckedChange} className="mt-0.5 shrink-0" />
@@ -506,7 +506,7 @@ export default function AiSettingsPage() {
         <TabsContent value="提供商">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Server className="size-4.5 text-muted-foreground" />
+              <Server className="size-4 text-muted-foreground" />
               <h2 className="text-base font-semibold text-foreground">{t('admin.aiSettings.providers.title', 'AI 提供商')}</h2>
             </div>
             <Button onClick={() => setEditing({ ...defaultProvider })}>
@@ -549,7 +549,7 @@ export default function AiSettingsPage() {
                   {!editing.id && Object.keys(presets).length > 0 && (
                     <>
                       <div>
-                        <Label className="mb-2 block">{t('admin.aiSettings.providers.presets', '快速预设')}</Label>
+                        <Label className="mb-2 block text-xs-plus text-foreground">{t('admin.aiSettings.providers.presets', '快速预设')}</Label>
                         <div className="flex flex-wrap gap-1.5">
                           {Object.entries(presets).map(([key, p]: [string, any]) => (
                             <Button key={key} variant="secondary" size="sm" onClick={() => applyPreset(key)}>{p.name}</Button>
@@ -589,7 +589,7 @@ export default function AiSettingsPage() {
                   </Field>
                   <div className="grid grid-cols-2 gap-3.5">
                     <div>
-                      <Label className="mb-1.5 block">{t('admin.aiSettings.providers.temperature', '温度 ({value})', { value: editing.temperature })}</Label>
+                      <Label className="mb-1.5 block text-xs-plus text-foreground">{t('admin.aiSettings.providers.temperature', '温度 ({value})', { value: editing.temperature })}</Label>
                       <input type="range" min="0" max="2" step="0.1" value={editing.temperature} onChange={e => setEditing({ ...editing, temperature: parseFloat(e.target.value) })} className="h-2 w-full cursor-pointer accent-primary" />
                     </div>
                     <Field label={t('admin.aiSettings.providers.timeout', '超时（秒）')}>
@@ -674,11 +674,11 @@ export default function AiSettingsPage() {
           <Section
             icon={MessageSquare}
             title={t('admin.aiSettings.chat.title', '前端聊天气泡')}
-            footer={<p className="mx-4 mt-2 text-2xs leading-relaxed text-muted-foreground">{t('admin.aiSettings.chat.footer', '聊天气泡 = 全站浮动 AI 助手（首页 / 列表 / 归档等非文章页右下角圆形按钮）。文章详情页 AI 伴读在「文章设置」中单独控制。')}</p>}
+            footer={<p className="mx-4 mt-2 text-2xs leading-relaxed text-muted-foreground">{t('admin.aiSettings.chat.footer', '聊天气泡 = 全站浮动 AI 助手（首页 / 列表 / 归档等非文章页右下角圆形按钮）。文章详情页不显示气泡，让位给文章自带的「AI 陪读」（陪读有自己的对话上下文，是独立功能，不受这个开关控制）。')}</p>}
           >
             <ToggleRow
               label={t('admin.aiSettings.chat.enableBubble', '启用聊天气泡')}
-              hint={t('admin.aiSettings.chat.enableBubbleHint', '关闭后所有非文章页右下角的圆形 AI 助手按钮完全隐藏；不影响文章详情页的「AI 伴读」开关')}
+              hint={t('admin.aiSettings.chat.enableBubbleHint', '关闭后所有非文章页右下角的圆形 AI 助手按钮完全隐藏；不影响文章详情页的「AI 陪读」')}
               checked={config.ai_chat_enabled === 'true'}
               onCheckedChange={v => updateConfig('ai_chat_enabled', String(v))}
             />
@@ -699,7 +699,7 @@ export default function AiSettingsPage() {
               triggerClassName="sm:max-w-60"
             />
             <div>
-              <Label className="mb-1.5 block">
+              <Label className="mb-1.5 block text-xs-plus text-foreground">
                 {t('admin.aiSettings.chat.temperature', '对话温度')} <span className="text-xs font-normal text-muted-foreground">({config.ai_chat_temp})</span>
               </Label>
               <input type="range" min={0} max={2} step={0.1} value={config.ai_chat_temp} onChange={e => updateConfig('ai_chat_temp', e.target.value)} className="h-2 w-full cursor-pointer accent-primary" />
@@ -712,50 +712,48 @@ export default function AiSettingsPage() {
         {/* ── 文章设置 ── */}
         <TabsContent value="文章设置">
           {/* 功能开关 */}
-          <div className="mb-6">
-            <Card className="p-5">
-              <div className="flex items-center gap-2">
-                <Zap className="size-4.5 text-muted-foreground" />
-                <h3 className="text-base font-semibold text-foreground">{t('admin.aiSettings.posts.automationTitle', 'AI 自动化功能')}</h3>
-              </div>
-              <p className="mt-1.5 text-xs text-muted-foreground">{t('admin.aiSettings.posts.automationHint', '开启后，发布或更新文章时 AI 将自动执行对应任务')}</p>
-              <div className="mt-4 flex gap-2.5">
-                {[
-                  { key: 'ai_summary_auto', icon: AlignLeft, label: t('admin.aiSettings.posts.autoSummary', 'AI 摘要'), desc: t('admin.aiSettings.posts.autoSummaryDesc', '自动生成摘要') },
-                  { key: 'ai_image_auto', icon: ImageIcon, label: t('admin.aiSettings.posts.autoImage', 'AI 特色图'), desc: t('admin.aiSettings.posts.autoImageDesc', '自动生成封面') },
-                  { key: 'ai_slug_auto', icon: LinkIcon, label: 'AI Slug', desc: t('admin.aiSettings.posts.autoSlugDesc', 'URL 别名') },
-                  { key: 'ai_keywords_auto', icon: Tags, label: t('admin.aiSettings.posts.autoKeywords', 'AI 关键词'), desc: t('admin.aiSettings.posts.autoKeywordsDesc', '提取关键词') },
-                  { key: 'ai_polish_auto', icon: Sparkles, label: t('admin.aiSettings.posts.autoPolish', 'AI 润色'), desc: t('admin.aiSettings.posts.autoPolishDesc', '润色优化排版') },
-                ].map(item => {
-                  const active = config[item.key] === 'true';
-                  const Icon = item.icon;
-                  return (
-                    <label
-                      key={item.key}
-                      className={cn(
-                        'flex flex-1 cursor-pointer flex-col items-center gap-2 rounded-md border p-4 text-center transition-colors',
-                        active ? 'border-primary bg-primary/5' : 'border-border',
-                      )}
-                    >
-                      <input type="checkbox" checked={active} onChange={e => updateConfig(item.key, String(e.target.checked))} className="hidden" />
-                      <Icon className={cn('size-6', active ? 'text-primary' : 'text-muted-foreground')} />
-                      <div className={cn('text-xs-plus font-semibold', active ? 'text-primary' : 'text-foreground')}>{item.label}</div>
-                      <div className="text-2xs text-muted-foreground">{item.desc}</div>
-                    </label>
-                  );
-                })}
-              </div>
-            </Card>
-          </div>
+          <Section
+            icon={Zap}
+            title={t('admin.aiSettings.posts.automationTitle', 'AI 自动化功能')}
+            description={t('admin.aiSettings.posts.automationHint', '开启后，发布或更新文章时 AI 将自动执行对应任务')}
+          >
+            <div className="flex gap-2.5">
+              {[
+                { key: 'ai_summary_auto', icon: AlignLeft, label: t('admin.aiSettings.posts.autoSummary', 'AI 摘要'), desc: t('admin.aiSettings.posts.autoSummaryDesc', '自动生成摘要') },
+                { key: 'ai_image_auto', icon: ImageIcon, label: t('admin.aiSettings.posts.autoImage', 'AI 特色图'), desc: t('admin.aiSettings.posts.autoImageDesc', '自动生成封面') },
+                { key: 'ai_slug_auto', icon: LinkIcon, label: 'AI Slug', desc: t('admin.aiSettings.posts.autoSlugDesc', 'URL 别名') },
+                { key: 'ai_keywords_auto', icon: Tags, label: t('admin.aiSettings.posts.autoKeywords', 'AI 关键词'), desc: t('admin.aiSettings.posts.autoKeywordsDesc', '提取关键词') },
+                { key: 'ai_polish_auto', icon: Sparkles, label: t('admin.aiSettings.posts.autoPolish', 'AI 润色'), desc: t('admin.aiSettings.posts.autoPolishDesc', '润色优化排版') },
+              ].map(item => {
+                const active = config[item.key] === 'true';
+                const Icon = item.icon;
+                return (
+                  <label
+                    key={item.key}
+                    className={cn(
+                      'flex flex-1 cursor-pointer flex-col items-center gap-1 border p-4 text-center transition-colors',
+                      'has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2',
+                      active ? 'border-primary bg-primary/5' : 'border-border',
+                    )}
+                  >
+                    <input type="checkbox" checked={active} onChange={e => updateConfig(item.key, String(e.target.checked))} className="sr-only" />
+                    <Icon className={cn('mb-1 size-5', active ? 'text-primary' : 'text-muted-foreground')} />
+                    <div className={cn('text-xs-plus font-semibold', active ? 'text-primary' : 'text-foreground')}>{item.label}</div>
+                    <div className="text-2xs text-muted-foreground">{item.desc}</div>
+                  </label>
+                );
+              })}
+            </div>
+          </Section>
 
           <Section
             icon={BookOpen}
-            title={t('admin.aiSettings.posts.readerTitle', '文章页 AI 伴读')}
+            title={t('admin.aiSettings.posts.readerTitle', '文章页 AI 陪读')}
             description={t('admin.aiSettings.posts.readerDescription', '控制文章详情页的「边读边聊」卡片和推荐问题。关闭后不会影响非文章页的全站聊天气泡。')}
           >
             <ToggleRow
-              label={t('admin.aiSettings.posts.enableReader', '启用文章页 AI 伴读')}
-              hint={t('admin.aiSettings.posts.enableReaderHint', '关闭后文章详情页不显示 AI 伴读，也不会加载推荐问题或发送伴读请求')}
+              label={t('admin.aiSettings.posts.enableReader', '启用文章页 AI 陪读')}
+              hint={t('admin.aiSettings.posts.enableReaderHint', '关闭后文章详情页不显示 AI 陪读，也不会加载推荐问题或发送陪读请求')}
               checked={config.ai_reader_chat_enabled !== 'false'}
               onCheckedChange={v => updateConfig('ai_reader_chat_enabled', String(v))}
             />
@@ -863,7 +861,7 @@ export default function AiSettingsPage() {
               return (
                 <div key={row.key}>
                   <div className="mb-1.5 flex items-center justify-between gap-2">
-                    <Label>{row.label}</Label>
+                    <Label className="text-xs-plus text-foreground">{row.label}</Label>
                     <button
                       type="button"
                       onClick={() => resetPrompt(optKey, row.key)}
@@ -1013,7 +1011,7 @@ export default function AiSettingsPage() {
           <Card className="mb-4 p-5">
             <div className="flex items-start gap-4">
               <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10">
-                <AlignLeft className="size-4.25 text-primary" />
+                <AlignLeft className="size-4 text-primary" />
               </div>
               <div className="flex-1">
                 <h3 className="mb-1 text-sm font-semibold text-foreground">{t('admin.aiSettings.batch.summaryTitle', '批量生成 AI 摘要')}</h3>
@@ -1044,7 +1042,7 @@ export default function AiSettingsPage() {
           <Card className="mb-4 p-5">
             <div className="flex items-start gap-4">
               <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10">
-                <CircleHelp className="size-4.25 text-primary" />
+                <CircleHelp className="size-4 text-primary" />
               </div>
               <div className="flex-1">
                 <h3 className="mb-1 text-sm font-semibold text-foreground">{t('admin.aiSettings.batch.questionsTitle', '批量生成陪读问题')}</h3>
@@ -1071,12 +1069,9 @@ export default function AiSettingsPage() {
             </div>
           </Card>
 
-          <Card className="border-dashed bg-muted p-4">
-            <p className="flex items-start gap-1.5 text-xs leading-relaxed text-muted-foreground">
-              <Lightbulb className="mt-0.5 size-3.5 shrink-0 text-primary" />
-              <span>{t('admin.aiSettings.batch.notice', '任务在后台运行，关闭此页也继续。回到此页会自动显示最新进度。新发布文章会由发布流程自动生成，这里用于补齐历史数据。')}</span>
-            </p>
-          </Card>
+          <Callout tone="info" icon={<Lightbulb className="text-primary" />}>
+            {t('admin.aiSettings.batch.notice', '任务在后台运行，关闭此页也继续。回到此页会自动显示最新进度。新发布文章会由发布流程自动生成，这里用于补齐历史数据。')}
+          </Callout>
         </TabsContent>
       </Tabs>
 

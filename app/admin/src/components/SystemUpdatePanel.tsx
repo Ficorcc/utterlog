@@ -698,7 +698,7 @@ export default function SystemUpdatePanel() {
             {releases && <span className="text-2xs font-normal text-muted-foreground">最近 {releases.length} 个发布</span>}
           </h3>
           <Button variant="outline" size="sm" onClick={() => loadReleases(true)}>
-            <RefreshCw className="size-3.5" />
+            <RefreshCw />
             刷新
           </Button>
         </div>

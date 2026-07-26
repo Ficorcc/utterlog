@@ -192,7 +192,7 @@ export default function ToolsPage() {
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <Label className="mb-1.5 block text-xs text-muted-foreground">{t('admin.tools.backup.autoBackup', '自动备份')}</Label>
+                <Label className="mb-1.5 block text-xs-plus text-foreground">{t('admin.tools.backup.autoBackup', '自动备份')}</Label>
                 <Select value={backupSchedule} onValueChange={(v) => setBackupSchedule((v as string) ?? '')}>
                   <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -204,7 +204,7 @@ export default function ToolsPage() {
                 </Select>
               </div>
               <div>
-                <Label className="mb-1.5 block text-xs text-muted-foreground">{t('admin.tools.backup.destination', '存储位置')}</Label>
+                <Label className="mb-1.5 block text-xs-plus text-foreground">{t('admin.tools.backup.destination', '存储位置')}</Label>
                 <Select value={backupDest} onValueChange={(v) => setBackupDest((v as string) ?? '')}>
                   <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -215,7 +215,7 @@ export default function ToolsPage() {
                 </Select>
               </div>
               <div>
-                <Label className="mb-1.5 block text-xs text-muted-foreground">{t('admin.tools.backup.keep', '保留数量')}</Label>
+                <Label className="mb-1.5 block text-xs-plus text-foreground">{t('admin.tools.backup.keep', '保留数量')}</Label>
                 <Select value={backupKeep} onValueChange={(v) => setBackupKeep((v as string) ?? '')}>
                   <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
                   <SelectContent>

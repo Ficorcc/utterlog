@@ -18,7 +18,6 @@ import { Route as AuthenticatedUtterlogRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedToolsRouteImport } from './routes/_authenticated/tools'
 import { Route as AuthenticatedThemesRouteImport } from './routes/_authenticated/themes'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
-import { Route as AuthenticatedSecurityRouteImport } from './routes/_authenticated/security'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedPostsRouteImport } from './routes/_authenticated/posts'
 import { Route as AuthenticatedPluginsRouteImport } from './routes/_authenticated/plugins'
@@ -100,11 +99,6 @@ const AuthenticatedThemesRoute = AuthenticatedThemesRouteImport.update({
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedSecurityRoute = AuthenticatedSecurityRouteImport.update({
-  id: '/security',
-  path: '/security',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
@@ -336,7 +330,6 @@ export interface FileRoutesByFullPath {
   '/plugins': typeof AuthenticatedPluginsRoute
   '/posts': typeof AuthenticatedPostsRouteWithChildren
   '/profile': typeof AuthenticatedProfileRoute
-  '/security': typeof AuthenticatedSecurityRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/themes': typeof AuthenticatedThemesRoute
   '/tools': typeof AuthenticatedToolsRoute
@@ -383,7 +376,6 @@ export interface FileRoutesByTo {
   '/playlists': typeof AuthenticatedPlaylistsRoute
   '/plugins': typeof AuthenticatedPluginsRoute
   '/profile': typeof AuthenticatedProfileRoute
-  '/security': typeof AuthenticatedSecurityRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/themes': typeof AuthenticatedThemesRoute
   '/tools': typeof AuthenticatedToolsRoute
@@ -434,7 +426,6 @@ export interface FileRoutesById {
   '/_authenticated/plugins': typeof AuthenticatedPluginsRoute
   '/_authenticated/posts': typeof AuthenticatedPostsRouteWithChildren
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
-  '/_authenticated/security': typeof AuthenticatedSecurityRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/themes': typeof AuthenticatedThemesRoute
   '/_authenticated/tools': typeof AuthenticatedToolsRoute
@@ -486,7 +477,6 @@ export interface FileRouteTypes {
     | '/plugins'
     | '/posts'
     | '/profile'
-    | '/security'
     | '/settings'
     | '/themes'
     | '/tools'
@@ -533,7 +523,6 @@ export interface FileRouteTypes {
     | '/playlists'
     | '/plugins'
     | '/profile'
-    | '/security'
     | '/settings'
     | '/themes'
     | '/tools'
@@ -583,7 +572,6 @@ export interface FileRouteTypes {
     | '/_authenticated/plugins'
     | '/_authenticated/posts'
     | '/_authenticated/profile'
-    | '/_authenticated/security'
     | '/_authenticated/settings'
     | '/_authenticated/themes'
     | '/_authenticated/tools'
@@ -676,13 +664,6 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/security': {
-      id: '/_authenticated/security'
-      path: '/security'
-      fullPath: '/security'
-      preLoaderRoute: typeof AuthenticatedSecurityRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/profile': {
@@ -993,7 +974,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedPluginsRoute: typeof AuthenticatedPluginsRoute
   AuthenticatedPostsRoute: typeof AuthenticatedPostsRouteWithChildren
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
-  AuthenticatedSecurityRoute: typeof AuthenticatedSecurityRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedThemesRoute: typeof AuthenticatedThemesRoute
   AuthenticatedToolsRoute: typeof AuthenticatedToolsRoute
@@ -1038,7 +1018,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedPluginsRoute: AuthenticatedPluginsRoute,
   AuthenticatedPostsRoute: AuthenticatedPostsRouteWithChildren,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
-  AuthenticatedSecurityRoute: AuthenticatedSecurityRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedThemesRoute: AuthenticatedThemesRoute,
   AuthenticatedToolsRoute: AuthenticatedToolsRoute,

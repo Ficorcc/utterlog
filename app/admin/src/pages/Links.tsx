@@ -8,12 +8,12 @@ import {
   Rss, ChevronUp, ChevronDown, Pencil, Trash2, CloudUpload, Loader2,
 } from 'lucide-react';
 import {
-  Button, Input, Label, Textarea, ConfirmDialog, EmptyState, Card,
+  Button, Input, Label, Textarea, ConfirmDialog, EmptyState, LoadingState, Card,
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@/components/ui/shadcn';
-import { RowAction } from '@/components/ui/row-actions';
+import { RowAction, RowActionGroup } from '@/components/ui/row-actions';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import { usePageBadge } from '@/layouts/DashboardLayout';
@@ -485,19 +485,20 @@ export default function LinksPage() {
       {/* Right: action buttons first, then search box (远右端 — 与 Posts 一致) */}
       <div className="flex min-h-10 flex-wrap items-center gap-2">
         <Button variant="outline" size="icon" onClick={refreshIcons} disabled={busy !== null} title={t('admin.links.refreshIco', '刷新 ico')}>
-          {busy === 'icon' ? <Loader2 className="size-4 animate-spin" /> : <ImageIcon className="size-4" />}
+          {busy === 'icon' ? <Loader2 className="animate-spin" /> : <ImageIcon />}
         </Button>
         <Button variant="outline" size="icon" onClick={() => setConfirmClearRss(true)} disabled={busy !== null} title={t('admin.links.clearRss', '清空 RSS')}>
-          {busy === 'rss' ? <Loader2 className="size-4 animate-spin" /> : <Eraser className="size-4" />}
+          {busy === 'rss' ? <Loader2 className="animate-spin" /> : <Eraser />}
         </Button>
         <Button variant="outline" size="icon" onClick={refreshFeeds} disabled={refreshingFeeds || busy !== null} title={t('admin.links.refreshFeeds', '刷新订阅')}>
-          <RefreshCw className={cn('size-4', refreshingFeeds && 'animate-spin')} />
+          <RefreshCw className={cn(refreshingFeeds && 'animate-spin')} />
         </Button>
         <Button variant="outline" size="icon" onClick={() => setShowGroupModal(true)} title={t('admin.links.groups', '分类')}>
-          <FolderTree className="size-4" />
+          <FolderTree />
         </Button>
-        <Button size="icon" onClick={openCreate} title={t('admin.common.add', '添加')}>
-          <Plus className="size-4" />
+        {/* 主操作（新建）实心，次要操作 outline —— 五个列表页同一套强调级 */}
+        <Button size="icon" onClick={openCreate} title={t('admin.common.add', '添加')} aria-label={t('admin.common.add', '添加')}>
+          <Plus />
         </Button>
 
         {/* 搜索：input + 正方形 🔍 按钮（搜索是即时的；按钮主要做视觉锚点，
@@ -510,12 +511,13 @@ export default function LinksPage() {
             className="w-56"
           />
           <Button
+            variant="outline"
             size="icon"
             title={t('common.search', '搜索')}
             aria-label={t('common.search', '搜索')}
             onClick={() => { /* 即时搜索：按钮仅作视觉锚点 */ }}
           >
-            <Search className="size-4" />
+            <Search />
           </Button>
           {search && (
             <Button
@@ -525,7 +527,7 @@ export default function LinksPage() {
               aria-label={t('admin.common.clear', '清空')}
               onClick={() => setSearch('')}
             >
-              <X className="size-4" />
+              <X />
             </Button>
           )}
         </div>
@@ -590,69 +592,78 @@ export default function LinksPage() {
         </Card>
       )}
 
-      {links.length === 0 && !loading ? (
-        <EmptyState title={t('admin.links.empty', '暂无友链')} description={t('admin.links.emptyDescription', '添加您的第一个友情链接')} actionText={t('admin.links.addLink', '添加友链')} onAction={openCreate} />
-      ) : (
-        <Card className="overflow-hidden">
-          <Table style={{ tableLayout: 'fixed' }}>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-11">#</TableHead>
-                <TableHead className="w-12"></TableHead>
-                <TableHead className="w-47.5">{t('admin.links.columns.name', '站点名称')}</TableHead>
-                <TableHead className="w-[28%]">{t('admin.links.columns.description', '描述')}</TableHead>
-                <TableHead className="w-[22%]">{t('admin.links.columns.url', '网址')}</TableHead>
-                <TableHead className="w-1/5">RSS</TableHead>
-                <TableHead className="w-22">{t('admin.links.columns.group', '分组')}</TableHead>
-                <TableHead className="w-21 text-right">{t('admin.common.actions', '操作')}</TableHead>
+      <Card className="overflow-hidden">
+        <Table style={{ tableLayout: 'fixed' }}>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-11">#</TableHead>
+              <TableHead className="w-12"></TableHead>
+              <TableHead className="w-47.5">{t('admin.links.columns.name', '站点名称')}</TableHead>
+              <TableHead className="w-[28%]">{t('admin.links.columns.description', '描述')}</TableHead>
+              <TableHead className="w-[22%]">{t('admin.links.columns.url', '网址')}</TableHead>
+              <TableHead className="w-1/5">RSS</TableHead>
+              <TableHead className="w-22">{t('admin.links.columns.group', '分组')}</TableHead>
+              <TableHead className="w-40 text-right">{t('admin.common.actions', '操作')}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {/* 只在「首屏还没有数据」时铺加载态：fetchLinks 每次都 setLoading(true)，
+                新建 / 编辑 / 删除 / 分组保存后都会重新拉一次，光判 loading 会让整张
+                表在每次操作后闪一下空。 */}
+            {loading && filteredLinks.length === 0 ? (
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={8} className="p-0">
+                  <LoadingState label={t('common.loading', '加载中…')} />
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading && filteredLinks.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="py-10 text-center"><Loader2 className="mx-auto size-5 animate-spin text-primary" /></TableCell>
+            ) : filteredLinks.length === 0 ? (
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={8} className="p-0">
+                  {/* 一条友链都没有时才给「添加第一个」入口；搜索无结果只报空 */}
+                  <EmptyState
+                    title={t('admin.links.empty', '暂无友链')}
+                    description={links.length === 0 ? t('admin.links.emptyDescription', '添加您的第一个友情链接') : undefined}
+                    actionText={links.length === 0 ? t('admin.links.addLink', '添加友链') : undefined}
+                    onAction={links.length === 0 ? openCreate : undefined}
+                  />
+                </TableCell>
+              </TableRow>
+            ) : filteredLinks.map((link: any, i: number) => {
+              const baseFavicon = link.logo || siteFaviconUrl(link.url);
+              const favicon = baseFavicon ? `${baseFavicon}${baseFavicon.includes('?') ? '&' : '?'}v=${iconBust}` : '';
+              return (
+                <TableRow key={link.id}>
+                  <TableCell><span className="text-xs text-muted-foreground">{Number(link.order_num) > 0 ? link.order_num : (link.id || i + 1)}</span></TableCell>
+                  <TableCell>
+                    <div className="relative size-7 overflow-hidden rounded-full bg-muted">
+                      <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-muted-foreground">{link.name?.[0] || '?'}</span>
+                      <img src={favicon} alt="" className="absolute inset-0 size-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                    </div>
+                  </TableCell>
+                  <TableCell><span className="block truncate font-medium">{link.name}</span></TableCell>
+                  <TableCell><span className="block truncate text-xs text-muted-foreground">{link.description || '—'}</span></TableCell>
+                  <TableCell><a href={link.url} target="_blank" rel="noopener noreferrer" className="block truncate text-xs text-primary hover:underline">{link.url}</a></TableCell>
+                  <TableCell>
+                    {link.rss_url ? (
+                      <span className="inline-flex min-w-0 max-w-full items-center gap-1.5">
+                        <Rss className="size-3 shrink-0 text-orange-500" />
+                        <a href={link.rss_url} target="_blank" rel="noopener noreferrer" className="block min-w-0 truncate text-xs text-muted-foreground hover:underline">{link.rss_url}</a>
+                      </span>
+                    ) : <span className="text-muted-foreground">—</span>}
+                  </TableCell>
+                  <TableCell><span className="block truncate text-xs text-muted-foreground">{groupLabel(link.group_name || DEFAULT_GROUP_KEY)}</span></TableCell>
+                  <TableCell>
+                    <RowActionGroup>
+                      <RowAction icon={Pencil} title={t('admin.common.edit', '编辑')} onClick={() => openEdit(link)} />
+                      <RowAction icon={Trash2} tone="danger" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(link.id)} />
+                    </RowActionGroup>
+                  </TableCell>
                 </TableRow>
-              ) : filteredLinks.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="py-10 text-center text-sm text-muted-foreground">{t('admin.links.empty', '暂无友链')}</TableCell>
-                </TableRow>
-              ) : filteredLinks.map((link: any, i: number) => {
-                const baseFavicon = link.logo || siteFaviconUrl(link.url);
-                const favicon = baseFavicon ? `${baseFavicon}${baseFavicon.includes('?') ? '&' : '?'}v=${iconBust}` : '';
-                return (
-                  <TableRow key={link.id}>
-                    <TableCell><span className="text-xs text-muted-foreground">{Number(link.order_num) > 0 ? link.order_num : (link.id || i + 1)}</span></TableCell>
-                    <TableCell>
-                      <div className="relative size-7 overflow-hidden rounded-full bg-muted">
-                        <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-muted-foreground">{link.name?.[0] || '?'}</span>
-                        <img src={favicon} alt="" className="absolute inset-0 size-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                      </div>
-                    </TableCell>
-                    <TableCell><span className="block truncate font-medium">{link.name}</span></TableCell>
-                    <TableCell><span className="block truncate text-xs text-muted-foreground">{link.description || '—'}</span></TableCell>
-                    <TableCell><a href={link.url} target="_blank" rel="noopener noreferrer" className="block truncate text-xs text-primary hover:underline">{link.url}</a></TableCell>
-                    <TableCell>
-                      {link.rss_url ? (
-                        <span className="inline-flex min-w-0 max-w-full items-center gap-1.5">
-                          <Rss className="size-3 shrink-0 text-orange-500" />
-                          <a href={link.rss_url} target="_blank" rel="noopener noreferrer" className="block min-w-0 truncate text-xs text-muted-foreground hover:underline">{link.rss_url}</a>
-                        </span>
-                      ) : <span className="text-muted-foreground">—</span>}
-                    </TableCell>
-                    <TableCell><span className="block truncate text-xs text-muted-foreground">{groupLabel(link.group_name || DEFAULT_GROUP_KEY)}</span></TableCell>
-                    <TableCell>
-                      <div className="flex justify-end gap-1">
-                        <RowAction icon={Pencil} title={t('admin.common.edit', '编辑')} onClick={() => openEdit(link)} />
-                        <RowAction icon={Trash2} tone="danger" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(link.id)} />
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </Card>
-      )}
+              );
+            })}
+          </TableBody>
+        </Table>
+      </Card>
 
       {/* Create/Edit Modal */}
       <Dialog open={isModalOpen} onOpenChange={(o) => !o && setIsModalOpen(false)}>
@@ -751,10 +762,10 @@ export default function LinksPage() {
                     <div key={group.key} className="grid items-center gap-2 bg-muted px-3 py-2" style={{ gridTemplateColumns: '84px minmax(140px, 1fr) minmax(260px, 1.5fr) 132px 64px auto' }}>
                       <span className="inline-flex gap-1.5">
                         <Button type="button" variant="ghost" size="icon-xs" className="text-muted-foreground hover:text-foreground" title={t('admin.common.moveUp', '上移')} disabled={index === 0} onClick={() => moveGroup(group.key, -1)}>
-                          <ChevronUp className="size-3" />
+                          <ChevronUp />
                         </Button>
                         <Button type="button" variant="ghost" size="icon-xs" className="text-muted-foreground hover:text-foreground" title={t('admin.common.moveDown', '下移')} disabled={index === existingGroups.length - 1} onClick={() => moveGroup(group.key, 1)}>
-                          <ChevronDown className="size-3" />
+                          <ChevronDown />
                         </Button>
                       </span>
                       {isEditing ? (
@@ -796,12 +807,12 @@ export default function LinksPage() {
                       </Select>
                       <span className="text-right text-2xs text-muted-foreground">{t('admin.links.countItems', '{count} 条', { count })}</span>
                       {!isEditing && (
-                        <span className="inline-flex justify-end gap-1.5">
+                        <RowActionGroup>
                           <RowAction icon={Pencil} title={t('admin.common.edit', '编辑')} onClick={() => setEditingGroup({ old: group.key, new: group.name })} />
                           {group.key !== DEFAULT_GROUP_KEY && (
                             <RowAction icon={Trash2} tone="danger" title={t('admin.common.delete', '删除')} onClick={() => deleteGroup(group.key)} />
                           )}
-                        </span>
+                        </RowActionGroup>
                       )}
                     </div>
                   );

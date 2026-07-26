@@ -10,7 +10,7 @@ export { RowAction, RowActionGroup, RowActions, rowActionPresets, type RowAction
 export { default as Spinner } from './Spinner';
 export {
   AdminToolbar,
-  DialogFooter,
+  DialogActions,
   EmptyPanel,
   LoadingState,
   MediaItemGrid,

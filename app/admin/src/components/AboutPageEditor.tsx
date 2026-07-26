@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import toast from 'react-hot-toast';
-import api, { optionsApi } from '@/lib/api';
+import { optionsApi } from '@/lib/api';
 import { ConfirmDialog, LoadingState, Modal, SaveButton } from '@/components/ui';
 import { Button, Input, Textarea } from '@/components/ui/shadcn';
 import { cn } from '@/lib/utils';
@@ -388,10 +388,10 @@ export default function AboutPageEditor({ open, onClose }: { open: boolean; onCl
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <Button variant="secondary" onClick={() => setConfirmResetTemplate(true)} style={aboutActionButtonStyle}>
-              <RotateCcw className="size-3.5" /> 载入默认模板
+              <RotateCcw /> 载入默认模板
             </Button>
             <Button variant="secondary" onClick={() => setTab('custom')} style={aboutActionButtonStyle}>
-              <FileCode className="size-3.5" /> 编辑 Markdown
+              <FileCode /> 编辑 Markdown
             </Button>
           </div>
         </div>
@@ -409,7 +409,7 @@ export default function AboutPageEditor({ open, onClose }: { open: boolean; onCl
         {config.mode !== 'markdown' && (
           <div className="mb-2.5" style={{ display: 'flex', justifyContent: 'flex-start' }}>
             <Button size="sm" variant="secondary" onClick={() => setConfig(prev => ({ ...prev, mode: 'markdown' }))}>
-              <FileCode className="size-3" /> 切换为自定义 Markdown
+              <FileCode /> 切换为自定义 Markdown
             </Button>
           </div>
         )}
@@ -518,7 +518,7 @@ function EditableList<T>({
       ))}
       <div>
         <Button variant="secondary" onClick={onAdd}>
-          <Plus className="size-3.5" /> {addLabel}
+          <Plus /> {addLabel}
         </Button>
       </div>
     </div>

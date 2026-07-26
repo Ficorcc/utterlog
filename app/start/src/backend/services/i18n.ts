@@ -2,11 +2,9 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { runtimePaths } from '../paths';
 
-const customLocaleDir = 'locales';
-
 export function localeFiles() {
   const files = new Set<string>();
-  for (const dir of [runtimePaths.builtinLocaleDir, customLocaleDir]) {
+  for (const dir of [runtimePaths.builtinLocaleDir, runtimePaths.customLocaleDir]) {
     if (!existsSync(dir)) continue;
     for (const file of readdirSync(dir)) {
       if (file.endsWith('.json')) files.add(file.replace(/\.json$/, ''));
@@ -18,7 +16,7 @@ export function localeFiles() {
 export function readLocale(locale: string) {
   if (!/^[a-zA-Z0-9_-]+$/.test(locale)) return null;
   const builtinPath = join(runtimePaths.builtinLocaleDir, `${locale}.json`);
-  const customPath = join(customLocaleDir, `${locale}.json`);
+  const customPath = join(runtimePaths.customLocaleDir, `${locale}.json`);
   let data: Record<string, unknown> | null = null;
   if (existsSync(builtinPath)) data = JSON.parse(readFileSync(builtinPath, 'utf8'));
   if (existsSync(customPath)) {

@@ -384,6 +384,11 @@ export async function runCoreMigrations() {
   )`);
   await sql.unsafe(`create index if not exists idx_stats_visitor_post_dates_post on ${table('stats_visitor_post_dates')} (post_id, date)`);
   await sql.unsafe(`create index if not exists idx_stats_visitor_post_dates_date on ${table('stats_visitor_post_dates')} (date)`);
+  // 安全中心（IP 封禁 / 安全事件 / IP 信誉）整体下线，schema.sql 里已经不再建
+  // 这三张表；老库升上来还留着，在这里清掉。ip_reputation 早就没代码碰了。
+  await sql.unsafe(`drop table if exists ${table('ip_bans')}`);
+  await sql.unsafe(`drop table if exists ${table('security_events')}`);
+  await sql.unsafe(`drop table if exists ${table('ip_reputation')}`);
 }
 
 export async function initDb() {

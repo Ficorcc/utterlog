@@ -6,16 +6,17 @@ import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Globe, Star, Pencil, MessageSquare, Ban, Trash2, Check, Search, Save } from 'lucide-react';
 import {
-  Button, Input, Label, Textarea, Card, Pagination, ConfirmDialog,
+  Button, Input, Label, Textarea, Card, Checkbox, Pagination, ConfirmDialog,
+  EmptyState, LoadingState,
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@/components/ui/shadcn';
-import { RowAction } from '@/components/ui/row-actions';
+import { RowAction, RowActionGroup } from '@/components/ui/row-actions';
 import { cn, formatDate } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import { postUrlOf } from '@/lib/site';
-import { usePageLoading } from '@/layouts/DashboardLayout';
+import { usePageBadge } from '@/layouts/DashboardLayout';
 
 const defaultAvatar = 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=64';
 
@@ -176,13 +177,8 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
   const { t } = useI18n();
   const navigate = useNavigate();
   const [comments, setComments] = useState<any[]>([]);
-  const { setPageLoading } = usePageLoading();
+  const { setPageBadge } = usePageBadge();
   const [loading, setLoading] = useState(true);
-  // 加载态上报给 header 的统一 spinner；离开本页时清掉。
-  useEffect(() => {
-    setPageLoading(loading);
-    return () => setPageLoading(false);
-  }, [loading, setPageLoading]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -211,6 +207,14 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
       window.dispatchEvent(new Event('admin:notifications-changed'));
     } catch {}
   }, []);
+
+  // 列表总数统一放在 header badge（五个列表页同一落位），表格页脚只留
+  // 每页条数 + 翻页。
+  useEffect(() => {
+    setPageBadge(<span>{t('admin.common.totalItems', '共 {total} 条', { total })}</span>);
+    return () => setPageBadge(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [total, t]);
 
   // Debounce search, instant for other changes
   useEffect(() => {
@@ -401,21 +405,8 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
 
         {status === 'trash' && comments.length > 0 && (
           <Button size="sm" variant="destructive" onClick={() => setEmptyTrash(true)}>
-            <Trash2 className="size-3.5" /> {t('admin.common.clear', '清空')}
+            <Trash2 /> {t('admin.common.clear', '清空')}
           </Button>
-        )}
-        {selectedIds.size > 0 && (
-          <>
-            <Button size="sm" variant="outline" onClick={() => batchAction('approve')}>
-              <Check className="size-3.5" /> {t('admin.comments.approve', '通过')}
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => batchAction('spam')}>
-              <Ban className="size-3.5" /> {t('admin.comments.spam', '垃圾')}
-            </Button>
-            <Button size="sm" variant="destructive" onClick={() => setBatchDeleteConfirm(true)}>
-              <Trash2 className="size-3.5" /> {t('admin.common.delete', '删除')}
-            </Button>
-          </>
         )}
 
         <div className="ml-auto flex items-center gap-1.5">
@@ -433,37 +424,54 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
       </div>
 
       <Card className="overflow-hidden">
+        {/* 批量操作条：贴在表格上沿，选中才出现（Posts / Comments 同一形态） */}
+        {selectedIds.size > 0 && (
+          <div className="flex flex-wrap items-center gap-2 border-b border-border bg-muted px-4 py-2">
+            <span className="text-xs text-muted-foreground">{t('admin.common.selectedCount', '已选 {count}', { count: selectedIds.size })}</span>
+            <Button size="sm" variant="outline" onClick={() => batchAction('approve')}>
+              <Check /> {t('admin.comments.approve', '通过')}
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => batchAction('spam')}>
+              <Ban /> {t('admin.comments.spam', '垃圾')}
+            </Button>
+            <Button size="sm" variant="destructive" onClick={() => setBatchDeleteConfirm(true)}>
+              <Trash2 /> {t('admin.common.delete', '删除')}
+            </Button>
+            <Button size="sm" variant="ghost" className="ml-auto" onClick={() => setSelectedIds(new Set())}>
+              {t('admin.posts.cancelSelection', '取消选择')}
+            </Button>
+          </div>
+        )}
+
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-55">
                 <label className="flex cursor-pointer items-center gap-1.5">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={comments.length > 0 && selectedIds.size === comments.length}
                     onChange={toggleSelectAll}
-                    className="size-4 cursor-pointer accent-primary"
                   />
                   <span>{t('admin.comments.columns.author', '作者')}</span>
-                  {selectedIds.size > 0 && (
-                    <span className="text-2xs font-medium text-primary">{t('admin.common.selectedCount', '已选 {count}', { count: selectedIds.size })}</span>
-                  )}
                 </label>
               </TableHead>
               <TableHead className="w-75">{t('admin.comments.columns.comment', '评论')}</TableHead>
               <TableHead className="w-45">{t('admin.comments.columns.replyTo', '回复至')}</TableHead>
               <TableHead className="w-30">{t('admin.comments.columns.submittedAt', '提交于')}</TableHead>
-              <TableHead className="w-35">{t('admin.common.actions', '操作')}</TableHead>
+              <TableHead className="w-40 text-right">{t('admin.common.actions', '操作')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              // 加载态统一由 header 的 spinner 表示（见 usePageLoading）
-              null
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={5} className="p-0">
+                  <LoadingState label={t('common.loading', '加载中…')} />
+                </TableCell>
+              </TableRow>
             ) : comments.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="py-10 text-center text-sm text-muted-foreground">
-                  {t('admin.common.noData', '暂无数据')}
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={5} className="p-0">
+                  <EmptyState title={t('admin.common.noData', '暂无数据')} />
                 </TableCell>
               </TableRow>
             ) : (
@@ -472,11 +480,10 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
                   {/* Author */}
                   <TableCell className="align-top">
                     <div className="flex items-start gap-2">
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={selectedIds.has(row.id)}
                         onChange={() => toggleSelect(row.id)}
-                        className="mt-2.5 size-4 shrink-0 cursor-pointer accent-primary"
+                        className="mt-2.5"
                       />
                       <img
                         src={row.avatar_url || defaultAvatar}
@@ -533,7 +540,7 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
 
                   {/* Actions */}
                   <TableCell className="align-top">
-                    <div className="flex gap-1">
+                    <RowActionGroup>
                       {/* 四种状态的操作集。颜色和 hover 全交给 RowAction 的
                           tone，这里只声明「这是什么操作」—— 之前每个分支各写一遍
                           className，同一个「通过」的绿色在四处是抄来抄去的。 */}
@@ -574,7 +581,7 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
                           <RowAction icon={Trash2} tone="danger" title={t('admin.comments.permanentDelete', '永久删除')} onClick={() => setDeleteId(row.id)} />
                         </>
                       )}
-                    </div>
+                    </RowActionGroup>
                   </TableCell>
                 </TableRow>
               ))
@@ -582,20 +589,19 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
           </TableBody>
         </Table>
 
+        {/* 表格页脚：每页条数在左、翻页在右（Posts / Comments 同一落位） */}
         <div className="flex items-center justify-between border-t border-border px-4 py-2">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">{t('admin.common.totalItems', '共 {count} 条', { count: total })}</span>
-            <Select value={perPage} onValueChange={(v) => { setPerPage(Number(v)); setPage(1); }}>
-              <SelectTrigger className="h-8 w-27.5 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={20}>{t('admin.common.perPage', '{count} 条/页', { count: 20 })}</SelectItem>
-                <SelectItem value={50}>{t('admin.common.perPage', '{count} 条/页', { count: 50 })}</SelectItem>
-                <SelectItem value={100}>{t('admin.common.perPage', '{count} 条/页', { count: 100 })}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <Select value={perPage} onValueChange={(v) => { setPerPage(Number(v)); setPage(1); }}>
+            <SelectTrigger className="h-8 w-27.5 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={10}>{t('admin.common.perPage', '{count} 条/页', { count: 10 })}</SelectItem>
+              <SelectItem value={20}>{t('admin.common.perPage', '{count} 条/页', { count: 20 })}</SelectItem>
+              <SelectItem value={50}>{t('admin.common.perPage', '{count} 条/页', { count: 50 })}</SelectItem>
+              <SelectItem value={100}>{t('admin.common.perPage', '{count} 条/页', { count: 100 })}</SelectItem>
+            </SelectContent>
+          </Select>
           <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
       </Card>

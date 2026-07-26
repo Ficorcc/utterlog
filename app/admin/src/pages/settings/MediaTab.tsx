@@ -1,8 +1,9 @@
 /**
  * 存储设置 tab（media）。
  *
- * 从 Settings.tsx 整段搬过来，JSX 与字段名一字未改 —— register 的字段名
- * 决定保存时 payload 里有没有这个 key，改错一个字用户的设置就会静默丢失。
+ * 从 Settings.tsx 整段搬过来，后来排版收口到 shared.tsx 的 Row 系列，但
+ * register 的字段名一字未改 —— 它决定保存时 payload 里有没有这个 key，
+ * 改错一个字用户的设置就会静默丢失。
  *
  * 存储用量、数据库清理、连接测试这些状态和 handler 都还在 Settings.tsx 里
  * （它们跟 fetchSettings / getValues 绑在一起），这里按 props 接进来。
@@ -10,13 +11,13 @@
 
 import { Button, Input, Textarea } from '@/components/ui/shadcn';
 import {
-  HardDrive, Cloud, Brush, Globe, Loader2, Plug, User, Zap, Images,
+  HardDrive, Cloud, Brush, Loader2, Plug, User, Zap, Images, Upload,
   BookOpen, Film, Music, Image as ImageIcon, Link as LinkIcon,
 } from 'lucide-react';
 import type { UseFormRegister } from 'react-hook-form';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
-import { Panel, SELECT_CLS } from './shared';
+import { InputRow, Panel, RadioCardRow, Row, SettingsSection, SELECT_CLS } from './shared';
 
 export type StorageStats = {
   files: number;
@@ -123,16 +124,13 @@ export default function MediaTab({
         </div>
       </Panel>
 
-      <Panel>
-        <div className="flex items-start justify-between gap-6">
-          <div className="flex-1">
-            <h3 className="mb-2 text-xs-plus font-semibold tracking-wide text-foreground">{t('admin.settings.media.cleanup.section', '数据库清理')}</h3>
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              {t('admin.settings.media.cleanup.description', '清理媒体库缺失文件记录、失效相册关联、孤儿文章关系、孤儿评论、足迹残留和过期授权数据。不会删除正文内容，也不会删除远程对象存储里的文件。')}
-            </p>
-          </div>
+      <Panel
+        title={t('admin.settings.media.cleanup.section', '数据库清理')}
+        description={t('admin.settings.media.cleanup.description', '清理媒体库缺失文件记录、失效相册关联、孤儿文章关系、孤儿评论、足迹残留和过期授权数据。不会删除正文内容，也不会删除远程对象存储里的文件。')}
+      >
+        <div className="flex justify-end">
           <Button type="button" variant="secondary" disabled={cleaningDatabase} onClick={() => setConfirmCleanupDatabase(true)} className="min-w-37">
-            {cleaningDatabase ? <Loader2 className="size-3.5 animate-spin" /> : <Brush className="size-3.5" />}
+            {cleaningDatabase ? <Loader2 className="animate-spin" /> : <Brush />}
             {t('admin.settings.media.cleanup.button', '清理数据库')}
           </Button>
         </div>
@@ -159,88 +157,63 @@ export default function MediaTab({
       </Panel>
 
       <Panel title={t('admin.settings.media.driver.section', '存储方式')}>
-        <div className="mb-6">
-          <label className="mb-2 block text-xs-plus font-medium text-muted-foreground">{t('admin.settings.media.driver.label', '存储驱动')}</label>
-          <div className="flex gap-2.5">
-            {([
-              { value: 'local', label: t('admin.settings.media.localStorage', '本地存储'), icon: HardDrive, desc: t('admin.settings.media.driver.localDesc', '文件保存在服务器本地') },
-              { value: 's3', label: 'AWS S3', icon: Cloud, desc: t('admin.settings.media.driver.s3Desc', 'Amazon S3 / 兼容存储') },
-              { value: 'r2', label: 'Cloudflare R2', icon: Cloud, desc: t('admin.settings.media.driver.r2Desc', '零出口费用对象存储') },
-            ]).map(d => {
-              const Icon = d.icon;
-              const active = mediaDriver === d.value;
-              return (
-                <label key={d.value} className={cn(
-                  'flex flex-1 cursor-pointer flex-col items-center gap-2 rounded-md border p-4 transition-colors',
-                  active ? 'border-primary bg-primary/5' : 'border-border bg-transparent',
-                )}>
-                  <input type="radio" value={d.value} {...register('media_driver')} className="hidden" />
-                  <Icon className={cn('size-5.5', active ? 'text-primary' : 'text-muted-foreground')} />
-                  <span className={cn('text-xs-plus font-semibold', active ? 'text-primary' : 'text-foreground')}>{d.label}</span>
-                  <span className="text-center text-2xs text-muted-foreground">{d.desc}</span>
-                </label>
-              );
-            })}
-          </div>
-        </div>
+        <RadioCardRow
+          className="mb-6"
+          label={t('admin.settings.media.driver.label', '存储驱动')}
+          value={mediaDriver}
+          register={register('media_driver')}
+          options={[
+            { value: 'local', label: t('admin.settings.media.localStorage', '本地存储'), icon: HardDrive, desc: t('admin.settings.media.driver.localDesc', '文件保存在服务器本地') },
+            { value: 's3', label: 'AWS S3', icon: Cloud, desc: t('admin.settings.media.driver.s3Desc', 'Amazon S3 / 兼容存储') },
+            { value: 'r2', label: 'Cloudflare R2', icon: Cloud, desc: t('admin.settings.media.driver.r2Desc', '零出口费用对象存储') },
+          ]}
+        />
 
         {(mediaDriver === 's3' || mediaDriver === 'r2') && (
-          <div className="flex flex-col gap-5 rounded-md border border-border bg-muted p-6">
-            <div className="flex items-center gap-2">
+          <div className="overflow-hidden rounded-md border border-border bg-muted">
+            <div className="flex items-center gap-2 border-b border-border px-3.5 py-3">
               <Cloud className="size-4 text-primary" />
               <h4 className="text-sm font-semibold text-foreground">{t('admin.settings.media.cloudConfig', '{provider} 配置', { provider: mediaDriver === 'r2' ? 'Cloudflare R2' : 'AWS S3' })}</h4>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="block text-xs-plus font-medium text-muted-foreground">Endpoint</label>
-                <Input {...register('s3_endpoint')} placeholder={mediaDriver === 'r2' ? 'https://<account_id>.r2.cloudflarestorage.com' : 'https://s3.amazonaws.com'} />
-              </div>
-              <div className="space-y-1.5">
-                <label className="block text-xs-plus font-medium text-muted-foreground">Region</label>
-                <Input {...register('s3_region')} placeholder={mediaDriver === 'r2' ? 'auto' : 'us-east-1'} />
-              </div>
-            </div>
+            <InputRow
+              label="Endpoint"
+              register={register('s3_endpoint')}
+              placeholder={mediaDriver === 'r2' ? 'https://<account_id>.r2.cloudflarestorage.com' : 'https://s3.amazonaws.com'}
+            />
+            <InputRow
+              label="Region"
+              register={register('s3_region')}
+              placeholder={mediaDriver === 'r2' ? 'auto' : 'us-east-1'}
+            />
+            <InputRow label="Bucket" register={register('s3_bucket')} placeholder="my-bucket" />
+            <InputRow label="Access Key" register={register('s3_access_key')} placeholder="AKIA..." />
+            <InputRow label="Secret Key" type="password" register={register('s3_secret_key')} placeholder="••••••••" />
 
-            <div className="space-y-1.5">
-              <label className="block text-xs-plus font-medium text-muted-foreground">Bucket</label>
-              <Input {...register('s3_bucket')} placeholder="my-bucket" className="max-w-80" />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="block text-xs-plus font-medium text-muted-foreground">Access Key</label>
-                <Input {...register('s3_access_key')} placeholder="AKIA..." />
-              </div>
-              <div className="space-y-1.5">
-                <label className="block text-xs-plus font-medium text-muted-foreground">Secret Key</label>
-                <Input type="password" {...register('s3_secret_key')} placeholder="••••••••" />
-              </div>
-            </div>
-
-            <div className="border-t border-border pt-5">
-              <div className="mb-2 flex items-center gap-1.5">
-                <Globe className="size-3.5 text-primary" />
-                <label className="text-xs-plus font-medium text-muted-foreground">{t('admin.settings.media.customDomain', '自定义域名 (CDN)')}</label>
-              </div>
-              <Input {...register('s3_custom_domain')} placeholder="https://cdn.yourdomain.com" className="max-w-100" />
-              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+            <Row
+              label={t('admin.settings.media.customDomain', '自定义域名 (CDN)')}
+              hint={<>
                 {t('admin.settings.media.customDomainHint', '绑定自定义域名后，所有文件 URL 将使用此域名访问。')}
                 {mediaDriver === 'r2' && ` ${t('admin.settings.media.r2CustomDomainHint', 'R2 可在 Cloudflare Dashboard 中绑定自定义域名。')}`}
                 {mediaDriver === 's3' && ` ${t('admin.settings.media.s3CdnHint', '建议配合 CloudFront 或其他 CDN 使用。')}`}
                 {t('admin.settings.media.customDomainEmptyHint', ' 留空则使用 Bucket 原始地址。')}
-              </p>
-            </div>
+              </>}
+            >
+              <Input {...register('s3_custom_domain')} placeholder="https://cdn.yourdomain.com" />
+            </Row>
 
-            <div className="border-t border-border pt-5">
-              <label className="mb-1.5 block text-xs-plus font-medium text-muted-foreground">{t('admin.settings.media.storageLimit', '空间容量限制 (GB)')}</label>
-              <Input type="number" min={1} {...register('storage_limit_gb')} placeholder="10" className="w-40" />
-              <p className="mt-1 text-xs text-muted-foreground">{t('admin.settings.media.storageLimitHint', '超过此容量将不允许继续上传')}</p>
-            </div>
+            {/* min={1} 得手写 Row —— InputRow 不透传 min，丢了它数字框就允许填 0/负数 */}
+            <Row
+              label={t('admin.settings.media.storageLimit', '空间容量限制 (GB)')}
+              hint={t('admin.settings.media.storageLimitHint', '超过此容量将不允许继续上传')}
+              last
+            >
+              <Input type="number" min={1} {...register('storage_limit_gb')} placeholder="10" />
+            </Row>
 
-            <div className="flex items-center gap-2.5 pt-1">
+            <div className="flex items-center gap-2.5 border-t border-border px-3.5 py-3">
               <Button type="button" variant="outline" onClick={testStorageConnection} disabled={testingStorage}>
-                {testingStorage ? <Loader2 className="size-3.5 animate-spin" /> : <Plug className="size-3.5" />}
+                {testingStorage ? <Loader2 className="animate-spin" /> : <Plug />}
                 {testingStorage ? t('admin.common.testing', '测试中…') : t('admin.common.testConnection', '测试连接')}
               </Button>
             </div>
@@ -248,10 +221,10 @@ export default function MediaTab({
         )}
       </Panel>
 
-      <Panel title={t('admin.settings.media.folderRouting.section', '分类存储路由')}>
-        <p className="mb-5 -mt-3 text-xs leading-relaxed text-muted-foreground">
-          {t('admin.settings.media.folderRouting.description', '为每个上传分类单独指定存储位置。选择「云端」时，该分类的文件将上传至已配置的 S3/R2；选择「本地」时始终保存在服务器本地。「跟随全局」使用上方存储方式设置。')}
-        </p>
+      <Panel
+        title={t('admin.settings.media.folderRouting.section', '分类存储路由')}
+        description={t('admin.settings.media.folderRouting.description', '为每个上传分类单独指定存储位置。选择「云端」时，该分类的文件将上传至已配置的 S3/R2；选择「本地」时始终保存在服务器本地。「跟随全局」使用上方存储方式设置。')}
+      >
         <div className="grid grid-cols-2 gap-2.5">
           {[
             { key: 'folder_driver_covers', label: t('admin.settings.media.folderRouting.covers', '文章封面'), icon: ImageIcon },
@@ -278,21 +251,22 @@ export default function MediaTab({
         </div>
       </Panel>
 
-      <Panel title={t('admin.settings.media.uploadLimits.section', '上传限制')}>
-        <div className="grid gap-y-6">
-          <div className="space-y-1.5">
-            <label className="block text-xs-plus font-medium text-muted-foreground">{t('admin.settings.media.uploadLimits.maxSize', '最大上传大小 (MB)')}</label>
-            <Input type="number" {...register('max_upload_size')} />
-          </div>
-          <div className="space-y-1.5">
-            <label className="block text-xs-plus font-medium text-muted-foreground">{t('admin.settings.media.uploadLimits.allowedTypes', '允许的文件类型')}</label>
-            <Textarea className="font-mono text-xs" rows={3} {...register('allowed_extensions')} placeholder={t('admin.settings.media.uploadLimits.allowedTypesPlaceholder', '每行一个扩展名，或用逗号分隔')} />
-            <p className="text-xs text-muted-foreground">
-              {t('admin.settings.media.uploadLimits.commonTypes', '常用：jpg, jpeg, png, gif, webp, svg, ico, mp4, mp3, pdf, zip, doc, docx, xls, xlsx, ppt, pptx, txt, md')}
-            </p>
-          </div>
-        </div>
-      </Panel>
+      <SettingsSection title={t('admin.settings.media.uploadLimits.section', '上传限制')} icon={Upload}>
+        <InputRow
+          label={t('admin.settings.media.uploadLimits.maxSize', '最大上传大小 (MB)')}
+          type="number"
+          register={register('max_upload_size')}
+        />
+        {/* 扩展名列表用等宽字体对齐才好读，TextareaRow 不收 className，手写 Row */}
+        <Row
+          label={t('admin.settings.media.uploadLimits.allowedTypes', '允许的文件类型')}
+          hint={t('admin.settings.media.uploadLimits.commonTypes', '常用：jpg, jpeg, png, gif, webp, svg, ico, mp4, mp3, pdf, zip, doc, docx, xls, xlsx, ppt, pptx, txt, md')}
+          column
+          last
+        >
+          <Textarea className="font-mono text-xs" rows={3} {...register('allowed_extensions')} placeholder={t('admin.settings.media.uploadLimits.allowedTypesPlaceholder', '每行一个扩展名，或用逗号分隔')} />
+        </Row>
+      </SettingsSection>
     </>
   );
 }

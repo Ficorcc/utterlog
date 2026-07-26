@@ -11,15 +11,17 @@ import {
   Save, Loader2, type LucideIcon,
 } from 'lucide-react';
 import {
-  Badge, Button, ConfirmDialog, Card, Switch, Label, Textarea,
+  Badge, Button, Checkbox, ConfirmDialog, Card, Switch, Label, Textarea,
+  EmptyState, LoadingState,
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/shadcn';
-import { RowAction } from '@/components/ui/row-actions';
-import { usePageLoading } from '@/layouts/DashboardLayout';
+import { RowAction, RowActionGroup } from '@/components/ui/row-actions';
+import { usePageBadge } from '@/layouts/DashboardLayout';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import AboutPageEditor from '@/components/AboutPageEditor';
+import { AdminToolbar } from '@/components/ui';
 
 // A built-in page with `contentKey` gets an inline HTML/markdown editor
 // stored in that option. Pages without contentKey are pure list views
@@ -129,13 +131,8 @@ export default function PagesPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const [pages, setPages] = useState<any[]>([]);
-  const { setPageLoading } = usePageLoading();
+  const { setPageBadge } = usePageBadge();
   const [loading, setLoading] = useState(true);
-  // 加载态上报给 header 的统一 spinner；离开本页时清掉。
-  useEffect(() => {
-    setPageLoading(loading);
-    return () => setPageLoading(false);
-  }, [loading, setPageLoading]);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [builtinStatus, setBuiltinStatus] = useState<Record<string, boolean>>({});
   const [editingKey, setEditingKey] = useState<string | null>(null);
@@ -155,6 +152,13 @@ export default function PagesPage() {
   const [savingCoding, setSavingCoding] = useState(false);
 
   useEffect(() => { fetchPages(); fetchBuiltinStatus(); }, []);
+
+  // 列表总数统一放在 header badge（五个列表页同一落位）。
+  useEffect(() => {
+    setPageBadge(<span>{t('admin.pages.totalPages', '{count} 个页面', { count: builtinPages.length + pages.length })}</span>);
+    return () => setPageBadge(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pages.length, t]);
 
   const openContentEditor = async (contentKey: string) => {
     if (contentKey === 'page_about_content') {
@@ -291,8 +295,8 @@ export default function PagesPage() {
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    try { await postsApi.delete(deleteId); toast.success(t('admin.posts.toast.deleteSuccess', '删除成功')); fetchPages(); }
-    catch { toast.error(t('admin.posts.toast.deleteFailed', '删除失败')); }
+    try { await postsApi.delete(deleteId); toast.success(t('admin.common.deleteSuccess', '删除成功')); fetchPages(); }
+    catch { toast.error(t('admin.common.deleteFailed', '删除失败')); }
     finally { setDeleteId(null); }
   };
 
@@ -319,15 +323,14 @@ export default function PagesPage() {
   return (
     <div>
 
-      {/* Header */}
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <span className="mr-auto text-sm text-muted-foreground">
-          {t('admin.pages.totalPages', '{count} 个页面', { count: builtinPages.length + pages.length })}
-        </span>
-        <Button size="icon" title={t('admin.pages.newPage', '新建页面')} onClick={() => navigate('/pages/create')}>
-          <Plus />
-        </Button>
-      </div>
+      {/* Header —— 主操作（新建）实心，次要操作 outline */}
+      <AdminToolbar
+        actions={
+          <Button size="icon" title={t('admin.pages.newPage', '新建页面')} aria-label={t('admin.pages.newPage', '新建页面')} onClick={() => navigate('/pages/create')}>
+            <Plus />
+          </Button>
+        }
+      />
 
       {/* All pages in one table */}
       <Card className="overflow-hidden">
@@ -338,13 +341,16 @@ export default function PagesPage() {
               <TableHead className="w-30">{t('admin.pages.columns.path', '路径')}</TableHead>
               <TableHead className="w-17.5">{t('admin.pages.columns.type', '类型')}</TableHead>
               <TableHead className="w-17.5">{t('admin.pages.columns.enabled', '启用')}</TableHead>
-              <TableHead className="w-22.5 text-right">{t('admin.posts.columns.actions', '操作')}</TableHead>
+              <TableHead className="w-40 text-right">{t('admin.common.actions', '操作')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              // 加载态统一由 header 的 spinner 表示（见 usePageLoading）
-              null
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={5} className="p-0">
+                  <LoadingState label={t('common.loading', '加载中…')} />
+                </TableCell>
+              </TableRow>
             ) : tableRows.map((row) => {
               const Icon = row.kind === 'builtin' ? row.page.icon : FileText;
               return (
@@ -365,7 +371,7 @@ export default function PagesPage() {
                     <Switch checked={row.enabled} onCheckedChange={() => row.kind === 'builtin' ? toggleBuiltin(row.page.key) : toggleStatus(row.page)} />
                   </TableCell>
                   <TableCell>
-                    <div className="flex justify-end gap-1">
+                    <RowActionGroup>
                       {row.kind === 'builtin' ? (
                         (row.page.contentKey || row.page.settingsKey) ? (
                           <RowAction
@@ -380,7 +386,7 @@ export default function PagesPage() {
                           <RowAction icon={Trash2} tone="danger" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(row.page.id)} />
                         </>
                       )}
-                    </div>
+                    </RowActionGroup>
                   </TableCell>
                 </TableRow>
               );
@@ -448,9 +454,9 @@ export default function PagesPage() {
 
             <div className="max-h-90 overflow-auto border border-border">
               {loadingCodingRepos ? (
-                <div className="p-6 text-center text-xs-plus text-muted-foreground">正在读取项目…</div>
+                <LoadingState label="正在读取项目…" />
               ) : codingRepos.length === 0 ? (
-                <div className="p-6 text-center text-xs-plus text-muted-foreground">暂无可用项目。</div>
+                <EmptyState title="暂无可用项目。" />
               ) : codingRepos.map(repo => {
                 const fullName = String(repo.full_name || repo.name || '').trim();
                 const autoSelected = codingSourceSelectedRepos.includes(fullName.toLowerCase());
@@ -461,7 +467,7 @@ export default function PagesPage() {
                     className={cn('grid items-center gap-2.5 border-b border-border px-3.5 py-3', autoSelected ? 'cursor-default' : 'cursor-pointer')}
                     style={{ gridTemplateColumns: '24px minmax(0, 1fr) auto' }}
                   >
-                    <input type="checkbox" checked={checked} disabled={autoSelected} onChange={() => toggleCodingRepo(fullName)} className="size-4 accent-primary" />
+                    <Checkbox checked={checked} disabled={autoSelected} onChange={() => toggleCodingRepo(fullName)} />
                     <span className="min-w-0">
                       <span className="block truncate text-xs-plus font-semibold text-foreground">
                         {repo.name || fullName}

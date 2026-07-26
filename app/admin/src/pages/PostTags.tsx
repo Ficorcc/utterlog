@@ -9,6 +9,7 @@ import {
   Button, Input, Label, Pagination, LoadingState, EmptyState, ConfirmDialog,
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/shadcn';
+import { RowAction } from '@/components/ui/row-actions';
 import { usePostsToolbar } from '@/layouts/PostsLayout';
 import { useI18n } from '@/lib/i18n';
 
@@ -88,8 +89,8 @@ export default function TagsPage() {
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    try { await tagsApi.delete(deleteId); toast.success(t('admin.posts.toast.deleteSuccess', '删除成功')); fetchTags(); }
-    catch { toast.error(t('admin.posts.toast.deleteFailed', '删除失败')); }
+    try { await tagsApi.delete(deleteId); toast.success(t('admin.common.deleteSuccess', '删除成功')); fetchTags(); }
+    catch { toast.error(t('admin.common.deleteFailed', '删除失败')); }
     finally { setDeleteId(null); }
   };
 
@@ -109,19 +110,21 @@ export default function TagsPage() {
             <div
               key={tag.id}
               onClick={() => openEdit(tag)}
-              className="group inline-flex cursor-pointer items-center gap-2 rounded-md border border-border bg-card px-3.5 py-2 transition-colors hover:border-primary hover:bg-primary/5"
+              className="group inline-flex cursor-pointer items-center gap-1.5 border border-border bg-card py-1 pl-3.5 pr-1 transition-colors hover:border-primary hover:bg-primary/5"
             >
               <span className="text-sm font-medium text-foreground">#{tag.name}</span>
               {tag.count > 0 && (
                 <span className="rounded-full bg-muted px-1.5 text-xs text-muted-foreground">{tag.count}</span>
               )}
-              <button
-                onClick={(e) => { e.stopPropagation(); setDeleteId(tag.id); }}
-                className="rounded p-0.5 text-muted-foreground opacity-40 transition-colors hover:text-destructive group-hover:opacity-100"
-                aria-label={t('common.delete', '删除')}
-              >
-                <X className="size-3.5" />
-              </button>
+              <span className="opacity-40 transition-opacity group-hover:opacity-100">
+                <RowAction
+                  icon={X}
+                  tone="danger"
+                  size="xs"
+                  title={t('common.delete', '删除')}
+                  onClick={(e) => { e.stopPropagation(); setDeleteId(tag.id); }}
+                />
+              </span>
             </div>
           ))}
         </div>

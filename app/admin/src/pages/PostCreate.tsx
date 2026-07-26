@@ -8,6 +8,7 @@ import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/shadcn';
+import { SaveButton } from '@/components/ui/save-button';
 import {
   Sparkles, Loader2, CloudUpload, X, PenLine,
   WandSparkles, UserRound, Smile, Shrink, Expand, AlignLeft, Search, Code, ListTree,
@@ -20,6 +21,25 @@ import MarkdownEditor from '@/components/editor/MarkdownEditor';
 import { adminDateYMDHM } from '@/lib/timezone';
 import FootprintEditor, { type FootprintFormValue, normalizeFootprintsForPayload } from '@/components/FootprintEditor';
 import VideoFormSection from '@/components/VideoFormSection';
+
+// 右栏顶部动作按钮共用的布局：等分一行、允许收缩到内容以下、内边距压窄。
+// PostCreate / PostEdit 两个编辑页保持同一串类名。
+const SIDEBAR_ACTION_CLS = 'min-w-0 flex-1 px-2';
+
+// 「标签 + Switch」一行的统一写法，两个编辑页保持同一段 JSX。
+function ToggleRow({ id, label, checked, onCheckedChange }: {
+  id: string;
+  label: string;
+  checked: boolean;
+  onCheckedChange: (value: boolean) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <Label htmlFor={id} className="cursor-pointer text-xs font-normal text-foreground">{label}</Label>
+      <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} />
+    </div>
+  );
+}
 
 export default function CreatePostPage() {
   const { t } = useI18n();
@@ -268,24 +288,26 @@ export default function CreatePostPage() {
           {/* Publish */}
           <div className="border-b border-border p-4">
             <div className="mb-2 flex gap-1.5">
-              <Button className="min-w-0 flex-1 px-2" disabled={submitting} onClick={() => handleSave('publish')}>
+              <Button className={SIDEBAR_ACTION_CLS} disabled={submitting} onClick={() => handleSave('publish')}>
                 {t('admin.postEditor.publish', '发布')}
               </Button>
-              <Button variant="outline" className="min-w-0 flex-1 px-2" disabled={submitting} onClick={() => handleSave('draft')}>
-                {t('admin.common.save', '保存')}
-              </Button>
-              <Button variant="outline" className="min-w-0 flex-1 px-2" onClick={() => navigate(backTarget)}>
+              <SaveButton
+                variant="secondary"
+                className={SIDEBAR_ACTION_CLS}
+                loading={submitting}
+                onClick={() => handleSave('draft')}
+              />
+              <Button variant="outline" className={SIDEBAR_ACTION_CLS} onClick={() => navigate(backTarget)}>
                 {t('admin.common.back', '返回')}
               </Button>
             </div>
             {aiFlags.polish && (
               <Button
-                size="sm"
                 variant="outline"
                 className="w-full gap-1.5 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                 onClick={() => setShowAiModal(true)}
               >
-                <Sparkles className="size-3.5" /> {t('admin.postEditor.aiProcessArticle', 'AI 处理文章')}
+                <Sparkles /> {t('admin.postEditor.aiProcessArticle', 'AI 处理文章')}
               </Button>
             )}
           </div>
@@ -302,20 +324,20 @@ export default function CreatePostPage() {
                     <img src={coverUrl} alt="" className="h-20 w-full border border-border object-cover" />
                     <button
                       onClick={() => setCoverUrl('')}
-                      className="absolute right-1 top-1 flex size-4.5 items-center justify-center rounded bg-black/50 text-white"
+                      className="absolute right-1 top-1 flex size-4.5 items-center justify-center bg-black/50 text-white"
                     >
                       <X className="size-3" />
                     </button>
                   </div>
                 )}
                 <div className="flex items-stretch gap-1.5">
-                  <Input value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)} placeholder={t('admin.postEditor.coverPlaceholder', '留空自动回退为正文首图')} className="h-9 flex-1 text-xs" />
+                  <Input value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)} placeholder={t('admin.postEditor.coverPlaceholder', '留空自动回退为正文首图')} className="flex-1 text-xs" />
                   {aiFlags.image && (
                     <Button
                       type="button"
                       variant="outline"
                       size="icon"
-                      className="size-9 shrink-0"
+                      className="shrink-0"
                       title={t('admin.postEditor.aiGenerateCover', 'AI 生成封面')}
                       disabled={coverAiLoading}
                       onClick={async () => {
@@ -338,21 +360,21 @@ export default function CreatePostPage() {
                       }}
                     >
                       {coverAiLoading
-                        ? <Loader2 className="size-3.5 animate-spin" />
-                        : <Sparkles className="size-3.5" />}
+                        ? <Loader2 className="animate-spin" />
+                        : <Sparkles />}
                     </Button>
                   )}
                   <Button
                     type="button"
                     variant="outline"
                     size="icon"
-                    className="size-9 shrink-0"
+                    className="shrink-0"
                     onClick={() => coverFileRef.current?.click()}
                     title={coverUploading ? t('admin.media.uploading', '上传中…') : t('admin.postEditor.uploadCover', '上传封面')}
                   >
                     {coverUploading
-                      ? <Loader2 className="size-3.5 animate-spin" />
-                      : <CloudUpload className="size-3.5" />}
+                      ? <Loader2 className="animate-spin" />
+                      : <CloudUpload />}
                   </Button>
                   <input ref={coverFileRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
                 </div>
@@ -365,16 +387,15 @@ export default function CreatePostPage() {
               <div>
                 <Label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t('admin.postEditor.slug', '别名 (Slug)')}</Label>
                 <div className="flex gap-1.5">
-                  <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder={t('admin.postEditor.slugPlaceholder', '留空自动分配唯一数字')} className="h-9 flex-1 text-xs" />
+                  <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder={t('admin.postEditor.slugPlaceholder', '留空自动分配唯一数字')} className="flex-1 text-xs" />
                   {aiFlags.slug && (
                   <Button
                     type="button"
                     variant="outline"
-                    size="sm"
-                    className="h-9 shrink-0 gap-1 px-2 text-2xs"
+                    className="shrink-0 gap-1 px-2 text-2xs"
                     disabled={slugLoading}
                     onClick={async () => {
-                      if (!title) return;
+                      if (!title) { toast.error(t('admin.postEditor.toast.fillTitleFirst', '请先填写标题')); return; }
                       setSlugLoading(true);
                       try {
                         const r: any = await api.post('/ai/slug', { title, content });
@@ -383,7 +404,7 @@ export default function CreatePostPage() {
                       setSlugLoading(false);
                     }}
                   >
-                    {slugLoading ? <Loader2 className="size-3 animate-spin" /> : <Sparkles className="size-3" />} AI
+                    {slugLoading ? <Loader2 className="animate-spin" /> : <Sparkles />} AI
                   </Button>
                   )}
                 </div>
@@ -393,7 +414,7 @@ export default function CreatePostPage() {
               <div>
                 <Label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t('admin.postEditor.category', '分类')}</Label>
                 <Select value={String(categoryId)} onValueChange={(v) => setCategoryId(v ? Number(v) : '')}>
-                  <SelectTrigger className="h-9 text-xs">
+                  <SelectTrigger className="text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -411,7 +432,6 @@ export default function CreatePostPage() {
                   <Button
                     type="button"
                     variant="ghost"
-                    size="sm"
                     disabled={tagsLoading}
                     className="h-auto gap-1 p-0 text-2xs text-primary hover:bg-transparent hover:text-primary/80"
                     onClick={async () => {
@@ -428,17 +448,17 @@ export default function CreatePostPage() {
                       setTagsLoading(false);
                     }}
                   >
-                    {tagsLoading ? <Loader2 className="size-2.5 animate-spin" /> : <Sparkles className="size-2.5" />} {t('admin.postEditor.aiExtract', 'AI 提取')}
+                    {tagsLoading ? <Loader2 className="animate-spin" /> : <Sparkles />} {t('admin.postEditor.aiExtract', 'AI 提取')}
                   </Button>
                   )}
                 </div>
-                <Input value={tagInput} onChange={(e) => setTagInput(e.target.value)} placeholder={t('admin.postEditor.tagsPlaceholder', 'Tag1, Tag2（默认提取 3 个关键词）')} className="h-9 text-xs" />
+                <Input value={tagInput} onChange={(e) => setTagInput(e.target.value)} placeholder={t('admin.postEditor.tagsPlaceholder', 'Tag1, Tag2（默认提取 3 个关键词）')} className="text-xs" />
               </div>
 
               {/* Publish time */}
               <div>
                 <Label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t('admin.postEditor.publishTime', '发布时间')}</Label>
-                <Input type="datetime-local" value={publishAt} onChange={(e) => setPublishAt(e.target.value)} className="h-9 text-xs" />
+                <Input type="datetime-local" value={publishAt} onChange={(e) => setPublishAt(e.target.value)} className="text-xs" />
               </div>
 
               <FootprintEditor
@@ -464,7 +484,6 @@ export default function CreatePostPage() {
                   <Button
                     type="button"
                     variant="ghost"
-                    size="sm"
                     disabled={excerptLoading}
                     className="h-auto gap-1 p-0 text-2xs text-primary hover:bg-transparent hover:text-primary/80"
                     onClick={async () => {
@@ -477,7 +496,7 @@ export default function CreatePostPage() {
                       setExcerptLoading(false);
                     }}
                   >
-                    {excerptLoading ? <Loader2 className="size-2.5 animate-spin" /> : <Sparkles className="size-2.5" />} {t('admin.postEditor.aiGenerate', 'AI 生成')}
+                    {excerptLoading ? <Loader2 className="animate-spin" /> : <Sparkles />} {t('admin.postEditor.aiGenerate', 'AI 生成')}
                   </Button>
                   )}
                 </div>
@@ -486,24 +505,32 @@ export default function CreatePostPage() {
 
               {/* Toggles */}
               <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="allowComment" className="cursor-pointer text-xs font-normal text-foreground">{t('admin.postEditor.allowComments', '允许评论')}</Label>
-                  <Switch id="allowComment" checked={allowComment} onCheckedChange={setAllowComment} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="allowRss" className="cursor-pointer text-xs font-normal text-foreground">{t('admin.postEditor.allowRss', '允许本文出现在 RSS 聚合')}</Label>
-                  <Switch id="allowRss" checked={allowRss} onCheckedChange={setAllowRss} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="pinned" className="cursor-pointer text-xs font-normal text-foreground">{t('admin.postEditor.pinned', '置顶文章')}</Label>
-                  <Switch id="pinned" checked={pinned} onCheckedChange={setPinned} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="privatePost" className="cursor-pointer text-xs font-normal text-foreground">{t('admin.postEditor.privatePost', '私密文章')}</Label>
-                  <Switch id="privatePost" checked={status === 'private'} onCheckedChange={(v) => setStatus(v ? 'private' : 'publish')} />
-                </div>
+                <ToggleRow
+                  id="allowComment"
+                  label={t('admin.postEditor.allowComments', '允许评论')}
+                  checked={allowComment}
+                  onCheckedChange={setAllowComment}
+                />
+                <ToggleRow
+                  id="allowRss"
+                  label={t('admin.postEditor.allowRss', '允许本文出现在 RSS 聚合')}
+                  checked={allowRss}
+                  onCheckedChange={setAllowRss}
+                />
+                <ToggleRow
+                  id="pinned"
+                  label={t('admin.postEditor.pinned', '置顶文章')}
+                  checked={pinned}
+                  onCheckedChange={setPinned}
+                />
+                <ToggleRow
+                  id="privatePost"
+                  label={t('admin.postEditor.privatePost', '私密文章')}
+                  checked={status === 'private'}
+                  onCheckedChange={(v) => setStatus(v ? 'private' : 'publish')}
+                />
                 {status === 'private' && (
-                  <Input value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t('admin.postEditor.passwordPlaceholder', '输入访问密码')} className="h-9 text-xs" />
+                  <Input value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t('admin.postEditor.passwordPlaceholder', '输入访问密码')} className="text-xs" />
                 )}
               </div>
             </div>
@@ -514,7 +541,7 @@ export default function CreatePostPage() {
       {/* Content Insert Modal */}
       <Dialog open={!!insertType} onOpenChange={(o) => !o && setInsertType(null)}>
         <DialogContent className="flex max-h-[70vh] w-125 max-w-[90vw] flex-col gap-0 p-0">
-          <DialogHeader className="border-b border-border px-5 py-3.5">
+          <DialogHeader className="border-b border-border px-5 py-4">
             <DialogTitle className="text-sm">
               {t('admin.postEditor.insertType', '插入{type}', { type: insertType ?? '' })}
             </DialogTitle>
@@ -568,7 +595,9 @@ export default function CreatePostPage() {
       </Dialog>
 
       {/* AI Processing Modal */}
-      <Dialog open={showAiModal} onOpenChange={(o) => { if (!o && !aiProcessing) setShowAiModal(false); }}>
+      {/* 处理中也允许关闭：/ai/polish 没有超时，卡住时把用户锁在模态里没有逃生出口。
+          关掉只是不看结果，请求继续跑完自然丢弃。 */}
+      <Dialog open={showAiModal} onOpenChange={setShowAiModal}>
         <DialogContent className="flex max-h-[80vh] w-140 max-w-[90vw] flex-col gap-0 p-0">
           <DialogHeader className="border-b border-border px-5 py-4">
             <DialogTitle className="flex items-center gap-1.5 text-sm-plus">
@@ -610,7 +639,7 @@ export default function CreatePostPage() {
                       } catch { toast.error(t('admin.postEditor.toast.aiUnavailable', 'AI 服务不可用')); }
                       setAiProcessing(false);
                     }}
-                    className="flex flex-col items-center gap-1 rounded-md border border-border bg-muted p-2.5 text-xs font-medium text-foreground transition-colors hover:border-primary disabled:cursor-wait disabled:opacity-50"
+                    className="flex flex-col items-center gap-1 border border-border bg-muted p-2.5 text-xs font-medium text-foreground transition-colors hover:border-primary disabled:cursor-wait disabled:opacity-50"
                   >
                     <Icon className="size-4.5" />
                     {item.label}
@@ -628,7 +657,7 @@ export default function CreatePostPage() {
               </div>
             )}
             {aiResult && !aiProcessing && (
-              <pre className="m-0 max-h-75 overflow-auto whitespace-pre-wrap break-words bg-muted p-3 font-mono text-xs leading-[1.7] text-foreground">
+              <pre className="m-0 max-h-75 overflow-auto whitespace-pre-wrap break-words bg-muted p-3 font-mono text-xs leading-relaxed text-foreground">
                 {aiResult}
               </pre>
             )}

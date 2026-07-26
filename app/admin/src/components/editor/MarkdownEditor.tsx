@@ -65,7 +65,6 @@ interface TBBtn {
   action: (ta: HTMLTextAreaElement, onChange: (v: string) => void) => void;
 }
 
-const TB_SIZE = 16;
 
 const toolbar: TBBtn[] = [
   // H1-H6 handled separately as dropdown

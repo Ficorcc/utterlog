@@ -1,7 +1,9 @@
 /**
  * 设置页 · Telegram tab。
  *
- * 从 Settings.tsx 里 `activeTab === 'telegram'` 那段整体搬过来的，JSX 一字未改。
+ * 从 Settings.tsx 里 `activeTab === 'telegram'` 那段整体搬过来的。
+ * Bot 连接原先是手写的上下堆叠表单，已改回 shared.tsx 的 Row 系列，跟本页
+ * 其它 section 一样是「左标签 + 右控件」的统一栅格。
  * Chat ID 的「获取」按钮要用父组件的 tgChats / fetchingChatId 局部 state，
  * 所以这两组 state 连同 setter 作为 prop 传进来。
  */
@@ -12,12 +14,12 @@ import type {
 import toast from 'react-hot-toast';
 import { Button, Input } from '@/components/ui/shadcn';
 import {
-  Search, Image as ImageIcon, Bell, UserCog,
+  Search, Image as ImageIcon, Bell, UserCog, Bot,
   Loader2, Plug, Link as LinkIcon, Megaphone, Users, User,
 } from 'lucide-react';
 import api from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
-import { Panel, SettingsSection, SwitchRow } from './shared';
+import { InputRow, Row, SettingsSection, SwitchRow } from './shared';
 
 export type TgChat = { id: string; type: string; name: string };
 
@@ -38,65 +40,68 @@ export default function TelegramTab({
 }) {
   return (
     <>
-      <Panel title={t('admin.settings.telegram.connection.section', 'Bot 连接')}>
-        <div className="flex flex-col gap-5">
-          <div className="space-y-1.5">
-            <label className="block text-xs-plus font-medium text-muted-foreground">Bot Token</label>
-            <Input type="password" placeholder={t('admin.settings.telegram.botTokenPlaceholder', '从 @BotFather 获取')} {...register('telegram_bot_token')} />
-            <p className="text-xs text-muted-foreground">{t('admin.settings.telegram.botFatherPrefix', '在 Telegram 中搜索')} <a href="https://t.me/BotFather" target="_blank" rel="noopener noreferrer" className="text-primary">@BotFather</a>{t('admin.settings.telegram.botFatherSuffix', '，发送 /newbot 创建')}</p>
+      <SettingsSection title={t('admin.settings.telegram.connection.section', 'Bot 连接')} icon={Bot}>
+        <InputRow
+          label="Bot Token"
+          hint={<>{t('admin.settings.telegram.botFatherPrefix', '在 Telegram 中搜索')} <a href="https://t.me/BotFather" target="_blank" rel="noopener noreferrer" className="text-primary">@BotFather</a>{t('admin.settings.telegram.botFatherSuffix', '，发送 /newbot 创建')}</>}
+          type="password"
+          placeholder={t('admin.settings.telegram.botTokenPlaceholder', '从 @BotFather 获取')}
+          register={register('telegram_bot_token')}
+        />
+        {/* 「获取」按钮和结果列表跟输入框是一件事，所以用 column 版 Row
+            手工包：上面一行输入框 + 按钮，下面挂拉回来的会话列表。 */}
+        <Row label="Chat ID" column>
+          <div className="flex w-full items-center gap-2">
+            <Input placeholder={t('admin.settings.telegram.chatIdPlaceholder', '你的用户/群组 ID')} className="min-w-0 flex-1" {...register('telegram_chat_id')} />
+            <Button
+              type="button"
+              variant="outline"
+              className="shrink-0 whitespace-nowrap"
+              disabled={fetchingChatId}
+              onClick={async () => {
+                setFetchingChatId(true);
+                setTgChats([]);
+                try {
+                  const vals = getValues();
+                  const r: any = await api.post('/telegram/get-chat-id', { bot_token: vals.telegram_bot_token });
+                  setTgChats(r.data?.chats || []);
+                  if (!r.data?.chats?.length) toast(r.data?.hint || t('admin.settings.telegram.noChats', '未找到聊天记录，请先向 Bot 发送一条消息'));
+                } catch (e: any) { toast.error(e?.response?.data?.error?.message || t('admin.common.fetchFailed', '获取失败')); }
+                finally { setFetchingChatId(false); }
+              }}
+            >
+              {fetchingChatId ? <Loader2 className="animate-spin" /> : <Search />}
+              {t('admin.common.fetch', '获取')}
+            </Button>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="block text-xs-plus font-medium text-muted-foreground">Chat ID</label>
-              <div className="flex gap-1.5">
-                <Input placeholder={t('admin.settings.telegram.chatIdPlaceholder', '你的用户/群组 ID')} className="min-w-0 flex-1" {...register('telegram_chat_id')} />
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="shrink-0 whitespace-nowrap"
-                  disabled={fetchingChatId}
-                  onClick={async () => {
-                    setFetchingChatId(true);
-                    setTgChats([]);
-                    try {
-                      const vals = getValues();
-                      const r: any = await api.post('/telegram/get-chat-id', { bot_token: vals.telegram_bot_token });
-                      setTgChats(r.data?.chats || []);
-                      if (!r.data?.chats?.length) toast(r.data?.hint || t('admin.settings.telegram.noChats', '未找到聊天记录，请先向 Bot 发送一条消息'));
-                    } catch (e: any) { toast.error(e?.response?.data?.error?.message || t('admin.common.fetchFailed', '获取失败')); }
-                    finally { setFetchingChatId(false); }
-                  }}
-                >
-                  {fetchingChatId ? <Loader2 className="size-3 animate-spin" /> : <Search className="size-3" />}
-                  {t('admin.common.fetch', '获取')}
-                </Button>
-              </div>
-              {tgChats.length > 0 && (
-                <div className="mt-1.5 overflow-hidden rounded-md border border-border">
-                  {tgChats.map((chat) => {
-                    const ChatIcon = chat.type === 'channel' ? Megaphone : (chat.type === 'group' || chat.type === 'supergroup') ? Users : User;
-                    return (
-                      <button
-                        key={chat.id}
-                        type="button"
-                        onClick={() => { reset({ ...getValues(), telegram_chat_id: chat.id }); setTgChats([]); }}
-                        className="flex w-full items-center gap-2 border-b border-border px-2.5 py-2 text-left text-xs last:border-b-0 hover:bg-accent"
-                      >
-                        <ChatIcon className="size-3 shrink-0 text-muted-foreground" />
-                        <span className="flex-1 text-foreground">{chat.name || t('admin.common.unknownWrapped', '(未知)')}</span>
-                        <span className="font-mono text-muted-foreground">{chat.id}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+          {tgChats.length > 0 && (
+            <div className="mt-1.5 overflow-hidden rounded-md border border-border">
+              {tgChats.map((chat) => {
+                const ChatIcon = chat.type === 'channel' ? Megaphone : (chat.type === 'group' || chat.type === 'supergroup') ? Users : User;
+                return (
+                  <button
+                    key={chat.id}
+                    type="button"
+                    onClick={() => { reset({ ...getValues(), telegram_chat_id: chat.id }); setTgChats([]); }}
+                    className="flex w-full items-center gap-2 border-b border-border px-2.5 py-2 text-left text-xs last:border-b-0 hover:bg-accent"
+                  >
+                    <ChatIcon className="size-3 shrink-0 text-muted-foreground" />
+                    <span className="flex-1 text-foreground">{chat.name || t('admin.common.unknownWrapped', '(未知)')}</span>
+                    <span className="font-mono text-muted-foreground">{chat.id}</span>
+                  </button>
+                );
+              })}
             </div>
-            <div className="space-y-1.5">
-              <label className="block text-xs-plus font-medium text-muted-foreground">Webhook Secret</label>
-              <Input type="password" placeholder={t('admin.settings.telegram.webhookSecretPlaceholder', '自定义密钥（可选）')} {...register('telegram_webhook_secret')} />
-            </div>
-          </div>
-          <div className="flex items-center gap-2.5 pt-1">
+          )}
+        </Row>
+        <InputRow
+          label="Webhook Secret"
+          type="password"
+          placeholder={t('admin.settings.telegram.webhookSecretPlaceholder', '自定义密钥（可选）')}
+          register={register('telegram_webhook_secret')}
+        />
+        <Row last>
+          <div className="flex w-full items-center gap-2.5">
             <Button
               type="button"
               variant="outline"
@@ -111,7 +116,7 @@ export default function TelegramTab({
                 } catch (e: any) { toast.error(e?.response?.data?.error?.message || t('admin.common.connectionFailed', '连接失败')); }
               }}
             >
-              <Plug className="size-3.5" /> {t('admin.common.testConnection', '测试连接')}
+              <Plug /> {t('admin.common.testConnection', '测试连接')}
             </Button>
             <Button
               type="button"
@@ -123,14 +128,16 @@ export default function TelegramTab({
                 } catch (e: any) { toast.error(e?.response?.data?.error?.message || t('admin.settings.telegram.webhookFailed', 'Webhook 设置失败')); }
               }}
             >
-              <LinkIcon className="size-3.5" /> {t('admin.settings.telegram.setupWebhook', '设置 Webhook')}
+              <LinkIcon /> {t('admin.settings.telegram.setupWebhook', '设置 Webhook')}
             </Button>
           </div>
-          <p className="border border-border bg-muted px-3 py-2.5 text-xs leading-loose text-muted-foreground">
+        </Row>
+        <div className="border-t border-border bg-muted px-3.5 py-2.5">
+          <p className="text-xs leading-relaxed text-muted-foreground">
             <strong>Webhook</strong> {t('admin.settings.telegram.webhookDescription', '是 Telegram 向你的服务器推送消息的回调地址。设置后，Bot 收到的消息会实时转发到你的博客后端，用于评论审批、回复等功能。需要先保存 Bot Token，再点「设置 Webhook」。')}
           </p>
         </div>
-      </Panel>
+      </SettingsSection>
 
       <SettingsSection title={t('admin.settings.telegram.notifications.section', '通知功能')} icon={Bell}>
         <SwitchRow label={t('admin.settings.telegram.notifications.newComment', '新评论通知')} name="tg_notify_comment" watch={watch} setValue={setValue} />

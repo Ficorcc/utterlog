@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
-import { Pencil, Trash2, Star, Loader2, Plus } from 'lucide-react';
+import { Star, Loader2 } from 'lucide-react';
 import { Button as ShadcnButton } from './shadcn/button';
 import { RowActions } from './row-actions';
 import { Card } from './shadcn/card';
+import { EmptyState } from './shadcn/empty-state';
 import { cn } from '@/lib/utils';
 
 // Shared admin composites, now rendered with the shadcn design system.
@@ -62,15 +63,17 @@ interface EmptyPanelProps {
   fontSize?: string | number;
 }
 
+/**
+ * EmptyPanel 现在是 shadcn EmptyState 的适配层，只保留默认标题。
+ *
+ * 两者本来是同一件事的两份实现，差别只在 title 颜色（muted vs foreground）
+ * 和按钮带不带 Plus 图标 —— 空状态在 20 处用 EmptyState、4 处用 EmptyPanel，
+ * 长相却不一样。EmptyState 是超集（多 description / icon），所以留它。
+ *
+ * 新代码直接用 EmptyState。
+ */
 export function EmptyPanel({ title = '暂无内容', actionText, onAction }: EmptyPanelProps) {
-  return (
-    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-      <p className="text-sm text-muted-foreground">{title}</p>
-      {actionText && onAction && (
-        <ShadcnButton variant="outline" size="sm" onClick={onAction}><Plus /> {actionText}</ShadcnButton>
-      )}
-    </div>
-  );
+  return <EmptyState title={title} actionText={actionText} onAction={onAction} />;
 }
 
 
@@ -104,7 +107,7 @@ export function RatingStars({ value, onChange, size = 18, gap = 4 }: RatingStars
   );
 }
 
-interface DialogFooterProps {
+interface DialogActionsProps {
   onCancel: () => void;
   onSubmit: () => void;
   submitting?: boolean;
@@ -112,7 +115,9 @@ interface DialogFooterProps {
   cancelText?: string;
 }
 
-export function DialogFooter({ onCancel, onSubmit, submitting, submitText = '保存', cancelText = '取消' }: DialogFooterProps) {
+// 成品动作栏（取消 + 提交 + loading），跟 shadcn/dialog 里那个只管布局的
+// DialogFooter 不是一回事 —— 之前两者同名，import 时得靠路径分辨。
+export function DialogActions({ onCancel, onSubmit, submitting, submitText = '保存', cancelText = '取消' }: DialogActionsProps) {
   return (
     <div className="flex justify-end gap-2 pt-1">
       <ShadcnButton variant="outline" onClick={onCancel}>{cancelText}</ShadcnButton>
@@ -129,41 +134,78 @@ interface MediaItemCardProps {
   onDelete: (id: number) => void;
   subtitle?: (item: any) => ReactNode;
   coverHeight?: number;
+  /** 无封面时的占位内容；传了才会强制画出封面区（音乐、相册都要占位方块）。 */
+  coverFallback?: ReactNode;
+  /** 叠在封面右上角的角标，比如公开/私有。 */
+  coverBadge?: (item: any) => ReactNode;
+  /** 点封面进详情（相册点封面进照片管理）。 */
+  onCoverClick?: (item: any) => void;
+  /** 整卡压暗，用于草稿/隐藏态。 */
+  dimmed?: (item: any) => boolean;
+  /** 操作行左侧的说明文字，比如来源平台、照片张数。 */
+  meta?: (item: any) => ReactNode;
+  /** 排在编辑/删除前面的额外操作，比如显示/隐藏切换。 */
+  extraActions?: (item: any) => ReactNode;
+  /** 是否渲染 item.comment 的评价段（音乐、相册没有这个字段，传 false）。 */
+  showComment?: boolean;
 }
 
-export function MediaItemCard({ item, onEdit, onDelete, subtitle, coverHeight = 160 }: MediaItemCardProps) {
+export function MediaItemCard({
+  item, onEdit, onDelete, subtitle, coverHeight = 160,
+  coverFallback, coverBadge, onCoverClick, dimmed, meta, extraActions,
+  showComment = true,
+}: MediaItemCardProps) {
+  const showCover = !!item.cover_url || !!coverFallback;
   return (
-    <Card className="overflow-hidden p-0">
-      {item.cover_url && (
-        <div className="w-full overflow-hidden bg-muted" style={{ height: coverHeight }}>
-          <img src={item.cover_url} alt={item.title} className="size-full object-cover" />
+    <Card className={cn('overflow-hidden p-0', dimmed?.(item) && 'opacity-50')}>
+      {showCover && (
+        <div
+          className={cn(
+            'relative flex w-full items-center justify-center overflow-hidden bg-muted',
+            onCoverClick && 'cursor-pointer',
+          )}
+          style={{ height: coverHeight }}
+          onClick={onCoverClick ? () => onCoverClick(item) : undefined}
+        >
+          {item.cover_url
+            ? <img src={item.cover_url} alt={item.title} className="size-full object-cover" />
+            : coverFallback}
+          {coverBadge?.(item)}
         </div>
       )}
       <div className="p-3.5">
-        <h3 className="mb-1 text-sm font-semibold text-foreground">{item.title}</h3>
-        {subtitle !== undefined ? <p className="mb-1.5 text-xs text-muted-foreground">{subtitle(item)}</p> : null}
+        {/* 标题和副标题都要 truncate：卡片宽度是 auto-fill 的，长标题不截断会把
+            卡片撑变形（Music 的歌名、Albums 的相册描述原本各自都带 truncate）。 */}
+        <h3 className="mb-1 truncate text-sm font-semibold text-foreground">{item.title}</h3>
+        {subtitle ? <p className="mb-1.5 truncate text-xs text-muted-foreground">{subtitle(item)}</p> : null}
         {item.rating > 0 && <div className="mb-1.5"><RatingStars value={item.rating} size={12} gap={2} /></div>}
-        {item.comment && <p className="line-clamp-2 text-xs text-muted-foreground">{item.comment}</p>}
-        <div className="mt-2"><RowActions onEdit={() => onEdit(item)} onDelete={() => onDelete(item.id)} /></div>
+        {/* 评价只有影音/图书/好物这类有，音乐和相册的数据里没有这个字段；
+            以前它们各写各的卡片，合并到这里后要能关掉，否则凭空多出一段文本。 */}
+        {showComment && item.comment && <p className="line-clamp-2 text-xs text-muted-foreground">{item.comment}</p>}
+        <div className="mt-2 flex items-center gap-2">
+          {meta && <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{meta(item)}</span>}
+          <RowActions
+            className={cn(!meta && 'flex-1')}
+            extra={extraActions?.(item)}
+            onEdit={() => onEdit(item)}
+            onDelete={() => onDelete(item.id)}
+          />
+        </div>
       </div>
     </Card>
   );
 }
 
-interface MediaItemGridProps {
+interface MediaItemGridProps extends Omit<MediaItemCardProps, 'item'> {
   items: any[];
-  onEdit: (item: any) => void;
-  onDelete: (id: number) => void;
-  subtitle?: (item: any) => ReactNode;
   minWidth?: number;
-  coverHeight?: number;
 }
 
-export function MediaItemGrid({ items, onEdit, onDelete, subtitle, minWidth = 240, coverHeight = 160 }: MediaItemGridProps) {
+export function MediaItemGrid({ items, minWidth = 240, ...card }: MediaItemGridProps) {
   return (
     <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${minWidth}px, 1fr))` }}>
       {items.map((item) => (
-        <MediaItemCard key={item.id} item={item} onEdit={onEdit} onDelete={onDelete} subtitle={subtitle} coverHeight={coverHeight} />
+        <MediaItemCard key={item.id} item={item} {...card} />
       ))}
     </div>
   );

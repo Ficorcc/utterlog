@@ -11,12 +11,16 @@ permissions:
   pull-requests: write
 
 jobs:
-  assign-author:
+  assign-maintainer:
     runs-on: ubuntu-latest
     steps:
-      - name: Assign issue / PR to its author
+      # assignee 的语义是「谁负责处理」，所以固定指派给维护者，而不是提交者
+      # —— 把 bug 指派给报告人等于让对方自己修。提交者是谁不用管，GitHub 本来
+      # 就在标题下方和列表行里显示 author，不需要这个 workflow 参与。
+      # 组织仓库下 github.repository_owner 是组织名，不能当 assignee，只能写死。
+      - name: Assign issue / PR to the maintainer
         uses: pozil/auto-assign-issue@v2
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          assignees: ${{ github.event.issue.user.login || github.event.pull_request.user.login }}
+          assignees: gentpan
           numOfAssignee: 1

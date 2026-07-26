@@ -6,7 +6,7 @@ import api from '@/lib/api';
 import { BrowserIcon, OSIcon, DeviceIcon } from '@/lib/tech-icons';
 import VisitorMap from '@/components/dashboard/VisitorMap';
 import {
-  Button, Card, Input, LoadingState, Pagination, Spinner,
+  Button, Card, Checkbox, Input, LoadingState, Pagination, Spinner,
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/shadcn';
@@ -177,7 +177,7 @@ export default function AnalyticsPage() {
             {/* Online users indicator */}
             <div className="relative">
               <Button variant="outline" size="sm" onClick={() => setOnlineOpen(!onlineOpen)}>
-                <span className="size-1.5 shrink-0 rounded-full bg-emerald-500 shadow-[0_0_6px_#22c55e]" />
+                <span className="size-1.5 shrink-0 rounded-full bg-emerald-500 shadow-[0_0_6px_var(--color-emerald-500)]" />
                 <span>{onlineUsers.length}</span>
                 <span>在线</span>
                 {onlineOpen ? <ChevronUp /> : <ChevronDown />}
@@ -358,7 +358,7 @@ function PurgeDialog({ onClose }: { onClose: () => void }) {
               {/* Options */}
               <div className="flex flex-col gap-2.5 rounded-md border border-border p-3.5">
                 <label className="flex cursor-pointer items-start gap-2">
-                  <input type="checkbox" checked={purgeBots} onChange={(e) => setPurgeBots(e.target.checked)} className="mt-0.5 size-4 accent-primary" />
+                  <Checkbox checked={purgeBots} onChange={(e) => setPurgeBots(e.target.checked)} className="mt-0.5" />
                   <div>
                     <div className="text-xs-plus font-medium text-foreground">清除爬虫记录</div>
                     <div className="mt-0.5 text-2xs text-muted-foreground">
@@ -368,7 +368,7 @@ function PurgeDialog({ onClose }: { onClose: () => void }) {
                 </label>
 
                 <label className="flex cursor-pointer items-start gap-2">
-                  <input type="checkbox" checked={purgeDupes} onChange={(e) => setPurgeDupes(e.target.checked)} className="mt-0.5 size-4 accent-primary" />
+                  <Checkbox checked={purgeDupes} onChange={(e) => setPurgeDupes(e.target.checked)} className="mt-0.5" />
                   <div>
                     <div className="text-xs-plus font-medium text-foreground">合并 30 秒内重复访问</div>
                     <div className="mt-0.5 text-2xs text-muted-foreground">
@@ -378,7 +378,7 @@ function PurgeDialog({ onClose }: { onClose: () => void }) {
                 </label>
 
                 <label className="flex items-start gap-2">
-                  <input type="checkbox" checked={!!olderDays} onChange={(e) => setOlderDays(e.target.checked ? '90' : '')} className="mt-0.5 size-4 accent-primary" />
+                  <Checkbox checked={!!olderDays} onChange={(e) => setOlderDays(e.target.checked ? '90' : '')} className="mt-0.5" />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 text-xs-plus font-medium text-foreground">
                       清除
@@ -475,7 +475,7 @@ function RecentVisitorsPanel() {
     <Card className="overflow-visible">
       <div className="flex items-center justify-between border-b border-border px-4 py-3">
         <h3 className="flex items-center text-xs-plus font-semibold text-foreground">
-          <Users className="mr-1.5 size-3.5 text-primary" />
+          <Users className="mr-1.5 size-4 text-primary" />
           最近访客
           <span className="ml-2 text-2xs font-normal text-muted-foreground">最近 7 天 · 上限 1000 条</span>
         </h3>

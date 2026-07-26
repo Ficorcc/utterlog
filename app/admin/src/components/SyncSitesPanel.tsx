@@ -303,7 +303,7 @@ export default function SyncSitesPanel({ platform = 'wordpress' }: SyncSitesPane
                     </TableCell>
                     <TableCell className="text-right">
                       <Button variant="outline" size="sm" className="text-destructive hover:text-destructive" onClick={() => setDeleteTarget(s)}>
-                        <Trash2 className="size-3.5" /> {t('admin.common.delete', '删除')}
+                        <Trash2 /> {t('admin.common.delete', '删除')}
                       </Button>
                     </TableCell>
                   </TableRow>

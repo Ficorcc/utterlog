@@ -1599,7 +1599,7 @@ export async function readerAiChatPayload(value: unknown, userId: number): Promi
   const postId = Number(body.post_id || body.postId || 0);
   // Keep the global chat bubble (post_id=0) independent from the article reader switch.
   if (postId > 0 && (await optionValue('ai_reader_chat_enabled', 'true')).toLowerCase() === 'false') {
-    throw new AiServiceError(404, 'READER_CHAT_DISABLED', '文章页 AI 伴读已关闭');
+    throw new AiServiceError(404, 'READER_CHAT_DISABLED', '文章页 AI 陪读已关闭');
   }
   const question = String(body.message || body.question || '').trim();
   let post: { id: number; title: string; excerpt: string | null; content: string | null; ai_questions: string | null } | null = null;

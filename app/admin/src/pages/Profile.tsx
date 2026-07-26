@@ -1,9 +1,8 @@
 
-import { useState, useEffect, useRef } from 'react';
-import { useAuthStore } from '@/lib/store';
+import { useState, useEffect} from 'react';
 import toast from 'react-hot-toast';
 import {
-  Button, Input, Label, Textarea, Card, Badge, ConfirmDialog,
+  Button, Input, Label, Textarea, Callout, Card, Badge, ConfirmDialog,
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/shadcn';
 import { RowAction } from '@/components/ui/row-actions';
@@ -36,16 +35,13 @@ function bufferToBase64url(buffer: ArrayBuffer): string {
 
 export default function ProfilePage() {
   const { locale, t } = useI18n();
-  const { user } = useAuthStore();
-  const [saving, setSaving] = useState(false);
+    const [saving, setSaving] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState('');
   const [gravatarUrl, setGravatarUrl] = useState('');
   const [utterlogAvatar, setUtterlogAvatar] = useState('');
   const [utterlogBound, setUtterlogBound] = useState(false);
   const [avatarSource, setAvatarSource] = useState('gravatar');
-  const [uploading, setUploading] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   // Original values for detecting changes
   const [origEmail, setOrigEmail] = useState('');
@@ -96,9 +92,8 @@ export default function ProfilePage() {
   const [socialSaving, setSocialSaving] = useState(false);
   const [showAddSocial, setShowAddSocial] = useState(false);
   const [newSocial, setNewSocial] = useState<SocialLink>({ icon: '', name: '', url: '' });
-  const socialQrRef = useRef<HTMLInputElement>(null);
 
-  const { register, handleSubmit, reset, getValues } = useForm({
+  const { register, handleSubmit, reset } = useForm({
     defaultValues: { nickname: '', email: '', username: '', bio: '', url: '' },
   });
 
@@ -160,7 +155,7 @@ export default function ProfilePage() {
       setPasskeys(prev => prev.filter(p => p.id !== deletePasskeyId));
       setDeletePasskeyId(null);
       toast.success(t('admin.profile.toast.deleted', '已删除'));
-    } catch { toast.error(t('admin.posts.toast.deleteFailed', '删除失败')); }
+    } catch { toast.error(t('admin.common.deleteFailed', '删除失败')); }
   };
 
   // Countdown timers
@@ -269,25 +264,6 @@ export default function ProfilePage() {
     finally { setChangingPassword(false); }
   };
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) { toast.error(t('admin.profile.toast.selectImage', '请选择图片文件')); return; }
-    setUploading(true);
-    try {
-      const fd = new FormData();
-      fd.append('file', file);
-      fd.append('folder', 'avatars');
-      const r: any = await api.post('/media/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      const url = r.data?.url || r.url;
-      if (url) {
-        setAvatarUrl(url);
-        await api.put('/profile', { avatar: url });
-        toast.success(t('admin.profile.toast.avatarUpdated', '头像已更新'));
-      }
-    } catch { toast.error(t('admin.common.uploadFailed', '上传失败')); }
-    finally { setUploading(false); if (fileRef.current) fileRef.current.value = ''; }
-  };
 
   const saveSocialLinks = async () => {
     setSocialSaving(true);
@@ -368,23 +344,23 @@ export default function ProfilePage() {
 
           <form onSubmit={handleSubmit(onSaveProfile)} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <Label>{t('admin.profile.username', '登录账号')}</Label>
+              <Label className="text-xs-plus text-foreground">{t('admin.profile.username', '登录账号')}</Label>
               <Input {...register('username')} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>{t('admin.profile.email', '邮箱')}</Label>
+              <Label className="text-xs-plus text-foreground">{t('admin.profile.email', '邮箱')}</Label>
               <Input type="email" {...register('email')} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>{t('admin.profile.nickname', '昵称')}</Label>
+              <Label className="text-xs-plus text-foreground">{t('admin.profile.nickname', '昵称')}</Label>
               <Input {...register('nickname')} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>{t('admin.profile.website', '个人网站')}</Label>
+              <Label className="text-xs-plus text-foreground">{t('admin.profile.website', '个人网站')}</Label>
               <Input placeholder="https://" {...register('url')} />
             </div>
             <div>
-              <Label className="mb-1.5 block">{t('admin.profile.bio', '简介')}</Label>
+              <Label className="mb-1.5 block text-xs-plus text-foreground">{t('admin.profile.bio', '简介')}</Label>
               <Textarea rows={3} {...register('bio')} placeholder={t('admin.profile.bioPlaceholder', '介绍一下自己…')} />
             </div>
             <p className="text-2xs text-muted-foreground">
@@ -404,19 +380,19 @@ export default function ProfilePage() {
           <h2 className="mb-4 text-sm-plus font-semibold text-foreground">{t('admin.profile.changePassword', '修改密码')}</h2>
           <form onSubmit={handlePwSubmit(onChangePassword)} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <Label>{t('admin.profile.currentPassword', '当前密码')}</Label>
+              <Label className="text-xs-plus text-foreground">{t('admin.profile.currentPassword', '当前密码')}</Label>
               <Input type="password" {...registerPw('current_password')} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>{t('admin.profile.newPassword', '新密码')}</Label>
+              <Label className="text-xs-plus text-foreground">{t('admin.profile.newPassword', '新密码')}</Label>
               <Input type="password" {...registerPw('new_password')} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>{t('admin.profile.confirmNewPassword', '确认新密码')}</Label>
+              <Label className="text-xs-plus text-foreground">{t('admin.profile.confirmNewPassword', '确认新密码')}</Label>
               <Input type="password" {...registerPw('confirm_password')} />
             </div>
             <div>
-              <Label className="mb-1.5 block">{t('admin.profile.emailCode', '邮箱验证码')}</Label>
+              <Label className="mb-1.5 block text-xs-plus text-foreground">{t('admin.profile.emailCode', '邮箱验证码')}</Label>
               <div className="flex gap-2">
                 <Input className="flex-1" placeholder={t('admin.profile.codePlaceholder', '输入验证码')} {...registerPw('verify_code')} />
                 <Button type="button" variant="outline" onClick={handlePwSendCode} disabled={pwSendingCode || pwCountdown > 0} className="shrink-0 whitespace-nowrap">
@@ -464,17 +440,17 @@ export default function ProfilePage() {
                       const inp = document.querySelector(`input[data-idx="${idx}"]`) as HTMLInputElement;
                       inp?.click();
                     }} title={t('admin.profile.uploadQr', '上传二维码')}>
-                      {link.qr ? <img src={link.qr} alt="" className="size-4.5 object-cover" /> : <QrCode className="size-3.5" />}
+                      {link.qr ? <img src={link.qr} alt="" className="size-4 object-cover" /> : <QrCode />}
                     </Button>
                   </>
                 ) : null}
                 {defaultSocialNames.includes(link.name) ? (
                   <Button type="button" variant="outline" size="icon-sm" className="shrink-0 text-muted-foreground" onClick={() => setSocialLinks(prev => prev.map((s, i) => i === idx ? { ...s, url: '', qr: undefined } : s))} title={t('admin.profile.clear', '清空')}>
-                    <Eraser className="size-3.5" />
+                    <Eraser />
                   </Button>
                 ) : (
                   <Button type="button" variant="outline" size="icon-sm" className="shrink-0 text-muted-foreground hover:text-destructive" onClick={() => setSocialLinks(prev => prev.filter((_, i) => i !== idx))}>
-                    <X className="size-3.5" />
+                    <X />
                   </Button>
                 )}
               </div>
@@ -514,7 +490,7 @@ export default function ProfilePage() {
           {/* Two-Factor Authentication */}
         <Card className="p-6">
           <div className="mb-4 flex items-center gap-2.5">
-            <ShieldCheck className="size-4.5 text-primary" />
+            <ShieldCheck className="size-4 text-primary" />
             <h2 className="text-sm-plus font-semibold text-foreground">{t('admin.profile.twoFactor', '两步验证')}</h2>
             {totpEnabled && (
               <Badge className="border-transparent bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
@@ -526,15 +502,12 @@ export default function ProfilePage() {
           {totpShowBackup ? (
             /* Show backup codes after enabling */
             <div>
-              <div className="mb-4 rounded-md border border-amber-500/30 bg-amber-500/15 p-4">
-                <p className="mb-2 flex items-center gap-1.5 text-xs-plus font-semibold text-amber-700 dark:text-amber-400">
-                  <TriangleAlert className="size-4" />
+              <Callout tone="warning" icon={<TriangleAlert className="text-amber-600 dark:text-amber-400" />} className="mb-4">
+                <div className="mb-1 font-semibold text-foreground">
                   {t('admin.profile.saveBackupCodes', '请保存以下备用码')}
-                </p>
-                <p className="text-xs text-amber-700 dark:text-amber-400">
-                  {t('admin.profile.backupCodesHint', '备用码仅显示一次，丢失验证器时可使用备用码登录。每个备用码只能使用一次。')}
-                </p>
-              </div>
+                </div>
+                {t('admin.profile.backupCodesHint', '备用码仅显示一次，丢失验证器时可使用备用码登录。每个备用码只能使用一次。')}
+              </Callout>
               <div className="mb-4 grid grid-cols-2 gap-2">
                 {totpBackupCodes.map((code, i) => (
                   <div key={i} className="rounded bg-muted px-3 py-2 text-center font-mono text-sm font-semibold tracking-wider text-foreground">
@@ -580,7 +553,7 @@ export default function ProfilePage() {
 
               {/* Manual secret */}
               <div className="mb-4">
-                <Label className="mb-1 block text-2xs text-muted-foreground">{t('admin.profile.manualSecret', '手动输入密钥')}</Label>
+                <Label className="mb-1 block text-xs-plus text-foreground">{t('admin.profile.manualSecret', '手动输入密钥')}</Label>
                 <div className="flex items-center gap-2">
                   <code className="flex-1 break-all rounded bg-muted px-3 py-2 text-xs-plus font-semibold tracking-wider text-foreground">
                     {totpSecret}
@@ -593,7 +566,7 @@ export default function ProfilePage() {
 
               {/* Verify code */}
               <div className="mb-4">
-                <Label className="mb-1.5 block">{t('admin.profile.confirmCode', '输入验证码确认')}</Label>
+                <Label className="mb-1.5 block text-xs-plus text-foreground">{t('admin.profile.confirmCode', '输入验证码确认')}</Label>
                 <Input
                   value={totpVerifyCode}
                   onChange={e => setTotpVerifyCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
@@ -654,11 +627,11 @@ export default function ProfilePage() {
               </p>
               <div className="mb-4 flex flex-col gap-3">
                 <div>
-                  <Label className="mb-1.5 block">{t('admin.profile.currentPassword', '当前密码')}</Label>
+                  <Label className="mb-1.5 block text-xs-plus text-foreground">{t('admin.profile.currentPassword', '当前密码')}</Label>
                   <Input value={totpDisablePw} onChange={e => setTotpDisablePw(e.target.value)} type="password" />
                 </div>
                 <div>
-                  <Label className="mb-1.5 block">{t('admin.profile.codeOrBackup', '验证码或备用码')}</Label>
+                  <Label className="mb-1.5 block text-xs-plus text-foreground">{t('admin.profile.codeOrBackup', '验证码或备用码')}</Label>
                   <Input value={totpDisableCode} onChange={e => setTotpDisableCode(e.target.value)} type="text" placeholder="000000" />
                 </div>
               </div>
@@ -746,7 +719,7 @@ export default function ProfilePage() {
         {/* Passkeys */}
         <Card className="p-6">
           <div className="mb-4 flex items-center gap-2.5">
-            <KeyRound className="size-4.5 text-primary" />
+            <KeyRound className="size-4 text-primary" />
             <h2 className="text-sm-plus font-semibold text-foreground">{t('admin.profile.passkeys', '通行密钥')}</h2>
             {passkeys.length > 0 && (
               <span className="text-xs text-muted-foreground">{t('admin.profile.passkeyCount', '{count} 个', { count: passkeys.length })}</span>
@@ -881,11 +854,11 @@ export default function ProfilePage() {
               {t('admin.profile.securityVerificationHint', '修改登录账号或邮箱需要验证身份，验证码将发送到当前邮箱。')}
             </p>
             <div className="flex flex-col gap-1.5">
-              <Label>{t('admin.profile.currentPassword', '当前密码')}</Label>
+              <Label className="text-xs-plus text-foreground">{t('admin.profile.currentPassword', '当前密码')}</Label>
               <Input type="password" value={verifyPassword} onChange={(e: any) => setVerifyPassword(e.target.value)} />
             </div>
             <div>
-              <Label className="mb-1.5 block">{t('admin.profile.emailCode', '邮箱验证码')}</Label>
+              <Label className="mb-1.5 block text-xs-plus text-foreground">{t('admin.profile.emailCode', '邮箱验证码')}</Label>
               <div className="flex gap-2">
                 <Input
                   value={verifyCode}

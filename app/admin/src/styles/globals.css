@@ -1,4 +1,9 @@
 @import "tailwindcss";
+/* Rombo tailwindcss-motion：纯编译期插件，只产 CSS 工具类，不带 JS 运行时。
+   提供 motion-{translate,scale,opacity,…}-{in,loop} 一族动画工具类，供
+   Rombo 那套 data-tea-motion-icon 图标直接使用。注意插件没有 draw-in，
+   描线动效仍走本文件底部自带的 icon-draw / icon-redraw。 */
+@plugin "tailwindcss-motion";
 
 /* ============================================================
  * shadcn/ui design tokens (Tailwind v4) — new admin UI system.
@@ -950,38 +955,6 @@ textarea.input {
   color: var(--color-text-dim);
   font-size: 12px;
   line-height: 1.6;
-}
-
-.settings-input {
-  width: 100%;
-  height: var(--ctrl-h-md);
-  padding: 0 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--ctrl-radius);
-  background: var(--color-bg-card);
-  color: var(--color-text-main);
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-textarea.settings-input {
-  height: auto;
-  min-height: 80px;
-  padding: 10px 12px;
-  line-height: 1.6;
-  resize: vertical;
-}
-
-.settings-input[type="range"] {
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-
-.settings-input:focus {
-  border-color: var(--color-focus-ring);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus-ring) 14%, transparent);
 }
 
 .settings-radio-group {
@@ -2102,7 +2075,7 @@ div:hover > .comment-hint { opacity: 0.75 !important; }
  *  - d 在两个形状之间插值、pathOffset 抖动这类还原不了的，按约定降级成
  *    scale / rotate / translateY 的轻微动效。
  *  组件侧一律用 Tailwind 任意值引用，例如
- *    animate-[icon-tilt_0.5s_ease-in-out] motion-reduce:animate-none
+ *    animate-[icon-chain-tug_0.6s_ease-in-out] motion-reduce:animate-none
  */
 
 /* 绕 viewBox 中心做 transform。.icon-origin-self 用的 fill-box 对
@@ -2144,11 +2117,26 @@ div:hover > .comment-hint { opacity: 0.75 !important; }
   100% { stroke-dashoffset: 0; opacity: 1; transform: scale(1); }
 }
 
-/* 小幅回摆 rotate [0, -5, 0]：link 的两段链子各绕自身中心拧一下。
-   比 icon-swing / icon-swing-damped 轻一个量级，不是同一个效果。 */
-@keyframes icon-tilt {
-  0%, 100% { transform: rotate(0deg); }
-  50%      { transform: rotate(-5deg); }
+/* 链子被拽两下，对应 pathLength [1, .97, 1, .97, 1] + pathOffset
+   [0, .05, 0, .05, 0]：pathLength 等价于 stroke-dasharray、pathOffset 等价于
+   stroke-dashoffset，两个都能动画，再叠一点回摆让拉扯看得出来。要求元素带
+   pathLength="1"，配 .icon-origin-self 让 rotate 绕自身中心（link）。 */
+@keyframes icon-chain-tug {
+  0%, 100% {
+    stroke-dasharray: 1 0;
+    stroke-dashoffset: 0;
+    transform: rotate(0deg);
+  }
+  25%, 75% {
+    stroke-dasharray: 0.93 0.07;
+    stroke-dashoffset: -0.05;
+    transform: rotate(-7deg);
+  }
+  50% {
+    stroke-dasharray: 1 0;
+    stroke-dashoffset: 0;
+    transform: rotate(0deg);
+  }
 }
 
 /* 抬起并停在半空 y: [0, -5, -3]、times [0, .6, 1]：map-pin 悬停时的抬升。

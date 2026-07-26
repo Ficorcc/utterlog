@@ -45,7 +45,18 @@
 
 ### 移除
 
-暂无。
+- **下线安全中心（不可逆，升级前请先备份）**：后台「安全」页及其全部功能移除——IP 封禁、安全事件时间线、CC 防护、GeoIP 地域封锁、全站 API 速率限制与 `require_login` 全站登录墙。请求链上的安全中间件一并摘除，`/api/v1/security/*` 接口不再存在。
+
+  升级会**删除** `ul_ip_bans`、`ul_security_events`、`ul_ip_reputation` 三张表（第三张自上线以来就无代码引用）。应用一启动即执行，无法回滚，需要留档请在升级前导出：
+
+  ```bash
+  set -a && . ./.env && set +a
+  PGPASSWORD="$DB_PASSWORD" pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" \
+    -t "${DB_PREFIX}ip_bans" -t "${DB_PREFIX}security_events" -t "${DB_PREFIX}ip_reputation" \
+    > security-tables-backup.sql
+  ```
+
+  受影响的防护能力请在反向代理层补齐，Nginx 用 `limit_req`、Caddy 用 `rate_limit`，登录接口尤其需要——原先 `/auth/login` 有 10 次/分钟的暴力破解限制。GeoIP 数据源选择（访客统计、评论归属地、足迹等仍在使用）已迁到「设置 → 第三方服务」，原有取值不变。
 
 ## [1.4.0] - 2026-07-24
 

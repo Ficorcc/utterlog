@@ -86,8 +86,8 @@ export function CoverInput({ value, onChange, folder, label, placeholder = 'http
               title={t('admin.cover.syncTitle', '将当前 URL 下载并保存到配置的存储')}
             >
               {fetching
-                ? <><Loader2 className="size-3.5 animate-spin" />{t('admin.cover.syncing', '同步中…')}</>
-                : <><CloudDownload className="size-3.5" />{t('admin.cover.syncToStorage', '同步到存储')}</>
+                ? <><Loader2 className="animate-spin" />{t('admin.cover.syncing', '同步中…')}</>
+                : <><CloudDownload />{t('admin.cover.syncToStorage', '同步到存储')}</>
               }
             </Button>
           </div>

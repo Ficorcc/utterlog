@@ -10,10 +10,10 @@
 
 import { useMemo } from 'react';
 import type { UseFormRegister, UseFormWatch } from 'react-hook-form';
-import { GitBranch, LocateFixed, Map, MapPin, Minimize2, type LucideIcon } from 'lucide-react';
+import { GitBranch, Globe, LocateFixed, Map, MapPin, Minimize2, type LucideIcon } from 'lucide-react';
 import { Input } from '@/components/ui/shadcn';
 import type { useI18n } from '@/lib/i18n';
-import { CredentialTest, Row, SettingsSection } from './shared';
+import { CredentialTest, Row, SelectRow, SettingsSection } from './shared';
 
 export default function ServicesTab({ t, register, watch }: {
   t: ReturnType<typeof useI18n>['t'];
@@ -118,6 +118,27 @@ export default function ServicesTab({ t, register, watch }: {
           ))}
         </SettingsSection>
       ))}
+
+      {/* GeoIP 数据源原先挂在已下线的安全中心页里，但读它的是访客统计、评论
+          归属地、足迹同步、天气和服务器出口 IP 识别 —— 全是第三方 IP 库的事，
+          所以跟着其它外部服务一起放这儿。 */}
+      <SettingsSection
+        title={t('admin.settings.services.geoip.section', 'IP 归属地')}
+        icon={Globe}
+        description={t('admin.settings.services.geoip.description', '访客统计、评论归属地、足迹和服务器出口 IP 识别都从这个数据源取。')}
+        inlineDescription
+      >
+        <SelectRow
+          label={t('admin.settings.services.geoip.provider', 'GeoIP 数据源')}
+          hint={t('admin.settings.services.geoip.providerHint', '国际源对境外 IP 更准，国内源对境内 IP 更准。')}
+          register={register('ip_geo_provider')}
+          options={[
+            { value: 'ipx', label: t('admin.settings.services.geoip.providerIpx', '国际默认源（国外更准确）') },
+            { value: 'cnip', label: t('admin.settings.services.geoip.providerCnip', '国内备用源（国内更准确）') },
+          ]}
+          last
+        />
+      </SettingsSection>
     </>
   );
 }

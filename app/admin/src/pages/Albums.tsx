@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import api, { mediaApi } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Plus, ImageIcon, Eye, EyeOff, Trash2, Check, Pencil, Loader2 } from 'lucide-react';
+import { Plus, ImageIcon, Eye, EyeOff, Trash2, Check } from 'lucide-react';
 import {
   Button,
   ConfirmDialog,
@@ -16,6 +16,8 @@ import {
 } from '@/components/ui/shadcn';
 import { RowAction } from '@/components/ui/row-actions';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/lib/i18n';
+import { AdminToolbar, DialogActions, MediaItemGrid } from '@/components/ui';
 
 interface Album {
   id: number;
@@ -30,6 +32,7 @@ interface Album {
 }
 
 export default function AlbumsPage() {
+  const { t } = useI18n();
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -58,7 +61,7 @@ export default function AlbumsPage() {
   };
 
   const handleCreate = async () => {
-    if (!form.title) { toast.error('请输入相册标题'); return; }
+    if (!form.title) { toast.error(t('admin.albums.titleRequired', '请输入相册标题')); return; }
     setSaving(true);
     try {
       await api.post('/albums', form);
@@ -66,7 +69,7 @@ export default function AlbumsPage() {
       setShowCreate(false);
       setForm({ title: '', slug: '', description: '', status: 'private' });
       fetchAlbums();
-    } catch { toast.error('创建失败'); }
+    } catch { toast.error(t('admin.common.createFailed', '创建失败')); }
     setSaving(false);
   };
 
@@ -78,7 +81,7 @@ export default function AlbumsPage() {
       toast.success('已更新');
       setEditAlbum(null);
       fetchAlbums();
-    } catch { toast.error('更新失败'); }
+    } catch { toast.error(t('admin.common.updateFailed', '更新失败')); }
     setSaving(false);
   };
 
@@ -97,9 +100,9 @@ export default function AlbumsPage() {
     setDeleting(true);
     try {
       await api.delete(`/albums/${deleteId}`);
-      toast.success('已删除');
+      toast.success(t('admin.common.deleted', '已删除'));
       fetchAlbums();
-    } catch { toast.error('删除失败'); }
+    } catch { toast.error(t('admin.common.deleteFailed', '删除失败')); }
     finally { setDeleting(false); setDeleteId(null); }
   };
 
@@ -109,7 +112,7 @@ export default function AlbumsPage() {
       await api.put(`/albums/${album.id}`, { status: newStatus });
       toast.success(newStatus === 'public' ? '已公开' : '已设为私有');
       fetchAlbums();
-    } catch { toast.error('操作失败'); }
+    } catch { toast.error(t('admin.common.operationFailed', '操作失败')); }
   };
 
   // Photo management
@@ -141,7 +144,7 @@ export default function AlbumsPage() {
       setShowAddPhotos(false);
       openManage(manageAlbum);
       fetchAlbums();
-    } catch { toast.error('添加失败'); }
+    } catch { toast.error(t('admin.common.addFailed', '添加失败')); }
   };
 
   const removePhoto = async (mediaId: number) => {
@@ -150,101 +153,92 @@ export default function AlbumsPage() {
       await api.delete(`/albums/${manageAlbum.id}/photos/${mediaId}`);
       setPhotos(prev => prev.filter((p: any) => p.id !== mediaId));
       fetchAlbums();
-    } catch { toast.error('移除失败'); }
+    } catch { toast.error(t('admin.common.removeFailed', '移除失败')); }
   };
 
   return (
     <div>
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <span className="mr-auto text-sm text-muted-foreground">管理照片相册，公开相册将在前端展示</span>
-        <Button size="icon" title="新建相册" onClick={openCreate}>
-          <Plus />
-        </Button>
-      </div>
+      <AdminToolbar
+        meta="管理照片相册，公开相册将在前端展示"
+        actions={
+          <Button size="icon" title={t('admin.albums.newAlbum', '新建相册')} onClick={openCreate}>
+            <Plus />
+          </Button>
+        }
+      />
 
       {loading ? (
         <LoadingState />
       ) : albums.length === 0 ? (
         <EmptyState title="暂无相册" actionText="创建第一个相册" onAction={openCreate} />
       ) : (
-        <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
-          {albums.map(album => (
-            <div key={album.id} className="overflow-hidden rounded-lg border border-border bg-card">
-              {/* Cover */}
-              <div className="relative flex h-40 cursor-pointer items-center justify-center bg-muted" onClick={() => openManage(album)}>
-                {album.cover_url ? (
-                  <img src={album.cover_url} alt="" className="size-full object-cover" />
-                ) : (
-                  <ImageIcon className="size-8 text-muted-foreground" />
-                )}
-                <div className={cn(
-                  'absolute right-2 top-2 rounded-sm px-2 py-0.5 text-2xs font-semibold',
-                  album.status === 'public' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-muted text-muted-foreground',
-                )}>
-                  {album.status === 'public' ? '公开' : '私有'}
-                </div>
-              </div>
-              {/* Info */}
-              <div className="p-3.5">
-                <h3 className="mb-1 text-sm font-semibold text-foreground">{album.title}</h3>
-                {album.description && <p className="mb-2 truncate text-xs text-muted-foreground">{album.description}</p>}
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">{album.photo_count} 张照片</span>
-                  <div className="flex gap-1">
-                    <RowAction
-                      icon={album.status === 'public' ? EyeOff : Eye}
-                      tone="warning"
-                      active={album.status === 'private'}
-                      title={album.status === 'public' ? '设为私有' : '公开'}
-                      onClick={() => toggleStatus(album)}
-                    />
-                    <RowAction icon={Pencil} title="编辑" onClick={() => openEdit(album)} />
-                    <RowAction icon={Trash2} tone="danger" title="删除" onClick={() => setDeleteId(album.id)} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <MediaItemGrid
+          showComment={false}
+          items={albums}
+          onEdit={openEdit}
+          onDelete={setDeleteId}
+          minWidth={280}
+          coverFallback={<ImageIcon className="size-8 text-muted-foreground" />}
+          onCoverClick={openManage}
+          coverBadge={(album) => (
+            <span className={cn(
+              'absolute right-2 top-2 px-2 py-0.5 text-2xs font-semibold',
+              album.status === 'public' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-muted text-muted-foreground',
+            )}>
+              {album.status === 'public' ? t('admin.common.public', '公开') : t('admin.common.private', '私有')}
+            </span>
+          )}
+          subtitle={(album) => album.description || ''}
+          meta={(album) => `${album.photo_count} 张照片`}
+          extraActions={(album) => (
+            <RowAction
+              icon={album.status === 'public' ? EyeOff : Eye}
+              tone="warning"
+              active={album.status === 'private'}
+              title={album.status === 'public' ? t('admin.albums.setPrivate', '设为私有') : t('admin.common.public', '公开')}
+              onClick={() => toggleStatus(album)}
+            />
+          )}
+        />
       )}
 
       {/* Create/Edit Modal */}
       <Dialog open={showCreate || !!editAlbum} onOpenChange={(o) => { if (!o) { setShowCreate(false); setEditAlbum(null); } }}>
         <DialogContent className="max-w-100">
           <DialogHeader>
-            <DialogTitle>{editAlbum ? '编辑相册' : '新建相册'}</DialogTitle>
+            <DialogTitle>{editAlbum ? t('admin.albums.editAlbum', '编辑相册') : t('admin.albums.newAlbum', '新建相册')}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-3.5">
             <div className="flex flex-col gap-1.5">
-              <Label>标题</Label>
+              <Label>{t('admin.common.title', '标题')}</Label>
               <Input value={form.title} onChange={(e: any) => setForm(p => ({ ...p, title: e.target.value }))} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>别名 (URL)</Label>
+              <Label>{t('admin.albums.slugUrl', '别名 (URL)')}</Label>
               <Input value={form.slug} onChange={(e: any) => setForm(p => ({ ...p, slug: e.target.value }))} placeholder="自动生成" />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>描述</Label>
+              <Label>{t('admin.common.description', '描述')}</Label>
               <Textarea rows={3} value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} placeholder="相册描述…" />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>可见性</Label>
+              <Label>{t('admin.albums.visibility', '可见性')}</Label>
               <Select value={form.status} onValueChange={v => setForm(p => ({ ...p, status: v as string }))}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="private">私有</SelectItem>
-                  <SelectItem value="public">公开</SelectItem>
+                  <SelectItem value="private">{t('admin.common.private', '私有')}</SelectItem>
+                  <SelectItem value="public">{t('admin.common.public', '公开')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex justify-end gap-2 pt-1">
-              <Button variant="outline" onClick={() => { setShowCreate(false); setEditAlbum(null); }}>取消</Button>
-              <Button onClick={editAlbum ? handleUpdate : handleCreate} disabled={saving}>
-                {saving && <Loader2 className="size-4 animate-spin" />}{editAlbum ? '更新' : '创建'}
-              </Button>
-            </div>
+            <DialogActions
+              onCancel={() => { setShowCreate(false); setEditAlbum(null); }}
+              onSubmit={editAlbum ? handleUpdate : handleCreate}
+              submitting={saving}
+              submitText={editAlbum ? t('admin.common.update', '更新') : t('admin.common.create', '创建')}
+            />
           </div>
         </DialogContent>
       </Dialog>
@@ -258,7 +252,7 @@ export default function AlbumsPage() {
           <div>
             <div className="mb-4 flex items-center justify-between">
               <span className="text-xs-plus text-muted-foreground">{photos.length} 张照片</span>
-              <Button onClick={openAddPhotos}><Plus className="size-4" /> 从媒体库添加</Button>
+              <Button onClick={openAddPhotos}><Plus /> {t('admin.albums.addFromMedia', '从媒体库添加')}</Button>
             </div>
             {photos.length === 0 ? (
               <EmptyState title="暂无照片，从媒体库添加" />
@@ -267,12 +261,17 @@ export default function AlbumsPage() {
                 {photos.map((photo: any) => (
                   <div key={photo.id} className="group relative aspect-square overflow-hidden bg-muted">
                     <img src={photo.url} alt="" className="size-full object-cover" />
-                    <button
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon-xs"
+                      title="移除"
+                      aria-label="移除"
                       onClick={() => removePhoto(photo.id)}
-                      className="absolute right-1 top-1 flex size-6 items-center justify-center rounded-sm bg-destructive text-destructive-foreground opacity-0 transition-opacity group-hover:opacity-100"
+                      className="absolute right-1 top-1 opacity-0 transition-opacity group-hover:opacity-100"
                     >
-                      <Trash2 className="size-3" />
-                    </button>
+                      <Trash2 />
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -285,7 +284,7 @@ export default function AlbumsPage() {
       <Dialog open={showAddPhotos} onOpenChange={(o) => !o && setShowAddPhotos(false)}>
         <DialogContent className="max-h-[calc(100vh-32px)] max-w-170 overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>从媒体库选择照片</DialogTitle>
+            <DialogTitle>{t('admin.albums.selectFromMedia', '从媒体库选择照片')}</DialogTitle>
           </DialogHeader>
           <div>
             {mediaList.length === 0 ? (
@@ -315,7 +314,7 @@ export default function AlbumsPage() {
                   })}
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setShowAddPhotos(false)}>取消</Button>
+                  <Button variant="outline" onClick={() => setShowAddPhotos(false)}>{t('admin.common.cancel', '取消')}</Button>
                   <Button onClick={addSelectedPhotos} disabled={selectedMedia.length === 0}>
                     添加 {selectedMedia.length > 0 ? `(${selectedMedia.length})` : ''}
                   </Button>

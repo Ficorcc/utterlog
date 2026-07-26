@@ -8,7 +8,7 @@ import { themesApi, type ExtensionManifest } from '@/lib/api';
 import FooterIconsEditor from '@/components/FooterIconsEditor';
 import AzureProfileSettings from '@/components/AzureProfileSettings';
 import MenusPage from './Menus';
-import { Button, buttonVariants, Card, ConfirmDialog, LoadingState } from '@/components/ui/shadcn';
+import { Button, buttonVariants, Callout, Card, ConfirmDialog, LoadingState } from '@/components/ui/shadcn';
 import { cn } from '@/lib/utils';
 
 export default function Themes() {
@@ -208,15 +208,13 @@ export default function Themes() {
 
       {/* Upload hint */}
       {requestedTheme && (
-        <div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-xs leading-relaxed text-muted-foreground">
-          <TriangleAlert className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" />
-          <p className="m-0">数据库记录的主题为 <strong>{requestedTheme}</strong>，但当前运行时不支持，前台实际渲染 <strong>{active}</strong>。请重新启用内置主题。</p>
-        </div>
+        <Callout tone="warning" icon={<TriangleAlert className="text-amber-600 dark:text-amber-400" />} className="mb-4">
+          数据库记录的主题为 <strong>{requestedTheme}</strong>，但当前运行时不支持，前台实际渲染 <strong>{active}</strong>。请重新启用内置主题。
+        </Callout>
       )}
-      <div className="mb-5 flex items-start gap-2 rounded-lg border border-border bg-muted px-4 py-3 text-xs leading-relaxed text-muted-foreground">
-        <Lightbulb className="mt-0.5 size-4 shrink-0 text-primary" />
-        <p className="m-0">主题包为 <code className="rounded bg-background px-1.5 py-0.5 text-2xs">.zip</code> 格式，根目录包含 <code className="rounded bg-background px-1.5 py-0.5 text-2xs">manifest.json</code>（含 <code>id / name / version</code>）。上传后自动解压到 <code className="rounded bg-background px-1.5 py-0.5 text-2xs">content/themes/&lt;id&gt;/</code>。</p>
-      </div>
+      <Callout tone="info" icon={<Lightbulb className="text-primary" />} className="mb-5">
+        主题包为 <code className="bg-background px-1.5 py-0.5 text-2xs">.zip</code> 格式，根目录包含 <code className="bg-background px-1.5 py-0.5 text-2xs">manifest.json</code>（含 <code>id / name / version</code>）。上传后自动解压到 <code className="bg-background px-1.5 py-0.5 text-2xs">content/themes/&lt;id&gt;/</code>。
+      </Callout>
 
       {/* Grid */}
       {loading ? (
@@ -311,7 +309,7 @@ export default function Themes() {
                         disabled
                         className="flex-1 border-primary bg-primary/10 text-primary opacity-100 disabled:opacity-100"
                       >
-                        <Check className="size-3.5" /> 当前主题
+                        <Check /> 当前主题
                       </Button>
                     ) : (
                       <Button
@@ -328,10 +326,10 @@ export default function Themes() {
                         href={theme.homepage}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'px-2.5')}
+                        className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'px-2.5 [&_svg]:size-3.5')}
                         title="主页"
                       >
-                        <ExternalLink className="size-3.5" />
+                        <ExternalLink />
                       </a>
                     )}
                     {!isActive && !theme.builtin && (
@@ -342,7 +340,7 @@ export default function Themes() {
                         onClick={() => setDeleteId(theme.id)}
                         title="删除"
                       >
-                        <Trash2 className="size-3.5" />
+                        <Trash2 />
                       </Button>
                     )}
                   </div>

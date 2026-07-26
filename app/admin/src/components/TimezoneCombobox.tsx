@@ -1,4 +1,5 @@
 import { useId, useMemo } from 'react';
+import { Input } from '@/components/ui/shadcn';
 
 // Comprehensive timezone list — 60+ major cities organized by UTC offset.
 // 想再加请加进来：[IANA, 中文城市, EN city]。UTC 偏移由 Intl 在渲染时
@@ -190,12 +191,13 @@ export function TimezoneCombobox({
 
   return (
     <>
-      <input
+      {/* 走 shadcn Input：原先挂的 .settings-input 是上一代设计系统的
+          全局类，跟同一行里的其它输入框已经对不上高度和描边了 */}
+      <Input
         type="text"
         list={listId}
         placeholder={placeholder || 'Asia/Shanghai'}
         autoComplete="off"
-        className="settings-input"
         {...register}
       />
       <datalist id={listId}>

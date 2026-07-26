@@ -1,9 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import type {
-  ForwardRefExoticComponent,
-  HTMLAttributes,
-  RefAttributes,
-} from 'react';
+import { useState } from 'react';
+import { AnimatedIcon } from '@/components/ui/animated-icon';
+import type { AnimatedIcon as AnimatedIconType } from '@/components/ui/animated-icon';
 import { AudioLinesIcon } from '@/components/ui/audio-lines';
 import { BookTextIcon } from '@/components/ui/book-text';
 import { BotIcon } from '@/components/ui/bot';
@@ -28,7 +25,6 @@ import { MonitorCheckIcon } from '@/components/ui/monitor-check';
 import { PlayIcon } from '@/components/ui/play';
 import { PlugZapIcon } from '@/components/ui/plug-zap';
 import { SettingsIcon } from '@/components/ui/settings';
-import { ShieldCheckIcon } from '@/components/ui/shield-check';
 import { SlidersHorizontalIcon } from '@/components/ui/sliders-horizontal';
 import { SparklesIcon } from '@/components/ui/sparkles';
 import { SquarePenIcon } from '@/components/ui/square-pen';
@@ -40,47 +36,13 @@ import VersionBadge from '@/components/VersionBadge';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 
-interface AnimatedIconHandle {
-  startAnimation: () => void;
-  stopAnimation: () => void;
-}
-
-type AnimatedIconProps = HTMLAttributes<HTMLDivElement> & { size?: number };
-type AnimatedIcon = ForwardRefExoticComponent<
-  AnimatedIconProps & RefAttributes<AnimatedIconHandle>
->;
-
-function SidebarIcon({
-  icon: Icon,
-  hovered,
-  size,
-  className,
-}: {
-  icon: AnimatedIcon;
-  hovered: boolean;
-  size: number;
-  className: string;
-}) {
-  const iconRef = useRef<AnimatedIconHandle>(null);
-
-  useEffect(() => {
-    if (hovered) {
-      iconRef.current?.startAnimation();
-    } else {
-      iconRef.current?.stopAnimation();
-    }
-  }, [hovered]);
-
-  return <Icon ref={iconRef} aria-hidden size={size} className={className} />;
-}
-
 interface MenuItem {
   to: string;
-  icon: AnimatedIcon;
+  icon: AnimatedIconType;
   label: string;
   key?: string;
   sub?: string;
-  children?: { to: string; icon: AnimatedIcon; label: string }[];
+  children?: { to: string; icon: AnimatedIconType; label: string }[];
 }
 
 // Use the closest animated semantic icon where lucide-animated has no exact
@@ -123,7 +85,6 @@ const menuItems: MenuItem[] = [
     ],
   },
   { to: '/analytics', icon: ChartLineIcon, label: '统计', sub: 'Analytics' },
-  { to: '/security', icon: ShieldCheckIcon, label: '安全', sub: 'Security' },
   { to: '/themes', icon: ContrastIcon, label: '主题', sub: 'Themes' },
   { to: '/plugins', icon: PlugZapIcon, label: '插件', sub: 'Plugins' },
   { to: '/tools', icon: WrenchIcon, label: '工具', sub: 'Tools' },
@@ -157,7 +118,6 @@ const navKeys: Record<string, string> = {
   '/media': 'admin.nav.media',
   '/albums': 'admin.nav.albums',
   '/analytics': 'admin.nav.analytics',
-  '/security': 'admin.nav.security',
   '/themes': 'admin.nav.themes',
   '/plugins': 'admin.nav.plugins',
   '/tools': 'admin.nav.tools',
@@ -201,7 +161,7 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
             // chevron render at the same height as plain rows.
             className="flex h-10 w-full items-center gap-2.5 border-l-2 border-transparent bg-transparent px-3.5 text-sm text-muted-foreground"
           >
-            <SidebarIcon
+            <AnimatedIcon
               icon={Icon}
               hovered={hoveredMenuItem === hoverKey}
               size={16}
@@ -216,14 +176,14 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
               )}
             </span>
             {expanded ? (
-              <SidebarIcon
+              <AnimatedIcon
                 icon={ChevronDownIcon}
                 hovered={hoveredMenuItem === hoverKey}
                 size={10}
                 className="flex size-2.5 shrink-0 items-center justify-center"
               />
             ) : (
-              <SidebarIcon
+              <AnimatedIcon
                 icon={ChevronRightIcon}
                 hovered={hoveredMenuItem === hoverKey}
                 size={10}
@@ -245,7 +205,7 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
                       isActive ? 'bg-muted text-primary' : 'text-muted-foreground',
                     )}
                   >
-                    <SidebarIcon
+                    <AnimatedIcon
                       icon={ChildIcon}
                       hovered={hoveredMenuItem === childHoverKey}
                       size={14}
@@ -279,7 +239,7 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
               collapsed ? 'justify-center' : 'justify-start',
             )}
           >
-            <SidebarIcon
+            <AnimatedIcon
               icon={Icon}
               hovered={hoveredMenuItem === hoverKey}
               size={16}
