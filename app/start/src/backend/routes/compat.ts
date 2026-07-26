@@ -2038,18 +2038,30 @@ export async function doubanImportPayload(input: Record<string, unknown>) {
     tip: '推荐使用 NeoDB (neodb.social) 绑定豆瓣账号后，通过 NeoDB API 批量导入' };
 }
 
+/**
+ * 订阅时间线只看最近 30 天**发布**的文章。
+ *
+ * 按 pub_date 而不是 created_at 过滤：created_at 是入库时间，各站 RSS 里挂着的
+ * 陈年旧文每次刷新都会被重新抓进来，按入库时间算等于全都是「最近的」——库里
+ * 1059 条按 created_at 全在 30 天内，按 pub_date 只有 109 条是真的近期更新。
+ */
+const FEED_WINDOW_SECONDS = 30 * 24 * 3600;
+
 export async function socialFeedTimeline(userId: number, query: URLSearchParams) {
   const page = Math.max(1, intParam(query.get('page') || undefined, 1));
   const perPage = Math.min(500, Math.max(1, intParam(query.get('per_page') || undefined, 20)));
+  const since = nowUnix() - FEED_WINDOW_SECONDS;
   const total = await one<{ count: string }>(
     `select count(*)::text as count from ${table('feed_items')} fi
-     join ${table('rss_subscriptions')} rs on fi.subscription_id = rs.id where rs.user_id = $1`, [userId],
+     join ${table('rss_subscriptions')} rs on fi.subscription_id = rs.id
+     where rs.user_id = $1 and fi.pub_date >= $2`, [userId, since],
   ).catch(() => null);
   const rows = await many<Record<string, unknown>>(
     `select fi.*, rs.site_name, rs.site_url from ${table('feed_items')} fi
      join ${table('rss_subscriptions')} rs on fi.subscription_id = rs.id
-     where rs.user_id = $1 order by fi.pub_date desc nulls last, fi.id desc limit $2 offset $3`,
-    [userId, perPage, (page - 1) * perPage],
+     where rs.user_id = $1 and fi.pub_date >= $2
+     order by fi.pub_date desc nulls last, fi.id desc limit $3 offset $4`,
+    [userId, since, perPage, (page - 1) * perPage],
   ).catch(() => []);
   const count = Number(total?.count || 0);
   return { rows, meta: { total: count, page, per_page: perPage, total_pages: Math.max(1, Math.ceil(count / perPage)) } };
@@ -2057,15 +2069,20 @@ export async function socialFeedTimeline(userId: number, query: URLSearchParams)
 
 export async function socialFeedStats(userId: number) {
   const sevenDaysAgo = nowUnix() - 7 * 24 * 3600;
+  const since = nowUnix() - FEED_WINDOW_SECONDS;
   const [count7d, countTotal, rssCount, lastFetched] = await Promise.all([
     one<{ count: string }>(
       `select count(*)::text as count from ${table('feed_items')} fi
-       join ${table('rss_subscriptions')} rs on fi.subscription_id = rs.id where rs.user_id = $1 and fi.created_at >= $2`,
+       join ${table('rss_subscriptions')} rs on fi.subscription_id = rs.id
+       where rs.user_id = $1 and fi.pub_date >= $2`,
       [userId, sevenDaysAgo],
     ).catch(() => null),
+    // 跟时间线同一个窗口 —— 页面上的「N 篇文章」必须跟实际能翻到的条数对得上，
+    // 否则显示 1059 却只列得出 109 条
     one<{ count: string }>(
       `select count(*)::text as count from ${table('feed_items')} fi
-       join ${table('rss_subscriptions')} rs on fi.subscription_id = rs.id where rs.user_id = $1`, [userId],
+       join ${table('rss_subscriptions')} rs on fi.subscription_id = rs.id
+       where rs.user_id = $1 and fi.pub_date >= $2`, [userId, since],
     ).catch(() => null),
     one<{ count: string }>(`select count(*)::text as count from ${table('rss_subscriptions')} where user_id = $1`, [userId]).catch(() => null),
     one<{ last_fetched_at: string }>(

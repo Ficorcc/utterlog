@@ -195,7 +195,7 @@ export default function LegacyFeedsView() {
           // 类名 —— 只有 Renascent 一个主题定义了样式，其余四个主题拿到会是
           // 无样式的裸 span，所以这里用「·」分隔。
           <>
-            <strong>{stats?.count_total ?? items.length}</strong> 篇文章
+            <strong>{stats?.count_total ?? items.length}</strong> 篇近月更新
             {stats?.rss_count ? <> · <strong>{stats.rss_count}</strong> 个 RSS</> : null}
             {stats?.last_fetched_at ? <> · <strong>{timeAgo(stats.last_fetched_at)}</strong> 更新</> : null}
           </>

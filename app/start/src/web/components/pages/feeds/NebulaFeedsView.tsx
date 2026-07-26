@@ -232,7 +232,7 @@ export default function NebulaFeedsView() {
         meta={
           <>
             <span className="blog-page-title-stat">
-              <strong>{stats ? stats.count_total : items.length}</strong> 篇文章
+              <strong>{stats ? stats.count_total : items.length}</strong> 篇近月更新
             </span>
             {stats && (
               <span className="blog-page-title-stat">
