@@ -81,6 +81,20 @@ async function fetchWithLimit(url: string, maxBytes: number, accept: string) {
 }
 
 /**
+ * 取 HTML 标签的属性值，双引号 / 单引号 / 不加引号三种写法都认。
+ *
+ * 不加引号是 HTML5 的合法写法，而且真的有人这么写 —— 实测友链里就有
+ * `<link rel=icon href=https://…/x.png>` 和 `<link rel="shortcut icon" href=/x.ico>`。
+ * 早先只认带引号的版本，这两个站点被判成「没有图标」，白白退回外部服务。
+ */
+function tagAttr(tag: string, name: string): string {
+  const pattern = new RegExp(`\\b${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'\`=<>]+))`, 'i');
+  const match = pattern.exec(tag);
+  if (!match) return '';
+  return (match[1] ?? match[2] ?? match[3] ?? '').trim();
+}
+
+/**
  * 从 HTML 里挑图标地址，按尺寸从大到小。
  *
  * 只认 link 标签的 rel，不做完整 HTML 解析 —— 目标是拿一个 URL，正则足够，
@@ -90,12 +104,12 @@ export function extractIconCandidates(html: string, baseUrl: string): string[] {
   const candidates: { href: string; score: number }[] = [];
   for (const match of html.matchAll(/<link\b[^>]*>/gi)) {
     const tag = match[0];
-    const rel = /\brel\s*=\s*["']?([^"'>]+)/i.exec(tag)?.[1]?.toLowerCase() || '';
-    if (!/\b(icon|apple-touch-icon|apple-touch-icon-precomposed|shortcut icon)\b/.test(rel)) continue;
-    const href = /\bhref\s*=\s*["']([^"']+)/i.exec(tag)?.[1]?.trim();
+    const rel = tagAttr(tag, 'rel').toLowerCase();
+    if (!/(^|\s)(shortcut\s+icon|icon|apple-touch-icon|apple-touch-icon-precomposed)(\s|$)/.test(rel)) continue;
+    const href = tagAttr(tag, 'href');
     if (!href || href.startsWith('data:')) continue;
     // sizes="180x180" 里取宽度当分数；apple-touch-icon 通常比 favicon 清晰，给个底分
-    const sizes = /\bsizes\s*=\s*["']?(\d+)x/i.exec(tag)?.[1];
+    const sizes = /^(\d+)x/i.exec(tagAttr(tag, 'sizes'))?.[1];
     const score = Number(sizes) || (rel.includes('apple') ? 180 : 32);
     try {
       candidates.push({ href: new URL(href, baseUrl).toString(), score });

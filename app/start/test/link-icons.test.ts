@@ -78,6 +78,34 @@ describe('从 HTML 里挑图标', () => {
     expect(extractIconCandidates(html, base)).toEqual(['https://example.com/fav.ico']);
   });
 
+  test('属性不加引号也要认 —— HTML5 合法写法，友链里真有', () => {
+    // 早先 href 的正则强制要求引号，这两个站点被判成「没有图标」白白退回外部服务。
+    // 左边是 thirdshire.com 的写法，右边是 koobai.com 的。
+    expect(extractIconCandidates('<link rel="shortcut icon" href=/knitting.ico>', base))
+      .toEqual(['https://example.com/knitting.ico']);
+    expect(extractIconCandidates('<link rel=icon href=https://img.koobai.com/koobai.png>', base))
+      .toEqual(['https://img.koobai.com/koobai.png']);
+  });
+
+  test('无引号的 rel 不能把后面的属性一起吃进来', () => {
+    // rel 的值到空格为止；早先的 [^"'>]+ 会一路吃到 '>'，把 href 也算进 rel 里
+    expect(extractIconCandidates('<link rel=stylesheet href=/app.css>', base)).toEqual([]);
+    expect(extractIconCandidates('<link rel=preload href=/icon.png as=image>', base)).toEqual([]);
+  });
+
+  test('三种引号写法混排都能取到 sizes', () => {
+    const html = `
+      <link rel=icon sizes=16x16 href=/a.png>
+      <link rel='icon' sizes='64x64' href='/b.png'>
+      <link rel="icon" sizes="32x32" href="/c.png">
+    `;
+    expect(extractIconCandidates(html, base)).toEqual([
+      'https://example.com/b.png',
+      'https://example.com/c.png',
+      'https://example.com/a.png',
+    ]);
+  });
+
   test('data: 内联图标跳过 —— 抓下来也没有可缓存的地址', () => {
     const html = `<link rel="icon" href="data:image/png;base64,iVBORw0KGgo=">`;
     expect(extractIconCandidates(html, base)).toEqual([]);
