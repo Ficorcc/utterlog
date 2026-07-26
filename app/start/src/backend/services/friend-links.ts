@@ -16,6 +16,8 @@ export type FriendLink = {
   url: string;
   email: string;
   logo: string;
+  /** 抓回来存在本地的站点图标路径，如 /uploads/link-icons/example.com.webp */
+  iconUrl: string;
 };
 
 /** 给前台的友链标记。**只有名字和站点地址** —— 邮箱不出这个边界。 */
@@ -34,8 +36,9 @@ let snapshot: IndexSnapshot | null = null;
 let loading: Promise<IndexSnapshot> | null = null;
 
 async function loadIndex(): Promise<IndexSnapshot> {
-  const rows = await many<{ id: number; name: string; url: string; email: string; logo: string }>(
-    `select id, name, coalesce(url,'') as url, coalesce(email,'') as email, coalesce(logo,'') as logo
+  const rows = await many<{ id: number; name: string; url: string; email: string; logo: string; icon_url: string }>(
+    `select id, name, coalesce(url,'') as url, coalesce(email,'') as email, coalesce(logo,'') as logo,
+            coalesce(icon_url,'') as icon_url
      from ${table('links')} where status = 1 and coalesce(url,'') <> ''`,
   ).catch(() => []);
   const links: FriendLink[] = rows.map((row) => ({
@@ -44,6 +47,7 @@ async function loadIndex(): Promise<IndexSnapshot> {
     url: String(row.url || ''),
     email: String(row.email || ''),
     logo: String(row.logo || ''),
+    iconUrl: String(row.icon_url || ''),
   }));
   return { index: buildSiteIndex(links, (link) => link.url), loadedAt: Date.now() };
 }
@@ -77,13 +81,22 @@ export function matchFriendBadge(url: string, index: Map<string, FriendLink>): F
   return hit ? { name: hit.name, url: hit.url } : null;
 }
 
-/** 友链头像：手填 logo 优先，其次邮箱算 gravatar，都没有交给调用方兜底。 */
-export function friendLinkAvatar(link: Pick<FriendLink, 'email' | 'logo'>, size = 64): string {
+/**
+ * 友链头像，四级降级：
+ *
+ *   1. logo        —— 手填的，人工设置永远最优先
+ *   2. Gravatar    —— 站长本人的头像，比站点图标更像「一个人」
+ *   3. icon_url    —— 抓回来存在本地的站点 favicon，给没留邮箱的友链兜底
+ *   4. 空          —— 交给前台回落到 favicon 服务（实时，不占本地存储）
+ */
+export function friendLinkAvatar(link: Partial<Pick<FriendLink, 'email' | 'logo' | 'iconUrl'>>, size = 64): string {
   if (link.logo) return link.logo;
-  const email = link.email.trim().toLowerCase();
-  if (!email) return '';
-  const hash = createHash('md5').update(email).digest('hex');
-  return `https://gravatar.bluecdn.com/avatar/${hash}?s=${size}&d=mp`;
+  const email = String(link.email || '').trim().toLowerCase();
+  if (email) {
+    const hash = createHash('md5').update(email).digest('hex');
+    return `https://gravatar.bluecdn.com/avatar/${hash}?s=${size}&d=mp`;
+  }
+  return String(link.iconUrl || '');
 }
 
 export type LinkEmailSuggestion = {
@@ -127,6 +140,7 @@ export async function suggestLinkEmails(): Promise<LinkEmailSuggestion[]> {
     url: String(row.url || ''),
     email: String(row.email || ''),
     logo: '',
+    iconUrl: '',
   }));
   const index = buildSiteIndex(rows, (link) => link.url);
 

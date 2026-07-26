@@ -187,6 +187,10 @@ export async function runCoreMigrations() {
   await sql.unsafe(`alter table ${table('links')} add column if not exists source_site_uuid varchar(80) default ''`);
   await sql.unsafe(`alter table ${table('links')} add column if not exists source_type varchar(32) default ''`);
   await sql.unsafe(`alter table ${table('links')} add column if not exists source_id varchar(100) default ''`);
+  // 抓回来存在本地的站点图标，跟用户手填的 logo 分开放：手填的优先级更高，
+  // 抓取覆盖它就把人工设置弄丢了。
+  await sql.unsafe(`alter table ${table('links')} add column if not exists icon_url varchar(500) default ''`);
+  await sql.unsafe(`alter table ${table('links')} add column if not exists icon_fetched_at bigint default 0`);
   await sql.unsafe(`create unique index if not exists idx_posts_sync_provenance on ${table('posts')} (source_site_uuid, source_type, source_id) where source_site_uuid != ''`);
   await sql.unsafe(`create unique index if not exists idx_comments_sync_provenance on ${table('comments')} (source_site_uuid, source_type, source_id) where source_site_uuid != ''`);
   await sql.unsafe(`create unique index if not exists idx_metas_sync_provenance on ${table('metas')} (source_site_uuid, source_type, source_id) where source_site_uuid != ''`);

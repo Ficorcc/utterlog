@@ -536,7 +536,7 @@ export async function listPublicContent(name: PublicContentTable, params: { page
     data: name === 'links'
       ? rows.map(({ email, ...rest }) => ({
           ...rest,
-          avatar: friendLinkAvatar({ email: String(email || ''), logo: String(rest.logo || '') }, 128),
+          avatar: friendLinkAvatar({ email: String(email || ''), logo: String(rest.logo || ''), iconUrl: String(rest.icon_url || '') }, 128),
         }))
       : Array.from(rows),
     meta: { total: count, page, per_page: perPage, total_pages: Math.max(1, Math.ceil(count / perPage)) },

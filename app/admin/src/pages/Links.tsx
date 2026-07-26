@@ -184,11 +184,29 @@ export default function LinksPage() {
     }
   };
 
-  const refreshIcons = () => {
+  // 真的去把各站点的图标抓回来存本地（手填过 logo 的会跳过），不是刷浏览器缓存。
+  // 几十个外部请求，慢的时候要十几秒，所以按钮保持 loading 到结束。
+  const refreshIcons = async () => {
     setBusy('icon');
-    setIconBust(Date.now());
-    setTimeout(() => setBusy(null), 400);
-    toast.success(t('admin.links.toast.iconsRefreshed', '已刷新所有友链图标缓存'));
+    try {
+      const r: any = await api.post('/admin/link-icons');
+      const d = r?.data || r;
+      const ok = Number(d?.ok ?? 0);
+      const failed = Number(d?.failed ?? 0);
+      setIconBust(Date.now());
+      await fetchLinks();
+      if (failed > 0) {
+        toast.success(t('admin.links.toast.iconsFetchedWithFailures', '已抓取 {ok} 个图标，{failed} 个失败', { ok, failed }));
+      } else if (ok > 0) {
+        toast.success(t('admin.links.toast.iconsFetched', '已抓取 {ok} 个站点图标', { ok }));
+      } else {
+        toast.success(t('admin.links.toast.iconsNothingToFetch', '没有需要抓取的友链'));
+      }
+    } catch (e: any) {
+      toast.error(e?.response?.data?.error?.message || t('admin.links.toast.iconsFetchFailed', '抓取图标失败'));
+    } finally {
+      setBusy(null);
+    }
   };
 
   const clearRSSCache = async () => {
@@ -636,7 +654,8 @@ export default function LinksPage() {
                 </TableCell>
               </TableRow>
             ) : filteredLinks.map((link: any, i: number) => {
-              const baseFavicon = link.logo || siteFaviconUrl(link.url);
+              // avatar 是服务端按 logo → Gravatar → 本地图标 算好的；都没有才回落 favicon 服务
+              const baseFavicon = link.avatar || link.logo || siteFaviconUrl(link.url);
               const favicon = baseFavicon ? `${baseFavicon}${baseFavicon.includes('?') ? '&' : '?'}v=${iconBust}` : '';
               return (
                 <TableRow key={link.id}>

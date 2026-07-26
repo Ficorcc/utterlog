@@ -156,7 +156,7 @@ async function mirrorLinkRssSubscription(link: Record<string, unknown>) {
       siteUrl, feedUrl, String(link.name || siteUrl),
       // 订阅页的头像就是这一列 —— 带上 Gravatar 兜底，回填过邮箱的友链在订阅页
       // 也能显示头像，不用再退回 favicon 服务
-      friendLinkAvatar({ email: String(link.email || ''), logo: String(link.logo || '') }, 128),
+      friendLinkAvatar({ email: String(link.email || ''), logo: String(link.logo || ''), iconUrl: String(link.icon_url || '') }, 128),
       nowUnix(),
     ],
   );
@@ -175,7 +175,7 @@ async function mirrorLinkRssSubscription(link: Record<string, unknown>) {
  */
 function publicLinkRow(row: Record<string, unknown>, authed?: boolean) {
   const email = String(row.email || '');
-  const avatar = friendLinkAvatar({ email, logo: String(row.logo || '') }, 128);
+  const avatar = friendLinkAvatar({ email, logo: String(row.logo || ''), iconUrl: String(row.icon_url || '') }, 128);
   if (authed) return { ...row, avatar };
   const { email: _omitted, ...rest } = row;
   return { ...rest, avatar };
