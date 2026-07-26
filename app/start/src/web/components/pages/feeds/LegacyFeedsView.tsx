@@ -64,8 +64,13 @@ function decodeEntities(s: string): string {
   return el.value;
 }
 
+type FeedStats = { rss_count: number; count_total: number; last_fetched_at: number };
+
 export default function LegacyFeedsView() {
   const [items, setItems] = useState<FeedItem[]>([]);
+  // 订阅源数 / 总文章数 / 最后抓取时间。标题栏原本只显示 items.length，
+  // 那是「当前已加载」的条数，滚动加载时会一直变，看不出订阅规模。
+  const [stats, setStats] = useState<FeedStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
@@ -96,6 +101,10 @@ export default function LegacyFeedsView() {
 
   useEffect(() => {
     loadFeeds(1, true);
+    // 统计单独取：接口很轻（四个 count），失败也不该影响文章列表渲染
+    api.get('/social/feed-stats')
+      .then((r: any) => setStats(r.data || r))
+      .catch(() => {});
   }, []);
 
   // One-shot auto-load when the sentinel scrolls into view. After it
@@ -181,7 +190,16 @@ export default function LegacyFeedsView() {
       <PageTitle
         title="订阅"
         icon="fa-sharp fa-light fa-rss"
-        meta={<><strong>{items.length}</strong> 篇文章</>}
+        meta={
+          // 措辞与 NebulaFeedsView 保持一致；但不用它那个 blog-page-title-stat
+          // 类名 —— 只有 Renascent 一个主题定义了样式，其余四个主题拿到会是
+          // 无样式的裸 span，所以这里用「·」分隔。
+          <>
+            <strong>{stats?.count_total ?? items.length}</strong> 篇文章
+            {stats?.rss_count ? <> · <strong>{stats.rss_count}</strong> 个 RSS</> : null}
+            {stats?.last_fetched_at ? <> · <strong>{timeAgo(stats.last_fetched_at)}</strong> 更新</> : null}
+          </>
+        }
       />
 
       <div style={{ padding: isMobile ? '24px 16px 80px' : '32px 32px 80px' }}>
