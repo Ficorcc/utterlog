@@ -2809,6 +2809,51 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   }
 }
 
+/* 评论里的「友链好友」标记。
+   四个主题的 CommentList 共用这一份 —— 主题各自的 styles.css 是运行时按需
+   加载的，写在那里换主题就会掉样式。tooltip 走 ::after + data-tip，纯 CSS，
+   不为一枚徽章拖进 tooltip 组件。 */
+.friend-badge {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary, #0052d9);
+  color: #fff;
+  font-size: 9px;
+  line-height: 1;
+  cursor: help;
+}
+
+.friend-badge::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: #111827;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.5;
+  font-weight: 400;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+.friend-badge:hover::after,
+.friend-badge:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+}
+
 .friend-link-card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

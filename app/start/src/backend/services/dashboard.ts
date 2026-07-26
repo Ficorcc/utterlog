@@ -125,7 +125,7 @@ export async function adminDashboardPayload() {
   const [stats, posts, comments] = await Promise.all([
     adminStatsPayload(),
     listPosts({ page: 1, perPage: 5, status: 'publish' }),
-    listComments({ page: 1, perPage: 15, status: 'approved' }),
+    listComments({ page: 1, perPage: 15, status: 'approved', authed: true }),
   ]);
   return {
     stats,

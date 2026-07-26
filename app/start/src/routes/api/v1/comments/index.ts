@@ -23,6 +23,7 @@ export const Route = createFileRoute('/api/v1/comments/')({
         excludeAdmin: ['1', 'true'].includes(query.get('exclude_admin') || ''), order: query.get('order') || 'desc',
         userId: authenticated ? positive(query.get('user_id'), 0) : 0,
         search: authenticated ? query.get('search') || '' : '',
+        authed: authenticated,
       });
       return apiPaginated(result.data, result.meta);
     },

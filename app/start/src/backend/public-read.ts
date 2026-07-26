@@ -5,6 +5,7 @@ import { optionValue } from './db/options';
 import { parsePermalinkPath } from './services/permalink';
 import { readOptionMap } from './services/options';
 import { siteTotalViews } from './services/analytics';
+import { friendLinkAvatar, friendLinkIndex, matchFriendBadge } from './services/friend-links';
 import { bumpPostViewOnRead, type ReadVisitor } from './services/tracking';
 import { defaultWeatherLocation, fetchVisitorWeather, visitorWeatherLocation, type VisitorWeatherResponse } from './weather';
 
@@ -49,6 +50,24 @@ function commentGeoFromRow(value: unknown) {
     return null;
   }
 }
+
+/**
+ * 匿名访客拿不到的评论字段。
+ *
+ * 评论列表是 `select c.*` 再整行摊平返回的，等于把 comments 表的每一列都发给了
+ * 前台 —— 任何人 curl 一次就能把全站评论者的邮箱和 IP 拖走。这里逐个置空，
+ * 而不是改成白名单 select：前台和后台共用同一个查询，白名单会连带影响后台。
+ *
+ * UA 保留：前台评论上「Windows · Chrome」那行就是靠它渲染的，属于有意展示。
+ */
+const ANONYMOUS_COMMENT_REDACTIONS = {
+  author_email: '',
+  email: '',
+  author_ip: '',
+  ip: '',
+  client_hints: '',
+  visitor_id: '',
+} as const;
 
 function gravatarUrlForEmail(email: string, size = 64) {
   const normalized = email.trim().toLowerCase();
@@ -512,7 +531,14 @@ export async function listPublicContent(name: PublicContentTable, params: { page
   ).catch(() => []);
   const count = Number(total?.count || 0);
   return {
-    data: Array.from(rows),
+    // 友链存了站长邮箱（拿来算 Gravatar），而这里是 select * 直出的公开接口。
+    // 邮箱换成算好的头像 URL 再发出去 —— 否则等于把友链站长的邮箱挂在公网上。
+    data: name === 'links'
+      ? rows.map(({ email, ...rest }) => ({
+          ...rest,
+          avatar: friendLinkAvatar({ email: String(email || ''), logo: String(rest.logo || '') }, 128),
+        }))
+      : Array.from(rows),
     meta: { total: count, page, per_page: perPage, total_pages: Math.max(1, Math.ceil(count / perPage)) },
     pagination: { total: count, page, per_page: perPage, total_pages: Math.max(1, Math.ceil(count / perPage)) },
   };
@@ -556,7 +582,14 @@ export async function listPostComments(postId: number) {
     `select * from ${table('comments')} where post_id = $1 and status = 'approved' order by created_at asc, id asc`,
     [postId],
   ).catch(() => []);
-  return rows.map((row) => ({ ...row, geo: commentGeoFromRow(row.geo) }));
+  const friendIndex = await friendLinkIndex();
+  return rows.map((row) => ({
+    ...row,
+    geo: commentGeoFromRow(row.geo),
+    friend: matchFriendBadge(String(row.author_url || ''), friendIndex),
+    avatar_url: gravatarUrlForEmail(String(row.author_email || ''), 64),
+    ...ANONYMOUS_COMMENT_REDACTIONS,
+  }));
 }
 
 export async function listMoments(params: { page?: number; perPage?: number; authed?: boolean; visibility?: string } = {}) {
@@ -626,6 +659,8 @@ export async function listComments(params: {
   order?: string;
   userId?: number;
   search?: string;
+  /** 后台管理界面要看邮箱和 IP；匿名访客拿到的是脱敏版本。 */
+  authed?: boolean;
 } = {}) {
   const page = Math.max(1, params.page || 1);
   const perPage = Math.min(500, Math.max(1, params.perPage || 20));
@@ -692,6 +727,7 @@ export async function listComments(params: {
      limit $${queryParams.length + 1} offset $${queryParams.length + 2}`,
     [...queryParams, perPage, offset],
   ).catch(() => []);
+  const friendIndex = await friendLinkIndex();
   const data = rows.map((row) => {
     const parentContent = String(row.parent_content || '');
     return {
@@ -701,6 +737,7 @@ export async function listComments(params: {
       email: row.author_email,
       url: row.author_url,
       ip: row.author_ip,
+      friend: matchFriendBadge(String(row.author_url || ''), friendIndex),
       user_agent: row.author_agent,
       avatar_url: gravatarUrlForEmail(String(row.author_email || ''), 64),
       author_avatar: gravatarUrlForEmail(String(row.author_email || ''), 48),
@@ -713,6 +750,8 @@ export async function listComments(params: {
         content: [...parentContent].length > 100 ? `${[...parentContent].slice(0, 100).join('')}...` : parentContent,
         created_at: row.parent_created_at,
       } : undefined,
+      // 放最后 —— 上面无论怎么组装，脱敏都是最后一道，以后加字段也不会绕过它
+      ...(params.authed ? {} : ANONYMOUS_COMMENT_REDACTIONS),
     };
   });
   const count = Number(total?.count || 0);

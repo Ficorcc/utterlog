@@ -1,5 +1,6 @@
 import { table } from '../config';
 import { exec, many, nowUnix, one } from '../db/helpers';
+import { friendLinkAvatar, invalidateFriendLinks } from './friend-links';
 
 export const contentResources = ['albums', 'books', 'games', 'goods', 'links', 'movies', 'music', 'playlists', 'videos'] as const;
 export type ContentResource = typeof contentResources[number];
@@ -85,7 +86,10 @@ export async function listContentRecords(resource: ContentResource, options: {
     [...params, perPage, (page - 1) * perPage],
   );
   const total = Number(totalRow?.count || 0);
-  return { rows, meta: { total, page, per_page: perPage, total_pages: Math.max(1, Math.ceil(total / perPage)) } };
+  return {
+    rows: resource === 'links' ? rows.map((row) => publicLinkRow(row, options.authed)) : rows,
+    meta: { total, page, per_page: perPage, total_pages: Math.max(1, Math.ceil(total / perPage)) },
+  };
 }
 
 export async function getContentRecord(resource: ContentResource, id: string, authed = false) {
@@ -101,6 +105,7 @@ export async function getContentRecord(resource: ContentResource, id: string, au
     if (resource === 'albums' && row.status !== 'public') return null;
     if (!['links', 'albums'].includes(resource) && row.status && row.status !== 'publish') return null;
   }
+  if (resource === 'links') return publicLinkRow(row, authed);
   if (resource !== 'playlists') return row;
   const songs = await many<Record<string, unknown>>(
     `select m.* from ${table('playlist_songs')} ps join ${table('music')} m on m.id = ps.music_id
@@ -147,9 +152,33 @@ async function mirrorLinkRssSubscription(link: Record<string, unknown>) {
     `insert into ${table('rss_subscriptions')} (user_id, site_url, feed_url, site_name, site_avatar, last_fetched_at, created_at)
      values (1,$1,$2,$3,$4,0,$5)
      on conflict (user_id, feed_url) do update set site_url = excluded.site_url, site_name = excluded.site_name, site_avatar = excluded.site_avatar`,
-    [siteUrl, feedUrl, String(link.name || siteUrl), String(link.logo || ''), nowUnix()],
+    [
+      siteUrl, feedUrl, String(link.name || siteUrl),
+      // 订阅页的头像就是这一列 —— 带上 Gravatar 兜底，回填过邮箱的友链在订阅页
+      // 也能显示头像，不用再退回 favicon 服务
+      friendLinkAvatar({ email: String(link.email || ''), logo: String(link.logo || '') }, 128),
+      nowUnix(),
+    ],
   );
   return { rss_subscription_synced: true };
+}
+
+/**
+ * 友链行的对外形态。
+ *
+ * `email` 存的是友链站长的邮箱，只用来算 Gravatar。这个接口是 `select *` 直出的，
+ * 后台和前台共用同一条路径 —— 不在这里剥掉，回填邮箱之后就等于把一批站长的
+ * 邮箱挂到了公网上。后台（authed）保留原样，友链编辑表单要能回填。
+ *
+ * 两边都补上算好的 `avatar`：有 logo 用 logo，其次 Gravatar，都没有交给前台
+ * 回落到 favicon 服务。
+ */
+function publicLinkRow(row: Record<string, unknown>, authed?: boolean) {
+  const email = String(row.email || '');
+  const avatar = friendLinkAvatar({ email, logo: String(row.logo || '') }, 128);
+  if (authed) return { ...row, avatar };
+  const { email: _omitted, ...rest } = row;
+  return { ...rest, avatar };
 }
 
 function changedRows(result: unknown) {
@@ -174,6 +203,7 @@ async function deleteUnusedLinkRssSubscription(feedUrl: unknown) {
 
 export async function createContentRecord(resource: ContentResource, body: Record<string, unknown>, userId: number) {
   const id = await insertRecord(resource, body, userId);
+  if (resource === 'links') invalidateFriendLinks();
   const rss = resource === 'links' ? await mirrorLinkRssSubscription({ ...body, id }) : {};
   return { id, ...rss };
 }
@@ -184,6 +214,7 @@ export async function updateContentRecord(resource: ContentResource, id: number,
   if (!before) throw new ContentRecordError(404, 'NOT_FOUND', '内容不存在');
   await updateRecord(resource, id, body);
   if (resource !== 'links') return { id };
+  invalidateFriendLinks();
   const after = await one<Record<string, unknown>>(`select * from ${table('links')} where id = $1`, [id]);
   const synced = after ? await mirrorLinkRssSubscription(after) : { rss_subscription_synced: false };
   const oldFeed = String(before.rss_url || '').trim();
@@ -198,7 +229,9 @@ export async function deleteContentRecord(resource: ContentResource, id: number)
   if (!before) throw new ContentRecordError(404, 'NOT_FOUND', '内容不存在');
   await exec(`delete from ${table(resource)} where id = $1`, [id]);
   if (resource === 'albums') await exec(`update ${table('media')} set album_id = 0 where album_id = $1`, [id]).catch(() => {});
-  return resource === 'links' ? deleteUnusedLinkRssSubscription(before.rss_url) : null;
+  if (resource !== 'links') return null;
+  invalidateFriendLinks();
+  return deleteUnusedLinkRssSubscription(before.rss_url);
 }
 
 function positiveId(value: unknown, label: string) {

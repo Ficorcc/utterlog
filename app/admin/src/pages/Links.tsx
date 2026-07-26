@@ -5,7 +5,7 @@ import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import {
   Layers, Folder, Image as ImageIcon, Eraser, RefreshCw, FolderTree, Plus, Search, X,
-  Rss, ChevronUp, ChevronDown, Pencil, Trash2, CloudUpload, Loader2,
+  Rss, ChevronUp, ChevronDown, Pencil, Trash2, CloudUpload, Loader2, MailSearch,
 } from 'lucide-react';
 import {
   Button, Input, Label, Textarea, ConfirmDialog, EmptyState, LoadingState, Card,
@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import { usePageBadge } from '@/layouts/DashboardLayout';
 import { siteFaviconUrl } from '@/lib/site-favicon';
+import LinkEmailMatchDialog from '@/components/links/LinkEmailMatchDialog';
 
 type LinkGroupStyle = 'card' | 'compact';
 
@@ -134,6 +135,7 @@ export default function LinksPage() {
   const [search, setSearch] = useState('');
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [showGroupModal, setShowGroupModal] = useState(false);
+  const [showEmailMatch, setShowEmailMatch] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [editingGroup, setEditingGroup] = useState<{ old: string; new: string } | null>(null);
   const [linkGroups, setLinkGroups] = useState<LinkGroupConfig[]>(DEFAULT_LINK_GROUPS);
@@ -331,7 +333,7 @@ export default function LinksPage() {
   };
 
   const [form, setForm] = useState({
-    name: '', url: '', description: '', logo: '', rss_url: '', group_name: 'default', order_num: 0,
+    name: '', url: '', description: '', logo: '', email: '', rss_url: '', group_name: 'default', order_num: 0,
   });
 
   useEffect(() => { fetchLinks(); }, []);
@@ -391,7 +393,7 @@ export default function LinksPage() {
 
   const openCreate = () => {
     setEditingId(null);
-    setForm({ name: '', url: '', description: '', logo: '', rss_url: '', group_name: 'default', order_num: nextOrderNum() });
+    setForm({ name: '', url: '', description: '', logo: '', email: '', rss_url: '', group_name: 'default', order_num: nextOrderNum() });
     setIsModalOpen(true);
   };
 
@@ -402,6 +404,7 @@ export default function LinksPage() {
       url: link.url || '',
       description: link.description || '',
       logo: link.logo || '',
+      email: link.email || '',
       rss_url: link.rss_url || '',
       group_name: link.group_name || 'default',
       order_num: link.order_num || 0,
@@ -495,6 +498,10 @@ export default function LinksPage() {
         </Button>
         <Button variant="outline" size="icon" onClick={() => setShowGroupModal(true)} title={t('admin.links.groups', '分类')}>
           <FolderTree />
+        </Button>
+        {/* 邮箱决定友链头像走 Gravatar 还是 favicon 兜底，所以放在图标操作旁边 */}
+        <Button variant="outline" size="icon" onClick={() => setShowEmailMatch(true)} title={t('admin.links.emailMatchTitle', '从评论匹配邮箱')}>
+          <MailSearch />
         </Button>
         {/* 主操作（新建）实心，次要操作 outline —— 五个列表页同一套强调级 */}
         <Button size="icon" onClick={openCreate} title={t('admin.common.add', '添加')} aria-label={t('admin.common.add', '添加')}>
@@ -723,6 +730,12 @@ export default function LinksPage() {
             </div>
 
             <div className="flex flex-col gap-1.5">
+              <Label>{t('admin.links.email', '邮箱')}</Label>
+              <Input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder={t('admin.links.emailPlaceholder', '用于 Gravatar 头像（可选）')} />
+              <p className="text-2xs text-muted-foreground">{t('admin.links.emailHint', '填了就用 Gravatar 作头像，优先级低于上面的图标；也可以用工具栏的「从评论匹配邮箱」批量填。')}</p>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
               <Label>{t('admin.links.description', '描述')}</Label>
               <Textarea rows={2} className="resize-y" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder={t('admin.links.descriptionPlaceholder', '简短介绍（可选）')} />
             </div>
@@ -846,6 +859,12 @@ export default function LinksPage() {
         title={t('admin.links.clearRss', '清空 RSS')}
         message={t('admin.links.confirm.clearRssCache', '确定清空 RSS 订阅缓存？所有已抓取的文章会被删除，下次刷新重新拉取。')}
         confirmText={t('admin.common.clear', '清空')}
+      />
+
+      <LinkEmailMatchDialog
+        open={showEmailMatch}
+        onOpenChange={setShowEmailMatch}
+        onSaved={fetchLinks}
       />
     </div>
   );

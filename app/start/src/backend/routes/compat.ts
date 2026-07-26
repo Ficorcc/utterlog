@@ -494,7 +494,13 @@ async function fetchRssFeed(feedUrl: string) {
 async function mirrorLinkSubscriptions() {
   await exec(
     `insert into ${table('rss_subscriptions')} (user_id, site_url, feed_url, site_name, site_avatar, last_fetched_at, created_at)
-     select 1, l.url, l.rss_url, l.name, coalesce(l.logo,''), 0, extract(epoch from now())::bigint
+     select 1, l.url, l.rss_url, l.name,
+            -- 跟 friendLinkAvatar() 同一套优先级：logo → 邮箱的 Gravatar → 空
+            coalesce(nullif(l.logo,''),
+              case when coalesce(l.email,'') <> ''
+                then 'https://gravatar.bluecdn.com/avatar/' || md5(lower(trim(l.email))) || '?s=128&d=mp'
+                else '' end),
+            0, extract(epoch from now())::bigint
      from ${table('links')} l
      where l.rss_url is not null and l.rss_url <> ''
      on conflict (user_id, feed_url) do update set

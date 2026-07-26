@@ -58,7 +58,7 @@ interface Comment {
   is_ai_reply?: boolean;
   comment_count?: number;
   level?: number;
-  is_friend_link?: boolean;
+  friend?: { name: string; url: string } | null;
   follow_status?: string; // "follower" | "following" | "mutual"
   os_name?: string;
   os_version?: string;
@@ -302,6 +302,11 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
             ) : (
               <span style={{ fontWeight: 600, fontSize: '13px', color: 'var(--color-text-main, #333)' }}>{comment.author}</span>
             )}
+            {comment.friend && (
+              <span className="friend-badge" data-tip={`友链好友 · ${comment.friend.name}`} tabIndex={0}>
+                <i className="fa-solid fa-link" />
+              </span>
+            )}
 
             {comment.is_admin && (
               <span style={{
@@ -355,16 +360,6 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
               );
             })()}
 
-            {/* 友链用户 */}
-            {comment.is_friend_link && (
-              <span style={{
-                fontSize: '10px', padding: '1px 5px',
-                background: '#e3f2fd', color: '#1565c0', fontWeight: 500,
-                display: 'inline-flex', alignItems: 'center', gap: '2px',
-              }}>
-                <i className="fa-solid fa-link" style={{ fontSize: '8px' }} /> 友链
-              </span>
-            )}
 
             {/* 网络用户 */}
             {comment.follow_status === 'mutual' && (

@@ -19,6 +19,8 @@ interface Link {
   url: string;
   description?: string;
   logo?: string;
+  /** 服务端算好的头像：手填 logo 优先，其次友链邮箱的 Gravatar。 */
+  avatar?: string;
   group_name?: string;
   rss_url?: string;
 }
@@ -235,7 +237,7 @@ export default function LegacyLinksView({ initialLinks, initialOptions }: { init
                     className={groupStyle(groupName) === 'compact' ? 'friend-link-compact-item' : 'friend-link-card-item'}
                   >
                     <img
-                      src={link.logo || getFavicon(link.url)}
+                      src={link.avatar || link.logo || getFavicon(link.url)}
                       alt=""
                       className="friend-link-logo"
                       onError={e => { (e.target as HTMLImageElement).src = getFavicon(link.url); }}

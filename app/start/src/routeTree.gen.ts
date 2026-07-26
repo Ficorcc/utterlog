@@ -168,6 +168,7 @@ import { Route as ApiV1AnalyticsActionRouteImport } from './routes/api/v1/analyt
 import { Route as ApiV1AiProvidersRouteImport } from './routes/api/v1/ai/providers'
 import { Route as ApiV1AiActionRouteImport } from './routes/api/v1/ai/$action'
 import { Route as ApiV1AdminStatsRouteImport } from './routes/api/v1/admin/stats'
+import { Route as ApiV1AdminLinkEmailsRouteImport } from './routes/api/v1/admin/link-emails'
 import { Route as ApiV1AdminHeaderCountsRouteImport } from './routes/api/v1/admin/header-counts'
 import { Route as ApiV1AdminBootstrapRouteImport } from './routes/api/v1/admin/bootstrap'
 import { Route as ApiV1ResourceIdRouteImport } from './routes/api/v1/$resource/$id'
@@ -1020,6 +1021,11 @@ const ApiV1AdminStatsRoute = ApiV1AdminStatsRouteImport.update({
   path: '/api/v1/admin/stats',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1AdminLinkEmailsRoute = ApiV1AdminLinkEmailsRouteImport.update({
+  id: '/api/v1/admin/link-emails',
+  path: '/api/v1/admin/link-emails',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1AdminHeaderCountsRoute = ApiV1AdminHeaderCountsRouteImport.update({
   id: '/api/v1/admin/header-counts',
   path: '/api/v1/admin/header-counts',
@@ -1347,6 +1353,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/$resource/$id': typeof ApiV1ResourceIdRoute
   '/api/v1/admin/bootstrap': typeof ApiV1AdminBootstrapRoute
   '/api/v1/admin/header-counts': typeof ApiV1AdminHeaderCountsRoute
+  '/api/v1/admin/link-emails': typeof ApiV1AdminLinkEmailsRoute
   '/api/v1/admin/stats': typeof ApiV1AdminStatsRoute
   '/api/v1/ai/$action': typeof ApiV1AiActionRoute
   '/api/v1/ai/providers': typeof ApiV1AiProvidersRouteWithChildren
@@ -1555,6 +1562,7 @@ export interface FileRoutesByTo {
   '/api/v1/$resource/$id': typeof ApiV1ResourceIdRoute
   '/api/v1/admin/bootstrap': typeof ApiV1AdminBootstrapRoute
   '/api/v1/admin/header-counts': typeof ApiV1AdminHeaderCountsRoute
+  '/api/v1/admin/link-emails': typeof ApiV1AdminLinkEmailsRoute
   '/api/v1/admin/stats': typeof ApiV1AdminStatsRoute
   '/api/v1/ai/$action': typeof ApiV1AiActionRoute
   '/api/v1/ai/providers': typeof ApiV1AiProvidersRouteWithChildren
@@ -1764,6 +1772,7 @@ export interface FileRoutesById {
   '/api/v1/$resource/$id': typeof ApiV1ResourceIdRoute
   '/api/v1/admin/bootstrap': typeof ApiV1AdminBootstrapRoute
   '/api/v1/admin/header-counts': typeof ApiV1AdminHeaderCountsRoute
+  '/api/v1/admin/link-emails': typeof ApiV1AdminLinkEmailsRoute
   '/api/v1/admin/stats': typeof ApiV1AdminStatsRoute
   '/api/v1/ai/$action': typeof ApiV1AiActionRoute
   '/api/v1/ai/providers': typeof ApiV1AiProvidersRouteWithChildren
@@ -1974,6 +1983,7 @@ export interface FileRouteTypes {
     | '/api/v1/$resource/$id'
     | '/api/v1/admin/bootstrap'
     | '/api/v1/admin/header-counts'
+    | '/api/v1/admin/link-emails'
     | '/api/v1/admin/stats'
     | '/api/v1/ai/$action'
     | '/api/v1/ai/providers'
@@ -2182,6 +2192,7 @@ export interface FileRouteTypes {
     | '/api/v1/$resource/$id'
     | '/api/v1/admin/bootstrap'
     | '/api/v1/admin/header-counts'
+    | '/api/v1/admin/link-emails'
     | '/api/v1/admin/stats'
     | '/api/v1/ai/$action'
     | '/api/v1/ai/providers'
@@ -2390,6 +2401,7 @@ export interface FileRouteTypes {
     | '/api/v1/$resource/$id'
     | '/api/v1/admin/bootstrap'
     | '/api/v1/admin/header-counts'
+    | '/api/v1/admin/link-emails'
     | '/api/v1/admin/stats'
     | '/api/v1/ai/$action'
     | '/api/v1/ai/providers'
@@ -2593,6 +2605,7 @@ export interface RootRouteChildren {
   ApiV1TrackRoute: typeof ApiV1TrackRouteWithChildren
   ApiV1AdminBootstrapRoute: typeof ApiV1AdminBootstrapRoute
   ApiV1AdminHeaderCountsRoute: typeof ApiV1AdminHeaderCountsRoute
+  ApiV1AdminLinkEmailsRoute: typeof ApiV1AdminLinkEmailsRoute
   ApiV1AdminStatsRoute: typeof ApiV1AdminStatsRoute
   ApiV1AiActionRoute: typeof ApiV1AiActionRoute
   ApiV1AiProvidersRoute: typeof ApiV1AiProvidersRouteWithChildren
@@ -3824,6 +3837,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1AdminStatsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/admin/link-emails': {
+      id: '/api/v1/admin/link-emails'
+      path: '/api/v1/admin/link-emails'
+      fullPath: '/api/v1/admin/link-emails'
+      preLoaderRoute: typeof ApiV1AdminLinkEmailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/admin/header-counts': {
       id: '/api/v1/admin/header-counts'
       path: '/api/v1/admin/header-counts'
@@ -4505,6 +4525,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1TrackRoute: ApiV1TrackRouteWithChildren,
   ApiV1AdminBootstrapRoute: ApiV1AdminBootstrapRoute,
   ApiV1AdminHeaderCountsRoute: ApiV1AdminHeaderCountsRoute,
+  ApiV1AdminLinkEmailsRoute: ApiV1AdminLinkEmailsRoute,
   ApiV1AdminStatsRoute: ApiV1AdminStatsRoute,
   ApiV1AiActionRoute: ApiV1AiActionRoute,
   ApiV1AiProvidersRoute: ApiV1AiProvidersRouteWithChildren,
