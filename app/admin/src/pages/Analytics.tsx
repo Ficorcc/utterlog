@@ -79,50 +79,6 @@ function IconStatList({ data, nameKey, valueKey, icon }: { data: any[]; nameKey:
   );
 }
 
-/**
- * 文章阅读排行。数据来自 stats_post_daily，而它和前台文章卡片上的数字是
- * 同一个写入点（文章详情页 SSR 时 +1）记下来的，所以这里的「累计」列必然
- * 等于卡片上显示的值，「本期」是其中落在当前时间窗口里的部分。
- */
-function PostViewsPanel({ period }: { period: string }) {
-  const [rows, setRows] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setLoading(true);
-    api.get(`/analytics/posts?period=${period}&limit=10`)
-      .then((r: any) => setRows(Array.isArray(r.data?.posts) ? r.data.posts : []))
-      .catch(() => setRows([]))
-      .finally(() => setLoading(false));
-  }, [period]);
-
-  const max = Math.max(...rows.map(row => Number(row.views) || 0), 1);
-
-  return (
-    <Card className="p-4">
-      <div className="mb-3 flex items-baseline justify-between">
-        <h3 className="text-xs-plus font-semibold text-foreground">文章阅读</h3>
-        <span className="text-3xs text-muted-foreground">与前台文章卡片同源</span>
-      </div>
-      {loading || !rows.length ? <ChartEmpty /> : (
-        <div className="flex flex-col gap-1.5">
-          {rows.map(row => (
-            <div key={row.id} className="flex items-center gap-2 text-xs">
-              <span className="flex-1 truncate" title={row.title || '未命名'}>{row.title || '未命名'}</span>
-              <div className="h-1 w-15 shrink-0 overflow-hidden rounded-sm bg-muted">
-                <div className="h-full rounded-sm bg-primary" style={{ width: `${(Number(row.views) / max) * 100}%` }} />
-              </div>
-              <span className="w-12 shrink-0 text-right font-semibold">{Number(row.views).toLocaleString()}</span>
-              <span className="w-16 shrink-0 text-right text-3xs text-muted-foreground">{Number(row.unique_visitors).toLocaleString()} 访客</span>
-              <span className="w-20 shrink-0 text-right text-3xs text-muted-foreground">累计 {Number(row.total_views).toLocaleString()}</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </Card>
-  );
-}
-
 export default function AnalyticsPage() {
   const [period, setPeriod] = useState('24h');
   const [data, setData] = useState<any>(null);
@@ -249,11 +205,6 @@ export default function AnalyticsPage() {
           <h3 className="mb-3 text-xs-plus font-semibold text-foreground">来源</h3>
           <BarChart data={data?.top_referers || []} labelKey="host" valueKey="count" barClass="bg-violet-500" />
         </Card>
-      </div>
-
-      {/* Post reads — same source as the public post cards */}
-      <div className="mb-5">
-        <PostViewsPanel period={period} />
       </div>
 
       {/* Browser / OS / Device / Country */}
