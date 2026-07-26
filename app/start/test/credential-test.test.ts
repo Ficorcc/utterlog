@@ -39,10 +39,20 @@ describe('第三方凭据测试', () => {
   });
 
   test('输入为空时回退到已保存的值 —— 用来验证线上正在生效的配置', async () => {
-    // github_access_token 在 options 里存了 saved-token，不该报「请先填写」
-    const result = await mod.testCredential({ field: 'github_access_token', value: '' })
-      .catch((e) => ({ ok: false, message: String(e?.message || e) }));
-    expect(String((result as { message: string }).message)).not.toMatch(/请先填写/);
+    // github_access_token 在 options 里存了 saved-token，不该报「请先填写」。
+    //
+    // 这里必须 mock fetch：断言只关心「有没有走到发请求这一步」，跟 GitHub
+    // 可不可达无关。原来不 mock 会真打 api.github.com，是全文件唯一一个依赖
+    // 外网的用例，5 秒超时后失败——并发跑整个 test 目录时偶发，还卡过部署。
+    const original = globalThis.fetch;
+    globalThis.fetch = (() => Promise.resolve(new Response('{}', { status: 200 }))) as typeof fetch;
+    try {
+      const result = await mod.testCredential({ field: 'github_access_token', value: '' })
+        .catch((e) => ({ ok: false, message: String(e?.message || e) }));
+      expect(String((result as { message: string }).message)).not.toMatch(/请先填写/);
+    } finally {
+      globalThis.fetch = original;
+    }
   });
 
   test('网络异常归类成连接问题，不会被误读成 key 无效', async () => {

@@ -7,6 +7,7 @@ import { installRedirect } from '@backend/http/install-redirect';
 import { requestIp } from '@backend/request-ip';
 import { brandingAssetResponse } from './server/branding-assets';
 import { isPublicCacheablePage, isVisitorPersonalizedPage } from './server/cache-policy';
+import { checkAuthThrottle } from './server/auth-throttle';
 
 export type StartRequestContext = {
   session: AuthSession | null;
@@ -167,6 +168,13 @@ const brandingAssets = createMiddleware().server(async ({ next, request }) => {
   return await brandingAssetResponse(request) || next();
 });
 
+// 只挡认证接口的爆破。安全中心整体下线时把全站限流一并删了，但登录接口
+// 不能裸奔；反向代理那层做不了（FrankenPHP 是 APT 包版，没编译 Caddy 的
+// rate_limit 插件），所以留在应用层。
+const authThrottle = createMiddleware().server(async ({ next, request, context }) => {
+  return checkAuthThrottle(request, context.clientIp) || next();
+});
+
 const errorBoundary = createMiddleware().server(async ({ next, context }) => {
   try {
     return await next();
@@ -208,5 +216,5 @@ const authContext = createMiddleware().server(async ({ next, request }) => {
 });
 
 export const startInstance = createStart(() => ({
-  requestMiddleware: [errorBoundary, installGuard, brandingAssets, authContext, cors, bodyLimit, apiNoCache, publicPageCache, personalizedPageNoCache, securityHeaders],
+  requestMiddleware: [errorBoundary, installGuard, brandingAssets, authContext, authThrottle, cors, bodyLimit, apiNoCache, publicPageCache, personalizedPageNoCache, securityHeaders],
 }));
