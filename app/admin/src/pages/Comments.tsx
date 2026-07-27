@@ -300,8 +300,16 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
     if (!replyId || !replyContent.trim()) return;
     setReplying(true);
     try {
-      await commentsApi.reply(replyId, replyContent);
-      toast.success(t('admin.comments.toast.replySuccess', '回复成功'));
+      const res: any = await commentsApi.reply(replyId, replyContent);
+      const d = res?.data ?? res;
+      // 邮件通知的结果一并说清楚 —— 光提示「回复成功」，对方到底收没收到无从判断
+      if (d?.notified) {
+        toast.success(t('admin.comments.toast.replySuccessNotified', '回复成功，已邮件通知 {email}', { email: d.notifiedTo || '' }));
+      } else if (d?.notifyReason) {
+        toast.success(t('admin.comments.toast.replySuccessNoNotify', '回复成功，未发送通知：{reason}', { reason: d.notifyReason }));
+      } else {
+        toast.success(t('admin.comments.toast.replySuccess', '回复成功'));
+      }
       setReplyId(null);
       setReplyContent('');
       // Reply adds a new comment — refetch to show it

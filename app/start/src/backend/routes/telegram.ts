@@ -152,7 +152,11 @@ async function publishTelegramCommentReply(commentId: number, content: string) {
         postUrl,
         unsubscribeUrl: unsubscribe,
       }),
-    ).catch(() => {});
+    ).catch((err) => {
+      // Telegram 端没有界面能回显，至少要留在 journalctl 里，否则同样查不出来
+      console.error(`[comment-reply/telegram] 通知 ${recipient} 失败（评论 #${inserted?.id || '?'}）:`,
+        err instanceof Error ? err.message : String(err));
+    });
   }
   return inserted?.id || 0;
 }

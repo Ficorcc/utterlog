@@ -182,15 +182,46 @@ export async function replyToAdminComment(parentId: number, userId: number, inpu
   const id = Number(rows[0]?.id || 0);
   await exec(`update ${table('posts')} set comment_count = comment_count + 1 where id = $1`, [parent.post_id]).catch(() => {});
 
+  return { id, ...(await notifyCommentReply({ parent, admin, replyId: id, content, now })) };
+}
+
+/**
+ * 回复通知的发信结果。回给后台，让管理员点完「回复」就知道对方收没收到。
+ *
+ * 之前这里是 `.catch(() => {})`：成功不记、失败也不记，后台只显示「回复成功」。
+ * 邮件到底发没发、为什么没发，事后完全查不出来 —— 这次排查就卡在这上面。
+ */
+export type ReplyNotifyResult = {
+  notified: boolean;
+  /** 没发的原因（收件人为空 / 已退订 / 发信报错…），发成功时为空。 */
+  notifyReason?: string;
+  /** 收件人，只在真的发出去时带上，用于后台提示「已通知 xxx」。 */
+  notifiedTo?: string;
+};
+
+async function notifyCommentReply(args: {
+  parent: { post_id: number; author_name: string; author_email: string | null; content: string; role: string | null; created_at: number };
+  admin: { email: string; username: string; nickname: string | null };
+  replyId: number;
+  content: string;
+  now: number;
+}): Promise<ReplyNotifyResult> {
+  const { parent, admin, replyId, content, now } = args;
   const recipient = String(parent.author_email || '').trim().toLowerCase();
   const adminEmail = String(admin.email || '').trim().toLowerCase();
-  if (recipient && parent.role !== 'admin' && recipient !== adminEmail && !(await isCommentReplyOptedOut(recipient))) {
+
+  if (!recipient) return { notified: false, notifyReason: '对方没有留下邮箱' };
+  if (parent.role === 'admin') return { notified: false, notifyReason: '被回复的是管理员自己' };
+  if (recipient === adminEmail) return { notified: false, notifyReason: '收件人就是当前管理员' };
+  if (await isCommentReplyOptedOut(recipient)) return { notified: false, notifyReason: '对方已退订回复通知' };
+
+  try {
     const post = await one<{ title: string; slug: string | null }>(
       `select title, slug from ${table('posts')} where id = $1`, [parent.post_id],
     ).catch(() => null);
     const siteTitle = await optionValue('site_title', 'Utterlog');
     const siteUrl = (await optionValue('site_url', config.appUrl)).replace(/\/+$/, '');
-    const postUrl = `${siteUrl}/posts/${encodeURIComponent(post?.slug || String(parent.post_id))}#comment-${id}`;
+    const postUrl = `${siteUrl}/posts/${encodeURIComponent(post?.slug || String(parent.post_id))}#comment-${replyId}`;
     const unsubscribe = await commentReplyUnsubscribeUrl(siteUrl, recipient);
     const site = await emailSite();
     await sendConfiguredEmail(
@@ -209,7 +240,12 @@ export async function replyToAdminComment(parentId: number, userId: number, inpu
         postUrl,
         unsubscribeUrl: unsubscribe,
       }),
-    ).catch(() => {});
+    );
+    return { notified: true, notifiedTo: recipient };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    // 落到 journalctl，事后能查是哪封、发给谁、什么原因
+    console.error(`[comment-reply] 通知 ${recipient} 失败（评论 #${replyId}）:`, message);
+    return { notified: false, notifyReason: `发信失败：${message}` };
   }
-  return { id };
 }
