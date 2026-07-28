@@ -7,7 +7,7 @@ export const Route = createFileRoute('/search')({
     q: typeof search.q === 'string' ? search.q : '',
   }),
   loaderDeps: ({ search }) => ({ query: search.q }),
-  loader: ({ deps }) => loadPublicPage({ kind: 'search', query: deps.query }),
+  loader: ({ deps, preload }) => loadPublicPage({ kind: 'search', query: deps.query }, preload),
   head: ({ loaderData }) => publicPageHead(loaderData),
   component: SearchPage,
 });

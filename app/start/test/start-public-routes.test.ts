@@ -53,6 +53,8 @@ describe('TanStack Start public route topology', () => {
       videoType: 'movie',
       year: '',
       region: '',
+      // 请求都带这个标记，用来把预取排除出全站浏览量（见 site-view-preload.test.ts）
+      preload: false,
     });
   });
 });

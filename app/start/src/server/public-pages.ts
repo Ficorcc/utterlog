@@ -56,7 +56,20 @@ function requestInteger(value: unknown, minimum: number, maximum: number, fallba
   return number;
 }
 
-export function validatePublicPageRequest(input: unknown): PublicPageRequest {
+/**
+ * 校验后的请求，额外带一个 preload 标记。
+ *
+ * 这个标记只用来决定「算不算一次浏览」，不参与任何取数逻辑，所以客户端能
+ * 伪造也无所谓 —— 想刷浏览量直接 curl 更省事。
+ */
+export type ValidatedPublicPageRequest = PublicPageRequest & { preload?: boolean };
+
+export function validatePublicPageRequest(input: unknown): ValidatedPublicPageRequest {
+  const preload = Boolean((input as Record<string, unknown> | null)?.preload);
+  return { ...validatePublicPageKind(input), preload };
+}
+
+function validatePublicPageKind(input: unknown): PublicPageRequest {
   if (!input || typeof input !== 'object') throw new TypeError('Invalid public page request');
   const value = input as Record<string, unknown>;
   const kind = requestText(value.kind, 32, true);
@@ -276,10 +289,14 @@ export const loadStartPublicPage = createServerFn({ method: 'GET' })
   .validator(validatePublicPageRequest)
   .handler(async ({ data }): Promise<PublicPageData> => {
     const ctx = await themeCtx();
-    // 全站浏览量：每渲染一次公开页 +1，跟文章阅读量同一个口径（刷新也算）。
+    // 全站浏览量：真实打开一次公开页 +1，跟文章阅读量同一个口径（刷新也算）。
     // 放在这里而不是中间件，是因为这个 server fn 就是所有公开页的唯一入口，
     // API 请求和静态资源根本走不到，不用再费劲排除。
-    bumpSiteViewOnRender(getRequestHeader('user-agent') || '');
+    //
+    // 预取要排除掉：前台开着 defaultPreload='intent'，鼠标划过站内链接就会
+    // 跑一遍 loader，也就是跑到这里。不排除的话，用户在首页扫一眼文章列表，
+    // 一篇没点也能刷出十几次浏览量 —— 这正是数字虚高的来源。
+    if (!data.preload) bumpSiteViewOnRender(getRequestHeader('user-agent') || '');
     const body = await resolvePublicPage(ctx, data);
     // 只带回 head() 需要的两个字段。完整 ctx 由 __root 的 loader 负责，
     // 这里再返一份的话整个 ThemeContext 会被序列化两遍（详见 PublicPageSite）。

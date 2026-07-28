@@ -3,7 +3,7 @@ import { PublicPage } from '../components/PublicPage';
 import { loadPublicPage, publicPageHead } from '../lib/public-route';
 
 export const Route = createFileRoute('/music')({
-  loader: () => loadPublicPage({ kind: 'music' }),
+  loader: ({ preload }) => loadPublicPage({ kind: 'music' }, preload),
   head: ({ loaderData }) => publicPageHead(loaderData),
   component: MusicPage,
 });

@@ -3,7 +3,7 @@ import { PublicPage } from '../../components/PublicPage';
 import { loadPublicPage, publicPageHead } from '../../lib/public-route';
 
 export const Route = createFileRoute('/tags/$slug')({
-  loader: ({ params }) => loadPublicPage({ kind: 'tag', slug: params.slug }),
+  loader: ({ params, preload }) => loadPublicPage({ kind: 'tag', slug: params.slug }, preload),
   head: ({ loaderData }) => publicPageHead(loaderData),
   component: TagPage,
 });

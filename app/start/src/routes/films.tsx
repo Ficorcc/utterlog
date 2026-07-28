@@ -14,13 +14,13 @@ export const Route = createFileRoute('/films')({
     region: searchText(search.region),
   }),
   loaderDeps: ({ search }) => search,
-  loader: ({ deps }) => loadPublicPage({
+  loader: ({ deps, preload }) => loadPublicPage({
     kind: 'films',
     page: deps.page,
     videoType: deps.video_type,
     year: deps.year,
     region: deps.region,
-  }),
+  }, preload),
   head: ({ loaderData }) => publicPageHead(loaderData),
   component: FilmsPage,
 });
