@@ -59,7 +59,8 @@ describe('邮件模板', () => {
     const md5 = createHash('md5').update('admin@example.com').digest('hex');
     expect(html).toContain(`gravatar.bluecdn.com/avatar/${md5}`);
     expect(html).toContain('d=mp');   // 没注册过的邮箱也要有默认图，不能是破图
-    expect(html).toContain('border-radius:999px');
+    // 头像跟全站一样走直角 —— 之前这里是圆形、新评论通知里却是方形
+    expect(html).not.toContain('border-radius');
     // 两行：称呼和主句合成一行，文章标题单独一行。标题不进主句是关键 ——
     // 塞进去的话长标题会把「回复了你的评论」挤到下一行。
     expect(html).toContain('你好 <b>织梦岁月</b>，<b>西风</b> 回复了你的评论</div>');
@@ -133,30 +134,27 @@ describe('邮件模板', () => {
     expect(without).toContain('Powered by');
   });
 
-  test('状态徽章是正方形图标，昵称带链接、邮箱跟随', () => {
+  test('状态徽章是中文字样，昵称带链接、邮箱跟随', () => {
     const base = {
       author: '张三', postTitle: '某文', content: '正文',
       postUrl: 'https://xifeng.net/archives/1', manageUrl: 'https://xifeng.net/admin/comments',
     };
-    // 正方形图标徽章：对号/省略号/叉号/垃圾桶，配色分绿橙红灰
+    // 文字徽章：符号在各家客户端字形和基线差太远，🗑 还会被渲染成彩色 emoji
     const approved = newCommentEmail(site, { ...base, status: 'approved' });
-    expect(approved).toContain('✓');
+    expect(approved).toContain('已通过');
     expect(approved).toContain('#0f7b3f');
-    expect(newCommentEmail(site, { ...base, status: 'pending' })).toContain('⋯');
-    expect(newCommentEmail(site, { ...base, status: 'spam' })).toContain('🗑');
-    expect(newCommentEmail(site, { ...base, status: 'trash' })).toContain('✕');
-    // 正方形：宽高相等
-    expect(approved).toContain('width:28px;height:28px');
-    // 读屏能读出中文状态，不是只念一个符号
-    expect(approved).toContain('aria-label="已通过"');
-    expect(newCommentEmail(site, { ...base, status: 'spam' })).toContain('aria-label="垃圾评论"');
+    expect(newCommentEmail(site, { ...base, status: 'pending' })).toContain('待审核');
+    expect(newCommentEmail(site, { ...base, status: 'spam' })).toContain('垃圾评论');
+    expect(newCommentEmail(site, { ...base, status: 'trash' })).toContain('已删除');
+    // 不留任何符号
+    expect(approved).not.toMatch(/[✓✕⋯🗑]/u);
     // 状态不再是标题里的括号文字
     expect(approved).not.toContain('（approved）');
     // 渲染在品牌行右上角而不是正文标题后 —— 标题长度不可控，跟在标题后
     // 会被挤到第二行吊着。
-    expect(approved.indexOf('✓')).toBeLessThan(approved.indexOf('发表了新评论'));
+    expect(approved.indexOf('已通过')).toBeLessThan(approved.indexOf('发表了新评论'));
     // 没有状态时不渲染空徽章格
-    expect(newCommentEmail(site, base)).not.toContain('width:28px;height:28px');
+    expect(newCommentEmail(site, base)).not.toContain('已通过');
     // 未知状态回退成文字标签，不至于什么都不显示
     expect(newCommentEmail(site, { ...base, status: 'archived' })).toContain('archived');
 
@@ -167,9 +165,8 @@ describe('邮件模板', () => {
     expect(both).toContain('mailto:a@b.com');
     // 完整 URL 不再作为独立文本出现（只在 href 里）
     expect(both).not.toContain('>https://a.com</a>');
-    // 访客头像在昵称之前，正方形、22px（跟昵称行高对齐，别撑高整行）
+    // 访客头像在昵称之前，22px 直角（跟昵称行高对齐，别撑高整行）
     expect(both).toContain('width="22" height="22"');
-    expect(both).toContain('border-radius:4px');
     const avatarMd5 = createHash('md5').update('a@b.com').digest('hex');
     expect(both.indexOf(avatarMd5)).toBeLessThan(both.indexOf('>张三</a>'));
 
@@ -239,5 +236,77 @@ describe('邮件模板', () => {
     expect(build('logo.png')).toContain('src="https://xifeng.net/logo.png"');
     expect(build('https://cdn.example/x.png')).toContain('src="https://cdn.example/x.png"');
     expect(build('')).toContain('>西<');
+  });
+});
+
+describe('审核按钮按状态给', () => {
+  // 之前只判断链接存不存在，而链接是无条件生成的 —— 一条已经自动通过的评论，
+  // 通知邮件里照样杵着一个「通过」按钮，点了什么也不会变。
+  const site = { title: '西风', url: 'https://xifeng.net', logo: '', timeZone: 'Asia/Shanghai' };
+  const base = {
+    author: '访客', postTitle: '一篇文章', content: '内容',
+    postUrl: 'https://x/p', manageUrl: 'https://x/admin',
+    approveUrl: 'https://x/approve', spamUrl: 'https://x/spam', postedAt: 1_800_000_000,
+  };
+  const buttonsOf = (status: string) =>
+    [...newCommentEmail(site, { ...base, status }).matchAll(/>(通过|标记垃圾)</g)].map((m) => m[1]);
+
+  test('已通过的评论不再显示「通过」，但仍可标记垃圾', () => {
+    expect(buttonsOf('approved')).toEqual(['标记垃圾']);
+  });
+
+  test('待审核两个都给', () => {
+    expect(buttonsOf('pending')).toEqual(['通过', '标记垃圾']);
+  });
+
+  test('已是垃圾的只留「通过」用来恢复', () => {
+    expect(buttonsOf('spam')).toEqual(['通过']);
+  });
+
+  test('回收站里的不给任何审核入口', () => {
+    expect(buttonsOf('trash')).toEqual([]);
+  });
+
+  test('没有链接时不会凭空冒出按钮', () => {
+    const html = newCommentEmail(site, { ...base, status: 'pending', approveUrl: '', spamUrl: '' });
+    expect([...html.matchAll(/>(通过|标记垃圾)</g)]).toHaveLength(0);
+  });
+});
+
+describe('邮件视觉统一', () => {
+  const site = { title: '西风', url: 'https://xifeng.net', logo: '', timeZone: 'Asia/Shanghai' };
+  const everyTemplate = () => [
+    verifyCodeEmail(site, { code: '123456', minutes: 10 }),
+    passwordResetEmail(site, { resetUrl: 'https://x/r', minutes: 30 }),
+    commentReplyEmail(site, {
+      recipientName: '织梦岁月', replierName: '西风', replierEmail: 'a@b.c', recipientEmail: 'd@e.f',
+      originalAt: 1_800_000_000, replyAt: 1_800_003_600, postTitle: '文章',
+      originalContent: '原文', replyContent: '回复', postUrl: 'https://x/p', unsubscribeUrl: 'https://x/u',
+    }),
+    newCommentEmail(site, {
+      author: '访客', postTitle: '文章', content: '内容', postUrl: 'https://x/p', manageUrl: 'https://x/a',
+      status: 'pending', approveUrl: 'https://x/ap', spamUrl: 'https://x/sp', postedAt: 1_800_000_000,
+    }),
+    noticeEmail(site, { heading: '测试邮件', lines: ['一行'], actionUrl: 'https://x', actionLabel: '查看' }),
+  ];
+
+  test('一律直角 —— 此前头像在两个模板里一个圆形一个方形', () => {
+    for (const html of everyTemplate()) {
+      expect(html).not.toContain('border-radius');
+    }
+  });
+
+  test('不出现任何符号图标 —— 各家客户端字形和基线差太远', () => {
+    for (const html of everyTemplate()) {
+      expect(html).not.toMatch(/[✓✕⋯🗑✅❤👍📧🔔]/u);
+    }
+  });
+
+  test('状态徽章用中文字样，不用符号', () => {
+    const html = newCommentEmail(site, {
+      author: '访客', postTitle: '文章', content: '内容', postUrl: 'https://x/p',
+      manageUrl: 'https://x/a', status: 'approved', postedAt: 1_800_000_000,
+    });
+    expect(html).toContain('已通过');
   });
 });

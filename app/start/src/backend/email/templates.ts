@@ -80,8 +80,8 @@ const LINE = '#e1e6eb';
  */
 function brand(site: EmailSite, badge = '') {
   const mark = site.logo
-    ? `<img src="${htmlEscape(site.logo)}" alt="" width="32" height="32" style="display:block;border-radius:4px;">`
-    : `<div style="width:32px;height:32px;background:${BRAND};color:#fff;font-weight:700;font-size:15px;line-height:32px;text-align:center;border-radius:4px;">${htmlEscape([...site.title][0] || 'U')}</div>`;
+    ? `<img src="${htmlEscape(site.logo)}" alt="" width="32" height="32" style="display:block;">`
+    : `<div style="width:32px;height:32px;background:${BRAND};color:#fff;font-weight:700;font-size:15px;line-height:32px;text-align:center;">${htmlEscape([...site.title][0] || 'U')}</div>`;
   // logo 在最左、站点名紧跟其后，徽章留在右上角固定位置（标题多长都不挤）。
   return `<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:24px;"><tr>
 <td aria-hidden="true" width="32" valign="middle" style="user-select:none;-webkit-user-select:none;">${mark}</td>
@@ -112,7 +112,7 @@ function shell(site: EmailSite, body: string, footer = POWERED, badge = '') {
 <html lang="zh-CN"><head><meta charset="utf-8"><title>${htmlEscape(site.title)}</title></head>
 <body style="margin:0;padding:0;background:#f4f6f9;font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;color:${TEXT};">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:40px 20px;"><tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.04);border-radius:4px;overflow:hidden;"><tr><td style="padding:40px 40px 36px;">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.04);overflow:hidden;"><tr><td style="padding:40px 40px 36px;">
 ${brand(site, badge)}
 ${body}
 ${footer}
@@ -130,7 +130,7 @@ function button(href: string, label: string, primary = true) {
 
 /** 审核按钮：实心色块，跟状态徽章同一套配色，一眼分得清通过和垃圾。 */
 function actionButton(href: string, label: string, color: string) {
-  return `<a target="_blank" rel="noopener noreferrer" href="${htmlEscape(href)}" style="display:inline-block;padding:10px 22px;font-size:13px;font-weight:600;text-decoration:none;color:#fff;background:${color};border-radius:4px;margin:14px 6px 0 0;">${label}</a>`;
+  return `<a target="_blank" rel="noopener noreferrer" href="${htmlEscape(href)}" style="display:inline-block;padding:10px 22px;font-size:13px;font-weight:600;text-decoration:none;color:#fff;background:${color};margin:14px 6px 0 0;">${label}</a>`;
 }
 
 function quote(content: string, accent = '#c8d3e0', postedAt = '', color = MUTED) {
@@ -235,7 +235,7 @@ export function commentReplyEmail(site: EmailSite, input: {
   // 的昵称前 —— 引用块不再单独占一列头像，正文就能占满宽度。
   const recipientAvatar = gravatarUrl(input.recipientEmail || '', 64);
   const headerAvatar = recipientAvatar
-    ? `<img src="${htmlEscape(recipientAvatar)}" alt="" width="32" height="32" style="display:block;border-radius:999px;">`
+    ? `<img src="${htmlEscape(recipientAvatar)}" alt="" width="32" height="32" style="display:block;">`
     : '';
   const replierAvatar = gravatarUrl(input.replierEmail || '', 40);
 
@@ -243,7 +243,7 @@ export function commentReplyEmail(site: EmailSite, input: {
   const label = (text: string, at: number | undefined, avatarUrl = '') => {
     const time = formatEmailTime(at, site.timeZone);
     const icon = avatarUrl
-      ? `<img src="${htmlEscape(avatarUrl)}" alt="" width="20" height="20" style="display:inline-block;border-radius:999px;vertical-align:-5px;margin-right:6px;">`
+      ? `<img src="${htmlEscape(avatarUrl)}" alt="" width="20" height="20" style="display:inline-block;vertical-align:-5px;margin-right:6px;">`
       : '';
     return `<table cellpadding="0" cellspacing="0" width="100%" style="margin:18px 0 2px;"><tr>
 <td align="left" style="font-size:13px;line-height:1.8;color:${MUTED};">${icon}${text}</td>
@@ -266,28 +266,45 @@ ${button(input.postUrl, '查看完整回复')}`;
 }
 
 /**
- * 评论状态徽章。颜色按状态分：通过=绿、待审=橙、垃圾=红，其余走中性灰。
- * 邮件客户端对 border-radius 支持良好，但 flex / gap 一律不能用，所以是
- * inline-block + padding 的老写法。
+ * 评论状态徽章：直接写中文状态名，不用符号。
+ *
+ * 早先是一个 28px 方块里放 ✓ / ⋯ / 🗑 / ✕。符号在各家客户端的字形和基线差得
+ * 很远，🗑 在部分 Windows 客户端还会被渲染成彩色 emoji，跟整封信的克制风格
+ * 打架；文字标签则处处一致，也省掉 aria-label 那层补丁。
+ * 颜色按状态分：通过=绿、待审=橙、垃圾=红，其余中性灰。
  */
 function statusBadge(status: string) {
   const value = String(status || '').trim();
   if (!value) return '';
-  // 用 Unicode 符号而不是图标字体或 SVG —— 邮件客户端对 @font-face 和内联
-  // SVG 的支持都不可靠，纯文本符号是唯一到处都渲染得出来的。
-  // aria-label 带中文状态名，读屏不会只念一个"对号"。
-  const marks: Record<string, { icon: string; color: string; background: string; label: string }> = {
-    approved: { icon: '✓', color: '#0f7b3f', background: '#e6f5ec', label: '已通过' },
-    pending: { icon: '⋯', color: '#9a6412', background: '#fdf3e2', label: '待审核' },
-    spam: { icon: '🗑', color: '#b42318', background: '#fdecea', label: '垃圾评论' },
-    trash: { icon: '✕', color: '#5a6b7f', background: '#eef1f5', label: '已删除' },
+  const marks: Record<string, { color: string; background: string; label: string }> = {
+    approved: { color: '#0f7b3f', background: '#e6f5ec', label: '已通过' },
+    pending: { color: '#9a6412', background: '#fdf3e2', label: '待审核' },
+    spam: { color: '#b42318', background: '#fdecea', label: '垃圾评论' },
+    trash: { color: '#5a6b7f', background: '#eef1f5', label: '已删除' },
   };
-  const mark = marks[value.toLowerCase()];
-  // 未知状态回退成文字标签，总比什么都不显示强
-  if (!mark) {
-    return `<span style="display:inline-block;padding:4px 10px;font-size:11px;font-weight:600;line-height:1.4;color:#5a6b7f;background:#eef1f5;border-radius:4px;">${htmlEscape(value)}</span>`;
-  }
-  return `<span role="img" aria-label="${htmlEscape(mark.label)}" title="${htmlEscape(mark.label)}" style="display:inline-block;width:28px;height:28px;line-height:28px;text-align:center;font-size:15px;font-weight:700;color:${mark.color};background:${mark.background};border-radius:4px;">${mark.icon}</span>`;
+  // 未知状态原样显示，总比什么都不显示强
+  const mark = marks[value.toLowerCase()]
+    ?? { color: '#5a6b7f', background: '#eef1f5', label: value };
+  return `<span style="display:inline-block;padding:5px 10px;font-size:11px;font-weight:600;line-height:1.4;white-space:nowrap;color:${mark.color};background:${mark.background};">${htmlEscape(mark.label)}</span>`;
+}
+
+/**
+ * 一键审核按钮，按评论当前状态给出**还有意义的**那几个。
+ *
+ * 之前只判断链接存不存在，而链接是无条件生成的 —— 于是一条已经自动通过的
+ * 评论，通知邮件里照样杵着一个「通过」按钮，点了什么也不会变。
+ *
+ *   已通过 → 只留「标记垃圾」（还能撤回）
+ *   垃圾   → 只留「通过」（还能恢复）
+ *   待审核 → 两个都给
+ *   已删除 → 都不给，回收站里的东西不该在邮件里改
+ */
+function moderationButtons(status: string, approveUrl: string, spamUrl: string) {
+  const value = String(status || '').trim().toLowerCase();
+  if (value === 'trash') return '';
+  const canApprove = Boolean(approveUrl) && value !== 'approved';
+  const canSpam = Boolean(spamUrl) && value !== 'spam';
+  return `${canApprove ? actionButton(approveUrl, '通过', '#0f7b3f') : ''}${canSpam ? actionButton(spamUrl, '标记垃圾', '#b42318') : ''}`;
 }
 
 export function newCommentEmail(site: EmailSite, input: {
@@ -314,7 +331,7 @@ export function newCommentEmail(site: EmailSite, input: {
   // 统一，不用圆形。没有邮箱就整格不渲染，昵称直接顶格。
   const visitorAvatar = gravatarUrl(input.email || '', 44);
   const avatarCell = visitorAvatar
-    ? `<td width="30" valign="middle" style="padding-right:8px;"><img src="${htmlEscape(visitorAvatar)}" alt="" width="22" height="22" style="display:block;border-radius:4px;"></td>`
+    ? `<td width="30" valign="middle" style="padding-right:8px;"><img src="${htmlEscape(visitorAvatar)}" alt="" width="22" height="22" style="display:block;"></td>`
     : '';
   const body = `<p style="font-size:15px;line-height:1.7;color:${TEXT};margin:0 0 16px;">
 <b>${htmlEscape(input.author)}</b> 在《${htmlEscape(input.postTitle)}》发表了新评论
@@ -332,7 +349,7 @@ ${meta}
 ${(() => { const at = formatEmailTime(input.postedAt, site.timeZone);
   return at ? `<div style="font-size:11px;color:#aebbcb;line-height:1.4;margin-top:10px;text-align:right;">${htmlEscape(at)}</div>` : ''; })()}
 </div>
-${input.approveUrl ? actionButton(input.approveUrl, '✓ 通过', '#0f7b3f') : ''}${input.spamUrl ? actionButton(input.spamUrl, '🗑 标记垃圾', '#b42318') : ''}
+${moderationButtons(input.status || '', input.approveUrl || '', input.spamUrl || '')}
 ${button(input.postUrl, '查看文章')}${button(input.manageUrl, '管理评论', false)}`;
   return shell(site, body, POWERED, statusBadge(input.status || ''));
 }
