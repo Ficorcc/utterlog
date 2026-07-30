@@ -7,6 +7,7 @@ import { commentModerationUrl } from '../email/comment-moderation';
 import { emailSite, newCommentEmail } from '../email/templates';
 import { aiAuditFailAction, auditCommentContent, enqueueAiCommentReply } from '../ai/comments';
 import { sendCommentModerationTelegram } from '../telegram';
+import { notifyCommentReply } from './comments';
 import { PublicWriteError } from './public-write';
 import { verifyCommentCaptcha } from './comment-captcha';
 
@@ -164,6 +165,22 @@ export async function createPublicComment(input: unknown, request: PublicComment
       content,
     });
   }
+
+  // 回复通知。此前只有后台的「回复」按钮会发，前台评论框这条路径完全没有
+  // —— 无论访客之间还是博主在文章页下回复，被回复的人都收不到任何提醒，
+  // 评论区根本对话不起来。
+  //
+  // 只在评论已通过时发：待审核的还没公开，提前通知等于把没过审的内容漏出去。
+  if (parentId > 0 && status === 'approved') {
+    void notifyPublicCommentReply({
+      parentId,
+      replyId: id,
+      replierName: String(body.author_name || body.author || body.name || '访客'),
+      replierEmail: authorEmail,
+      content,
+      now,
+    });
+  }
   if ((await optionValue('comment_notify_admin', 'true')) !== 'false' && request.userId === 0) {
     const admin = await one<{ email: string }>(
       `select email from ${table('users')} where role = 'admin' order by id asc limit 1`,
@@ -203,4 +220,38 @@ export async function createPublicComment(input: unknown, request: PublicComment
     void enqueueAiCommentReply({ commentId: id, postId, parentId: parentId > 0 ? parentId : 0, content, audit: aiAudit }).catch(() => {});
   }
   return { id, status };
+}
+
+/**
+ * 给被回复的人发通知。
+ *
+ * 单独拿出来是因为要先把父评论查全（作者名、邮箱、原文、时间，以及作者是不是
+ * 博主），而插入评论那段只留了一个 parentId。fire-and-forget：通知发不出去
+ * 不该拖慢发表评论的响应，失败原因由 notifyCommentReply 记进服务日志。
+ */
+async function notifyPublicCommentReply(args: {
+  parentId: number;
+  replyId: number;
+  replierName: string;
+  replierEmail: string;
+  content: string;
+  now: number;
+}) {
+  const parent = await one<{
+    post_id: number; author_name: string; author_email: string | null;
+    content: string; role: string | null; created_at: number;
+  }>(
+    `select c.post_id, c.author_name, c.author_email, c.content, c.created_at, coalesce(u.role,'') as role
+     from ${table('comments')} c left join ${table('users')} u on u.id = c.user_id
+     where c.id = $1`,
+    [args.parentId],
+  ).catch(() => null);
+  if (!parent) return;
+  await notifyCommentReply({
+    parent,
+    replier: { name: args.replierName, email: args.replierEmail },
+    replyId: args.replyId,
+    content: args.content,
+    now: args.now,
+  });
 }

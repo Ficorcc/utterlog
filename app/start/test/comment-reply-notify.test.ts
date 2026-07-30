@@ -144,3 +144,61 @@ describe('管理员回复后的通知结果', () => {
     }
   });
 });
+
+describe('回复者不限于管理员', () => {
+  // 前台评论框此前完全没有回复通知 —— 无论访客之间还是博主在文章页下回复，
+  // 被回复的人都收不到提醒，评论区根本对话不起来。
+  test('游客回复游客也要通知，回复者署名用游客昵称', async () => {
+    reset();
+    const res = await mod.notifyCommentReply({
+      parent: { ...PARENT },
+      replier: { name: '路过的人', email: 'passerby@example.com' },
+      replyId: 1001,
+      content: '我也遇到过这个问题',
+      now: NOW,
+    });
+    expect(res.notified).toBe(true);
+    expect(res.notifiedTo).toBe('visitor@example.com');
+    expect(sendCalls).toHaveLength(1);
+  });
+
+  test('自己回复自己不发 —— 邮箱相同就跳过', async () => {
+    reset();
+    const res = await mod.notifyCommentReply({
+      parent: { ...PARENT },
+      replier: { name: 'Huo', email: 'visitor@example.com' },
+      replyId: 1002,
+      content: '补充一句',
+      now: NOW,
+    });
+    expect(res.notified).toBe(false);
+    expect(res.notifyReason).toContain('自己');
+    expect(sendCalls).toHaveLength(0);
+  });
+
+  test('被回复的是博主时不发 —— 博主已经有「新评论」通知，别发两封', async () => {
+    reset();
+    const res = await mod.notifyCommentReply({
+      parent: { ...PARENT, role: 'admin' },
+      replier: { name: '访客', email: 'guest@example.com' },
+      replyId: 1003,
+      content: '请教一下',
+      now: NOW,
+    });
+    expect(res.notified).toBe(false);
+    expect(sendCalls).toHaveLength(0);
+  });
+
+  test('回复者没留邮箱照样能通知对方 —— 别因为回复者匿名就不发', async () => {
+    reset();
+    const res = await mod.notifyCommentReply({
+      parent: { ...PARENT },
+      replier: { name: '匿名', email: '' },
+      replyId: 1004,
+      content: '同问',
+      now: NOW,
+    });
+    expect(res.notified).toBe(true);
+    expect(sendCalls).toHaveLength(1);
+  });
+});

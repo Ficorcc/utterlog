@@ -182,7 +182,14 @@ export async function replyToAdminComment(parentId: number, userId: number, inpu
   const id = Number(rows[0]?.id || 0);
   await exec(`update ${table('posts')} set comment_count = comment_count + 1 where id = $1`, [parent.post_id]).catch(() => {});
 
-  return { id, ...(await notifyCommentReply({ parent, admin, replyId: id, content, now })) };
+  return {
+    id,
+    ...(await notifyCommentReply({
+      parent,
+      replier: { name: admin.nickname || admin.username || '博主', email: admin.email || '' },
+      replyId: id, content, now,
+    })),
+  };
 }
 
 /**
@@ -199,20 +206,27 @@ export type ReplyNotifyResult = {
   notifiedTo?: string;
 };
 
-async function notifyCommentReply(args: {
+/**
+ * 回复通知。后台的「回复」按钮和前台评论框共用这一份。
+ *
+ * 回复者用 `replier` 而不是写死管理员：前台回复的多数是游客，互相回复也该
+ * 收到通知，不然评论区没法真正对话起来。
+ */
+export async function notifyCommentReply(args: {
   parent: { post_id: number; author_name: string; author_email: string | null; content: string; role: string | null; created_at: number };
-  admin: { email: string; username: string; nickname: string | null };
+  replier: { name: string; email: string };
   replyId: number;
   content: string;
   now: number;
 }): Promise<ReplyNotifyResult> {
-  const { parent, admin, replyId, content, now } = args;
+  const { parent, replier, replyId, content, now } = args;
   const recipient = String(parent.author_email || '').trim().toLowerCase();
-  const adminEmail = String(admin.email || '').trim().toLowerCase();
+  const replierEmail = String(replier.email || '').trim().toLowerCase();
 
   if (!recipient) return { notified: false, notifyReason: '对方没有留下邮箱' };
+  // 被回复的是博主时不发：博主本来就会收到「新评论」通知，再来一封是重复的
   if (parent.role === 'admin') return { notified: false, notifyReason: '被回复的是管理员自己' };
-  if (recipient === adminEmail) return { notified: false, notifyReason: '收件人就是当前管理员' };
+  if (recipient === replierEmail) return { notified: false, notifyReason: '自己回复自己' };
   if (await isCommentReplyOptedOut(recipient)) return { notified: false, notifyReason: '对方已退订回复通知' };
 
   try {
@@ -229,8 +243,8 @@ async function notifyCommentReply(args: {
       `你的评论收到了回复 - ${siteTitle}`,
       commentReplyEmail(site, {
         recipientName: parent.author_name || '你好',
-        replierName: admin.nickname || admin.username || '博主',
-        replierEmail: admin.email || '',
+        replierName: replier.name || '访客',
+        replierEmail: replier.email || '',
         recipientEmail: recipient,
         originalAt: Number(parent.created_at || 0),
         replyAt: now,
