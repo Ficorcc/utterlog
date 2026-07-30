@@ -310,3 +310,58 @@ describe('邮件视觉统一', () => {
     expect(html).toContain('已通过');
   });
 });
+
+describe('按钮规格统一', () => {
+  // 此前主按钮和审核按钮是两个函数：padding 26 / 22、字重 500 / 600 各写各的，
+  // 一封邮件里四个按钮排在一起宽窄不齐；描边按钮还因为多了 1px 边框比旁边高 2px。
+  const site: EmailSite = { title: '西风', url: 'https://x', logo: '', timeZone: 'Asia/Shanghai' };
+  const buttonsIn = (html: string) =>
+    [...html.matchAll(/<a[^>]*style="([^"]*display:inline-block[^"]*)"[^>]*>([^<]*)<\/a>/g)]
+      .map(([, style]) => style);
+  const prop = (style: string, name: string) =>
+    (new RegExp(`(?:^|;)${name}:([^;]*)`).exec(style) || [, ''])[1];
+
+  const richMail = () => newCommentEmail(site, {
+    author: '访客', postTitle: '文章', content: '内容',
+    postUrl: 'https://x/p', manageUrl: 'https://x/a', status: 'pending',
+    approveUrl: 'https://x/ap', spamUrl: 'https://x/sp', postedAt: 1_800_000_000,
+  });
+
+  test('同一封邮件里的按钮 padding 和字重完全一致', () => {
+    const styles = buttonsIn(richMail());
+    expect(styles.length).toBe(4);   // 通过 / 标记垃圾 / 查看文章 / 管理评论
+    expect(new Set(styles.map((s) => prop(s, 'padding'))).size).toBe(1);
+    expect(new Set(styles.map((s) => prop(s, 'font-weight'))).size).toBe(1);
+  });
+
+  test('每个按钮都带等宽边框 —— 否则描边的那个会比实心的高 2px', () => {
+    for (const style of buttonsIn(richMail())) {
+      expect(prop(style, 'border')).toMatch(/^1px solid /);
+    }
+  });
+
+  test('按钮一律直角', () => {
+    for (const style of buttonsIn(richMail())) {
+      expect(style).not.toContain('border-radius');
+    }
+  });
+
+  test('跨模板也是同一套规格，不是只有新评论那封齐', () => {
+    const others = [
+      passwordResetEmail(site, { resetUrl: 'https://x/r', minutes: 30 }),
+      commentReplyEmail(site, {
+        recipientName: 'A', replierName: 'B', replierEmail: 'a@b.c', recipientEmail: 'd@e.f',
+        originalAt: 1_800_000_000, replyAt: 1_800_003_600, postTitle: '文章',
+        originalContent: '原文', replyContent: '回复', postUrl: 'https://x/p', unsubscribeUrl: 'https://x/u',
+      }),
+      noticeEmail(site, { heading: '标题', actionUrl: 'https://x', actionLabel: '查看' }),
+    ];
+    const reference = buttonsIn(richMail())[0];
+    for (const html of others) {
+      for (const style of buttonsIn(html)) {
+        expect(prop(style, 'padding')).toBe(prop(reference, 'padding'));
+        expect(prop(style, 'font-weight')).toBe(prop(reference, 'font-weight'));
+      }
+    }
+  });
+});

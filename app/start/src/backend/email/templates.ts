@@ -121,16 +121,33 @@ ${footer}
 </body></html>`;
 }
 
+/**
+ * 邮件里所有按钮的唯一出处。
+ *
+ * 此前主按钮和审核按钮是两个函数，左右 padding（26 / 22）和字重（500 / 600）
+ * 各写各的，一封新评论通知里四个按钮排在一起宽窄不齐。更隐蔽的是：描边按钮
+ * 有 1px 边框、实心按钮没有，同一行里描边的那个就比旁边高 2 像素 —— 邮件里
+ * 没有 box-sizing 可依赖，只能让每个按钮都带一条等宽边框（实心按钮的边框色
+ * 取自身背景色，看不出来但占位），高度才真正对齐。
+ *
+ * 一律直角，跟徽章、卡片、后台保持一致。
+ */
+function emailButton(href: string, label: string, options: { background?: string; color?: string; border?: string } = {}) {
+  const background = options.background ?? BRAND;
+  const color = options.color ?? '#fff';
+  const border = options.border ?? background;
+  return `<a target="_blank" rel="noopener noreferrer" href="${htmlEscape(href)}" style="display:inline-block;padding:10px 24px;font-size:13px;font-weight:600;line-height:1.4;text-decoration:none;text-align:center;color:${color};background:${background};border:1px solid ${border};margin:14px 6px 0 0;">${htmlEscape(label)}</a>`;
+}
+
 function button(href: string, label: string, primary = true) {
-  const style = primary
-    ? `color:#fff;background:${BRAND};`
-    : `color:${BRAND};background:#fff;border:1px solid ${BRAND};`;
-  return `<a target="_blank" rel="noopener noreferrer" href="${htmlEscape(href)}" style="display:inline-block;padding:10px 26px;font-size:13px;font-weight:500;text-decoration:none;margin:14px 6px 0 0;${style}">${htmlEscape(label)}</a>`;
+  return primary
+    ? emailButton(href, label)
+    : emailButton(href, label, { background: '#fff', color: BRAND, border: BRAND });
 }
 
 /** 审核按钮：实心色块，跟状态徽章同一套配色，一眼分得清通过和垃圾。 */
 function actionButton(href: string, label: string, color: string) {
-  return `<a target="_blank" rel="noopener noreferrer" href="${htmlEscape(href)}" style="display:inline-block;padding:10px 22px;font-size:13px;font-weight:600;text-decoration:none;color:#fff;background:${color};margin:14px 6px 0 0;">${label}</a>`;
+  return emailButton(href, label, { background: color });
 }
 
 function quote(content: string, accent = '#c8d3e0', postedAt = '', color = MUTED) {
