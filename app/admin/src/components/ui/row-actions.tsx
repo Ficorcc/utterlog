@@ -76,9 +76,40 @@ export function RowAction({
   );
 }
 
-/** 一行操作按钮的容器，右对齐、间距统一。 */
-export function RowActionGroup({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('flex items-center justify-end gap-0.5', className)}>{children}</div>;
+/**
+ * 一行操作按钮的容器，右对齐、间距统一。
+ *
+ * `revealOnHover`：平时透明，指针移到所在卡片/行上才浮出来。卡片流（说说这类
+ * 一屏十几张、每张都带编辑删除）用它能让视线只落在内容上。**父元素必须带
+ * `group` 类**，否则 group-hover 无从触发。
+ *
+ * 三件事一起做才算可用：
+ *   - `group-focus-within`：键盘用 Tab 走到按钮上时也要显形，否则纯键盘操作
+ *     等于摸黑点。
+ *   - `@media (hover: none)`：触摸屏没有悬停这一说，不常驻显示的话按钮永远
+ *     出不来，功能直接消失。
+ *   - 用 opacity 而不是 hidden：留住占位，浮出时右侧内容不会跳。透明状态下
+ *     按钮仍可点击，但破坏性操作都有二次确认，不值得再加 pointer-events 的
+ *     优先级纠缠；对读屏也更友好（opacity 不影响可访问性树）。
+ */
+export function RowActionGroup({
+  children, className, revealOnHover,
+}: { children: ReactNode; className?: string; revealOnHover?: boolean }) {
+  return (
+    <div
+      className={cn(
+        'flex items-center justify-end gap-0.5',
+        revealOnHover && [
+          'opacity-0 transition-opacity duration-150',
+          'group-hover:opacity-100 group-focus-within:opacity-100',
+          '[@media(hover:none)]:opacity-100',
+        ],
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
 }
 
 /**

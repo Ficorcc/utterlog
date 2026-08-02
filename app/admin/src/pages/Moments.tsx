@@ -376,7 +376,7 @@ export default function MomentsPage() {
       ) : (
         <div className="flex flex-col gap-3">
           {filteredMoments.map((m) => (
-            <Card key={m.id} className="px-5 py-4">
+            <Card key={m.id} className="group px-5 py-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{m.content}</p>
@@ -399,7 +399,7 @@ export default function MomentsPage() {
                     {m.visibility !== 'public' && <><span>&middot;</span><span>{m.visibility === 'private' ? t('admin.moments.visibility.private', '仅自己') : t('admin.moments.visibility.unlisted', '不公开')}</span></>}
                   </div>
                 </div>
-                <RowActionGroup className="ml-3 shrink-0">
+                <RowActionGroup revealOnHover className="ml-3 shrink-0">
                   <RowAction icon={Pencil} title={t('admin.common.edit', '编辑')} onClick={() => openEdit(m)} />
                   <RowAction icon={Trash2} tone="danger" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(m.id)} />
                 </RowActionGroup>
