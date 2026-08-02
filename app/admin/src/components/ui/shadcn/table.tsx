@@ -3,6 +3,11 @@ import { cn } from '@/lib/utils';
 
 // shadcn styled table primitives — pair with @tanstack/react-table's
 // flexRender for headers/cells. Pure elements, no Base UI needed.
+//
+// 单元格间距比 shadcn 原版（p-4 / h-12 px-4）收一档，但比早先的 p-2 / h-10 px-2
+// 松：p-2 下行高只有约 36px，头像、开关、行操作按钮挤在一起，页面管理这种行数
+// 少的列表尤其显得局促。12px 落在 4px 网格上，十二个列表页共用这一处默认值，
+// 不要在单个页面上覆盖，否则各页行高又会长歪。
 export const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (
     <div className="relative w-full overflow-auto">
@@ -31,13 +36,13 @@ TableRow.displayName = 'TableRow';
 
 export const TableHead = React.forwardRef<HTMLTableCellElement, React.ThHTMLAttributes<HTMLTableCellElement>>(
   ({ className, ...props }, ref) => (
-    <th ref={ref} className={cn('h-10 px-2 text-left align-middle font-medium text-muted-foreground', className)} {...props} />
+    <th ref={ref} className={cn('h-11 px-3 text-left align-middle font-medium text-muted-foreground', className)} {...props} />
   ),
 );
 TableHead.displayName = 'TableHead';
 
 export const TableCell = React.forwardRef<HTMLTableCellElement, React.TdHTMLAttributes<HTMLTableCellElement>>(
-  ({ className, ...props }, ref) => <td ref={ref} className={cn('p-2 align-middle', className)} {...props} />,
+  ({ className, ...props }, ref) => <td ref={ref} className={cn('px-3 py-3 align-middle', className)} {...props} />,
 );
 TableCell.displayName = 'TableCell';
 
