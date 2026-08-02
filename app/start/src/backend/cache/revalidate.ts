@@ -1,5 +1,4 @@
 import { ephemeral } from '../store/ephemeral';
-import { revalidateTags as clearTaggedByTags } from './tagged';
 
 const TAG_EPHEMERAL_PREFIXES: Record<string, string[]> = {
   coding: ['coding:'],
@@ -36,12 +35,9 @@ export async function handleRevalidate(input: RevalidateInput = {}) {
     }
   }
 
-  const clearedTagged = clearTaggedByTags(tags);
-
   return {
     paths,
     tags,
-    cleared_tagged: clearedTagged,
     cleared_ephemeral: clearedEphemeral,
     revalidated: true,
   };

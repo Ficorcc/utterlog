@@ -6,14 +6,6 @@ export function toDate(input: string | number | Date): Date {
   return new Date(input);
 }
 
-export function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .substring(0, 100);
-}
-
 export function truncate(str: string, length: number): string {
   if (str.length <= length) return str;
   return `${str.substring(0, length)}...`;

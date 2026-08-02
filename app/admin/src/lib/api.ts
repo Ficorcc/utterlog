@@ -183,9 +183,10 @@ export const mediaApi = {
 };
 
 // Revalidate frontend cache (called after settings/theme/plugin changes).
-// Sends `tags: ['options', 'coding']` so the web tier's tagged fetches
-// flushes immediately — otherwise the 10s time-based revalidate keeps
-// serving the old value and admin changes look like they didn't apply.
+// Sends `tags: ['options', 'coding']`; the server maps each tag to the
+// ephemeral key prefixes it owns and drops them immediately — otherwise the
+// time-based expiry keeps serving the old value and admin changes look like
+// they didn't apply.
 function revalidateCache() {
   const token = useAuthStore.getState().accessToken;
   fetch('/api/revalidate', {
