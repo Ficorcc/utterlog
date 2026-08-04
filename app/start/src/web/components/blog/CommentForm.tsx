@@ -311,21 +311,21 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel, com
 
       {/* Info fields (for new/editing visitors) */}
       {showInfoFields && (
-        <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border, #eee)' }}>
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '6px', padding: '0 16px', height: '50px', borderRight: '1px solid var(--color-border, #eee)' }}>
+        <div className="comment-info-fields">
+          <div className="comment-info-field">
             <i className="fa-regular fa-user" style={{ fontSize: '12px', color: '#bbb' }} />
             <input value={name} onChange={e => setName(e.target.value)} placeholder="昵称*"
-              style={{ flex: 1, border: 'none', outline: 'none', fontSize: '13px', background: 'transparent', color: 'var(--color-text-main)' }} />
+              style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', fontSize: '13px', background: 'transparent', color: 'var(--color-text-main)' }} />
           </div>
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '6px', padding: '0 16px', height: '50px', borderRight: '1px solid var(--color-border, #eee)' }}>
+          <div className="comment-info-field">
             <i className="fa-regular fa-envelope" style={{ fontSize: '12px', color: '#bbb' }} />
             <input value={email} onChange={e => setEmail(e.target.value)} placeholder="邮箱*" type="email"
-              style={{ flex: 1, border: 'none', outline: 'none', fontSize: '13px', background: 'transparent', color: 'var(--color-text-main)' }} />
+              style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', fontSize: '13px', background: 'transparent', color: 'var(--color-text-main)' }} />
           </div>
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '6px', padding: '0 16px', height: '50px' }}>
+          <div className="comment-info-field">
             <i className="fa-regular fa-globe" style={{ fontSize: '12px', color: '#bbb' }} />
             <input value={url} onChange={e => setUrl(e.target.value)} placeholder="网站"
-              style={{ flex: 1, border: 'none', outline: 'none', fontSize: '13px', background: 'transparent', color: 'var(--color-text-main)' }} />
+              style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', fontSize: '13px', background: 'transparent', color: 'var(--color-text-main)' }} />
           </div>
         </div>
       )}

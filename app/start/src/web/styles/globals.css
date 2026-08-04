@@ -2809,6 +2809,45 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   }
 }
 
+/* 评论表单的昵称 / 邮箱 / 网址三格。
+   窄屏改成竖排：三格并排时每格只剩三分之一宽度，中文占位符加图标根本放不下，
+   网址那格直接被挤出屏幕（原因是 flex 项默认 min-width:auto，撑不住就溢出而
+   不是收缩）。布局写在这里而不是内联 style，内联样式没法带媒体查询，
+   优先级还压过类选择器。 */
+.comment-info-fields {
+  display: flex;
+  border-bottom: 1px solid var(--color-border, #eee);
+}
+
+.comment-info-field {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  height: 50px;
+  border-right: 1px solid var(--color-border, #eee);
+}
+
+.comment-info-field:last-child {
+  border-right: none;
+}
+
+@media (max-width: 640px) {
+  .comment-info-fields {
+    flex-direction: column;
+  }
+  /* 竖排后格与格之间要横线，右侧竖线反而多余 */
+  .comment-info-field {
+    border-right: none;
+    border-bottom: 1px solid var(--color-border, #eee);
+  }
+  .comment-info-field:last-child {
+    border-bottom: none;
+  }
+}
+
 /* 评论里的「友链好友」标记。
    四个主题的 CommentList 共用这一份 —— 主题各自的 styles.css 是运行时按需
    加载的，写在那里换主题就会掉样式。tooltip 走 ::after + data-tip，纯 CSS，
