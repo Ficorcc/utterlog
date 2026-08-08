@@ -2834,6 +2834,37 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   border-right: none;
 }
 
+/* 输入控件的字号单独拎出来：窄屏下必须 >= 16px。
+   iOS Safari 只要输入框字号小于 16px，聚焦时就会强制放大整个页面，放大后
+   版心被推出视口、要手动缩回去 —— 表单「尺寸不对」多半是这个而不是真的样式写错。
+   桌面端不受影响，仍用 13/14px。 */
+.comment-field-input {
+  font-size: 13px;
+}
+
+.comment-textarea-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 12px 12px 12px 16px;
+  min-height: 250px;
+}
+
+.comment-textarea {
+  font-size: 14px;
+  min-height: 220px;
+}
+
+/* 点「回复」弹出的紧凑表单。字号比完整版还小（12/13px），iOS 上放大得更狠，
+   而移动端恰恰是回复用得最多的地方。 */
+.comment-compact-input {
+  font-size: 12px;
+}
+
+.comment-compact-textarea {
+  font-size: 13px;
+}
+
 @media (max-width: 640px) {
   .comment-info-fields {
     flex-direction: column;
@@ -2842,9 +2873,27 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   .comment-info-field {
     border-right: none;
     border-bottom: 1px solid var(--color-border, #eee);
+    height: 46px;
   }
   .comment-info-field:last-child {
     border-bottom: none;
+  }
+
+  .comment-field-input,
+  .comment-textarea,
+  .comment-compact-input,
+  .comment-compact-textarea {
+    font-size: 16px;
+  }
+
+  /* 三格竖排已经吃掉 138px，输入区再占 250px 的话小屏上整个表单要 460px 起，
+     一屏基本只剩表单。缩到 160px，够写几行又不至于挤掉下面的提交按钮。 */
+  .comment-textarea-row {
+    padding: 12px;
+    min-height: 160px;
+  }
+  .comment-textarea {
+    min-height: 130px;
   }
 }
 

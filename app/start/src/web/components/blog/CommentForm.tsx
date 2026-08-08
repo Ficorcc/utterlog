@@ -177,7 +177,7 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel, com
       : name;
 
     const linkBtn: React.CSSProperties = { background: 'none', border: 'none', color: 'var(--color-text-dim)', cursor: 'pointer', fontSize: '11px', padding: 0 };
-    const inputStyle: React.CSSProperties = { flex: 1, minWidth: 0, padding: '7px 10px', fontSize: '12px', border: '1px solid var(--color-border)', background: 'var(--color-bg-card)', outline: 'none', borderRadius: 0, color: 'var(--color-text-main)', fontFamily: 'inherit' };
+    const inputStyle: React.CSSProperties = { flex: 1, minWidth: 0, padding: '7px 10px', border: '1px solid var(--color-border)', background: 'var(--color-bg-card)', outline: 'none', borderRadius: 0, color: 'var(--color-text-main)', fontFamily: 'inherit' };
 
     return (
       <div style={{ background: 'var(--color-bg-soft)', border: '1px solid var(--color-border)' }}>
@@ -236,15 +236,15 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel, com
           {/* Info fields (anonymous first-timer OR editing cached info) */}
           {showInfoFields && (
             <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
-              <input value={name} onChange={e => setName(e.target.value)} placeholder="昵称*" style={inputStyle} />
-              <input value={email} onChange={e => setEmail(e.target.value)} placeholder="邮箱*" type="email" style={inputStyle} />
+              <input className="comment-compact-input" value={name} onChange={e => setName(e.target.value)} placeholder="昵称*" style={inputStyle} />
+              <input className="comment-compact-input" value={email} onChange={e => setEmail(e.target.value)} placeholder="邮箱*" type="email" style={inputStyle} />
               <input value={url} onChange={e => setUrl(e.target.value)} placeholder="网站" style={inputStyle} />
             </div>
           )}
 
-          <textarea ref={textareaRef} value={content} onChange={e => setContent(e.target.value)}
+          <textarea className="comment-compact-textarea" ref={textareaRef} value={content} onChange={e => setContent(e.target.value)}
             placeholder="写下你的回复…" rows={3}
-            style={{ width: '100%', padding: '10px', fontSize: '13px', lineHeight: 1.6, border: '1px solid var(--color-border)', background: 'var(--color-bg-card)', outline: 'none', resize: 'vertical', color: 'var(--color-text-main)', fontFamily: 'inherit', borderRadius: 0 }} />
+            style={{ width: '100%', padding: '10px', lineHeight: 1.6, border: '1px solid var(--color-border)', background: 'var(--color-bg-card)', outline: 'none', resize: 'vertical', color: 'var(--color-text-main)', fontFamily: 'inherit', borderRadius: 0 }} />
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
             {!isAdmin && (
@@ -315,35 +315,38 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel, com
           <div className="comment-info-field">
             <i className="fa-regular fa-user" style={{ fontSize: '12px', color: '#bbb' }} />
             <input value={name} onChange={e => setName(e.target.value)} placeholder="昵称*"
-              style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', fontSize: '13px', background: 'transparent', color: 'var(--color-text-main)' }} />
+              className="comment-field-input"
+              style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', background: 'transparent', color: 'var(--color-text-main)' }} />
           </div>
           <div className="comment-info-field">
             <i className="fa-regular fa-envelope" style={{ fontSize: '12px', color: '#bbb' }} />
             <input value={email} onChange={e => setEmail(e.target.value)} placeholder="邮箱*" type="email"
-              style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', fontSize: '13px', background: 'transparent', color: 'var(--color-text-main)' }} />
+              className="comment-field-input"
+              style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', background: 'transparent', color: 'var(--color-text-main)' }} />
           </div>
           <div className="comment-info-field">
             <i className="fa-regular fa-globe" style={{ fontSize: '12px', color: '#bbb' }} />
             <input value={url} onChange={e => setUrl(e.target.value)} placeholder="网站"
-              style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', fontSize: '13px', background: 'transparent', color: 'var(--color-text-main)' }} />
+              className="comment-field-input"
+              style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', background: 'transparent', color: 'var(--color-text-main)' }} />
           </div>
         </div>
       )}
 
       {/* Textarea */}
       <div style={{ position: 'relative' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', padding: '12px 12px 12px 16px', gap: '6px', minHeight: '250px', borderBottom: showEmoji ? 'none' : undefined }}>
+        <div className="comment-textarea-row" style={{ borderBottom: showEmoji ? 'none' : undefined }}>
           <i className="fa-regular fa-pen-to-square" style={{ fontSize: '12px', color: '#bbb', marginTop: '4px' }} />
           <textarea
             ref={textareaRef}
             value={content}
             onChange={e => setContent(e.target.value)}
             placeholder="评论"
+            className="comment-textarea"
             style={{
               flex: 1, border: 'none', outline: 'none', resize: 'vertical',
-              fontSize: '14px', lineHeight: 1.7, background: 'transparent',
+              lineHeight: 1.7, background: 'transparent',
               color: 'var(--color-text-main)', fontFamily: 'inherit', padding: 0,
-              minHeight: '220px',
             }}
           />
         </div>
