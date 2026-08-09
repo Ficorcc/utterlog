@@ -383,12 +383,11 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
     { key: 'mine', label: t('admin.comments.status.mine', '我的'), count: 0 },
     { key: 'spam', label: t('admin.comments.status.spam', '垃圾'), count: spamCount },
     { key: 'trash', label: t('admin.comments.status.trash', '回收站'), count: 0 },
-    { key: 'annotations', label: t('admin.comments.status.annotations', '段落点评'), count: 0 },
   ];
 
   return (
     <div>
-      {/* Single row: 6 status tabs + contextual actions + search.
+      {/* Single row: 5 status tabs + contextual actions + search.
           The search bar sits at the far right (ml-auto) filling the rest. */}
       <div className="mb-4 flex items-center gap-1.5">
         {statusTabs.map(s => (

@@ -677,7 +677,6 @@
     "admin.comments.status.mine": "Mine",
     "admin.comments.status.spam": "Spam",
     "admin.comments.status.trash": "Trash",
-    "admin.comments.status.annotations": "Annotations",
     "admin.comments.columns.author": "Author",
     "admin.comments.columns.comment": "Comment",
     "admin.comments.columns.replyTo": "Reply To",
@@ -1627,14 +1626,6 @@
     "admin.playlists.edit": "Edit playlist",
     "admin.playlists.setDefault": "Set as default playlist",
     "admin.playlists.noSongs": "No tracks yet — add them under Music first",
-    "admin.playlists.neteaseIdHint": "The NetEase playlist ID is in the URL: music.163.com/playlist?id=",
-    "admin.annotations.trash": "Trash",
-    "admin.annotations.spam": "Spam",
-    "admin.annotations.pending": "Pending",
-    "admin.annotations.mine": "Mine",
-    "admin.annotations.inPost": "In post",
-    "admin.annotations.title": "Paragraph notes",
-    "admin.annotations.storedIn": "Paragraph notes are stored in",
-    "admin.annotations.content": "Note"
+    "admin.playlists.neteaseIdHint": "The NetEase playlist ID is in the URL: music.163.com/playlist?id="
   }
 }

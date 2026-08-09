@@ -102,7 +102,7 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
 
         <div className="azure-post-content-shell">
           <article>
-            <PostContent content={post.content || ''} postId={post.id} />
+            <PostContent content={post.content || ''} />
           </article>
           <TableOfContents content={post.content || ''} variant="mobile" />
           <div className="blog-toc-outer hidden xl:block">

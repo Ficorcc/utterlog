@@ -5,6 +5,30 @@
 发布说明统一使用中文分类，每个版本固定保留四个段落：`新增`、`优化`、`修复`、`移除`。
 发布产物由 GitHub Actions 的 Bun workflow 校验和生成，不在更新日志中罗列构建文件。
 
+## 未发布
+
+### 新增
+
+- 暂无。
+
+### 优化
+
+- 暂无。
+
+### 修复
+
+- 暂无。
+
+### 移除
+
+- **下线段落点评**：读者对文章单个段落做批注的功能整体移除，包括前台弹窗、后台「段落点评」管理页与相关接口。升级时会**删除 `ul_annotations` 表**；如果站点用过这个功能且想留存数据，升级前请先备份：
+
+  ```bash
+  set -a && . ./.env && set +a
+  PGPASSWORD="$DB_PASSWORD" pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" \
+    -t "${DB_PREFIX}annotations" > annotations-backup.sql
+  ```
+
 ## [1.5.1] - 2026-07-31
 
 ### 新增

@@ -170,7 +170,7 @@ async function updatePostRecord(postId: number, body: Record<string, unknown>) {
       `insert into ${table('posts')} (${names.join(', ')}) values (${names.map((_, index) => `$${index + 1}`).join(', ')})`,
       values,
     );
-    for (const relTable of ['relationships', 'post_footprints', 'post_meta', 'annotations', 'comments']) {
+    for (const relTable of ['relationships', 'post_footprints', 'post_meta', 'comments']) {
       await exec(`update ${table(relTable)} set post_id = $1 where post_id = $2`, [newId, postId]).catch(() => {});
     }
     await exec(`delete from ${table('posts')} where id = $1`, [postId]);
@@ -444,7 +444,7 @@ export async function deletePost(id: number) {
   const footprintPlaces = await many<{ place_id: number }>(
     `select coalesce(place_id,0) as place_id from ${table('post_footprints')} where post_id = $1`, [id],
   ).catch(() => []);
-  for (const relation of ['relationships', 'comments', 'annotations', 'post_episodes', 'post_footprints']) {
+  for (const relation of ['relationships', 'comments', 'post_episodes', 'post_footprints']) {
     await exec(`delete from ${table(relation)} where post_id = $1`, [id]).catch(() => {});
   }
   await exec(`delete from ${table('posts')} where id = $1`, [id]);

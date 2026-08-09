@@ -677,7 +677,6 @@
     "admin.comments.status.mine": "Мои",
     "admin.comments.status.spam": "Спам",
     "admin.comments.status.trash": "Корзина",
-    "admin.comments.status.annotations": "Аннотации",
     "admin.comments.columns.author": "Автор",
     "admin.comments.columns.comment": "Комментарий",
     "admin.comments.columns.replyTo": "Ответ к",
@@ -1627,14 +1626,6 @@
     "admin.playlists.edit": "Редактировать плейлист",
     "admin.playlists.setDefault": "Сделать плейлистом по умолчанию",
     "admin.playlists.noSongs": "Треков пока нет — сначала добавьте их в разделе «Музыка»",
-    "admin.playlists.neteaseIdHint": "ID плейлиста NetEase находится в ссылке: music.163.com/playlist?id=",
-    "admin.annotations.trash": "Корзина",
-    "admin.annotations.spam": "Спам",
-    "admin.annotations.pending": "На модерации",
-    "admin.annotations.mine": "Мои",
-    "admin.annotations.inPost": "В записи",
-    "admin.annotations.title": "Заметки к абзацам",
-    "admin.annotations.storedIn": "Заметки к абзацам хранятся в",
-    "admin.annotations.content": "Текст заметки"
+    "admin.playlists.neteaseIdHint": "ID плейлиста NetEase находится в ссылке: music.163.com/playlist?id="
   }
 }

@@ -677,7 +677,6 @@
     "admin.comments.status.mine": "我的",
     "admin.comments.status.spam": "垃圾",
     "admin.comments.status.trash": "回收站",
-    "admin.comments.status.annotations": "段落点评",
     "admin.comments.columns.author": "作者",
     "admin.comments.columns.comment": "评论",
     "admin.comments.columns.replyTo": "回复至",
@@ -1627,14 +1626,6 @@
     "admin.playlists.edit": "编辑歌单",
     "admin.playlists.setDefault": "设为默认歌单",
     "admin.playlists.noSongs": "暂无歌曲，请先在音乐管理中添加",
-    "admin.playlists.neteaseIdHint": "网易云歌单 ID 在链接中：music.163.com/playlist?id=",
-    "admin.annotations.trash": "回收站",
-    "admin.annotations.spam": "垃圾",
-    "admin.annotations.pending": "待审核",
-    "admin.annotations.mine": "我的",
-    "admin.annotations.inPost": "所在文章",
-    "admin.annotations.title": "段落点评",
-    "admin.annotations.storedIn": "段落点评存储在",
-    "admin.annotations.content": "点评内容"
+    "admin.playlists.neteaseIdHint": "网易云歌单 ID 在链接中：music.163.com/playlist?id="
   }
 }

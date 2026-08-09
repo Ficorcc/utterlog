@@ -102,7 +102,7 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
           <div className="nebula-post-body">
             <div className="nebula-post-prose">
               <VideoPostBody post={post} />
-              {post.content ? <PostContent content={post.content} postId={post.id} /> : null}
+              {post.content ? <PostContent content={post.content} /> : null}
             </div>
           </div>
         </>
@@ -123,7 +123,7 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
           <div className="nebula-post-body">
             <div className="nebula-post-prose">
               <AISummary postId={post.id} aiSummary={post.ai_summary} excerpt={post.excerpt} />
-              <PostContent content={post.content || ''} postId={post.id} />
+              <PostContent content={post.content || ''} />
             </div>
           </div>
         </>

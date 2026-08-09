@@ -105,7 +105,7 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
 
         <div style={{ position: 'relative' }}>
           <article>
-            <PostContent content={post.content || ''} postId={post.id} />
+            <PostContent content={post.content || ''} />
           </article>
           <div className="blog-toc-outer hidden xl:block">
             <TableOfContents content={post.content || ''} />

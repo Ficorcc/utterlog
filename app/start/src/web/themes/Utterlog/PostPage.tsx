@@ -73,7 +73,7 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
               <VideoPostBody post={post} />
               {post.content ? (
                 <article style={{ marginTop: 24 }}>
-                  <PostContent content={post.content} postId={post.id} />
+                  <PostContent content={post.content} />
                 </article>
               ) : null}
             </>
@@ -84,7 +84,7 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
               </h1>
               <AISummary postId={post.id} aiSummary={post.ai_summary} excerpt={post.excerpt} />
               <article>
-                <PostContent content={post.content || ''} postId={post.id} />
+                <PostContent content={post.content || ''} />
               </article>
             </>
           )}

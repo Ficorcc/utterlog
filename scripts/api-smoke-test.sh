@@ -106,7 +106,6 @@ check GET "/api/v1/comments?post_id=${POST_ID}&status=approved&per_page=5"
 check GET /api/v1/search?q=test
 check GET /api/v1/feed
 check GET /api/v1/footprints
-check GET "/api/v1/annotations?post_id=${POST_ID}"
 check GET /api/v1/online
 check GET /api/v1/visitor/geo
 check GET /api/v1/visitor/weather

@@ -770,10 +770,6 @@
 
 
 
-
-
-
-
 [data-theme="Nebula"] .nebula-icon-button.active {
   color: var(--color-primary);
   background: rgba(127, 207, 255, 0.1);
@@ -917,10 +913,6 @@
   gap: 56px;
   padding-top: 32px;
 }
-
-
-
-
 
 
 
@@ -1086,8 +1078,6 @@
   white-space: nowrap;
 }
 
-
-
 /* ============================================================ */
 /* Post list / Post card                                          */
 /* ============================================================ */
@@ -1209,8 +1199,6 @@
   -webkit-line-clamp: 2;
   overflow: hidden;
 }
-
-
 
 
 [data-theme="Nebula"] .nebula-card-arrow {
@@ -2096,10 +2084,6 @@
 
 
 
-
-
-
-
 [data-theme="Nebula"] .nebula-tags {
   display: flex;
   flex-wrap: wrap;
@@ -2871,8 +2855,6 @@
 [data-theme="Nebula"] .nebula-comments .comment-thread span[style*="color: rgb(221, 221, 221)"] {
   color: rgba(225, 231, 238, 0.7) !important;
 }
-
-
 
 /* ============================================================ */
 /* Footer                                                         */
@@ -3771,39 +3753,6 @@
   color: var(--nebula-navy-deep);
 }
 
-/* ─── 段落点评弹窗（BlockAnnotation）—— 默认 var(--color-bg-card) 在
-   Nebula 下被映射到 var(--color-bg-card)，跟文章正文/底色完全一样，弹窗"消失"在
-   背景里。这里用一个略浮起的深底 + 蓝细边 + 加重阴影区分层次 */
-[data-theme="Nebula"] .block-annotation-panel {
-  background: #1a1d22 !important;
-  border-color: rgba(128, 207, 255, 0.22) !important;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55),
-              0 0 0 1px rgba(128, 207, 255, 0.06) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-          backdrop-filter: blur(20px) saturate(160%);
-}
-/* 内部分割线 / Header / 输入框分割线 都映射成 --color-border / --color-divider
-   全局已经有覆盖，但弹窗顶上 / 底上的 border 默认是 var(--color-border)，
-   在 Nebula 下是低对比 —— 给一个更醒目的蓝调分割 */
-[data-theme="Nebula"] .block-annotation-panel > div[style*="border-bottom"] {
-  border-bottom-color: rgba(128, 207, 255, 0.14) !important;
-}
-[data-theme="Nebula"] .block-annotation-panel > div[style*="border-top"] {
-  border-top-color: rgba(128, 207, 255, 0.14) !important;
-}
-/* 输入框背景：弹窗已是 #1a1d22，输入框继续用 --color-bg-card 的话会
-   再次跟弹窗底色撞色（还是 var(--color-bg-card)）。输入框单独翻成更深一档，加蓝边 */
-[data-theme="Nebula"] .block-annotation-input {
-  background: rgba(0, 0, 0, 0.35) !important;
-  border-color: rgba(128, 207, 255, 0.18) !important;
-  color: var(--color-text-main) !important;
-}
-[data-theme="Nebula"] .block-annotation-input::placeholder {
-  color: rgba(225, 231, 238, 0.42);
-}
-[data-theme="Nebula"] .block-annotation-input:focus {
-  border-color: var(--color-focus-ring) !important;
-}
 
 /* PostNavigation / Related posts 在 Nebula 容器里时给点上下间距 */
 [data-theme="Nebula"] .nebula-related-wrap > * { margin: 0; }
@@ -4379,8 +4328,6 @@
   background: rgba(178, 38, 30, 0.18) !important;
 }
 
-
-
 /* ---- 通用按钮 ---- */
 /* btn-primary 在 sky 蓝底上写 #fff 对比度差，改 navy-deep */
 [data-theme="Nebula"] .btn-primary {
@@ -4480,10 +4427,6 @@
 [data-theme="Nebula"] .coding-heatmap-avatar {
   border-color: rgba(128, 207, 255, 0.18) !important;
 }
-
-
-
-
 
 
 
@@ -4969,8 +4912,6 @@
   [data-theme="Nebula"] .dice-icon--result { font-size: 72px; }
   [data-theme="Nebula"] .dice-modal-content { padding: 20px; gap: 18px; }
 }
-
-
 
 /* ── 申请友链弹窗暗色适配 —— 用结构选择器代替 inline-style 字符串匹配
    ── inline JS handlers (onFocus/onBlur/onMouseEnter) 设的颜色浏览器
@@ -5605,8 +5546,6 @@
   [data-theme="Nebula"] .nebula-post-cover--with-title {
     aspect-ratio: 4 / 3;
   }
-
-
 
   [data-theme="Nebula"] .nebula-hero {
     padding: 56px 16px 64px;

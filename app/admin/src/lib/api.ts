@@ -199,19 +199,6 @@ function revalidateCache() {
   }).catch(() => {});
 }
 
-// Annotations (段落点评) admin API
-export const annotationsApi = {
-  list: (params?: { page?: number; per_page?: number; post_id?: number }) => {
-    const sp = new URLSearchParams();
-    if (params?.page) sp.set('page', String(params.page));
-    if (params?.per_page) sp.set('per_page', String(params.per_page));
-    if (params?.post_id) sp.set('post_id', String(params.post_id));
-    const q = sp.toString();
-    return api.get(`/admin/annotations${q ? `?${q}` : ''}`);
-  },
-  remove: (id: number) => api.delete(`/admin/annotations/${id}`),
-  batchDelete: (ids: number[]) => api.post('/admin/annotations/batch-delete', { ids }),
-};
 
 // Options API
 let optionsCache: any | null = null;

@@ -22,15 +22,15 @@ body:
       description: 一步步怎么触发
       placeholder: |
         1. 访问 /posts/foo
-        2. 点击段落旁的加号
-        3. 观察：没有弹窗
+        2. 在评论框填好昵称和邮箱后提交
+        3. 观察：页面没有反应
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
       label: 预期行为
-      placeholder: 应当弹出点评输入框
+      placeholder: 应当正常保存并提示成功
     validations:
       required: true
   - type: input

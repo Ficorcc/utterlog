@@ -10,8 +10,6 @@ import rehypeSlug from 'rehype-slug';
 import 'prismjs/themes/prism-tomorrow.css';
 import { siteFaviconUrl } from '@/lib/site-favicon';
 
-import { AnnotationProvider } from './AnnotationProvider';
-import BlockAnnotation from './BlockAnnotation';
 import LazyImage from './LazyImage';
 import Lightbox from './Lightbox';
 import ImageGrid from './ImageGrid';
@@ -22,7 +20,6 @@ import { processGithubRepoLinks } from './shortcodes';
 
 interface PostContentProps {
   content: string;
-  postId?: number;
 }
 
 // Code block with copy button + collapse for >20 lines
@@ -273,14 +270,7 @@ function processShortcodes(text: string): string {
   return processGithubRepoLinks(text);
 }
 
-export default function PostContent({ content, postId }: PostContentProps) {
-  // Block counters for annotation block_ids. Reset inline at the
-  // top of every render (below) so IDs are deterministic regardless
-  // of how many times this component re-renders — otherwise opening
-  // the lightbox, receiving exif data, etc. would increment the
-  // counters further and every BlockAnnotation's blockId would drift,
-  // forcing a remount cascade.
-  const blockCounters = useRef({ p: 0, pre: 0, img: 0 });
+export default function PostContent({ content }: PostContentProps) {
   // originRect 记录"点击的那张缩略图在视口里的位置"，传给 Lightbox 做
   // FLIP（First, Last, Invert, Play）动画 —— 灯箱图从这个 rect 平滑放
   // 大到全屏，关闭时反向飞回。null 时 Lightbox 退化为中心呼吸动画。
@@ -368,19 +358,11 @@ export default function PostContent({ content, postId }: PostContentProps) {
   // `exifMapRef.current` so fresh exif data still propagates without
   // invalidating the factory identity.
   const components = useMemo(() => ({
-    p: ({ node, children, ...props }: any) => {
-      const id = `p-${blockCounters.current.p++}`;
-      const el = <p {...props}>{children}</p>;
-      return postId ? <BlockAnnotation blockId={id}>{el}</BlockAnnotation> : el;
-    },
+    p: ({ node, children, ...props }: any) => <p {...props}>{children}</p>,
     img: ({ node, ...props }: any) => (
       <LazyImage {...props} exifData={typeof props.src === 'string' ? exifMapRef.current[props.src] : undefined} />
     ),
-    pre: ({ node, ...props }: any) => {
-      const id = `code-${blockCounters.current.pre++}`;
-      const el = <CodeBlock {...props} />;
-      return postId ? <BlockAnnotation blockId={id}>{el}</BlockAnnotation> : el;
-    },
+    pre: ({ node, ...props }: any) => <CodeBlock {...props} />,
     a: ({ node, ...props }: any) => {
       // .md-download-btn 是 [download] shortcode 渲染的按钮，不该被
       // ExternalLink 包成"网站 favicon + 外链 icon"的预览链接 ——
@@ -438,12 +420,7 @@ export default function PostContent({ content, postId }: PostContentProps) {
       }
       return <div {...props} />;
     },
-  }), [postId]);
-
-  // Reset block counters at the top of every render so the p/pre
-  // factories above produce the same IDs each pass regardless of
-  // how many times we re-render.
-  blockCounters.current = { p: 0, pre: 0, img: 0 };
+  }), []);
 
   const inner = (
     <>
@@ -466,8 +443,5 @@ export default function PostContent({ content, postId }: PostContentProps) {
     </>
   );
 
-  if (postId) {
-    return <AnnotationProvider postId={postId}>{inner}</AnnotationProvider>;
-  }
   return inner;
 }

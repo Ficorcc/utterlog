@@ -114,8 +114,6 @@ DROP INDEX IF EXISTS public.idx_comments_created;
 DROP INDEX IF EXISTS public.idx_books_progress;
 DROP INDEX IF EXISTS public.idx_books_created;
 DROP INDEX IF EXISTS public.idx_books_author;
-DROP INDEX IF EXISTS public.idx_annotations_post;
-DROP INDEX IF EXISTS public.idx_annotations_block;
 DROP INDEX IF EXISTS public.idx_albums_slug;
 DROP INDEX IF EXISTS public.idx_ai_msg_conv;
 DROP INDEX IF EXISTS public.idx_ai_logs_user;
@@ -165,7 +163,6 @@ ALTER TABLE IF EXISTS ONLY public.ul_federated_users DROP CONSTRAINT IF EXISTS u
 ALTER TABLE IF EXISTS ONLY public.ul_ai_comment_queue DROP CONSTRAINT IF EXISTS ul_ai_comment_queue_pkey;
 ALTER TABLE IF EXISTS ONLY public.ul_comments DROP CONSTRAINT IF EXISTS ul_comments_pkey;
 ALTER TABLE IF EXISTS ONLY public.ul_books DROP CONSTRAINT IF EXISTS ul_books_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_annotations DROP CONSTRAINT IF EXISTS ul_annotations_pkey;
 ALTER TABLE IF EXISTS ONLY public.ul_albums DROP CONSTRAINT IF EXISTS ul_albums_pkey;
 ALTER TABLE IF EXISTS ONLY public.ul_ai_providers DROP CONSTRAINT IF EXISTS ul_ai_providers_slug_key;
 ALTER TABLE IF EXISTS ONLY public.ul_ai_providers DROP CONSTRAINT IF EXISTS ul_ai_providers_pkey;
@@ -200,7 +197,6 @@ ALTER TABLE IF EXISTS public.ul_federated_users ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.ul_comments ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.ul_ai_comment_queue ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.ul_books ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_annotations ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.ul_albums ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.ul_ai_providers ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.ul_ai_messages ALTER COLUMN id DROP DEFAULT;
@@ -259,8 +255,6 @@ DROP SEQUENCE IF EXISTS public.ul_comments_id_seq;
 DROP TABLE IF EXISTS public.ul_comments;
 DROP SEQUENCE IF EXISTS public.ul_books_id_seq;
 DROP TABLE IF EXISTS public.ul_books;
-DROP SEQUENCE IF EXISTS public.ul_annotations_id_seq;
-DROP TABLE IF EXISTS public.ul_annotations;
 DROP SEQUENCE IF EXISTS public.ul_albums_id_seq;
 DROP TABLE IF EXISTS public.ul_albums;
 DROP SEQUENCE IF EXISTS public.ul_ai_providers_id_seq;
@@ -583,44 +577,6 @@ CREATE SEQUENCE public.ul_albums_id_seq
 --
 
 ALTER SEQUENCE public.ul_albums_id_seq OWNED BY public.ul_albums.id;
-
-
---
--- Name: ul_annotations; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.ul_annotations (
-    id integer NOT NULL,
-    post_id integer NOT NULL,
-    block_id character varying(64) NOT NULL,
-    user_name character varying(100) NOT NULL,
-    user_email character varying(200),
-    user_avatar character varying(500),
-    user_site character varying(300),
-    utterlog_id character varying(100),
-    content text NOT NULL,
-    created_at bigint NOT NULL
-);
-
-
---
--- Name: ul_annotations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.ul_annotations_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: ul_annotations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.ul_annotations_id_seq OWNED BY public.ul_annotations.id;
 
 
 --
@@ -1724,13 +1680,6 @@ ALTER TABLE ONLY public.ul_albums ALTER COLUMN id SET DEFAULT nextval('public.ul
 
 
 --
--- Name: ul_annotations id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.ul_annotations ALTER COLUMN id SET DEFAULT nextval('public.ul_annotations_id_seq'::regclass);
-
-
---
 -- Name: ul_books id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1975,14 +1924,6 @@ ALTER TABLE ONLY public.ul_ai_providers
 
 ALTER TABLE ONLY public.ul_albums
     ADD CONSTRAINT ul_albums_pkey PRIMARY KEY (id);
-
-
---
--- Name: ul_annotations ul_annotations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.ul_annotations
-    ADD CONSTRAINT ul_annotations_pkey PRIMARY KEY (id);
 
 
 --
@@ -2355,20 +2296,6 @@ CREATE INDEX idx_ai_msg_conv ON public.ul_ai_messages USING btree (conversation_
 --
 
 CREATE UNIQUE INDEX idx_albums_slug ON public.ul_albums USING btree (slug) WHERE ((slug)::text <> ''::text);
-
-
---
--- Name: idx_annotations_block; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_annotations_block ON public.ul_annotations USING btree (post_id, block_id);
-
-
---
--- Name: idx_annotations_post; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_annotations_post ON public.ul_annotations USING btree (post_id);
 
 
 --

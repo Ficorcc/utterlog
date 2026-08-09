@@ -120,12 +120,12 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
             {post.type === 'video' ? (
               <>
                 <VideoPostBody post={post} />
-                {post.content ? <PostContent content={post.content} postId={post.id} /> : null}
+                {post.content ? <PostContent content={post.content} /> : null}
               </>
             ) : (
               <>
                 <AISummary postId={post.id} aiSummary={post.ai_summary} excerpt={post.excerpt} />
-                <PostContent content={post.content || ''} postId={post.id} />
+                <PostContent content={post.content || ''} />
               </>
             )}
           </div>

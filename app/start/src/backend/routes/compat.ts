@@ -810,9 +810,6 @@ async function cleanupDatabase() {
   result.post_meta_deleted = await execChanged(
     `delete from ${table('post_meta')} pm where not exists (select 1 from ${table('posts')} p where p.id = pm.post_id)`,
   );
-  result.annotations_deleted = await execChanged(
-    `delete from ${table('annotations')} an where not exists (select 1 from ${table('posts')} p where p.id = an.post_id)`,
-  );
   result.comments_deleted = await execChanged(
     `delete from ${table('comments')} cm where not exists (select 1 from ${table('posts')} p where p.id = cm.post_id)`,
   );
