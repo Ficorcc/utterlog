@@ -240,14 +240,22 @@ export async function runCoreMigrations() {
   // 一条 parent 指向已删评论的回复。先清孤儿再补约束（老库新库都在这里统一）。
   await sql.unsafe(`delete from ${table('ai_comment_queue')} q
     where not exists (select 1 from ${table('comments')} c where c.id = q.comment_id)`);
-  await sql.unsafe(`do $$ begin
-    if not exists (
-      select 1 from information_schema.table_constraints
-      where table_name = '${table('ai_comment_queue')}' and constraint_name = '${table('ai_comment_queue')}_comment_fk'
-    ) then
+  // 老库的队列表是 create table 建的，自带内联 references（约束名 *_comment_id_fkey）；
+  // 只有全新安装走 schema.sql 的才缺。所以判据是「表上有没有任何外键」，
+  // 不能只查自己起的名字 —— 那样会在老库上叠出第二条重复约束（线上踩过）。
+  await sql.unsafe(`do $$
+  declare fk_count int;
+  begin
+    select count(*) into fk_count from information_schema.table_constraints
+    where table_name = '${table('ai_comment_queue')}' and constraint_type = 'FOREIGN KEY';
+    if fk_count = 0 then
       alter table ${table('ai_comment_queue')}
         add constraint ${table('ai_comment_queue')}_comment_fk
         foreign key (comment_id) references ${table('comments')}(id) on delete cascade;
+    elsif fk_count > 1 then
+      -- 修掉此前重复加上的那条（保留原生的 *_comment_id_fkey）
+      alter table ${table('ai_comment_queue')}
+        drop constraint if exists ${table('ai_comment_queue')}_comment_fk;
     end if;
   end $$`);
   await sql.unsafe(`create table if not exists ${table('post_episodes')} (
