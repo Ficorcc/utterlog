@@ -2379,7 +2379,7 @@ CREATE INDEX idx_ai_comment_queue_status ON public.ul_ai_comment_queue USING btr
 -- Name: idx_ai_comment_queue_comment; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_ai_comment_queue_comment ON public.ul_ai_comment_queue USING btree (comment_id);
+CREATE UNIQUE INDEX idx_ai_comment_queue_comment ON public.ul_ai_comment_queue USING btree (comment_id);
 
 
 --
@@ -2829,6 +2829,14 @@ CREATE INDEX idx_users_status ON public.ul_users USING btree (status);
 
 ALTER TABLE ONLY public.ul_ai_conversations
     ADD CONSTRAINT ul_ai_conversations_provider_id_fkey FOREIGN KEY (provider_id) REFERENCES public.ul_ai_providers(id) ON DELETE SET NULL;
+
+--
+-- Name: ul_ai_comment_queue ul_ai_comment_queue_comment_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ul_ai_comment_queue
+    ADD CONSTRAINT ul_ai_comment_queue_comment_fk FOREIGN KEY (comment_id) REFERENCES public.ul_comments(id) ON DELETE CASCADE;
+
 
 
 --

@@ -149,6 +149,10 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel, com
       if (status === 'approved') {
         const toasts = ['妙笔生花，评论已上墙', '言之有物，已成功发表', '高见已收，感谢分享', '一字千金，评论发布成功', '才思敏捷，已发表成功', '留言已至，期待下次光临', '字字珠玑，感谢你的评论', '好评如潮，你的观点已发布'];
         toast.success(toasts[Math.floor(Math.random() * toasts.length)]);
+      } else if (status === 'spam') {
+        // 被自动过滤拦下的要说实话 —— 原来统一显示「审核通过后将显示」，
+        // 被误杀的用户会一直等一条永远不会出现的评论
+        toast('评论未能通过自动过滤，如有误判请通过邮件联系站长', { icon: '⚠️', duration: 6000 });
       } else {
         toast.success('评论已提交，审核通过后将显示');
       }

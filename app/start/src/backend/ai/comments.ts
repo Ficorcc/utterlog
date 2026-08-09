@@ -210,6 +210,42 @@ function parseAuditResult(raw: string): AiAuditResult | null {
  * 这里单独记一条，action 用 comment-audit-decision 跟原始调用区分开，
  * 后台 AI 日志页和统计都能看到。
  */
+/**
+ * 把重启时中断的队列行捞出来标成 error。
+ *
+ * 生成链路（延迟等待 + AI 调用）整个挂在业务进程内存里：延迟窗口最长能配到
+ * 1 小时，中途部署 / 重启 / 崩溃，那行就永远停在 status='pending' 且 ai_reply=''
+ * —— 没有任何东西会再回来处理它，后台「待审核」页签里它看起来还像在排队。
+ *
+ * 不在这里自动重新生成（那要引入并发闸门和重试记账），只把确定死掉的行翻成
+ * error 并写明原因，让它出现在后台「错误」页签 —— 那里本来就有「重新生成」按钮，
+ * 人工一键就能救回来。
+ *
+ * 「确定死掉」的判据：行龄超过 配置的延迟 + AI 超时余量。不能用固定值 —— 配了
+ * 1 小时延迟的站点，行在前 1 小时内属于正常等待，标早了会把活的标死。
+ */
+export function startAiQueueRecovery() {
+  const sweep = async () => {
+    try {
+      const delaySeconds = Math.max(0, Number(await optionValue('ai_comment_reply_delay', '0')) || 0);
+      const graceSeconds = Math.max(300, delaySeconds + 120);
+      const rows: any = await exec(
+        `update ${table('ai_comment_queue')}
+         set status = 'error', error_msg = '生成中断（进程重启），可在后台重新生成'
+         where status = 'pending' and coalesce(ai_reply, '') = '' and created_at < $1
+         returning id`,
+        [nowUnix() - graceSeconds],
+      );
+      const n = Array.isArray(rows) ? rows.length : 0;
+      if (n > 0) console.warn(`[ai-reply] 恢复 ${n} 条中断的队列行（标记为 error，可在后台重新生成）`);
+    } catch (err) {
+      console.warn('[ai-reply] 队列恢复扫描失败:', err instanceof Error ? err.message : err);
+    }
+  };
+  void sweep();
+  setInterval(sweep, 10 * 60 * 1000).unref();
+}
+
 export async function logAuditDecision(
   commentId: number,
   audit: { passed: boolean; confidence: number; reason: string } | null,
@@ -297,8 +333,12 @@ async function queueStillPending(queueId: number) {
 async function replyRateLimitReached() {
   const limit = Number(await optionValue('ai_comment_reply_rate_limit', '20')) || 0;
   if (limit <= 0) return false;
+  // 数队列表而不是 ai_logs：日志要等 AI 调用返回才写，而队列行在入队那一刻就有。
+  // 原来配了延迟（最长 1 小时）时，窗口内涌进来的评论在「日志还没写」的时候全部
+  // 通过检查，限流形同虚设；后台「重新生成」也走同一个 action 的日志，管理员手动
+  // 重生成几条就吃掉访客侧配额 —— 队列行只由访客评论创建，天然不串味。
   const row = await one<{ count: string }>(
-    `select count(*)::text as count from ${table('ai_logs')} where action = 'comment-reply' and created_at >= $1`,
+    `select count(*)::text as count from ${table('ai_comment_queue')} where created_at >= $1`,
     [nowUnix() - 3600],
   ).catch(() => null);
   return Number(row?.count || 0) >= limit;
@@ -338,9 +378,12 @@ export async function enqueueAiCommentReply(input: {
     `insert into ${table('ai_comment_queue')}
       (comment_id, post_id, comment_text, ai_reply, status, created_at, ai_audit_passed, ai_audit_confidence, ai_audit_reason)
      values ($1,$2,$3,'','pending',$4,$5,$6,$7)
+     on conflict (comment_id) do nothing
      returning id`,
     [input.commentId, input.postId, input.content, now, input.audit?.passed ?? null, input.audit?.confidence ?? null, input.audit?.reason ?? null],
   ).then((rows: any) => Number(rows?.[0]?.id || 0));
+  // on conflict 命中说明并发的另一个请求已经抢先入队 —— 不重复生成
+  if (!queueId) return;
 
   try {
     const delay = await replyDelayMs();

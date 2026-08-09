@@ -205,3 +205,53 @@ describe('可观测性', () => {
     expect(src.indexOf('logAuditDecision(id')).toBeGreaterThan(src.indexOf('rows[0]?.id'));
   });
 });
+
+describe('队列的数据正确性', () => {
+  // 这几条是源码断言：行为要靠数据库才能测，但「改回去」是能在源码层拦住的。
+  test('限流数的是队列表，不是 ai_logs —— 日志在调用返回后才写，延迟窗口会全绕过', async () => {
+    const src = await Bun.file('app/start/src/backend/ai/comments.ts').text();
+    const fn = src.slice(src.indexOf('async function replyRateLimitReached'), src.indexOf('async function replyDelayMs'));
+    expect(fn).toContain("table('ai_comment_queue')");
+    expect(fn).not.toContain("table('ai_logs')");
+  });
+
+  test('入队 insert 带 on conflict，唯一索引兜底并发去重', async () => {
+    const src = await Bun.file('app/start/src/backend/ai/comments.ts').text();
+    expect(src).toContain('on conflict (comment_id) do nothing');
+    // 撞上时 returning 为空，必须提前返回，不能拿 queueId=0 去白跑一次 AI
+    const after = src.slice(src.indexOf('on conflict (comment_id) do nothing'));
+    expect(after).toContain('if (!queueId) return;');
+  });
+
+  test('迁移里有唯一索引与外键（新装库走 schema.sql，没有外键，靠这里统一补）', async () => {
+    const src = await Bun.file('app/start/src/backend/db/client.ts').text();
+    expect(src).toContain('create unique index if not exists idx_ai_comment_queue_comment');
+    expect(src).toContain('ai_comment_queue');
+    expect(src).toMatch(/foreign key \(comment_id\) references \$\{table\('comments'\)\}\(id\) on delete cascade/);
+  });
+
+  test('启动流程注册了中断恢复', async () => {
+    const src = await Bun.file('app/start/src/backend/index.ts').text();
+    expect(src).toContain('startAiQueueRecovery()');
+  });
+});
+
+describe('关键词拦截不再误杀', () => {
+  test('英文按词边界：Essex / sexism / adulthood 不能被拦', async () => {
+    const src = await Bun.file('app/start/src/backend/services/public-comments.ts').text();
+    // 不再有裸的 'sex' / 'adult' / 'subscribe' 子串项
+    const listArea = src.slice(src.indexOf('SPAM_WORDS_EN'), src.indexOf('async function isSpamComment'));
+    expect(listArea).not.toContain("'sex'");
+    expect(listArea).not.toContain("'adult'");
+    expect(listArea).not.toContain("'subscribe'");
+    // 英文走词边界正则
+    expect(src).toContain('SPAM_EN_RE');
+  });
+
+  test('中文不再有单字「药」—— 中药 / 药店 这类正常内容曾被整个拦掉', async () => {
+    const src = await Bun.file('app/start/src/backend/services/public-comments.ts').text();
+    const listArea = src.slice(src.indexOf('SPAM_WORDS_ZH'), src.indexOf('SPAM_EN_RE'));
+    expect(listArea).not.toContain("'药'");
+    expect(listArea).toContain("'壮阳药'");
+  });
+});

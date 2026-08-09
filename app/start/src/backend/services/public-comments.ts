@@ -36,15 +36,29 @@ async function validPassportToken(token: string) {
   return Boolean(payload?.success && payload?.data?.valid && payload?.data?.utterlog_id);
 }
 
+/**
+ * 关键词拦截。命中即 spam 且短路掉后面的 AI 审核，所以词表宁窄勿宽 ——
+ * 这里误杀的评论没有任何平反机会。
+ *
+ * 英文词必须按词边界匹配：原来是子串 includes，`sex` 命中 Essex/sexism、
+ * `adult` 命中 adulthood；中文单字更糟，`药` 把中药、吃药、药店全杀了 ——
+ * 一个聊健康话题的博客基本没法评论。中文改用明确的垃圾短语。
+ */
+const SPAM_WORDS_EN = [
+  'casino', 'poker', 'viagra', 'cialis', 'lottery', 'free money', 'buy now', 'click here',
+  'earn money', 'make money', 'xxx', 'porn',
+];
+const SPAM_WORDS_ZH = [
+  '赌博', '博彩', '彩票', '代开发票', '刷单', '兼职日赚', '加微信', '加qq', '代孕',
+  '壮阳药', '迷药', '办证', '发票代开',
+];
+const SPAM_EN_RE = new RegExp(`\\b(${SPAM_WORDS_EN.map((w) => w.replace(/ /g, '\\s+')).join('|')})\\b`, 'i');
+
 async function isSpamComment(content: string, email: string, url: string, ip: string) {
   const lower = content.toLowerCase();
   if ((lower.match(/https?:\/\//g) || []).length > 2) return true;
-  const spamWords = [
-    'casino', 'poker', 'viagra', 'cialis', 'lottery', 'free money', 'buy now', 'click here',
-    'subscribe', 'earn money', 'make money', 'adult', 'xxx', 'porn', 'sex', '药', '赌博',
-    '彩票', '代开发票', '刷单', '兼职日赚', '加微信', '加qq', '代孕',
-  ];
-  if (spamWords.some((word) => lower.includes(word))) return true;
+  if (SPAM_EN_RE.test(content)) return true;
+  if (SPAM_WORDS_ZH.some((word) => lower.includes(word))) return true;
   const emailLower = email.toLowerCase();
   if (['tempmail.', 'guerrillamail.', 'throwaway.', 'yopmail.', 'sharklasers.'].some((domain) => emailLower.includes(domain))) return true;
   if (/(.)\1{9,}/u.test(content)) return true;

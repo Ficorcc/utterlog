@@ -228,7 +228,28 @@ export async function runCoreMigrations() {
     ai_audit_reason text
   )`);
   await sql.unsafe(`create index if not exists idx_ai_comment_queue_status on ${table('ai_comment_queue')} (status, created_at desc)`);
-  await sql.unsafe(`create index if not exists idx_ai_comment_queue_comment on ${table('ai_comment_queue')} (comment_id)`);
+  // comment_id 要唯一：原来的去重是「先查后插」，两步之间没有锁，并发重复提交
+  // （双击 / 客户端重试）会给同一条评论生成两次回复。换成唯一索引 + insert 端
+  // on conflict do nothing，数据库层兜底。先清掉可能已存在的重复行（保留最早的）。
+  await sql.unsafe(`delete from ${table('ai_comment_queue')} a using ${table('ai_comment_queue')} b
+    where a.comment_id = b.comment_id and a.id > b.id`);
+  await sql.unsafe(`drop index if exists idx_ai_comment_queue_comment`);
+  await sql.unsafe(`create unique index if not exists idx_ai_comment_queue_comment on ${table('ai_comment_queue')} (comment_id)`);
+  // 外键补齐：本文件的 create table 带 references … on delete cascade，但全新安装
+  // 走的是 schema.sql，那份没有外键 —— 硬删评论后队列行原地残留，点「发布」会插出
+  // 一条 parent 指向已删评论的回复。先清孤儿再补约束（老库新库都在这里统一）。
+  await sql.unsafe(`delete from ${table('ai_comment_queue')} q
+    where not exists (select 1 from ${table('comments')} c where c.id = q.comment_id)`);
+  await sql.unsafe(`do $$ begin
+    if not exists (
+      select 1 from information_schema.table_constraints
+      where table_name = '${table('ai_comment_queue')}' and constraint_name = '${table('ai_comment_queue')}_comment_fk'
+    ) then
+      alter table ${table('ai_comment_queue')}
+        add constraint ${table('ai_comment_queue')}_comment_fk
+        foreign key (comment_id) references ${table('comments')}(id) on delete cascade;
+    end if;
+  end $$`);
   await sql.unsafe(`create table if not exists ${table('post_episodes')} (
     id serial primary key,
     post_id integer not null references ${table('posts')}(id) on delete cascade,
