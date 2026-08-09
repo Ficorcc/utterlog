@@ -118,13 +118,32 @@ export async function createPublicComment(input: unknown, request: PublicComment
     ).catch(() => null);
     if (Number(previous?.count || 0) > 0) status = 'approved';
   }
-  if (status === 'pending' && (await optionValue('comment_moderation', 'false')) !== 'true') status = 'approved';
 
-  const aiAudit = status === 'pending' && request.userId === 0 ? await auditCommentContent(content).catch(() => null) : null;
+  // AI 审核要排在「全局审核开关」之前。
+  //
+  // 之前它在后面，而 comment_moderation 默认 false 会先把 status 改成 approved，
+  // 于是审核那行的 `status === 'pending'` 永远不成立 —— 站长把「启用 AI 审核」
+  // 打开、配好 provider、测试通过，线上一条都没审，后台还没有任何提示。
+  //
+  // 现在只要开了 ai_comment_audit_enabled 就跑，与「评论需要人工审核」解耦：
+  // 审核判不通过按 failAction 处理；判通过则继续走下面的人工审核开关（AI 说没问题
+  // 不等于站长不想再看一眼）；判不了（auditCommentContent 返回 null）就当没审过。
+  const aiAudit = status === 'pending' && request.userId === 0
+    ? await auditCommentContent(content).catch((err) => {
+        console.warn('[ai-audit] 审核调用失败，按未审核处理:', err instanceof Error ? err.message : err);
+        return null;
+      })
+    : null;
   if (aiAudit && !aiAudit.passed) {
     const failAction = await aiAuditFailAction();
+    // reject 落 spam，pending 留待人工，ignore 不动 —— 无论哪种都跳过下面的
+    // 自动放行，否则刚判定的结果会被立刻覆盖掉
     if (failAction === 'reject') status = 'spam';
-    if (failAction === 'pending') status = 'pending';
+  }
+
+  if (status === 'pending' && (await optionValue('comment_moderation', 'false')) !== 'true') {
+    // AI 判过不通过的（failAction=pending/ignore）不在这里放行，留给人工看
+    if (!(aiAudit && !aiAudit.passed)) status = 'approved';
   }
   const geo = await resolveCommentGeo(request.ip);
   const now = nowUnix();

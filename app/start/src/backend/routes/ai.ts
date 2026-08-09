@@ -1170,9 +1170,13 @@ async function publishAiCommentReply(queueId: number, reply: string, reviewerId:
   if (!['pending', 'error'].includes(row.status)) throw new Error('该队列条目已处理');
   const user = await one<{ username: string; nickname: string | null; email: string | null }>(`select username, nickname, email from ${table('users')} where id = $1`, [reviewerId]).catch(() => null);
   const now = nowUnix();
+  // 先校验正文，再拼徽章 —— 反过来的话两者都为空时 finalReply 只剩徽章文字，
+  // trim 后非空、校验放行，会往评论区插一条正文只有「AI 辅助回复」的评论。
+  // 队列里 ai_reply 为空的行是真实存在的（生成中途进程重启就会留下）。
+  const body = String(reply || row.ai_reply || '').trim();
+  if (!body) throw new Error('回复内容不能为空');
   const badge = (await optionValue('ai_comment_reply_badge_text', '🤖 AI 辅助回复')).trim();
-  const finalReply = `${reply || row.ai_reply}${badge ? `\n\n${badge}` : ''}`;
-  if (!finalReply.trim()) throw new Error('回复内容不能为空');
+  const finalReply = `${body}${badge ? `\n\n${badge}` : ''}`;
   await exec(
     `insert into ${table('comments')} (post_id, author_name, author_email, content, parent_id, user_id, status, source, created_at, updated_at, is_ai_reply)
      values ($1,$2,$3,$4,$5,$6,'approved','local',$7,$7,true)`,

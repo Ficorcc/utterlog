@@ -84,9 +84,21 @@ async function logAi(provider: Record<string, unknown> | null, action: string, s
   ).catch(() => {});
 }
 
+/**
+ * 评论侧的 AI 调用。
+ *
+ * 失败必须留痕：这条链路是无人值守自动跑的，站长不会盯着。原来只有「拿到响应
+ * 但状态码非 2xx」会写 ai_logs，而「没有可用 provider」和「请求超时」都在那句
+ * logAi 之前抛出，调用方又用 .catch 吞掉 —— 结果是 ai_logs 零新增、journal 零
+ * 输出、后台一切正常，而实际每条评论都在悄悄跳过审核。
+ */
 async function callAiText(messages: { role: string; content: string }[], action: string) {
   const provider = await activeAiProvider('text', aiPurposeForAction(action));
-  if (!provider) throw new Error('未配置启用的文本 AI 提供商');
+  if (!provider) {
+    await logAi(null, action, 'error', '未配置启用的文本 AI 提供商', {});
+    console.warn(`[ai] ${action} 跳过：未配置启用的文本 AI 提供商`);
+    throw new Error('未配置启用的文本 AI 提供商');
+  }
   const endpoint = normalizeAiEndpoint(String(provider.endpoint || ''), 'text');
   const model = String(provider.model || '');
   const apiKey = String(provider.api_key || '');
@@ -106,26 +118,73 @@ async function callAiText(messages: { role: string; content: string }[], action:
     body = { model, messages, max_tokens: maxTokens, temperature };
   }
 
-  const res = await fetch(endpoint, { method: 'POST', headers, body: JSON.stringify(body), signal: AbortSignal.timeout(timeout) });
+  let res: Response;
+  try {
+    res = await fetch(endpoint, { method: 'POST', headers, body: JSON.stringify(body), signal: AbortSignal.timeout(timeout) });
+  } catch (err) {
+    // 超时和网络错误走这里 —— 原来这一条完全静默
+    const message = err instanceof Error ? err.message : String(err);
+    await logAi(provider, action, 'error', `请求失败：${message}`, { timeout });
+    console.warn(`[ai] ${action} 请求失败:`, message);
+    throw err;
+  }
+
   const payload: any = await res.json().catch(() => ({}));
   if (!res.ok || payload.error) {
     const message = payload.error?.message || payload.error || `HTTP ${res.status}`;
     await logAi(provider, action, 'error', String(message), { status: res.status });
+    console.warn(`[ai] ${action} 返回错误:`, String(message));
     throw new Error(String(message));
   }
   const content = isAnthropicEndpoint(endpoint)
     ? (payload.content || []).map((part: any) => part.text || '').join('\n').trim()
     : String(payload.choices?.[0]?.message?.content || payload.choices?.[0]?.text || '').trim();
+  // 空返回按失败记：原来照样记 success，接上「空回复也能发布」就会发出一条只有徽章的评论
+  if (!content) {
+    await logAi(provider, action, 'error', '模型返回空内容', { usage: payload.usage || {} });
+    console.warn(`[ai] ${action} 模型返回空内容`);
+    throw new Error('模型返回空内容');
+  }
   await logAi(provider, action, 'success', content, { usage: payload.usage || {} });
   return content;
 }
 
-function parseAuditResult(raw: string): AiAuditResult {
+/**
+ * 解析模型返回的审核结论。**解析不出来返回 null，不要当成「不通过」。**
+ *
+ * 原来是 `parsed.passed === true` 严格判断、confidence 缺省取 0，于是
+ * `{"passed":true}`（没给 confidence）、`{"passed":"true"}`（字符串）、
+ * `{"pass":true}`（少个 ed）这三种常见的模型输出偏差全部被判成不通过，
+ * 而默认动作是直接标 spam —— 一条正常评论就这么没了，访客那边还显示
+ * 「已提交，审核通过后显示」。判不了就交回上层按「未审核」处理，
+ * 宁可漏过也不误杀。
+ */
+function parseAuditResult(raw: string): AiAuditResult | null {
   const json = raw.match(/\{[\s\S]*\}/)?.[0] || raw;
-  const parsed = JSON.parse(json) as Record<string, unknown>;
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(json) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+  if (!parsed || typeof parsed !== 'object') return null;
+
+  // passed / pass 都认，布尔和字符串都认
+  const rawPassed = parsed.passed ?? parsed.pass ?? parsed.ok;
+  const passed = rawPassed === true || rawPassed === 1
+    || (typeof rawPassed === 'string' && ['true', 'yes', '1', 'pass'].includes(rawPassed.trim().toLowerCase()));
+  const failed = rawPassed === false || rawPassed === 0
+    || (typeof rawPassed === 'string' && ['false', 'no', '0', 'fail'].includes(rawPassed.trim().toLowerCase()));
+  // 既不像通过也不像不通过 —— 模型没按格式回，交回上层当未审核
+  if (!passed && !failed) return null;
+
+  // 模型不给 confidence 是常态，按「它没表达不确定」处理，即满分。
+  // 取 0 的话会连同下面的阈值判断把所有这类输出打成不通过。
+  const hasConfidence = parsed.confidence !== undefined && parsed.confidence !== null
+    && Number.isFinite(Number(parsed.confidence));
   return {
-    passed: parsed.passed === true,
-    confidence: Math.max(0, Math.min(1, Number(parsed.confidence ?? 0))),
+    passed,
+    confidence: hasConfidence ? Math.max(0, Math.min(1, Number(parsed.confidence))) : 1,
     reason: String(parsed.reason || '').slice(0, 120),
   };
 }
@@ -135,8 +194,17 @@ export async function auditCommentContent(content: string): Promise<AiAuditResul
   const prompt = renderTemplate(await optionValue('ai_comment_audit_prompt', commentAuditDefaultPrompt), { content });
   const raw = await callAiText([{ role: 'user', content: prompt }], 'comment-audit');
   const result = parseAuditResult(raw);
+  if (!result) {
+    console.warn('[ai-audit] 无法解析模型返回，按未审核处理:', raw.slice(0, 200));
+    return null;
+  }
   const threshold = Math.max(0, Math.min(1, Number(await optionValue('ai_comment_audit_threshold', '0.8')) || 0.8));
-  if (result.passed && result.confidence < threshold) return { ...result, passed: false, reason: result.reason || '置信度低于阈值' };
+  // 阈值双向生效：原来只推翻低置信度的「通过」，低置信度的「不通过」
+  // （哪怕 confidence 0.05）却原样杀掉评论。两边都不够自信就当没审。
+  if (result.confidence < threshold) {
+    console.warn(`[ai-audit] 置信度 ${result.confidence} 低于阈值 ${threshold}，按未审核处理`);
+    return null;
+  }
   return result;
 }
 
@@ -176,6 +244,21 @@ async function publishAiReply(queueId: number, postId: number, parentCommentId: 
     `update ${table('ai_comment_queue')} set status = 'approved', processed_at = $1, reviewer_id = $2 where id = $3`,
     [now, admin?.id || 0, queueId],
   );
+}
+
+/**
+ * 自动发布前确认这条还没被人工处理过。
+ *
+ * 延迟发布最长能配到 1 小时，这段窗口里管理员完全可能在后台把它拒了。
+ * 后台那条发布路径有 `if (!['pending','error'].includes(status)) throw`，
+ * 自动这条原来没有 —— 延迟结束照发不误，还把状态从 rejected 改回 approved，
+ * 管理员连自己拒过的痕迹都看不到。
+ */
+async function queueStillPending(queueId: number) {
+  const row = await one<{ status: string }>(
+    `select status from ${table('ai_comment_queue')} where id = $1`, [queueId],
+  ).catch(() => null);
+  return Boolean(row) && ['pending', 'error'].includes(String(row?.status || ''));
 }
 
 async function replyRateLimitReached() {
@@ -236,7 +319,14 @@ export async function enqueueAiCommentReply(input: {
     });
     const reply = await callAiText([{ role: 'user', content: prompt }], 'comment-reply');
     await exec(`update ${table('ai_comment_queue')} set ai_reply = $1, error_msg = null where id = $2`, [reply, queueId]);
-    if (mode === 'auto') await publishAiReply(queueId, input.postId, input.commentId, reply);
+    // 延迟窗口里管理员可能已经把这条拒了，发之前再确认一次状态
+    if (mode === 'auto') {
+      if (await queueStillPending(queueId)) {
+        await publishAiReply(queueId, input.postId, input.commentId, reply);
+      } else {
+        console.warn(`[ai-reply] 队列 #${queueId} 已被人工处理，跳过自动发布`);
+      }
+    }
   } catch (err) {
     await exec(
       `update ${table('ai_comment_queue')} set status = 'error', error_msg = $1 where id = $2`,
