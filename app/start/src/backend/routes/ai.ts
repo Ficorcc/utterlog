@@ -1450,20 +1450,21 @@ export async function aiGetActionPayload(action: string, userId: number, searchP
     return { data: rows, pagination: { total: count, page, per_page: perPage, total_pages: Math.ceil(count / perPage) } };
   }
   if (action === 'stats') {
+    // 不按 user_id 过滤：自动跑的那几类（comment-audit / comment-reply / reader-chat /
+    // search）写的都是 user_id = null，加了过滤就一条都统计不到 —— 而它们恰恰是唯一
+    // 无人值守、唯一会失控烧钱的调用。线上实测 16 条日志里有 12 条因此不可见。
+    // 本站是单管理员，ai_logs 本来就是全站维度的。
     const [totals, byAction, byModel] = await Promise.all([
       one<{ total_calls: number; total_tokens: number }>(
-        `select count(*)::int as total_calls, coalesce(sum(total_tokens),0)::int as total_tokens from ${table('ai_logs')} where user_id = $1`,
-        [userId],
+        `select count(*)::int as total_calls, coalesce(sum(total_tokens),0)::int as total_tokens from ${table('ai_logs')}`,
       ).catch(() => null),
       many<Record<string, unknown>>(
         `select coalesce(nullif(action,''),'unknown') as action, count(*)::int as count, coalesce(sum(total_tokens),0)::int as tokens
-         from ${table('ai_logs')} where user_id = $1 group by action order by count desc, action asc`,
-        [userId],
+         from ${table('ai_logs')} group by action order by count desc, action asc`,
       ).catch(() => []),
       many<Record<string, unknown>>(
         `select coalesce(nullif(model,''),'unknown') as model, count(*)::int as count, coalesce(sum(total_tokens),0)::int as tokens
-         from ${table('ai_logs')} where user_id = $1 group by model order by count desc, model asc limit 20`,
-        [userId],
+         from ${table('ai_logs')} group by model order by count desc, model asc limit 20`,
       ).catch(() => []),
     ]);
     return { data: { totals: totals || { total_calls: 0, total_tokens: 0 }, by_action: byAction, by_model: byModel } };

@@ -5,7 +5,7 @@ import { lookupGeoIp } from '../geoip';
 import { sendConfiguredEmail } from '../email';
 import { commentModerationUrl } from '../email/comment-moderation';
 import { emailSite, newCommentEmail } from '../email/templates';
-import { aiAuditFailAction, auditCommentContent, enqueueAiCommentReply } from '../ai/comments';
+import { aiAuditFailAction, auditCommentContent, enqueueAiCommentReply, logAuditDecision } from '../ai/comments';
 import { sendCommentModerationTelegram } from '../telegram';
 import { notifyCommentReply } from './comments';
 import { PublicWriteError } from './public-write';
@@ -134,6 +134,7 @@ export async function createPublicComment(input: unknown, request: PublicComment
         return null;
       })
     : null;
+  const auditRan = status === 'pending' && request.userId === 0;
   if (aiAudit && !aiAudit.passed) {
     const failAction = await aiAuditFailAction();
     // reject 落 spam，pending 留待人工，ignore 不动 —— 无论哪种都跳过下面的
@@ -159,6 +160,9 @@ export async function createPublicComment(input: unknown, request: PublicComment
     ],
   );
   const id = Number(rows[0]?.id || 0);
+  // 审核跑过就记一条结论，不管判定如何、也不管开没开 AI 回复。
+  // 这是「为什么这条评论被拦了」唯一能事后追溯的地方。
+  if (auditRan) void logAuditDecision(id, aiAudit, status).catch(() => {});
   if (status === 'approved') {
     await exec(`update ${table('posts')} set comment_count = comment_count + 1 where id = $1`, [postId]).catch(() => {});
   }

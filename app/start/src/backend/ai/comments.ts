@@ -77,10 +77,21 @@ async function activeAiProvider(type = 'text', purpose = '') {
 }
 
 async function logAi(provider: Record<string, unknown> | null, action: string, status: string, message: string, metadata: Record<string, unknown> = {}) {
+  // token 三列要写：另外两处写 ai_logs 的地方（routes/ai.ts、services/search.ts）
+  // 都解析了 usage，只有这里漏了，导致后台「总 Token 消耗」里评论审核和自动回复
+  // 恒为 0 —— 而这两类是唯一自动触发、唯一会失控烧钱的调用。
+  const usage = (metadata.usage || {}) as Record<string, unknown>;
+  const promptTokens = Number(usage.prompt_tokens ?? usage.input_tokens ?? 0) || 0;
+  const completionTokens = Number(usage.completion_tokens ?? usage.output_tokens ?? 0) || 0;
   await exec(
-    `insert into ${table('ai_logs')} (user_id, provider, model, action, status, message, metadata, created_at)
-     values (null,$1,$2,$3,$4,$5,$6::jsonb,$7)`,
-    [provider?.slug || provider?.name || '', provider?.model || '', action, status, message.slice(0, 1000), JSON.stringify(metadata), nowUnix()],
+    `insert into ${table('ai_logs')} (user_id, provider, model, action, prompt_tokens, completion_tokens, total_tokens, status, message, metadata, created_at)
+     values (null,$1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb,$10)`,
+    [
+      provider?.slug || provider?.name || '', provider?.model || '', action,
+      promptTokens, completionTokens,
+      Number(usage.total_tokens ?? 0) || promptTokens + completionTokens,
+      status, message.slice(0, 1000), JSON.stringify(metadata), nowUnix(),
+    ],
   ).catch(() => {});
 }
 
@@ -187,6 +198,28 @@ function parseAuditResult(raw: string): AiAuditResult | null {
     confidence: hasConfidence ? Math.max(0, Math.min(1, Number(parsed.confidence))) : 1,
     reason: String(parsed.reason || '').slice(0, 120),
   };
+}
+
+/**
+ * 把一次审核的最终结论记进 ai_logs。
+ *
+ * 队列表那三列（ai_audit_passed / confidence / reason）只有在同时开了「AI 智能回复」
+ * 时才会有行 —— 而最常见的用法是只开审核不开回复，那种情况下判定结果原本无处可查。
+ * 用户投诉「我的评论发不出去」时，运维分不清是关键词拦的、频率拦的还是 AI 判的。
+ *
+ * 这里单独记一条，action 用 comment-audit-decision 跟原始调用区分开，
+ * 后台 AI 日志页和统计都能看到。
+ */
+export async function logAuditDecision(
+  commentId: number,
+  audit: { passed: boolean; confidence: number; reason: string } | null,
+  finalStatus: string,
+) {
+  const verdict = !audit ? '未判定' : audit.passed ? '通过' : '不通过';
+  const detail = audit ? `置信度 ${audit.confidence}${audit.reason ? `，理由：${audit.reason}` : ''}` : '模型未给出可用结论';
+  await logAi(null, 'comment-audit-decision', audit && !audit.passed ? 'error' : 'success',
+    `评论 #${commentId} 审核${verdict}（${detail}）→ 最终状态 ${finalStatus}`,
+    { comment_id: commentId, passed: audit?.passed ?? null, confidence: audit?.confidence ?? null, final_status: finalStatus });
 }
 
 export async function auditCommentContent(content: string): Promise<AiAuditResult | null> {

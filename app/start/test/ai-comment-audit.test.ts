@@ -177,3 +177,31 @@ describe('审核不再被全局审核开关短路', () => {
 afterAll(() => {
   globalThis.fetch = originalFetch;
 });
+
+describe('可观测性', () => {
+  // 线上实测过：16 条 ai_logs 里有 12 条 user_id 为 null（评论审核、自动回复、
+  // AI 陪读、语义搜索都写 null），而统计 SQL 带 `where user_id = $1`，
+  // 于是后台「总调用次数 / 总 Token」看不到它们 —— 恰恰是唯一会失控烧钱的几类。
+  test('AI 统计不按 user_id 过滤', async () => {
+    const src = await Bun.file('app/start/src/backend/routes/ai.ts').text();
+    const stats = src.slice(src.indexOf("if (action === 'stats')"), src.indexOf("if (action === 'stats')") + 1600);
+    expect(stats).toContain('ai_logs');
+    expect(stats).not.toMatch(/ai_logs\)\}\s+where user_id = \$1/);
+    expect(stats).not.toMatch(/from \$\{table\('ai_logs'\)\} where user_id/);
+  });
+
+  test('评论侧的 logAi 会写 token 三列', async () => {
+    const src = await Bun.file('app/start/src/backend/ai/comments.ts').text();
+    const logAi = src.slice(src.indexOf('async function logAi'), src.indexOf('async function logAi') + 1200);
+    for (const col of ['prompt_tokens', 'completion_tokens', 'total_tokens']) {
+      expect(logAi).toContain(col);
+    }
+  });
+
+  test('审核跑过就留一条结论日志，与开没开 AI 回复无关', async () => {
+    const src = await Bun.file('app/start/src/backend/services/public-comments.ts').text();
+    expect(src).toContain('logAuditDecision');
+    // 必须在评论落库之后调用 —— 那时才知道最终状态
+    expect(src.indexOf('logAuditDecision(id')).toBeGreaterThan(src.indexOf('rows[0]?.id'));
+  });
+});
