@@ -4,6 +4,9 @@ export type DocumentLink = {
   rel: string;
   href: string;
   crossOrigin?: '' | 'anonymous' | 'use-credentials';
+  /** rel="preload" requires the resource type for browsers to fetch early. */
+  as?: string;
+  type?: string;
 };
 
 export function startDocumentLinks(ctx: ThemeContextData | null | undefined): DocumentLink[] {
@@ -19,6 +22,12 @@ export function startDocumentLinks(ctx: ThemeContextData | null | undefined): Do
     // DNS/TCP/TLS connection while the document is parsed so the first image
     // can start transferring immediately when it enters the viewport.
     { rel: 'preconnect', href: 'https://img.ficor.net', crossOrigin: 'anonymous' },
+    // FontAwesome uses font-display:block. Preload the two families that cover
+    // most first-screen icons so they do not appear in a later wave.
+    { rel: 'preload', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous',
+      href: 'https://static.bluecdn.com/libs/fontawesome/7.3.1/webfonts/fa-solid-900.woff2' },
+    { rel: 'preload', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous',
+      href: 'https://static.bluecdn.com/libs/fontawesome/7.3.1/webfonts/fa-light-300.woff2' },
     { rel: 'stylesheet', href: 'https://static.bluecdn.com/libs/fontawesome/7.3.1/css/all.min.css' },
     { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/noto-sans-sc.css' },
     { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/alimama-fangyuanti.css' },
