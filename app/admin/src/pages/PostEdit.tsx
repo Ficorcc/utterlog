@@ -49,6 +49,12 @@ function ToggleRow({ id, label, checked, onCheckedChange }: {
 // so the round-trip is consistent.
 function toLocalDatetime(val: string | number | null | undefined): string {
   if (val === null || val === undefined || val === '') return '';
+  // `published_at` is a PostgreSQL timestamp without timezone. The public API
+  // deliberately returns it as a site wall-clock value, so do not parse it in
+  // the administrator's browser timezone before placing it in this input.
+  if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(val) && !/(?:Z|[+-]\d{2}:?\d{2})$/i.test(val)) {
+    return val.replace(' ', 'T').slice(0, 16);
+  }
   const n = Number(val);
   const d = !isNaN(n) && n > 1e9 && n < 1e10
     ? new Date(n * 1000)

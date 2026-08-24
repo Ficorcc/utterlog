@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Plus, Search, X } from 'lucide-react';
 import {
-  Button, Input, Label, Pagination, LoadingState, EmptyState, ConfirmDialog,
+  Button, Input, Label, LoadingState, EmptyState, ConfirmDialog,
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/shadcn';
 import { RowAction } from '@/components/ui/row-actions';
@@ -25,8 +25,6 @@ export default function TagsPage() {
   const { t } = useI18n();
   const [tags, setTags] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -50,10 +48,10 @@ export default function TagsPage() {
             placeholder={t('admin.tags.searchPlaceholder', '搜索标签…')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && (setPage(1), fetchTags())}
+            onKeyDown={(e) => e.key === 'Enter' && fetchTags()}
             className="w-56"
           />
-          <Button variant="outline" size="icon" title={t('common.search', '搜索')} onClick={() => { setPage(1); fetchTags(); }}>
+          <Button variant="outline" size="icon" title={t('common.search', '搜索')} onClick={fetchTags}>
             <Search />
           </Button>
         </div>
@@ -62,14 +60,13 @@ export default function TagsPage() {
     return () => setToolbar(null);
   }, [search, t]);
 
-  useEffect(() => { fetchTags(); }, [page]);
+  useEffect(() => { fetchTags(); }, []);
 
   const fetchTags = async () => {
     setLoading(true);
     try {
-      const response: any = await tagsApi.list({ page, limit: 20, search });
+      const response: any = await tagsApi.list({ page: 1, limit: 500, search });
       setTags(response.data || []);
-      setTotalPages(response.meta?.total_pages || Math.max(1, Math.ceil((response.meta?.total || 0) / 20)) || 1);
     } catch { toast.error(t('admin.tags.toast.fetchFailed', '获取标签失败')); }
     finally { setLoading(false); }
   };
@@ -127,12 +124,6 @@ export default function TagsPage() {
               </span>
             </div>
           ))}
-        </div>
-      )}
-
-      {totalPages > 1 && (
-        <div className="mt-4">
-          <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
       )}
 

@@ -15,6 +15,10 @@ export function startDocumentLinks(ctx: ThemeContextData | null | undefined): Do
     { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
     { rel: 'manifest', href: '/site.webmanifest' },
     { rel: 'preconnect', href: 'https://static.bluecdn.com', crossOrigin: 'anonymous' },
+    // Most article images are served from the site's upload host. Warm its
+    // DNS/TCP/TLS connection while the document is parsed so the first image
+    // can start transferring immediately when it enters the viewport.
+    { rel: 'preconnect', href: 'https://img.ficor.net', crossOrigin: 'anonymous' },
     { rel: 'stylesheet', href: 'https://static.bluecdn.com/libs/fontawesome/7.3.1/css/all.min.css' },
     { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/noto-sans-sc.css' },
     { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/alimama-fangyuanti.css' },

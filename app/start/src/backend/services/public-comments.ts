@@ -8,6 +8,7 @@ import { emailSite, newCommentEmail } from '../email/templates';
 import { aiAuditFailAction, auditCommentContent, enqueueAiCommentReply, logAuditDecision } from '../ai/comments';
 import { sendCommentModerationTelegram } from '../telegram';
 import { notifyCommentReply } from './comments';
+import { createNotification } from './notifications';
 import { PublicWriteError } from './public-write';
 import { verifyCommentCaptcha } from './comment-captcha';
 
@@ -181,15 +182,12 @@ export async function createPublicComment(input: unknown, request: PublicComment
     await exec(`update ${table('posts')} set comment_count = comment_count + 1 where id = $1`, [postId]).catch(() => {});
   }
   if (request.userId === 0 || status === 'pending') {
-    await exec(
-      `insert into ${table('notifications')} (user_id, type, title, content, is_read, created_at)
-       values (1, 'comment', $1, $2, false, $3)`,
-      [
-        `${String(body.author_name || body.author || body.name || '访客')} 发表了新评论`,
-        `状态: ${status} | ${content.slice(0, 100)}`,
-        now,
-      ],
-    ).catch(() => {});
+    await createNotification({
+      type: 'comment',
+      title: `${String(body.author_name || body.author || body.name || '访客')} 发表了新评论`,
+      content: `状态: ${status} | ${content.slice(0, 100)}`,
+      createdAt: now,
+    }).catch(() => {});
   }
   if (status === 'pending') {
     void sendCommentModerationTelegram({

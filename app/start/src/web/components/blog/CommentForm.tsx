@@ -58,6 +58,7 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel, com
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const emojiRef = useRef<HTMLDivElement>(null);
   const [captchaResult, setCaptchaResult] = useState<{ challenge: string; nonce: string; captcha_id?: string; captcha_code?: string } | null>(null);
+  const [captchaVersion, setCaptchaVersion] = useState(0);
 
   useEffect(() => {
     if (!showEmoji) return;
@@ -163,6 +164,12 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel, com
       const message = err?.response?.data?.error?.message || err?.response?.data?.message || '评论提交失败';
       toast.error(message);
     } finally {
+      // Both PoW and image challenges are single-use. Mount a fresh challenge
+      // after every request so a second comment on the same page never reuses it.
+      if (!isAdmin) {
+        setCaptchaResult(null);
+        setCaptchaVersion((value) => value + 1);
+      }
       setSubmitting(false);
     }
   };
@@ -252,7 +259,7 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel, com
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
             {!isAdmin && (
-              <CommentCaptcha onVerified={setCaptchaResult} onReset={() => setCaptchaResult(null)} />
+              <CommentCaptcha key={captchaVersion} onVerified={setCaptchaResult} onReset={() => { setCaptchaResult(null); setCaptchaVersion((value) => value + 1); }} />
             )}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginLeft: 'auto' }}>
               {onCancel && <button onClick={onCancel} style={{ padding: '6px 14px', fontSize: '12px', border: '1px solid var(--color-border)', background: 'transparent', color: 'var(--color-text-sub)', cursor: 'pointer' }}>取消</button>}
@@ -413,7 +420,7 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel, com
     {/* Bottom: captcha + submit (outside the border box) */}
     <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: '12px', gap: '8px' }}>
       {!isAdmin && (
-        <CommentCaptcha onVerified={setCaptchaResult} onReset={() => setCaptchaResult(null)} />
+        <CommentCaptcha key={captchaVersion} onVerified={setCaptchaResult} onReset={() => { setCaptchaResult(null); setCaptchaVersion((value) => value + 1); }} />
       )}
       <button onClick={handleSubmit} disabled={submitting} className="comment-submit-button"
         style={{ padding: '8px 20px', fontSize: '13px', fontWeight: 600, border: 'none', background: 'var(--color-primary)', color: '#fff', cursor: submitting ? 'wait' : 'pointer', opacity: submitting ? 0.6 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '80px' }}>

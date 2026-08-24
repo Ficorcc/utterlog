@@ -1,6 +1,21 @@
 export type DateInput = string | number | Date;
 
-export function toDate(input: DateInput): Date {
+function wallClockDate(input: string, timeZone?: string): Date | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?$/.exec(input.trim());
+  if (!match || !isValidTimeZone(timeZone)) return null;
+  const [year, month, day, hour, minute, second] = match.slice(1).map((part) => Number(part || 0));
+  const guess = Date.UTC(year, month - 1, day, hour, minute, second);
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
+  }).formatToParts(new Date(guess));
+  const pick = (type: string) => Number(parts.find((part) => part.type === type)?.value || 0);
+  const offset = Date.UTC(pick('year'), pick('month') - 1, pick('day'), pick('hour'), pick('minute'), pick('second')) - guess;
+  return new Date(guess - offset);
+}
+
+export function toDate(input: DateInput, timeZone?: string): Date {
   if (input instanceof Date) return input;
   if (typeof input === 'number') {
     return input > 1e12 ? new Date(input) : new Date(input * 1000);
@@ -9,7 +24,7 @@ export function toDate(input: DateInput): Date {
   if (!Number.isNaN(numeric) && numeric > 0) {
     return numeric > 1e12 ? new Date(numeric) : new Date(numeric * 1000);
   }
-  return new Date(input);
+  return wallClockDate(input, timeZone) || new Date(input);
 }
 
 export function isValidTimeZone(timeZone?: string | null): boolean {
@@ -40,7 +55,7 @@ export function resolveSiteTimeZone(options?: Record<string, string | undefined>
   if (isValidTimeZone(effective)) return effective;
 
   if (isValidTimeZone(fallback)) return String(fallback).trim();
-  return localTimeZone();
+  return 'Asia/Shanghai';
 }
 
 function withTimeZone<T extends Intl.DateTimeFormatOptions>(options: T, timeZone: string): T {
@@ -54,7 +69,7 @@ export function formatDateInTimeZone(
   options: Intl.DateTimeFormatOptions,
   timeZone: string,
 ): string {
-  const date = toDate(input);
+  const date = toDate(input, timeZone);
   if (Number.isNaN(date.getTime())) return '';
   try {
     return date.toLocaleDateString(locale, withTimeZone(options, timeZone));
@@ -69,7 +84,7 @@ export function formatDateTimeInTimeZone(
   options: Intl.DateTimeFormatOptions,
   timeZone: string,
 ): string {
-  const date = toDate(input);
+  const date = toDate(input, timeZone);
   if (Number.isNaN(date.getTime())) return '';
   try {
     return date.toLocaleString(locale, withTimeZone(options, timeZone));
@@ -79,7 +94,7 @@ export function formatDateTimeInTimeZone(
 }
 
 export function datePartsInTimeZone(input: DateInput, timeZone: string) {
-  const date = toDate(input);
+  const date = toDate(input, timeZone);
   if (Number.isNaN(date.getTime())) return { year: 0, month: 0, day: 0 };
   if (!isValidTimeZone(timeZone)) {
     return { year: date.getFullYear(), month: date.getMonth() + 1, day: date.getDate() };

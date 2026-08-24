@@ -1,14 +1,13 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { formatWithAdminTimeZone } from './timezone';
-import { toDate } from '../../../shared/string-utils';
+import { adminDateFromInput, formatWithAdminTimeZone } from './timezone';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 export function formatDate(date: string | number | Date): string {
-  const d = toDate(date);
+  const d = adminDateFromInput(date);
   if (isNaN(d.getTime())) return '';
   return formatWithAdminTimeZone(d, 'zh-CN', {
     year: 'numeric',
@@ -23,7 +22,7 @@ type Translate = (key: string, fallback?: string, vars?: Record<string, string |
 
 export function formatRelativeTime(date: string | number | Date, t?: Translate): string {
   const now = new Date();
-  const d = toDate(date);
+  const d = adminDateFromInput(date);
   if (isNaN(d.getTime())) return '';
   const diff = now.getTime() - d.getTime();
 

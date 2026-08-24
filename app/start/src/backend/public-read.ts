@@ -107,8 +107,38 @@ function stripMarkdownExcerpt(content: string, maxLen = 200) {
   return [...text].slice(0, maxLen).join('');
 }
 
-function sanitizePostForResponse(row: Record<string, unknown>, detail: boolean) {
+function isValidTimeZone(timeZone: string): boolean {
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function siteTimeZone() {
+  const configured = (await optionValue('site_timezone', 'Asia/Shanghai')).trim() || 'Asia/Shanghai';
+  return isValidTimeZone(configured) ? configured : 'Asia/Shanghai';
+}
+
+function siteWallClockTimestamp(date: Date, timeZone: string) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
+  }).formatToParts(date);
+  const part = (type: string) => parts.find((item) => item.type === type)?.value || '00';
+  return `${part('year')}-${part('month')}-${part('day')}T${part('hour')}:${part('minute')}:${part('second')}`;
+}
+
+function sanitizePostForResponse(row: Record<string, unknown>, detail: boolean, timeZone: string) {
   const next = { ...row };
+  // PostgreSQL `timestamp without time zone` represents a site wall-clock
+  // publish time. Return the same no-zone value regardless of this process's
+  // own timezone, so clients can parse it with site_timezone.
+  if (next.published_at instanceof Date) {
+    next.published_at = siteWallClockTimestamp(next.published_at, timeZone);
+  }
   delete next.password;
   next.meta = next.meta || {};
   if (!detail) {
@@ -161,8 +191,9 @@ async function ownerPublicPayload(user: Record<string, unknown> | null) {
 }
 
 async function attachPostRelations(rows: Record<string, unknown>[], detail = false) {
+  const timeZone = await siteTimeZone();
   const ids = rows.map((row) => Number(row.id)).filter((id) => Number.isFinite(id));
-  if (ids.length === 0) return rows.map((row) => sanitizePostForResponse(row, detail));
+  if (ids.length === 0) return rows.map((row) => sanitizePostForResponse(row, detail, timeZone));
   const metas = await many<Record<string, unknown> & { post_id: number }>(
     `select r.post_id, m.*
      from ${table('relationships')} r
@@ -181,7 +212,7 @@ async function attachPostRelations(rows: Record<string, unknown>[], detail = fal
   }
   return rows.map((row) => {
     const rel = byPost.get(Number(row.id)) || { categories: [], tags: [] };
-    return sanitizePostForResponse({ ...row, meta: row.meta || {}, categories: rel.categories, tags: rel.tags }, detail);
+    return sanitizePostForResponse({ ...row, meta: row.meta || {}, categories: rel.categories, tags: rel.tags }, detail, timeZone);
   });
 }
 
@@ -448,7 +479,7 @@ async function getPostBy(column: 'id' | 'display_id' | 'slug', value: string | n
     footprint_countries: footprintCountriesFrom(footprints),
     episodes,
     author: authorUser ? await ownerPublicPayload(authorUser) : null,
-  }, true);
+  }, true, await siteTimeZone());
 }
 
 export async function getPostBySlug(slug: string, reader: ReadVisitor | null = null, authed = false) {
@@ -490,7 +521,11 @@ export async function getPostNavigation(postId: number) {
        order by coalesce(published_at, to_timestamp(created_at)::timestamp) asc, id asc limit 1`, [postId, pivot],
     ).catch(() => null),
   ]);
-  return { prev, next };
+  const timeZone = await siteTimeZone();
+  return {
+    prev: prev ? sanitizePostForResponse(prev, false, timeZone) : null,
+    next: next ? sanitizePostForResponse(next, false, timeZone) : null,
+  };
 }
 
 export async function resolvePublicPostPath(pathname: string, reader: ReadVisitor | null = null) {
@@ -649,6 +684,19 @@ export async function getPublicAlbum(idOrSlug: string, page = 1, perPage = 20) {
   return { ...album, album, photos, total: Number(total?.count || 0), page: safePage };
 }
 
+function commentLevelFromCount(commentCount: number) {
+  if (commentCount <= 5) return 1;
+  if (commentCount <= 10) return 2;
+  if (commentCount <= 20) return 3;
+  if (commentCount <= 30) return 4;
+  if (commentCount <= 45) return 5;
+  if (commentCount <= 60) return 6;
+  if (commentCount <= 80) return 7;
+  if (commentCount <= 100) return 8;
+  if (commentCount <= 120) return 9;
+  return 10;
+}
+
 export async function listComments(params: {
   page?: number;
   perPage?: number;
@@ -662,6 +710,16 @@ export async function listComments(params: {
   /** 后台管理界面要看邮箱和 IP；匿名访客拿到的是脱敏版本。 */
   authed?: boolean;
 } = {}) {
+  // A visitor may comment from another browser, so an authenticated account or
+  // email takes precedence over the browser-local visitor id. Comments without
+  // a stable identity must remain separate rather than being merged by name.
+  const visitorIdentity = (alias: string) => `case
+    when ${alias}.user_id > 0 then 'user:' || ${alias}.user_id::text
+    when nullif(lower(trim(coalesce(${alias}.author_email, ''))), '') is not null
+      then 'email:' || lower(trim(${alias}.author_email))
+    when nullif(${alias}.visitor_id, '') is not null then 'visitor:' || ${alias}.visitor_id
+    else 'comment:' || ${alias}.id::text
+  end`;
   const page = Math.max(1, params.page || 1);
   const perPage = Math.min(500, Math.max(1, params.perPage || 20));
   const offset = (page - 1) * perPage;
@@ -717,11 +775,18 @@ export async function listComments(params: {
             p.created_at as post_created_at, p.published_at as post_published_at,
             p.comment_count as post_comment_count,
             coalesce(u.role,'') as user_role,
+            coalesce(visitor_stats.comment_count, 1) as visitor_comment_count,
             pc.author_name as parent_author, pc.content as parent_content, pc.created_at as parent_created_at
      from ${table('comments')} c
      left join ${table('posts')} p on p.id = c.post_id
      left join ${table('users')} u on u.id = c.user_id
      left join ${table('comments')} pc on pc.id = c.parent_id
+     left join (
+       select ${visitorIdentity('vc')} as identity_key, count(*)::int as comment_count
+       from ${table('comments')} vc
+       where vc.status = 'approved'
+       group by 1
+     ) visitor_stats on visitor_stats.identity_key = ${visitorIdentity('c')}
      ${whereSql}
      order by c.created_at ${normalizeDirection(params.order)}, c.id ${normalizeDirection(params.order)}
      limit $${queryParams.length + 1} offset $${queryParams.length + 2}`,
@@ -730,6 +795,7 @@ export async function listComments(params: {
   const friendIndex = await friendLinkIndex();
   const data = rows.map((row) => {
     const parentContent = String(row.parent_content || '');
+    const commentCount = Math.max(1, Number(row.visitor_comment_count || 1));
     return {
       ...row,
       geo: commentGeoFromRow(row.geo),
@@ -742,8 +808,8 @@ export async function listComments(params: {
       avatar_url: gravatarUrlForEmail(String(row.author_email || ''), 64),
       author_avatar: gravatarUrlForEmail(String(row.author_email || ''), 48),
       is_admin: row.user_role === 'admin',
-      comment_count: 1,
-      level: 1,
+      comment_count: commentCount,
+      level: commentLevelFromCount(commentCount),
       parent: row.parent_id ? {
         id: row.parent_id,
         author: row.parent_author,

@@ -53,7 +53,8 @@ export async function listContentRecords(resource: ContentResource, options: {
   if (columns.has('status')) {
     if (resource === 'links') {
       if (options.authed && options.status) {
-        params.push(Number.parseInt(options.status, 10) || 1);
+        const status = Number.parseInt(options.status, 10);
+        params.push(Number.isFinite(status) ? status : 1);
         where.push(`status = $${params.length}`);
       } else if (!options.authed) {
         params.push(1);

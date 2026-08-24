@@ -5,7 +5,7 @@ import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import {
   Layers, Folder, Image as ImageIcon, Eraser, RefreshCw, FolderTree, Plus, Search, X,
-  Rss, ChevronUp, ChevronDown, Pencil, Trash2, CloudUpload, Loader2, MailSearch,
+  Rss, ChevronUp, ChevronDown, Pencil, Trash2, CloudUpload, Loader2, MailSearch, Check,
 } from 'lucide-react';
 import {
   Button, Input, Label, Textarea, ConfirmDialog, EmptyState, LoadingState, Card,
@@ -19,6 +19,7 @@ import { useI18n } from '@/lib/i18n';
 import { usePageBadge } from '@/layouts/DashboardLayout';
 import { siteFaviconUrl } from '@/lib/site-favicon';
 import LinkEmailMatchDialog from '@/components/links/LinkEmailMatchDialog';
+import { useSearchParams } from '@/lib/router';
 
 type LinkGroupStyle = 'card' | 'compact';
 
@@ -42,6 +43,7 @@ interface FeedProgress {
   pruned_items?: number;
   refreshed_items_deleted?: number;
   message?: string;
+  history?: Array<{ started_at: number; finished_at: number; fetched: number; new_items: number; failed: number; message: string }>;
 }
 
 const DEFAULT_GROUP_KEY = 'default';
@@ -124,6 +126,8 @@ function mergeLinkGroups(configs: LinkGroupConfig[], links: any[]): LinkGroupCon
 
 export default function LinksPage() {
   const { t } = useI18n();
+  const [searchParams] = useSearchParams();
+  const pendingOnly = searchParams.get('status') === '0';
   const { setPageBadge } = usePageBadge();
   const [links, setLinks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -141,6 +145,7 @@ export default function LinksPage() {
   const [linkGroups, setLinkGroups] = useState<LinkGroupConfig[]>(DEFAULT_LINK_GROUPS);
   const [refreshingFeeds, setRefreshingFeeds] = useState(false);
   const [feedProgress, setFeedProgress] = useState<FeedProgress | null>(null);
+  const [feedIntervalHours, setFeedIntervalHours] = useState(4);
   const [busy, setBusy] = useState<'icon' | 'rss' | null>(null);
   const [confirmClearRss, setConfirmClearRss] = useState(false);
   // Incremented by 一键刷新 ico — appended to favicon URLs to bust
@@ -150,6 +155,17 @@ export default function LinksPage() {
   const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   const responseData = (r: any) => r?.data || r || {};
+
+  const saveFeedInterval = async () => {
+    const hours = Math.min(168, Math.max(1, Math.round(Number(feedIntervalHours) || 4)));
+    setFeedIntervalHours(hours);
+    try {
+      await optionsApi.update('feed_fetch_interval_hours', String(hours));
+      toast.success(`订阅每 ${hours} 小时自动刷新`);
+    } catch {
+      toast.error(t('admin.common.saveFailed', '保存失败'));
+    }
+  };
 
   const refreshFeeds = async () => {
     setRefreshingFeeds(true);
@@ -354,19 +370,22 @@ export default function LinksPage() {
     name: '', url: '', description: '', logo: '', email: '', rss_url: '', group_name: 'default', order_num: 0,
   });
 
-  useEffect(() => { fetchLinks(); }, []);
+  useEffect(() => { fetchLinks(); }, [pendingOnly]);
 
   const fetchLinks = async () => {
     setLoading(true);
     try {
-      const [linksRes, optionsRes]: any[] = await Promise.all([
-        linksApi.list(),
+      const [linksRes, optionsRes, feedStatusRes]: any[] = await Promise.all([
+        linksApi.list(pendingOnly ? { status: 0 } : undefined),
         optionsApi.list(),
+        api.get('/social/fetch-feeds/status'),
       ]);
       const nextLinks = linksRes.data || [];
       const options = optionsRes.data || optionsRes || {};
       setLinks(nextLinks);
       setLinkGroups(mergeLinkGroups(parseLinkGroupsOption(options.link_groups), nextLinks));
+      setFeedIntervalHours(Math.min(168, Math.max(1, Number(options.feed_fetch_interval_hours) || 4)));
+      setFeedProgress(responseData(feedStatusRes));
     } catch { toast.error(t('admin.links.toast.fetchFailed', '获取友链失败')); }
     finally { setLoading(false); }
   };
@@ -397,12 +416,12 @@ export default function LinksPage() {
       <span>
         {searchTerm
           ? t('admin.links.totalFiltered', '共 {count} 条友链 · 命中 {matched} 条', { count: links.length, matched: filteredLinks.length })
-          : t('admin.links.total', '共 {count} 条友链', { count: links.length })}
+          : pendingOnly ? `待处理友链申请 ${links.length} 条` : t('admin.links.total', '共 {count} 条友链', { count: links.length })}
       </span>
     );
     return () => setPageBadge(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [links.length, filteredLinks.length, searchTerm, t]);
+  }, [links.length, filteredLinks.length, pendingOnly, searchTerm, t]);
 
   const nextOrderNum = () => orderedLinks.reduce((max: number, link: any) => {
     const n = Number(link.order_num) > 0 ? Number(link.order_num) : Number(link.id) || 0;
@@ -462,6 +481,16 @@ export default function LinksPage() {
     finally { setDeleteId(null); }
   };
 
+  const approveLinkRequest = async (link: any) => {
+    try {
+      await linksApi.update(link.id, { status: 1 });
+      toast.success('友链申请已通过');
+      fetchLinks();
+    } catch {
+      toast.error(t('admin.common.operationFailed', '操作失败'));
+    }
+  };
+
   const groupLabel = (g: string) => {
     if (g === 'all') return t('admin.common.all', '全部');
     const group = groupMap.get(g);
@@ -505,6 +534,21 @@ export default function LinksPage() {
 
       {/* Right: action buttons first, then search box (远右端 — 与 Posts 一致) */}
       <div className="flex min-h-10 flex-wrap items-center gap-2">
+        <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <span>订阅周期</span>
+          <Input
+            type="number"
+            min={1}
+            max={168}
+            value={feedIntervalHours}
+            onChange={(e) => setFeedIntervalHours(Number(e.target.value) || 1)}
+            onBlur={saveFeedInterval}
+            onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+            className="h-8 w-16"
+            aria-label="订阅自动刷新周期（小时）"
+          />
+          <span>小时</span>
+        </label>
         <Button variant="outline" size="icon" onClick={refreshIcons} disabled={busy !== null} title={t('admin.links.refreshIco', '刷新 ico')}>
           {busy === 'icon' ? <Loader2 className="animate-spin" /> : <ImageIcon />}
         </Button>
@@ -614,6 +658,15 @@ export default function LinksPage() {
               ))}
             </div>
           )}
+          {!!feedProgress?.history?.length && (
+            <div className="flex flex-col gap-1 border-t border-border pt-2 text-xs text-muted-foreground">
+              {feedProgress.history.slice(0, 3).map((run, index) => (
+                <span key={`${run.started_at}-${index}`}>
+                  {new Date(run.started_at * 1000).toLocaleString()} · 成功 {run.fetched} · 新增 {run.new_items} · 失败 {run.failed} · {run.message}
+                </span>
+              ))}
+            </div>
+          )}
         </Card>
       )}
 
@@ -666,7 +719,10 @@ export default function LinksPage() {
                       <img src={favicon} alt="" className="absolute inset-0 size-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                     </div>
                   </TableCell>
-                  <TableCell><span className="block truncate font-medium">{link.name}</span></TableCell>
+                  <TableCell>
+                    <span className="block truncate font-medium">{link.name}</span>
+                    {Number(link.status) === 0 && <span className="text-2xs font-medium text-primary">待审核</span>}
+                  </TableCell>
                   <TableCell><span className="block truncate text-xs text-muted-foreground">{link.description || '—'}</span></TableCell>
                   <TableCell><a href={link.url} target="_blank" rel="noopener noreferrer" className="block truncate text-xs text-primary hover:underline">{link.url}</a></TableCell>
                   <TableCell>
@@ -680,6 +736,7 @@ export default function LinksPage() {
                   <TableCell><span className="block truncate text-xs text-muted-foreground">{groupLabel(link.group_name || DEFAULT_GROUP_KEY)}</span></TableCell>
                   <TableCell>
                     <RowActionGroup>
+                      {Number(link.status) === 0 && <RowAction icon={Check} tone="success" title="通过申请" onClick={() => approveLinkRequest(link)} />}
                       <RowAction icon={Pencil} title={t('admin.common.edit', '编辑')} onClick={() => openEdit(link)} />
                       <RowAction icon={Trash2} tone="danger" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(link.id)} />
                     </RowActionGroup>

@@ -207,7 +207,7 @@ function geoHeaders(request: Request) {
 }
 
 async function siteDate(value = new Date()) {
-  const timeZone = (await optionValue('site_timezone', 'UTC')).trim() || 'UTC';
+  const timeZone = (await optionValue('site_timezone', 'Asia/Shanghai')).trim() || 'Asia/Shanghai';
   try {
     const parts = new Intl.DateTimeFormat('en', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(value);
     const get = (type: string) => parts.find((part) => part.type === type)?.value || '';

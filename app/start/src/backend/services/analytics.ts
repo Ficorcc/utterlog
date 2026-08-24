@@ -20,7 +20,7 @@ export function analyticsPeriod(value: string | null): AnalyticsPeriod {
 }
 
 async function siteTimeZone() {
-  return (await optionValue('site_timezone', 'UTC')).trim() || 'UTC';
+  return (await optionValue('site_timezone', 'Asia/Shanghai')).trim() || 'Asia/Shanghai';
 }
 
 async function siteDate(value = new Date()) {

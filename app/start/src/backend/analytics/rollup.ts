@@ -17,7 +17,7 @@ export function rowsChanged(result: unknown) {
 }
 
 async function siteTimeZone() {
-  return (await optionValue('site_timezone', 'UTC')).trim() || 'UTC';
+  return (await optionValue('site_timezone', 'Asia/Shanghai')).trim() || 'Asia/Shanghai';
 }
 
 async function rollupDates(timeZone: string) {

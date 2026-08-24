@@ -159,7 +159,7 @@ export const commentsApi = {
 // just the generic 20-row page. Friendship-link counts in the hundreds
 // are common post-migration.
 export const linksApi = {
-  list: () => api.get('/links?per_page=500'),
+  list: (params?: { status?: number | string }) => api.get('/links', { params: { per_page: 500, ...(params || {}) } }),
   create: (data: any) => api.post('/links', data),
   update: (id: number, data: any) => api.put(`/links/${id}`, data),
   delete: (id: number) => api.delete(`/links/${id}`),

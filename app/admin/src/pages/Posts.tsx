@@ -1,6 +1,6 @@
 import {
   MessageSquare, Eye, EyeOff, FileText, Folder, Settings as SettingsIcon,
-  Search, Pencil, Plus, Trash2, ChevronUp, ChevronDown, Save, Loader2,
+  Search, Pencil, Plus, Trash2, ChevronUp, ChevronDown, Save, Loader2, X,
 } from 'lucide-react';
 
 import { useEffect, useState } from 'react';
@@ -54,6 +54,7 @@ export default function PostsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
+  const [taxonomyFilter, setTaxonomyFilter] = useState<{ type: 'category' | 'tag'; id: number; name: string } | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [, setDeleting] = useState(false);
   const [selected, setSelected] = useState<Set<number>>(new Set());
@@ -81,7 +82,7 @@ export default function PostsPage() {
     return labels[value] || value;
   };
 
-  useEffect(() => { fetchPosts(); }, [page, status, perPage, orderDir]);
+  useEffect(() => { fetchPosts(); }, [page, status, perPage, orderDir, taxonomyFilter]);
 
   // 列表总数统一放在 header badge（五个列表页同一落位），表格页脚只留
   // 每页条数 + 翻页。
@@ -132,6 +133,8 @@ export default function PostsPage() {
         page, limit: perPage,
         status: status || undefined,
         search: search || undefined,
+        category_id: taxonomyFilter?.type === 'category' ? taxonomyFilter.id : undefined,
+        tag_id: taxonomyFilter?.type === 'tag' ? taxonomyFilter.id : undefined,
         order_by: 'published_at', order: orderDir,
       } as any);
       setPosts(response.data?.posts || response.data || []);
@@ -214,6 +217,20 @@ export default function PostsPage() {
             </Button>
           ))}
         </div>
+        {taxonomyFilter && (
+          <Button
+            size="sm"
+            variant="outline"
+            title={t('admin.posts.clearTaxonomyFilter', '清除筛选')}
+            onClick={() => { setTaxonomyFilter(null); setPage(1); }}
+          >
+            {taxonomyFilter.type === 'category'
+              ? t('common.categories', '分类')
+              : t('admin.posts.columns.keywords', '关键词')}
+            ：{taxonomyFilter.name}
+            <X className="size-3.5" />
+          </Button>
+        )}
         {/* 主操作（新建）实心，次要操作 outline —— 五个列表页同一套强调级 */}
         <Button size="icon" title={t('admin.posts.newPost', '新建文章')} aria-label={t('admin.posts.newPost', '新建文章')} onClick={() => navigate('/posts/create')}>
           <Plus />
@@ -234,7 +251,7 @@ export default function PostsPage() {
       </>
     );
     return () => setToolbar(null);
-  }, [search, status, t]);
+  }, [search, status, taxonomyFilter, t]);
 
   return (
     <div>
@@ -334,10 +351,15 @@ export default function PostsPage() {
                       {!cat ? (
                         <span className="text-2xs text-muted-foreground">-</span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <button
+                          type="button"
+                          title={t('admin.posts.filterCategory', '查看此分类文章')}
+                          onClick={() => { setTaxonomyFilter({ type: 'category', id: Number(cat.id), name: String(cat.name) }); setPage(1); }}
+                          className="inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:text-primary"
+                        >
                           {cat.icon ? <i className={cn(cat.icon, 'shrink-0 text-xs-plus text-primary')} /> : <Folder className="size-3.5 shrink-0 text-primary" />}
                           <span className="truncate">{cat.name}</span>
-                        </span>
+                        </button>
                       )}
                     </TableCell>
                     <TableCell>
@@ -346,9 +368,17 @@ export default function PostsPage() {
                       ) : (
                         // No wrap — the column is in an auto-layout table and grows to
                         // fit however many tags this post has.
-                        <div className="inline-flex items-center gap-1">
+                        <div className="inline-flex flex-nowrap items-center gap-1 whitespace-nowrap">
                           {tags.map((tag: any) => (
-                            <span key={tag.id} className="inline-block border border-border bg-muted px-2 py-px text-2xs leading-relaxed text-muted-foreground">{tag.name}</span>
+                            <button
+                              key={tag.id}
+                              type="button"
+                              title={t('admin.posts.filterTag', '查看此关键词文章')}
+                              onClick={() => { setTaxonomyFilter({ type: 'tag', id: Number(tag.id), name: String(tag.name) }); setPage(1); }}
+                              className="inline-block shrink-0 whitespace-nowrap border border-border bg-muted px-2 py-px text-2xs leading-relaxed text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+                            >
+                              {tag.name}
+                            </button>
                           ))}
                         </div>
                       )}

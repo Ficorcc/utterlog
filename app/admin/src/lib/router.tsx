@@ -15,6 +15,17 @@ function adminPath(pathname: string) {
   return path.startsWith('/') ? path : `/${path}`;
 }
 
+function navigationTarget(value: string) {
+  const [pathAndSearch, hash = ''] = value.split('#', 2);
+  const [pathname, query = ''] = pathAndSearch.split('?', 2);
+  const search = Object.fromEntries(new URLSearchParams(query).entries());
+  return {
+    pathname: pathname || '/',
+    search: Object.keys(search).length ? search : undefined,
+    hash: hash || undefined,
+  };
+}
+
 export function useNavigate() {
   const navigate = useTanStackNavigate();
   const router = useRouter();
@@ -23,7 +34,14 @@ export function useNavigate() {
       router.history.go(to);
       return;
     }
-    return navigate({ to: to as never, replace: options.replace, state: options.state as never });
+    const target = navigationTarget(to);
+    return navigate({
+      to: target.pathname as never,
+      search: target.search as never,
+      hash: target.hash,
+      replace: options.replace,
+      state: options.state as never,
+    } as never);
   }, [navigate, router]);
 }
 

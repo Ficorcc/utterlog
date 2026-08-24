@@ -178,7 +178,7 @@ function dateInSiteTimeZone(date: Date, timeZone: string) {
 }
 
 async function rolling365ContributionRange() {
-  const timeZone = (await optionValue('site_timezone', 'UTC')).trim() || 'UTC';
+  const timeZone = (await optionValue('site_timezone', 'Asia/Shanghai')).trim() || 'Asia/Shanghai';
   const toDate = dateInSiteTimeZone(new Date(), timeZone);
   const fromAnchor = new Date();
   fromAnchor.setUTCDate(fromAnchor.getUTCDate() - 364);

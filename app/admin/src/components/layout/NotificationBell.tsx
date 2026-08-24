@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { MessageSquare, ChevronRight } from 'lucide-react';
 import { BellIcon, type BellIconHandle } from '@/components/ui/bell';
-import { Link } from '@/lib/router';
+import { Link, useNavigate } from '@/lib/router';
 import api from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { useI18n } from '@/lib/i18n';
@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 
 export default function NotificationBell() {
   const { locale, t } = useI18n();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useState(0);
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -85,6 +86,44 @@ export default function NotificationBell() {
     return formatWithAdminTimeZone(d, locale || 'zh-CN', { month: 'short', day: 'numeric' });
   };
 
+  const notificationCopy = (notification: any) => {
+    let data: Record<string, any> = {};
+    if (notification?.data && typeof notification.data === 'object') data = notification.data;
+    else if (typeof notification?.data === 'string') {
+      try { data = JSON.parse(notification.data); } catch { data = {}; }
+    }
+    const fallbackTitles: Record<string, string> = {
+      comment: '新评论', feed: '关注动态更新', follow: '新的关注', federation: '联邦通知',
+    };
+    const title = String(notification?.title || data.title || fallbackTitles[String(notification?.type || '')] || '系统通知');
+    const content = String(notification?.content || data.content || '');
+    const explicitTarget = String(data.admin_url || data.adminUrl || '').trim();
+    const targets: Record<string, string> = {
+      comment: '/comments',
+      feed: '/feeds',
+      follow: '/follows',
+      federation: '/utterlog',
+    };
+    return {
+      title,
+      content: content === title ? '' : content,
+      target: explicitTarget.startsWith('/') ? explicitTarget.replace(/^\/admin(?=\/|$)/, '') : targets[String(notification?.type || '')] || '/',
+      leavesAdmin: !explicitTarget && notification?.type === 'feed',
+    };
+  };
+
+  const openNotification = (notification: any) => {
+    const { target, leavesAdmin } = notificationCopy(notification);
+    if (!notification.is_read) {
+      setNotifications(items => items.map(item => item.id === notification.id ? { ...item, is_read: true } : item));
+      setUnread(count => Math.max(0, count - 1));
+      void api.post(`/notifications/${notification.id}/read`);
+    }
+    setOpen(false);
+    if (leavesAdmin) window.location.assign(target);
+    else navigate(target);
+  };
+
   return (
     <div style={{ position: 'relative', display: 'inline-flex' }}>
       {/* 与 DashboardLayout 的「访问首页」按钮共用同一套 header 图标按钮样式：
@@ -144,22 +183,26 @@ export default function NotificationBell() {
               ) : notifications.length === 0 ? (
                 <div className="p-8 text-center text-xs-plus text-muted-foreground">{t('admin.notification.empty', '暂无通知')}</div>
               ) : (
-                notifications.map((n, i) => (
-                  <div
+                notifications.map((n, i) => {
+                  const copy = notificationCopy(n);
+                  return <button
                     key={i}
+                    type="button"
+                    onClick={() => openNotification(n)}
                     className={cn('cursor-pointer border-b border-border py-2.5 px-4', n.is_read ? 'bg-transparent' : 'bg-muted')}
+                    style={{ width: '100%', textAlign: 'left' }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                       <p className="text-xs-plus" style={{ fontWeight: n.is_read ? 400 : 600, flex: 1 }}>
-                        {typeof n.title === 'string' ? n.title : String(n.title || '')}
+                        {copy.title}
                       </p>
                       <span className="ml-2 shrink-0 text-2xs text-muted-foreground">
                         {formatTime(n.created_at)}
                       </span>
                     </div>
-                    {n.content && <p className="mt-0.5 text-xs text-muted-foreground" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{typeof n.content === 'string' ? n.content : ''}</p>}
-                  </div>
-                ))
+                    {copy.content && <p className="mt-0.5 text-xs text-muted-foreground" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{copy.content}</p>}
+                  </button>
+                })
               )}
             </div>
           </div>

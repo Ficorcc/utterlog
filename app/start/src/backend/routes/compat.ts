@@ -7,6 +7,7 @@ import { dirname, join, posix } from 'node:path';
 import { config, table } from '../config';
 import { exec, intParam, many, nowUnix, one, pageParams } from '../db/helpers';
 import { optionValue, saveOption } from '../db/options';
+import { createNotification } from '../services/notifications';
 import { assertPublicHttpUrl, normalizePublicHttpUrl } from '../http/public-url';
 import { ephemeral } from '../store/ephemeral';
 import { appVersion } from '../system/metrics';
@@ -350,6 +351,17 @@ async function importWordPressWxr(xml: string, userId: number) {
 
 type FeedFetchFailure = { id: number; feed_url: string; error: string };
 
+type FeedFetchRun = {
+  started_at: number;
+  finished_at: number;
+  total: number;
+  fetched: number;
+  new_items: number;
+  failed: number;
+  force: boolean;
+  message: string;
+};
+
 type FeedFetchProgress = {
   running: boolean;
   force: boolean;
@@ -366,6 +378,7 @@ type FeedFetchProgress = {
   pruned_items: number;
   refreshed_items_deleted: number;
   message: string;
+  history: FeedFetchRun[];
 };
 
 type FeedFetchOptions = {
@@ -391,6 +404,7 @@ const emptyFeedFetchProgress = (): FeedFetchProgress => ({
   pruned_items: 0,
   refreshed_items_deleted: 0,
   message: '',
+  history: [],
 });
 
 let feedFetchProgress: FeedFetchProgress = emptyFeedFetchProgress();
@@ -419,6 +433,14 @@ function normalizeFeedFetchProgress(value: unknown): FeedFetchProgress {
     pruned_items: Number(raw.pruned_items || 0),
     refreshed_items_deleted: Number(raw.refreshed_items_deleted || 0),
     message: String(raw.message || ''),
+    history: Array.isArray(raw.history) ? raw.history.slice(0, 20).map((item) => {
+      const run = item && typeof item === 'object' ? item as Partial<FeedFetchRun> : {};
+      return {
+        started_at: Number(run.started_at || 0), finished_at: Number(run.finished_at || 0),
+        total: Number(run.total || 0), fetched: Number(run.fetched || 0), new_items: Number(run.new_items || 0),
+        failed: Number(run.failed || 0), force: run.force === true, message: String(run.message || ''),
+      };
+    }) : [],
   };
 }
 
@@ -450,6 +472,35 @@ function feedFetchStatus() {
 
 function feedErrorMessage(err: unknown) {
   return err instanceof Error ? err.message : String(err || '拉取失败');
+}
+
+function finishFeedFetchWithError(err: unknown) {
+  const finishedAt = nowUnix();
+  const message = feedErrorMessage(err);
+  const current = feedFetchProgress;
+  feedFetchProgress = {
+    ...current,
+    running: false,
+    finished_at: finishedAt,
+    current_url: '',
+    message,
+    history: [{
+      started_at: current.started_at || finishedAt,
+      finished_at: finishedAt,
+      total: current.total,
+      fetched: current.fetched,
+      new_items: current.new_items,
+      failed: Math.max(1, current.failed),
+      force: current.force,
+      message,
+    }, ...current.history].slice(0, 20),
+  };
+  saveFeedFetchProgress();
+  return feedFetchStatus();
+}
+
+export function recordFeedFetchFailure(err: unknown) {
+  return finishFeedFetchWithError(err);
 }
 
 function parseFeedDate(value: string, fallback = 0) {
@@ -553,6 +604,7 @@ export async function runFeedFetch(options: number | FeedFetchOptions = 0) {
   const subs = await many<{ id: number; feed_url: string }>(
     `select id, feed_url from ${table('rss_subscriptions')} order by last_fetched_at asc ${limit > 0 ? `limit ${limit}` : ''}`,
   ).catch(() => []);
+  const history = feedFetchProgress.history;
   feedFetchProgress = {
     ...emptyFeedFetchProgress(),
     running: true,
@@ -562,6 +614,7 @@ export async function runFeedFetch(options: number | FeedFetchOptions = 0) {
     pruned_subscriptions: prunedSubscriptions,
     pruned_items: prunedItems,
     message: subs.length ? '正在刷新订阅' : '没有可刷新的订阅',
+    history,
   };
   saveFeedFetchProgress();
   let fetched = 0;
@@ -607,11 +660,7 @@ export async function runFeedFetch(options: number | FeedFetchOptions = 0) {
   }
   await exec(`delete from ${table('feed_items')} where created_at < $1`, [nowUnix() - 7 * 24 * 3600]).catch(() => {});
   if (newItems > 0) {
-    await exec(
-      `insert into ${table('notifications')} (user_id, type, title, content, created_at)
-       values (1,'feed','关注动态更新',$1,$2)`,
-      [`发现 ${newItems} 条新内容`, nowUnix()],
-    ).catch(() => {});
+    await createNotification({ type: 'feed', title: '关注动态更新', content: `发现 ${newItems} 条新内容` }).catch(() => {});
   }
   const result = {
     total: subs.length,
@@ -624,10 +673,11 @@ export async function runFeedFetch(options: number | FeedFetchOptions = 0) {
     pruned_items: prunedItems,
     refreshed_items_deleted: refreshedItemsDeleted,
   };
+  const finishedAt = nowUnix();
   feedFetchProgress = {
     ...feedFetchProgress,
     running: false,
-    finished_at: nowUnix(),
+    finished_at: finishedAt,
     total: subs.length,
     done: subs.length,
     fetched,
@@ -637,6 +687,16 @@ export async function runFeedFetch(options: number | FeedFetchOptions = 0) {
     current_url: '',
     refreshed_items_deleted: refreshedItemsDeleted,
     message: failed > 0 ? '刷新完成，部分订阅失败' : '刷新完成',
+    history: [{
+      started_at: feedFetchProgress.started_at,
+      finished_at: finishedAt,
+      total: subs.length,
+      fetched,
+      new_items: newItems,
+      failed,
+      force,
+      message: failed > 0 ? '刷新完成，部分订阅失败' : '刷新完成',
+    }, ...feedFetchProgress.history].slice(0, 20),
   };
   saveFeedFetchProgress();
   return result;
@@ -2099,9 +2159,7 @@ export function startSocialFeedFetch(force: boolean) {
   if (!feedFetchProgress.running) {
     started = true;
     feedFetchProgress = { ...emptyFeedFetchProgress(), running: true, force, started_at: nowUnix(), message: '准备刷新订阅' };
-    void runFeedFetch({ limit: force ? 0 : 100, force, trackProgress: true, cleanupOrphans: force }).catch((error) => {
-      feedFetchProgress = { ...feedFetchProgress, running: false, finished_at: nowUnix(), current_url: '', message: feedErrorMessage(error) };
-    });
+    void runFeedFetch({ limit: force ? 0 : 100, force, trackProgress: true, cleanupOrphans: force }).catch(recordFeedFetchFailure);
   }
   return { started, ...feedFetchStatus() };
 }
@@ -2120,10 +2178,12 @@ export async function acceptFederationFollow(input: Record<string, unknown>) {
     `insert into ${table('followers')} (user_id, following_id, source_site, status, mutual, created_at, updated_at)
      values (0,1,$1,'active',false,$2,$2) on conflict do nothing`, [followerSite, now],
   ).catch(() => {});
-  await exec(
-    `insert into ${table('notifications')} (user_id, type, title, content, created_at) values (1,'follow',$1,$2,$3)`,
-    [`${String(input.follower_name || followerSite)} 关注了你`, `来自 ${followerSite}`, now],
-  ).catch(() => {});
+  await createNotification({
+    type: 'follow',
+    title: `${String(input.follower_name || followerSite)} 关注了你`,
+    content: `来自 ${followerSite}`,
+    createdAt: now,
+  }).catch(() => {});
   const already = await one<{ count: string }>(
     `select count(*)::text as count from ${table('followers')} where user_id = 1 and source_site = $1`, [followerSite],
   ).catch(() => null);
@@ -2195,10 +2255,11 @@ export async function createFederatedComment(input: Record<string, unknown>) {
 export async function receiveFederationWebhook(input: Record<string, unknown>, providedSecret = '') {
   const secret = (await optionValue('federation_webhook_secret', '')).trim();
   if (secret && providedSecret !== secret) throw new FederationServiceError(403, 'FORBIDDEN', 'Invalid federation webhook secret');
-  await exec(
-    `insert into ${table('notifications')} (user_id, type, title, content, created_at) values (1,'federation',$1,$2,$3)`,
-    [String(input.title || input.type || '联邦通知'), JSON.stringify(input).slice(0, 1000), nowUnix()],
-  ).catch(() => {});
+  await createNotification({
+    type: 'federation',
+    title: String(input.title || input.type || '联邦通知'),
+    content: JSON.stringify(input).slice(0, 1000),
+  }).catch(() => {});
   return { received: true };
 }
 

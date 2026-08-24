@@ -35,7 +35,7 @@ export async function emailSite(): Promise<EmailSite> {
     optionValue('site_title', 'Utterlog'),
     optionValue('site_url', config.appUrl),
     optionValue('site_logo', ''),
-    optionValue('site_timezone', 'UTC'),
+    optionValue('site_timezone', 'Asia/Shanghai'),
   ]);
   const siteUrl = (url || config.appUrl).replace(/\/+$/, '');
   return {

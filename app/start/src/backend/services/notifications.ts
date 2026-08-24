@@ -1,6 +1,6 @@
 import { verifyAccessToken } from '../auth/jwt';
 import { table } from '../config';
-import { exec, many, one } from '../db/helpers';
+import { exec, many, nowUnix, one } from '../db/helpers';
 
 export class NotificationServiceError extends Error {
   constructor(public status: number, public code: string, message: string) {
@@ -14,6 +14,32 @@ function positiveId(value: unknown) {
   return id;
 }
 
+export async function createNotification(input: {
+  userId?: number;
+  type: string;
+  title: string;
+  content?: string;
+  data?: Record<string, unknown>;
+  createdAt?: number;
+}) {
+  const createdAt = input.createdAt || nowUnix();
+  await exec(
+    `insert into ${table('notifications')} (user_id, type, data, is_read, created_at)
+     values ($1,$2,$3::jsonb,false,$4)`,
+    [input.userId || 1, input.type, JSON.stringify({ title: input.title, content: input.content || '', ...(input.data || {}) }), createdAt],
+  );
+}
+
+function notificationForResponse(row: Record<string, unknown>) {
+  const raw = row.data;
+  let data: Record<string, unknown> = {};
+  if (raw && typeof raw === 'object') data = raw as Record<string, unknown>;
+  else if (typeof raw === 'string') {
+    try { data = JSON.parse(raw) as Record<string, unknown>; } catch { data = {}; }
+  }
+  return { ...row, data, title: String(data.title || ''), content: String(data.content || '') };
+}
+
 export async function listNotifications(userId: number, options: { page?: number; perPage?: number } = {}) {
   const page = Math.max(1, Math.floor(options.page || 1));
   const perPage = Math.min(500, Math.max(1, Math.floor(options.perPage || 20)));
@@ -25,7 +51,7 @@ export async function listNotifications(userId: number, options: { page?: number
     [userId, perPage, (page - 1) * perPage],
   ).catch(() => []);
   const total = Number(totalRow?.count || 0);
-  return { rows, meta: { total, page, per_page: perPage, total_pages: Math.max(1, Math.ceil(total / perPage)) } };
+  return { rows: rows.map(notificationForResponse), meta: { total, page, per_page: perPage, total_pages: Math.max(1, Math.ceil(total / perPage)) } };
 }
 
 export async function unreadNotificationCount(userId: number) {

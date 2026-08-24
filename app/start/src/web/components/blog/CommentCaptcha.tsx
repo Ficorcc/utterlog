@@ -108,6 +108,8 @@ export default function CommentCaptcha({ onVerified, onReset }: CommentCaptchaPr
     setImgCode(val);
     if (val.length === 4) {
       onVerified({ challenge: '', nonce: '', captcha_id: imgId, captcha_code: val });
+    } else {
+      onReset?.();
     }
   };
 
@@ -134,15 +136,12 @@ export default function CommentCaptcha({ onVerified, onReset }: CommentCaptchaPr
           userSelect: 'none', transition: 'border-color 0.3s',
         }}
       >
-        <a href="https://docs.utterlog.io/captcha" target="_blank" rel="noopener noreferrer"
-          style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0, textDecoration: 'none' }}
-          title="Utterlog PoW Captcha"
-        >
+        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }} aria-hidden="true">
           <svg width="22" height="22" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 0c9.601 0 12 2.399 12 12 0 9.601-2.399 12-12 12-9.601 0-12-2.399-12-12C0 2.399 2.399 0 12 0z" fill={isVerified ? '#0052D9' : '#ccc'} style={{ transition: 'fill 0.3s' }} />
             <path d="M17.008 17.29H11.44a5.57 5.57 0 0 1-5.562-5.567A5.57 5.57 0 0 1 11.44 6.16a5.57 5.57 0 0 1 5.567 5.563Z" fill="white" />
           </svg>
-        </a>
+        </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ fontSize: '12px', color: isVerified ? '#16a34a' : 'var(--color-text-sub, #666)' }}>
             {powState === 'idle' ? '点击验证' : isVerified ? '验证成功' : '验证中…'}

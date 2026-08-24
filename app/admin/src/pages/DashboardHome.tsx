@@ -146,7 +146,7 @@ export default function DashboardPage() {
   const todoItems = [
     { count: todo.pending_comments, label: t('admin.dashboard.todo.pendingComments', '条评论待审核'), href: '/comments/pending' },
     { count: todo.drafts, label: t('admin.dashboard.todo.drafts', '篇草稿未发布'), href: '/posts?status=draft' },
-    { count: todo.link_requests, label: t('admin.dashboard.todo.linkRequests', '条友链申请待处理'), href: '/links' },
+    { count: todo.link_requests, label: t('admin.dashboard.todo.linkRequests', '条友链申请待处理'), href: '/links?status=0' },
   ].filter((item) => item.count > 0);
 
   const quickActions = [

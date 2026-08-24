@@ -1,14 +1,6 @@
 let configuredTimeZone = '';
 let effectiveTimeZone = '';
 
-function browserTimeZone(): string {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-  } catch {
-    return '';
-  }
-}
-
 function isValidTimeZone(timeZone?: string): boolean {
   if (!timeZone) return false;
   try {
@@ -27,7 +19,7 @@ export function setAdminTimeZone(configured?: string, effective?: string) {
 export function adminTimeZone(): string {
   if (isValidTimeZone(configuredTimeZone)) return configuredTimeZone;
   if (isValidTimeZone(effectiveTimeZone)) return effectiveTimeZone;
-  return browserTimeZone() || 'UTC';
+  return 'Asia/Shanghai';
 }
 
 export function formatWithAdminTimeZone(
@@ -41,6 +33,34 @@ export function formatWithAdminTimeZone(
   } catch {
     return date.toLocaleString(locale, options);
   }
+}
+
+// Published timestamps are PostgreSQL "timestamp without time zone" values.
+// Parse those values as site wall-clock time, not in the administrator's
+// browser timezone, so every admin screen agrees with the public site.
+export function adminDateFromInput(input: string | number | Date): Date {
+  if (input instanceof Date) return input;
+  if (typeof input === 'number') return new Date(input > 1e12 ? input : input * 1000);
+
+  const numeric = Number(input);
+  if (!Number.isNaN(numeric) && numeric > 0) {
+    return new Date(numeric > 1e12 ? numeric : numeric * 1000);
+  }
+
+  const match = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?$/.exec(input.trim());
+  const timeZone = adminTimeZone();
+  if (!match || !isValidTimeZone(timeZone)) return new Date(input);
+
+  const [year, month, day, hour, minute, second] = match.slice(1).map((part) => Number(part || 0));
+  const guess = Date.UTC(year, month - 1, day, hour, minute, second);
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
+  }).formatToParts(new Date(guess));
+  const pick = (type: string) => Number(parts.find((part) => part.type === type)?.value || 0);
+  const offset = Date.UTC(pick('year'), pick('month') - 1, pick('day'), pick('hour'), pick('minute'), pick('second')) - guess;
+  return new Date(guess - offset);
 }
 
 // Returns "YYYY-MM-DD" in site_timezone — replacement for the common

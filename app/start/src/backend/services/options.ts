@@ -22,7 +22,7 @@ export async function readOptionMap(includeSensitive = false) {
     if (!includeSensitive && isSensitiveOptionName(row.name)) continue;
     result[row.name] = row.value;
   }
-  result.site_timezone_effective = result.site_timezone || 'UTC';
+  result.site_timezone_effective = result.site_timezone || 'Asia/Shanghai';
   return result;
 }
 

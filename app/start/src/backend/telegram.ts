@@ -133,7 +133,7 @@ async function scalarCount(query: string, params: unknown[] = []) {
 
 export async function sendDailyReportTelegram(force = false) {
   if (!(await optionEnabled('tg_daily_report'))) return;
-  const timeZone = (await optionValue('site_timezone', 'UTC')).trim() || 'UTC';
+  const timeZone = (await optionValue('site_timezone', 'Asia/Shanghai')).trim() || 'Asia/Shanghai';
   const today = await siteDateKey(timeZone);
   if (!force) {
     const lastSent = (await optionValue('telegram_daily_report_last_date', '')).trim();

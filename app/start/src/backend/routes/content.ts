@@ -122,8 +122,20 @@ function formatRfc822InTimeZone(date: Date, timeZone: string) {
   return `${weekday}, ${pick('day')} ${month} ${pick('year')} ${pick('hour')}:${pick('minute')}:${pick('second')} ${offset}`;
 }
 
-function formatIso8601Date(date: Date) {
-  return date.toISOString().replace(/\.\d{3}Z$/, 'Z');
+function formatIso8601InTimeZone(date: Date, timeZone: string) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  }).formatToParts(date);
+  const pick = (type: string) => parts.find((part) => part.type === type)?.value || '00';
+  const offset = formatTimezoneOffset(date, timeZone);
+  return `${pick('year')}-${pick('month')}-${pick('day')}T${pick('hour')}:${pick('minute')}:${pick('second')}${offset.slice(0, 3)}:${offset.slice(3)}`;
 }
 
 function postDateParts(
@@ -181,7 +193,7 @@ async function loadPublishedPostsForFeed(limit = 50) {
 
 function buildRssFeedXml(opts: Record<string, string>, posts: Record<string, unknown>[]) {
   const site = siteOrigin(opts);
-  const timeZone = String(opts.site_timezone || 'UTC').trim() || 'UTC';
+  const timeZone = String(opts.site_timezone || 'Asia/Shanghai').trim() || 'Asia/Shanghai';
   const channelTitle = String(opts.site_title || 'Utterlog').trim() || 'Utterlog';
   const channelDescription = String(opts.site_description || opts.seo_default_description || channelTitle).trim();
   const permalink = opts.permalink_structure || '/posts/%postname%';
@@ -200,7 +212,7 @@ function buildRssFeedXml(opts: Record<string, string>, posts: Record<string, unk
       `    <link>${xmlEscape(link)}</link>`,
       `    <guid isPermaLink="false">${xmlEscape(guid)}</guid>`,
       `    <pubDate>${formatRssPubDate(post, timeZone)}</pubDate>`,
-      `    <dc:date>${formatIso8601Date(publishedAt)}</dc:date>`,
+      `    <dc:date>${formatIso8601InTimeZone(publishedAt, timeZone)}</dc:date>`,
       `    <description>${cdata(description)}</description>`,
       '  </item>',
     ].join('\n');

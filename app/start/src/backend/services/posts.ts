@@ -57,6 +57,37 @@ function normalizeJsonbValue(value: unknown) {
   return typeof value === 'string' ? value : JSON.stringify(value);
 }
 
+function formatWallClockInTimeZone(date: Date, timeZone: string) {
+  try {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
+    }).formatToParts(date);
+    const part = (type: string) => parts.find((item) => item.type === type)?.value || '00';
+    return `${part('year')}-${part('month')}-${part('day')}T${part('hour')}:${part('minute')}:${part('second')}`;
+  } catch {
+    return date.toISOString().slice(0, 19);
+  }
+}
+
+async function siteWallClockNow() {
+  const timeZone = (await optionValue('site_timezone', 'Asia/Shanghai')).trim() || 'Asia/Shanghai';
+  return formatWallClockInTimeZone(new Date(), timeZone);
+}
+
+async function normalizePublishedAtInput(value: unknown) {
+  if (typeof value !== 'string') return value;
+  const input = value.trim();
+  // Current admin sends the datetime-local wall-clock value unchanged. Older
+  // tabs converted it with toISOString(), so repair only explicit UTC/offset
+  // inputs before PostgreSQL drops their offset for a naive timestamp column.
+  if (!/(?:Z|[+-]\d{2}:?\d{2})$/i.test(input)) return value;
+  const instant = new Date(input);
+  if (Number.isNaN(instant.getTime())) return value;
+  const timeZone = (await optionValue('site_timezone', 'Asia/Shanghai')).trim() || 'Asia/Shanghai';
+  return formatWallClockInTimeZone(instant, timeZone);
+}
+
 export function normalizePostInput(body: Record<string, unknown>, forCreate = false) {
   const next = { ...body };
   if (forCreate && !next.type) next.type = 'post';
@@ -67,7 +98,6 @@ export function normalizePostInput(body: Record<string, unknown>, forCreate = fa
   }
   if (String(next.excerpt || '').trim()) next.ai_summary = String(next.excerpt || '').trim();
   if (Object.prototype.hasOwnProperty.call(next, 'meta')) next.meta = normalizeJsonbValue(next.meta);
-  if (forCreate && next.status === 'publish' && !next.published_at) next.published_at = new Date().toISOString();
   return next;
 }
 
@@ -99,6 +129,16 @@ function postColumnEntries(columns: Set<string>, data: Record<string, unknown>, 
   return Object.entries(data).filter(([key]) => columns.has(key) && !blocked.has(key));
 }
 
+function postColumnPlaceholder(key: string, value: unknown, index: number) {
+  const placeholder = `$${index + 1}`;
+  // postgres.js encodes ISO-looking strings as timestamps. For PostgreSQL's
+  // naive published_at column that silently shifts a Beijing wall-clock value
+  // by eight hours, so bind strings as text before the explicit SQL cast.
+  return key === 'published_at' && typeof value === 'string'
+    ? `${placeholder}::text::timestamp without time zone`
+    : placeholder;
+}
+
 async function createPostRecord(body: Record<string, unknown>, userId: number) {
   const columns = await tableColumns('posts');
   const now = nowUnix();
@@ -121,7 +161,7 @@ async function createPostRecord(body: Record<string, unknown>, userId: number) {
   const names = entries.map(([key]) => key);
   const values = entries.map(([key, value]) => key === 'meta' ? normalizeJsonbValue(value) : value ?? null);
   await exec(
-    `insert into ${table('posts')} (${names.join(', ')}) values (${names.map((_, index) => `$${index + 1}`).join(', ')})`,
+    `insert into ${table('posts')} (${names.join(', ')}) values (${entries.map(([key, value], index) => postColumnPlaceholder(key, value, index)).join(', ')})`,
     values,
   );
   if (publicPost) await syncPostsSequence();
@@ -135,7 +175,7 @@ async function updatePostColumns(id: number, body: Record<string, unknown>) {
   if (entries.length === 0) return id;
   const values = entries.map(([key, value]) => key === 'meta' ? normalizeJsonbValue(value) : value ?? null);
   await exec(
-    `update ${table('posts')} set ${entries.map(([key], index) => `${key} = $${index + 1}`).join(', ')} where id = $${entries.length + 1}`,
+    `update ${table('posts')} set ${entries.map(([key, value], index) => `${key} = ${postColumnPlaceholder(key, value, index)}`).join(', ')} where id = $${entries.length + 1}`,
     [...values, id],
   );
   return id;
@@ -147,7 +187,7 @@ async function updatePostRecord(postId: number, body: Record<string, unknown>) {
   const finalType = String(body.type || existing.type || 'post');
   const finalStatus = String(body.status || existing.status || 'draft');
   if (existing.status === 'draft' && finalStatus === 'publish' && !body.published_at && !existing.published_at) {
-    body.published_at = new Date().toISOString();
+    body.published_at = await siteWallClockNow();
   }
   if (postId < 0 && finalType === 'post' && finalStatus === 'publish') {
     const columns = await tableColumns('posts');
@@ -167,7 +207,7 @@ async function updatePostRecord(postId: number, body: Record<string, unknown>) {
     const names = entries.map(([key]) => key);
     const values = entries.map(([key, value]) => key === 'meta' ? normalizeJsonbValue(value) : value ?? null);
     await exec(
-      `insert into ${table('posts')} (${names.join(', ')}) values (${names.map((_, index) => `$${index + 1}`).join(', ')})`,
+      `insert into ${table('posts')} (${names.join(', ')}) values (${entries.map(([key, value], index) => postColumnPlaceholder(key, value, index)).join(', ')})`,
       values,
     );
     for (const relTable of ['relationships', 'post_footprints', 'post_meta', 'comments']) {
@@ -413,13 +453,15 @@ async function notifyPublished(postId: number, wasPublished: boolean) {
      from ${table('posts')} p where p.id = $1`, [postId],
   ).catch(() => null);
   if (!post || post.status !== 'publish' || (post.type && post.type !== 'post')) return;
-  const path = postPath(post, options.permalink_structure || '/posts/%postname%', options.site_timezone || 'UTC');
+  const path = postPath(post, options.permalink_structure || '/posts/%postname%', options.site_timezone || 'Asia/Shanghai');
   const origin = String(options.site_url || config.appUrl || '').replace(/\/+$/, '');
   void sendPostPublishedTelegram({ title: String(post.title || '未命名文章'), url: origin ? `${origin}${path}` : path });
 }
 
 export async function createPost(body: Record<string, unknown>, userId: number) {
   const normalized = normalizePostInput(body, true);
+  if (normalized.published_at) normalized.published_at = await normalizePublishedAtInput(normalized.published_at);
+  if (normalized.status === 'publish' && !normalized.published_at) normalized.published_at = await siteWallClockNow();
   const id = await createPostRecord(normalized, userId);
   await savePostExtras(id, normalized);
   await notifyPublished(id, false);
@@ -431,6 +473,7 @@ export async function updatePost(id: number, body: Record<string, unknown>) {
   const before = await one<{ status: string }>(`select status from ${table('posts')} where id = $1`, [id]);
   if (!before) throw new PostServiceError(404, 'NOT_FOUND', '文章不存在');
   const normalized = normalizePostInput(body);
+  if (normalized.published_at) normalized.published_at = await normalizePublishedAtInput(normalized.published_at);
   const nextId = await updatePostRecord(id, normalized);
   await savePostExtras(nextId, normalized);
   await notifyPublished(nextId, before.status === 'publish');

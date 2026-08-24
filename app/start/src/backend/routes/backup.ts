@@ -10,7 +10,7 @@ import { publicStorageUrl, putStorageObject, storageSettings } from '../media/st
 const backupDir = process.env.BACKUP_DIR || 'backups';
 
 async function backupTimestamp(date = new Date()) {
-  const timeZone = (await optionValue('site_timezone', 'UTC')).trim() || 'UTC';
+  const timeZone = (await optionValue('site_timezone', 'Asia/Shanghai')).trim() || 'Asia/Shanghai';
   try {
     const parts = new Intl.DateTimeFormat('en-CA', {
       timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
@@ -302,7 +302,7 @@ export async function backupStatsPayload() {
 
 export async function backupListPayload() {
   mkdirSync(backupDir, { recursive: true });
-  const timeZone = (await optionValue('site_timezone', 'UTC')).trim() || 'UTC';
+  const timeZone = (await optionValue('site_timezone', 'Asia/Shanghai')).trim() || 'Asia/Shanghai';
   const formatTime = (date: Date) => {
     try {
       const parts = new Intl.DateTimeFormat('en-CA', {
