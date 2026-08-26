@@ -125,7 +125,10 @@ export async function adminDashboardPayload() {
   const [stats, posts, comments] = await Promise.all([
     adminStatsPayload(),
     listPosts({ page: 1, perPage: 5, status: 'publish' }),
-    listComments({ page: 1, perPage: 15, status: 'approved', authed: true }),
+    // Fetch enough visible records at the source. Filtering the first page in
+    // the admin UI left the panel empty whenever the newest comments were all
+    // owner replies.
+    listComments({ page: 1, perPage: 5, status: 'approved', excludeAdmin: true, authed: true }),
   ]);
   return {
     stats,
