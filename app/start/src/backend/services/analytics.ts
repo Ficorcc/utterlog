@@ -65,24 +65,17 @@ async function rollupWindow(period: AnalyticsPeriod) {
     cutoffDate: await siteDate(new Date(cutoffUnix * 1000)) };
 }
 
-/**
- * 全站累计浏览量的唯一口径。stats_global 是 /track 一次次累加出来的权威值，
- * 但升级前没有这张表的老库可能还是 0，这时退回 access_logs 的行数兜底。
- *
- * 别再用 sum(posts.view_count) 充当这个指标：那是文章阅读量，还含外站导入
- * 带进来的历史基线，跟「全站被访问了多少次」不是一回事。
- */
+/** 全站累计浏览量的展示口径：每日真实访问聚合。 */
 export async function siteTotalViews() {
-  const [stored, logged] = await Promise.all([
-    one<{ total: string }>(`select coalesce(total_views,0)::text as total from ${table('stats_global')} where id = 1`).catch(() => null),
-    one<{ count: string }>(`select count(*)::text as count from ${table('access_logs')}`).catch(() => null),
-  ]);
-  return Math.max(Number(stored?.total || 0), Number(logged?.count || 0));
+  const row = await one<{ total: string }>(
+    `select coalesce(sum(visits),0)::text as total from ${table('stats_daily')} where dimension = '_total'`,
+  ).catch(() => null);
+  return Number(row?.total || 0);
 }
 
 /**
- * 文章阅读排行 / 趋势：读 stats_post_daily，也就是 bumpPostViewOnRead 按天
- * 写下的那份明细，跟文章卡片上的数字同源。period 走统计页那套时间窗口。
+ * 文章阅读排行 / 趋势：读 stats_post_daily，也就是 /track 成功上报后
+ * 写下的真实访问明细。posts.view_count 保留历史基线，只从 /track 继续增长。
  */
 export async function analyticsPostViews(period: AnalyticsPeriod, limit = 20) {
   const startUnix = await periodStart(period);
@@ -108,7 +101,7 @@ export async function analyticsPostViews(period: AnalyticsPeriod, limit = 20) {
 }
 
 async function visitsForPeriod(period: AnalyticsPeriod, global: { views: string; uniques: string } | null) {
-  if (period === 'all' && global) return Number(global.views || 0);
+  if (period === 'all') return siteTotalViews();
   if (!['year', '365d'].includes(period)) {
     const where = await analyticsWhere(period);
     const row = await one<{ count: string }>(`select count(*)::text as count from ${table('access_logs')} ${where.sql}`, where.params);

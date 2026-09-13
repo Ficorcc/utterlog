@@ -1,10 +1,10 @@
 import { expect, test } from 'bun:test';
 import { isPostDetailPath, isPublicCacheablePage, isVisitorPersonalizedPage } from '../src/server/cache-policy';
 
-test('home and paginated home are visitor-personalized (never CDN-cached)', () => {
+test('home and paginated home are public-cacheable', () => {
   for (const path of ['/', '/page/1', '/page/12', '/page/12/']) {
-    expect(isVisitorPersonalizedPage(path)).toBe(true);
-    expect(isPublicCacheablePage(path)).toBe(false);
+    expect(isVisitorPersonalizedPage(path)).toBe(false);
+    expect(isPublicCacheablePage(path)).toBe(true);
   }
 });
 
@@ -36,8 +36,6 @@ test('public content pages are cacheable', () => {
 
 test('private / dynamic paths are not cacheable', () => {
   for (const path of [
-    '/',
-    '/page/2',
     '/admin',
     '/admin/posts',
     '/login',
@@ -51,8 +49,7 @@ test('private / dynamic paths are not cacheable', () => {
   }
 });
 
-// 文章详情页的阅读量在 SSR 同一请求里 +1，进了共享缓存就不再计数、数字冻结。
-test('post detail pages are never cacheable, whichever permalink structure is set', () => {
+test('post detail pages are cacheable because /track records visits', () => {
   const cases: [string, string][] = [
     ['/archives/%display_id%', '/archives/33'],
     ['/archives/%post_id%', '/archives/33'],
@@ -64,8 +61,8 @@ test('post detail pages are never cacheable, whichever permalink structure is se
   ];
   for (const [structure, path] of cases) {
     expect(isPostDetailPath(path, structure)).toBe(true);
-    expect(isPublicCacheablePage(path, structure)).toBe(false);
-    expect(isPublicCacheablePage(`${path}/`, structure)).toBe(false);
+    expect(isPublicCacheablePage(path, structure)).toBe(true);
+    expect(isPublicCacheablePage(`${path}/`, structure)).toBe(true);
   }
 });
 

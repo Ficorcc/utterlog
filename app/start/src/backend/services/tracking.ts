@@ -7,6 +7,7 @@ import { optionValue } from '../db/options';
 import { lookupGeoIp } from '../geoip';
 import { requestIp } from '../request-ip';
 import { ephemeral } from '../store/ephemeral';
+import { parsePermalinkPath } from './permalink';
 
 export { requestIp };
 
@@ -39,92 +40,13 @@ export function readVisitorFromRequest(request: Request): ReadVisitor {
   return { ip: requestIp(request), ua: request.headers.get('user-agent') || '' };
 }
 
-/**
- * 文章阅读量的唯一写入口：文章详情页 SSR 读取时同步 +1，渲染出来的数字
- * 就是这次访问之后的值。放在服务端而不是浏览器 /track 里，是因为 /track
- * 要等页面渲染完才发出，当前这一屏永远看不到自己这次访问。
- *
- * 口径是「页面加载量」，跟 PV 一样：点进来算一次，刷新一次算一次，同一个
- * 人反复看也一次次累加，不做时间窗口去重 —— 站长要的就是这篇文章被打开
- * 过多少次。唯一挡掉的是爬虫 UA。想看「多少人看过」用 unique_visitors，
- * 那一列仍然按 (读者, 文章, 天) 去重。
- *
- * 之所以敢不去重：站内指向文章的链接一律走 PostLink（prefetch 默认关），
- * 鼠标划过不会触发 loader；公开页也没挂 CDN 缓存。所以一次 +1 就对应一次
- * 真实的页面加载。往后要给文章链接开预取的话，这里得跟着重新考虑。
- *
- * 累计数（posts.view_count）和按天明细（stats_post_daily）都只从这里写，
- * 同一次判定写两处，所以两个数字必然对得上：按天明细求和等于本站自己数
- * 出来的阅读量，view_count 在此之上还含 WordPress 等外站导入时带进来的
- * 历史基线。/track 不再碰任何文章维度的统计，只负责访客明细和全站 PV。
- */
-export async function bumpPostViewOnRead(postId: number, visitor: ReadVisitor) {
-  if (!(postId > 0) || isBotUa(visitor.ua)) return false;
-  const updated = await exec(
-    `update ${table('posts')} set view_count=coalesce(view_count,0)+1 where id=$1 and type='post' and status='publish'`,
-    [postId],
-  ).catch((error) => {
-    console.error('[analytics] post view bump failed', error);
-    return null;
-  });
-  if (!(Number((updated as { count?: number } | null)?.count || 0) > 0)) return false;
-  await recordPostReadDaily(postId, `${visitor.ip}\0${visitor.ua}`);
-  return true;
+// Compatibility for old SSR callers: reads never record visits.
+export async function bumpPostViewOnRead(_postId: number, _visitor: ReadVisitor) {
+  return false;
 }
 
-/**
- * 按天明细跟着累计数一起落库。views 和累计数同步 +1（每次加载都算），
- * unique_visitors 则按 (读者, 文章, 天) 去重，所以同一个人今天刷十次是
- * views +10、unique_visitors +1。
- *
- * SSR 阶段拿不到浏览器 localStorage 里的 visitor_id（那是 /track 才有的
- * 东西），所以读者身份按 ip+ua 的哈希算 —— 换来的是不依赖 JS，装了拦截
- * 插件的访问也照样算进来。
- *
- * 明细写失败不回滚累计数：卡片上的数字比一张统计表更要紧，老库缺表
- * 或缺唯一索引时不该把阅读量一起拖掉。
- */
-async function recordPostReadDaily(postId: number, readerKey: string) {
-  const date = await siteDate();
-  const visitorKey = createHash('sha256').update(readerKey).digest('hex').slice(0, 40);
-  const firstToday = await one<{ inserted: boolean }>(
-    `insert into ${table('stats_visitor_post_dates')} (visitor_id, post_id, date) values ($1,$2,$3::date)
-     on conflict (visitor_id, post_id, date) do update set visitor_id=excluded.visitor_id returning (xmax=0) as inserted`,
-    [visitorKey, postId, date],
-  ).catch(() => null);
-  await exec(
-    `insert into ${table('stats_post_daily')} (post_id, date, views, unique_visitors) values ($1,$2::date,1,$3)
-     on conflict (post_id, date) do update set views=${table('stats_post_daily')}.views+1,
-       unique_visitors=${table('stats_post_daily')}.unique_visitors+excluded.unique_visitors`,
-    [postId, date, firstToday?.inserted ? 1 : 0],
-  ).catch((error) => {
-    console.error('[analytics] post daily stats write failed', error);
-  });
-}
-
-/**
- * 全站浏览量：公开页每渲染一次 +1，口径跟文章阅读量完全一致 —— 打开算一次、
- * 刷新算一次，不去重也不限流，只挡爬虫 UA。
- *
- * 从 /track 挪到 SSR 这一侧的原因有两个：一是浏览器上报要等 JS 跑起来，关了
- * JS 或被拦截插件挡掉的访问统统漏计；二是 /track 那条链路带 30 秒去重和频率
- * 封禁，同一个人连刷十次只算一次，跟「刷新就 +1」的口径对不上。
- *
- * 不 await：页脚那个数字是前端单独请求 /archive/stats 拿的，不参与本次 SSR
- * 渲染，没必要让一次计数写入拖慢首屏。写失败只打日志。
- *
- * 唯一访客数（total_uniques）仍由 /track 负责 —— 那个要靠浏览器 localStorage
- * 里的 visitor_id 才能去重，服务端拿不到。
- */
-export function bumpSiteViewOnRender(ua: string) {
-  if (isBotUa(ua)) return;
-  void exec(
-    `update ${table('stats_global')} set total_views = total_views + 1, updated_at = $1 where id = 1`,
-    [nowUnix()],
-  ).catch((error) => {
-    console.error('[analytics] site view bump failed', error);
-  });
-}
+// Compatibility for old SSR callers: renders never record visits.
+export function bumpSiteViewOnRender(_ua: string) {}
 
 async function pageViewGate(identity: string, ip: string, path: string, now: number) {
   const identityBlockKey = analyticsKey('block:identity', identity);
@@ -217,6 +139,16 @@ async function siteDate(value = new Date()) {
   }
 }
 
+async function trackedPostTarget(path: string) {
+  const structure = await optionValue('permalink_structure', '/posts/%postname%').catch(() => '/posts/%postname%');
+  const parsed = parsePermalinkPath(path, structure) || (structure === '/posts/%postname%' ? null : parsePermalinkPath(path, '/posts/%postname%'));
+  if (!parsed) return null;
+  if (Number(parsed.displayId || 0) > 0) return { column: 'display_id' as const, value: Number(parsed.displayId) };
+  if (Number(parsed.id || 0) > 0) return { column: 'id' as const, value: Number(parsed.id) };
+  if (parsed.slug) return { column: 'slug' as const, value: parsed.slug };
+  return null;
+}
+
 async function enrichAccessGeo(logId: number, ip: string) {
   if (!logId) return;
   try {
@@ -268,13 +200,27 @@ export async function trackPageView(request: Request, input: Record<string, unkn
   const gateReason = await pageViewGate(visitor, ip, path, now);
   if (gateReason) return { tracked: false, reason: gateReason };
   const today = await siteDate(new Date(now * 1000));
+  const postTarget = await trackedPostTarget(path);
   const dimensions: Array<[string, string, string]> = [
     ['browser', parsed.browser || 'Unknown', ''], ['os', parsed.os || 'Unknown', ''], ['device', parsed.device || 'Unknown', ''],
   ];
   if (geo.countryName || geo.country) dimensions.push(['country', geo.countryName || geo.country, geo.country || '']);
   let accessLogId = 0;
+  let suppressedReason = '';
   try {
     await sql.begin(async (tx) => {
+      await tx.unsafe(`select pg_advisory_xact_lock(hashtextextended($1,0))`, [`analytics:${visitor}`]);
+      const duplicateRows = await tx.unsafe<{ exists: boolean }[]>(
+        `select exists(
+           select 1 from ${table('access_logs')}
+           where path=$2 and coalesce(nullif(visitor_id,''),nullif(fingerprint,''),ip)=$1 and created_at >= $3
+         ) as exists`,
+        [visitor, path, now - PAGE_VIEW_DEDUP_SECONDS],
+      );
+      if (duplicateRows[0]?.exists) {
+        suppressedReason = 'duplicate';
+        return;
+      }
       const siteVisitorRows = await tx.unsafe<{ inserted: boolean }[]>(
         `insert into ${table('stats_visitor_dates')} (visitor_id, date) values ($1, $2::date)
          on conflict (visitor_id, date) do update set visitor_id=excluded.visitor_id returning (xmax=0) as inserted`, [visitor, today],
@@ -289,11 +235,8 @@ export async function trackPageView(request: Request, input: Record<string, unkn
           geo.region, geo.city, geo.latitude, geo.longitude, now, visitorId, fingerprint],
       );
       accessLogId = Number(accessRows[0]?.id || 0);
-      // total_views 已改由 SSR 渲染时累加（见 bumpSiteViewOnRender），这里只
-      // 记唯一访客 —— 那个要靠浏览器的 visitor_id 去重，服务端拿不到。两边
-      // 各写各的字段，不会双计。
       await tx.unsafe(
-        `update ${table('stats_global')} set total_uniques=total_uniques+$2,
+        `update ${table('stats_global')} set total_views=total_views+1, total_uniques=total_uniques+$2,
          first_event_at=case when first_event_at=0 then $1 else first_event_at end, updated_at=$1 where id=1`, [now, uniqueInc],
       );
       await tx.unsafe(
@@ -312,11 +255,33 @@ export async function trackPageView(request: Request, input: Record<string, unkn
           [today, dimension, value, extra, uniqueInc],
         );
       }
+      if (postTarget) {
+        const postRows = await tx.unsafe<{ id: number }[]>(
+          `update ${table('posts')} set view_count=coalesce(view_count,0)+1
+           where ${postTarget.column}=$1 and type='post' and status='publish' and deleted_at=0 returning id`,
+          [postTarget.value],
+        );
+        const postId = Number(postRows[0]?.id || 0);
+        if (postId > 0) {
+          const postVisitorRows = await tx.unsafe<{ inserted: boolean }[]>(
+            `insert into ${table('stats_visitor_post_dates')} (visitor_id, post_id, date) values ($1,$2,$3::date)
+             on conflict (visitor_id, post_id, date) do update set visitor_id=excluded.visitor_id returning (xmax=0) as inserted`,
+            [visitor, postId, today],
+          );
+          await tx.unsafe(
+            `insert into ${table('stats_post_daily')} (post_id, date, views, unique_visitors) values ($1,$2::date,1,$3)
+             on conflict (post_id, date) do update set views=${table('stats_post_daily')}.views+1,
+               unique_visitors=${table('stats_post_daily')}.unique_visitors+excluded.unique_visitors`,
+            [postId, today, postVisitorRows[0]?.inserted ? 1 : 0],
+          );
+        }
+      }
     });
   } catch (error) {
     console.error('[analytics] track write failed', error);
     return { tracked: false, reason: 'write_failed' };
   }
+  if (!accessLogId) return { tracked: false, reason: suppressedReason || 'duplicate' };
   if (accessLogId && (!geo.country || !geo.latitude || !geo.longitude)) void enrichAccessGeo(accessLogId, ip);
   if (visitor) await ephemeral.set(`online:${visitor}`, JSON.stringify({ visitor_id: visitor, ip, path, ts: now,
     country_code: geo.country, city: geo.city }), 300);

@@ -6,7 +6,7 @@ import { parsePermalinkPath } from './services/permalink';
 import { readOptionMap } from './services/options';
 import { siteTotalViews } from './services/analytics';
 import { friendLinkAvatar, friendLinkIndex, matchFriendBadge } from './services/friend-links';
-import { bumpPostViewOnRead, type ReadVisitor } from './services/tracking';
+import { type ReadVisitor } from './services/tracking';
 import { defaultWeatherLocation, fetchVisitorWeather, visitorWeatherLocation, type VisitorWeatherResponse } from './weather';
 
 type MetaType = 'category' | 'tag';
@@ -147,6 +147,7 @@ function sanitizePostForResponse(row: Record<string, unknown>, detail: boolean, 
     if (!String(next.excerpt || '').trim() && next.content) {
       next.excerpt = stripMarkdownExcerpt(String(next.content || ''), 200);
     }
+    delete next.ai_summary;
     delete next.content;
   }
   return next;
@@ -450,11 +451,7 @@ async function getPostBy(column: 'id' | 'display_id' | 'slug', value: string | n
     [value],
   ).catch(() => null);
   if (!post || (!authed && post.status !== 'publish')) return null;
-  // 阅读量在读取的同一请求里 +1，并把 +1 后的值返回给 SSR 渲染，
-  // 所以页面上的数字就是这次访问之后的值。
-  if (reader && post.status === 'publish' && post.type === 'post' && await bumpPostViewOnRead(Number(post.id), reader)) {
-    post.view_count = Number(post.view_count || 0) + 1;
-  }
+  void reader;
   const metas = await many<Record<string, unknown>>(
     `select m.* from ${table('relationships')} r join ${table('metas')} m on m.id = r.meta_id where r.post_id = $1 order by m.type, m.name`,
     [post.id],
@@ -829,25 +826,19 @@ export async function listComments(params: {
 }
 
 export async function loadHomePageDataDirect(page: number) {
-  const options = await getOptionsMap();
-  const perPage = Number(options.posts_per_page) || 10;
-  const [postsRes, categories, archiveStats, momentsRes, commentsRes] = await Promise.all([
+  const perPage = Number(await optionValue('posts_per_page', '10').catch(() => '10')) || 10;
+  const [postsRes, momentsRes, commentsRes] = await Promise.all([
     listPosts({ page, perPage, status: 'publish' }),
-    listMetas('category'),
-    archiveStatsPayload(),
     listMoments({ perPage: 1 }),
-    listComments({ perPage: 60, status: 'approved', excludeAdmin: true }),
+    listComments({ perPage: 5, status: 'approved', excludeAdmin: true }),
   ]);
   const moments = momentsRes.data.moments || [];
   return {
     posts: (postsRes.data || []).filter((post: any) => post.id != null && post.title),
     page,
     totalPages: postsRes.meta.total_pages || 1,
-    categories,
-    archiveStats,
     latestMoment: moments[0] || null,
     latestComments: commentsRes.data || [],
     perPage,
-    options,
   };
 }

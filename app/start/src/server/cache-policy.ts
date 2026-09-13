@@ -1,13 +1,13 @@
 import { parsePermalinkPath } from '@backend/services/permalink';
 
-export function isVisitorPersonalizedPage(pathname: string) {
-  return pathname === '/' || /^\/page\/\d+\/?$/.test(pathname);
+export function isVisitorPersonalizedPage(_pathname: string) {
+  return false;
 }
 
-// 公开内容页：对所有匿名访客渲染结果一致，可交给 CDN 短期缓存。
-// 首页 `/` 与 `/page/N` 因含访客个性化（天气等）不在此列，由
-// isVisitorPersonalizedPage 单独打 no-store。
+// 公开内容页：对所有匿名访客渲染结果一致，可交给网关短期缓存。
+// 访客天气、在线人数和访问统计都在浏览器端单独请求，不再阻塞 SSR。
 const PUBLIC_CACHEABLE_EXACT = new Set([
+  '/',
   '/about',
   '/coding',
   '/moments',
@@ -27,6 +27,7 @@ const PUBLIC_CACHEABLE_EXACT = new Set([
 ]);
 
 const PUBLIC_CACHEABLE_PREFIXES = [
+  '/page/',
   '/categories/', // 分类归档
   '/tags/', // 标签归档
   '/date/', // 日期归档
@@ -34,11 +35,8 @@ const PUBLIC_CACHEABLE_PREFIXES = [
 ];
 
 /**
- * 文章详情页永远不进共享缓存：阅读量在 SSR 读取的同一请求里 +1，一旦命中
- * 缓存这次访问既不计数、页面上的数字也会被冻结成缓存那一刻的值。
- *
- * 判断依据是站点当前的固定链接结构，而不是写死某个前缀 —— `/archives/29`、
- * `/2026/07/hello`、`/tech/hello`、`/hello` 都可能是文章详情，取决于设置。
+ * 文章详情页也可以短缓存：阅读量已经移到浏览器 /track 成功上报后记录，
+ * 命中 HTML 缓存不会漏计真实访问。
  */
 export function isPostDetailPath(pathname: string, permalinkStructure: string) {
   if (!permalinkStructure) return false;
@@ -51,6 +49,6 @@ export function isPublicCacheablePage(pathname: string, permalinkStructure = '')
   if (isVisitorPersonalizedPage(pathname)) return false;
   const path = pathname.replace(/\/+$/, '') || '/';
   if (PUBLIC_CACHEABLE_EXACT.has(path)) return true;
-  if (isPostDetailPath(path, permalinkStructure)) return false;
+  if (isPostDetailPath(path, permalinkStructure)) return true;
   return PUBLIC_CACHEABLE_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }

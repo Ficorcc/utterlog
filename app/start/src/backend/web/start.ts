@@ -40,11 +40,15 @@ export async function handleStartRequest(request: Request): Promise<Response | n
     const headers = new Headers(response.headers);
     if (!headers.has('x-utterlog-renderer')) headers.set('x-utterlog-renderer', 'tanstack-start');
     if (method === 'HEAD') {
+      // HEAD discards the body, so cancel SSR work and its lifetime timer.
+      void response.body?.cancel().catch((error) => {
+        console.warn('TanStack Start HEAD cleanup failed:', method, new URL(request.url).pathname, error);
+      });
       return new Response(null, { status: response.status, statusText: response.statusText, headers });
     }
     return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
   } catch (error) {
-    console.error('TanStack Start render error:', error);
+    console.error('TanStack Start render error:', method, new URL(request.url).pathname, error);
     return null;
   }
 }

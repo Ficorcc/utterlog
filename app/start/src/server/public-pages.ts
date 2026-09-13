@@ -7,7 +7,6 @@ import { codingPayload } from '@backend/routes/coding';
 import {
   getPostBySlug,
   getOptionsMap,
-  getVisitorWeather,
   listMoments,
   listPosts,
   listPublicContent,
@@ -17,7 +16,7 @@ import {
   searchPublicPosts,
 } from '@backend/public-read';
 import { requestIp } from '@backend/request-ip';
-import { bumpSiteViewOnRender, type ReadVisitor } from '@backend/services/tracking';
+import { type ReadVisitor } from '@backend/services/tracking';
 import { loadStartThemeContextDirect } from './theme';
 
 export type PublicPageRequest =
@@ -246,9 +245,8 @@ function visitorIp() {
   }));
 }
 
-// 文章详情页的读取者身份：SSR 拿不到浏览器 localStorage 里的 visitor_id，
-// 用 IP + UA 代替。阅读量本身每次加载都 +1，这个身份只用来算独立访客。
-// 影视条目不计阅读量，reader 传 null。
+// Kept for compatibility with public-read call sites. Reading posts no longer
+// records analytics; browser /track is the only visit counter.
 function postReader(): ReadVisitor {
   return { ip: visitorIp(), ua: getRequestHeader('user-agent') || '' };
 }
@@ -257,13 +255,8 @@ async function postBySlug(slug: string, reader: ReadVisitor | null = null) {
   return safe(getPostBySlug(slug, reader), null);
 }
 
-async function homeRoute(ctx: ThemeContextData | null, page: number): Promise<PublicPageBody> {
-  const ip = visitorIp();
-  const [home, visitorWeather] = await Promise.all([
-    safe(loadHomePageDataDirect(page), null),
-    safe(getVisitorWeather(ip), null, 1200),
-  ]);
-  if (ctx) ctx.visitorWeather = visitorWeather;
+async function homeRoute(_ctx: ThemeContextData | null, page: number): Promise<PublicPageBody> {
+  const home = await safe(loadHomePageDataDirect(page), null);
   return {
     kind: 'home', posts: home?.posts || [],
     page: home?.page || page,
@@ -289,14 +282,6 @@ export const loadStartPublicPage = createServerFn({ method: 'GET' })
   .validator(validatePublicPageRequest)
   .handler(async ({ data }): Promise<PublicPageData> => {
     const ctx = await themeCtx();
-    // 全站浏览量：真实打开一次公开页 +1，跟文章阅读量同一个口径（刷新也算）。
-    // 放在这里而不是中间件，是因为这个 server fn 就是所有公开页的唯一入口，
-    // API 请求和静态资源根本走不到，不用再费劲排除。
-    //
-    // 预取要排除掉：前台开着 defaultPreload='intent'，鼠标划过站内链接就会
-    // 跑一遍 loader，也就是跑到这里。不排除的话，用户在首页扫一眼文章列表，
-    // 一篇没点也能刷出十几次浏览量 —— 这正是数字虚高的来源。
-    if (!data.preload) bumpSiteViewOnRender(getRequestHeader('user-agent') || '');
     const body = await resolvePublicPage(ctx, data);
     // 只带回 head() 需要的两个字段。完整 ctx 由 __root 的 loader 负责，
     // 这里再返一份的话整个 ThemeContext 会被序列化两遍（详见 PublicPageSite）。

@@ -1393,7 +1393,7 @@ async function importSyncBatch(jobId: string, siteUuid: string, resource: string
         item.password || item.post_password || '',
         item.allow_comment === undefined ? true : Boolean(item.allow_comment),
         Boolean(item.is_sticky || item.pinned),
-        Number(item.view_count || 0),
+        0,
         publishedAt,
         updatedAt,
         sourceType,
@@ -1408,7 +1408,7 @@ async function importSyncBatch(jobId: string, siteUuid: string, resource: string
       if (existing?.id) {
         row = await one<{ id: number }>(
           `update ${table('posts')} set title=$1, content=$2, excerpt=$3, author_id=$4, status=$5, type=$6,
-             cover_url=$7, password=$8, allow_comment=$9, pinned=$10, view_count=$11, published_at=$12,
+             cover_url=$7, password=$8, allow_comment=$9, pinned=$10, view_count=coalesce(view_count,$11::int), published_at=$12,
              updated_at=$13, source_type=$14, source_site_uuid=$15, source_id=$16
            where id = $17 returning id`,
           [...baseValues, existing.id],
@@ -1430,12 +1430,6 @@ async function importSyncBatch(jobId: string, siteUuid: string, resource: string
       if (row?.id) {
         const template = String(item.template || item.page_template || '').trim();
         if (template) await exec(`update ${table('posts')} set template=$1 where id=$2`, [template, row.id]).catch(() => {});
-        const oldViewCount = Number(existing?.view_count || 0);
-        const nextViewCount = Number(item.view_count || 0);
-        const delta = nextViewCount - oldViewCount;
-        if (delta !== 0) {
-          await exec(`update ${table('stats_global')} set total_views = total_views + $1, updated_at = $2 where id = 1`, [delta, nowUnix()]).catch(() => {});
-        }
         await recordSyncMap(jobId, siteUuid, resource, sourceId, row.id);
         await recordSyncMap(jobId, siteUuid, 'posts', sourceId, row.id);
         await attachPostTerms(row.id, siteUuid, item.categories || item.category_slugs, item.tags || item.tag_slugs);
