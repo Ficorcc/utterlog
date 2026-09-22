@@ -101,8 +101,8 @@ export default function NotificationBell() {
     const targets: Record<string, string> = {
       comment: '/comments',
       feed: '/feeds',
-      follow: '/follows',
-      federation: '/utterlog',
+      follow: '/',
+      federation: '/',
     };
     return {
       title,

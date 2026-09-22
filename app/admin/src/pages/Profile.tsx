@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/shadcn';
 import { RowAction } from '@/components/ui/row-actions';
 import {
-  Globe, Plus, QrCode, Eraser, X, ShieldCheck, ShieldOff,
+  Plus, QrCode, Eraser, X, ShieldCheck, ShieldOff,
   TriangleAlert, Copy, KeyRound, Fingerprint, Trash2, Save, Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -39,9 +39,6 @@ export default function ProfilePage() {
   const [changingPassword, setChangingPassword] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState('');
   const [gravatarUrl, setGravatarUrl] = useState('');
-  const [utterlogAvatar, setUtterlogAvatar] = useState('');
-  const [utterlogBound, setUtterlogBound] = useState(false);
-  const [avatarSource, setAvatarSource] = useState('gravatar');
 
   // Original values for detecting changes
   const [origEmail, setOrigEmail] = useState('');
@@ -119,9 +116,6 @@ export default function ProfilePage() {
       setOrigUsername(d.username || '');
       if (d.gravatar_url) setGravatarUrl(d.gravatar_url);
       if (d.avatar) setAvatarUrl(d.avatar);
-      if (d.utterlog_avatar) { setUtterlogAvatar(d.utterlog_avatar); setUtterlogBound(true); }
-      if (d.utterlog_id) setUtterlogBound(true);
-      if (d.avatar_source) setAvatarSource(d.avatar_source);
       if (d.totp_enabled) setTotpEnabled(true);
     }).catch(() => {});
 
@@ -298,47 +292,11 @@ export default function ProfilePage() {
           {/* Avatar */}
           <div className="mb-5 flex items-start gap-4">
             {/* Gravatar */}
-            <div
-              className="cursor-pointer text-center"
-              onClick={async () => {
-                setAvatarSource('gravatar');
-                try { await optionsApi.updateMany({ avatar_source: 'gravatar' }); toast.success(t('admin.profile.toast.switchedGravatar', '已切换为 Gravatar')); } catch {}
-              }}
-            >
-              <div className={cn(
-                'size-18 overflow-hidden rounded-full bg-muted transition-colors',
-                avatarSource === 'gravatar' ? 'border-[3px] border-primary' : 'border-2 border-border',
-              )}>
+            <div className="text-center">
+              <div className="size-18 overflow-hidden rounded-full border-2 border-border bg-muted">
                 {gravatarUrl && <img src={gravatarUrl} alt="" className="size-full object-cover" />}
               </div>
-              <span className={cn('mt-1 block text-3xs', avatarSource === 'gravatar' ? 'font-semibold text-primary' : 'text-muted-foreground')}>Gravatar</span>
-            </div>
-            {/* Utterlog */}
-            <div
-              className={cn('text-center', utterlogBound ? 'cursor-pointer opacity-100' : 'cursor-default opacity-50')}
-              onClick={async () => {
-                if (!utterlogBound) { toast.error(t('admin.profile.toast.bindUtterlogFirst', '请先绑定 Utterlog ID')); return; }
-                setAvatarSource('utterlog');
-                try { await optionsApi.updateMany({ avatar_source: 'utterlog' }); toast.success(t('admin.profile.toast.switchedFederatedAvatar', '已切换为联盟头像')); } catch {}
-              }}
-            >
-              <div className={cn(
-                'flex size-18 items-center justify-center overflow-hidden rounded-full bg-muted transition-colors',
-                avatarSource === 'utterlog' ? 'border-[3px] border-primary' : utterlogBound ? 'border-2 border-border' : 'border-2 border-dashed border-border',
-              )}>
-                {utterlogAvatar ? (
-                  <img src={utterlogAvatar} alt="" className="size-full object-cover" />
-                ) : (
-                  <Globe className="size-6 text-muted-foreground" />
-                )}
-              </div>
-              <span className={cn('mt-1 block text-3xs', avatarSource === 'utterlog' ? 'font-semibold text-primary' : 'text-muted-foreground')}>{t('admin.profile.federatedAvatar', '联盟头像')}</span>
-            </div>
-            <div className="flex-1 pt-2">
-              <p className="text-2xs leading-relaxed text-muted-foreground">
-                {t('admin.profile.avatarSourceHint', '点击头像切换前端显示来源。')}
-                {!utterlogBound && <> <a href="/utterlog" className="text-primary hover:underline">{t('admin.profile.bindUtterlogId', '绑定 Utterlog ID')}</a> {t('admin.profile.avatarBindSuffix', '后可使用联盟头像。')}</>}
-              </p>
+              <span className="mt-1 block text-3xs text-muted-foreground">Gravatar</span>
             </div>
           </div>
 

@@ -27,7 +27,6 @@ const API_BASE = typeof window !== 'undefined'
 
 export default function AIReaderChat({ postId, title, excerpt, authorAvatar }: AIReaderChatProps) {
   // Priority: explicit prop (post author) > site owner (admin) > generic fallback.
-  // Also pull options so we can read ai_chat_position later in the file
   // and apply the admin's left/right preference.
   const { owner, options } = useThemeContext();
   const readerRevealed = useReaderScrollReveal();
@@ -209,7 +208,7 @@ export default function AIReaderChat({ postId, title, excerpt, authorAvatar }: A
   // Honour AI 设置 → 聊天配置 → 气泡位置. Was hard-coded right-side
   // even after admins picked left in the dropdown — the option got
   // saved to the DB but the front-end never read it.
-  const positionLeft = (options?.ai_chat_position || '').toLowerCase() === 'left';
+  const positionLeft = false;
   const positionStyle: React.CSSProperties = positionLeft
     ? { left: 24 }
     : { right: 24 };

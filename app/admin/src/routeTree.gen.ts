@@ -14,7 +14,6 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedVideosRouteImport } from './routes/_authenticated/videos'
-import { Route as AuthenticatedUtterlogRouteImport } from './routes/_authenticated/utterlog'
 import { Route as AuthenticatedToolsRouteImport } from './routes/_authenticated/tools'
 import { Route as AuthenticatedThemesRouteImport } from './routes/_authenticated/themes'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -32,7 +31,6 @@ import { Route as AuthenticatedLinksRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedGoodsRouteImport } from './routes/_authenticated/goods'
 import { Route as AuthenticatedGamesRouteImport } from './routes/_authenticated/games'
 import { Route as AuthenticatedFootprintsRouteImport } from './routes/_authenticated/footprints'
-import { Route as AuthenticatedFollowsRouteImport } from './routes/_authenticated/follows'
 import { Route as AuthenticatedFilmsRouteImport } from './routes/_authenticated/films'
 import { Route as AuthenticatedCommentsRouteImport } from './routes/_authenticated/comments'
 import { Route as AuthenticatedBooksRouteImport } from './routes/_authenticated/books'
@@ -40,7 +38,6 @@ import { Route as AuthenticatedBackupRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as AuthenticatedAlbumsRouteImport } from './routes/_authenticated/albums'
 import { Route as AuthenticatedAiSettingsRouteImport } from './routes/_authenticated/ai-settings'
-import { Route as AuthenticatedAiRouteImport } from './routes/_authenticated/ai'
 import { Route as AuthenticatedPostsIndexRouteImport } from './routes/_authenticated/posts/index'
 import { Route as AuthenticatedSystemUpdateRouteImport } from './routes/_authenticated/system_.update'
 import { Route as AuthenticatedPostsCreateRouteImport } from './routes/_authenticated/posts_.create'
@@ -78,11 +75,6 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
 const AuthenticatedVideosRoute = AuthenticatedVideosRouteImport.update({
   id: '/videos',
   path: '/videos',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedUtterlogRoute = AuthenticatedUtterlogRouteImport.update({
-  id: '/utterlog',
-  path: '/utterlog',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedToolsRoute = AuthenticatedToolsRouteImport.update({
@@ -170,11 +162,6 @@ const AuthenticatedFootprintsRoute = AuthenticatedFootprintsRouteImport.update({
   path: '/footprints',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedFollowsRoute = AuthenticatedFollowsRouteImport.update({
-  id: '/follows',
-  path: '/follows',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthenticatedFilmsRoute = AuthenticatedFilmsRouteImport.update({
   id: '/films',
   path: '/films',
@@ -208,11 +195,6 @@ const AuthenticatedAlbumsRoute = AuthenticatedAlbumsRouteImport.update({
 const AuthenticatedAiSettingsRoute = AuthenticatedAiSettingsRouteImport.update({
   id: '/ai-settings',
   path: '/ai-settings',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedAiRoute = AuthenticatedAiRouteImport.update({
-  id: '/ai',
-  path: '/ai',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedPostsIndexRoute = AuthenticatedPostsIndexRouteImport.update({
@@ -300,7 +282,6 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/ai': typeof AuthenticatedAiRoute
   '/ai-settings': typeof AuthenticatedAiSettingsRoute
   '/albums': typeof AuthenticatedAlbumsRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
@@ -308,7 +289,6 @@ export interface FileRoutesByFullPath {
   '/books': typeof AuthenticatedBooksRoute
   '/comments': typeof AuthenticatedCommentsRoute
   '/films': typeof AuthenticatedFilmsRoute
-  '/follows': typeof AuthenticatedFollowsRoute
   '/footprints': typeof AuthenticatedFootprintsRoute
   '/games': typeof AuthenticatedGamesRoute
   '/goods': typeof AuthenticatedGoodsRoute
@@ -326,7 +306,6 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/themes': typeof AuthenticatedThemesRoute
   '/tools': typeof AuthenticatedToolsRoute
-  '/utterlog': typeof AuthenticatedUtterlogRoute
   '/videos': typeof AuthenticatedVideosRoute
   '/ai/logs': typeof AuthenticatedAiLogsRoute
   '/comments/$status': typeof AuthenticatedCommentsStatusRoute
@@ -346,7 +325,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/ai': typeof AuthenticatedAiRoute
   '/ai-settings': typeof AuthenticatedAiSettingsRoute
   '/albums': typeof AuthenticatedAlbumsRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
@@ -354,7 +332,6 @@ export interface FileRoutesByTo {
   '/books': typeof AuthenticatedBooksRoute
   '/comments': typeof AuthenticatedCommentsRoute
   '/films': typeof AuthenticatedFilmsRoute
-  '/follows': typeof AuthenticatedFollowsRoute
   '/footprints': typeof AuthenticatedFootprintsRoute
   '/games': typeof AuthenticatedGamesRoute
   '/goods': typeof AuthenticatedGoodsRoute
@@ -371,7 +348,6 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/themes': typeof AuthenticatedThemesRoute
   '/tools': typeof AuthenticatedToolsRoute
-  '/utterlog': typeof AuthenticatedUtterlogRoute
   '/videos': typeof AuthenticatedVideosRoute
   '/': typeof AuthenticatedIndexRoute
   '/ai/logs': typeof AuthenticatedAiLogsRoute
@@ -394,7 +370,6 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/_authenticated/ai': typeof AuthenticatedAiRoute
   '/_authenticated/ai-settings': typeof AuthenticatedAiSettingsRoute
   '/_authenticated/albums': typeof AuthenticatedAlbumsRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
@@ -402,7 +377,6 @@ export interface FileRoutesById {
   '/_authenticated/books': typeof AuthenticatedBooksRoute
   '/_authenticated/comments': typeof AuthenticatedCommentsRoute
   '/_authenticated/films': typeof AuthenticatedFilmsRoute
-  '/_authenticated/follows': typeof AuthenticatedFollowsRoute
   '/_authenticated/footprints': typeof AuthenticatedFootprintsRoute
   '/_authenticated/games': typeof AuthenticatedGamesRoute
   '/_authenticated/goods': typeof AuthenticatedGoodsRoute
@@ -420,7 +394,6 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/themes': typeof AuthenticatedThemesRoute
   '/_authenticated/tools': typeof AuthenticatedToolsRoute
-  '/_authenticated/utterlog': typeof AuthenticatedUtterlogRoute
   '/_authenticated/videos': typeof AuthenticatedVideosRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/ai_/logs': typeof AuthenticatedAiLogsRoute
@@ -444,7 +417,6 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/reset-password'
-    | '/ai'
     | '/ai-settings'
     | '/albums'
     | '/analytics'
@@ -452,7 +424,6 @@ export interface FileRouteTypes {
     | '/books'
     | '/comments'
     | '/films'
-    | '/follows'
     | '/footprints'
     | '/games'
     | '/goods'
@@ -470,7 +441,6 @@ export interface FileRouteTypes {
     | '/settings'
     | '/themes'
     | '/tools'
-    | '/utterlog'
     | '/videos'
     | '/ai/logs'
     | '/comments/$status'
@@ -490,7 +460,6 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/reset-password'
-    | '/ai'
     | '/ai-settings'
     | '/albums'
     | '/analytics'
@@ -498,7 +467,6 @@ export interface FileRouteTypes {
     | '/books'
     | '/comments'
     | '/films'
-    | '/follows'
     | '/footprints'
     | '/games'
     | '/goods'
@@ -515,7 +483,6 @@ export interface FileRouteTypes {
     | '/settings'
     | '/themes'
     | '/tools'
-    | '/utterlog'
     | '/videos'
     | '/'
     | '/ai/logs'
@@ -537,7 +504,6 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/login'
     | '/reset-password'
-    | '/_authenticated/ai'
     | '/_authenticated/ai-settings'
     | '/_authenticated/albums'
     | '/_authenticated/analytics'
@@ -545,7 +511,6 @@ export interface FileRouteTypes {
     | '/_authenticated/books'
     | '/_authenticated/comments'
     | '/_authenticated/films'
-    | '/_authenticated/follows'
     | '/_authenticated/footprints'
     | '/_authenticated/games'
     | '/_authenticated/goods'
@@ -563,7 +528,6 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/themes'
     | '/_authenticated/tools'
-    | '/_authenticated/utterlog'
     | '/_authenticated/videos'
     | '/_authenticated/'
     | '/_authenticated/ai_/logs'
@@ -623,13 +587,6 @@ declare module '@tanstack/react-router' {
       path: '/videos'
       fullPath: '/videos'
       preLoaderRoute: typeof AuthenticatedVideosRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/utterlog': {
-      id: '/_authenticated/utterlog'
-      path: '/utterlog'
-      fullPath: '/utterlog'
-      preLoaderRoute: typeof AuthenticatedUtterlogRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/tools': {
@@ -751,13 +708,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFootprintsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/follows': {
-      id: '/_authenticated/follows'
-      path: '/follows'
-      fullPath: '/follows'
-      preLoaderRoute: typeof AuthenticatedFollowsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/films': {
       id: '/_authenticated/films'
       path: '/films'
@@ -805,13 +755,6 @@ declare module '@tanstack/react-router' {
       path: '/ai-settings'
       fullPath: '/ai-settings'
       preLoaderRoute: typeof AuthenticatedAiSettingsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/ai': {
-      id: '/_authenticated/ai'
-      path: '/ai'
-      fullPath: '/ai'
-      preLoaderRoute: typeof AuthenticatedAiRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/posts/': {
@@ -931,7 +874,6 @@ const AuthenticatedPostsRouteWithChildren =
   AuthenticatedPostsRoute._addFileChildren(AuthenticatedPostsRouteChildren)
 
 interface AuthenticatedRouteChildren {
-  AuthenticatedAiRoute: typeof AuthenticatedAiRoute
   AuthenticatedAiSettingsRoute: typeof AuthenticatedAiSettingsRoute
   AuthenticatedAlbumsRoute: typeof AuthenticatedAlbumsRoute
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
@@ -939,7 +881,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedBooksRoute: typeof AuthenticatedBooksRoute
   AuthenticatedCommentsRoute: typeof AuthenticatedCommentsRoute
   AuthenticatedFilmsRoute: typeof AuthenticatedFilmsRoute
-  AuthenticatedFollowsRoute: typeof AuthenticatedFollowsRoute
   AuthenticatedFootprintsRoute: typeof AuthenticatedFootprintsRoute
   AuthenticatedGamesRoute: typeof AuthenticatedGamesRoute
   AuthenticatedGoodsRoute: typeof AuthenticatedGoodsRoute
@@ -957,7 +898,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedThemesRoute: typeof AuthenticatedThemesRoute
   AuthenticatedToolsRoute: typeof AuthenticatedToolsRoute
-  AuthenticatedUtterlogRoute: typeof AuthenticatedUtterlogRoute
   AuthenticatedVideosRoute: typeof AuthenticatedVideosRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedAiLogsRoute: typeof AuthenticatedAiLogsRoute
@@ -974,7 +914,6 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAiRoute: AuthenticatedAiRoute,
   AuthenticatedAiSettingsRoute: AuthenticatedAiSettingsRoute,
   AuthenticatedAlbumsRoute: AuthenticatedAlbumsRoute,
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
@@ -982,7 +921,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedBooksRoute: AuthenticatedBooksRoute,
   AuthenticatedCommentsRoute: AuthenticatedCommentsRoute,
   AuthenticatedFilmsRoute: AuthenticatedFilmsRoute,
-  AuthenticatedFollowsRoute: AuthenticatedFollowsRoute,
   AuthenticatedFootprintsRoute: AuthenticatedFootprintsRoute,
   AuthenticatedGamesRoute: AuthenticatedGamesRoute,
   AuthenticatedGoodsRoute: AuthenticatedGoodsRoute,
@@ -1000,7 +938,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedThemesRoute: AuthenticatedThemesRoute,
   AuthenticatedToolsRoute: AuthenticatedToolsRoute,
-  AuthenticatedUtterlogRoute: AuthenticatedUtterlogRoute,
   AuthenticatedVideosRoute: AuthenticatedVideosRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedAiLogsRoute: AuthenticatedAiLogsRoute,

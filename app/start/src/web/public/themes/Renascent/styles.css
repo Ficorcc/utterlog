@@ -2031,7 +2031,6 @@
 
 /* AI 陪读卡片直角化 */
 [data-theme="Renascent"] [class*="ai-reader"],
-[data-theme="Renascent"] .blog-main .ai-chat-bubble,
 [data-theme="Renascent"] .blog-main [data-ai-reader] {
   border-radius: 0 !important;
 }[data-theme="Renascent"] [class*="pagination"] {

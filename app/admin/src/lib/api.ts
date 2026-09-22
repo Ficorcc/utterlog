@@ -324,35 +324,6 @@ export const playlistsApi = {
   import: (server: string, playlistId: string, title: string) => api.post("/playlists/import", { server, playlist_id: playlistId, title }),
 };
 
-// Utterlog Network API
-export const networkApi = {
-  // Network status (auto-registers on first call)
-  status: () => api.get('/network/status'),
-  pushInfo: () => api.post('/network/push-info'),
-
-  // Community feed & sites
-  feed: (params?: { page?: number; per_page?: number }) => api.get('/network/feed', { params }),
-  sites: (params?: { page?: number }) => api.get('/network/sites', { params }),
-
-  // Content subscriptions
-  subscribe: (siteURL: string) => api.post('/network/subscribe', { site_url: siteURL }),
-  unsubscribe: (siteURL: string) => api.post('/network/unsubscribe', { site_url: siteURL }),
-  subscriptions: () => api.get('/network/subscriptions'),
-  pullContent: (siteURL: string, type?: string, since?: string) =>
-    api.get('/network/pull-content', { params: { site_url: siteURL, type, since } }),
-
-  // Publish notifications
-  publishNotify: (postId: number, title: string, contentType?: string) =>
-    api.post('/network/publish-notify', { post_id: postId, title, content_type: contentType || 'post' }),
-
-  // Utterlog ID
-  utterlogProfile: () => api.get('/network/utterlog-profile'),
-  bindUtterlogID: (utterlogId: string, token: string) =>
-    api.post('/network/bind-utterlog-id', { utterlog_id: utterlogId, token }),
-  unbindUtterlogID: () => api.post('/network/unbind-utterlog-id'),
-  oauthAuthorize: () => api.get('/network/oauth/authorize'),
-};
-
 // Extension (Themes / Plugins) API
 export interface ExtensionManifest {
   id: string;

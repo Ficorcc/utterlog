@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback, createContext, useContext, useMemo, type ReactNode } from 'react';
 import {
   Gauge, SquarePen, Plus, Folder, Tag, MonitorPlay, FileText, FilePlus,
-  MessageCircle, MapPin, MessagesSquare, Bot, Users, Link as LinkIcon, Images,
+  MessageCircle, MapPin, MessagesSquare, Bot, Link as LinkIcon, Images,
   GalleryVerticalEnd, Music, ListMusic, Film, Video, BookOpen, Gamepad2,
   ShoppingBag, LineChart, Palette, Plug, Wrench, Database,
-  Settings, User, Globe, Sparkles, ScrollText, SlidersHorizontal, Pencil,
+  Settings, User, ScrollText, SlidersHorizontal, Pencil,
   Clock, Ban, Trash2, UserPen, ChevronUp, ChevronDown, LogOut,
   type LucideIcon,
 } from 'lucide-react';
@@ -56,7 +56,6 @@ const pageTitleMap: Record<string, PageMeta> = {
   '/footprints':     { label: '足迹管理',      en: 'Footprints',      icon: MapPin },
   '/comments':       { label: '评论管理',      en: 'Comments',        icon: MessagesSquare },
   '/comments/ai':    { label: 'AI 评论队列',    en: 'AI Comment Queue', icon: Bot },
-  '/follows':        { label: '关注管理',      en: 'Follows',         icon: Users },
   '/links':          { label: '友链管理',      en: 'Links',           icon: LinkIcon },
   '/media':          { label: '媒体库',        en: 'Media',           icon: Images },
   '/albums':         { label: '相册管理',      en: 'Albums',          icon: GalleryVerticalEnd },
@@ -75,8 +74,6 @@ const pageTitleMap: Record<string, PageMeta> = {
   '/backup':         { label: '备份恢复',      en: 'Backup',          icon: Database },
   '/settings':       { label: '系统设置',      en: 'Settings',        icon: Settings },
   '/profile':        { label: '个人资料',      en: 'Profile',         icon: User },
-  '/utterlog':       { label: 'Utterlog 网络', en: 'Network',         icon: Globe },
-  '/ai':             { label: 'AI 助手',       en: 'AI Assistant',    icon: Sparkles },
   '/ai/logs':        { label: 'AI 调用日志',   en: 'AI Logs',         icon: ScrollText },
   '/ai-settings':    { label: 'AI 设置',       en: 'AI Settings',     icon: SlidersHorizontal },
 };
@@ -235,9 +232,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     pathname === '/films/create' ||
     pathname.startsWith('/films/edit/') ||
     pathname === '/pages/create' ||
-    pathname.startsWith('/pages/edit/') ||
-    pathname === '/ai' ||
-    pathname.startsWith('/ai/');
+    pathname.startsWith('/pages/edit/');
 
   // Wide pages — no max-width cap but still scrollable (unlike fullWidth
   // which hides overflow). Useful for dense list tables whose rightmost

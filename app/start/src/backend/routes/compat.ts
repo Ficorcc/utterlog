@@ -1,12 +1,12 @@
 import { decodeJwt, jwtVerify, SignJWT } from 'jose';
-import { createHash, randomBytes, randomUUID } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { mkdir, rm } from 'node:fs/promises';
 import { isIP } from 'node:net';
 import { dirname, join, posix } from 'node:path';
 import { config, table } from '../config';
 import { exec, intParam, many, nowUnix, one, pageParams } from '../db/helpers';
-import { optionValue, saveOption } from '../db/options';
+import { optionValue } from '../db/options';
 import { createNotification } from '../services/notifications';
 import { assertPublicHttpUrl, normalizePublicHttpUrl } from '../http/public-url';
 import { ephemeral } from '../store/ephemeral';
@@ -1111,89 +1111,6 @@ async function fetchRemoteMetadata(siteUrl: string) {
   return payload?.data || payload;
 }
 
-const utterlogHub = 'https://id.utterlog.com';
-
-function siteFingerprint() {
-  return createHash('sha256').update(`${config.appUrl}:${config.jwtSecret}`).digest('hex');
-}
-
-async function hubRequest(method: string, path: string, body?: unknown) {
-  const siteId = await optionValue('utterlog_site_id', '');
-  const res = await fetch(`${utterlogHub}${path}`, {
-    method,
-    headers: {
-      'content-type': 'application/json',
-      'x-site-fingerprint': siteFingerprint(),
-      ...(siteId ? { 'x-site-id': siteId } : {}),
-    },
-    body: body == null ? undefined : JSON.stringify(body),
-    signal: AbortSignal.timeout(15000),
-  });
-  const payload = await res.json().catch(() => ({}));
-  return { res, payload: payload as any };
-}
-
-async function ensureNetworkRegistered() {
-  const existing = await optionValue('utterlog_site_id', '');
-  const connected = (await optionValue('utterlog_connected', 'false')) === 'true';
-  if (existing && connected) return { site_id: existing, connected: true };
-
-  const metadata = await siteMetadata();
-  const { res, payload } = await hubRequest('POST', '/api/v1/sites/register', {
-    fingerprint: siteFingerprint(),
-    url: config.appUrl,
-    name: metadata.name,
-    description: metadata.description,
-    logo: metadata.logo,
-    protocol: 'utterlog-federation/1.0',
-    admin: metadata.admin,
-  });
-  if (!res.ok) return { site_id: '', connected: false };
-  const siteId = String(payload?.data?.site_id || payload?.site_id || '');
-  if (siteId) await saveOption('utterlog_site_id', siteId);
-  await saveOption('utterlog_connected', 'true');
-  return { site_id: siteId, connected: true };
-}
-
-async function pushNetworkSiteInfo() {
-  const registered = await ensureNetworkRegistered();
-  if (!registered.connected || !registered.site_id) throw new Error('无法连接 Utterlog 网络');
-  const metadata = await siteMetadata();
-  const [postCount, commentCount] = await Promise.all([
-    one<{ count: string }>(`select count(*)::text as count from ${table('posts')} where status = 'publish'`).catch(() => null),
-    one<{ count: string }>(`select count(*)::text as count from ${table('comments')} where status = 'approved'`).catch(() => null),
-  ]);
-  const { res } = await hubRequest('PUT', `/api/v1/sites/${encodeURIComponent(registered.site_id)}`, {
-    site_id: registered.site_id,
-    fingerprint: siteFingerprint(),
-    url: config.appUrl,
-    name: metadata.name,
-    description: metadata.description,
-    logo: metadata.logo,
-    post_count: Number(postCount?.count || 0),
-    comment_count: Number(commentCount?.count || 0),
-  });
-  if (!res.ok) throw new Error(`hub returned HTTP ${res.status}`);
-  return { pushed: true, site_id: registered.site_id };
-}
-
-async function verifyUtterlogIdToken(utterlogId: string, token: string) {
-  const res = await fetch(`${utterlogHub}/api/v1/auth/verify`, {
-    headers: { authorization: `Bearer ${token}` },
-    signal: AbortSignal.timeout(10000),
-  });
-  const payload: any = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error('Utterlog ID 验证失败');
-  const data = payload?.data || payload;
-  if (String(data.utterlog_id || '') !== utterlogId) throw new Error('Utterlog ID 不匹配');
-  return data as Record<string, unknown>;
-}
-
-async function publicFrontendUrl() {
-  const siteUrl = (await optionValue('site_url', config.appUrl)).trim() || config.appUrl;
-  return siteUrl.replace(/\/+$/, '');
-}
-
 export async function networkContentPayload(sp: URLSearchParams) {
   const contentType = sp.get('type') || 'post';
   const since = Number(sp.get('since') || 0);
@@ -2279,163 +2196,6 @@ export async function identifyPassport(input: Record<string, unknown>) {
   if (!payload.success || !data.valid) throw new FederationServiceError(401, 'INVALID_PASSPORT', '身份验证失败');
   return { identified: true, utterlog_id: data.utterlog_id || '', nickname: data.nickname || '', avatar: data.avatar || '',
     email: data.email || '', email_hash: data.email_hash || '', site_url: data.site_url || '', follow_status: '', is_friend_link: false };
-}
-
-export class NetworkServiceError extends Error {
-  constructor(public status: number, public code: string, message: string) {
-    super(message);
-  }
-}
-
-export async function networkStatusPayload() {
-  const registered = await ensureNetworkRegistered().catch(async () => ({ site_id: await optionValue('utterlog_site_id', ''), connected: false }));
-  return { hub: utterlogHub, site_id: registered.site_id, fingerprint: `${siteFingerprint().slice(0, 12)}...`, connected: registered.connected };
-}
-
-export async function pushNetworkInfo() {
-  try { return await pushNetworkSiteInfo(); }
-  catch (error) { throw new NetworkServiceError(502, 'HUB_UNREACHABLE', error instanceof Error ? error.message : '无法连接 Utterlog 中心'); }
-}
-
-export async function networkHubFeed(query: URLSearchParams) {
-  const page = encodeURIComponent(query.get('page') || '1');
-  const perPage = encodeURIComponent(query.get('per_page') || '20');
-  try {
-    const { res, payload } = await hubRequest('GET', `/api/v1/activity?page=${page}&per_page=${perPage}`);
-    return res.ok && payload?.success ? payload.data || { items: [], total: 0 } : { items: [], total: 0, hub_status: 'error' };
-  } catch {
-    return { items: [], total: 0, hub_status: 'offline' };
-  }
-}
-
-export async function networkHubSites(query: URLSearchParams) {
-  try {
-    const { res, payload } = await hubRequest('GET', `/api/v1/sites?page=${encodeURIComponent(query.get('page') || '1')}`);
-    return res.ok && payload?.success ? payload.data || { sites: [], total: 0 } : { sites: [], total: 0 };
-  } catch {
-    return { sites: [], total: 0 };
-  }
-}
-
-export async function subscribeNetworkSite(userId: number, input: Record<string, unknown>) {
-  const siteUrl = normalizedSiteUrl(input.site_url);
-  if (!siteUrl) throw new NetworkServiceError(400, 'VALIDATION_ERROR', 'site_url 不能为空');
-  const meta = await fetchRemoteMetadata(siteUrl).catch(() => ({ name: siteUrl, logo: '', favicon: '' }));
-  const feedUrl = String(input.feed_url || `${siteUrl}/api/v1/feed`);
-  await exec(
-    `insert into ${table('rss_subscriptions')} (user_id, site_url, feed_url, site_name, site_avatar, last_fetched_at, created_at)
-     values ($1,$2,$3,$4,$5,0,$6)
-     on conflict (user_id, feed_url) do update set site_url=$2, site_name=$4, site_avatar=$5`,
-    [userId, siteUrl, feedUrl, meta.name || siteUrl, meta.logo || meta.favicon || '', nowUnix()],
-  );
-  return { subscribed: true, site_name: meta.name || siteUrl, site_logo: meta.logo || '' };
-}
-
-export async function unsubscribeNetworkSite(userId: number, input: Record<string, unknown>) {
-  await exec(`delete from ${table('rss_subscriptions')} where user_id = $1 and site_url = $2`, [userId, normalizedSiteUrl(input.site_url)]);
-  return { unsubscribed: true };
-}
-
-export async function networkSubscriptions(userId: number) {
-  return many<Record<string, unknown>>(
-    `select * from ${table('rss_subscriptions')} where user_id = $1 order by created_at desc`, [userId],
-  ).catch(() => []);
-}
-
-export async function pullNetworkContent(query: URLSearchParams) {
-  const siteUrl = normalizedSiteUrl(query.get('site_url'));
-  if (!siteUrl) throw new NetworkServiceError(400, 'VALIDATION_ERROR', 'site_url 参数不能为空');
-  const safeSiteUrl = await assertPublicHttpUrl(siteUrl);
-  const url = `${safeSiteUrl}/api/v1/network/content?type=${encodeURIComponent(query.get('type') || 'post')}${query.get('since') ? `&since=${encodeURIComponent(query.get('since') || '')}` : ''}`;
-  const payload = await fetchJson<any>(url, 15000).catch((error) => ({ success: false, error: error instanceof Error ? error.message : '拉取内容失败' }));
-  if (payload.success === false) throw new NetworkServiceError(502, 'PULL_FAILED', payload.error || '拉取内容失败');
-  return payload.data || payload;
-}
-
-export async function publishNetworkNotification(input: Record<string, unknown>) {
-  const rows = await many<{ source_site: string }>(
-    `select distinct source_site from ${table('followers')} where coalesce(source_site,'') != ''`,
-  ).catch(() => []);
-  let notified = 0;
-  for (const row of rows) {
-    void assertPublicHttpUrl(row.source_site).then((siteUrl) => fetch(`${siteUrl}/api/v1/federation/webhook`, {
-      method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ type: 'new_content', site: config.appUrl, title: input.title || '', post_id: input.post_id || 0,
-        content_type: input.content_type || 'post' }),
-    })).catch(() => {});
-    notified++;
-  }
-  const siteId = await optionValue('utterlog_site_id', '');
-  if (siteId) {
-    const siteTitle = await optionValue('site_title', 'Utterlog!');
-    void hubRequest('POST', '/api/v1/activity', { site_id: siteId, type: 'new_content', title: input.title || '',
-      content_type: input.content_type || 'post', url: config.appUrl, name: siteTitle || 'Utterlog!' }).catch(() => {});
-  }
-  return { notified };
-}
-
-export async function bindUtterlogId(userId: number, input: Record<string, unknown>) {
-  const utterlogId = String(input.utterlog_id || '').trim();
-  const token = String(input.token || '').trim();
-  if (!utterlogId || !token) throw new NetworkServiceError(400, 'VALIDATION_ERROR', 'utterlog_id 和 token 不能为空');
-  try {
-    const data = await verifyUtterlogIdToken(utterlogId, token);
-    await exec(`update ${table('users')} set utterlog_id = $1, utterlog_avatar = $2, updated_at = $3 where id = $4`,
-      [utterlogId, String(data.avatar || ''), nowUnix(), userId]);
-    return { bound: true, utterlog_id: utterlogId, utterlog_avatar: String(data.avatar || '') };
-  } catch (error) {
-    throw new NetworkServiceError(401, 'INVALID_TOKEN', error instanceof Error ? error.message : 'Utterlog ID 验证失败');
-  }
-}
-
-export async function unbindUtterlogId(userId: number) {
-  await exec(`update ${table('users')} set utterlog_id = '', utterlog_avatar = '', updated_at = $1 where id = $2`, [nowUnix(), userId]).catch(() => {});
-  return { unbound: true };
-}
-
-export async function utterlogProfile(userId: number) {
-  const user = await one<Record<string, unknown>>(
-    `select username, email, nickname, avatar, coalesce(utterlog_id,'') as utterlog_id, coalesce(utterlog_avatar,'') as utterlog_avatar
-     from ${table('users')} where id = $1`, [userId],
-  ).catch(() => null);
-  return { utterlog_id: String(user?.utterlog_id || ''), utterlog_avatar: String(user?.utterlog_avatar || ''),
-    username: String(user?.username || ''), nickname: String(user?.nickname || user?.username || ''), email: String(user?.email || ''),
-    avatar: String(user?.avatar || ''), avatar_url: String(user?.utterlog_avatar || user?.avatar || ''), bound: Boolean(user?.utterlog_id) };
-}
-
-export async function networkOauthAuthorization(userId: number) {
-  const registered = await ensureNetworkRegistered();
-  if (!registered.connected || !registered.site_id) throw new NetworkServiceError(502, 'NOT_CONNECTED', '无法连接 Utterlog 网络');
-  const redirectUri = `${(await publicFrontendUrl()).replace(/\/+$/, '')}/api/v1/network/oauth/callback`;
-  const state = `${Date.now()}-${userId}`;
-  const authUrl = `${utterlogHub}/oauth/authorize?client_id=${encodeURIComponent(registered.site_id)}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}&response_type=code&scope=profile`;
-  return { auth_url: authUrl, url: authUrl, state };
-}
-
-export async function networkOauthCallback(query: URLSearchParams) {
-  const code = String(query.get('code') || '');
-  const state = String(query.get('state') || '');
-  const siteId = await optionValue('utterlog_site_id', '');
-  const frontend = await publicFrontendUrl();
-  const finish = (bound: boolean) => new Response(`<!doctype html><html><body><script>
-    if (window.opener) { window.opener.location.reload(); }
-    window.close();
-    setTimeout(function(){ window.location.href = '${frontend}/admin/utterlog${bound ? '' : '?error=oauth_failed'}'; }, 500);
-  </script><p>${bound ? '绑定成功' : '绑定失败'}，正在关闭...</p></body></html>`, {
-    headers: { 'content-type': 'text/html; charset=utf-8' },
-  });
-  if (!code || !state || !siteId) return finish(false);
-  const { res, payload } = await hubRequest('POST', '/oauth/token', { grant_type: 'authorization_code', code, client_id: siteId,
-    fingerprint: siteFingerprint(), redirect_uri: `${frontend}/api/v1/network/oauth/callback` })
-    .catch(() => ({ res: null as any, payload: null as any }));
-  if (!res?.ok) return finish(false);
-  const data = payload?.data || payload || {};
-  const userId = intParam(state.split('-').at(-1) || '', 0);
-  if (userId > 0) {
-    await exec(`update ${table('users')} set utterlog_id = $1, utterlog_avatar = $2, updated_at = $3 where id = $4`,
-      [String(data.utterlog_id || ''), String(data.avatar || ''), nowUnix(), userId]).catch(() => {});
-  }
-  return finish(true);
 }
 
 export class SocialServiceError extends Error {

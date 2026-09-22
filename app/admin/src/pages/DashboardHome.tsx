@@ -29,7 +29,7 @@ function AnimatedNumber({ value }: { value: number }) {
 
   return <>{display.toLocaleString()}</>;
 }
-import api, { networkApi } from '@/lib/api';
+import api from '@/lib/api';
 import { formatRelativeTime } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import { postUrlOf } from '@/lib/site';
@@ -39,8 +39,6 @@ import { usePageLoading } from '@/layouts/DashboardLayout';
 interface Stats { posts: number; comments: number; links: number; views: number; today: number; words: number; days: number; categories: number; tags: number }
 interface Todo { pending_comments: number; drafts: number; link_requests: number }
 interface RecentPost { id: number; display_id?: number; title: string; slug: string; status: string; created_at: string; published_at?: string | null; view_count?: number; comment_count?: number; categories?: { id: number; name: string; slug: string; icon?: string }[] }
-interface NetworkActivity { type: string; site: string; site_name: string; title: string; content_type: string; created_at: string }
-interface NetworkSite { name: string; url: string; logo: string; description: string }
 
 // Category icon is user data (FA class); render it, else a Lucide fallback.
 function CatIcon({ icon, className }: { icon?: string; className?: string }) {
@@ -64,9 +62,6 @@ export default function DashboardPage() {
     return () => setPageLoading(false);
   }, [loading, setPageLoading]);
   const [sparkline, setSparkline] = useState<{ date: string; visits: number; visitors: number; weekday: string }[]>([]);
-  const [networkConnected, setNetworkConnected] = useState(false);
-  const [networkActivity, setNetworkActivity] = useState<NetworkActivity[]>([]);
-  const [networkSites, setNetworkSites] = useState<NetworkSite[]>([]);
 
   useEffect(() => { fetchStats(); }, []);
 
@@ -104,19 +99,6 @@ export default function DashboardPage() {
       setRecentComments((bootstrap.recent_comments || []).filter((c: any) => c.id != null).slice(0, 5));
     } catch { /* interceptor handles expired sessions */ } finally { setLoading(false); }
 
-    try {
-      const nr: any = await networkApi.status();
-      const nd = nr.data || nr;
-      setNetworkConnected(nd.connected || false);
-      if (nd.connected) {
-        const [feedRes, sitesRes]: any = await Promise.all([
-          networkApi.feed({ per_page: 5 }).catch(() => ({ data: { items: [] } })),
-          networkApi.sites({ page: 1 }).catch(() => ({ data: { sites: [] } })),
-        ]);
-        setNetworkActivity((feedRes.data?.items || feedRes.items || []).slice(0, 5));
-        setNetworkSites((sitesRes.data?.sites || sitesRes.sites || []).slice(0, 4));
-      }
-    } catch {}
   };
 
   const openPostPage = (post: any) => window.open(postUrlOf(post), '_blank', 'noopener,noreferrer');
@@ -404,91 +386,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 未连接社区时只留一条窄提示——原来的整块空态 + CTA 在概览页上太占版面 */}
-      {!networkConnected ? (
-        <button
-          type="button"
-          onClick={() => navigate('/utterlog')}
-          className="flex w-full items-center gap-3 border border-border bg-card px-5 py-3 text-left transition-colors hover:border-primary"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
-            <path d="M12 0c9.601 0 12 2.399 12 12 0 9.601-2.399 12-12 12-9.601 0-12-2.399-12-12C0 2.399 2.399 0 12 0z" fill="var(--primary)" />
-            <path d="M17.008 17.29H11.44a5.57 5.57 0 0 1-5.562-5.567A5.57 5.57 0 0 1 11.44 6.16a5.57 5.57 0 0 1 5.567 5.563Z" fill="white" />
-          </svg>
-          <span className="text-xs-plus font-medium text-foreground">{t('admin.dashboard.joinNetwork', '加入 Utterlog 去中心化网络')}</span>
-          <span className="hidden text-xs text-muted-foreground sm:inline">
-            {t('admin.dashboard.networkDescription', '连接到 Utterlog 社区，与其他独立博客互相订阅、共享内容、交流互动')}
-          </span>
-          <span className="ml-auto inline-flex shrink-0 items-center gap-1 text-xs font-medium text-primary">
-            {t('admin.common.connect', '连接')} <ArrowRight className="size-3.5" />
-          </span>
-        </button>
-      ) : (
-      <div className="overflow-hidden border border-border bg-card">
-        <div className="flex items-center justify-between border-b border-border px-5 py-4">
-          <div className="flex items-center gap-2.5">
-            <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
-              <path d="M12 0c9.601 0 12 2.399 12 12 0 9.601-2.399 12-12 12-9.601 0-12-2.399-12-12C0 2.399 2.399 0 12 0z" fill="var(--primary)" />
-              <path d="M17.008 17.29H11.44a5.57 5.57 0 0 1-5.562-5.567A5.57 5.57 0 0 1 11.44 6.16a5.57 5.57 0 0 1 5.567 5.563Z" fill="white" />
-            </svg>
-            <h2 className="text-sm-plus font-semibold text-foreground">{t('admin.dashboard.community', 'Utterlog 社区')}</h2>
-            {/* 直角，跟「已发布」那类状态徽章一致；rounded-full 只留给头像、
-                开关和数字计数气泡。 */}
-            <span className={`px-2 py-0.5 text-2xs font-semibold ${networkConnected ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-muted text-muted-foreground'}`}>
-              {networkConnected ? t('admin.common.connected', '已连接') : t('admin.common.disconnected', '未连接')}
-            </span>
-          </div>
-          <ViewAll to="/utterlog" label={networkConnected ? t('admin.common.manage', '管理') : t('admin.common.connect', '连接')} />
-        </div>
-
-        {/* 不再撑最小高度：两栏都空时（刚连上、还没有动态）原来会留出
-            200px 空白，看起来像加载失败。 */}
-        {(
-          <div className="grid grid-cols-2">
-            <div className="border-r border-border">
-              <div className="border-b border-border px-5 py-3">
-                <span className="text-xs font-semibold text-muted-foreground">{t('admin.dashboard.networkActivity', '网络动态')}</span>
-              </div>
-              {networkActivity.length === 0 ? (
-                <div className="px-5 py-6 text-center text-xs-plus text-muted-foreground">{t('admin.dashboard.noNetworkActivity', '暂无社区动态')}</div>
-              ) : (
-                networkActivity.map((item, idx) => (
-                  <div key={idx} className={`px-5 py-2.5 ${idx < networkActivity.length - 1 ? 'border-b border-border' : ''}`}>
-                    <p className="truncate text-xs-plus text-foreground">
-                      <span className="font-semibold">{item.site_name}</span>
-                      {' '}{t('admin.dashboard.publishedContent', '发布了{type}', { type: item.content_type === 'moment' ? t('admin.nav.moments', '说说') : t('admin.nav.posts', '文章') })}
-                    </p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">{item.title}</p>
-                  </div>
-                ))
-              )}
-            </div>
-            <div>
-              <div className="border-b border-border px-5 py-3">
-                <span className="text-xs font-semibold text-muted-foreground">{t('admin.dashboard.newSites', '新加入站点')}</span>
-              </div>
-              {networkSites.length === 0 ? (
-                <div className="px-5 py-6 text-center text-xs-plus text-muted-foreground">{t('admin.dashboard.noNewSites', '暂无新站点')}</div>
-              ) : (
-                networkSites.map((site, idx) => (
-                  <div key={idx} className={`flex items-center gap-2.5 px-5 py-2.5 ${idx < networkSites.length - 1 ? 'border-b border-border' : ''}`}>
-                    {site.logo ? (
-                      <img src={site.logo} alt="" className="size-7 rounded object-cover" />
-                    ) : (
-                      <div className="flex size-7 items-center justify-center rounded bg-muted text-xs font-bold text-primary">{(site.name || '?')[0]}</div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-xs-plus font-medium text-foreground">{site.name}</p>
-                      <p className="truncate text-2xs text-muted-foreground">{site.url}</p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-      )}
     </div>
   );
 }

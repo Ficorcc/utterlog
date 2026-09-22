@@ -119,7 +119,6 @@ import { Route as ApiV1NotificationsUnreadCountRouteImport } from './routes/api/
 import { Route as ApiV1NotificationsStreamRouteImport } from './routes/api/v1/notifications/stream'
 import { Route as ApiV1NotificationsReadAllRouteImport } from './routes/api/v1/notifications/read-all'
 import { Route as ApiV1NotificationsIdRouteImport } from './routes/api/v1/notifications/$id'
-import { Route as ApiV1NetworkActionRouteImport } from './routes/api/v1/network/$action'
 import { Route as ApiV1MusicSearchRouteImport } from './routes/api/v1/music/search'
 import { Route as ApiV1MomentsRecentTagsRouteImport } from './routes/api/v1/moments/recent-tags'
 import { Route as ApiV1MomentsIdRouteImport } from './routes/api/v1/moments/$id'
@@ -187,7 +186,6 @@ import { Route as ApiV1PostsIdCommentsRouteImport } from './routes/api/v1/posts/
 import { Route as ApiV1PluginsIdActionRouteImport } from './routes/api/v1/plugins/$id/$action'
 import { Route as ApiV1PlaylistsIdSongsRouteImport } from './routes/api/v1/playlists/$id/songs'
 import { Route as ApiV1NotificationsIdReadRouteImport } from './routes/api/v1/notifications/$id/read'
-import { Route as ApiV1NetworkOauthActionRouteImport } from './routes/api/v1/network/oauth/$action'
 import { Route as ApiV1CommentsIdReplyRouteImport } from './routes/api/v1/comments/$id/reply'
 import { Route as ApiV1CommentsIdEditRouteImport } from './routes/api/v1/comments/$id/edit'
 import { Route as ApiV1CommentsIdApproveRouteImport } from './routes/api/v1/comments/$id/approve'
@@ -196,7 +194,6 @@ import { Route as ApiV1AuthTotpActionRouteImport } from './routes/api/v1/auth/to
 import { Route as ApiV1AuthPasskeyAvailableRouteImport } from './routes/api/v1/auth/passkey/available'
 import { Route as ApiV1AlbumsIdPhotosRouteImport } from './routes/api/v1/albums/$id/photos'
 import { Route as ApiV1AiProvidersIdRouteImport } from './routes/api/v1/ai/providers/$id'
-import { Route as ApiV1AiConversationsIdRouteImport } from './routes/api/v1/ai/conversations/$id'
 import { Route as ApiV1AdminSystemActionRouteImport } from './routes/api/v1/admin/system/$action'
 import { Route as ApiV1AdminFootprintsPlacesRouteImport } from './routes/api/v1/admin/footprints/places'
 import { Route as ApiV1AdminFootprintsGeocodeRouteImport } from './routes/api/v1/admin/footprints/geocode'
@@ -770,11 +767,6 @@ const ApiV1NotificationsIdRoute = ApiV1NotificationsIdRouteImport.update({
   path: '/api/v1/notifications/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1NetworkActionRoute = ApiV1NetworkActionRouteImport.update({
-  id: '/api/v1/network/$action',
-  path: '/api/v1/network/$action',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiV1MusicSearchRoute = ApiV1MusicSearchRouteImport.update({
   id: '/api/v1/music/search',
   path: '/api/v1/music/search',
@@ -1118,11 +1110,6 @@ const ApiV1NotificationsIdReadRoute =
     path: '/read',
     getParentRoute: () => ApiV1NotificationsIdRoute,
   } as any)
-const ApiV1NetworkOauthActionRoute = ApiV1NetworkOauthActionRouteImport.update({
-  id: '/api/v1/network/oauth/$action',
-  path: '/api/v1/network/oauth/$action',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiV1CommentsIdReplyRoute = ApiV1CommentsIdReplyRouteImport.update({
   id: '/reply',
   path: '/reply',
@@ -1164,11 +1151,6 @@ const ApiV1AiProvidersIdRoute = ApiV1AiProvidersIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => ApiV1AiProvidersRoute,
-} as any)
-const ApiV1AiConversationsIdRoute = ApiV1AiConversationsIdRouteImport.update({
-  id: '/api/v1/ai/conversations/$id',
-  path: '/api/v1/ai/conversations/$id',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1AdminSystemActionRoute = ApiV1AdminSystemActionRouteImport.update({
   id: '/api/v1/admin/system/$action',
@@ -1382,7 +1364,6 @@ export interface FileRoutesByFullPath {
   '/api/v1/moments/$id': typeof ApiV1MomentsIdRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/music/search': typeof ApiV1MusicSearchRoute
-  '/api/v1/network/$action': typeof ApiV1NetworkActionRoute
   '/api/v1/notifications/$id': typeof ApiV1NotificationsIdRouteWithChildren
   '/api/v1/notifications/read-all': typeof ApiV1NotificationsReadAllRoute
   '/api/v1/notifications/stream': typeof ApiV1NotificationsStreamRoute
@@ -1435,7 +1416,6 @@ export interface FileRoutesByFullPath {
   '/api/v1/admin/footprints/geocode': typeof ApiV1AdminFootprintsGeocodeRoute
   '/api/v1/admin/footprints/places': typeof ApiV1AdminFootprintsPlacesRoute
   '/api/v1/admin/system/$action': typeof ApiV1AdminSystemActionRoute
-  '/api/v1/ai/conversations/$id': typeof ApiV1AiConversationsIdRoute
   '/api/v1/ai/providers/$id': typeof ApiV1AiProvidersIdRoute
   '/api/v1/albums/$id/photos': typeof ApiV1AlbumsIdPhotosRouteWithChildren
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
@@ -1444,7 +1424,6 @@ export interface FileRoutesByFullPath {
   '/api/v1/comments/$id/approve': typeof ApiV1CommentsIdApproveRoute
   '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
   '/api/v1/comments/$id/reply': typeof ApiV1CommentsIdReplyRoute
-  '/api/v1/network/oauth/$action': typeof ApiV1NetworkOauthActionRoute
   '/api/v1/notifications/$id/read': typeof ApiV1NotificationsIdReadRoute
   '/api/v1/playlists/$id/songs': typeof ApiV1PlaylistsIdSongsRoute
   '/api/v1/plugins/$id/$action': typeof ApiV1PluginsIdActionRoute
@@ -1588,7 +1567,6 @@ export interface FileRoutesByTo {
   '/api/v1/moments/$id': typeof ApiV1MomentsIdRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/music/search': typeof ApiV1MusicSearchRoute
-  '/api/v1/network/$action': typeof ApiV1NetworkActionRoute
   '/api/v1/notifications/$id': typeof ApiV1NotificationsIdRouteWithChildren
   '/api/v1/notifications/read-all': typeof ApiV1NotificationsReadAllRoute
   '/api/v1/notifications/stream': typeof ApiV1NotificationsStreamRoute
@@ -1641,7 +1619,6 @@ export interface FileRoutesByTo {
   '/api/v1/admin/footprints/geocode': typeof ApiV1AdminFootprintsGeocodeRoute
   '/api/v1/admin/footprints/places': typeof ApiV1AdminFootprintsPlacesRoute
   '/api/v1/admin/system/$action': typeof ApiV1AdminSystemActionRoute
-  '/api/v1/ai/conversations/$id': typeof ApiV1AiConversationsIdRoute
   '/api/v1/ai/providers/$id': typeof ApiV1AiProvidersIdRoute
   '/api/v1/albums/$id/photos': typeof ApiV1AlbumsIdPhotosRouteWithChildren
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
@@ -1650,7 +1627,6 @@ export interface FileRoutesByTo {
   '/api/v1/comments/$id/approve': typeof ApiV1CommentsIdApproveRoute
   '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
   '/api/v1/comments/$id/reply': typeof ApiV1CommentsIdReplyRoute
-  '/api/v1/network/oauth/$action': typeof ApiV1NetworkOauthActionRoute
   '/api/v1/notifications/$id/read': typeof ApiV1NotificationsIdReadRoute
   '/api/v1/playlists/$id/songs': typeof ApiV1PlaylistsIdSongsRoute
   '/api/v1/plugins/$id/$action': typeof ApiV1PluginsIdActionRoute
@@ -1795,7 +1771,6 @@ export interface FileRoutesById {
   '/api/v1/moments/$id': typeof ApiV1MomentsIdRoute
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/music/search': typeof ApiV1MusicSearchRoute
-  '/api/v1/network/$action': typeof ApiV1NetworkActionRoute
   '/api/v1/notifications/$id': typeof ApiV1NotificationsIdRouteWithChildren
   '/api/v1/notifications/read-all': typeof ApiV1NotificationsReadAllRoute
   '/api/v1/notifications/stream': typeof ApiV1NotificationsStreamRoute
@@ -1848,7 +1823,6 @@ export interface FileRoutesById {
   '/api/v1/admin/footprints/geocode': typeof ApiV1AdminFootprintsGeocodeRoute
   '/api/v1/admin/footprints/places': typeof ApiV1AdminFootprintsPlacesRoute
   '/api/v1/admin/system/$action': typeof ApiV1AdminSystemActionRoute
-  '/api/v1/ai/conversations/$id': typeof ApiV1AiConversationsIdRoute
   '/api/v1/ai/providers/$id': typeof ApiV1AiProvidersIdRoute
   '/api/v1/albums/$id/photos': typeof ApiV1AlbumsIdPhotosRouteWithChildren
   '/api/v1/auth/passkey/available': typeof ApiV1AuthPasskeyAvailableRoute
@@ -1857,7 +1831,6 @@ export interface FileRoutesById {
   '/api/v1/comments/$id/approve': typeof ApiV1CommentsIdApproveRoute
   '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
   '/api/v1/comments/$id/reply': typeof ApiV1CommentsIdReplyRoute
-  '/api/v1/network/oauth/$action': typeof ApiV1NetworkOauthActionRoute
   '/api/v1/notifications/$id/read': typeof ApiV1NotificationsIdReadRoute
   '/api/v1/playlists/$id/songs': typeof ApiV1PlaylistsIdSongsRoute
   '/api/v1/plugins/$id/$action': typeof ApiV1PluginsIdActionRoute
@@ -2003,7 +1976,6 @@ export interface FileRouteTypes {
     | '/api/v1/moments/$id'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/music/search'
-    | '/api/v1/network/$action'
     | '/api/v1/notifications/$id'
     | '/api/v1/notifications/read-all'
     | '/api/v1/notifications/stream'
@@ -2056,7 +2028,6 @@ export interface FileRouteTypes {
     | '/api/v1/admin/footprints/geocode'
     | '/api/v1/admin/footprints/places'
     | '/api/v1/admin/system/$action'
-    | '/api/v1/ai/conversations/$id'
     | '/api/v1/ai/providers/$id'
     | '/api/v1/albums/$id/photos'
     | '/api/v1/auth/passkey/available'
@@ -2065,7 +2036,6 @@ export interface FileRouteTypes {
     | '/api/v1/comments/$id/approve'
     | '/api/v1/comments/$id/edit'
     | '/api/v1/comments/$id/reply'
-    | '/api/v1/network/oauth/$action'
     | '/api/v1/notifications/$id/read'
     | '/api/v1/playlists/$id/songs'
     | '/api/v1/plugins/$id/$action'
@@ -2209,7 +2179,6 @@ export interface FileRouteTypes {
     | '/api/v1/moments/$id'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/music/search'
-    | '/api/v1/network/$action'
     | '/api/v1/notifications/$id'
     | '/api/v1/notifications/read-all'
     | '/api/v1/notifications/stream'
@@ -2262,7 +2231,6 @@ export interface FileRouteTypes {
     | '/api/v1/admin/footprints/geocode'
     | '/api/v1/admin/footprints/places'
     | '/api/v1/admin/system/$action'
-    | '/api/v1/ai/conversations/$id'
     | '/api/v1/ai/providers/$id'
     | '/api/v1/albums/$id/photos'
     | '/api/v1/auth/passkey/available'
@@ -2271,7 +2239,6 @@ export interface FileRouteTypes {
     | '/api/v1/comments/$id/approve'
     | '/api/v1/comments/$id/edit'
     | '/api/v1/comments/$id/reply'
-    | '/api/v1/network/oauth/$action'
     | '/api/v1/notifications/$id/read'
     | '/api/v1/playlists/$id/songs'
     | '/api/v1/plugins/$id/$action'
@@ -2415,7 +2382,6 @@ export interface FileRouteTypes {
     | '/api/v1/moments/$id'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/music/search'
-    | '/api/v1/network/$action'
     | '/api/v1/notifications/$id'
     | '/api/v1/notifications/read-all'
     | '/api/v1/notifications/stream'
@@ -2468,7 +2434,6 @@ export interface FileRouteTypes {
     | '/api/v1/admin/footprints/geocode'
     | '/api/v1/admin/footprints/places'
     | '/api/v1/admin/system/$action'
-    | '/api/v1/ai/conversations/$id'
     | '/api/v1/ai/providers/$id'
     | '/api/v1/albums/$id/photos'
     | '/api/v1/auth/passkey/available'
@@ -2477,7 +2442,6 @@ export interface FileRouteTypes {
     | '/api/v1/comments/$id/approve'
     | '/api/v1/comments/$id/edit'
     | '/api/v1/comments/$id/reply'
-    | '/api/v1/network/oauth/$action'
     | '/api/v1/notifications/$id/read'
     | '/api/v1/playlists/$id/songs'
     | '/api/v1/plugins/$id/$action'
@@ -2615,7 +2579,6 @@ export interface RootRouteChildren {
   ApiV1MomentsIdRoute: typeof ApiV1MomentsIdRoute
   ApiV1MomentsRecentTagsRoute: typeof ApiV1MomentsRecentTagsRoute
   ApiV1MusicSearchRoute: typeof ApiV1MusicSearchRoute
-  ApiV1NetworkActionRoute: typeof ApiV1NetworkActionRoute
   ApiV1NotificationsIdRoute: typeof ApiV1NotificationsIdRouteWithChildren
   ApiV1NotificationsReadAllRoute: typeof ApiV1NotificationsReadAllRoute
   ApiV1NotificationsStreamRoute: typeof ApiV1NotificationsStreamRoute
@@ -2661,12 +2624,10 @@ export interface RootRouteChildren {
   ApiV1AdminFootprintsGeocodeRoute: typeof ApiV1AdminFootprintsGeocodeRoute
   ApiV1AdminFootprintsPlacesRoute: typeof ApiV1AdminFootprintsPlacesRoute
   ApiV1AdminSystemActionRoute: typeof ApiV1AdminSystemActionRoute
-  ApiV1AiConversationsIdRoute: typeof ApiV1AiConversationsIdRoute
   ApiV1AlbumsIdPhotosRoute: typeof ApiV1AlbumsIdPhotosRouteWithChildren
   ApiV1AuthPasskeyAvailableRoute: typeof ApiV1AuthPasskeyAvailableRoute
   ApiV1AuthTotpActionRoute: typeof ApiV1AuthTotpActionRoute
   ApiV1BackupDownloadFilenameRoute: typeof ApiV1BackupDownloadFilenameRoute
-  ApiV1NetworkOauthActionRoute: typeof ApiV1NetworkOauthActionRoute
   ApiV1PlaylistsIdSongsRoute: typeof ApiV1PlaylistsIdSongsRoute
   ApiV1PublicAlbumsIdRoute: typeof ApiV1PublicAlbumsIdRoute
   ApiV1SyncPlatformActionRoute: typeof ApiV1SyncPlatformActionRoute
@@ -3453,13 +3414,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1NotificationsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/network/$action': {
-      id: '/api/v1/network/$action'
-      path: '/api/v1/network/$action'
-      fullPath: '/api/v1/network/$action'
-      preLoaderRoute: typeof ApiV1NetworkActionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/v1/music/search': {
       id: '/api/v1/music/search'
       path: '/api/v1/music/search'
@@ -3929,13 +3883,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1NotificationsIdReadRouteImport
       parentRoute: typeof ApiV1NotificationsIdRoute
     }
-    '/api/v1/network/oauth/$action': {
-      id: '/api/v1/network/oauth/$action'
-      path: '/api/v1/network/oauth/$action'
-      fullPath: '/api/v1/network/oauth/$action'
-      preLoaderRoute: typeof ApiV1NetworkOauthActionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/v1/comments/$id/reply': {
       id: '/api/v1/comments/$id/reply'
       path: '/reply'
@@ -3991,13 +3938,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/v1/ai/providers/$id'
       preLoaderRoute: typeof ApiV1AiProvidersIdRouteImport
       parentRoute: typeof ApiV1AiProvidersRoute
-    }
-    '/api/v1/ai/conversations/$id': {
-      id: '/api/v1/ai/conversations/$id'
-      path: '/api/v1/ai/conversations/$id'
-      fullPath: '/api/v1/ai/conversations/$id'
-      preLoaderRoute: typeof ApiV1AiConversationsIdRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/api/v1/admin/system/$action': {
       id: '/api/v1/admin/system/$action'
@@ -4511,7 +4451,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1MomentsIdRoute: ApiV1MomentsIdRoute,
   ApiV1MomentsRecentTagsRoute: ApiV1MomentsRecentTagsRoute,
   ApiV1MusicSearchRoute: ApiV1MusicSearchRoute,
-  ApiV1NetworkActionRoute: ApiV1NetworkActionRoute,
   ApiV1NotificationsIdRoute: ApiV1NotificationsIdRouteWithChildren,
   ApiV1NotificationsReadAllRoute: ApiV1NotificationsReadAllRoute,
   ApiV1NotificationsStreamRoute: ApiV1NotificationsStreamRoute,
@@ -4557,12 +4496,10 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1AdminFootprintsGeocodeRoute: ApiV1AdminFootprintsGeocodeRoute,
   ApiV1AdminFootprintsPlacesRoute: ApiV1AdminFootprintsPlacesRoute,
   ApiV1AdminSystemActionRoute: ApiV1AdminSystemActionRoute,
-  ApiV1AiConversationsIdRoute: ApiV1AiConversationsIdRoute,
   ApiV1AlbumsIdPhotosRoute: ApiV1AlbumsIdPhotosRouteWithChildren,
   ApiV1AuthPasskeyAvailableRoute: ApiV1AuthPasskeyAvailableRoute,
   ApiV1AuthTotpActionRoute: ApiV1AuthTotpActionRoute,
   ApiV1BackupDownloadFilenameRoute: ApiV1BackupDownloadFilenameRoute,
-  ApiV1NetworkOauthActionRoute: ApiV1NetworkOauthActionRoute,
   ApiV1PlaylistsIdSongsRoute: ApiV1PlaylistsIdSongsRoute,
   ApiV1PublicAlbumsIdRoute: ApiV1PublicAlbumsIdRoute,
   ApiV1SyncPlatformActionRoute: ApiV1SyncPlatformActionRoute,

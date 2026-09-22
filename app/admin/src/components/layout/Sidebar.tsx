@@ -26,9 +26,7 @@ import { PlayIcon } from '@/components/ui/play';
 import { PlugZapIcon } from '@/components/ui/plug-zap';
 import { SettingsIcon } from '@/components/ui/settings';
 import { SlidersHorizontalIcon } from '@/components/ui/sliders-horizontal';
-import { SparklesIcon } from '@/components/ui/sparkles';
 import { SquarePenIcon } from '@/components/ui/square-pen';
-import { UsersIcon } from '@/components/ui/users';
 import { WrenchIcon } from '@/components/ui/wrench';
 import { NavLink } from '@/lib/router';
 import SystemStatusPanel from './SystemStatusPanel';
@@ -68,7 +66,6 @@ const menuItems: MenuItem[] = [
       { to: '/goods', label: '好物', icon: CartIcon },
     ],
   },
-  { to: '/follows', icon: UsersIcon, label: '关注', sub: 'Follows' },
   {
     to: '/comments', icon: MessageSquareIcon, label: '评论', sub: 'Comments',
     children: [
@@ -92,7 +89,6 @@ const menuItems: MenuItem[] = [
 ];
 
 const aiMenuItems: MenuItem[] = [
-  { to: '/ai', icon: SparklesIcon, label: 'AI 助手', sub: 'Assistant' },
   { to: '/ai-settings', icon: SlidersHorizontalIcon, label: 'AI 设置', sub: 'AI Settings' },
 ];
 
@@ -111,7 +107,6 @@ const navKeys: Record<string, string> = {
   '/books': 'admin.nav.books',
   '/games': 'admin.nav.games',
   '/goods': 'admin.nav.goods',
-  '/follows': 'admin.nav.follows',
   '/comments': 'admin.nav.comments',
   '/comments/ai': 'admin.nav.aiCommentQueue',
   '/links': 'admin.nav.links',
@@ -122,9 +117,7 @@ const navKeys: Record<string, string> = {
   '/plugins': 'admin.nav.plugins',
   '/tools': 'admin.nav.tools',
   '/settings': 'admin.nav.settings',
-  '/ai': 'admin.nav.aiAssistant',
   '/ai-settings': 'admin.nav.aiSettings',
-  '/utterlog': 'admin.nav.utterlogCenter',
 };
 
 interface Props {
@@ -308,39 +301,6 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
         )}
         {aiMenuItems.map(renderMenuItem)}
 
-        {/* Utterlog Network */}
-        <div className="border-t border-border my-1.5" />
-        {!collapsed && (
-          <p className="font-semibold tracking-[0.5px] text-muted-foreground text-2xs py-1 px-3">
-            Utterlog
-          </p>
-        )}
-        <NavLink
-          to="/utterlog"
-          className="block no-underline"
-          title={collapsed ? t('admin.nav.utterlogCenter', 'Utterlog 中心') : undefined}
-        >
-          {({ isActive }) => (
-            <span
-              className={cn(
-                'flex h-10 items-center gap-2.5 border-l-2 px-3 text-sm',
-                isActive ? 'border-primary bg-muted text-primary' : 'border-transparent text-muted-foreground',
-                collapsed ? 'justify-center' : 'justify-start',
-              )}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
-                <path d="M12 0c9.601 0 12 2.399 12 12 0 9.601-2.399 12-12 12-9.601 0-12-2.399-12-12C0 2.399 2.399 0 12 0z" className={isActive ? 'fill-primary' : 'fill-muted-foreground'} />
-                <path d="M17.008 17.29H11.44a5.57 5.57 0 0 1-5.562-5.567A5.57 5.57 0 0 1 11.44 6.16a5.57 5.57 0 0 1 5.567 5.563Z" fill="white" />
-              </svg>
-              {!collapsed && (
-                <span className="flex items-baseline gap-1.5">
-                  {t('admin.nav.utterlogCenter', 'Utterlog 中心')}
-                  <span className="text-3xs font-normal text-muted-foreground">Network</span>
-                </span>
-              )}
-            </span>
-          )}
-        </NavLink>
       </nav>
 
       {/* System status panel (CPU / Memory / Disk / Uptime) */}

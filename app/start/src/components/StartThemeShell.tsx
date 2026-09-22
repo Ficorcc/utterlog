@@ -6,7 +6,6 @@ import { getThemeComponents } from '@/lib/theme';
 import { SlotFooter, SlotHead } from '@/lib/slots';
 import PageViewTracker from '@/components/blog/PageViewTracker';
 import NavigationProgress from '@/components/blog/NavigationProgress';
-import AIChatBubble from '@/components/blog/AIChatBubble';
 import { NavigationProvider } from '@/lib/navigation';
 import { useRouterState } from '@tanstack/react-router';
 
@@ -37,7 +36,6 @@ export function StartThemeShell({
               {children}
             </ThemeLayout>
           </Suspense>
-          <AIChatBubble />
           <SlotFooter options={ctx.options} />
         </ThemeProvider>
       </Providers>
