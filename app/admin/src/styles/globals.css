@@ -1,4 +1,15 @@
 @import "tailwindcss";
+
+/* Keep tab navigation scrollable without inheriting the global scrollbar. */
+.settings-tab-nav {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.settings-tab-nav::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
 /* Rombo tailwindcss-motion：纯编译期插件，只产 CSS 工具类，不带 JS 运行时。
    提供 motion-{translate,scale,opacity,…}-{in,loop} 一族动画工具类，供
    Rombo 那套 data-tea-motion-icon 图标直接使用。注意插件没有 draw-in，

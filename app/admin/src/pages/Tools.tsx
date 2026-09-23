@@ -134,7 +134,7 @@ export default function ToolsPage({ initialTab = 'wp-sync' }: { initialTab?: Too
   return (
     <div>
       {/* Tabs */}
-      <div className="mb-5 flex gap-0 overflow-x-auto border-b border-border">
+      <div className="settings-tab-nav mb-5 flex gap-0 overflow-x-auto border-b border-border">
         {tabs.map(tab => (
           <button
             key={tab.key}

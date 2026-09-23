@@ -479,7 +479,7 @@ export default function SettingsPage() {
             data-[selected]: 与 Base UI 实际输出的 aria-selected 对不上，
             激活样式一直没生效。窄屏横向滚动而不是换行，九个 tab 换行会把
             表单顶下去半屏。 */}
-        <TabsList className="flex h-auto w-full flex-nowrap justify-start gap-0.5 overflow-x-auto rounded-none border-b border-border bg-transparent p-0 text-muted-foreground [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <TabsList className="settings-tab-nav flex h-auto w-full flex-nowrap justify-start gap-0.5 overflow-x-auto rounded-none border-b border-border bg-transparent p-0 text-muted-foreground">
           {tabs.map((tab) => {
             const selected = activeTab === tab.id || (activeTab === 'plugins' && tab.id === 'tools');
             return (
