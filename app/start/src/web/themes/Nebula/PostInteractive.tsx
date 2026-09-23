@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import AIReaderChat from '@/components/blog/AIReaderChat';
 import CommentList from '@/components/blog/CommentList';
 
 export function CommentCount({ initial }: { initial: number }) {
@@ -39,7 +38,7 @@ export function CommentSectionLive({ postId, title, excerpt, authorAvatar }: Com
           }
         }}
       />
-      <AIReaderChat postId={postId} title={title || ''} excerpt={excerpt || ''} authorAvatar={authorAvatar} />
+
     </section>
   );
 }

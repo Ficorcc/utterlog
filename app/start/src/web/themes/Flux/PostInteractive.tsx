@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import CommentList from './CommentList';
-import AIReaderChat from './AIReaderChat';
 
 export function CommentCount({ initial }: { initial: number }) {
   // 通过 window event 监听评论数变化
@@ -27,7 +26,7 @@ export function CommentSection({ postId, title, excerpt, authorAvatar }: { postI
           }
         }}
       />
-      <AIReaderChat postId={postId} title={title} excerpt={excerpt} authorAvatar={authorAvatar} />
+
     </div>
   );
 }

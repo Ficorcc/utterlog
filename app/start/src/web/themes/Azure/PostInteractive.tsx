@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import CommentList from './CommentList';
-import AIReaderChat from './AIReaderChat';
 
 export function CommentCount({ initial }: { initial: number }) {
   const [count, setCount] = useState(initial);
@@ -39,7 +38,7 @@ export function CommentSectionLive({ postId, title, excerpt, authorAvatar }: Com
           }
         }}
       />
-      <AIReaderChat postId={postId} title={title} excerpt={excerpt} authorAvatar={authorAvatar} />
+
     </div>
   );
 }

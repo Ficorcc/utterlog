@@ -1,11 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { authenticateRequest } from '@backend/auth/session';
 import {
   aiGetActionPayload,
   aiPostActionPayload,
   type AiActionResult,
   AiServiceError,
-  readerAiChatPayload,
 } from '@backend/routes/ai';
 import { apiFail, apiOk, apiPaginated, withAdmin } from '../../../../server/http';
 
@@ -50,15 +48,6 @@ export const Route = createFileRoute('/api/v1/ai/$action')({ server: { handlers:
     });
   },
   POST: async ({ request, params }) => {
-    if (params.action === 'reader-chat') {
-      try {
-        const session = await authenticateRequest(request).catch(() => null);
-        const body = await request.json().catch(() => ({}));
-        return actionResponse(await readerAiChatPayload(body, session?.userId || 0));
-      } catch (error) {
-        return serviceError(error);
-      }
-    }
     if (!postActions.has(params.action)) return apiFail(404, 'NOT_FOUND', 'AI 接口不存在');
     return withAdmin(request, async ({ userId }) => {
       try {

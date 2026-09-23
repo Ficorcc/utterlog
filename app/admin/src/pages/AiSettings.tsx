@@ -4,7 +4,7 @@ import api, { optionsApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 import {
   Plus, Server, Shuffle, SquarePen, UserPen, Terminal,
-  ShieldHalf, ListChecks, Zap, BookOpen, AlignLeft, Image as ImageIcon,
+  ShieldHalf, ListChecks, Zap, AlignLeft, Image as ImageIcon,
   Sparkles, CircleHelp, Square, Trash2, Lightbulb, RotateCcw, Link2 as LinkIcon,
   Tags, ScrollText, Pencil, Save, Loader2, type LucideIcon,
 } from 'lucide-react';
@@ -182,7 +182,6 @@ export default function AiSettingsPage() {
 6. 只围绕文章和公开站点内容回答，不透露后台数据或管理能力。
 7. 优先使用简洁的 Markdown 提升可读性；不要无意义地堆砌标题、列表或代码块，不要主动添加 emoji。`,
     // Article reader is enabled by default to preserve the existing site behavior.
-    ai_reader_chat_enabled: 'true',
     ai_summary_auto: 'false',
     ai_summary_max_length: '200',
     // Prompt textareas start empty — load() pre-fills them with the
@@ -700,18 +699,6 @@ export default function AiSettingsPage() {
             </div>
           </Section>
 
-          <Section
-            icon={BookOpen}
-            title={t('admin.aiSettings.posts.readerTitle', '文章页 AI 陪读')}
-            description={t('admin.aiSettings.posts.readerDescription', '控制文章详情页的「边读边聊」卡片和推荐问题。')}
-          >
-            <ToggleRow
-              label={t('admin.aiSettings.posts.enableReader', '启用文章页 AI 陪读')}
-              hint={t('admin.aiSettings.posts.enableReaderHint', '关闭后文章详情页不显示 AI 陪读，也不会加载推荐问题或发送陪读请求')}
-              checked={config.ai_reader_chat_enabled !== 'false'}
-              onCheckedChange={v => updateConfig('ai_reader_chat_enabled', String(v))}
-            />
-          </Section>
 
           {/* 摘要设置 */}
           {config.ai_summary_auto === 'true' && (

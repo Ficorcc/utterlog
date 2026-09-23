@@ -1,7 +1,6 @@
 'use client';
 
 import Link from '@/components/AppLink';
-import { useReaderChatStore } from '@/lib/store';
 import { useThemeContext } from '@/lib/theme-context';
 
 export default function Footer() {
@@ -9,23 +8,9 @@ export default function Footer() {
   const year = new Date().getFullYear();
   const siteName = site.title || 'Utterlog';
   const footerItems = menus.footer || [];
-  const readerActive = useReaderChatStore(state => state.active);
-  const readerDismissed = useReaderChatStore(state => state.dismissed);
-  const showReader = useReaderChatStore(state => state.show);
 
   return (
     <>
-      {readerActive && readerDismissed && (
-        <button
-          type="button"
-          className="renascent-reader-button"
-          title="重新打开陪读"
-          aria-label="重新打开陪读"
-          onClick={showReader}
-        >
-          <i className="fa-sharp fa-solid fa-message-bot" aria-hidden="true" />
-        </button>
-      )}
       <footer className="renascent-footer">
         <div className="renascent-container renascent-footer-inner">
           <div>

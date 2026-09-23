@@ -4,7 +4,6 @@ import TableOfContents from './TableOfContents';
 import AISummary from './AISummary';
 import PostNavigation from './PostNavigation';
 import CommentList from './CommentList';
-import AIReaderChat from './AIReaderChat';
 import VideoPostBody from '@/components/blog/VideoPostBody';
 import { formatDateInTimeZone, resolveSiteTimeZone } from '@/lib/timezone';
 import { postDateInput } from '@/lib/post-date';
@@ -112,7 +111,7 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
         {/* Comments */}
         <div style={{ padding: '0 32px 32px' }}>
           <CommentList postId={post.id} />
-          <AIReaderChat postId={post.id} title={post.title} excerpt={post.excerpt} />
+
         </div>
       </div>
 
