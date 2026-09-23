@@ -1,6 +1,5 @@
-import { createFileRoute } from '@tanstack/react-router';
-import Tools from '@/pages/Tools';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_authenticated/tools')({
-  component: Tools,
+  beforeLoad: () => { throw redirect({ to: '/settings', hash: 'tools', replace: true }); },
 });

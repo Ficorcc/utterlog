@@ -1,6 +1,5 @@
-import { createFileRoute } from '@tanstack/react-router';
-import Plugins from '@/pages/Plugins';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_authenticated/plugins')({
-  component: Plugins,
+  beforeLoad: () => { throw redirect({ to: '/settings', hash: 'plugins', replace: true }); },
 });

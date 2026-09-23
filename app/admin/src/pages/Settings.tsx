@@ -1,5 +1,5 @@
 
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { optionsApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 import {
@@ -22,6 +22,8 @@ import { DatabaseIcon } from '@/components/ui/database';
 import { ImageIcon as AnimatedImageIcon } from '@/components/ui/image';
 import { KeyIcon } from '@/components/ui/key';
 import { CloudDownloadIcon } from '@/components/ui/cloud-download';
+import { WrenchIcon } from '@/components/ui/wrench';
+import { PlugZapIcon } from '@/components/ui/plug-zap';
 import api from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
@@ -40,7 +42,9 @@ import ImageTab from './settings/ImageTab';
 
 // Native <select> styled like the shadcn Input so it stays compatible
 // with react-hook-form register() (Base UI Select can't take register).
-const VALID_TABS = new Set(['general', 'seo', 'email', 'telegram', 'comment', 'media', 'image', 'services', 'update']);
+const Tools = lazy(() => import('./Tools'));
+const Plugins = lazy(() => import('./Plugins'));
+const VALID_TABS = new Set(['general', 'seo', 'email', 'telegram', 'comment', 'media', 'image', 'services', 'tools', 'plugins', 'update']);
 function initialTabFromHash(): string {
   if (typeof window === 'undefined') return 'general';
   const h = window.location.hash.replace(/^#/, '');
@@ -461,6 +465,8 @@ export default function SettingsPage() {
     { id: 'media', label: t('admin.settings.tabs.media', '存储设置'), icon: DatabaseIcon },
     { id: 'image', label: t('admin.settings.tabs.image', '图片处理'), icon: AnimatedImageIcon },
     { id: 'services', label: t('admin.settings.tabs.services', '第三方服务'), icon: KeyIcon },
+    { id: 'tools', label: t('admin.nav.tools', '工具'), icon: WrenchIcon },
+    { id: 'plugins', label: t('admin.nav.plugins', '插件'), icon: PlugZapIcon },
     { id: 'update', label: t('admin.settings.tabs.update', '系统更新'), icon: CloudDownloadIcon },
   ], [t]);
 
@@ -508,6 +514,11 @@ export default function SettingsPage() {
 
       {/* Content */}
       <div>
+        {activeTab === 'tools' || activeTab === 'plugins' ? (
+          <Suspense fallback={<Spinner />}>
+            {activeTab === 'tools' ? <Tools /> : <Plugins />}
+          </Suspense>
+        ) : (
         <form onSubmit={handleSubmit(onSubmit)}>
 
           {/* ==================== 常规设置 ==================== */}
@@ -593,6 +604,7 @@ export default function SettingsPage() {
             </div>
           )}
         </form>
+        )}
       </div>
       <ConfirmDialog
         open={confirmCleanupDatabase}

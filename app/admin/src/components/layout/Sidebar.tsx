@@ -23,11 +23,9 @@ import { MessageCircleIcon } from '@/components/ui/message-circle';
 import { MessageSquareIcon } from '@/components/ui/message-square';
 import { MonitorCheckIcon } from '@/components/ui/monitor-check';
 import { PlayIcon } from '@/components/ui/play';
-import { PlugZapIcon } from '@/components/ui/plug-zap';
 import { SettingsIcon } from '@/components/ui/settings';
 import { SlidersHorizontalIcon } from '@/components/ui/sliders-horizontal';
 import { SquarePenIcon } from '@/components/ui/square-pen';
-import { WrenchIcon } from '@/components/ui/wrench';
 import { NavLink } from '@/lib/router';
 import SystemStatusPanel from './SystemStatusPanel';
 import VersionBadge from '@/components/VersionBadge';
@@ -83,8 +81,6 @@ const menuItems: MenuItem[] = [
   },
   { to: '/analytics', icon: ChartLineIcon, label: '统计', sub: 'Analytics' },
   { to: '/themes', icon: ContrastIcon, label: '主题', sub: 'Themes' },
-  { to: '/plugins', icon: PlugZapIcon, label: '插件', sub: 'Plugins' },
-  { to: '/tools', icon: WrenchIcon, label: '工具', sub: 'Tools' },
   { to: '/settings', icon: SettingsIcon, label: '设置', sub: 'Settings' },
 ];
 
@@ -114,8 +110,6 @@ const navKeys: Record<string, string> = {
   '/albums': 'admin.nav.albums',
   '/analytics': 'admin.nav.analytics',
   '/themes': 'admin.nav.themes',
-  '/plugins': 'admin.nav.plugins',
-  '/tools': 'admin.nav.tools',
   '/settings': 'admin.nav.settings',
   '/ai-settings': 'admin.nav.aiSettings',
 };
