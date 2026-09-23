@@ -14,9 +14,20 @@ test('基础 Tabs 组件覆盖 aria-selected，不只写 data-[selected]', () =>
 
 test('设置页的 tab 选中态由 activeTab 判断，不依赖组件库属性', () => {
   // 这一页九个 tab，选中态失效很难一眼看出来，所以直接用自己管理的 state
-  expect(settingsPage).toContain('const selected = activeTab === tab.id;');
+  expect(settingsPage).toContain("const selected = activeTab === tab.id || (activeTab === 'plugins' && tab.id === 'tools');");
   // 选中时必须有可见的视觉差异：主色 + 下边框
   expect(settingsPage).toContain("'border-primary bg-transparent font-semibold text-primary shadow-none'");
+});
+
+test('旧插件入口选中工具页并打开内嵌插件', async () => {
+  const toolsPage = await Bun.file('app/admin/src/pages/Tools.tsx').text();
+  const pluginsRoute = await Bun.file('app/admin/src/routes/_authenticated/plugins.tsx').text();
+  expect(settingsPage).toContain("activeTab === 'plugins' ? 'tools' : activeTab");
+  expect(settingsPage).toContain("initialTab={activeTab === 'plugins' ? 'plugins' : 'wp-sync'}");
+  expect(settingsPage).not.toContain("id: 'plugins'");
+  expect(toolsPage).toContain("activeTab === 'plugins'");
+  expect(toolsPage).toContain('<Plugins />');
+  expect(pluginsRoute).toContain("hash: 'plugins'");
 });
 
 test('设置页 tab 栏窄屏横向滚动，不换行', () => {

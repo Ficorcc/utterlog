@@ -1,6 +1,6 @@
 import { CloudUpload, Database, Settings as SettingsIcon, AlertTriangle, Loader2 } from 'lucide-react';
 
-import { useState, useEffect } from 'react';
+import { lazy, Suspense, useState, useEffect } from 'react';
 import { optionsApi } from '@/lib/api';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -15,12 +15,15 @@ import SyncSitesPanel from '@/components/SyncSitesPanel';
 import RebuildStatsPanel from '@/components/RebuildStatsPanel';
 import { useI18n } from '@/lib/i18n';
 
-export default function ToolsPage() {
+const Plugins = lazy(() => import('./Plugins'));
+type ToolTab = 'backup' | 'wp-sync' | 'typecho-sync' | 'plugins';
+
+export default function ToolsPage({ initialTab = 'wp-sync' }: { initialTab?: ToolTab }) {
   const { t } = useI18n();
   // 2026-05: 移除「导入工具」tab —— 历史 WordPress XML 导入只是初版临时
   // 入口，已被「WordPress 同步」插件 + 推送流程完全取代。Typecho 走同样
   // 的同步插件，没必要再保留 XML 上传那个分支。
-  const [activeTab, setActiveTab] = useState<'backup' | 'wp-sync' | 'typecho-sync'>('wp-sync');
+  const [activeTab, setActiveTab] = useState<ToolTab>(initialTab);
 
   // Backup state
   const [stats, setStats] = useState<any>(null);
@@ -125,18 +128,19 @@ export default function ToolsPage() {
     { key: 'wp-sync' as const, label: t('admin.tools.tabs.wpSync', 'WordPress 同步') },
     { key: 'typecho-sync' as const, label: t('admin.tools.tabs.typechoSync', 'Typecho 同步') },
     { key: 'backup' as const, label: t('admin.tools.tabs.backup', '备份恢复') },
+    { key: 'plugins' as const, label: t('admin.nav.plugins', '插件') },
   ];
 
   return (
     <div>
       {/* Tabs */}
-      <div className="mb-5 flex gap-0 border-b border-border">
+      <div className="mb-5 flex gap-0 overflow-x-auto border-b border-border">
         {tabs.map(tab => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
             className={cn(
-              'border-b-2 px-5 py-2.5 text-sm transition-colors',
+              'shrink-0 whitespace-nowrap border-b-2 px-5 py-2.5 text-sm transition-colors',
               activeTab === tab.key
                 ? 'border-primary font-semibold text-primary'
                 : 'border-transparent font-normal text-muted-foreground hover:text-foreground',
@@ -148,6 +152,11 @@ export default function ToolsPage() {
       </div>
 
       {/* ==================== WordPress 同步 ==================== */}
+      {activeTab === 'plugins' && (
+        <Suspense fallback={<Loader2 className="size-4 animate-spin" aria-label="Loading" />}>
+          <Plugins />
+        </Suspense>
+      )}
       {activeTab === 'wp-sync' && (
         <>
           <SyncSitesPanel platform="wordpress" />

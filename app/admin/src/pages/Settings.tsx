@@ -23,7 +23,6 @@ import { ImageIcon as AnimatedImageIcon } from '@/components/ui/image';
 import { KeyIcon } from '@/components/ui/key';
 import { CloudDownloadIcon } from '@/components/ui/cloud-download';
 import { WrenchIcon } from '@/components/ui/wrench';
-import { PlugZapIcon } from '@/components/ui/plug-zap';
 import api from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
@@ -43,7 +42,6 @@ import ImageTab from './settings/ImageTab';
 // Native <select> styled like the shadcn Input so it stays compatible
 // with react-hook-form register() (Base UI Select can't take register).
 const Tools = lazy(() => import('./Tools'));
-const Plugins = lazy(() => import('./Plugins'));
 const VALID_TABS = new Set(['general', 'seo', 'email', 'telegram', 'comment', 'media', 'image', 'services', 'tools', 'plugins', 'update']);
 function initialTabFromHash(): string {
   if (typeof window === 'undefined') return 'general';
@@ -466,7 +464,6 @@ export default function SettingsPage() {
     { id: 'image', label: t('admin.settings.tabs.image', '图片处理'), icon: AnimatedImageIcon },
     { id: 'services', label: t('admin.settings.tabs.services', '第三方服务'), icon: KeyIcon },
     { id: 'tools', label: t('admin.nav.tools', '工具'), icon: WrenchIcon },
-    { id: 'plugins', label: t('admin.nav.plugins', '插件'), icon: PlugZapIcon },
     { id: 'update', label: t('admin.settings.tabs.update', '系统更新'), icon: CloudDownloadIcon },
   ], [t]);
 
@@ -477,14 +474,14 @@ export default function SettingsPage() {
   return (
     <div className="w-full">
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as string)} className="mb-7">
+      <Tabs value={activeTab === 'plugins' ? 'tools' : activeTab} onValueChange={(v) => setActiveTab(v as string)} className="mb-7">
         {/* 选中态直接由 activeTab 判断，不依赖组件库的属性 —— 之前写的
             data-[selected]: 与 Base UI 实际输出的 aria-selected 对不上，
             激活样式一直没生效。窄屏横向滚动而不是换行，九个 tab 换行会把
             表单顶下去半屏。 */}
         <TabsList className="flex h-auto w-full flex-nowrap justify-start gap-0.5 overflow-x-auto rounded-none border-b border-border bg-transparent p-0 text-muted-foreground [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {tabs.map((tab) => {
-            const selected = activeTab === tab.id;
+            const selected = activeTab === tab.id || (activeTab === 'plugins' && tab.id === 'tools');
             return (
               <TabsTrigger
                 key={tab.id}
@@ -516,7 +513,7 @@ export default function SettingsPage() {
       <div>
         {activeTab === 'tools' || activeTab === 'plugins' ? (
           <Suspense fallback={<Spinner />}>
-            {activeTab === 'tools' ? <Tools /> : <Plugins />}
+            <Tools key={activeTab} initialTab={activeTab === 'plugins' ? 'plugins' : 'wp-sync'} />
           </Suspense>
         ) : (
         <form onSubmit={handleSubmit(onSubmit)}>
