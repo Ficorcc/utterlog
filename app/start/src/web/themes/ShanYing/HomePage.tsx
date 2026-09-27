@@ -40,6 +40,7 @@ import { currentSeason, resolveScene, sceneImageUrl, sceneImageSmallUrl, seasonI
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { discoverLinks, type DiscoverLink } from '@shared/discover-links';
 
 type SortKey = 'latest' | 'comments' | 'views';
 type ViewKey = 'list' | 'grid';
@@ -61,33 +62,7 @@ const SOCIAL_LABELS: Record<string, { icon: string; label: string }> = {
   rss: { icon: 'fa-regular fa-rss', label: 'RSS' },
 };
 
-/** 后台「头部按钮」（theme_header_buttons）配置的站点入口。
- *  原先渲染在顶栏最右侧，2026-09-26 按需求移到 Hero 右下角
- *  「发现更多博客」那一行 —— 顶栏透明时这些纯黑 SVG 压在暗色山景上几乎看不见。 */
-interface SiteLink {
-  icon: string;
-  label: string;
-  href?: string;
-  copy?: string;
-}
-
-function normalizeSiteLinks(raw?: string): SiteLink[] {
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed
-      .map((item: any) => ({
-        icon: String(item?.icon || '').trim(),
-        label: String(item?.label || '').trim(),
-        href: item?.href ? String(item.href).trim() : '',
-        copy: item?.copy ? String(item.copy).trim() : '',
-      }))
-      .filter((item) => item.icon && item.label);
-  } catch {
-    return [];
-  }
-}
+type SiteLink = DiscoverLink;
 
 /** 图标三态：内联 SVG / 图片地址 / FontAwesome class。 */
 function renderSiteIcon(icon: string) {
@@ -232,8 +207,7 @@ export default function HomePage({
     { label: '浏览', value: stats?.total_views || 0 },
   ];
 
-  // 后台配置的站点入口（原顶栏右上角那一排），渲染在「发现更多博客」行
-  const siteLinks = useMemo(() => normalizeSiteLinks(ctx.options?.theme_header_buttons), [ctx.options?.theme_header_buttons]);
+  const siteLinks = useMemo(() => discoverLinks(ctx.options || {}), [ctx.options]);
 
   const copySiteLink = async (item: SiteLink, event: React.MouseEvent<HTMLElement>) => {
     if (!item.copy) return;
@@ -353,26 +327,6 @@ export default function HomePage({
             <div className="sy-discover-col">
               <small>发现更多博客</small>
               <nav className="sy-discover-links" aria-label="发现更多博客">
-                <a
-                  className="sy-icon-button"
-                  href="https://www.travellings.cn/go.html"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="开往 · 发现更多博客"
-                  aria-label="开往 · 发现更多博客"
-                >
-                  <i className="fa-solid fa-train" aria-hidden="true" />
-                </a>
-                <a
-                  className="sy-icon-button"
-                  href="https://www.foreverblog.cn/go.html"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="十年之约 · 探索更多文章"
-                  aria-label="十年之约 · 探索更多文章"
-                >
-                  <i className="fa-solid fa-blog" aria-hidden="true" />
-                </a>
                 {siteLinks.map((item, index) => (
                   item.copy ? (
                     <button

@@ -8,6 +8,7 @@ import { themesApi, type AzureAccent, type ExtensionManifest } from '@/lib/api';
 import FooterIconsEditor from '@/components/FooterIconsEditor';
 import AzureProfileSettings from '@/components/AzureProfileSettings';
 import MenusPage from './Menus';
+import { DISCOVER_LINKS_KEY, discoverLinks } from '../../../shared/discover-links';
 import { Button, buttonVariants, Callout, Card, ConfirmDialog, LoadingState } from '@/components/ui/shadcn';
 import { cn } from '@/lib/utils';
 
@@ -25,7 +26,7 @@ const normalizeAzureAccent = (value: unknown): AzureAccent => {
 };
 
 export default function Themes() {
-  const [tab, setTab] = useState<'themes' | 'menus' | 'profile' | 'header' | 'footer' | 'hero'>('themes');
+  const [tab, setTab] = useState<'themes' | 'menus' | 'profile' | 'header' | 'footer' | 'hero' | 'discover'>('themes');
   const [themes, setThemes] = useState<ExtensionManifest[]>([]);
   const [active, setActive] = useState<string>('');
   const [requestedTheme, setRequestedTheme] = useState<string | null>(null);
@@ -43,6 +44,7 @@ export default function Themes() {
     || activeManifest?.admin_panels
     || [];
   const showProfile = adminPanels.includes('profile_card');
+  const showDiscover = adminPanels.includes('discover_links');
   const showHeader = adminPanels.includes('header_buttons');
   const showFooter = adminPanels.includes('footer_icons');
   const showHero = adminPanels.includes('hero_tiles');
@@ -121,6 +123,7 @@ export default function Themes() {
     { key: 'themes', label: '主题', Icon: Palette, visible: true },
     { key: 'menus', label: '菜单', Icon: List, visible: true },
     { key: 'profile', label: '资料卡', Icon: IdCard, visible: showProfile },
+    { key: 'discover', label: '发现更多博客', Icon: Share2, visible: showDiscover },
     { key: 'header', label: '头部按钮', Icon: AppWindow, visible: showHeader },
     { key: 'hero', label: '首页图块', Icon: LayoutGrid, visible: showHero },
     { key: 'footer', label: '页脚图标', Icon: Share2, visible: showFooter },
@@ -130,7 +133,7 @@ export default function Themes() {
   useEffect(() => {
     if (!tabs.find(t => t.key === tab)) setTab('themes');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showProfile, showHeader, showFooter, showHero]);
+  }, [showProfile, showHeader, showFooter, showHero, showDiscover]);
 
   return (
     <div>
@@ -158,7 +161,14 @@ export default function Themes() {
 
       {tab === 'menus' && <MenusPage />}
       {tab === 'profile' && showProfile && <AzureProfileSettings />}
-      {tab === 'header' && showHeader && (
+      {tab === 'discover' && showDiscover && (
+        <FooterIconsEditor optionKey={DISCOVER_LINKS_KEY} fallbackItems={discoverLinks}
+          title="发现更多博客" emptyText="暂无入口，保存后首页不显示任何发现链接。"
+          emptyRow={{ icon: 'fa-solid fa-link', label: '博客入口', href: '' }}
+          description="显示在首页「发现更多博客」区域。可添加、删除或调整顺序，编辑名称、链接和图标；图标支持 FontAwesome 类名、图片 URL、SVG 或上传图片。填写复制文本后，点击将复制文本。"
+        />
+      )}
+      {tab === 'header'  && showHeader && (
         <FooterIconsEditor
           optionKey="theme_header_buttons"
           title="头部图标按钮"

@@ -18,6 +18,7 @@ const defaultEmptyRow: FooterIcon = { icon: 'fa-light fa-link', label: '按钮',
 
 interface FooterIconsEditorProps {
   optionKey?: string;
+  fallbackItems?: (options: Record<string, unknown>) => FooterIcon[];
   title?: string;
   description?: ReactNode;
   emptyText?: string;
@@ -26,6 +27,7 @@ interface FooterIconsEditorProps {
 
 export default function FooterIconsEditor({
   optionKey = DEFAULT_OPTION_KEY,
+  fallbackItems,
   title = '页脚图标按钮',
   description,
   emptyText = '尚未配置额外按钮，页脚仍会显示固定的 RSS 按钮。',
@@ -46,6 +48,7 @@ export default function FooterIconsEditor({
         const r: any = await optionsApi.list();
         const data = r.data || r;
         const raw = data[optionKey];
+        if (fallbackItems) setItems(fallbackItems(data));
         if (raw) {
           try {
             const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
@@ -55,7 +58,7 @@ export default function FooterIconsEditor({
       } catch { toast.error('加载配置失败'); }
       finally { setLoading(false); }
     })();
-  }, [optionKey]);
+  }, [optionKey, fallbackItems]);
 
   const addRow = () => setItems([...items, { ...emptyRow }]);
   const removeRow = (i: number) => setItems(items.filter((_, idx) => idx !== i));
