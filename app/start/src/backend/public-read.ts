@@ -830,7 +830,7 @@ export async function loadHomePageDataDirect(page: number) {
   const [postsRes, momentsRes, commentsRes] = await Promise.all([
     listPosts({ page, perPage, status: 'publish' }),
     listMoments({ perPage: 1 }),
-    listComments({ perPage: 5, status: 'approved', excludeAdmin: true }),
+    listComments({ perPage: 10, status: 'approved', excludeAdmin: true, order: 'desc' }),
   ]);
   const moments = momentsRes.data.moments || [];
   return {
