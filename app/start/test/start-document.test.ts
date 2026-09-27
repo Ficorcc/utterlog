@@ -48,6 +48,16 @@ describe('TanStack Start document assets', () => {
     ]);
   });
 
+  test('ShanYing keeps required fonts without competing font preloads', () => {
+    const links = startDocumentLinks(context('ShanYing'));
+    expect(links.filter((link) => link.as === 'font')).toHaveLength(0);
+    const hrefs = links.map((link) => link.href);
+    expect(hrefs).toContain('https://static.bluecdn.com/libs/fontawesome/7.3.1/css/all.min.css');
+    expect(hrefs).toContain('https://static.bluecdn.com/fonts/alimama-fangyuanti.css');
+    expect(hrefs).toContain('https://static.bluecdn.com/fonts/noto-sans-sc.css');
+    expect(hrefs).not.toContain('https://static.bluecdn.com/fonts/luo.css');
+  });
+
   test('does not inject theme-specific CSS without server context', () => {
     const links = startDocumentLinks(null).map((link) => link.href);
     expect(links).toContain('https://static.bluecdn.com/fonts/noto-sans-sc.css');

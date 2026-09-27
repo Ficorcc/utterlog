@@ -122,6 +122,11 @@ export { DEFAULT_BLOG_THEME, blogThemeAccentAttr, normalizeThemeName, resolveBlo
 
 export function getThemeComponents(themeName: string): ThemeComponents {
   const name = normalizeThemeName(themeName);
+  // Start the home chunk alongside Layout instead of waiting for Layout's
+  // Suspense boundary to resolve. Other themes/routes keep their lazy chunks.
+  if (name === 'ShanYing' && typeof window !== 'undefined' && window.location.pathname === '/') {
+    void import('@/themes/ShanYing/HomePage').catch(() => {});
+  }
   return themeRegistry[name] || themeRegistry[DEFAULT_BLOG_THEME];
 }
 

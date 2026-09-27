@@ -10,7 +10,7 @@ export type DocumentLink = {
 };
 
 export function startDocumentLinks(ctx: ThemeContextData | null | undefined): DocumentLink[] {
-  return [
+  const links: DocumentLink[] = [
     { rel: 'icon', href: ctx?.site.favicon || '/favicon.ico' },
     // iOS 添加到主屏只认 apple-touch-icon 这个 rel + 固定文件名；manifest 让
     // Android/桌面 PWA 拿到 192/512 图标。两者都由后台上传 favicon 时生成，
@@ -46,4 +46,14 @@ export function startDocumentLinks(ctx: ThemeContextData | null | undefined): Do
     { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/google-sans-code.css' },
     ...(ctx ? [{ rel: 'stylesheet', href: `/themes/${ctx.theme.name}/styles.css?v=${ctx.theme.manifest?.version || '0'}` }] : []),
   ];
+  if (ctx?.theme.name !== 'ShanYing') return links;
+
+  // ShanYing uses system UI text, Alimama headings and Noto article text.
+  // Let FontAwesome request only the families actually rendered on each page;
+  // preloading all four families competes with the hero and hydration scripts.
+  const unusedFonts = new Set(['luo.css', 'fugaz-one.css', 'ubuntu.css', 'google-sans-code.css']);
+  return links.filter((link) =>
+    !(link.rel === 'preload' && link.as === 'font')
+    && !unusedFonts.has(link.href.split('/').pop() || ''),
+  );
 }

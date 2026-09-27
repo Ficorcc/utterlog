@@ -36,7 +36,7 @@ import {
   ShanYingRecentHeatmap,
   useReveal,
 } from './shanying-shared';
-import { currentSeason, resolveScene, sceneImageUrl, seasonImageUrl } from './shanying-scene';
+import { currentSeason, resolveScene, sceneImageUrl, sceneImageSmallUrl, seasonImageUrl } from './shanying-scene';
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
@@ -257,7 +257,7 @@ export default function HomePage({
       {/* ── 个人档案 Hero ── */}
       <section className="sy-hero" data-scene={scene} aria-labelledby="sy-hero-title">
         <div className="sy-hero-scene" aria-hidden="true">
-          <img src={sceneImageUrl(scene)} alt="" loading="eager" fetchPriority="high" decoding="async" />
+          <img src={sceneImageUrl(scene)} srcSet={`${sceneImageSmallUrl(scene)} 1280w, ${sceneImageUrl(scene)} 1774w`} sizes="(min-width: 1048px) 1000px, calc(100vw - 48px)" width={1774} height={887} alt="" loading="eager" fetchPriority="high" decoding="async" />
           <span className="sy-hero-veil" />
         </div>
 
