@@ -16,6 +16,7 @@ import { usePathname } from '@/lib/navigation';
 import { useThemeContext, type MenuItem } from '@/lib/theme-context';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
+import NavMenu, { MenuTree } from './NavMenu';
 import { Icon, cycleMode, modeLabel, useShanYingMode } from './shanying-shared';
 
 const API_BASE = '/api/v1';
@@ -208,6 +209,7 @@ export default function Header() {
 
   const renderNavItem = (item: MenuItem) => {
     const active = isActive(item.href || '#');
+    if (item.children?.length) return <NavMenu key={`${item.href}-${item.label}`} item={item} active={active} highlight={moveGlider} />;
     return (
       <Link
         key={`${item.href}-${item.label}`}
@@ -359,11 +361,7 @@ export default function Header() {
 
       {mobileOpen && (
         <nav className="sy-mobile-nav" aria-label="移动导航">
-          {navItems.map((item) => (
-            <Link key={`m-${item.href}-${item.label}`} href={item.href || '#'} className={isActive(item.href || '#') ? 'is-active' : ''}>
-              {item.label}
-            </Link>
-          ))}
+          <MenuTree items={navItems} close={() => setMobileOpen(false)} />
         </nav>
       )}
     </>
