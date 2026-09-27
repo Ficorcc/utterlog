@@ -672,7 +672,7 @@ async function buildAdminSystemPrompt() {
     ctx.push(`## 用户\n管理员：${admins?.count || 0} 人，作者：${authors?.count || 0} 人`);
   }
   if (permissions.theme_info) {
-    ctx.push(`## 主题\n当前主题：${await optionValue('active_theme', 'Utterlog')}`);
+    ctx.push(`## 主题\n当前主题：${await optionValue('active_theme', 'Azure')}`);
   }
   if (ctx.length) base += `\n\n---\n以下是当前站点数据，你可以根据这些信息回答问题：\n\n${ctx.join('\n\n')}`;
   if (permissions.database_query) {

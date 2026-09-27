@@ -1,17 +1,21 @@
 {
   "name": "Azure",
-  "version": "2.0.6",
-  "description": "蔚蓝极简内容优先主题 — 直角设计，支持蔚蓝 / 中国红配色",
+  "version": "2.1.0",
+  "description": "蔚蓝极简内容优先主题 — 直角设计，支持蔚蓝 / 中国红 / 青绿 / 浅灰 四种配色",
   "author": "Utterlog Team",
   "screenshot": "screenshot.png",
   "colors": {
     "primary": "#0052D9",
     "primaryRed": "#F53102",
+    "primaryGreen": "#00C767",
+    "primaryGray": "#6B7280",
     "background": "#ffffff"
   },
   "accents": [
     { "key": "blue", "label": "蔚蓝", "primary": "#0052D9" },
-    { "key": "red", "label": "中国红", "primary": "#F53102" }
+    { "key": "red", "label": "中国红", "primary": "#F53102" },
+    { "key": "green", "label": "青绿", "primary": "#00C767" },
+    { "key": "gray", "label": "浅灰", "primary": "#6B7280" }
   ],
   "layout": {
     "maxWidth": "900px",

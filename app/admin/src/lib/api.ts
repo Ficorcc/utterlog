@@ -346,9 +346,12 @@ export interface ExtensionManifest {
   admin_panels?: string[];
 }
 
+/** Azure 可选的配色（与 @shared/blog-theme 的 BlogThemeAccent 保持一致） */
+export type AzureAccent = 'blue' | 'red' | 'green' | 'gray';
+
 export const themesApi = {
-  list: () => api.get<{ themes: ExtensionManifest[]; active: string; azure_accent?: 'blue' | 'red'; requested?: string }>('/themes'),
-  activate: (id: string, body?: { accent?: 'blue' | 'red' }) => api.post(`/themes/${id}/activate`, body || {}),
+  list: () => api.get<{ themes: ExtensionManifest[]; active: string; azure_accent?: AzureAccent; requested?: string }>('/themes'),
+  activate: (id: string, body?: { accent?: AzureAccent }) => api.post(`/themes/${id}/activate`, body || {}),
   remove: (id: string) => api.delete(`/themes/${id}`),
   upload: (file: File) => {
     const fd = new FormData();

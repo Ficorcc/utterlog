@@ -395,18 +395,18 @@ export default function MomentsPage({
       <div style={{ padding: isMobile ? '24px 16px 120px' : '32px 32px 120px' }}>
       {loading ? (
         <div style={{ textAlign: 'center', padding: '80px 0' }}>
-          <p style={{ fontSize: '13px', color: '#999' }}>加载中…</p>
+          <p style={{ fontSize: '13px', color: 'var(--community-muted, #999)' }}>加载中…</p>
         </div>
       ) : moments.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '80px 0' }}>
-          <p style={{ fontSize: '15px', color: '#999' }}>暂无说说</p>
+          <p style={{ fontSize: '15px', color: 'var(--community-muted, #999)' }}>暂无说说</p>
         </div>
       ) : (
         <>
           {/* Filter bar */}
           {filterTag && (
             <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-              <span style={{ fontSize: '13px', color: 'var(--color-text-dim, #999)' }}>筛选：</span>
+              <span style={{ fontSize: '13px', color: 'var(--community-muted, var(--color-text-dim, #999))' }}>筛选：</span>
               <button
                 onClick={() => setFilterTag(null)}
                 style={{
@@ -478,7 +478,7 @@ export default function MomentsPage({
                   )}
 
                   <div className="moment-card" style={{
-                    background: '#fff',
+                    background: 'var(--community-surface, #fff)',
                     borderRadius: '2px',
                     boxShadow: isActive ? '0 12px 40px rgba(0,0,0,0.15)' : '0 2px 12px rgba(0,0,0,0.06)',
                     maxHeight: scattered && !isActive ? '280px' : 'none',
@@ -487,11 +487,11 @@ export default function MomentsPage({
                     {/* Text content */}
                     <div style={{ padding: '20px 24px' }}>
                       <div style={{ marginBottom: '12px' }}>
-                        <span style={{ fontSize: '10px', color: '#9e9a93', letterSpacing: '0.08em' }}>{relativeTime(m.created_at)}</span>
+                        <span style={{ fontSize: '10px', color: 'var(--community-muted, #9e9a93)', letterSpacing: '0.08em' }}>{relativeTime(m.created_at)}</span>
                       </div>
                       {m.content && (
                         <p style={{
-                          fontSize: '14px', lineHeight: 1.85, color: '#2b2a28',
+                          fontSize: '14px', lineHeight: 1.85, color: 'var(--community-text, #2b2a28)',
                           whiteSpace: 'pre-wrap', wordBreak: 'break-word',
                           margin: 0,
                           ...(scattered && !isActive ? {
@@ -503,11 +503,11 @@ export default function MomentsPage({
                         }}>{m.content}</p>
                       )}
                       {(m.location || sourceLabel) && (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '14px', fontSize: '11px', color: '#b8b4ad' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '14px', fontSize: '11px', color: 'var(--community-muted, #b8b4ad)' }}>
                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
                             {m.location && <><i className="fa-regular fa-location-dot" style={{ fontSize: '10px' }} />{m.location}</>}
                           </span>
-                          {sourceLabel && <span style={{ fontSize: '10px', color: '#c4c0b8' }}>via {sourceLabel}</span>}
+                          {sourceLabel && <span style={{ fontSize: '10px', color: 'var(--community-muted, #c4c0b8)' }}>via {sourceLabel}</span>}
                         </div>
                       )}
                     </div>
@@ -589,8 +589,8 @@ export default function MomentsPage({
       <div style={{ position: 'fixed', bottom: `${32 + toolbarLift}px`, left: '50%', transform: 'translateX(-50%)', zIndex: 1000, transition: 'bottom 0.18s ease-out' }}>
         <div className="moments-toolbar" style={{
           display: 'flex', alignItems: 'center', gap: '8px', height: '54px',
-          background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-          border: '1px solid rgba(0,0,0,0.08)', borderRadius: '27px', padding: '0 12px',
+          background: 'var(--community-glass, rgba(255,255,255,0.88))', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+          border: '1px solid var(--community-border, rgba(0,0,0,0.08))', borderRadius: '27px', padding: '0 12px',
           boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
         }}>
           {/* 标题 — 点击恢复全部 */}
@@ -599,11 +599,11 @@ export default function MomentsPage({
               onClick={() => { setFilterTag(null); setFilterYear(null); setFilterMonth(null); setShowCalendar(false); setShowTagPanel(false); }}
               style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
             >
-              <span className="moments-toolbar-title" style={{ fontSize: '12px', fontWeight: 600, color: '#1a1a1a' }}>说说</span>
+              <span className="moments-toolbar-title" style={{ fontSize: '12px', fontWeight: 600, color: 'var(--community-text, #1a1a1a)' }}>说说</span>
               <span style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', bottom: '-8px', width: '4px', height: '4px', borderRadius: '50%', background: '#4a9e8e' }} />
             </button>
           </div>
-          <div style={{ width: '1px', height: '24px', background: '#e2dfd8' }} />
+          <div style={{ width: '1px', height: '24px', background: 'var(--community-border, #e2dfd8)' }} />
           {/* 按钮组 */}
           <div style={{ display: 'flex', alignItems: 'center', padding: '0 4px', gap: '2px', position: 'relative' }}>
             {/* 日历筛选 */}
@@ -614,10 +614,10 @@ export default function MomentsPage({
                 style={{
                   width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                   borderRadius: '50%', border: 'none', cursor: 'pointer',
-                  background: (filterYear !== null || showCalendar) ? 'rgba(0,82,217,0.08)' : 'transparent',
-                  color: (filterYear !== null || showCalendar) ? 'var(--color-primary, #0052D9)' : '#7a7670', transition: 'background 0.2s',
+                  background: (filterYear !== null || showCalendar) ? 'var(--community-active, rgba(0,82,217,0.08))' : 'transparent',
+                  color: (filterYear !== null || showCalendar) ? 'var(--color-primary, #0052D9)' : 'var(--community-muted, #7a7670)', transition: 'background 0.2s',
                 }}
-                onMouseEnter={e => { if (filterYear === null && !showCalendar) e.currentTarget.style.background = 'rgba(0,0,0,0.05)'; }}
+                onMouseEnter={e => { if (filterYear === null && !showCalendar) e.currentTarget.style.background = 'var(--community-hover, rgba(0,0,0,0.05))'; }}
                 onMouseLeave={e => { if (filterYear === null && !showCalendar) e.currentTarget.style.background = 'transparent'; }}
               >
                 <i className="fa-regular fa-calendar" style={{ fontSize: '16px' }} />
@@ -638,7 +638,7 @@ export default function MomentsPage({
                 return (
                   <div className="moments-popover" style={{
                     position: 'absolute', bottom: '48px', left: '50%', transform: 'translateX(-50%)',
-                    background: '#fff', border: '1px solid #e5e5e5', borderRadius: '8px',
+                    background: 'var(--community-surface, #fff)', border: '1px solid var(--community-border, #e5e5e5)', borderRadius: '8px',
                     boxShadow: '0 8px 32px rgba(0,0,0,0.12)', padding: '12px', minWidth: '220px',
                   }}>
                     {/* 清除筛选 */}
@@ -648,7 +648,7 @@ export default function MomentsPage({
                         style={{
                           width: '100%', padding: '6px 0', marginBottom: '8px', fontSize: '12px',
                           color: 'var(--color-primary, #0052D9)', background: 'none', border: 'none', cursor: 'pointer',
-                          borderBottom: '1px solid #f0f0f0',
+                          borderBottom: '1px solid var(--community-border, #f0f0f0)',
                         }}
                       >
                         <i className="fa-regular fa-xmark" style={{ marginRight: '4px' }} />
@@ -661,7 +661,7 @@ export default function MomentsPage({
                           className={`moments-year-btn${filterYear === year ? ' is-active' : ''}`}
                           onClick={() => { setFilterYear(year); setFilterMonth(null); setShowCalendar(false); }}
                           style={{
-                            fontSize: '13px', fontWeight: 600, color: filterYear === year ? 'var(--color-primary, #0052D9)' : '#1a1a1a',
+                            fontSize: '13px', fontWeight: 600, color: filterYear === year ? 'var(--color-primary, #0052D9)' : 'var(--community-text, #1a1a1a)',
                             background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0', width: '100%', textAlign: 'left',
                           }}
                         >
@@ -675,9 +675,9 @@ export default function MomentsPage({
                               onClick={() => { setFilterYear(year); setFilterMonth(month); setShowCalendar(false); }}
                               style={{
                                 padding: '3px 8px', fontSize: '11px', borderRadius: '4px',
-                                border: filterYear === year && filterMonth === month ? '1px solid var(--color-primary, #0052D9)' : '1px solid #e5e5e5',
-                                background: filterYear === year && filterMonth === month ? 'var(--color-primary, #0052D9)' : '#fafafa',
-                                color: filterYear === year && filterMonth === month ? '#fff' : '#666',
+                                border: filterYear === year && filterMonth === month ? '1px solid var(--color-primary, #0052D9)' : '1px solid var(--community-border, #e5e5e5)',
+                                background: filterYear === year && filterMonth === month ? 'var(--color-primary, #0052D9)' : 'var(--community-soft, #fafafa)',
+                                color: filterYear === year && filterMonth === month ? 'var(--community-on-accent, #fff)' : 'var(--community-text, #666)',
                                 cursor: 'pointer', transition: 'all 0.15s',
                               }}
                             >
@@ -688,7 +688,7 @@ export default function MomentsPage({
                       </div>
                     ))}
                     {years.length === 0 && (
-                      <p style={{ fontSize: '12px', color: '#999', textAlign: 'center', padding: '8px 0' }}>暂无数据</p>
+                      <p style={{ fontSize: '12px', color: 'var(--community-muted, #999)', textAlign: 'center', padding: '8px 0' }}>暂无数据</p>
                     )}
                   </div>
                 );
@@ -702,11 +702,11 @@ export default function MomentsPage({
                 style={{
                   width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                   borderRadius: '50%', border: 'none', cursor: 'pointer',
-                  background: (filterTag || showTagPanel) ? 'rgba(0,82,217,0.08)' : 'transparent',
-                  color: (filterTag || showTagPanel) ? 'var(--color-primary, #0052D9)' : '#7a7670', transition: 'background 0.2s',
+                  background: (filterTag || showTagPanel) ? 'var(--community-active, rgba(0,82,217,0.08))' : 'transparent',
+                  color: (filterTag || showTagPanel) ? 'var(--color-primary, #0052D9)' : 'var(--community-muted, #7a7670)', transition: 'background 0.2s',
                   fontSize: '16px', fontWeight: 700,
                 }}
-                onMouseEnter={e => { if (!filterTag && !showTagPanel) e.currentTarget.style.background = 'rgba(0,0,0,0.05)'; }}
+                onMouseEnter={e => { if (!filterTag && !showTagPanel) e.currentTarget.style.background = 'var(--community-hover, rgba(0,0,0,0.05))'; }}
                 onMouseLeave={e => { if (!filterTag && !showTagPanel) e.currentTarget.style.background = 'transparent'; }}
               >
                 #
@@ -722,7 +722,7 @@ export default function MomentsPage({
                 return (
                   <div className="moments-popover" style={{
                     position: 'absolute', bottom: '48px', left: '50%', transform: 'translateX(-50%)',
-                    background: '#fff', border: '1px solid #e5e5e5', borderRadius: '8px',
+                    background: 'var(--community-surface, #fff)', border: '1px solid var(--community-border, #e5e5e5)', borderRadius: '8px',
                     boxShadow: '0 8px 32px rgba(0,0,0,0.12)', padding: '12px', minWidth: '180px',
                   }}>
                     {filterTag && (
@@ -731,7 +731,7 @@ export default function MomentsPage({
                         style={{
                           width: '100%', padding: '6px 0', marginBottom: '8px', fontSize: '12px',
                           color: 'var(--color-primary, #0052D9)', background: 'none', border: 'none', cursor: 'pointer',
-                          borderBottom: '1px solid #f0f0f0',
+                          borderBottom: '1px solid var(--community-border, #f0f0f0)',
                         }}
                       >
                         <i className="fa-regular fa-xmark" style={{ marginRight: '4px' }} />
@@ -749,9 +749,9 @@ export default function MomentsPage({
                             onClick={() => { setFilterTag(isActive ? null : tag); setShowTagPanel(false); }}
                             style={{
                               padding: '4px 10px', fontSize: '12px', borderRadius: '4px',
-                              border: isActive ? `1px solid ${tc.bg}` : '1px solid #e5e5e5',
-                              background: isActive ? tc.bg : '#fafafa',
-                              color: isActive ? '#fff' : '#555',
+                              border: isActive ? `1px solid ${tc.bg}` : '1px solid var(--community-border, #e5e5e5)',
+                              background: isActive ? tc.bg : 'var(--community-soft, #fafafa)',
+                              color: isActive ? '#fff' : 'var(--community-text, #555)',
                               cursor: 'pointer', transition: 'all 0.15s',
                               display: 'flex', alignItems: 'center', gap: '4px',
                             }}
@@ -762,7 +762,7 @@ export default function MomentsPage({
                       })}
                     </div>
                     {allTags.length === 0 && (
-                      <p style={{ fontSize: '12px', color: '#999', textAlign: 'center', padding: '8px 0' }}>暂无标签</p>
+                      <p style={{ fontSize: '12px', color: 'var(--community-muted, #999)', textAlign: 'center', padding: '8px 0' }}>暂无标签</p>
                     )}
                   </div>
                 );
@@ -770,8 +770,8 @@ export default function MomentsPage({
             </div>
             {/* 发布（仅管理员） */}
             {isAdmin && (
-              <button onClick={openComposer} title="发布说说" style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', border: 'none', cursor: 'pointer', background: 'transparent', color: '#7a7670', transition: 'background 0.2s' }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.05)')}
+              <button onClick={openComposer} title="发布说说" style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', border: 'none', cursor: 'pointer', background: 'transparent', color: 'var(--community-muted, #7a7670)', transition: 'background 0.2s' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'var(--community-hover, rgba(0,0,0,0.05))')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
               >
                 <i className="fa-regular fa-plus" style={{ fontSize: '18px' }} />
@@ -779,15 +779,15 @@ export default function MomentsPage({
             )}
             {/* 管理后台 */}
             {isAdmin && (
-              <a href="/admin/moments" title="管理说说" style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', border: 'none', cursor: 'pointer', background: 'transparent', color: '#7a7670', textDecoration: 'none', transition: 'background 0.2s' }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.05)')}
+              <a href="/admin/moments" title="管理说说" style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', border: 'none', cursor: 'pointer', background: 'transparent', color: 'var(--community-muted, #7a7670)', textDecoration: 'none', transition: 'background 0.2s' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'var(--community-hover, rgba(0,0,0,0.05))')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
               ><i className="fa-regular fa-gear" style={{ fontSize: '18px' }} /></a>
             )}
           </div>
-          <div style={{ width: '1px', height: '24px', background: '#e2dfd8' }} />
+          <div style={{ width: '1px', height: '24px', background: 'var(--community-border, #e2dfd8)' }} />
           {/* 数量 */}
-          <div style={{ padding: '0 12px', fontSize: '11px', color: '#999' }}>
+          <div style={{ padding: '0 12px', fontSize: '11px', color: 'var(--community-muted, #999)' }}>
             {filterYear !== null ? (
               <span style={{ color: 'var(--color-primary, #0052D9)', fontWeight: 500 }}>{filterYear}{filterMonth !== null ? `·${filterMonth + 1}月` : ''}</span>
             ) : (
@@ -803,7 +803,7 @@ export default function MomentsPage({
           style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.15)', backdropFilter: 'blur(4px)' }}
           onClick={(e) => { if (e.target === e.currentTarget) setShowComposer(false); }}
         >
-          <div className="moments-composer" style={{ width: '520px', maxWidth: '90vw', background: '#fff', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.12)', position: 'relative', overflow: 'hidden' }}>
+          <div className="moments-composer" style={{ width: '520px', maxWidth: '90vw', background: 'var(--community-surface, #fff)', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.12)', position: 'relative', overflow: 'hidden' }}>
             {/* Badge */}
             <div className={`moments-composer-badge${mood ? '' : ' is-default'}`} style={{
               position: 'absolute', top: '-1px', right: '24px',
@@ -818,7 +818,7 @@ export default function MomentsPage({
             <div style={{ padding: '28px' }}>
               {/* Header */}
               <div style={{ marginBottom: '20px' }}>
-                <span style={{ fontSize: '14px', color: '#9e9a93' }}>写点什么？</span>
+                <span style={{ fontSize: '14px', color: 'var(--community-muted, #9e9a93)' }}>写点什么？</span>
               </div>
 
               {/* Tags */}
@@ -826,8 +826,8 @@ export default function MomentsPage({
                 {tags.map(tag => (
                   <button key={tag} onClick={() => setMood(mood === tag ? '' : tag)} style={{
                     padding: '5px 14px', borderRadius: '16px', fontSize: '12px',
-                    border: `1px solid ${mood === tag ? getTagColor(tag).bg : '#e2dfd8'}`,
-                    color: mood === tag ? getTagColor(tag).bg : '#7a7670',
+                    border: `1px solid ${mood === tag ? getTagColor(tag).bg : 'var(--community-border, #e2dfd8)'}`,
+                    color: mood === tag ? getTagColor(tag).bg : 'var(--community-muted, #7a7670)',
                     background: mood === tag ? `${getTagColor(tag).bg}0F` : 'transparent',
                     cursor: 'pointer', transition: 'all 0.2s',
                   }}>{tag}</button>
@@ -836,7 +836,7 @@ export default function MomentsPage({
 
               {/* Textarea */}
               <textarea ref={textareaRef} value={content} onChange={e => setContent(e.target.value)} placeholder="请输入你的想法…"
-                style={{ width: '100%', minHeight: '140px', border: 'none', outline: 'none', fontSize: '14px', lineHeight: 1.8, color: '#2b2a28', resize: 'vertical', fontFamily: 'inherit', background: 'transparent' }}
+                style={{ width: '100%', minHeight: '140px', border: 'none', outline: 'none', fontSize: '14px', lineHeight: 1.8, color: 'var(--community-text, #2b2a28)', resize: 'vertical', fontFamily: 'inherit', background: 'transparent' }}
               />
 
               {/* Image previews */}
@@ -857,15 +857,15 @@ export default function MomentsPage({
                     </div>
                   ))}
                   {uploading && (
-                    <div style={{ width: '72px', height: '72px', borderRadius: '6px', background: '#f5f4f1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <span style={{ fontSize: '11px', color: '#9e9a93' }}>上传中</span>
+                    <div style={{ width: '72px', height: '72px', borderRadius: '6px', background: 'var(--community-soft, #f5f4f1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--community-muted, #9e9a93)' }}>上传中</span>
                     </div>
                   )}
                 </div>
               )}
 
               {/* Footer */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #f0ede8' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--community-border, #f0ede8)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   {/* Image upload button */}
                   <button
@@ -874,8 +874,8 @@ export default function MomentsPage({
                     style={{
                       display: 'flex', alignItems: 'center', gap: '4px',
                       padding: '4px 10px', borderRadius: '12px', fontSize: '12px',
-                      background: 'transparent', color: images.length > 0 ? '#4a9e8e' : '#b8b4ad',
-                      border: '1px solid #e2dfd8', cursor: uploading ? 'wait' : 'pointer',
+                      background: 'transparent', color: images.length > 0 ? '#4a9e8e' : 'var(--community-muted, #b8b4ad)',
+                      border: '1px solid var(--community-border, #e2dfd8)', cursor: uploading ? 'wait' : 'pointer',
                       transition: 'all 0.2s',
                     }}
                   >
@@ -898,7 +898,7 @@ export default function MomentsPage({
                     <button onClick={handleGetLocation} disabled={locating} style={{
                       display: 'flex', alignItems: 'center', gap: '4px',
                       padding: '4px 10px', borderRadius: '12px', fontSize: '12px',
-                      background: 'transparent', color: '#b8b4ad', border: '1px solid #e2dfd8',
+                      background: 'transparent', color: 'var(--community-muted, #b8b4ad)', border: '1px solid var(--community-border, #e2dfd8)',
                       cursor: locating ? 'wait' : 'pointer',
                     }}>
                       <i className="fa-regular fa-location-dot" style={{ fontSize: '12px' }} /><span>{locating ? '定位中…' : '选择位置'}</span>
@@ -906,7 +906,7 @@ export default function MomentsPage({
                   )}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <button onClick={() => setShowComposer(false)} style={{ fontSize: '12px', color: '#b8b4ad', background: 'none', border: 'none', cursor: 'pointer' }}>
+                  <button onClick={() => setShowComposer(false)} style={{ fontSize: '12px', color: 'var(--community-muted, #b8b4ad)', background: 'none', border: 'none', cursor: 'pointer' }}>
                     取消
                   </button>
                   <button

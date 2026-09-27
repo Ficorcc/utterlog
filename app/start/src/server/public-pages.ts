@@ -7,6 +7,8 @@ import { codingPayload } from '@backend/routes/coding';
 import {
   getPostBySlug,
   getOptionsMap,
+  getVisitorWeather,
+  listComments,
   listMoments,
   listPosts,
   listPublicContent,
@@ -16,13 +18,13 @@ import {
   searchPublicPosts,
 } from '@backend/public-read';
 import { requestIp } from '@backend/request-ip';
-import { type ReadVisitor } from '@backend/services/tracking';
+import { bumpSiteViewOnRender, type ReadVisitor } from '@backend/services/tracking';
 import { loadStartThemeContextDirect } from './theme';
 
 export type PublicPageRequest =
   | { kind: 'home'; page?: number }
   | { kind: 'post' | 'film'; slug: string }
-  | { kind: 'archives' | 'categories' | 'tags' | 'about' | 'coding' | 'footprints' | 'moments' | 'links' | 'feeds' | 'albums' | 'music' }
+  | { kind: 'archives' | 'categories' | 'tags' | 'about' | 'coding' | 'footprints' | 'moments' | 'links' | 'feeds' | 'albums' | 'music' | 'dashboard' }
   | { kind: 'category' | 'tag'; slug: string }
   | { kind: 'search'; query?: string }
   | { kind: 'shelf'; shelf: 'movies' | 'books' | 'games' | 'goods' }
@@ -32,7 +34,7 @@ export type PublicPageRequest =
 
 const staticPageKinds = new Set([
   'archives', 'categories', 'tags', 'about', 'coding', 'footprints',
-  'moments', 'links', 'feeds', 'albums', 'music',
+  'moments', 'links', 'feeds', 'albums', 'music', 'dashboard',
 ]);
 const shelfKinds = new Set(['movies', 'books', 'games', 'goods']);
 
@@ -148,7 +150,8 @@ export type PublicPageBody =
   | { kind: 'shelf'; shelf: 'movies' | 'books' | 'games' | 'goods'; items: any[] }
   | { kind: 'search'; query: string; results: any[]; mode: string; total: number; timeZone: string }
   | { kind: 'films'; items: any[]; total: number; page: number; perPage: number; totalPages: number; filters: Record<string, string> }
-  | { kind: 'date'; posts: any[]; year: number; month?: number; day?: number; timeZone: string };
+  | { kind: 'date'; posts: any[]; year: number; month?: number; day?: number; timeZone: string }
+  | { kind: 'dashboard'; posts: any[]; hotPosts: any[]; moments: any[]; momentTotal: number; comments: any[]; links: any[] };
 
 export type PublicPageData = PublicPageBody & { site: PublicPageSite };
 
@@ -245,8 +248,9 @@ function visitorIp() {
   }));
 }
 
-// Kept for compatibility with public-read call sites. Reading posts no longer
-// records analytics; browser /track is the only visit counter.
+// 文章详情页的读取者身份：SSR 拿不到浏览器 localStorage 里的 visitor_id，
+// 用 IP + UA 代替。阅读量本身每次加载都 +1，这个身份只用来算独立访客。
+// 影视条目不计阅读量，reader 传 null。
 function postReader(): ReadVisitor {
   return { ip: visitorIp(), ua: getRequestHeader('user-agent') || '' };
 }
@@ -255,8 +259,13 @@ async function postBySlug(slug: string, reader: ReadVisitor | null = null) {
   return safe(getPostBySlug(slug, reader), null);
 }
 
-async function homeRoute(_ctx: ThemeContextData | null, page: number): Promise<PublicPageBody> {
-  const home = await safe(loadHomePageDataDirect(page), null);
+async function homeRoute(ctx: ThemeContextData | null, page: number): Promise<PublicPageBody> {
+  const ip = visitorIp();
+  const [home, visitorWeather] = await Promise.all([
+    safe(loadHomePageDataDirect(page), null),
+    safe(getVisitorWeather(ip), null, 1200),
+  ]);
+  if (ctx) ctx.visitorWeather = visitorWeather;
   return {
     kind: 'home', posts: home?.posts || [],
     page: home?.page || page,
@@ -264,6 +273,30 @@ async function homeRoute(_ctx: ThemeContextData | null, page: number): Promise<P
     latestMoment: home?.latestMoment || null,
     latestComments: home?.latestComments || [],
     perPage: home?.perPage || 10,
+  };
+}
+
+async function dashboardRoute(ctx: ThemeContextData | null): Promise<PublicPageBody> {
+  // 站点控制面板（对照 WP 原主题 template-parts/dashboard.php）：
+  // 最新 9 篇 / 热门 5 篇 / 最近 4 条说说 / 最近 6 条评论 / 全部友链。
+  // 统计、分类、标签、日历（heatmap 已含近一年按天计数）走 ThemeContext，不重复取。
+  const [recentRes, hotRes, momentsRes, commentsRes, linksRes] = await Promise.all([
+    safe(listPosts({ perPage: 9, status: 'publish' }), emptyPostList(1, 9)),
+    safe(listPosts({ perPage: 5, status: 'publish', orderBy: 'view_count' }), emptyPostList(1, 5)),
+    safe(listMoments({ perPage: 4 }), emptyMomentList(1, 4)),
+    safe(listComments({ perPage: 6, status: 'approved', excludeAdmin: true }), emptyContentList(1, 6)),
+    safe(listPublicContent('links', { perPage: 500 }), emptyContentList(1, 500)),
+  ]);
+  const momentBody = dataOf<any>(momentsRes, []);
+  const moments = Array.isArray(momentBody) ? momentBody : momentBody.moments || [];
+  return {
+    kind: 'dashboard',
+    posts: dataOf<any[]>(recentRes, []),
+    hotPosts: dataOf<any[]>(hotRes, []),
+    momentTotal: Number((momentsRes as any)?.meta?.total || (momentsRes as any)?.pagination?.total || moments.length),
+    moments,
+    comments: dataOf<any[]>(commentsRes, []),
+    links: dataOf<any[]>(linksRes, []).filter((link: any) => String(link?.status || 'publish') === 'publish' || link?.status === 1),
   };
 }
 
@@ -282,6 +315,14 @@ export const loadStartPublicPage = createServerFn({ method: 'GET' })
   .validator(validatePublicPageRequest)
   .handler(async ({ data }): Promise<PublicPageData> => {
     const ctx = await themeCtx();
+    // 全站浏览量：真实打开一次公开页 +1，跟文章阅读量同一个口径（刷新也算）。
+    // 放在这里而不是中间件，是因为这个 server fn 就是所有公开页的唯一入口，
+    // API 请求和静态资源根本走不到，不用再费劲排除。
+    //
+    // 预取要排除掉：前台开着 defaultPreload='intent'，鼠标划过站内链接就会
+    // 跑一遍 loader，也就是跑到这里。不排除的话，用户在首页扫一眼文章列表，
+    // 一篇没点也能刷出十几次浏览量 —— 这正是数字虚高的来源。
+    if (!data.preload) bumpSiteViewOnRender(getRequestHeader('user-agent') || '');
     const body = await resolvePublicPage(ctx, data);
     // 只带回 head() 需要的两个字段。完整 ctx 由 __root 的 loader 负责，
     // 这里再返一份的话整个 ThemeContext 会被序列化两遍（详见 PublicPageSite）。
@@ -401,6 +442,10 @@ async function resolvePublicPage(ctx: ThemeContextData | null, data: PublicPageR
 
     if (data.kind === 'date') {
       return dateRoute(ctx, data.year, data.month, data.day);
+    }
+
+    if (data.kind === 'dashboard') {
+      return dashboardRoute(ctx);
     }
 
     if (data.kind === 'permalink') {

@@ -80,7 +80,7 @@ export async function listThemesPayload() {
         || (typeof manifest.preview === 'string' && manifest.preview.startsWith('/') ? manifest.preview : '');
       return { ...manifest, id, kind: 'theme', builtin: dirIndex === 0, supported: SUPPORTED_BLOG_THEMES.has(id), preview, enabled: id === active };
     }).filter(Boolean) : []);
-  return { themes, active, azure_accent: active === 'Azure' && azureAccent === 'red' ? 'red' : 'blue',
+  return { themes, active, azure_accent: active === 'Azure' ? resolveBlogTheme('Azure', azureAccent).accent : 'blue',
     ...(rawActive !== active ? { requested: rawActive } : {}) };
 }
 
@@ -141,7 +141,7 @@ export async function activateTheme(idValue: unknown, body: Record<string, unkno
   if (!extensionExists('theme', id)) throw new ExtensionServiceError(404, 'NOT_FOUND', '主题不存在');
   if (!SUPPORTED_BLOG_THEMES.has(id)) throw new ExtensionServiceError(400, 'UNSUPPORTED_THEME', '当前运行时不支持此主题，请切换至内置主题');
   await saveOption('active_theme', id);
-  const accent = id === 'Azure' && String(body.accent || body.azure_accent || '').toLowerCase() === 'red' ? 'red' : 'blue';
+  const accent = id === 'Azure' ? resolveBlogTheme('Azure', String(body.accent || body.azure_accent || '')).accent : 'blue';
   await saveOption('azure_accent', accent);
   return { id, active: true, azure_accent: accent };
 }

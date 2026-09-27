@@ -22,16 +22,28 @@ export function startDocumentLinks(ctx: ThemeContextData | null | undefined): Do
     // DNS/TCP/TLS connection while the document is parsed so the first image
     // can start transferring immediately when it enters the viewport.
     { rel: 'preconnect', href: 'https://img.ficor.net', crossOrigin: 'anonymous' },
-    // FontAwesome uses font-display:block. Preload the two families that cover
-    // most first-screen icons so they do not appear in a later wave.
+    // FontAwesome uses font-display:block, so every family that actually renders
+    // on the first screen must be preloaded or its glyphs pop in a later wave.
+    // regular(全站 111 处) 与 brands(22 处，首页社交图标) 的用量不比 solid/light
+    // 少，之前只预备了两个族，导致图标分两波出现。
     { rel: 'preload', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous',
       href: 'https://static.bluecdn.com/libs/fontawesome/7.3.1/webfonts/fa-solid-900.woff2' },
+    { rel: 'preload', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous',
+      href: 'https://static.bluecdn.com/libs/fontawesome/7.3.1/webfonts/fa-regular-400.woff2' },
+    { rel: 'preload', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous',
+      href: 'https://static.bluecdn.com/libs/fontawesome/7.3.1/webfonts/fa-brands-400.woff2' },
     { rel: 'preload', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous',
       href: 'https://static.bluecdn.com/libs/fontawesome/7.3.1/webfonts/fa-light-300.woff2' },
     { rel: 'stylesheet', href: 'https://static.bluecdn.com/libs/fontawesome/7.3.1/css/all.min.css' },
     { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/noto-sans-sc.css' },
     { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/alimama-fangyuanti.css' },
     { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/luo.css' },
+    // 下面三份原先写在 globals.css 的 `@import url(...)` 里。CSS @import 必须等
+    // 宿主样式表下载并解析完才会发起请求，等于给首屏多串一截关键路径；
+    // 提到这里由 <link> 与其它样式表并行发起。
+    { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/fugaz-one.css' },
+    { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/ubuntu.css' },
+    { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/google-sans-code.css' },
     ...(ctx ? [{ rel: 'stylesheet', href: `/themes/${ctx.theme.name}/styles.css?v=${ctx.theme.manifest?.version || '0'}` }] : []),
   ];
 }

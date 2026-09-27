@@ -205,12 +205,12 @@ export default function LegacyFeedsView() {
       <div style={{ padding: isMobile ? '24px 16px 80px' : '32px 32px 80px' }}>
       {loading ? (
         <div style={{ textAlign: 'center', padding: '80px 0' }}>
-          <p style={{ fontSize: '13px', color: '#999' }}>加载中…</p>
+          <p style={{ fontSize: '13px', color: 'var(--community-muted, #999)' }}>加载中…</p>
         </div>
       ) : items.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '80px 0' }}>
-          <p style={{ fontSize: '15px', color: '#999', marginBottom: '8px' }}>暂无订阅内容</p>
-          <p style={{ fontSize: '13px', color: '#bbb' }}>在后台友链管理中添加 RSS 地址即可</p>
+          <p style={{ fontSize: '15px', color: 'var(--community-muted, #999)', marginBottom: '8px' }}>暂无订阅内容</p>
+          <p style={{ fontSize: '13px', color: 'var(--community-muted, #bbb)' }}>在后台友链管理中添加 RSS 地址即可</p>
         </div>
       ) : isMobile ? (
         /* Mobile: simple vertical list */
@@ -225,10 +225,10 @@ export default function LegacyFeedsView() {
             const showInitial = !favicon || !faviconLoaded[i];
             return (
               <a key={i} href={item.link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                <div style={{ background: '#fff', borderRadius: '2px', padding: '20px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+                <div style={{ background: 'var(--community-surface, #fff)', borderRadius: '2px', padding: '20px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#fff', color: color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, overflow: 'hidden', position: 'relative' }}>
+                      <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--community-surface, #fff)', color: color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, overflow: 'hidden', position: 'relative' }}>
                         {showInitial && <span>{initial}</span>}
                         {favicon && (
                           <img
@@ -240,13 +240,13 @@ export default function LegacyFeedsView() {
                           />
                         )}
                       </div>
-                      <span style={{ fontSize: '12px', color: '#7a7670', fontWeight: 500 }}>{name}</span>
+                      <span style={{ fontSize: '12px', color: 'var(--community-muted, #7a7670)', fontWeight: 500 }}>{name}</span>
                     </div>
-                    <span style={{ fontSize: '10px', color: '#b8b4ad' }}>{timeAgo(date)}</span>
+                    <span style={{ fontSize: '10px', color: 'var(--community-muted, #b8b4ad)' }}>{timeAgo(date)}</span>
                   </div>
-                  <h3 style={{ fontSize: '15px', fontWeight: 700, lineHeight: 1.5, color: '#2b2a28', marginBottom: '8px' }}>{decodeEntities(item.title)}</h3>
+                  <h3 style={{ fontSize: '15px', fontWeight: 700, lineHeight: 1.5, color: 'var(--community-text, #2b2a28)', marginBottom: '8px' }}>{decodeEntities(item.title)}</h3>
                   {item.description && (
-                    <p style={{ fontSize: '13px', lineHeight: 1.7, color: '#7a7670', display: '-webkit-box', WebkitLineClamp: 8, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{decodeEntities(item.description)}</p>
+                    <p style={{ fontSize: '13px', lineHeight: 1.7, color: 'var(--community-muted, #7a7670)', display: '-webkit-box', WebkitLineClamp: 8, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{decodeEntities(item.description)}</p>
                   )}
                 </div>
               </a>
@@ -325,7 +325,7 @@ export default function LegacyFeedsView() {
                 >
                   <div
                     style={{
-                      background: '#fff',
+                      background: 'var(--community-surface, #fff)',
                       borderRadius: '2px',
                       padding: '24px',
                       boxShadow: isActive
@@ -345,7 +345,7 @@ export default function LegacyFeedsView() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
                         <div style={{
                           width: '28px', height: '28px', borderRadius: '50%',
-                          background: '#fff', color: color,
+                          background: 'var(--community-surface, #fff)', color: color,
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: '12px', fontWeight: 700, flexShrink: 0,
                           overflow: 'hidden', position: 'relative',
@@ -361,9 +361,9 @@ export default function LegacyFeedsView() {
                             />
                           )}
                         </div>
-                        <span style={{ fontSize: '12px', color: '#7a7670', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
+                        <span style={{ fontSize: '12px', color: 'var(--community-muted, #7a7670)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
                       </div>
-                      <span style={{ fontSize: '10px', color: '#b8b4ad', letterSpacing: '0.05em', flexShrink: 0 }}>
+                      <span style={{ fontSize: '10px', color: 'var(--community-muted, #b8b4ad)', letterSpacing: '0.05em', flexShrink: 0 }}>
                         {timeAgo(date)}
                       </span>
                     </div>
@@ -371,7 +371,7 @@ export default function LegacyFeedsView() {
                     {/* Title */}
                     <h3 style={{
                       fontSize: '15px', fontWeight: 700, lineHeight: 1.5,
-                      color: '#2b2a28', marginBottom: '12px',
+                      color: 'var(--community-text, #2b2a28)', marginBottom: '12px',
                     }}>
                       {decodeEntities(item.title)}
                     </h3>
@@ -379,7 +379,7 @@ export default function LegacyFeedsView() {
                     {/* Description */}
                     {item.description && (
                       <p style={{
-                        fontSize: '13px', lineHeight: 1.8, color: '#7a7670',
+                        fontSize: '13px', lineHeight: 1.8, color: 'var(--community-muted, #7a7670)',
                         ...(isActive ? {} : { display: '-webkit-box', WebkitLineClamp: 8, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' }),
                       }}>
                         {decodeEntities(item.description)}
@@ -404,7 +404,7 @@ export default function LegacyFeedsView() {
       {items.length > 0 && hasMore && (
         <div ref={sentinelRef} style={{ padding: '32px 0', textAlign: 'center' }}>
           {loadingMore ? (
-            <span style={{ fontSize: '13px', color: '#888' }}>
+            <span style={{ fontSize: '13px', color: 'var(--community-muted, #888)' }}>
               <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: 6 }} /> 加载中…
             </span>
           ) : autoLoadExhausted ? (
@@ -412,7 +412,7 @@ export default function LegacyFeedsView() {
               onClick={() => loadFeeds(page + 1, false)}
               style={{
                 padding: '10px 28px', fontSize: '13px', fontWeight: 500,
-                background: '#fff', color: 'var(--color-primary, #0052D9)', border: '1px solid var(--color-primary, #0052D9)',
+                background: 'var(--community-surface, #fff)', color: 'var(--color-primary, #0052D9)', border: '1px solid var(--color-primary, #0052D9)',
                 cursor: 'pointer',
               }}
             >

@@ -10,6 +10,7 @@ const pageTitles: Partial<Record<PublicPageData['kind'], string>> = {
   coding: 'Coding',
   search: '搜索',
   films: '影视',
+  dashboard: '站点控制面板',
 };
 
 // site 是页面 loader 专门为 head() 留的最小副本 —— 完整 ThemeContext 在

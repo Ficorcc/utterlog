@@ -43,10 +43,8 @@ import {
   type BlogThemeAccent,
 } from '@shared/blog-theme';
 import AzureManifest from '@/themes/Azure/theme.json';
-import FluxManifest from '@/themes/Flux/theme.json';
-import NebulaManifest from '@/themes/Nebula/theme.json';
 import RenascentManifest from '@/themes/Renascent/theme.json';
-import UtterlogManifest from '@/themes/Utterlog/theme.json';
+import ShanYingManifest from '@/themes/ShanYing/theme.json';
 
 type ThemeComponent<Props = any> = ComponentType<Props> | LazyExoticComponent<ComponentType<Props>>;
 
@@ -64,6 +62,7 @@ export interface ThemeComponents {
   CategoriesPage?: ThemeComponent;
   TagsPage?: ThemeComponent;
   NotFoundPage?: ThemeComponent;
+  DashboardPage?: ThemeComponent;
 }
 
 const SharedCommentSection = lazy(() => import('@/components/blog/CommentList'));
@@ -80,27 +79,6 @@ const Azure: ThemeComponents = {
   CommentSection: SharedCommentSection,
 };
 
-const Flux: ThemeComponents = {
-  Header: lazy(() => import('@/themes/Flux/Header')),
-  Footer: lazy(() => import('@/themes/Flux/Footer')),
-  Layout: lazy(() => import('@/themes/Flux/Layout')),
-  HomePage: lazy(() => import('@/themes/Flux/HomePage')),
-  PostPage: lazy(() => import('@/themes/Flux/PostPage')),
-  PostCard: lazy(() => import('@/themes/Flux/PostCard')),
-  CommentSection: SharedCommentSection,
-};
-
-const Nebula: ThemeComponents = {
-  Header: lazy(() => import('@/themes/Nebula/Header')),
-  Footer: lazy(() => import('@/themes/Nebula/Footer')),
-  Layout: lazy(() => import('@/themes/Nebula/Layout')),
-  HomePage: lazy(() => import('@/themes/Nebula/HomePage')),
-  PostPage: lazy(() => import('@/themes/Nebula/PostPage')),
-  PostCard: lazy(() => import('@/themes/Nebula/PostCard')),
-  CommentSection: lazy(() => import('@/themes/Nebula/PostInteractive').then((module) => ({ default: module.CommentSection }))),
-  ArchivePage: lazy(() => import('@/themes/Nebula/ArchivePage')),
-};
-
 const Renascent: ThemeComponents = {
   Header: lazy(() => import('@/themes/Renascent/Header')),
   Footer: lazy(() => import('@/themes/Renascent/Footer')),
@@ -111,30 +89,33 @@ const Renascent: ThemeComponents = {
   CommentSection: lazy(() => import('@/themes/Renascent/PostInteractive').then((module) => ({ default: module.CommentSection }))),
 };
 
-const Utterlog: ThemeComponents = {
-  Header: lazy(() => import('@/themes/Utterlog/Header')),
-  Footer: lazy(() => import('@/themes/Utterlog/Footer')),
-  Layout: lazy(() => import('@/themes/Utterlog/Layout')),
-  HomePage: lazy(() => import('@/themes/Utterlog/HomePage')),
-  PostPage: lazy(() => import('@/themes/Utterlog/PostPage')),
-  PostCard: lazy(() => import('@/themes/Utterlog/PostCard')),
+const ShanYing: ThemeComponents = {
+  Header: lazy(() => import('@/themes/ShanYing/Header')),
+  Footer: lazy(() => import('@/themes/ShanYing/Footer')),
+  Layout: lazy(() => import('@/themes/ShanYing/Layout')),
+  HomePage: lazy(() => import('@/themes/ShanYing/HomePage')),
+  PostPage: lazy(() => import('@/themes/ShanYing/PostPage')),
+  PostCard: lazy(() => import('@/themes/ShanYing/PostCard')),
   CommentSection: SharedCommentSection,
+  ArchivePage: lazy(() => import('@/themes/ShanYing/ArchivePage')),
+  CategoryPage: lazy(() => import('@/themes/ShanYing/CategoryPage')),
+  TagPage: lazy(() => import('@/themes/ShanYing/TagPage')),
+  CategoriesPage: lazy(() => import('@/themes/ShanYing/CategoriesPage')),
+  TagsPage: lazy(() => import('@/themes/ShanYing/TagsPage')),
+  NotFoundPage: lazy(() => import('@/themes/ShanYing/NotFoundPage')),
+  DashboardPage: lazy(() => import('@/themes/ShanYing/DashboardPage')),
 };
 
 const themeRegistry: Record<string, ThemeComponents> = {
   Azure,
-  Flux,
-  Nebula,
   Renascent,
-  Utterlog,
+  ShanYing,
 };
 
 const manifestRegistry: Record<string, ThemeManifest> = {
   Azure: AzureManifest as ThemeManifest,
-  Flux: FluxManifest as ThemeManifest,
-  Nebula: NebulaManifest as ThemeManifest,
   Renascent: RenascentManifest as ThemeManifest,
-  Utterlog: UtterlogManifest as ThemeManifest,
+  ShanYing: ShanYingManifest as ThemeManifest,
 };
 
 export { DEFAULT_BLOG_THEME, blogThemeAccentAttr, normalizeThemeName, resolveBlogTheme, type BlogThemeAccent };

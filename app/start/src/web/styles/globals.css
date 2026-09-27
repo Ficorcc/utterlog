@@ -1,6 +1,5 @@
-@import url("https://static.bluecdn.com/fonts/fugaz-one.css");
-@import url("https://static.bluecdn.com/fonts/ubuntu.css");
-@import url("https://static.bluecdn.com/fonts/google-sans-code.css");
+/* 三份 CDN 字体样式表（fugaz-one / ubuntu / google-sans-code）已挪到
+   src/lib/document.ts 的 <link> 列表：@import 会串行阻塞，<link> 可并行。 */
 @import "tailwindcss";
 @import "mapbox-gl/dist/mapbox-gl.css";
 @import "./video-post.css";
@@ -290,9 +289,10 @@ html.lightbox-active body {
   --color-focus-ring: #0052D9;
 }
 
-/* Azure — 蔚蓝极简（Utterlog 官方默认主题，与后台一致）*/
-[data-theme="Azure"]:not([data-accent="red"]),
-[data-theme="azure"]:not([data-accent="red"]) {
+/* Azure — 蔚蓝极简（默认配色；其余 accent 见下方各自分组）*/
+/* 注意：新增 accent 后必须同步这里的 :not() 链，否则新配色会被这段默认蓝盖住 */
+[data-theme="Azure"]:not([data-accent="red"]):not([data-accent="green"]):not([data-accent="gray"]),
+[data-theme="azure"]:not([data-accent="red"]):not([data-accent="green"]):not([data-accent="gray"]) {
   --color-primary: #0052D9;
   --color-primary-hover: #0044B8;
   --color-primary-active: #003A9E;
@@ -322,6 +322,40 @@ html.lightbox-active body {
   --color-text-sub: #5A6B7F;
   --color-text-dim: #9AA5B0;
   --color-focus-ring: #F53102;
+}
+
+/* Azure 青绿配色（取自 Flux 主题主色 #00C767，hover / active 同族压深） */
+[data-theme="Azure"][data-accent="green"],
+[data-theme="azure"][data-accent="green"] {
+  --color-primary: #00C767;
+  --color-primary-hover: #00AA58;
+  --color-primary-active: #00914A;
+  --color-bg-main: #FFFFFF;
+  --color-bg-card: #FFFFFF;
+  --color-bg-soft: #F3FAF6;
+  --color-border: #E2EDE7;
+  --color-divider: #F0F7F3;
+  --color-text-main: #0D1A2D;
+  --color-text-sub: #5A6B7F;
+  --color-text-dim: #9AA5B0;
+  --color-focus-ring: #00C767;
+}
+
+/* Azure 浅灰配色（中性灰，白底对比度约 4.8:1，满足 WCAG AA 正文） */
+[data-theme="Azure"][data-accent="gray"],
+[data-theme="azure"][data-accent="gray"] {
+  --color-primary: #6B7280;
+  --color-primary-hover: #5A616E;
+  --color-primary-active: #4A505B;
+  --color-bg-main: #FFFFFF;
+  --color-bg-card: #FFFFFF;
+  --color-bg-soft: #F6F7F9;
+  --color-border: #E5E7EB;
+  --color-divider: #F0F1F3;
+  --color-text-main: #0D1A2D;
+  --color-text-sub: #5A6B7F;
+  --color-text-dim: #9AA5B0;
+  --color-focus-ring: #6B7280;
 }
 
 /* Dark — 深色 */
@@ -2957,8 +2991,8 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
 .friend-link-card-item,
 .friend-link-compact-item {
   min-width: 0;
-  border: 1px solid #e5e5e5;
-  background: #fff;
+  border: 1px solid var(--community-border, #e5e5e5);
+  background: var(--community-surface, #fff);
   color: inherit;
   text-decoration: none;
   transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
@@ -2989,7 +3023,7 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   height: 44px;
   object-fit: cover;
   flex: 0 0 auto;
-  background: #f5f5f5;
+  background: var(--community-soft, #f5f5f5);
 }
 
 .friend-link-compact-item .friend-link-logo {
@@ -3002,7 +3036,7 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #1a1a1a;
+  color: var(--community-text, #1a1a1a);
   font-size: 14px;
   font-weight: 600;
   line-height: 1.3;
@@ -3013,12 +3047,12 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #888;
+  color: var(--community-muted, #888);
   font-size: 12px;
 }
 
 .friend-link-external {
-  color: #ccc;
+  color: var(--community-muted, #ccc);
   flex: 0 0 auto;
   font-size: 12px;
 }

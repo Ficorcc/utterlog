@@ -1,0 +1,41 @@
+Whono for Utterlog —— 上游来源与许可
+=====================================
+
+本主题是 astro-whono 的 Utterlog 移植版，视觉设计与版式取自上游项目。
+
+  上游项目：astro-whono
+  仓库地址：https://github.com/cxro/astro-whono
+  作者：cxro
+  许可：MIT License
+  移植日期：2026-09-26
+
+移植内容：双栏壳（左侧栏 + 1px 分隔线 + 正文）、衬线正文与楷体注解的字体分工、
+          克制的朱红强调色、浅色/深色令牌、列表行与归档行的版式、阅读模式。
+改写内容：由 Astro 组件改写为 Utterlog 的 React 主题组件，接入
+          useThemeContext / AppLink / PostLink / 共享评论与目录组件；
+          深色模式改用 data-whono-color 属性（Utterlog 的 data-theme 被主题名占用）。
+
+上游许可原文
+------------
+
+MIT License
+
+Copyright (c) 2026 cxro
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

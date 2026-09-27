@@ -174,12 +174,12 @@ export default function LegacyLinksView({ initialLinks, initialOptions }: { init
             style={{
               padding: '6px 16px', fontSize: '13px', fontWeight: 600,
               border: '1px solid var(--color-primary, #0052D9)', color: 'var(--color-primary, #0052D9)',
-              background: '#fff', cursor: 'pointer',
+              background: 'var(--community-surface, #fff)', cursor: 'pointer',
               display: 'inline-flex', alignItems: 'center', gap: '6px',
               transition: 'all 0.15s',
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-primary, #0052D9)'; e.currentTarget.style.color = '#fff'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = 'var(--color-primary, #0052D9)'; }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-primary, #0052D9)'; e.currentTarget.style.color = 'var(--community-on-accent, #fff)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'var(--community-surface, #fff)'; e.currentTarget.style.color = 'var(--color-primary, #0052D9)'; }}
           >
             <i className="fa-regular fa-handshake" style={{ fontSize: '12px' }} />
             我要申请
@@ -196,9 +196,9 @@ export default function LegacyLinksView({ initialLinks, initialOptions }: { init
               <button key={g} onClick={() => setActiveGroup(g)} style={{
                 padding: '6px 16px', fontSize: '13px', fontWeight: activeGroup === g ? 600 : 400,
                 border: '1px solid',
-                borderColor: activeGroup === g ? 'var(--color-primary, #0052D9)' : '#d9d9d9',
-                background: activeGroup === g ? 'var(--color-primary, #0052D9)' : '#fff',
-                color: activeGroup === g ? '#fff' : '#555',
+                borderColor: activeGroup === g ? 'var(--color-primary, #0052D9)' : 'var(--community-border, #d9d9d9)',
+                background: activeGroup === g ? 'var(--color-primary, #0052D9)' : 'var(--community-surface, #fff)',
+                color: activeGroup === g ? 'var(--community-on-accent, #fff)' : 'var(--community-text, #555)',
                 cursor: 'pointer', transition: 'all 0.15s',
               }}>
                 {groupLabel(g)}
@@ -208,9 +208,9 @@ export default function LegacyLinksView({ initialLinks, initialOptions }: { init
         )}
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '80px 0', color: '#999' }}>加载中…</div>
+          <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--community-muted, #999)' }}>加载中…</div>
         ) : links.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '80px 0', color: '#999' }}>暂无友链</div>
+          <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--community-muted, #999)' }}>暂无友链</div>
         ) : (
           /* Grouped display */
           displayGroupKeys.map((groupName) => {
@@ -222,8 +222,8 @@ export default function LegacyLinksView({ initialLinks, initialOptions }: { init
               {activeGroup === 'all' && groups.length > 2 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
                   <i className={groupIcon(groupName)} style={{ color: 'var(--color-primary, #0052D9)', fontSize: '14px', width: '16px', textAlign: 'center' }} />
-                  <h2 style={{ fontSize: '15px', fontWeight: 600, color: '#1a1a1a' }}>{groupLabel(groupName)}</h2>
-                  <span style={{ fontSize: '12px', color: '#999' }}>{groupLinks.length} 个</span>
+                  <h2 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--community-text, #1a1a1a)' }}>{groupLabel(groupName)}</h2>
+                  <span style={{ fontSize: '12px', color: 'var(--community-muted, #999)' }}>{groupLinks.length} 个</span>
                 </div>
               )}
 
@@ -279,16 +279,16 @@ export default function LegacyLinksView({ initialLinks, initialOptions }: { init
             onClick={e => e.stopPropagation()}
             style={{
               width: '100%', maxWidth: '640px', maxHeight: 'calc(100vh - 48px)',
-              background: '#fff', border: '1px solid #e5e5e5',
+              background: 'var(--community-surface, #fff)', border: '1px solid var(--community-border, #e5e5e5)',
               boxShadow: '0 24px 60px rgba(0,0,0,0.18)',
               display: 'flex', flexDirection: 'column', overflow: 'hidden',
             }}
           >
             {/* Modal header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid #e5e5e5' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--community-border, #e5e5e5)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <i className="fa-regular fa-handshake" style={{ color: 'var(--color-primary, #0052D9)', fontSize: '16px' }} />
-                <h2 style={{ fontSize: '15px', fontWeight: 600, color: '#1a1a1a' }}>申请友链</h2>
+                <h2 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--community-text, #1a1a1a)' }}>申请友链</h2>
               </div>
               <button
                 onClick={() => !applying && setShowApply(false)}
@@ -297,10 +297,10 @@ export default function LegacyLinksView({ initialLinks, initialOptions }: { init
                 style={{
                   width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                   background: 'transparent', border: 'none', cursor: applying ? 'not-allowed' : 'pointer',
-                  color: '#999', fontSize: '16px', transition: 'color 0.15s, background 0.15s',
+                  color: 'var(--community-muted, #999)', fontSize: '16px', transition: 'color 0.15s, background 0.15s',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#f5f5f5'; e.currentTarget.style.color = '#333'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#999'; }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'var(--community-soft, #f5f5f5)'; e.currentTarget.style.color = 'var(--community-text, #333)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--community-muted, #999)'; }}
               >
                 <i className="fa-regular fa-xmark" />
               </button>
@@ -308,70 +308,70 @@ export default function LegacyLinksView({ initialLinks, initialOptions }: { init
 
             {/* Modal body — scrollable */}
             <div style={{ padding: '20px', overflowY: 'auto', flex: 1 }}>
-              <p style={{ fontSize: '13px', color: '#888', marginBottom: '16px', lineHeight: 1.6 }}>
+              <p style={{ fontSize: '13px', color: 'var(--community-muted, #888)', marginBottom: '16px', lineHeight: 1.6 }}>
                 欢迎互换友链！请填写以下信息，审核通过后将自动显示在本页。
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ fontSize: '12px', color: '#666', display: 'block', marginBottom: '4px' }}>站点名称 *</label>
+                  <label style={{ fontSize: '12px', color: 'var(--community-text, #666)', display: 'block', marginBottom: '4px' }}>站点名称 *</label>
                   <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="我的博客"
-                    style={{ width: '100%', padding: '8px 12px', fontSize: '13px', border: '1px solid #d9d9d9', outline: 'none', background: '#fff', color: '#1a1a1a', boxSizing: 'border-box' }}
-                    onFocus={e => (e.currentTarget.style.borderColor = 'var(--color-primary, #0052D9)')} onBlur={e => (e.currentTarget.style.borderColor = '#d9d9d9')}
+                    style={{ width: '100%', padding: '8px 12px', fontSize: '13px', border: '1px solid var(--community-border, #d9d9d9)', outline: 'none', background: 'var(--community-surface, #fff)', color: 'var(--community-text, #1a1a1a)', boxSizing: 'border-box' }}
+                    onFocus={e => (e.currentTarget.style.borderColor = 'var(--color-primary, #0052D9)')} onBlur={e => (e.currentTarget.style.borderColor = 'var(--community-border, #d9d9d9)')}
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '12px', color: '#666', display: 'block', marginBottom: '4px' }}>站点地址 *</label>
+                  <label style={{ fontSize: '12px', color: 'var(--community-text, #666)', display: 'block', marginBottom: '4px' }}>站点地址 *</label>
                   <input value={form.url} onChange={e => setForm({ ...form, url: e.target.value })} placeholder="https://example.com"
-                    style={{ width: '100%', padding: '8px 12px', fontSize: '13px', border: '1px solid #d9d9d9', outline: 'none', background: '#fff', color: '#1a1a1a', boxSizing: 'border-box' }}
-                    onFocus={e => (e.currentTarget.style.borderColor = 'var(--color-primary, #0052D9)')} onBlur={e => (e.currentTarget.style.borderColor = '#d9d9d9')}
+                    style={{ width: '100%', padding: '8px 12px', fontSize: '13px', border: '1px solid var(--community-border, #d9d9d9)', outline: 'none', background: 'var(--community-surface, #fff)', color: 'var(--community-text, #1a1a1a)', boxSizing: 'border-box' }}
+                    onFocus={e => (e.currentTarget.style.borderColor = 'var(--color-primary, #0052D9)')} onBlur={e => (e.currentTarget.style.borderColor = 'var(--community-border, #d9d9d9)')}
                   />
                 </div>
                 <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ fontSize: '12px', color: '#666', display: 'block', marginBottom: '4px' }}>站点描述</label>
+                  <label style={{ fontSize: '12px', color: 'var(--community-text, #666)', display: 'block', marginBottom: '4px' }}>站点描述</label>
                   <input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="一句话介绍你的站点"
-                    style={{ width: '100%', padding: '8px 12px', fontSize: '13px', border: '1px solid #d9d9d9', outline: 'none', background: '#fff', color: '#1a1a1a', boxSizing: 'border-box' }}
-                    onFocus={e => (e.currentTarget.style.borderColor = 'var(--color-primary, #0052D9)')} onBlur={e => (e.currentTarget.style.borderColor = '#d9d9d9')}
+                    style={{ width: '100%', padding: '8px 12px', fontSize: '13px', border: '1px solid var(--community-border, #d9d9d9)', outline: 'none', background: 'var(--community-surface, #fff)', color: 'var(--community-text, #1a1a1a)', boxSizing: 'border-box' }}
+                    onFocus={e => (e.currentTarget.style.borderColor = 'var(--color-primary, #0052D9)')} onBlur={e => (e.currentTarget.style.borderColor = 'var(--community-border, #d9d9d9)')}
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '12px', color: '#666', display: 'block', marginBottom: '4px' }}>站点图标</label>
+                  <label style={{ fontSize: '12px', color: 'var(--community-text, #666)', display: 'block', marginBottom: '4px' }}>站点图标</label>
                   <input value={form.logo} onChange={e => setForm({ ...form, logo: e.target.value })} placeholder="留空自动获取"
-                    style={{ width: '100%', padding: '8px 12px', fontSize: '13px', border: '1px solid #d9d9d9', outline: 'none', background: '#fff', color: '#1a1a1a', boxSizing: 'border-box' }}
-                    onFocus={e => (e.currentTarget.style.borderColor = 'var(--color-primary, #0052D9)')} onBlur={e => (e.currentTarget.style.borderColor = '#d9d9d9')}
+                    style={{ width: '100%', padding: '8px 12px', fontSize: '13px', border: '1px solid var(--community-border, #d9d9d9)', outline: 'none', background: 'var(--community-surface, #fff)', color: 'var(--community-text, #1a1a1a)', boxSizing: 'border-box' }}
+                    onFocus={e => (e.currentTarget.style.borderColor = 'var(--color-primary, #0052D9)')} onBlur={e => (e.currentTarget.style.borderColor = 'var(--community-border, #d9d9d9)')}
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '12px', color: '#666', display: 'block', marginBottom: '4px' }}>头像地址</label>
+                  <label style={{ fontSize: '12px', color: 'var(--community-text, #666)', display: 'block', marginBottom: '4px' }}>头像地址</label>
                   <input value={form.avatar} onChange={e => setForm({ ...form, avatar: e.target.value })} placeholder="https://example.com/avatar.png"
-                    style={{ width: '100%', padding: '8px 12px', fontSize: '13px', border: '1px solid #d9d9d9', outline: 'none', background: '#fff', color: '#1a1a1a', boxSizing: 'border-box' }}
-                    onFocus={e => (e.currentTarget.style.borderColor = 'var(--color-primary, #0052D9)')} onBlur={e => (e.currentTarget.style.borderColor = '#d9d9d9')}
+                    style={{ width: '100%', padding: '8px 12px', fontSize: '13px', border: '1px solid var(--community-border, #d9d9d9)', outline: 'none', background: 'var(--community-surface, #fff)', color: 'var(--community-text, #1a1a1a)', boxSizing: 'border-box' }}
+                    onFocus={e => (e.currentTarget.style.borderColor = 'var(--color-primary, #0052D9)')} onBlur={e => (e.currentTarget.style.borderColor = 'var(--community-border, #d9d9d9)')}
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '12px', color: '#666', display: 'block', marginBottom: '4px' }}>RSS / Feed 地址</label>
+                  <label style={{ fontSize: '12px', color: 'var(--community-text, #666)', display: 'block', marginBottom: '4px' }}>RSS / Feed 地址</label>
                   <input value={form.rss_url} onChange={e => setForm({ ...form, rss_url: e.target.value })} placeholder="https://example.com/feed.xml"
-                    style={{ width: '100%', padding: '8px 12px', fontSize: '13px', border: '1px solid #d9d9d9', outline: 'none', background: '#fff', color: '#1a1a1a', boxSizing: 'border-box' }}
-                    onFocus={e => (e.currentTarget.style.borderColor = 'var(--color-primary, #0052D9)')} onBlur={e => (e.currentTarget.style.borderColor = '#d9d9d9')}
+                    style={{ width: '100%', padding: '8px 12px', fontSize: '13px', border: '1px solid var(--community-border, #d9d9d9)', outline: 'none', background: 'var(--community-surface, #fff)', color: 'var(--community-text, #1a1a1a)', boxSizing: 'border-box' }}
+                    onFocus={e => (e.currentTarget.style.borderColor = 'var(--color-primary, #0052D9)')} onBlur={e => (e.currentTarget.style.borderColor = 'var(--community-border, #d9d9d9)')}
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '12px', color: '#666', display: 'block', marginBottom: '4px' }}>联系邮箱</label>
+                  <label style={{ fontSize: '12px', color: 'var(--community-text, #666)', display: 'block', marginBottom: '4px' }}>联系邮箱</label>
                   <input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="方便通知审核结果（选填）" type="email"
-                    style={{ width: '100%', padding: '8px 12px', fontSize: '13px', border: '1px solid #d9d9d9', outline: 'none', background: '#fff', color: '#1a1a1a', boxSizing: 'border-box' }}
-                    onFocus={e => (e.currentTarget.style.borderColor = 'var(--color-primary, #0052D9)')} onBlur={e => (e.currentTarget.style.borderColor = '#d9d9d9')}
+                    style={{ width: '100%', padding: '8px 12px', fontSize: '13px', border: '1px solid var(--community-border, #d9d9d9)', outline: 'none', background: 'var(--community-surface, #fff)', color: 'var(--community-text, #1a1a1a)', boxSizing: 'border-box' }}
+                    onFocus={e => (e.currentTarget.style.borderColor = 'var(--color-primary, #0052D9)')} onBlur={e => (e.currentTarget.style.borderColor = 'var(--community-border, #d9d9d9)')}
                   />
                 </div>
               </div>
             </div>
 
             {/* Modal footer */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', padding: '12px 20px', borderTop: '1px solid #e5e5e5', background: '#fafafa' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', padding: '12px 20px', borderTop: '1px solid var(--community-border, #e5e5e5)', background: 'var(--community-soft, #fafafa)' }}>
               <button
                 onClick={() => !applying && setShowApply(false)}
                 disabled={applying}
                 style={{
                   padding: '7px 18px', fontSize: '13px', fontWeight: 500,
-                  border: '1px solid #d9d9d9', background: '#fff', color: '#555',
+                  border: '1px solid var(--community-border, #d9d9d9)', background: 'var(--community-surface, #fff)', color: 'var(--community-text, #555)',
                   cursor: applying ? 'not-allowed' : 'pointer',
                 }}
               >
@@ -382,7 +382,7 @@ export default function LegacyLinksView({ initialLinks, initialOptions }: { init
                 disabled={applying}
                 style={{
                   padding: '8px 24px', fontSize: '13px', fontWeight: 600,
-                  border: 'none', background: 'var(--color-primary, #0052D9)', color: '#fff',
+                  border: 'none', background: 'var(--color-primary, #0052D9)', color: 'var(--community-on-accent, #fff)',
                   cursor: applying ? 'wait' : 'pointer', opacity: applying ? 0.6 : 1,
                 }}
               >

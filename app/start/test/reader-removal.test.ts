@@ -14,6 +14,7 @@ test('reader API and admin toggle are removed without removing comments', async 
   expect(route).not.toContain('reader-chat');
   const settings = await Bun.file('app/admin/src/pages/AiSettings.tsx').text();
   expect(settings).not.toContain('ai_reader_chat_enabled');
-  const article = await Bun.file('app/start/src/web/themes/Utterlog/PostPage.tsx').text();
-  expect(article).toContain('<CommentList postId={post.id} />');
+  // 夹具主题改为当前启用的 ShanYing（原 Utterlog 主题已下线）
+  const article = await Bun.file('app/start/src/web/themes/ShanYing/PostPage.tsx').text();
+  expect(article).toContain('<CommentList postId={post?.id}');
 });

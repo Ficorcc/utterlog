@@ -258,6 +258,27 @@ export function PublicPage({ data }: { data: PublicPageData }) {
           const Component = theme.TagPage || DefaultTagPage;
           return <Component tag={data.tag} posts={data.posts} timeZone={ctx.timeZone} />;
         }
+        if (data.kind === 'dashboard' && ctx) {
+          const theme = getThemeComponents(ctx.theme.name);
+          const Component = theme.DashboardPage;
+          if (Component) {
+            return (
+              <Component
+                posts={data.posts}
+                hotPosts={data.hotPosts}
+                moments={data.moments}
+                momentTotal={data.momentTotal}
+                comments={data.comments}
+                links={data.links}
+                categories={ctx.categories}
+                tags={ctx.tags}
+                stats={ctx.archiveStats}
+                timeZone={ctx.timeZone}
+                siteTitle={ctx.site.title}
+              />
+            );
+          }
+        }
         if (data.kind === 'about') return <AboutContent />;
         if (data.kind === 'coding') return <CodingPage data={data.data} timeZone={data.timeZone} />;
         if (data.kind === 'footprints') return <FootprintsClient initialRows={data.rows} options={ctx?.options || {}} />;

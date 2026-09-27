@@ -1,0 +1,35 @@
+{
+  "id": "Whono",
+  "name": "Whono · 素笺双栏",
+  "version": "1.0.0",
+  "description": "移植自 astro-whono 的极简双栏主题：左侧栏导航、衬线正文、楷体注解，支持浅色/深色与阅读模式。",
+  "author": "cxro（astro-whono 原作） / Utterlog 移植",
+  "license": "MIT",
+  "screenshot": "screenshot.png",
+  "colors": {
+    "primary": "#b91c1c",
+    "background": "#fffefc"
+  },
+  "layout": {
+    "maxWidth": "1100px",
+    "headerStyle": "sidebar"
+  },
+  "menuPositions": [
+    {
+      "key": "header",
+      "label": "侧栏导航",
+      "description": "左侧栏的主导航菜单"
+    },
+    {
+      "key": "footer",
+      "label": "页脚导航",
+      "description": "正文底部的辅助链接"
+    }
+  ],
+  "features": [
+    "search",
+    "darkMode",
+    "readingMode",
+    "footer_menu"
+  ]
+}

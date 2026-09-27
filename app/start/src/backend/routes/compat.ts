@@ -2015,10 +2015,18 @@ export async function doubanImportPayload(input: Record<string, unknown>) {
  */
 const FEED_WINDOW_SECONDS = 30 * 24 * 3600;
 
+/** 今天 00:00 的 unix 秒（服务器本地时区）。订阅页的「今日更新」用它做下界。 */
+function startOfTodayUnix() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return Math.floor(d.getTime() / 1000);
+}
+
 export async function socialFeedTimeline(userId: number, query: URLSearchParams) {
   const page = Math.max(1, intParam(query.get('page') || undefined, 1));
   const perPage = Math.min(500, Math.max(1, intParam(query.get('per_page') || undefined, 20)));
-  const since = nowUnix() - FEED_WINDOW_SECONDS;
+  // period=today 只取今天发布的；不带或 all 时仍是最近 30 天窗口（旧行为不变）
+  const since = query.get('period') === 'today' ? startOfTodayUnix() : nowUnix() - FEED_WINDOW_SECONDS;
   const total = await one<{ count: string }>(
     `select count(*)::text as count from ${table('feed_items')} fi
      join ${table('rss_subscriptions')} rs on fi.subscription_id = rs.id
@@ -2037,13 +2045,22 @@ export async function socialFeedTimeline(userId: number, query: URLSearchParams)
 
 export async function socialFeedStats(userId: number) {
   const sevenDaysAgo = nowUnix() - 7 * 24 * 3600;
+  const todayStart = startOfTodayUnix();
   const since = nowUnix() - FEED_WINDOW_SECONDS;
-  const [count7d, countTotal, rssCount, lastFetched] = await Promise.all([
+  const [count7d, countToday, countTotal, rssCount, lastFetched] = await Promise.all([
     one<{ count: string }>(
       `select count(*)::text as count from ${table('feed_items')} fi
        join ${table('rss_subscriptions')} rs on fi.subscription_id = rs.id
        where rs.user_id = $1 and fi.pub_date >= $2`,
       [userId, sevenDaysAgo],
+    ).catch(() => null),
+    // 今天发布的条数 —— 订阅页标题行的「N 篇今日更新」用它，
+    // 跟 period=today 的时间线同口径（都按 pub_date 从今天 00:00 起算）
+    one<{ count: string }>(
+      `select count(*)::text as count from ${table('feed_items')} fi
+       join ${table('rss_subscriptions')} rs on fi.subscription_id = rs.id
+       where rs.user_id = $1 and fi.pub_date >= $2`,
+      [userId, todayStart],
     ).catch(() => null),
     // 跟时间线同一个窗口 —— 页面上的「N 篇文章」必须跟实际能翻到的条数对得上，
     // 否则显示 1059 却只列得出 109 条
@@ -2057,7 +2074,8 @@ export async function socialFeedStats(userId: number) {
       `select coalesce(max(last_fetched_at), 0)::text as last_fetched_at from ${table('rss_subscriptions')} where user_id = $1`, [userId],
     ).catch(() => null),
   ]);
-  return { count_7d: Number(count7d?.count || 0), count_total: Number(countTotal?.count || 0),
+  return { count_7d: Number(count7d?.count || 0), count_today: Number(countToday?.count || 0),
+    count_total: Number(countTotal?.count || 0),
     rss_count: Number(rssCount?.count || 0), last_fetched_at: Number(lastFetched?.last_fetched_at || 0) };
 }
 

@@ -1,0 +1,5421 @@
+/* ============================================================================
+ *  ShanYing · 山映
+ *  移植自 WordPress 主题「山映 · ShanYing」（作者：西风，GPL-2.0）
+ *
+ *  两条硬约束：
+ *   1. 作用域挂主题名 —— 根元素由 __root.tsx 写成 <html data-theme="ShanYing">。
+ *   2. 深色模式不能用 data-theme（已被主题名占用），改用 data-shanying-mode，
+ *      并且必须补 prefers-color-scheme 兜底，否则首屏会闪浅色。
+ *
+ *  字体说明：原主题的「站酷庆科黄油体 / 快看世界体 / Misans」不在 Utterlog
+ *  的字体白名单里，统一降级到全站已加载的 Alimama FangYuanTi VF / Noto Sans SC。
+ * ========================================================================= */
+
+/* ═══ 1. 设计令牌 ═══════════════════════════════════════════════════════ */
+
+html[data-theme='ShanYing'] {
+  --sy-frame: 1000px;
+  --sy-reading: 880px;
+
+  --sy-bg: #fafafa;
+  --sy-text: #202126;
+  /* 原主题是 #757782，压在 #fafafa 上只有 4.26:1，达不到 WCAG AA 的 4.5:1。
+     这里压深到 #676B76：在 #ffffff→#f0f0f0 的整段浅底上都有 ≥4.9:1，
+     色相不变，肉眼几乎看不出差别。 */
+  --sy-muted: #676b76;
+  --sy-surface: #ffffff;
+  --sy-glass: #ffffff;
+  --sy-soft: #f1f2f5;
+  --sy-line: rgb(25 28 40 / 0.1);
+  --sy-accent: #0052d9;
+  --sy-accent-text: #ffffff;
+  --sy-focus: #0052d9;
+  --sy-shadow: 0 18px 55px rgb(20 24 40 / 0.065);
+
+  --sy-radius-panel: 28px;
+  --sy-radius-card: 28px;
+  --sy-radius-row: 24px;
+  --sy-radius-thumb: 12px;
+
+  --sy-ease: cubic-bezier(0.2, 0.75, 0.25, 1);
+  --sy-gentle: cubic-bezier(0.4, 0, 0.25, 1);
+  --sy-motion-reveal: 1000ms;
+
+  --sy-heat-0: var(--sy-line);
+  --sy-heat-1: color-mix(in srgb, var(--sy-accent) 25%, var(--sy-surface));
+  --sy-heat-2: color-mix(in srgb, var(--sy-accent) 48%, var(--sy-surface));
+  --sy-heat-3: color-mix(in srgb, var(--sy-accent) 72%, var(--sy-surface));
+  --sy-heat-4: var(--sy-accent);
+
+  --sy-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --sy-brand-font: 'Alimama FangYuanTi VF', var(--sy-font);
+  --sy-reading-font: 'Noto Sans SC', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+
+  /* 共享的 code-highlight-styles.css 会读 --font-mono，主题必须提供，否则
+     代码块会退回正文无衬线字体。 */
+  --font-mono: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
+  --sy-code-bg: #1b1f24;
+  --sy-code-text: #e6edf3;
+
+  /* 覆盖 Utterlog 通用令牌，让评论 / AI 摘要 / 目录跟随主题配色 */
+  --color-primary: var(--sy-accent);
+  --color-primary-hover: #0044b8;
+  --color-primary-active: #003a9e;
+  --color-text-main: var(--sy-text);
+  --color-text-sub: var(--sy-muted);
+  --color-text-dim: #9aa0ad;
+  --color-border: var(--sy-line);
+  --color-divider: color-mix(in srgb, var(--sy-line) 62%, transparent);
+  --color-bg-card: var(--sy-surface);
+  --color-bg-main: var(--sy-bg);
+  --color-bg-soft: var(--sy-soft);
+  --color-focus-ring: var(--sy-focus);
+  --font-serif: var(--sy-brand-font);
+
+  color-scheme: light;
+}
+
+html[data-theme='ShanYing'][data-shanying-mode='dark'] {
+  --sy-bg: #0a0a0a;
+  --sy-text: #eeeeee;
+  --sy-muted: #a3a3a3;
+  --sy-surface: #191919;
+  --sy-glass: #191919;
+  --sy-soft: #242424;
+  --sy-line: rgb(255 255 255 / 0.09);
+  --sy-accent: #90ff3a;
+  --sy-accent-text: #0a0a0a;
+  --sy-focus: #90ff3a;
+  --sy-shadow: 0 18px 55px rgb(0 0 0 / 0.12);
+
+  --color-primary-hover: #a6ff61;
+  --color-primary-active: #7ee02f;
+  --color-text-dim: #6f6f6f;
+
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme='ShanYing']:not([data-shanying-mode='light']) {
+    --sy-bg: #0a0a0a;
+    --sy-text: #eeeeee;
+    --sy-muted: #a3a3a3;
+    --sy-surface: #191919;
+    --sy-glass: #191919;
+    --sy-soft: #242424;
+    --sy-line: rgb(255 255 255 / 0.09);
+    --sy-accent: #90ff3a;
+    --sy-accent-text: #0a0a0a;
+    --sy-focus: #90ff3a;
+    --sy-shadow: 0 18px 55px rgb(0 0 0 / 0.12);
+
+    color-scheme: dark;
+  }
+}
+
+@media (max-width: 700px) {
+  html[data-theme='ShanYing'] {
+    --sy-radius-panel: 24px;
+    --sy-radius-card: 22px;
+    --sy-radius-row: 20px;
+  }
+}
+
+/* ═══ 2. 基础 ═══════════════════════════════════════════════════════════ */
+
+html[data-theme='ShanYing'],
+html[data-theme='ShanYing'] body {
+  background: var(--sy-bg);
+  color: var(--sy-text);
+}
+
+html[data-theme='ShanYing'] .sy-theme {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  min-height: 100dvh;
+  background: var(--sy-bg);
+  color: var(--sy-text);
+  font-family: var(--sy-font);
+  -webkit-font-smoothing: antialiased;
+}
+
+html[data-theme='ShanYing'] .sy-main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  background: var(--sy-bg);
+}
+
+html[data-theme='ShanYing'] .sy-frame {
+  width: min(var(--sy-frame), calc(100% - 48px));
+  margin-inline: auto;
+  padding: 100px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+html[data-theme='ShanYing'] .sy-frame:has(> .sy-home) {
+  /* 首页：Hero 与下方内容同宽 —— 两者都由 .sy-frame 的
+     min(--sy-frame, 100% - 48px) 决定，这里不再给 Hero 单独放开宽度。
+     顶部内边距 = 白条高度 62px + 14px 间隙（白条现在是圆角矩形，
+     与 Hero 之间留一条缝才不会出现圆角处的月牙缺口）；
+     ≤700px 时头部降为 56px，对应 70px。 */
+  padding: 76px 0 0;
+  gap: 0;
+}
+
+html[data-theme='ShanYing'] .sy-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+html[data-theme='ShanYing'] .sy-kicker {
+  margin: 0;
+  color: var(--sy-muted);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+html[data-theme='ShanYing'] .sy-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-style: normal;
+}
+
+html[data-theme='ShanYing'] :focus-visible {
+  outline: 2px solid var(--sy-focus);
+  outline-offset: 3px;
+}
+
+html[data-theme='ShanYing'] .sy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 0 18px;
+  border: 1px solid var(--sy-line);
+  border-radius: 999px;
+  background: var(--sy-surface);
+  color: var(--sy-text);
+  font-size: 13px;
+  text-decoration: none;
+  transition: background 0.3s, color 0.3s, transform 0.3s var(--sy-ease);
+}
+
+html[data-theme='ShanYing'] .sy-btn:hover {
+  transform: translateY(-2px);
+}
+
+html[data-theme='ShanYing'] .sy-btn--solid {
+  background: var(--sy-accent);
+  border-color: var(--sy-accent);
+  color: var(--sy-accent-text);
+}
+
+/* ═══ 3. 头部悬浮胶囊 ═══════════════════════════════════════════════════ */
+
+html[data-theme='ShanYing'] .sy-header {
+  /* 头部局部调色变量。默认是「浅底深字」；当头部浮在照片上时（透明态），
+     由本节的最后一段统一覆盖成浅色，子元素一律引用这几个变量，
+     避免为每种元素各写一条 :has() 长选择器。 */
+  --sy-hd-text: var(--sy-text);
+  --sy-hd-muted: var(--sy-muted);
+  --sy-hd-fill: var(--sy-soft);
+  --sy-hd-hover: transparent;
+  --sy-hd-accent: var(--sy-accent);
+  --sy-hd-shadow: none;
+
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  z-index: 60;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  width: min(var(--sy-frame), calc(100% - 48px));
+  height: 62px;
+  padding: 0 10px 0 14px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  text-shadow: var(--sy-hd-shadow);
+  transition: width 0.55s var(--sy-ease), padding 0.45s var(--sy-ease), color 0.3s;
+}
+
+/* 顶部完全透明，让 Hero 山水图透上来；底色装在 ::before 里方便单独淡入淡出 */
+html[data-theme='ShanYing'] .sy-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: 1px solid transparent;
+  border-radius: inherit;
+  background: transparent;
+  box-shadow: none;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s var(--sy-gentle), background 0.4s, border-color 0.4s;
+}
+
+html[data-theme='ShanYing'] .sy-header[data-scrolled='1'] {
+  width: min(calc(var(--sy-frame) - 100px), calc(100% - 64px));
+  padding-inline: 8px 6px;
+}
+
+html[data-theme='ShanYing'] .sy-header[data-scrolled='1']::before {
+  opacity: 1;
+  border-color: var(--sy-line);
+  background: color-mix(in srgb, var(--sy-glass) 84%, transparent);
+  backdrop-filter: saturate(165%) blur(18px);
+  box-shadow: 0 14px 36px rgb(20 24 40 / 0.08);
+}
+
+/* ── 主导航 + 滑块 ── */
+
+html[data-theme='ShanYing'] .sy-nav {
+  position: relative;
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+}
+
+html[data-theme='ShanYing'] .sy-nav-glider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  border-radius: 999px;
+  background: var(--sy-hd-fill);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.42s var(--sy-ease), width 0.42s var(--sy-ease), height 0.32s var(--sy-ease), opacity 0.26s linear, background 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-nav-link {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  color: var(--sy-hd-muted);
+  font-size: 13.5px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.3s var(--sy-gentle), background 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-nav-link:hover {
+  background: var(--sy-hd-hover);
+}
+
+html[data-theme='ShanYing'] .sy-nav-link:hover,
+html[data-theme='ShanYing'] .sy-nav-link.is-active {
+  color: var(--sy-hd-text);
+}
+
+/* ── 站标 ── */
+
+html[data-theme='ShanYing'] .sy-brand {
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: var(--sy-hd-text);
+  text-decoration: none;
+}
+
+html[data-theme='ShanYing'] .sy-brand-avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--sy-hd-fill);
+  color: var(--sy-hd-accent);
+  font-size: 13px;
+  font-weight: 700;
+  transition: background 0.3s, color 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-brand-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+html[data-theme='ShanYing'] .sy-brand-title {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  /* 中间 auto 列被两侧挤压时，标题会退化成「一字一行」竖排 —— 禁止换行 */
+  white-space: nowrap;
+  font-family: var(--sy-brand-font);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.16;
+  letter-spacing: 0.005em;
+}
+
+html[data-theme='ShanYing'] .sy-brand-title small {
+  color: var(--sy-hd-muted);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+}
+
+/* 滚动成胶囊后站名收起副标题，把宽度让给导航。
+   2026-09-26：按需求改成**常隐**（顶部态也不再显示），所以选择器去掉了
+   `[data-scrolled='1']` 前置条件。 */
+html[data-theme='ShanYing'] .sy-brand-title small {
+  display: none;
+}
+
+/* ── 工具区 / 圆形图标按钮 ── */
+
+html[data-theme='ShanYing'] .sy-tools {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+html[data-theme='ShanYing'] .sy-icon-button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--sy-hd-muted);
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s, transform 0.3s var(--sy-ease), border-color 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-icon-button:hover {
+  background: var(--sy-hd-hover, var(--sy-soft));
+  color: var(--sy-hd-text);
+}
+
+html[data-theme='ShanYing'] .sy-icon-button:active {
+  transform: scale(0.93);
+}
+
+html[data-theme='ShanYing'] .sy-tool-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* FA 字形在自己的字形盒里有基线/步进偏差，直接依赖 place-items 居中会
+   「图标在圆圈里偏上偏左」。让 <i> 撑满按钮、在内部再做一次精确居中。 */
+html[data-theme='ShanYing'] .sy-icon-button > i {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  line-height: 1;
+}
+
+html[data-theme='ShanYing'] .sy-tool-icon-img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+/* 后台自定义图标多为纯黑填充的 SVG（WordPress / Astro / LiteNote 等），
+   深色模式下在暗色头部里几乎看不见 → 反相成浅色（hue-rotate 保住彩色图标的色相）。 */
+html[data-theme='ShanYing'][data-shanying-mode='dark'] .sy-tool-icon-img {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme='ShanYing']:not([data-shanying-mode='light']) .sy-tool-icon-img {
+    filter: invert(1) hue-rotate(180deg);
+  }
+}
+
+/* ── 深浅三态切换：三个图标叠在一起，按 data-mode 轮播 ── */
+
+html[data-theme='ShanYing'] .sy-mode-toggle .sy-mode-icon {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transform: scale(0.6) rotate(-30deg);
+  transition: opacity 0.32s var(--sy-gentle), transform 0.34s var(--sy-ease);
+}
+
+html[data-theme='ShanYing'] .sy-mode-toggle[data-mode='system'] .sy-mode-system,
+html[data-theme='ShanYing'] .sy-mode-toggle[data-mode='light'] .sy-mode-sun,
+html[data-theme='ShanYing'] .sy-mode-toggle[data-mode='dark'] .sy-mode-moon {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── 搜索：输入框从右侧向左展开 ── */
+
+html[data-theme='ShanYing'] .sy-search {
+  display: flex;
+  align-items: center;
+}
+
+html[data-theme='ShanYing'] .sy-search-form {
+  display: flex;
+  align-items: center;
+  width: 0;
+  margin-right: 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--sy-soft);
+  opacity: 0;
+  transition: width 0.42s var(--sy-ease), margin 0.42s var(--sy-ease), opacity 0.3s var(--sy-gentle);
+}
+
+html[data-theme='ShanYing'] .sy-search[data-open='1'] .sy-search-form {
+  width: 190px;
+  margin-right: 6px;
+  opacity: 1;
+}
+
+html[data-theme='ShanYing'] .sy-search-form input {
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  padding: 0 2px 0 14px;
+  border: 0;
+  background: transparent;
+  color: var(--sy-text);
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+html[data-theme='ShanYing'] .sy-search-form input::-webkit-search-cancel-button {
+  display: none;
+}
+
+html[data-theme='ShanYing'] .sy-search-form button {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  background: transparent;
+  color: var(--sy-muted);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* ── 搜索结果下拉 ── */
+
+html[data-theme='ShanYing'] .sy-search-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: min(360px, calc(100vw - 48px));
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 8px;
+  border: 1px solid var(--sy-line);
+  border-radius: 20px;
+  background: var(--sy-surface);
+  box-shadow: var(--sy-shadow);
+  animation: sy-drop 0.3s var(--sy-ease) both;
+}
+
+html[data-theme='ShanYing'] .sy-search-result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  color: var(--sy-text);
+  font-size: 13px;
+  text-decoration: none;
+  transition: background 0.25s;
+}
+
+html[data-theme='ShanYing'] .sy-search-result:hover {
+  background: var(--sy-soft);
+}
+
+html[data-theme='ShanYing'] .sy-search-result > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html[data-theme='ShanYing'] .sy-search-result small {
+  flex: none;
+  color: var(--sy-muted);
+  font-size: 11px;
+}
+
+html[data-theme='ShanYing'] .sy-search-empty {
+  margin: 0;
+  padding: 14px 12px;
+  color: var(--sy-muted);
+  font-size: 12.5px;
+  text-align: center;
+}
+
+@keyframes sy-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── 汉堡按钮（morph）与移动菜单 ── */
+
+html[data-theme='ShanYing'] .sy-menu-morph {
+  display: none;
+}
+
+html[data-theme='ShanYing'] .sy-menu-morph svg {
+  width: 18px;
+  height: 18px;
+}
+
+html[data-theme='ShanYing'] .sy-menu-morph path {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.38s var(--sy-ease), opacity 0.24s linear;
+}
+
+html[data-theme='ShanYing'] .sy-menu-morph[data-open='true'] .sy-menu-morph-top {
+  transform: translateY(5px) rotate(45deg);
+}
+
+html[data-theme='ShanYing'] .sy-menu-morph[data-open='true'] .sy-menu-morph-middle {
+  opacity: 0;
+  transform: scaleX(0.2);
+}
+
+html[data-theme='ShanYing'] .sy-menu-morph[data-open='true'] .sy-menu-morph-bottom {
+  transform: translateY(-5px) rotate(-45deg);
+}
+
+html[data-theme='ShanYing'] .sy-mobile-nav {
+  position: fixed;
+  top: 88px;
+  left: 50%;
+  z-index: 55;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  width: min(var(--sy-frame), calc(100% - 48px));
+  padding: 10px;
+  border: 1px solid var(--sy-line);
+  border-radius: 22px;
+  background: var(--sy-surface);
+  box-shadow: var(--sy-shadow);
+  transform: translateX(-50%);
+  animation: sy-drop 0.3s var(--sy-ease) both;
+}
+
+html[data-theme='ShanYing'] .sy-mobile-nav a {
+  padding: 11px 14px;
+  border-radius: 14px;
+  color: var(--sy-text);
+  font-size: 14px;
+  text-decoration: none;
+  transition: background 0.25s, color 0.25s;
+}
+
+html[data-theme='ShanYing'] .sy-mobile-nav a:hover,
+html[data-theme='ShanYing'] .sy-mobile-nav a.is-active {
+  background: var(--sy-soft);
+  color: var(--sy-accent);
+}
+
+/* ── 首页头部：通栏白条 + 白底深字 ──────────────────────────────────────
+   原设计是「与页面同宽的浮动胶囊 + 透明底 + 白字」，让 Hero 山水图从头部
+   后面透上来、靠 text-shadow 压对比度。2026-09-26 两次按需求调整：
+
+   1) 底色改白：删掉「透明态切浅色」的变量覆盖、回落到 `.sy-header` 默认的
+      「浅底深字」，并复用滚动胶囊那套 `::before` 显隐机制填上纯白。
+   2) 形状改通栏：不再居中悬浮，改成贴页面顶端、直角、左右不留白，
+      与下方 Hero 图片无缝相接。
+
+   判断条件刻意写成 `:has(.sy-frame > .sy-home)`，也就是 `.sy-frame` 里
+   「唯一那个页面就是首页」——和上面把首页容器放开到通栏的
+   `.sy-frame:has(> .sy-home)` 是同一件事，两条规则永远同步。
+   不用 `:has(.sy-hero)`：那是个后代选择器，只要页面上任何地方出现
+   `.sy-hero` 就会命中（比如把别的页面挂在同一个容器里时），
+   头部会在浅底上变成白字。
+
+   其余页面仍保留「浮动胶囊」造型：`.sy-frame` 有 100px 顶部内边距让开
+   固定头部，头部浮在普通底色上，走默认调色，本来就是白底深字。 */
+
+/* 首页顶部态保留通栏白条；滚动后「回归」到默认的浮动玻璃胶囊，
+   不再强制 100% 宽度与白底 —— 那条胶囊态才是原先为滚动设计的形态
+   （玻璃质感 + 收起「足迹 / 更多」与自定义图标）。 */
+html[data-theme='ShanYing'] .sy-theme:has(.sy-frame > .sy-home) .sy-header:not([data-scrolled='1']) {
+  top: 0;
+  left: 50%;
+  /* 与 Hero 同宽：和 .sy-frame / .sy-hero 共用同一条宽度公式，
+     左右边缘严格对齐（不再通栏）。 */
+  width: min(var(--sy-frame), calc(100% - 48px));
+  transform: translateX(-50%);
+  /* 圆角矩形（不是胶囊），圆角与下方 Hero 面板一致 */
+  border-radius: var(--sy-radius-panel);
+  padding: 0 24px;
+}
+
+html[data-theme='ShanYing'] .sy-theme:has(.sy-frame > .sy-home) .sy-header:not([data-scrolled='1'])::before {
+  opacity: 1;
+  border-color: var(--sy-line);
+  background: var(--sy-surface);
+  box-shadow: 0 6px 20px rgb(20 24 40 / 0.05);
+  backdrop-filter: none;
+}
+
+/* ═══ 4. 首页 Hero（山景档案） ═════════════════════════════════════════ */
+
+html[data-theme='ShanYing'] .sy-home {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding-bottom: 22px;
+}
+
+html[data-theme='ShanYing'] .sy-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  min-height: 660px;
+  /* Hero 与下方内容同宽（由 .sy-frame 决定），从通栏白条下沿开始，
+     所以顶部内边距 = 原 118px 减去头部高度 62px —— 内容仍落在同一个 y 上。 */
+  padding: 56px 34px 32px;
+  overflow: hidden;
+  border-radius: var(--sy-radius-panel);
+  isolation: isolate;
+}
+
+html[data-theme='ShanYing'] .sy-hero-scene {
+  position: absolute;
+  /* 整块 Hero 面板都铺图：面板已让开头部，不需要再给图片单独留顶部偏移。
+     ≤700px 时头部降为 56px，由上方 .sy-frame 的媒体查询跟着调。 */
+  inset: 0;
+  z-index: -1;
+}
+
+html[data-theme='ShanYing'] .sy-hero-scene img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: sy-scene 1.8s var(--sy-gentle) both;
+}
+
+@keyframes sy-scene {
+  from {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Hero 永远压在照片上，所以正文色锁定浅色，不跟主题深浅走。
+   顶部那一段比原主题更重：原主题顶部没有压暗，实测导航文字对比度只有
+   1.8:1；这里用像素级色标把「头部胶囊占据的那 92px」压到 0.62→0.56，
+   保证浅色导航/站标在任何一张山景（含最亮的 day / snow）上都能达到
+   WCAG AA（≥4.5:1），之后回落到 0.16，不影响中段照片观感。
+
+   注意它是 .sy-hero-scene 的**子元素**（见 HomePage.tsx），所以这里保持
+   inset: 0 —— 跟着父级一起下移即可，自己不要再位移一次，否则会叠加。 */
+html[data-theme='ShanYing'] .sy-hero-veil {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgb(10 12 16 / 0.62) 0px,
+      rgb(10 12 16 / 0.56) 92px,
+      rgb(10 12 16 / 0.16) 300px,
+      rgb(10 12 16 / 0.62) 100%
+    ),
+    radial-gradient(120% 72% at 10% 100%, rgb(10 12 16 / 0.5), transparent 62%);
+}
+
+html[data-theme='ShanYing'] .sy-hero,
+html[data-theme='ShanYing'] .sy-hero a {
+  color: #f4f6f9;
+}
+
+html[data-theme='ShanYing'] .sy-hero-top {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 34px;
+}
+
+html[data-theme='ShanYing'] .sy-hero-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 560px;
+}
+
+html[data-theme='ShanYing'] .sy-hero-welcome-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+html[data-theme='ShanYing'] .sy-welcome {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 6px 15px;
+  border: 1px solid rgb(255 255 255 / 0.22);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.1);
+  color: #f4f6f9;
+  font-size: 12.5px;
+  backdrop-filter: blur(10px);
+}
+
+html[data-theme='ShanYing'] .sy-welcome span {
+  color: #fff;
+  animation: sy-pulse 2.6s var(--sy-gentle) infinite;
+}
+
+@keyframes sy-pulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}
+
+html[data-theme='ShanYing'] .sy-hero-social {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+html[data-theme='ShanYing'] .sy-hero-social a {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgb(255 255 255 / 0.2);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.1);
+  font-size: 14px;
+  text-decoration: none;
+  backdrop-filter: blur(10px);
+  transition: transform 0.34s var(--sy-ease), background 0.3s, color 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-hero-social a:hover {
+  transform: translateY(-3px);
+  background: #fff;
+  color: #15181f;
+}
+
+html[data-theme='ShanYing'] .sy-hero-identity h1 {
+  margin: 0;
+  font-family: var(--sy-brand-font);
+  /* 较原稿缩小 30%：clamp(34px, 5.4vw, 62px) → clamp(24px, 3.8vw, 43px) */
+  font-size: clamp(24px, 3.8vw, 43px);
+  font-weight: 700;
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+  color: #fff;
+  text-shadow: 0 2px 28px rgb(0 0 0 / 0.36);
+}
+
+html[data-theme='ShanYing'] .sy-hero-note {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  max-width: 460px;
+  padding: 14px 18px;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-radius: 20px;
+  background: rgb(12 14 18 / 0.34);
+  color: #eef1f5;
+  font-size: 13px;
+  line-height: 1.62;
+  text-decoration: none;
+  backdrop-filter: blur(14px);
+  transition: transform 0.42s var(--sy-ease), background 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-hero-note:hover {
+  transform: translateY(-3px);
+  background: rgb(12 14 18 / 0.48);
+}
+
+html[data-theme='ShanYing'] .sy-hero-note small {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgb(255 255 255 / 0.64);
+  font-size: 11px;
+}
+
+html[data-theme='ShanYing'] .sy-hero-visual {
+  flex: none;
+}
+
+/* ── 首页头像：单块方图（原照片堆已移除） ── */
+
+html[data-theme='ShanYing'] .sy-photo-stack {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+html[data-theme='ShanYing'] .sy-stack-front {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.72);
+  border-radius: 12px;
+  background: rgb(12 14 18 / 0.52);
+  box-shadow: 0 10px 24px rgb(0 0 0 / 0.34);
+  color: rgb(255 255 255 / 0.82);
+  font-size: 20px;
+  transition: transform 0.6s var(--sy-ease);
+}
+
+html[data-theme='ShanYing'] .sy-stack-front img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+html[data-theme='ShanYing'] .sy-photo-stack:hover .sy-stack-front {
+  transform: scale(1.02);
+}
+
+/* ── Hero 下半：热力图 + 最近访客 ── */
+
+html[data-theme='ShanYing'] .sy-hero-bottom {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 18px;
+  /* 把底部两个面板撑到与 Hero 外框同宽，使它们与下方 .sy-hub 等宽对齐。
+     数值与 .sy-hero 在该断点的左右 padding 相反（34 / 24 / 18）。 */
+  width: calc(100% + 68px);
+  margin-inline: -34px;
+}
+
+html[data-theme='ShanYing'] .sy-hero-calendar,
+html[data-theme='ShanYing'] .sy-hero-visitors {
+  padding: 16px 18px;
+  border: 1px solid rgb(255 255 255 / 0.16);
+  border-radius: 22px;
+  background: rgb(10 12 16 / 0.36);
+  color: #eef1f5;
+  backdrop-filter: blur(16px);
+}
+
+html[data-theme='ShanYing'] .sy-hero-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 最近访客：方块内左右两列，左为「最近来聊天的朋友+头像」，右为「发现更多博客+图标」 */
+html[data-theme='ShanYing'] .sy-hero-visitors {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+html[data-theme='ShanYing'] .sy-visitor-col,
+html[data-theme='ShanYing'] .sy-discover-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+html[data-theme='ShanYing'] .sy-visitor-col > small,
+html[data-theme='ShanYing'] .sy-discover-col > small {
+  color: rgb(255 255 255 / 0.62);
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+/* 「发现更多博客」的图标：等宽网格 + 固定单元尺寸，图标一律居中，
+   无论后台配了几个站点入口都按同样的行列对齐，不会因 flex 换行而参差。 */
+html[data-theme='ShanYing'] .sy-discover-links {
+  display: grid;
+  /* 固定 3 列：当前 6 个入口（开往 / 十年之约 + 后台 4 个）正好 2×3 排满，
+     多出来的会继续按同一网格往下对齐，不会出现 flex 换行时的参差。 */
+  grid-template-columns: repeat(3, 32px);
+  justify-content: start;
+  align-content: start;
+  gap: 8px 6px;
+}
+
+html[data-theme='ShanYing'] .sy-discover-links .sy-icon-button {
+  width: 32px;
+  height: 32px;
+  font-size: 13px;
+}
+
+/* 自定义站点图标（内联 SVG / 图片）统一到 16px，和字体图标视觉重量一致 */
+html[data-theme='ShanYing'] .sy-discover-links .sy-tool-icon > svg {
+  width: 16px;
+  height: 16px;
+}
+
+html[data-theme='ShanYing'] .sy-discover-links .sy-tool-icon-img {
+  width: 16px;
+  height: 16px;
+}
+
+html[data-theme='ShanYing'] .sy-discover-label {
+  color: rgb(255 255 255 / 0.45);
+  font-size: 10.5px;
+}
+
+html[data-theme='ShanYing'] .sy-hero-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+html[data-theme='ShanYing'] .sy-hero-heading strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+html[data-theme='ShanYing'] .sy-hero-heading small {
+  color: rgb(255 255 255 / 0.62);
+  font-size: 12px;
+}
+
+html[data-theme='ShanYing'] .sy-hero-badges {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+html[data-theme='ShanYing'] .sy-hero-badges span {
+  color: rgb(255 255 255 / 0.6);
+  font-size: 11.5px;
+}
+
+html[data-theme='ShanYing'] .sy-hero-badges b {
+  color: #fff;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-theme='ShanYing'] .sy-heatmap-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+html[data-theme='ShanYing'] .sy-heatmap-chip span {
+  color: rgb(255 255 255 / 0.5);
+  font-size: 10px;
+}
+
+html[data-theme='ShanYing'] .sy-heatmap-chip i,
+html[data-theme='ShanYing'] .sy-heatmap-mini button {
+  border-radius: 2.5px;
+  background: rgb(255 255 255 / 0.14);
+}
+
+html[data-theme='ShanYing'] .sy-heatmap-chip i {
+  width: 9px;
+  height: 9px;
+}
+
+html[data-theme='ShanYing'] .sy-heatmap-chip i[data-level='1'],
+html[data-theme='ShanYing'] .sy-heatmap-mini button[data-level='1'] {
+  background: color-mix(in srgb, var(--sy-accent) 34%, rgb(255 255 255 / 0.16));
+}
+
+html[data-theme='ShanYing'] .sy-heatmap-chip i[data-level='2'],
+html[data-theme='ShanYing'] .sy-heatmap-mini button[data-level='2'] {
+  background: color-mix(in srgb, var(--sy-accent) 58%, rgb(255 255 255 / 0.16));
+}
+
+html[data-theme='ShanYing'] .sy-heatmap-chip i[data-level='3'],
+html[data-theme='ShanYing'] .sy-heatmap-mini button[data-level='3'] {
+  background: color-mix(in srgb, var(--sy-accent) 80%, rgb(255 255 255 / 0.16));
+}
+
+html[data-theme='ShanYing'] .sy-heatmap-chip i[data-level='4'],
+html[data-theme='ShanYing'] .sy-heatmap-mini button[data-level='4'] {
+  background: var(--sy-accent);
+}
+
+/* 90 天 = 30 列 × 3 行，与原主题 home-profile.css 同构 */
+html[data-theme='ShanYing'] .sy-heatmap-mini {
+  display: grid;
+  grid-template-columns: repeat(30, minmax(0, 1fr));
+  gap: 3px;
+}
+
+html[data-theme='ShanYing'] .sy-heatmap-mini button {
+  aspect-ratio: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  cursor: default;
+  transition: transform 0.25s var(--sy-ease);
+}
+
+html[data-theme='ShanYing'] .sy-heatmap-mini button:hover {
+  transform: scale(1.35);
+}
+
+html[data-theme='ShanYing'] .sy-visitor-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  padding-block: 4px;
+}
+
+html[data-theme='ShanYing'] .sy-visitor {
+  width: 38px;
+  height: 38px;
+  margin-left: -10px;
+  overflow: hidden;
+  border: 2px solid rgb(255 255 255 / 0.28);
+  border-radius: 50%;
+  background: rgb(12 14 18 / 0.6);
+  transition: transform 0.36s var(--sy-ease), margin 0.36s var(--sy-ease), border-color 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-visitor:first-child {
+  margin-left: 0;
+}
+
+html[data-theme='ShanYing'] .sy-visitor img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+html[data-theme='ShanYing'] .sy-visitor-row:hover .sy-visitor {
+  margin-left: 2px;
+}
+
+html[data-theme='ShanYing'] .sy-visitor:hover {
+  transform: translateY(-5px);
+  border-color: #fff;
+}
+
+html[data-theme='ShanYing'] .sy-visitor-empty {
+  color: rgb(255 255 255 / 0.5);
+  font-size: 12px;
+}
+
+/* 旧版「图标挂在标题行右侧」的写法（inline-flex + margin-left:auto），
+   已由上方 999 行附近的等宽网格取代：这里只保留配色与尺寸。 */
+html[data-theme='ShanYing'] .sy-discover-links .sy-icon-button {
+  width: 32px;
+  height: 32px;
+  color: rgb(255 255 255 / 0.8);
+}
+
+html[data-theme='ShanYing'] .sy-discover-links .sy-icon-button:hover {
+  background: rgb(255 255 255 / 0.16);
+  color: #fff;
+}
+
+/* 「发现更多博客」里的自定义站点图标（原顶栏右上角那一排，2026-09-26 移来）：
+   后台配的多是纯黑填充的 SVG（WordPress / Astro / LiteNote），Hero 是暗色山景，
+   直接用等于看不见 —— 统一反相成浅色，和左边两个字体图标（开往 / 十年之约）
+   保持同一观感。这里的选择器比深色模式那条更具体，能覆盖它的滤镜。 */
+html[data-theme='ShanYing'] .sy-discover-links .sy-tool-link .sy-tool-icon-img,
+html[data-theme='ShanYing'] .sy-discover-links .sy-tool-link .sy-tool-icon > svg {
+  filter: brightness(0) invert(1);
+  opacity: 0.8;
+}
+
+html[data-theme='ShanYing'] .sy-discover-links .sy-tool-link:hover .sy-tool-icon-img,
+html[data-theme='ShanYing'] .sy-discover-links .sy-tool-link:hover .sy-tool-icon > svg {
+  opacity: 1;
+}
+
+/* ═══ 5. 文章分类台（feng-article-hub） ═══════════════════════════════ */
+
+html[data-theme='ShanYing'] .sy-hub {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* 分类标签条：每个分类是一张「上图下名」的小图块 */
+html[data-theme='ShanYing'] .sy-hub-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+html[data-theme='ShanYing'] .sy-hub-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+html[data-theme='ShanYing'] .sy-hub-tabs button {
+  display: flex;
+  /* 铺满整行：各卡均分容器宽度，与页面同宽；放不下时保持最小宽并横向滚动 */
+  flex: 1 1 0;
+  min-width: 96px;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--sy-line);
+  border-radius: 20px;
+  background: var(--sy-surface);
+  color: var(--sy-muted);
+  font-family: inherit;
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.38s var(--sy-ease), border-color 0.3s, background 0.3s, color 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-hub-tabs button:hover {
+  transform: translateY(-3px);
+  color: var(--sy-text);
+}
+
+html[data-theme='ShanYing'] .sy-hub-tabs button[data-active='1'] {
+  border-color: var(--sy-accent);
+  background: color-mix(in srgb, var(--sy-accent) 7%, var(--sy-surface));
+  color: var(--sy-text);
+}
+
+html[data-theme='ShanYing'] .sy-hub-tab-image {
+  display: grid;
+  place-items: center;
+  height: 66px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--sy-soft);
+  color: var(--sy-muted);
+  font-size: 22px;
+}
+
+html[data-theme='ShanYing'] .sy-hub-tab-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+html[data-theme='ShanYing'] .sy-hub-tab-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* 面板主体 */
+html[data-theme='ShanYing'] .sy-hub-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px 24px;
+  border: 1px solid var(--sy-line);
+  border-radius: var(--sy-radius-panel);
+  background: var(--sy-surface);
+  box-shadow: var(--sy-shadow);
+}
+
+html[data-theme='ShanYing'] .sy-hub-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--sy-line);
+}
+
+html[data-theme='ShanYing'] .sy-hub-sorts {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+html[data-theme='ShanYing'] .sy-hub-sorts button {
+  padding: 7px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--sy-muted);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-hub-sorts button:hover {
+  color: var(--sy-text);
+}
+
+html[data-theme='ShanYing'] .sy-hub-sorts button[data-active='1'] {
+  background: var(--sy-text);
+  color: var(--sy-surface);
+}
+
+html[data-theme='ShanYing'] .sy-hub-pager {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+html[data-theme='ShanYing'] .sy-hub-head-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+html[data-theme='ShanYing'] .sy-hub-views {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--sy-line);
+  border-radius: 999px;
+}
+
+html[data-theme='ShanYing'] .sy-hub-views button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--sy-muted);
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-hub-views button:hover {
+  color: var(--sy-text);
+}
+
+html[data-theme='ShanYing'] .sy-hub-views button[data-active='1'] {
+  background: var(--sy-text);
+  color: var(--sy-surface);
+}
+
+/* 宫格视图：三列以内的封面宫格，复用分类宫格卡 */
+html[data-theme='ShanYing'] .sy-hub-grid {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+html[data-theme='ShanYing'] .sy-hub-pager a,
+html[data-theme='ShanYing'] .sy-hub-pager span {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--sy-line);
+  border-radius: 50%;
+  color: var(--sy-text);
+  font-size: 12px;
+  text-decoration: none;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-hub-pager a:hover {
+  background: var(--sy-soft);
+  border-color: var(--sy-muted);
+}
+
+html[data-theme='ShanYing'] .sy-hub-pager .is-disabled {
+  opacity: 0.35;
+}
+
+html[data-theme='ShanYing'] .sy-hub-pager em {
+  color: var(--sy-muted);
+  font-size: 12px;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 左列表 + 右大预览 */
+html[data-theme='ShanYing'] .sy-hub-body {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 22px;
+  align-items: start;
+}
+
+html[data-theme='ShanYing'] .sy-hub-list {
+  display: flex;
+  flex-direction: column;
+}
+
+html[data-theme='ShanYing'] .sy-hub-list-item {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 10px;
+  border-bottom: 1px solid var(--sy-line);
+  border-radius: 14px;
+  transition: background 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-hub-list-item:last-child {
+  border-bottom: 0;
+}
+
+html[data-theme='ShanYing'] .sy-hub-list-item[data-active='1'] {
+  background: var(--sy-soft);
+}
+
+html[data-theme='ShanYing'] .sy-hub-list-index {
+  color: var(--sy-muted);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-theme='ShanYing'] .sy-hub-list-title {
+  overflow: hidden;
+  color: var(--sy-text);
+  font-size: 14px;
+  text-decoration: none;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition: color 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-hub-list-item[data-active='1'] .sy-hub-list-title {
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-hub-list-date {
+  color: var(--sy-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-theme='ShanYing'] .sy-hub-empty {
+  margin: 0;
+  padding: 28px 8px;
+  color: var(--sy-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+html[data-theme='ShanYing'] .sy-hub-empty a {
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-hub-preview {
+  position: sticky;
+  top: 96px;
+  aspect-ratio: 4 / 3.3;
+  overflow: hidden;
+  border-radius: var(--sy-radius-card);
+  background: var(--sy-soft);
+}
+
+html[data-theme='ShanYing'] .sy-hub-preview-inner {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  color: #fff;
+  text-decoration: none;
+}
+
+html[data-theme='ShanYing'] .sy-hub-preview-inner img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.9s var(--sy-gentle);
+}
+
+html[data-theme='ShanYing'] .sy-hub-preview-inner:hover img {
+  transform: scale(1.05);
+}
+
+html[data-theme='ShanYing'] .sy-hub-preview-veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(10 12 16 / 0.08) 28%, rgb(10 12 16 / 0.84) 100%);
+}
+
+html[data-theme='ShanYing'] .sy-hub-preview-copy {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 20px;
+}
+
+html[data-theme='ShanYing'] .sy-hub-preview-copy strong {
+  font-family: var(--sy-brand-font);
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.36;
+}
+
+html[data-theme='ShanYing'] .sy-hub-preview-copy em {
+  display: -webkit-box;
+  overflow: hidden;
+  color: rgb(255 255 255 / 0.74);
+  font-size: 12.5px;
+  font-style: normal;
+  line-height: 1.66;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+html[data-theme='ShanYing'] .sy-hub-preview-blank {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--sy-muted);
+  font-size: 30px;
+}
+
+/* 标签云：恒为一行，超出容器的直接裁掉并在右缘做渐隐，绝不撑破布局 */
+html[data-theme='ShanYing'] .sy-hub-tags {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  padding-top: 16px;
+  border-top: 1px solid var(--sy-line);
+  mask-image: linear-gradient(to right, #000 calc(100% - 42px), transparent);
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 42px), transparent);
+}
+
+html[data-theme='ShanYing'] .sy-hub-tags a,
+html[data-theme='ShanYing'] .sy-hub-tags-label {
+  flex: none;
+  white-space: nowrap;
+}
+
+html[data-theme='ShanYing'] .sy-hub-tags-label {
+  color: var(--sy-muted);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+html[data-theme='ShanYing'] .sy-hub-tags a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  padding: 5px 10px;
+  border: 1px solid var(--sy-line);
+  border-radius: 999px;
+  color: var(--sy-muted);
+  font-size: 11.5px;
+  text-decoration: none;
+  transition: transform 0.3s var(--sy-ease), border-color 0.3s, color 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-hub-tags a:hover {
+  transform: translateY(-2px);
+  border-color: var(--sy-accent);
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-hub-tags sup {
+  font-size: 9px;
+  opacity: 0.7;
+}
+
+/* ═══ 6. 三种文章卡片 ═══════════════════════════════════════════════════ */
+
+html[data-theme='ShanYing'] .sy-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* ── 6.1 封面卡：上图下文，标题区用封面主色（--sy-card-tone 由 JS 内联注入） ── */
+
+html[data-theme='ShanYing'] .sy-cover-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--sy-line);
+  border-radius: var(--sy-radius-card);
+  background: var(--sy-surface);
+  box-shadow: var(--sy-shadow);
+  transition: transform 0.6s var(--sy-ease), box-shadow 0.5s, border-color 0.4s, opacity 0.8s var(--sy-gentle);
+}
+
+html[data-theme='ShanYing'] .sy-cover-card[data-pending='1'],
+html[data-theme='ShanYing'] .sy-recent-row[data-pending='1'],
+html[data-theme='ShanYing'] .sy-hub[data-pending='1'] {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+html[data-theme='ShanYing'] .sy-cover-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 28px 66px rgb(20 24 40 / 0.12);
+}
+
+html[data-theme='ShanYing'] .sy-cover-card-image {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--sy-soft);
+}
+
+html[data-theme='ShanYing'] .sy-cover-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.9s var(--sy-gentle);
+}
+
+html[data-theme='ShanYing'] .sy-cover-card:hover .sy-cover-card-image img {
+  transform: scale(1.06);
+}
+
+/* 图片底部渐隐进标题区，接缝与正文底色完全同色 */
+html[data-theme='ShanYing'] .sy-cover-card-image::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 46%;
+  background: linear-gradient(180deg, rgb(0 0 0 / 0), var(--sy-card-tone, #1a2428));
+  pointer-events: none;
+}
+
+html[data-theme='ShanYing'] .sy-cover-card-blank {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(140deg, var(--sy-card-tone, #1a2428), color-mix(in srgb, var(--sy-card-tone, #1a2428) 55%, #000));
+}
+
+html[data-theme='ShanYing'] .sy-cover-card-category {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgb(12 14 18 / 0.5);
+  color: #fff;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(10px);
+}
+
+html[data-theme='ShanYing'] .sy-cover-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px 20px;
+  background: var(--sy-card-tone, #1a2428);
+  color: #f2f5f8;
+}
+
+html[data-theme='ShanYing'] .sy-cover-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgb(255 255 255 / 0.58);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-theme='ShanYing'] .sy-cover-card-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+html[data-theme='ShanYing'] .sy-cover-card-meta span:last-child {
+  margin-left: auto;
+  font-size: 15px;
+  transition: transform 0.4s var(--sy-ease);
+}
+
+html[data-theme='ShanYing'] .sy-cover-card:hover .sy-cover-card-meta span:last-child {
+  transform: translate(3px, -3px);
+}
+
+html[data-theme='ShanYing'] .sy-cover-card-title {
+  margin: 0;
+  font-family: var(--sy-brand-font);
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.36;
+  letter-spacing: -0.005em;
+}
+
+html[data-theme='ShanYing'] .sy-cover-card-title a {
+  color: #fff;
+  text-decoration: none;
+}
+
+html[data-theme='ShanYing'] .sy-cover-card-title a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+html[data-theme='ShanYing'] .sy-cover-card-excerpt {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: rgb(255 255 255 / 0.62);
+  font-size: 12.5px;
+  line-height: 1.7;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* ── 6.2 分类宫格卡：整图作底，标题压左下角，悬浮上浮换出摘要 ── */
+
+html[data-theme='ShanYing'] .sy-cover-card--tile {
+  aspect-ratio: 3 / 4;
+  justify-content: flex-end;
+}
+
+html[data-theme='ShanYing'] .sy-cover-card--tile .sy-cover-card-image {
+  position: absolute;
+  inset: 0;
+  aspect-ratio: auto;
+}
+
+html[data-theme='ShanYing'] .sy-cover-card--tile .sy-cover-card-image::after {
+  height: 100%;
+  background: linear-gradient(180deg, rgb(10 12 16 / 0.2) 0%, rgb(0 0 0 / 0) 34%, var(--sy-card-tone, #1a2428) 100%);
+}
+
+html[data-theme='ShanYing'] .sy-cover-card--tile .sy-cover-card-body {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  padding: 18px;
+  background: transparent;
+}
+
+html[data-theme='ShanYing'] .sy-cover-card--tile .sy-cover-card-title {
+  font-size: 17px;
+}
+
+html[data-theme='ShanYing'] .sy-card-corners {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgb(12 14 18 / 0.5);
+  color: rgb(255 255 255 / 0.82);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  backdrop-filter: blur(10px);
+}
+
+html[data-theme='ShanYing'] .sy-card-corners span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+html[data-theme='ShanYing'] .sy-card-hover-summary {
+  max-height: 0;
+  margin: 0;
+  overflow: hidden;
+  opacity: 0;
+  color: rgb(255 255 255 / 0.68);
+  font-size: 12px;
+  line-height: 1.68;
+  transition: max-height 0.5s var(--sy-ease), margin 0.5s var(--sy-ease), opacity 0.4s var(--sy-gentle);
+}
+
+html[data-theme='ShanYing'] .sy-cover-card--tile:hover .sy-card-hover-summary {
+  max-height: 92px;
+  margin-top: 8px;
+  opacity: 1;
+}
+
+/* ── 6.3 最新文章行：128px 缩略图 + 文案 + 圆形箭头 ── */
+
+html[data-theme='ShanYing'] .sy-recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+html[data-theme='ShanYing'] .sy-recent-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 128px 1fr auto;
+  align-items: center;
+  gap: 18px;
+  padding: 12px;
+  border: 1px solid var(--sy-line);
+  border-radius: var(--sy-radius-row);
+  background: var(--sy-surface);
+  transition: transform 0.5s var(--sy-ease), box-shadow 0.45s, border-color 0.4s, opacity 0.7s var(--sy-gentle);
+}
+
+html[data-theme='ShanYing'] .sy-recent-row:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--sy-accent) 40%, var(--sy-line));
+  box-shadow: var(--sy-shadow);
+}
+
+html[data-theme='ShanYing'] .sy-recent-row-image {
+  display: block;
+  width: 128px;
+  height: 96px;
+  overflow: hidden;
+  border-radius: var(--sy-radius-thumb);
+  background: var(--sy-soft);
+}
+
+html[data-theme='ShanYing'] .sy-recent-row-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.8s var(--sy-gentle);
+}
+
+html[data-theme='ShanYing'] .sy-recent-row:hover .sy-recent-row-image img {
+  transform: scale(1.07);
+}
+
+html[data-theme='ShanYing'] .sy-recent-row-blank {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background: var(--sy-soft);
+  color: var(--sy-muted);
+  font-size: 22px;
+}
+
+html[data-theme='ShanYing'] .sy-recent-row-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+html[data-theme='ShanYing'] .sy-recent-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--sy-muted);
+  font-size: 11px;
+}
+
+html[data-theme='ShanYing'] .sy-recent-row-meta > span:first-child {
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-recent-row-copy h2 {
+  margin: 0;
+  font-family: var(--sy-brand-font);
+  font-size: 16.5px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+html[data-theme='ShanYing'] .sy-recent-row-copy h2 a {
+  color: var(--sy-text);
+  text-decoration: none;
+}
+
+html[data-theme='ShanYing'] .sy-recent-row-copy h2 a:hover {
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-recent-row-copy p {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: var(--sy-muted);
+  font-size: 12.5px;
+  line-height: 1.65;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+html[data-theme='ShanYing'] .sy-recent-row-arrow {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--sy-line);
+  border-radius: 50%;
+  color: var(--sy-muted);
+  font-size: 15px;
+  transition: background 0.4s, border-color 0.4s, color 0.4s, transform 0.5s var(--sy-ease);
+}
+
+html[data-theme='ShanYing'] .sy-recent-row:hover .sy-recent-row-arrow {
+  transform: rotate(45deg);
+  border-color: var(--sy-accent);
+  background: var(--sy-accent);
+  color: var(--sy-accent-text);
+}
+
+/* ── 6.4 首页第 2 页起的纯列表 + 分页 ── */
+
+html[data-theme='ShanYing'] .sy-home-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+html[data-theme='ShanYing'] .sy-section-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+html[data-theme='ShanYing'] .sy-section-heading p {
+  margin: 0;
+  color: var(--sy-muted);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+html[data-theme='ShanYing'] .sy-section-heading h2 {
+  margin: 0;
+  font-family: var(--sy-brand-font);
+  font-size: 26px;
+  font-weight: 700;
+}
+
+html[data-theme='ShanYing'] .sy-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-top: 8px;
+}
+
+html[data-theme='ShanYing'] .sy-pagination a {
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 18px;
+  border: 1px solid var(--sy-line);
+  border-radius: 999px;
+  background: var(--sy-surface);
+  color: var(--sy-text);
+  font-size: 13px;
+  text-decoration: none;
+  transition: transform 0.3s var(--sy-ease), border-color 0.3s, color 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-pagination a:hover {
+  transform: translateY(-2px);
+  border-color: var(--sy-accent);
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-pagination em {
+  color: var(--sy-muted);
+  font-size: 12px;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 分类图标：后台可填 FA 类名 / 图片 / 内联 SVG */
+html[data-theme='ShanYing'] .sy-cat-icon {
+  display: inline-block;
+  flex: none;
+  color: var(--sy-accent);
+  vertical-align: middle;
+}
+
+/* ═══ 7. 文章页 ═════════════════════════════════════════════════════════ */
+
+html[data-theme='ShanYing'] .sy-article {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--sy-line);
+  border-radius: var(--sy-radius-panel);
+  background: var(--sy-surface);
+  box-shadow: var(--sy-shadow);
+}
+
+/* ── 7.1 头图 Hero ── */
+
+html[data-theme='ShanYing'] .sy-entry-hero {
+  position: relative;
+  padding: 44px 34px 30px;
+  overflow: hidden;
+}
+
+html[data-theme='ShanYing'] .sy-entry-hero--image {
+  padding: 130px 34px 40px;
+  color: #f4f6f9;
+  isolation: isolate;
+}
+
+html[data-theme='ShanYing'] .sy-entry-hero-media {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+html[data-theme='ShanYing'] .sy-entry-hero-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 文章页头图不像首页那样顶到最上沿（.sy-frame 保留 100px 顶部内边距让开
+   固定头部），所以这里沿用原主题的压暗节奏，不需要为导航额外加深。 */
+html[data-theme='ShanYing'] .sy-entry-hero-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(8 10 14 / 0.55) 0%, rgb(8 10 14 / 0.32) 45%, rgb(8 10 14 / 0.78) 100%);
+}
+
+html[data-theme='ShanYing'] .sy-entry-hero-copy {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: var(--sy-reading);
+}
+
+html[data-theme='ShanYing'] .sy-entry-hero-copy h1 {
+  margin: 0;
+  font-family: var(--sy-brand-font);
+  font-size: clamp(26px, 3.6vw, 40px);
+  font-weight: 700;
+  line-height: 1.28;
+  letter-spacing: -0.01em;
+}
+
+/* ── 7.2 信息药丸：静息只显示值，悬浮/聚焦时向上长出标签 ── */
+
+html[data-theme='ShanYing'] .sy-entry-tools {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+html[data-theme='ShanYing'] .sy-entry-facts {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  /* 给向上长出的标签留出视觉空间 */
+  padding-top: 30px;
+  margin-top: -30px;
+}
+
+html[data-theme='ShanYing'] .sy-entry-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 14px;
+  border: 1px solid var(--sy-line);
+  border-radius: 999px;
+  background: var(--sy-soft);
+  color: var(--sy-text);
+  font-size: 12px;
+  cursor: default;
+  transition: background 0.35s, border-color 0.35s;
+}
+
+html[data-theme='ShanYing'] .sy-entry-hero--image .sy-entry-pill {
+  border-color: rgb(255 255 255 / 0.22);
+  background: rgb(12 14 18 / 0.32);
+  color: #f2f5f8;
+  backdrop-filter: blur(12px);
+}
+
+html[data-theme='ShanYing'] .sy-entry-pill-label {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--sy-text);
+  color: var(--sy-surface);
+  font-size: 10px;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, 8px) scale(0.86);
+  pointer-events: none;
+  transition: opacity 0.3s var(--sy-gentle), transform 0.42s var(--sy-ease);
+}
+
+html[data-theme='ShanYing'] .sy-entry-pill:hover .sy-entry-pill-label,
+html[data-theme='ShanYing'] .sy-entry-pill:focus-visible .sy-entry-pill-label {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+html[data-theme='ShanYing'] .sy-entry-pill-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+html[data-theme='ShanYing'] .sy-entry-pill-value > i {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+html[data-theme='ShanYing'] .sy-entry-avatar {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--sy-accent);
+  color: var(--sy-accent-text);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+html[data-theme='ShanYing'] .sy-entry-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+html[data-theme='ShanYing'] .sy-entry-author {
+  font-weight: 500;
+}
+
+/* ── 7.3 右侧圆形动作钮 + 分享溅开 ── */
+
+html[data-theme='ShanYing'] .sy-entry-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+html[data-theme='ShanYing'] .sy-entry-round {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--sy-line);
+  border-radius: 50%;
+  background: var(--sy-surface);
+  color: var(--sy-text);
+  font-size: 15px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.4s var(--sy-ease), background 0.3s, border-color 0.3s, color 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-entry-round:hover {
+  transform: translateY(-3px);
+  border-color: var(--sy-accent);
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-entry-hero--image .sy-entry-round {
+  border-color: rgb(255 255 255 / 0.24);
+  background: rgb(12 14 18 / 0.32);
+  color: #f2f5f8;
+  backdrop-filter: blur(12px);
+}
+
+html[data-theme='ShanYing'] .sy-entry-hero--image .sy-entry-round:hover {
+  border-color: #fff;
+  background: #fff;
+  color: #15181f;
+}
+
+html[data-theme='ShanYing'] .sy-share {
+  position: relative;
+}
+
+html[data-theme='ShanYing'] .sy-share-toggle .sy-share-cross {
+  display: none;
+}
+
+html[data-theme='ShanYing'] .sy-share[data-open='1'] .sy-share-toggle .sy-share-glyph {
+  display: none;
+}
+
+html[data-theme='ShanYing'] .sy-share[data-open='1'] .sy-share-toggle .sy-share-cross {
+  display: inline;
+}
+
+html[data-theme='ShanYing'] .sy-share-options {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 12px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+html[data-theme='ShanYing'] .sy-share[data-open='1'] .sy-share-options {
+  pointer-events: auto;
+}
+
+html[data-theme='ShanYing'] .sy-share-choice {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(14px) scale(0.6);
+  transition: opacity 0.34s var(--sy-gentle), transform 0.46s var(--sy-ease), filter 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-share[data-open='1'] .sy-share-choice {
+  opacity: 1;
+  transform: none;
+}
+
+html[data-theme='ShanYing'] .sy-share[data-open='1'] .sy-share-choice:nth-child(1) { transition-delay: 0.06s; }
+html[data-theme='ShanYing'] .sy-share[data-open='1'] .sy-share-choice:nth-child(2) { transition-delay: 0.12s; }
+html[data-theme='ShanYing'] .sy-share[data-open='1'] .sy-share-choice:nth-child(3) { transition-delay: 0.18s; }
+
+html[data-theme='ShanYing'] .sy-share-choice:hover {
+  filter: brightness(1.12);
+}
+
+html[data-theme='ShanYing'] .sy-share-wechat { background: #07c160; }
+html[data-theme='ShanYing'] .sy-share-weibo { background: #e6162d; }
+html[data-theme='ShanYing'] .sy-share-x { background: #111111; }
+
+/* ── 7.4 底部卷边曲线：把头图收进卡片正文色 ── */
+
+html[data-theme='ShanYing'] .sy-entry-curve {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  display: block;
+  width: 100%;
+  height: 24px;
+}
+
+html[data-theme='ShanYing'] .sy-entry-curve path {
+  fill: var(--sy-surface);
+}
+
+/* ── 7.5 正文区 ── */
+
+html[data-theme='ShanYing'] .sy-entry-body {
+  width: 100%;
+  max-width: calc(var(--sy-reading) + 68px);
+  margin-inline: auto;
+  padding: 34px 34px 10px;
+}
+
+html[data-theme='ShanYing'] .sy-article-text {
+  font-family: var(--sy-reading-font);
+}
+
+/* ── 7.6 正文长文排版 ──
+ * 段落节奏直接对齐原主题 typography.css 的「中文长文阅读」一节：
+ * 17px / 行高 1.85 / 标题 600 字重 / 段间距 1.2em。
+ * 注意：Utterlog 的 globals.css 不含 .blog-prose 排版，这部分必须由主题
+ * 自己提供，否则正文会退回浏览器默认样式。 */
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose {
+  width: 100%;
+  color: var(--sy-text);
+  font-family: var(--sy-reading-font);
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.85;
+  letter-spacing: normal;
+  word-break: normal;
+  text-align: start;
+  -webkit-font-smoothing: antialiased;
+}
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose > :first-child {
+  margin-top: 0;
+}
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose p {
+  margin-block: 0 1.2em;
+  line-height: 1.85;
+}
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose :is(h1, h2, h3, h4, h5, h6) {
+  margin-block: 1.8em 0.65em;
+  color: var(--sy-text);
+  font-family: var(--sy-brand-font);
+  font-weight: 600;
+  line-height: 1.45;
+  letter-spacing: normal;
+  text-wrap: pretty;
+  scroll-margin-top: 100px;
+}
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose h1 { font-size: 30px; }
+html[data-theme='ShanYing'] .sy-article-text .blog-prose h2 { font-size: 26px; }
+html[data-theme='ShanYing'] .sy-article-text .blog-prose h3 { font-size: 21px; }
+html[data-theme='ShanYing'] .sy-article-text .blog-prose h4 { font-size: 18px; }
+html[data-theme='ShanYing'] .sy-article-text .blog-prose :is(h5, h6) { font-size: 17px; }
+
+/* 连续标题之间收紧一点，避免出现两段同样大的留白 */
+html[data-theme='ShanYing'] .sy-article-text .blog-prose :is(h1, h2, h3, h4) + :is(h2, h3, h4) {
+  margin-top: 0.9em;
+}
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose :is(ul, ol) {
+  margin-block: 0 1.2em;
+  padding-inline-start: 1.6em;
+  line-height: 1.85;
+}
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose li {
+  margin-block: 0.35em;
+  padding-inline-start: 0.15em;
+}
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose li :is(ul, ol) {
+  margin-block: 0.35em;
+}
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose li > p {
+  margin-bottom: 0.5em;
+}
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose a {
+  color: var(--sy-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose blockquote {
+  margin-block: 1.5em;
+  padding: 16px 22px;
+  border: 0;
+  border-left: 3px solid var(--sy-accent);
+  border-radius: 0 var(--sy-radius-thumb) var(--sy-radius-thumb) 0;
+  background: var(--sy-soft);
+  color: var(--sy-muted);
+  font-size: 16px;
+  line-height: 1.85;
+}
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose blockquote p {
+  margin-bottom: 0;
+  font-size: inherit;
+}
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose hr {
+  margin-block: 2.4em;
+  border: 0;
+  border-top: 1px solid var(--sy-line);
+}
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose :is(table, th, td) {
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose table {
+  width: 100%;
+  margin-block: 1.6em;
+  border-collapse: collapse;
+}
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose :is(th, td) {
+  padding: 12px 14px;
+  border: 1px solid var(--sy-line);
+  vertical-align: top;
+  text-align: left;
+}
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose th {
+  background: var(--sy-soft);
+  font-weight: 600;
+}
+
+/* 行内代码：浅底描边，跟正文同一行不跳脱 */
+html[data-theme='ShanYing'] .sy-article-text .blog-prose code {
+  padding: 0.12em 0.4em;
+  border: 1px solid var(--sy-line);
+  border-radius: 5px;
+  background: var(--sy-soft);
+  color: var(--sy-text);
+  font-family: var(--font-mono);
+  font-size: 0.84em;
+}
+
+/* 代码块保持深色：共享的 code-highlight-styles.css 就是按深色底设计的 */
+html[data-theme='ShanYing'] .sy-article-text .blog-prose pre {
+  margin-block: 1.6em;
+  padding: 16px 18px;
+  overflow-x: auto;
+  border: 1px solid var(--sy-line);
+  border-radius: var(--sy-radius-thumb);
+  background: var(--sy-code-bg);
+  color: var(--sy-code-text);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.7;
+  tab-size: 2;
+}
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose pre code {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: inherit;
+}
+
+html[data-theme='ShanYing'] .sy-article-text .code-block-wrapper {
+  border-radius: var(--sy-radius-thumb);
+  background: var(--sy-code-bg);
+}
+
+html[data-theme='ShanYing'] .sy-article-text .code-block-wrapper pre {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+html[data-theme='ShanYing'] .sy-article-text .code-copy-btn {
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.08);
+  color: var(--sy-code-text);
+}
+
+html[data-theme='ShanYing'] .sy-article-text .code-copy-btn:hover {
+  background: rgb(255 255 255 / 0.16);
+}
+
+html[data-theme='ShanYing'] .sy-article-text .code-expand-btn {
+  border-radius: 0 0 var(--sy-radius-thumb) var(--sy-radius-thumb);
+  background: var(--sy-code-bg);
+  color: var(--sy-code-text);
+  font-family: var(--font-mono);
+}
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose :is(img, video) {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--sy-radius-thumb);
+  background: var(--sy-soft);
+}
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose .blog-image {
+  display: block;
+  margin: 2em 0;
+}
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose .blog-image img {
+  width: 100%;
+}
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose figure {
+  margin: 2em 0;
+}
+
+html[data-theme='ShanYing'] .sy-article-text .blog-prose figcaption {
+  margin-top: 10px;
+  color: var(--sy-muted);
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* ── 7.7 共享组件在主题下的配色 ── */
+
+html[data-theme='ShanYing'] .blog-ai-summary {
+  margin: 0 0 32px;
+  padding: 20px 22px;
+  border: 1px solid color-mix(in srgb, var(--sy-accent) 24%, var(--sy-line));
+  border-radius: var(--sy-radius-row);
+  background: color-mix(in srgb, var(--sy-accent) 5%, var(--sy-surface));
+}
+
+html[data-theme='ShanYing'] .blog-ai-summary-header {
+  margin-bottom: 10px;
+  color: var(--sy-accent);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+html[data-theme='ShanYing'] .blog-ai-summary-body {
+  color: var(--sy-muted);
+  font-size: 14.5px;
+  line-height: 1.85;
+}
+
+html[data-theme='ShanYing'] .blog-toc {
+  border-left-color: var(--sy-line);
+}
+
+html[data-theme='ShanYing'] .blog-toc-header {
+  color: var(--sy-muted);
+}
+
+html[data-theme='ShanYing'] .blog-toc-item {
+  color: var(--sy-muted);
+  transition: color 0.25s;
+}
+
+html[data-theme='ShanYing'] .blog-toc-item:hover {
+  color: var(--sy-text);
+}
+
+html[data-theme='ShanYing'] .blog-toc-item.active {
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .post-nav-section .post-prev-next,
+html[data-theme='ShanYing'] .post-nav-section .post-related-card {
+  border-radius: var(--sy-radius-row);
+}
+
+/* 时效提醒：只在文章超过一年未更新时出现 */
+html[data-theme='ShanYing'] .sy-article-age {
+  margin: 0 0 26px;
+  padding: 16px 20px;
+  border: 1px solid color-mix(in srgb, #e8a33d 42%, var(--sy-line));
+  border-radius: 18px;
+  background: color-mix(in srgb, #e8a33d 10%, var(--sy-surface));
+}
+
+html[data-theme='ShanYing'] .sy-article-age strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  color: var(--sy-text);
+  font-size: 13.5px;
+}
+
+html[data-theme='ShanYing'] .sy-article-age strong::before {
+  content: '';
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #e8a33d;
+}
+
+html[data-theme='ShanYing'] .sy-article-age p {
+  margin: 0;
+  color: var(--sy-muted);
+  font-size: 12.5px;
+  line-height: 1.72;
+}
+
+/* ── 7.8 END 印章 + 版权块 ── */
+
+html[data-theme='ShanYing'] .sy-article-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  width: 100%;
+  max-width: calc(var(--sy-reading) + 68px);
+  margin-inline: auto;
+  padding: 10px 34px 40px;
+}
+
+html[data-theme='ShanYing'] .sy-article-end {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+html[data-theme='ShanYing'] .sy-article-end::before,
+html[data-theme='ShanYing'] .sy-article-end::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--sy-line);
+}
+
+html[data-theme='ShanYing'] .sy-article-end span {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--sy-line);
+  border-radius: 50%;
+  color: var(--sy-muted);
+  font-family: var(--sy-brand-font);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}
+
+html[data-theme='ShanYing'] .sy-article-copyright {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px 24px;
+  border: 1px solid var(--sy-line);
+  border-radius: var(--sy-radius-row);
+  background: var(--sy-soft);
+}
+
+html[data-theme='ShanYing'] .sy-article-copyright h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  font-family: var(--sy-brand-font);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+html[data-theme='ShanYing'] .sy-article-copyright dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: 12px 20px;
+  margin: 0;
+}
+
+html[data-theme='ShanYing'] .sy-article-copyright dl > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+html[data-theme='ShanYing'] .sy-article-copyright dt {
+  color: var(--sy-muted);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+html[data-theme='ShanYing'] .sy-article-copyright dd {
+  margin: 0;
+  color: var(--sy-text);
+  font-size: 13px;
+}
+
+html[data-theme='ShanYing'] .sy-article-copyright dd a {
+  color: var(--sy-accent);
+  text-decoration: none;
+}
+
+html[data-theme='ShanYing'] .sy-article-copyright dd a:hover {
+  text-decoration: underline;
+}
+
+html[data-theme='ShanYing'] .sy-copyright-source,
+html[data-theme='ShanYing'] .sy-copyright-keywords {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+html[data-theme='ShanYing'] .sy-copyright-source > span,
+html[data-theme='ShanYing'] .sy-copyright-keywords > span {
+  flex: none;
+  color: var(--sy-muted);
+  font-size: 11px;
+}
+
+html[data-theme='ShanYing'] .sy-copyright-link {
+  padding: 0;
+  border: 0;
+  border-bottom: 1px dashed var(--sy-line);
+  background: transparent;
+  color: var(--sy-text);
+  font-family: inherit;
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+}
+
+html[data-theme='ShanYing'] .sy-copyright-link:hover {
+  border-color: var(--sy-accent);
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-copyright-keywords a {
+  padding: 4px 11px;
+  border: 1px solid var(--sy-line);
+  border-radius: 999px;
+  color: var(--sy-muted);
+  font-size: 11.5px;
+  text-decoration: none;
+  transition: color 0.3s, border-color 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-copyright-keywords a:hover {
+  border-color: var(--sy-accent);
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-copyright-rule {
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--sy-line);
+  color: var(--sy-muted);
+  font-size: 11.5px;
+  line-height: 1.78;
+}
+
+html[data-theme='ShanYing'] .sy-copyright-rule span {
+  display: block;
+  opacity: 0.82;
+}
+
+/* ── 7.9 再读一篇 / 评论区 ── */
+
+html[data-theme='ShanYing'] .sy-related,
+html[data-theme='ShanYing'] .sy-comments {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 26px 26px 24px;
+  border: 1px solid var(--sy-line);
+  border-radius: var(--sy-radius-panel);
+  background: var(--sy-surface);
+  box-shadow: var(--sy-shadow);
+}
+
+html[data-theme='ShanYing'] .sy-related-heading,
+html[data-theme='ShanYing'] .sy-comments-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+html[data-theme='ShanYing'] .sy-related-heading h2,
+html[data-theme='ShanYing'] .sy-comments-heading h2 {
+  margin: 4px 0 0;
+  font-family: var(--sy-brand-font);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+/* 共享的目录 / 相关文章也跟随主题配色 */
+html[data-theme='ShanYing'] .blog-toc-item.active {
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .post-nav-section .post-prev-next,
+html[data-theme='ShanYing'] .post-nav-section .post-related-card {
+  border-radius: var(--sy-radius-row);
+}
+
+/* ── 7.10 上一篇 / 下一篇 + 相关文章（PostNavigation 共享组件） ──
+   该组件只有其他主题（Utterlog/Nebula/Renascent）各自提供样式，ShanYing
+   此前只给了圆角 → 封面图按原始宽高比全宽渲染，底部「页脚图片」巨大且
+   拖慢加载。这里按主题版式补齐：封面绝对定位裁切 + 固定高度的小卡。 */
+
+html[data-theme='ShanYing'] .post-nav-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── 上一篇 / 下一篇 ── */
+
+html[data-theme='ShanYing'] .post-prev-next {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+html[data-theme='ShanYing'] .post-prev-next-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 116px;
+  overflow: hidden;
+  border-radius: var(--sy-radius-row);
+  background: var(--sy-soft);
+  isolation: isolate;
+}
+
+html[data-theme='ShanYing'] .post-prev-next-link.next {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+html[data-theme='ShanYing'] .post-prev-next-cover {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+html[data-theme='ShanYing'] .post-prev-next-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 压暗封面，保证白字对比度（浅色/深色模式都用同一层黑纱） */
+html[data-theme='ShanYing'] .post-prev-next-cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgb(10 14 22 / 0.62), rgb(10 14 22 / 0.34));
+}
+
+html[data-theme='ShanYing'] .post-prev-next-link.next .post-prev-next-cover::after {
+  background: linear-gradient(270deg, rgb(10 14 22 / 0.62), rgb(10 14 22 / 0.34));
+}
+
+html[data-theme='ShanYing'] .post-prev-next-text {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-width: 78%;
+  padding: 16px 20px;
+}
+
+html[data-theme='ShanYing'] .post-prev-next-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: rgb(255 255 255 / 0.78);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+}
+
+html[data-theme='ShanYing'] .post-prev-next-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+/* ── 相关文章标签 + 卡片 ── */
+
+html[data-theme='ShanYing'] .post-related-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+html[data-theme='ShanYing'] .post-related-tab {
+  padding: 7px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--sy-soft);
+  color: var(--sy-muted);
+  font-family: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: background 0.25s, color 0.25s;
+}
+
+html[data-theme='ShanYing'] .post-related-tab:hover:not(:disabled) {
+  color: var(--sy-text);
+}
+
+html[data-theme='ShanYing'] .post-related-tab.active {
+  background: var(--sy-accent);
+  color: var(--sy-accent-text);
+}
+
+html[data-theme='ShanYing'] .post-related-tab:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+html[data-theme='ShanYing'] .post-related-refresh {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--sy-muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.25s, color 0.25s;
+}
+
+html[data-theme='ShanYing'] .post-related-refresh:hover {
+  background: var(--sy-soft);
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .post-related-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+html[data-theme='ShanYing'] .post-related-card {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: var(--sy-radius-row);
+  background: var(--sy-soft);
+  text-decoration: none;
+}
+
+html[data-theme='ShanYing'] .post-related-card-cover {
+  position: absolute;
+  inset: 0;
+}
+
+html[data-theme='ShanYing'] .post-related-card-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+html[data-theme='ShanYing'] .post-related-card-date,
+html[data-theme='ShanYing'] .post-related-card-cat {
+  position: absolute;
+  top: 10px;
+  z-index: 2;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgb(12 16 24 / 0.45);
+  color: rgb(255 255 255 / 0.92);
+  font-size: 11px;
+  backdrop-filter: blur(6px);
+}
+
+html[data-theme='ShanYing'] .post-related-card-date {
+  right: 10px;
+}
+
+html[data-theme='ShanYing'] .post-related-card-cat {
+  left: 10px;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html[data-theme='ShanYing'] .post-related-card-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  background: linear-gradient(transparent 45%, rgb(8 12 20 / 0.62));
+  opacity: 0;
+  transition: opacity 0.3s var(--sy-gentle);
+}
+
+html[data-theme='ShanYing'] .post-related-card:hover .post-related-card-overlay,
+html[data-theme='ShanYing'] .post-related-card:focus-visible .post-related-card-overlay {
+  opacity: 1;
+}
+
+html[data-theme='ShanYing'] .post-related-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  color: #fff;
+}
+
+html[data-theme='ShanYing'] .post-related-card-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+html[data-theme='ShanYing'] .post-related-card-stats {
+  flex: none;
+  color: rgb(255 255 255 / 0.8);
+  font-size: 11px;
+}
+
+html[data-theme='ShanYing'] .post-related-empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 26px 12px;
+  color: var(--sy-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  html[data-theme='ShanYing'] .post-prev-next {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-theme='ShanYing'] .post-related-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  html[data-theme='ShanYing'] .post-prev-next-text {
+    max-width: 88%;
+  }
+}
+
+/* ═══ 8. 悬浮阅读工具条（feng-reading-tools） ═══════════════════════ */
+
+html[data-theme='ShanYing'] .sy-reading-tools {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid var(--sy-line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--sy-glass) 86%, transparent);
+  box-shadow: 0 16px 40px rgb(20 24 40 / 0.12);
+  opacity: 0;
+  transform: translate(-50%, 20px);
+  pointer-events: none;
+  backdrop-filter: saturate(160%) blur(18px);
+  transition: opacity 0.42s var(--sy-gentle), transform 0.5s var(--sy-ease);
+}
+
+html[data-theme='ShanYing'] .sy-reading-tools[data-visible='1'] {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+
+html[data-theme='ShanYing'] .sy-reading-btn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--sy-muted);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-reading-btn:hover {
+  background: var(--sy-soft);
+  color: var(--sy-text);
+}
+
+html[data-theme='ShanYing'] .sy-reading-btn[data-pressed='true'] {
+  background: var(--sy-accent);
+  color: var(--sy-accent-text);
+}
+
+html[data-theme='ShanYing'] .sy-reading-percent {
+  min-width: 46px;
+  color: var(--sy-text);
+  font-size: 12px;
+  text-align: center;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-theme='ShanYing'] .sy-reading-panel {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 12px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(360px, calc(100vw - 40px));
+  max-height: min(58vh, 460px);
+  padding: 16px;
+  border: 1px solid var(--sy-line);
+  border-radius: 22px;
+  background: var(--sy-surface);
+  box-shadow: var(--sy-shadow);
+  transform: translateX(-50%);
+  animation: sy-rise 0.36s var(--sy-ease) both;
+}
+
+@keyframes sy-rise {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+html[data-theme='ShanYing'] .sy-reading-panel > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--sy-muted);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+html[data-theme='ShanYing'] .sy-reading-panel > header button {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--sy-line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--sy-muted);
+  cursor: pointer;
+}
+
+html[data-theme='ShanYing'] .sy-reading-toc {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+/* 共享目录组件在面板里要放弃 sticky，否则会跟着外层面板一起错位 */
+html[data-theme='ShanYing'] .sy-reading-toc .blog-toc {
+  position: static !important;
+  top: auto !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+html[data-theme='ShanYing'] .sy-reading-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px;
+  border-top: 1px solid var(--sy-line);
+  color: var(--sy-accent);
+  font-size: 12.5px;
+  text-decoration: none;
+}
+
+/* 专注阅读：把正文之外的区块整体降噪 */
+html[data-theme='ShanYing'][data-sy-focus='1'] .sy-related,
+html[data-theme='ShanYing'][data-sy-focus='1'] .sy-comments,
+html[data-theme='ShanYing'][data-sy-focus='1'] .sy-footer {
+  opacity: 0.26;
+  filter: grayscale(0.55);
+  transition: opacity 0.5s var(--sy-gentle), filter 0.5s var(--sy-gentle);
+}
+
+/* ═══ 9. 归档 / 分类 / 标签 ═════════════════════════════════════════════ */
+
+html[data-theme='ShanYing'] .sy-archive,
+html[data-theme='ShanYing'] .sy-taxonomy {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+html[data-theme='ShanYing'] .sy-archive-head {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 8px;
+}
+
+html[data-theme='ShanYing'] .sy-archive-head h1 {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  font-family: var(--sy-brand-font);
+  font-size: clamp(28px, 4.4vw, 42px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+html[data-theme='ShanYing'] .sy-archive-title-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 46px;
+  height: 46px;
+  overflow: hidden;
+  border: 1px solid var(--sy-line);
+  border-radius: 16px;
+  background: var(--sy-surface);
+  color: var(--sy-accent);
+  font-size: 19px;
+}
+
+html[data-theme='ShanYing'] .sy-archive-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  color: var(--sy-muted);
+  font-size: 12.5px;
+}
+
+html[data-theme='ShanYing'] .sy-archive-stats b {
+  color: var(--sy-text);
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-theme='ShanYing'] .sy-taxonomy-desc {
+  max-width: 760px;
+  margin: 0;
+  color: var(--sy-muted);
+  font-size: 13.5px;
+  line-height: 1.85;
+}
+
+html[data-theme='ShanYing'] .sy-archive-block {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px 24px;
+  border: 1px solid var(--sy-line);
+  border-radius: var(--sy-radius-panel);
+  background: var(--sy-surface);
+  box-shadow: var(--sy-shadow);
+}
+
+html[data-theme='ShanYing'] .sy-archive-block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+html[data-theme='ShanYing'] .sy-archive-block-head h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  font-family: var(--sy-brand-font);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+html[data-theme='ShanYing'] .sy-archive-block-head h2 i {
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-archive-block-head > span {
+  color: var(--sy-muted);
+  font-size: 11.5px;
+}
+
+/* ── 整年热力图（53 周 × 7 天） ── */
+
+html[data-theme='ShanYing'] .sy-heatmap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+html[data-theme='ShanYing'] .sy-heatmap-months {
+  display: flex;
+  gap: 3px;
+  overflow: hidden;
+  color: var(--sy-muted);
+  font-size: 9.5px;
+}
+
+html[data-theme='ShanYing'] .sy-heatmap-months span {
+  flex: none;
+  width: 10px;
+  white-space: nowrap;
+}
+
+html[data-theme='ShanYing'] .sy-heatmap-grid {
+  display: flex;
+  gap: 3px;
+}
+
+html[data-theme='ShanYing'] .sy-heatmap-week {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+html[data-theme='ShanYing'] .sy-heatmap-grid i,
+html[data-theme='ShanYing'] .sy-heatmap-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 2.5px;
+  background: var(--sy-heat-0);
+}
+
+html[data-theme='ShanYing'] .sy-heatmap-grid i[data-level='1'],
+html[data-theme='ShanYing'] .sy-heatmap-legend i[data-level='1'] { background: var(--sy-heat-1); }
+html[data-theme='ShanYing'] .sy-heatmap-grid i[data-level='2'],
+html[data-theme='ShanYing'] .sy-heatmap-legend i[data-level='2'] { background: var(--sy-heat-2); }
+html[data-theme='ShanYing'] .sy-heatmap-grid i[data-level='3'],
+html[data-theme='ShanYing'] .sy-heatmap-legend i[data-level='3'] { background: var(--sy-heat-3); }
+html[data-theme='ShanYing'] .sy-heatmap-grid i[data-level='4'],
+html[data-theme='ShanYing'] .sy-heatmap-legend i[data-level='4'] { background: var(--sy-heat-4); }
+
+html[data-theme='ShanYing'] .sy-heatmap-grid i[data-future='1'] {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--sy-line);
+}
+
+html[data-theme='ShanYing'] .sy-heatmap-legend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  color: var(--sy-muted);
+  font-size: 10px;
+}
+
+html[data-theme='ShanYing'] .sy-heatmap-legend em {
+  margin-left: 10px;
+  font-style: normal;
+  opacity: 0.82;
+}
+
+/* ── 分类总览：四列卡片，带图标 / 描述 / 最新一篇 ── */
+
+html[data-theme='ShanYing'] .sy-archive-cats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 14px;
+}
+
+html[data-theme='ShanYing'] .sy-archive-cat {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px;
+  border: 1px solid var(--sy-line);
+  border-radius: var(--sy-radius-row);
+  background: var(--sy-soft);
+  transition: transform 0.45s var(--sy-ease), border-color 0.35s;
+}
+
+html[data-theme='ShanYing'] .sy-archive-cat:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--sy-accent) 45%, var(--sy-line));
+}
+
+html[data-theme='ShanYing'] .sy-archive-cat > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+html[data-theme='ShanYing'] .sy-archive-cat > header a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--sy-text);
+  font-family: var(--sy-brand-font);
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+html[data-theme='ShanYing'] .sy-archive-cat > header a:hover {
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-archive-cat > header > span {
+  flex: none;
+  color: var(--sy-muted);
+  font-size: 11px;
+}
+
+html[data-theme='ShanYing'] .sy-archive-cat > p {
+  margin: 0;
+  color: var(--sy-muted);
+  font-size: 12.5px;
+  line-height: 1.72;
+}
+
+html[data-theme='ShanYing'] .sy-archive-cat-latest {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--sy-line);
+  color: var(--sy-text);
+  font-size: 12.5px;
+  text-decoration: none;
+}
+
+html[data-theme='ShanYing'] .sy-archive-cat-latest > span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+html[data-theme='ShanYing'] .sy-archive-cat-latest time {
+  flex: none;
+  color: var(--sy-muted);
+  font-size: 11px;
+}
+
+html[data-theme='ShanYing'] .sy-archive-cat-latest:hover > span {
+  color: var(--sy-accent);
+}
+
+/* ── 标签云 ── */
+
+html[data-theme='ShanYing'] .sy-archive-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+html[data-theme='ShanYing'] .sy-archive-tags a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 6px 13px;
+  border: 1px solid var(--sy-line);
+  border-radius: 999px;
+  color: var(--sy-muted);
+  font-size: 12.5px;
+  text-decoration: none;
+  transition: transform 0.3s var(--sy-ease), color 0.3s, border-color 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-archive-tags a:hover {
+  transform: translateY(-2px);
+  border-color: var(--sy-accent);
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-archive-tags sup {
+  font-size: 9px;
+  opacity: 0.65;
+}
+
+html[data-theme='ShanYing'] .sy-archive-tags--large a {
+  padding: 9px 17px;
+  font-size: 14px;
+}
+
+/* ── 年 / 月 / 日 时间线 ── */
+
+html[data-theme='ShanYing'] .sy-archive-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 26px 26px 30px;
+  border: 1px solid var(--sy-line);
+  border-radius: var(--sy-radius-panel);
+  background: var(--sy-surface);
+  box-shadow: var(--sy-shadow);
+}
+
+html[data-theme='ShanYing'] .sy-archive-year > header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+html[data-theme='ShanYing'] .sy-archive-year > header a {
+  color: var(--sy-text);
+  font-family: var(--sy-brand-font);
+  font-size: 30px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-archive-year > header a:hover {
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-archive-year > header span {
+  color: var(--sy-muted);
+  font-size: 11.5px;
+}
+
+html[data-theme='ShanYing'] .sy-archive-month {
+  margin-bottom: 12px;
+  padding-left: 18px;
+  border-left: 2px solid var(--sy-line);
+}
+
+html[data-theme='ShanYing'] .sy-archive-month-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  text-decoration: none;
+}
+
+html[data-theme='ShanYing'] .sy-archive-month-head h3 {
+  margin: 0;
+  color: var(--sy-text);
+  font-size: 14.5px;
+  font-weight: 600;
+  transition: color 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-archive-month-head:hover h3 {
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-archive-month-head > span {
+  color: var(--sy-muted);
+  font-size: 11px;
+}
+
+html[data-theme='ShanYing'] .sy-archive-month ol {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+html[data-theme='ShanYing'] .sy-archive-month li {
+  display: grid;
+  grid-template-columns: 54px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  transition: background 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-archive-month li:hover {
+  background: var(--sy-soft);
+}
+
+html[data-theme='ShanYing'] .sy-archive-month li time {
+  color: var(--sy-muted);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-theme='ShanYing'] .sy-archive-post {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--sy-text);
+  font-size: 13.5px;
+  text-decoration: none;
+}
+
+html[data-theme='ShanYing'] .sy-archive-post > span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+html[data-theme='ShanYing'] .sy-archive-post:hover > span {
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-archive-post-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--sy-muted);
+  font-size: 11px;
+}
+
+html[data-theme='ShanYing'] .sy-archive-post-stats span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+html[data-theme='ShanYing'] .sy-archive-empty {
+  margin: 0;
+  padding: 28px 10px;
+  color: var(--sy-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+html[data-theme='ShanYing'] .sy-archive-empty a {
+  color: var(--sy-accent);
+}
+
+/* ═══ 10. 404 ═══════════════════════════════════════════════════════════ */
+
+html[data-theme='ShanYing'] .sy-notfound {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: min(78vh, 620px);
+  padding: 60px 40px;
+  overflow: hidden;
+  border-radius: var(--sy-radius-panel);
+  isolation: isolate;
+}
+
+html[data-theme='ShanYing'] .sy-notfound-scene {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+html[data-theme='ShanYing'] .sy-notfound-scene img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+html[data-theme='ShanYing'] .sy-notfound-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 560px;
+  color: #f4f6f9;
+}
+
+html[data-theme='ShanYing'] .sy-notfound-copy .sy-kicker {
+  color: rgb(255 255 255 / 0.7);
+}
+
+html[data-theme='ShanYing'] .sy-notfound-copy h1 {
+  margin: 0;
+  font-family: var(--sy-brand-font);
+  font-size: clamp(30px, 5vw, 52px);
+  font-weight: 700;
+  line-height: 1.12;
+}
+
+html[data-theme='ShanYing'] .sy-notfound-copy p {
+  margin: 0;
+  color: rgb(255 255 255 / 0.76);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+html[data-theme='ShanYing'] .sy-notfound-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+html[data-theme='ShanYing'] .sy-notfound-actions .sy-btn {
+  border-color: rgb(255 255 255 / 0.28);
+  background: rgb(255 255 255 / 0.12);
+  color: #fff;
+  backdrop-filter: blur(10px);
+}
+
+html[data-theme='ShanYing'] .sy-notfound-actions .sy-btn:hover {
+  background: rgb(255 255 255 / 0.22);
+}
+
+html[data-theme='ShanYing'] .sy-notfound-actions .sy-btn--solid {
+  border-color: var(--sy-accent);
+  background: var(--sy-accent);
+  color: var(--sy-accent-text);
+}
+
+/* ═══ 11. 页脚（四季底图）与返回顶部 ═══════════════════════════════════ */
+
+html[data-theme='ShanYing'] .sy-footer {
+  position: relative;
+  flex: 0 0 auto;
+  width: min(var(--sy-frame), calc(100% - 48px));
+  margin-inline: auto;
+  margin-top: 40px;
+  overflow: hidden;
+  border-radius: var(--sy-radius-panel) var(--sy-radius-panel) 0 0;
+  isolation: isolate;
+}
+
+html[data-theme='ShanYing'] .sy-footer-landscape {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+html[data-theme='ShanYing'] .sy-footer-landscape img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+html[data-theme='ShanYing'] .sy-footer-veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(10 12 16 / 0.58) 0%, rgb(10 12 16 / 0.84) 100%);
+}
+
+html[data-theme='ShanYing'] .sy-footer-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  padding: 46px 34px 30px;
+  color: #eef1f5;
+}
+
+html[data-theme='ShanYing'] .sy-footer-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+
+html[data-theme='ShanYing'] .sy-footer-brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  color: rgb(255 255 255 / 0.68);
+  font-size: 12.5px;
+}
+
+html[data-theme='ShanYing'] .sy-footer-name {
+  color: #fff;
+  font-family: var(--sy-brand-font);
+  font-size: 17px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+html[data-theme='ShanYing'] .sy-footer-rights {
+  color: rgb(255 255 255 / 0.5);
+  font-size: 11.5px;
+}
+
+html[data-theme='ShanYing'] .sy-footer-links {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+html[data-theme='ShanYing'] .sy-footer-links a {
+  color: rgb(255 255 255 / 0.74);
+  font-size: 12.5px;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-footer-links a:hover {
+  color: #fff;
+}
+
+/* 页脚中部统计：三项，每项是「图标 · 数字 · 标签」。
+   2026-09-27 改版去掉了页脚导航里的 RSS 与 owner.bio 那一行；
+   更早的 `.sy-footer-live` / `.sy-footer-dot` 实时统计规则也已不再使用。 */
+
+/* 页脚右侧：文章 / 评论 */
+html[data-theme='ShanYing'] .sy-footer-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+}
+
+html[data-theme='ShanYing'] .sy-footer-stats span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgb(255 255 255 / 0.62);
+  font-size: 11.5px;
+}
+
+html[data-theme='ShanYing'] .sy-footer-stats b {
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 法务行：左边站点副标题那行，右边博主入口（HomeAuthDock，仅首页）。
+   窄屏放不下时换行，按钮掉到第二行右对齐。 */
+html[data-theme='ShanYing'] .sy-footer-legal {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 22px;
+  padding-top: 22px;
+  border-top: 1px solid rgb(255 255 255 / 0.14);
+}
+
+html[data-theme='ShanYing'] .sy-footer-meta {
+  margin: 0;
+  color: rgb(255 255 255 / 0.5);
+  font-size: 11.5px;
+  line-height: 1.8;
+}
+
+html[data-theme='ShanYing'] .sy-footer-meta a {
+  color: rgb(255 255 255 / 0.78);
+}
+
+html[data-theme='ShanYing'] .sy-top {
+  position: fixed;
+  right: 26px;
+  bottom: 26px;
+  z-index: 54;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid var(--sy-line);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--sy-glass) 88%, transparent);
+  color: var(--sy-text);
+  font-size: 15px;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(16px) scale(0.9);
+  pointer-events: none;
+  box-shadow: var(--sy-shadow);
+  backdrop-filter: blur(14px);
+  transition: opacity 0.4s var(--sy-gentle), transform 0.48s var(--sy-ease), background 0.3s, border-color 0.3s, color 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-top[data-visible='1'] {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+html[data-theme='ShanYing'] .sy-top:hover {
+  border-color: var(--sy-accent);
+  background: var(--sy-accent);
+  color: var(--sy-accent-text);
+}
+
+/* ═══ 12. 页脚右下角的博主入口（HomeAuthDock） ═════════════════════════ */
+
+/* 原主题没有这个组件（WordPress 靠顶部管理条），所以没有可复刻的样式。
+   胶囊里只有一颗按钮 —— 未登录是「登录」，已登录是「头像 + 昵称 ⌄」，
+   后台入口收在弹出菜单里，不再单独占一格。
+
+   2026-09-27 改版：原来是「固定在视口左下角的玻璃胶囊」，现在收进页脚右下角，
+   和页脚法务行同一排、右对齐，跟着页脚一起滚动，仍然只在首页出现。
+
+   为什么不再用 --sy-glass 那套主题令牌：页脚底下常年压着四季山水图（偏暗），
+   与页面自身的浅/深色无关，所以这里改用固定的白色透明系，跟页脚文字同语言。
+   旧的浮层版位置沿革留个档：.sy-header fixed top:18 居中 z-60、
+   .sy-top fixed right:26 / bottom:26 z-54、
+   .sy-reading-tools fixed left:50% / bottom:22 z-55（仅文章页）——
+   当年四个角只剩左下角是空的，所以浮层放那儿；现在收进页脚，都不冲突了。 */
+html[data-theme='ShanYing'] .sy-auth-dock {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid rgb(255 255 255 / 0.2);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.08);
+  color: #fff;
+  backdrop-filter: saturate(150%) blur(14px);
+  animation: sy-dock-in 0.5s var(--sy-gentle) both;
+}
+
+/* 页脚底是暗的，按钮配色不能跟着主题的浅/深色令牌走 */
+html[data-theme='ShanYing'] .sy-footer-legal .sy-auth-item {
+  color: rgb(255 255 255 / 0.86);
+}
+
+html[data-theme='ShanYing'] .sy-footer-legal .sy-auth-item i {
+  color: rgb(255 255 255 / 0.6);
+}
+
+html[data-theme='ShanYing'] .sy-footer-legal .sy-auth-item:hover,
+html[data-theme='ShanYing'] .sy-footer-legal .sy-auth-item:focus-visible {
+  background: rgb(255 255 255 / 0.14);
+  color: #fff;
+}
+
+html[data-theme='ShanYing'] .sy-footer-legal .sy-auth-item:hover i,
+html[data-theme='ShanYing'] .sy-footer-legal .sy-auth-item:focus-visible i {
+  color: #fff;
+}
+
+html[data-theme='ShanYing'] .sy-footer-legal .sy-auth-avatar {
+  background: rgb(255 255 255 / 0.16);
+  color: #fff;
+}
+
+/* 弹出菜单贴着页脚右缘向上弹，别越出页脚 */
+html[data-theme='ShanYing'] .sy-footer-legal .sy-auth-menu {
+  left: auto;
+  right: 0;
+}
+
+@keyframes sy-dock-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+html[data-theme='ShanYing'] .sy-auth-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 13px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--sy-text);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.28s var(--sy-gentle), color 0.28s;
+}
+
+html[data-theme='ShanYing'] .sy-auth-item i {
+  font-size: 12px;
+  color: var(--sy-muted);
+  transition: color 0.28s;
+}
+
+html[data-theme='ShanYing'] .sy-auth-item:hover,
+html[data-theme='ShanYing'] .sy-auth-item:focus-visible {
+  background: var(--sy-soft);
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-auth-item:hover i,
+html[data-theme='ShanYing'] .sy-auth-item:focus-visible i {
+  color: var(--sy-accent);
+}
+
+/* 已登录：唯一那颗按钮换成账号按钮，点开向上弹小菜单 */
+html[data-theme='ShanYing'] .sy-auth-account {
+  position: relative;
+  display: inline-flex;
+}
+
+html[data-theme='ShanYing'] .sy-auth-avatar {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--sy-soft);
+  color: var(--sy-text);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+html[data-theme='ShanYing'] .sy-auth-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+html[data-theme='ShanYing'] .sy-auth-caret {
+  font-size: 10px !important;
+  transition: transform 0.3s var(--sy-ease);
+}
+
+html[data-theme='ShanYing'] .sy-auth-user[aria-expanded='true'] .sy-auth-caret {
+  transform: rotate(180deg);
+}
+
+html[data-theme='ShanYing'] .sy-auth-menu {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 10px);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  min-width: 148px;
+  padding: 5px;
+  border: 1px solid var(--sy-line);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--sy-glass) 94%, transparent);
+  box-shadow: var(--sy-shadow);
+  backdrop-filter: saturate(165%) blur(18px);
+  animation: sy-dock-in 0.26s var(--sy-gentle) both;
+}
+
+html[data-theme='ShanYing'] .sy-auth-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--sy-text);
+  font-family: inherit;
+  font-size: 12.5px;
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.24s var(--sy-gentle), color 0.24s;
+}
+
+html[data-theme='ShanYing'] .sy-auth-menu-item i {
+  font-size: 12px;
+  color: var(--sy-muted);
+  transition: color 0.24s;
+}
+
+html[data-theme='ShanYing'] .sy-auth-menu-item:hover {
+  background: var(--sy-soft);
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-auth-menu-item:hover i {
+  color: var(--sy-accent);
+}
+
+/* ═══ 13. 响应式 ════════════════════════════════════════════════════════ */
+
+@media (max-width: 1050px) {
+  html[data-theme='ShanYing'] .sy-hero-bottom {
+    grid-template-columns: 1fr;
+  }
+
+  html[data-theme='ShanYing'] .sy-hub-body {
+    grid-template-columns: 1fr;
+  }
+
+  /* 窄屏把大预览提到列表上方，避免右侧空一列 */
+  html[data-theme='ShanYing'] .sy-hub-preview {
+    position: relative;
+    top: 0;
+    order: -1;
+    aspect-ratio: 16 / 9;
+  }
+}
+
+@media (max-width: 900px) {
+  /* 导航收进汉堡；display:none 的项不再参与 grid 排布，改成两列 */
+  html[data-theme='ShanYing'] .sy-header {
+    grid-template-columns: 1fr auto;
+  }
+
+  html[data-theme='ShanYing'] .sy-nav {
+    display: none;
+  }
+
+  html[data-theme='ShanYing'] .sy-brand {
+    justify-self: start;
+  }
+
+  html[data-theme='ShanYing'] .sy-menu-morph {
+    display: grid;
+  }
+
+  html[data-theme='ShanYing'] .sy-mobile-nav {
+    display: flex;
+  }
+
+  html[data-theme='ShanYing'] .sy-frame {
+    width: calc(100% - 32px);
+  }
+
+  /* 首页白条跟着 Hero 收窄到同一个宽度 */
+  html[data-theme='ShanYing'] .sy-theme:has(.sy-frame > .sy-home) .sy-header:not([data-scrolled='1']) {
+    width: calc(100% - 32px);
+    padding: 0 20px;
+  }
+
+  html[data-theme='ShanYing'] .sy-hero {
+    padding: 44px 24px 26px;
+  }
+
+  html[data-theme='ShanYing'] .sy-hero-bottom {
+    width: calc(100% + 48px);
+    margin-inline: -24px;
+  }
+
+  html[data-theme='ShanYing'] .sy-footer {
+    width: calc(100% - 32px);
+  }
+
+  html[data-theme='ShanYing'] .sy-footer-main {
+    flex-wrap: wrap;
+  }
+
+  html[data-theme='ShanYing'] .sy-hero-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  html[data-theme='ShanYing'] .sy-hero-visual {
+    align-self: center;
+  }
+
+  html[data-theme='ShanYing'] .sy-entry-hero,
+  html[data-theme='ShanYing'] .sy-entry-hero--image {
+    padding: 108px 22px 30px;
+  }
+
+  html[data-theme='ShanYing'] .sy-entry-body,
+  html[data-theme='ShanYing'] .sy-article-footer {
+    padding-inline: 22px;
+  }
+}
+
+@media (max-width: 700px) {
+  html[data-theme='ShanYing'] .sy-frame {
+    width: calc(100% - 24px);
+    gap: 18px;
+  }
+
+  /* 首页：头部在这个断点降为 56px，Hero 让开的顶部内边距跟着收（:has 选择器
+     优先级高于上面那条，必须写在媒体查询里、且用同一个 :has 选择器覆盖） */
+  html[data-theme='ShanYing'] .sy-frame:has(> .sy-home) {
+    padding-top: 70px;
+  }
+
+  html[data-theme='ShanYing'] .sy-header {
+    width: calc(100% - 24px);
+    height: 56px;
+    padding: 0 6px 0 8px;
+  }
+
+  /* 首页头部只在顶部态与 Hero 同宽（滚动后回归浮动胶囊） */
+  html[data-theme='ShanYing'] .sy-theme:has(.sy-frame > .sy-home) .sy-header:not([data-scrolled='1']) {
+    width: calc(100% - 24px);
+    padding: 0 14px;
+  }
+
+
+  html[data-theme='ShanYing'] .sy-header[data-scrolled='1'] {
+    width: calc(100% - 36px);
+  }
+
+  /* 手机上把次要按钮让给搜索与菜单，避免挤成一团 */
+  html[data-theme='ShanYing'] .sy-header .sy-mode-toggle,
+  html[data-theme='ShanYing'] .sy-header a[href='/rss'] {
+    display: none;
+  }
+
+  html[data-theme='ShanYing'] .sy-search[data-open='1'] .sy-search-form {
+    width: 132px;
+  }
+
+  html[data-theme='ShanYing'] .sy-search-panel {
+    right: -4px;
+    width: calc(100vw - 24px);
+  }
+
+  html[data-theme='ShanYing'] .sy-mobile-nav {
+    top: 80px;
+    width: calc(100% - 24px);
+  }
+
+  html[data-theme='ShanYing'] .sy-hero {
+    min-height: 0;
+    padding: 36px 18px 22px;
+    border-radius: 22px;
+  }
+
+  html[data-theme='ShanYing'] .sy-hero-bottom {
+    width: calc(100% + 36px);
+    margin-inline: -18px;
+  }
+
+  /* 手机上访客面板左右太挤，改为上下堆叠 */
+  html[data-theme='ShanYing'] .sy-hero-visitors {
+    grid-template-columns: 1fr;
+  }
+
+  html[data-theme='ShanYing'] .sy-footer {
+    width: calc(100% - 24px);
+  }
+
+  html[data-theme='ShanYing'] .sy-footer-main {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  html[data-theme='ShanYing'] .sy-hero-identity h1 {
+    font-size: clamp(20px, 6.3vw, 28px);
+  }
+
+  html[data-theme='ShanYing'] .sy-photo-stack {
+    width: 90px;
+    height: 90px;
+  }
+
+  /* 15 列 × 6 行，一格保持可点大小 */
+  html[data-theme='ShanYing'] .sy-heatmap-mini {
+    grid-template-columns: repeat(15, minmax(0, 1fr));
+  }
+
+  html[data-theme='ShanYing'] .sy-heatmap-grid {
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+
+  html[data-theme='ShanYing'] .sy-hub-panel,
+  html[data-theme='ShanYing'] .sy-archive-block,
+  html[data-theme='ShanYing'] .sy-archive-timeline,
+  html[data-theme='ShanYing'] .sy-related,
+  html[data-theme='ShanYing'] .sy-comments {
+    padding: 18px 16px;
+  }
+
+  html[data-theme='ShanYing'] .sy-hub-tabs button {
+    min-width: 84px;
+  }
+
+  html[data-theme='ShanYing'] .sy-recent-row {
+    grid-template-columns: 96px 1fr;
+    gap: 14px;
+  }
+
+  html[data-theme='ShanYing'] .sy-recent-row-image {
+    width: 96px;
+    height: 76px;
+  }
+
+  html[data-theme='ShanYing'] .sy-recent-row-arrow {
+    display: none;
+  }
+
+  html[data-theme='ShanYing'] .sy-recent-row-copy p {
+    display: none;
+  }
+
+  html[data-theme='ShanYing'] .sy-entry-hero,
+  html[data-theme='ShanYing'] .sy-entry-hero--image {
+    padding: 96px 16px 26px;
+  }
+
+  html[data-theme='ShanYing'] .sy-entry-body,
+  html[data-theme='ShanYing'] .sy-article-footer {
+    padding-inline: 16px;
+  }
+
+  /* 触屏没有悬停，药丸标签直接不参与 */
+  html[data-theme='ShanYing'] .sy-entry-pill-label {
+    display: none;
+  }
+
+  html[data-theme='ShanYing'] .sy-article-copyright {
+    padding: 18px 16px;
+  }
+
+  html[data-theme='ShanYing'] .sy-reading-tools {
+    bottom: 14px;
+  }
+
+  html[data-theme='ShanYing'] .sy-top {
+    right: 14px;
+    bottom: 74px;
+  }
+
+  /* 页脚里的博主入口：「登录」两个字得留着（未登录时没有头像可认），
+     但「已登录」时的昵称在小屏没必要 —— 头像是谁一看就懂。 */
+  html[data-theme='ShanYing'] .sy-auth-item {
+    padding: 8px 11px;
+  }
+
+  html[data-theme='ShanYing'] .sy-auth-user .sy-auth-label {
+    display: none;
+  }
+
+  html[data-theme='ShanYing'] .sy-footer-inner {
+    padding: 32px 18px 24px;
+  }
+
+  html[data-theme='ShanYing'] .sy-archive-cats {
+    grid-template-columns: 1fr;
+  }
+
+  html[data-theme='ShanYing'] .sy-archive-month li {
+    grid-template-columns: 48px 1fr;
+  }
+
+  html[data-theme='ShanYing'] .sy-archive-post-stats {
+    display: none;
+  }
+
+  html[data-theme='ShanYing'] .sy-notfound {
+    padding: 46px 22px;
+  }
+
+  /* 正文跟原主题一致地在窄屏收一号，避免长句在 17px 下断得太碎 */
+  html[data-theme='ShanYing'] .sy-article-text .blog-prose {
+    font-size: 16px;
+  }
+
+  html[data-theme='ShanYing'] .sy-article-text .blog-prose h1 { font-size: 27px; }
+  html[data-theme='ShanYing'] .sy-article-text .blog-prose h2 { font-size: 23px; }
+  html[data-theme='ShanYing'] .sy-article-text .blog-prose h3 { font-size: 20px; }
+
+  html[data-theme='ShanYing'] .sy-article-text .blog-prose blockquote {
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+
+  html[data-theme='ShanYing'] .sy-article-text .blog-prose :is(table, th, td) {
+    font-size: 14px;
+  }
+
+  html[data-theme='ShanYing'] .sy-article-text .blog-prose pre {
+    font-size: 13px;
+  }
+}
+
+/* ═══ 14. 无障碍与打印 ══════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme='ShanYing'] *,
+  html[data-theme='ShanYing'] *::before,
+  html[data-theme='ShanYing'] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* 关掉动效时，入场元素必须直接可见，否则会永远停在透明态 */
+  html[data-theme='ShanYing'] .sy-cover-card[data-pending='1'],
+  html[data-theme='ShanYing'] .sy-recent-row[data-pending='1'],
+  html[data-theme='ShanYing'] .sy-hub[data-pending='1'] {
+    opacity: 1;
+    transform: none;
+  }
+
+  html[data-theme='ShanYing'] .sy-photo-stack:hover .sy-stack-front {
+    transform: none;
+  }
+}
+
+@media print {
+  html[data-theme='ShanYing'] .sy-header,
+  html[data-theme='ShanYing'] .sy-mobile-nav,
+  html[data-theme='ShanYing'] .sy-footer,
+  html[data-theme='ShanYing'] .sy-reading-tools,
+  html[data-theme='ShanYing'] .sy-top,
+  html[data-theme='ShanYing'] .sy-auth-dock,
+  html[data-theme='ShanYing'] .sy-related,
+  html[data-theme='ShanYing'] .sy-comments,
+  html[data-theme='ShanYing'] .sy-article-age {
+    display: none !important;
+  }
+
+  html[data-theme='ShanYing'] .sy-frame {
+    width: 100%;
+    padding: 0;
+    gap: 0;
+  }
+
+  html[data-theme='ShanYing'] .sy-article {
+    border: 0;
+    box-shadow: none;
+  }
+
+  html[data-theme='ShanYing'] .sy-entry-hero--image {
+    padding: 24px 0;
+    color: var(--sy-text);
+  }
+
+  html[data-theme='ShanYing'] .sy-entry-hero-media {
+    display: none;
+  }
+
+  html[data-theme='ShanYing'] .sy-entry-body,
+  html[data-theme='ShanYing'] .sy-article-footer {
+    max-width: none;
+    padding-inline: 0;
+  }
+}
+
+/* ═══ 17. 站点控制面板（/dashboard） ═════════════════════════════════
+ * 对照 WP 原主题 assets/css/dashboard.css 的版式：头部 kicker + 统计摘要，
+ * 分类卡片横排，主栏（最新/热门/说说/评论）+ 侧栏（日历/标签/友链）。
+ * 颜色全部走 --sy-* 令牌，深色模式自动跟随。 */
+
+html[data-theme='ShanYing'] .sy-dash {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  padding-top: 10px;
+}
+
+html[data-theme='ShanYing'] .sy-dash[data-pending='1'] {
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+html[data-theme='ShanYing'] .sy-dash {
+  transition: opacity 0.7s var(--sy-ease), transform 0.7s var(--sy-ease);
+}
+
+/* ── 头部 ── */
+
+html[data-theme='ShanYing'] .sy-dash-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 26px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-kicker {
+  margin: 0;
+  color: var(--sy-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+html[data-theme='ShanYing'] .sy-dash-intro h1 {
+  margin: 0;
+  font-family: var(--sy-brand-font);
+  font-size: clamp(26px, 3.4vw, 34px);
+  line-height: 1.2;
+}
+
+html[data-theme='ShanYing'] .sy-dash-subtitle {
+  margin: 0;
+  color: var(--sy-muted);
+  font-size: 14px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px 28px;
+  min-width: min(460px, 100%);
+  padding: 22px 28px;
+  border-radius: var(--sy-radius-card);
+  background: var(--sy-soft);
+}
+
+html[data-theme='ShanYing'] .sy-dash-summary > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-summary strong {
+  font-family: var(--sy-brand-font);
+  font-size: 22px;
+  line-height: 1.15;
+  color: var(--sy-text);
+}
+
+html[data-theme='ShanYing'] .sy-dash-summary span {
+  color: var(--sy-muted);
+  font-size: 12px;
+}
+
+/* ── 通用小节 ── */
+
+html[data-theme='ShanYing'] .sy-dash-section > header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-section > header h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--sy-text);
+}
+
+html[data-theme='ShanYing'] .sy-dash-section > header h2 .sy-icon {
+  color: var(--sy-accent);
+  font-size: 14px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-section > header > a {
+  color: var(--sy-muted);
+  font-size: 12.5px;
+  text-decoration: none;
+  transition: color 0.25s;
+}
+
+html[data-theme='ShanYing'] .sy-dash-section > header > a:hover {
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-dash-empty {
+  margin: 0;
+  padding: 6px 2px;
+  color: var(--sy-muted);
+  font-size: 13px;
+}
+
+/* ── 分类浏览 ── */
+
+html[data-theme='ShanYing'] .sy-dash-categories {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-category {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 16px;
+  border: 1px solid var(--sy-line);
+  border-radius: 16px;
+  background: var(--sy-surface);
+  color: var(--sy-text);
+  text-decoration: none;
+  transition: transform 0.3s var(--sy-ease), border-color 0.3s, box-shadow 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-dash-category:hover {
+  border-color: color-mix(in srgb, var(--sy-accent) 45%, var(--sy-line));
+  box-shadow: var(--sy-shadow);
+  transform: translateY(-2px);
+}
+
+html[data-theme='ShanYing'] .sy-dash-category-icon {
+  display: grid;
+  place-items: center;
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-dash-category strong {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-category b {
+  color: var(--sy-muted);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+/* ── 主栏 + 侧栏 ── */
+
+html[data-theme='ShanYing'] .sy-dash-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 34px;
+  align-items: start;
+}
+
+html[data-theme='ShanYing'] .sy-dash-main {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  min-width: 0;
+}
+
+html[data-theme='ShanYing'] .sy-dash-reading {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  min-width: 0;
+}
+
+/* ── 文章行（最新 / 热门） ── */
+
+html[data-theme='ShanYing'] .sy-dash-posts {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+html[data-theme='ShanYing'] .sy-dash-post-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 10px 2px;
+  border-bottom: 1px solid color-mix(in srgb, var(--sy-line) 55%, transparent);
+  color: var(--sy-text);
+  text-decoration: none;
+  transition: color 0.25s;
+}
+
+html[data-theme='ShanYing'] .sy-dash-posts li:last-child .sy-dash-post-row {
+  border-bottom: none;
+}
+
+html[data-theme='ShanYing'] .sy-dash-post-row time {
+  flex: none;
+  min-width: 44px;
+  color: var(--sy-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-theme='ShanYing'] .sy-dash-post-row span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-post-row:hover {
+  color: var(--sy-accent);
+}
+
+/* ── 最近说说 ── */
+
+html[data-theme='ShanYing'] .sy-dash-talks {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-talk {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 9px 2px;
+  color: var(--sy-text);
+  text-decoration: none;
+  transition: color 0.25s;
+}
+
+html[data-theme='ShanYing'] .sy-dash-talk time {
+  flex: none;
+  min-width: 64px;
+  color: var(--sy-muted);
+  font-size: 12px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-talk span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-talk:hover {
+  color: var(--sy-accent);
+}
+
+/* ── 最近评论 ── */
+
+html[data-theme='ShanYing'] .sy-dash-comments {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-comment {
+  display: flex;
+  gap: 11px;
+  padding: 14px;
+  border: 1px solid var(--sy-line);
+  border-radius: 16px;
+  background: var(--sy-surface);
+  color: var(--sy-text);
+  text-decoration: none;
+  transition: transform 0.3s var(--sy-ease), border-color 0.3s, box-shadow 0.3s;
+}
+
+html[data-theme='ShanYing'] .sy-dash-comment:hover {
+  border-color: color-mix(in srgb, var(--sy-accent) 45%, var(--sy-line));
+  box-shadow: var(--sy-shadow);
+  transform: translateY(-2px);
+}
+
+html[data-theme='ShanYing'] .sy-dash-avatar {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--sy-line);
+}
+
+html[data-theme='ShanYing'] .sy-dash-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+html[data-theme='ShanYing'] .sy-dash-comment-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+html[data-theme='ShanYing'] .sy-dash-comment-byline {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-comment-byline strong {
+  font-size: 13px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-comment-byline time {
+  color: var(--sy-muted);
+  font-size: 11px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-comment-excerpt {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  color: var(--sy-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+/* ── 文章日历 ── */
+
+html[data-theme='ShanYing'] .sy-dash-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 16px 14px;
+  border: 1px solid var(--sy-line);
+  border-radius: 16px;
+  background: var(--sy-surface);
+}
+
+html[data-theme='ShanYing'] .sy-dash-cal-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-cal-toolbar strong {
+  font-size: 14px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-cal-toolbar button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--sy-muted);
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.25s, color 0.25s;
+}
+
+html[data-theme='ShanYing'] .sy-dash-cal-toolbar button:hover:not(:disabled) {
+  background: var(--sy-soft);
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-dash-cal-toolbar button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+html[data-theme='ShanYing'] .sy-dash-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 2px 0;
+}
+
+html[data-theme='ShanYing'] .sy-dash-cal-week {
+  padding: 4px 0;
+  color: var(--sy-muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+html[data-theme='ShanYing'] .sy-dash-cal-day {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 32px;
+  border-radius: 10px;
+  color: var(--sy-text);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+}
+
+html[data-theme='ShanYing'] .sy-dash-cal-day[data-has-post] {
+  color: var(--sy-accent);
+  font-weight: 600;
+}
+
+html[data-theme='ShanYing'] .sy-dash-cal-day[data-has-post]::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: currentcolor;
+}
+
+html[data-theme='ShanYing'] .sy-dash-cal-day[data-has-post]:hover {
+  background: color-mix(in srgb, var(--sy-accent) 12%, transparent);
+}
+
+html[data-theme='ShanYing'] .sy-dash-cal-day[data-today] {
+  background: var(--sy-accent);
+  color: var(--sy-accent-text);
+  font-weight: 700;
+}
+
+html[data-theme='ShanYing'] .sy-dash-cal-day[data-today]::after {
+  display: none;
+}
+
+html[data-theme='ShanYing'] .sy-dash-cal-note {
+  margin: 0;
+  color: var(--sy-muted);
+  font-size: 11px;
+}
+
+/* ── 热门标签 / 友情链接 ── */
+
+html[data-theme='ShanYing'] .sy-dash-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-tags > a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 6px 12px;
+  border: 1px solid var(--sy-line);
+  border-radius: 999px;
+  background: var(--sy-surface);
+  color: var(--sy-text);
+  font-size: 12.5px;
+  text-decoration: none;
+  transition: border-color 0.25s, background 0.25s, color 0.25s;
+}
+
+html[data-theme='ShanYing'] .sy-dash-tags > a small {
+  color: var(--sy-muted);
+  font-size: 11px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-tags > a:hover {
+  background: var(--sy-accent);
+  color: var(--sy-accent-text);
+}
+
+html[data-theme='ShanYing'] .sy-dash-tags > a:hover small {
+  color: color-mix(in srgb, var(--sy-accent-text) 75%, transparent);
+}
+
+html[data-theme='ShanYing'] .sy-dash-friends {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 12px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-friends > a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--sy-text);
+  font-size: 13px;
+  text-decoration: none;
+  transition: color 0.25s;
+}
+
+html[data-theme='ShanYing'] .sy-dash-friends > a:hover {
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-dash-friends > a > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html[data-theme='ShanYing'] .sy-dash-friend-avatar {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--sy-soft);
+}
+
+html[data-theme='ShanYing'] .sy-dash-friend-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── 头部三条横线按钮（控制面板入口） ── */
+
+html[data-theme='ShanYing'] .sy-dash-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+html[data-theme='ShanYing'] .sy-dash-toggle.is-active {
+  color: var(--sy-accent);
+}
+
+/* ── 响应式 ── */
+
+@media (max-width: 1050px) {
+  html[data-theme='ShanYing'] .sy-dash-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-theme='ShanYing'] .sy-dash-sidebar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    align-items: start;
+    gap: 30px;
+  }
+}
+
+@media (max-width: 900px) {
+  html[data-theme='ShanYing'] .sy-dash-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-theme='ShanYing'] .sy-dash-summary {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  html[data-theme='ShanYing'] .sy-dash {
+    gap: 24px;
+  }
+
+  html[data-theme='ShanYing'] .sy-dash-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 18px 20px;
+  }
+
+  html[data-theme='ShanYing'] .sy-dash-reading {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-theme='ShanYing'] .sy-dash-comments {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-theme='ShanYing'] .sy-dash-sidebar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ═══ 滚动胶囊精简态（2026-09-26） ════════════════════════════════════════
+   实测：滚动成胶囊后 .sy-header[data-scrolled='1'] 的宽度被锁在
+   min(--sy-frame - 100px, 100% - 64px) = 900px，而头部内容实际需要 949px，
+   于是右侧 2~3 个自定义图标被挤出玻璃胶囊外（1440px 窗口下也溢出 49px，
+   901px 窗口下溢出 112px），在深色底上几乎看不见。这里按需求在胶囊态收起
+   「足迹 / 更多」两项导航与右上角自定义图标，内容降到 ~670px，任何宽度都不再溢出。 */
+
+html[data-theme='ShanYing'] .sy-header[data-scrolled='1'] .sy-nav-link.sy-nav-compact,
+html[data-theme='ShanYing'] .sy-header[data-scrolled='1'] .sy-tool-custom {
+  display: none;
+}
+
+/* Shared community pages: dark surfaces, readable metadata and accent controls. */
+html[data-theme='ShanYing'][data-shanying-mode='dark'] {
+  --community-surface: var(--sy-surface);
+  --community-soft: var(--sy-soft);
+  --community-text: var(--sy-text);
+  --community-muted: #ababab;
+  --community-border: #3b3b3b;
+  --community-glass: rgb(25 25 25 / 0.94);
+  --community-active: rgb(144 255 58 / 0.12);
+  --community-hover: rgb(255 255 255 / 0.07);
+  --community-on-accent: var(--sy-accent-text);
+}
+@media (prefers-color-scheme: dark) {
+  html[data-theme='ShanYing']:not([data-shanying-mode='light']) {
+  --community-surface: var(--sy-surface);
+  --community-soft: var(--sy-soft);
+  --community-text: var(--sy-text);
+  --community-muted: #ababab;
+  --community-border: #3b3b3b;
+  --community-glass: rgb(25 25 25 / 0.94);
+  --community-active: rgb(144 255 58 / 0.12);
+  --community-hover: rgb(255 255 255 / 0.07);
+  --community-on-accent: var(--sy-accent-text);
+  }
+}
+
+
+/* 只有「返回顶部」还是 fixed 浮层，需要被 --sy-footer-clearance 顶上去；
+   博主入口已经收进页脚，不再参与。Footer.tsx 里的观察器仍然保留。 */
+html[data-theme='ShanYing'] .sy-top {
+  bottom: max(26px, var(--sy-footer-clearance, 0px));
+}
+@media (max-width: 767px) {
+  html[data-theme='ShanYing'] .sy-top { bottom: max(74px, var(--sy-footer-clearance, 0px)); }
+}
+
+/* Fine white weather outline, matching the reference's upper-right placement. */
+html[data-theme='ShanYing'] .sy-hero-weather {
+  position: absolute;
+  top: 22px;
+  right: 32px;
+  z-index: 3;
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  color: #fff;
+  border-radius: 4px;
+}
+html[data-theme='ShanYing'] .sy-hero-weather svg { width: 100%; height: 100%; }
+html[data-theme='ShanYing'] .sy-hero-weather:focus-visible { outline: 1px solid #fff; outline-offset: 5px; }
+@media (max-width: 767px) {
+  html[data-theme='ShanYing'] .sy-hero-weather { top: 16px; right: 18px; width: 30px; height: 30px; }
+}
+
+/* Weather details sit directly on the image, without a card or badge. */
+html[data-theme='ShanYing'] .sy-hero-weather-trigger {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%; padding: 0; border: 0;
+  background: transparent; color: inherit; cursor: pointer;
+}
+html[data-theme='ShanYing'] .sy-hero-weather-trigger:focus-visible {
+  outline: 1px solid currentColor; outline-offset: 5px; border-radius: 4px;
+}
+html[data-theme='ShanYing'] .sy-hero-weather-details {
+  position: absolute; right: calc(100% + 18px); top: -2px;
+  display: flex; flex-direction: column; gap: 2px;
+  width: max-content; max-width: calc(100vw - 100px);
+  color: #fff; text-align: right; font-size: 12px; line-height: 20px;
+  font-weight: 500; white-space: nowrap;
+  opacity: 0; visibility: hidden; transform: translateX(5px);
+  transition: opacity 180ms ease, transform 180ms ease, visibility 180ms;
+  pointer-events: none;
+}
+html[data-theme='ShanYing'] .sy-hero-weather[data-open='true'] .sy-hero-weather-details {
+  opacity: 1; visibility: visible; transform: translateX(0);
+}
+html[data-theme='ShanYing'] .sy-hero-weather svg {
+  transform-origin: center; animation: sy-weather-drift 5s ease-in-out infinite;
+}
+html[data-theme='ShanYing'] .sy-hero-weather[data-weather='sun'] svg { animation: sy-weather-sun 24s linear infinite; }
+html[data-theme='ShanYing'] .sy-hero-weather[data-weather='moon'] svg { animation: sy-weather-moon 6s ease-in-out infinite; }
+html[data-theme='ShanYing'] .sy-hero-weather[data-weather='unknown'] svg { animation: none; }
+html[data-theme='ShanYing'] .sy-hero-weather[data-weather='rain'] svg > path:last-child { animation: sy-weather-rain 1.2s linear infinite; }
+@keyframes sy-weather-sun { to { transform: rotate(360deg); } }
+@keyframes sy-weather-moon { 0%,100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+@keyframes sy-weather-drift { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+@keyframes sy-weather-rain { from { transform: translateY(-1px); opacity: .5; } to { transform: translateY(2px); opacity: 1; } }
+@media (max-width: 767px) {
+  html[data-theme='ShanYing'] .sy-hero-weather-details { top: -6px; right: calc(100% + 10px); font-size: 10px; line-height: 16px; gap: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme='ShanYing'] .sy-hero-weather svg,
+  html[data-theme='ShanYing'] .sy-hero-weather svg > path { animation: none !important; }
+  html[data-theme='ShanYing'] .sy-hero-weather-details { transition: none; transform: none; }
+}
+
+/* ═══ 订阅页 ══════════════════════════════════════════════════════════════
+ * 复刻 WordPress 主题「山映 · ShanYing」的订阅页
+ * （pages/subscriptions.php + assets/css/main.css 的 /* feng-feed *\/ 段）。
+ *
+ * 结构：标题行（左标题 / 右统计）→ 圆角面板
+ *        └ 标签栏 → 状态行 → 条目列表 → 再看一些 → 页脚说明
+ * 组件：app/start/src/web/components/pages/feeds/ShanYingFeedsView.tsx
+ *
+ * 配色全部走 --sy-* 令牌，浅色 / 深色自动跟随，不需要额外的深色分支。
+ * 原主题的 --xf-accent 深色值就是 #90FF3A，跟这里的 --sy-accent 完全一致。
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+html[data-theme='ShanYing'] .sy-feeds { min-height: calc(100vh - 200px); }
+
+/* ── 标题行：去掉通用页标题的内边距与底边，统计改成右对齐的一行 ── */
+html[data-theme='ShanYing'] .sy-feeds .blog-page-title {
+  align-items: center;
+  gap: 24px;
+  margin: 0 0 26px;
+  padding: 0;
+  border-bottom: 0;
+}
+html[data-theme='ShanYing'] .sy-feeds .blog-page-title-icon { font-size: 22px; }
+html[data-theme='ShanYing'] .sy-feeds .blog-page-title-meta {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  flex-wrap: nowrap;
+  gap: 16px;
+  color: var(--sy-muted);
+  font-size: 12px;
+}
+html[data-theme='ShanYing'] .sy-feeds-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+html[data-theme='ShanYing'] .sy-feeds-stat > i { font-size: 13px; }
+html[data-theme='ShanYing'] .sy-feeds-stat > strong {
+  color: var(--sy-text);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  min-width: 2ch;
+  text-align: right;
+}
+
+/* ── 圆角面板 ── */
+html[data-theme='ShanYing'] .sy-feeds-panel {
+  padding: 30px 34px 26px;
+  background: var(--sy-surface);
+  border: 1px solid var(--sy-line);
+  border-radius: var(--sy-radius-panel);
+  box-shadow: var(--sy-shadow);
+}
+
+/* ── 标签栏 ── */
+html[data-theme='ShanYing'] .sy-feeds-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--sy-line);
+}
+html[data-theme='ShanYing'] .sy-feeds-tabs { display: flex; gap: 5px; }
+html[data-theme='ShanYing'] .sy-feeds-tabs button {
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--sy-muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.4s var(--sy-gentle), color 0.4s var(--sy-gentle);
+}
+html[data-theme='ShanYing'] .sy-feeds-tabs button:hover { color: var(--sy-text); }
+html[data-theme='ShanYing'] .sy-feeds-tabs button[aria-pressed='true'] {
+  color: var(--sy-accent);
+  background: color-mix(in srgb, var(--sy-accent) 8%, var(--sy-surface));
+}
+html[data-theme='ShanYing'] .sy-feeds-tabs button:focus-visible {
+  outline: 1px solid var(--sy-focus);
+  outline-offset: 2px;
+}
+
+/* ── 状态行 ── */
+html[data-theme='ShanYing'] .sy-feeds-status {
+  margin: 16px 0 0;
+  min-height: 18px;
+  color: var(--sy-muted);
+  font-size: 11px;
+}
+
+/* ── 条目列表 ── */
+html[data-theme='ShanYing'] .sy-feeds-entries { transition: opacity 0.45s var(--sy-gentle); }
+html[data-theme='ShanYing'] .sy-feeds-entries[aria-busy='true'] { opacity: 0.55; }
+
+html[data-theme='ShanYing'] .sy-feed-entry {
+  display: flex;
+  gap: 16px;
+  padding: 25px 0;
+  border-bottom: 1px solid var(--sy-line);
+}
+
+html[data-theme='ShanYing'] .sy-feed-entry-mark {
+  position: relative;
+  flex: 0 0 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--sy-accent) 6%, var(--sy-surface));
+  font-size: 14px;
+}
+/* 首字母垫在底下，站点图标加载成功就盖住它；图标挂了就露出首字母 */
+html[data-theme='ShanYing'] .sy-feed-entry-initial {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+html[data-theme='ShanYing'] .sy-feed-entry-mark img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  background: var(--sy-surface);
+}
+
+html[data-theme='ShanYing'] .sy-feed-entry-body { flex: 1; min-width: 0; }
+
+html[data-theme='ShanYing'] .sy-feed-entry-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--sy-muted);
+  font-size: 11px;
+}
+html[data-theme='ShanYing'] .sy-feed-today { color: var(--sy-accent); font-size: 10px; }
+
+html[data-theme='ShanYing'] .sy-feed-title {
+  margin: 8px 0 6px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+html[data-theme='ShanYing'] .sy-feed-title a {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--sy-text);
+  text-decoration: none;
+  transition: color 0.5s var(--sy-gentle);
+}
+html[data-theme='ShanYing'] .sy-feed-title a:hover { color: var(--sy-accent); }
+html[data-theme='ShanYing'] .sy-feed-title i {
+  flex: 0 0 auto;
+  font-size: 14px;
+  opacity: 0.4;
+  transition: opacity 0.5s var(--sy-gentle), transform 0.5s var(--sy-gentle);
+}
+html[data-theme='ShanYing'] .sy-feed-title a:hover i { opacity: 1; transform: scale(1.1); }
+
+html[data-theme='ShanYing'] .sy-feed-desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+  color: var(--sy-muted);
+  font-size: 12px;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+
+/* ── 空状态 ── */
+html[data-theme='ShanYing'] .sy-feeds-empty {
+  padding: 65px 12px;
+  text-align: center;
+  color: var(--sy-muted);
+}
+html[data-theme='ShanYing'] .sy-feeds-empty > i { font-size: 30px; color: var(--sy-accent); opacity: 0.65; }
+html[data-theme='ShanYing'] .sy-feeds-empty h2 {
+  margin: 18px 0 10px;
+  color: var(--sy-text);
+  font-size: 17px;
+  font-weight: 400;
+}
+html[data-theme='ShanYing'] .sy-feeds-empty p { margin: 0; font-size: 12px; }
+
+/* ── 再看一些 ── */
+html[data-theme='ShanYing'] .sy-feeds-more-wrap { padding-top: 28px; text-align: center; }
+html[data-theme='ShanYing'] .sy-feeds-loading { color: var(--sy-muted); font-size: 12px; }
+html[data-theme='ShanYing'] .sy-feeds-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--sy-accent) 6%, var(--sy-surface));
+  color: var(--sy-accent);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.4s var(--sy-gentle);
+}
+html[data-theme='ShanYing'] .sy-feeds-more:hover { background: color-mix(in srgb, var(--sy-accent) 12%, var(--sy-surface)); }
+html[data-theme='ShanYing'] .sy-feeds-more:focus-visible { outline: 1px solid var(--sy-focus); outline-offset: 2px; }
+html[data-theme='ShanYing'] .sy-feeds-more i { font-size: 12px; }
+
+/* ── 页脚说明 ── */
+html[data-theme='ShanYing'] .sy-feeds-footer {
+  margin-top: 35px;
+  color: var(--sy-muted);
+  font-size: 10px;
+  line-height: 1.9;
+}
+
+/* ── 窄屏 ── */
+@media (max-width: 900px) {
+  html[data-theme='ShanYing'] .sy-feeds .blog-page-title {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  html[data-theme='ShanYing'] .sy-feeds .blog-page-title-meta { flex-wrap: wrap; gap: 12px; }
+}
+@media (max-width: 700px) {
+  html[data-theme='ShanYing'] .sy-feeds-panel { padding: 22px 20px 20px; border-radius: var(--sy-radius-card); }
+  html[data-theme='ShanYing'] .sy-feed-entry { gap: 12px; padding: 20px 0; }
+  html[data-theme='ShanYing'] .sy-feed-title { font-size: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme='ShanYing'] .sy-feeds * { transition: none !important; }
+}
+
+/* ═══ 首页：文章列表与页脚之间的留白减半 ═══════════════════════════════
+ * 实测这段空档是 62px，由两处拼出来：
+ *     .sy-home    padding-bottom  22px
+ *     .sy-footer  margin-top      40px
+ * 两处各减半 → 11 + 20 = 31px，正好是原来的一半。
+ *
+ * 只在首页生效：`.sy-theme:has(.sy-home)` 用来判断当前是不是首页，
+ * 其他页面的页脚间距保持 40px 不动。
+ * ═══════════════════════════════════════════════════════════════════════ */
+html[data-theme='ShanYing'] .sy-home { padding-bottom: 11px; }
+html[data-theme='ShanYing'] .sy-theme:has(.sy-home) .sy-footer { margin-top: 20px; }

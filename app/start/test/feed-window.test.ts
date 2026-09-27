@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, mock, test } from 'bun:test';
+import { afterEach, beforeAll, beforeEach, describe, expect, mock, setSystemTime, test } from 'bun:test';
 
 /**
  * 订阅时间线的时间窗口。
@@ -22,6 +22,10 @@ const queries: { sql: string; params: unknown[] }[] = [];
 mock.module('../src/backend/db/helpers', () => ({
   one: async (sql: string, params: unknown[] = []) => {
     queries.push({ sql, params });
+    if (sql.includes('feed_items')) {
+      const count = params[1] === NOW - 30 * DAY ? '109' : params[1] === NOW - 7 * DAY ? '17' : '3';
+      return { count };
+    }
     return { count: '109', last_fetched_at: '0' };
   },
   many: async (sql: string, params: unknown[] = []) => {
@@ -51,7 +55,10 @@ function feedQueries() {
   return queries.filter((item) => item.sql.includes('feed_items'));
 }
 
-describe('订阅时间线只看近 30 天', () => {
+describe('订阅时间线的全部与今日窗口', () => {
+  beforeEach(() => setSystemTime(NOW * 1000));
+  afterEach(() => setSystemTime());
+
   test('列表和计数都按 pub_date 过滤，且用的是同一个 30 天边界', async () => {
     queries.length = 0;
     await mod.socialFeedTimeline(1, new URLSearchParams());
@@ -76,16 +83,20 @@ describe('订阅时间线只看近 30 天', () => {
 
   test('统计里的总数跟时间线同窗口，7 天数也按发布时间算', async () => {
     queries.length = 0;
-    await mod.socialFeedStats(1);
+    const stats = await mod.socialFeedStats(1);
+    expect(stats.count_today).toBe(3);
+    expect(stats.count_total).toBe(109);
+    expect(stats.count_7d).toBe(17);
     const hits = feedQueries();
-    expect(hits.length).toBe(2);
+    expect(hits.length).toBe(3);
     const bounds = hits.map(({ sql, params }) => {
       expect(sql).toContain('pub_date >=');
       expect(sql).not.toMatch(/created_at\s*>=/);
       return params[1];
     });
-    // 一个 30 天窗口（对齐时间线），一个 7 天窗口
-    expect(new Set(bounds)).toEqual(new Set([NOW - 30 * DAY, NOW - 7 * DAY]));
+    // 全部、近 7 天、今日统计分别使用相应的发布时间下界。
+    const todayStart = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000);
+    expect(new Set(bounds)).toEqual(new Set([NOW - 30 * DAY, NOW - 7 * DAY, todayStart]));
   });
 
   test('统计的总数口径必须跟时间线的总数口径一致', async () => {
@@ -94,8 +105,24 @@ describe('订阅时间线只看近 30 天', () => {
     const timelineBound = feedQueries()[0].params[1];
     queries.length = 0;
     await mod.socialFeedStats(1);
-    // stats 的第二条查询是 count_total
-    const statsTotalBound = feedQueries()[1].params[1];
-    expect(statsTotalBound).toBe(timelineBound);
+    const countBounds = feedQueries().map(q => q.params[1]);
+    expect(countBounds).toContain(timelineBound);
+  });
+
+  test('今日列表、翻页和统计使用同一个午夜边界', async () => {
+    const todayStart = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000);
+    for (const page of [1, 2]) {
+      queries.length = 0;
+      await mod.socialFeedTimeline(1, new URLSearchParams(`period=today&page=${page}`));
+      const hits = feedQueries();
+      expect(hits.length).toBe(2);
+      for (const { sql, params } of hits) {
+        expect(sql).toContain('pub_date >=');
+        expect(params[1]).toBe(todayStart);
+      }
+    }
+    queries.length = 0;
+    await mod.socialFeedStats(1);
+    expect(feedQueries().map(q => q.params[1])).toContain(todayStart);
   });
 });

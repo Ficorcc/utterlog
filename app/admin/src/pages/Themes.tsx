@@ -4,12 +4,25 @@ import {
   ExternalLink, Trash2, List, IdCard, AppWindow, LayoutGrid, Share2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { themesApi, type ExtensionManifest } from '@/lib/api';
+import { themesApi, type AzureAccent, type ExtensionManifest } from '@/lib/api';
 import FooterIconsEditor from '@/components/FooterIconsEditor';
 import AzureProfileSettings from '@/components/AzureProfileSettings';
 import MenusPage from './Menus';
 import { Button, buttonVariants, Callout, Card, ConfirmDialog, LoadingState } from '@/components/ui/shadcn';
 import { cn } from '@/lib/utils';
+
+/** Azure 可选配色。新增配色时同时要改 globals.css 的令牌块与 :not() 链。 */
+const AZURE_ACCENTS: { key: AzureAccent; label: string; color: string }[] = [
+  { key: 'blue', label: '蔚蓝', color: '#0052D9' },
+  { key: 'red', label: '中国红', color: '#F53102' },
+  { key: 'green', label: '青绿', color: '#00C767' },
+  { key: 'gray', label: '浅灰', color: '#6B7280' },
+];
+
+const normalizeAzureAccent = (value: unknown): AzureAccent => {
+  const key = String(value || '').trim().toLowerCase();
+  return AZURE_ACCENTS.some((item) => item.key === key) ? (key as AzureAccent) : 'blue';
+};
 
 export default function Themes() {
   const [tab, setTab] = useState<'themes' | 'menus' | 'profile' | 'header' | 'footer' | 'hero'>('themes');
@@ -20,7 +33,7 @@ export default function Themes() {
   const [uploading, setUploading] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [activating, setActivating] = useState<string | null>(null);
-  const [azureAccent, setAzureAccent] = useState<'blue' | 'red'>('blue');
+  const [azureAccent, setAzureAccent] = useState<AzureAccent>('blue');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 当前 active 主题在 manifest 里声明了哪些自定义 admin panel —— tabs
@@ -42,7 +55,7 @@ export default function Themes() {
       setThemes(d.themes || []);
       setActive(d.active || '');
       setRequestedTheme(d.requested || null);
-      setAzureAccent(d.azure_accent === 'red' ? 'red' : 'blue');
+      setAzureAccent(normalizeAzureAccent(d.azure_accent));
     } catch {
       toast.error('获取主题列表失败');
     } finally {
@@ -71,16 +84,15 @@ export default function Themes() {
     }
   };
 
-  const handleActivate = async (id: string, accent?: 'blue' | 'red') => {
+  const handleActivate = async (id: string, accent?: AzureAccent) => {
     if (id === active && id !== 'Azure') return;
     if (id === active && id === 'Azure' && (!accent || accent === azureAccent)) return;
     setActivating(id);
     try {
       const payload = id === 'Azure' ? { accent: accent || azureAccent } : undefined;
       const res: any = await themesApi.activate(id, payload);
-      const nextAccent = res?.data?.azure_accent === 'red' || payload?.accent === 'red' ? 'red' : 'blue';
       setActive(id);
-      setAzureAccent(nextAccent);
+      setAzureAccent(normalizeAzureAccent(res?.data?.azure_accent ?? payload?.accent));
       setRequestedTheme(null);
       setThemes((prev) => prev.map((t) => ({ ...t, enabled: t.id === id })));
       toast.success(id === 'Azure' && accent ? 'Azure 配色已更新' : '主题已切换，刷新前台即可生效');
@@ -278,22 +290,27 @@ export default function Themes() {
                     </p>
                   )}
                   {theme.id === 'Azure' && isActive && (
-                    <div className="mb-3 flex gap-2">
-                      {(['blue', 'red'] as const).map((accent) => (
+                    <div className="mb-3 grid grid-cols-2 gap-2">
+                      {AZURE_ACCENTS.map(({ key, label, color }) => (
                         <Button
-                          key={accent}
+                          key={key}
                           type="button"
                           variant="outline"
                           size="sm"
                           disabled={activating === theme.id}
-                          onClick={() => handleActivate('Azure', accent)}
+                          onClick={() => handleActivate('Azure', key)}
                           className={cn(
-                            'flex-1',
-                            azureAccent === accent ? 'border-primary bg-primary/10' : 'border-border',
-                            accent === 'red' ? 'text-[#F53102] hover:text-[#F53102]' : 'text-primary hover:text-primary',
+                            'justify-start',
+                            azureAccent === key ? 'border-primary bg-primary/10' : 'border-border',
                           )}
+                          style={{ color }}
                         >
-                          {accent === 'blue' ? '蔚蓝' : '中国红'}
+                          <span
+                            aria-hidden
+                            className="mr-1.5 inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+                            style={{ backgroundColor: color }}
+                          />
+                          {label}
                         </Button>
                       ))}
                     </div>
