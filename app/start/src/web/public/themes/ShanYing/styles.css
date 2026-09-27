@@ -297,6 +297,10 @@ html[data-theme='ShanYing'] .sy-header[data-scrolled='1']::before {
 
 html[data-theme='ShanYing'] .sy-nav {
   position: relative;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
   justify-self: start;
   display: flex;
   align-items: center;
@@ -318,6 +322,7 @@ html[data-theme='ShanYing'] .sy-nav-glider {
 
 html[data-theme='ShanYing'] .sy-nav-link {
   position: relative;
+  flex-shrink: 0;
   z-index: 1;
   display: inline-flex;
   align-items: center;
@@ -5096,14 +5101,7 @@ html[data-theme='ShanYing'] .sy-dash-toggle.is-active {
   }
 }
 
-/* ═══ 滚动胶囊精简态（2026-09-26） ════════════════════════════════════════
-   实测：滚动成胶囊后 .sy-header[data-scrolled='1'] 的宽度被锁在
-   min(--sy-frame - 100px, 100% - 64px) = 900px，而头部内容实际需要 949px，
-   于是右侧 2~3 个自定义图标被挤出玻璃胶囊外（1440px 窗口下也溢出 49px，
-   901px 窗口下溢出 112px），在深色底上几乎看不见。这里按需求在胶囊态收起
-   「足迹 / 更多」两项导航与右上角自定义图标，内容降到 ~670px，任何宽度都不再溢出。 */
-
-html[data-theme='ShanYing'] .sy-header[data-scrolled='1'] .sy-nav-link.sy-nav-compact,
+/* Compact header tools; configured navigation items remain available. */
 html[data-theme='ShanYing'] .sy-header[data-scrolled='1'] .sy-tool-custom {
   display: none;
 }
