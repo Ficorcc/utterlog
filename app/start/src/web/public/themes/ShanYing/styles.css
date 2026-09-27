@@ -244,12 +244,20 @@ html[data-theme='ShanYing'] .sy-header {
   left: 50%;
   z-index: 60;
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  /* 2026-09-27：站名要落在正中。原来写的是 `1fr auto 1fr`，但 `1fr` 的真身是
+     `minmax(auto, 1fr)` —— 内容比「均分份额」宽时那一列照样会涨。实测首页
+     1280px 下算出 462 / 119.3 / 350.7，左边导航比右边工具区宽 111px，站名
+     被顶到 cx=696，比头部中线 640 右偏 56px。
+     改成 minmax(0, 1fr) 后两列被钉死在同一个宽度上，站名严格居中。
+     代价是导航若比半宽还宽就会溢出，所以同批把导航项收紧了（见 .sy-nav-link）。 */
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 10px;
   width: min(var(--sy-frame), calc(100% - 48px));
   height: 62px;
-  padding: 0 10px 0 14px;
+  /* 2026-09-27：原来是 `0 10px 0 14px`（左侧多 4px 去抵消导航自身的 4px 内边距），
+     但左右不等 = 内容框中心偏离头部中心 2px，站名就不是正中了。改成对称值。 */
+  padding: 0 12px;
   transform: translateX(-50%);
   border-radius: 999px;
   text-shadow: var(--sy-hd-shadow);
@@ -273,7 +281,8 @@ html[data-theme='ShanYing'] .sy-header::before {
 
 html[data-theme='ShanYing'] .sy-header[data-scrolled='1'] {
   width: min(calc(var(--sy-frame) - 100px), calc(100% - 64px));
-  padding-inline: 8px 6px;
+  /* 同理对称化：原来 8/6，站名偏右 1px */
+  padding-inline: 7px;
 }
 
 html[data-theme='ShanYing'] .sy-header[data-scrolled='1']::before {
@@ -313,7 +322,10 @@ html[data-theme='ShanYing'] .sy-nav-link {
   display: inline-flex;
   align-items: center;
   height: 34px;
-  padding: 0 14px;
+  /* 2026-09-27：横向内边距 14 → 10。相邻两项的文字间距从 30px 收到 22px，
+     六项一共省下 48px，正好给上面「站名居中」腾出余量。字号不动，
+     免得整条导航看着变小一号。 */
+  padding: 0 10px;
   border-radius: 999px;
   color: var(--sy-hd-muted);
   font-size: 13.5px;
@@ -3761,8 +3773,15 @@ html[data-theme='ShanYing'] .sy-footer-veil {
 html[data-theme='ShanYing'] .sy-footer-inner {
   display: flex;
   flex-direction: column;
-  gap: 26px;
-  padding: 46px 34px 30px;
+  /* 2026-09-27：页脚整体压掉 30%。实测原高 185px，拆开是
+   *     padding-top 46 + gap 26 + 主行 26 + (法务行 padding-top 22 + 内容 36) + padding-bottom 30
+   * 主行与法务行的内容高度是文字撑出来的、不能动，只能从三处留白里挤：
+   *     padding 46/30 → 28/16（-32）
+   *     gap     26    → 12   （-14）
+   *     法务行 padding-top 22 → 12（-10，见 .sy-footer-legal）
+   * 合计 -56 → 185 - 56 = 129px，正好 -30%。 */
+  gap: 12px;
+  padding: 28px 34px 16px;
   color: #eef1f5;
 }
 
@@ -3846,7 +3865,8 @@ html[data-theme='ShanYing'] .sy-footer-legal {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px 22px;
-  padding-top: 22px;
+  /* 2026-09-27：随页脚整体压缩，22 → 12（页脚 -30% 的一部分） */
+  padding-top: 12px;
   border-top: 1px solid rgb(255 255 255 / 0.14);
 }
 
@@ -3918,6 +3938,9 @@ html[data-theme='ShanYing'] .sy-auth-dock {
   display: inline-flex;
   align-items: center;
   gap: 2px;
+  /* 窄屏法务行换行时，space-between 会把按钮甩到第二行最左边；
+     auto 外边距把剩下的空间全吸走，无论换不换行都贴右。 */
+  margin-left: auto;
   padding: 3px;
   border: 1px solid rgb(255 255 255 / 0.2);
   border-radius: 999px;
@@ -4106,6 +4129,19 @@ html[data-theme='ShanYing'] .sy-auth-menu-item:hover i {
     top: 0;
     order: -1;
     aspect-ratio: 16 / 9;
+  }
+}
+
+/* ── 901–1000px：导航再收一档内边距 ────────────────────────────────────
+   站名居中要求左右两列等宽，于是每列只有「(头部内容宽 - 站名宽) / 2」。
+   901px 窗口下这条算式只给到 332.8px，而七项导航在 10px 内边距下是 349px，
+   会越过中线压到站名盒子上（实测 nav.right=397 > brand.x=391）。
+   这里把内边距再收到 8px，导航降到 321px，留出 11px 余量。
+   1000px 以上两列有 382px，用不上这条；900px 以下文字导航整个收进汉堡，
+   这条自动失效。 */
+@media (max-width: 1000px) {
+  html[data-theme='ShanYing'] .sy-nav-link {
+    padding: 0 8px;
   }
 }
 
@@ -4340,8 +4376,26 @@ html[data-theme='ShanYing'] .sy-auth-menu-item:hover i {
     display: none;
   }
 
+  /* 窄屏页脚按同一目标压 30%。实测手机 390px 下页脚 188px，拆开是
+   *     padding 20+13 + gap 12 + 主行 61 + 法务行 82
+   * 主行（品牌 26 + 18 + 统计 17）与法务行（21 + 12 + 登录 37）里的内容高度
+   * 是文字与按钮撑出来的，只能继续收行间距，否则手机上只降得下 20%：
+   *     padding 20/13 → 16/10（-7）
+   *     gap     12    → 8   （-4）
+   *     主行    18    → 12  （-6）
+   *     法务行  12    → 8   （-4）
+   * 合计 -21 → 188 - 21 = 167px，相对改前的 235px 是 -29%。 */
   html[data-theme='ShanYing'] .sy-footer-inner {
-    padding: 32px 18px 24px;
+    gap: 8px;
+    padding: 16px 18px 10px;
+  }
+
+  html[data-theme='ShanYing'] .sy-footer-main {
+    gap: 12px;
+  }
+
+  html[data-theme='ShanYing'] .sy-footer-legal {
+    gap: 8px 22px;
   }
 
   html[data-theme='ShanYing'] .sy-archive-cats {

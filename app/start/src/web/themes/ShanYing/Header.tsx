@@ -20,13 +20,26 @@ import { Icon, cycleMode, modeLabel, useShanYingMode } from './shanying-shared';
 
 const API_BASE = '/api/v1';
 
-/** 滚动成胶囊后收起的两项导航（足迹 / 更多）：腾出宽度给右侧工具区，
- *  否则胶囊内容比胶囊本身还宽，右上角图标会被挤到玻璃胶囊外面。 */
-const COMPACT_HIDDEN_NAV_HREFS = ['/footprints', '#'];
-const COMPACT_HIDDEN_NAV_LABELS = ['足迹', '更多'];
+/** 滚动成胶囊后收起的一项导航（足迹）：腾出宽度给右侧工具区，
+ *  否则胶囊内容比胶囊本身还宽，右上角图标会被挤到玻璃胶囊外面。
+ *  2026-09-27：原来这里还带着「更多」，但「更多」已改成常驻过滤（见
+ *  HIDDEN_NAV_*），不会再渲染出来，留着这条判断只会误导。 */
+const COMPACT_HIDDEN_NAV_HREFS = ['/footprints'];
+const COMPACT_HIDDEN_NAV_LABELS = ['足迹'];
 const isCompactHiddenNav = (item: MenuItem) =>
   COMPACT_HIDDEN_NAV_HREFS.includes((item.href || '').trim())
   || COMPACT_HIDDEN_NAV_LABELS.includes((item.label || '').trim());
+
+/** 永远不进导航的菜单项。
+ *  「更多」是从原 WordPress 主题的菜单结构里带过来的占位项，href 是 `#`，
+ *  点下去什么都不会发生（Utterlog 这一版没有下拉菜单实现）。2026-09-27
+ *  按需求去掉：留着既占宽度、又把站名挤离中线。
+ *  按 href 与 label 双重匹配，后台把这一项改成别的写法也能拦住。 */
+const HIDDEN_NAV_HREFS = ['#'];
+const HIDDEN_NAV_LABELS = ['更多'];
+const isHiddenNavItem = (item: MenuItem) =>
+  HIDDEN_NAV_HREFS.includes((item.href || '').trim())
+  || HIDDEN_NAV_LABELS.includes((item.label || '').trim());
 
 /** 找到真正的滚动容器：Utterlog 全站用 `.blog-main`，兜底才用 window。 */
 function getScroller(): HTMLElement | Window {
@@ -52,15 +65,17 @@ export default function Header() {
   const gliderRef = useRef<HTMLSpanElement>(null);
 
   const siteName = site.title || 'Utterlog';
-  const navItems: MenuItem[] = menus.header?.length
-    ? menus.header
-    : [
-        { href: '/', label: '首页' },
-        { href: '/archives', label: '归档' },
-        { href: '/moments', label: '说说' },
-        { href: '/categories', label: '分类' },
-        { href: '/links', label: '友链' },
-      ];
+  const navItems: MenuItem[] = (
+    menus.header?.length
+      ? menus.header
+      : [
+          { href: '/', label: '首页' },
+          { href: '/archives', label: '归档' },
+          { href: '/moments', label: '说说' },
+          { href: '/categories', label: '分类' },
+          { href: '/links', label: '友链' },
+        ]
+  ).filter((item) => !isHiddenNavItem(item));
 
   useEffect(() => {
     setMobileOpen(false);
@@ -144,8 +159,9 @@ export default function Header() {
   useEffect(() => {
     const nav = navRef.current;
     if (!nav) return;
-    // 胶囊态会收起「足迹 / 更多」，导航内部布局随之变化 → 重新贴合当前项，
-    // 否则滑块会停在已被收起的位置；被 display:none 的项没有客户区，直接跳过。
+    // 胶囊态（以及 901–1000px 那一档）会收起「足迹」，导航内部布局随之变化
+    // → 重新贴合当前项，否则滑块会停在已被收起的位置；被 display:none 的项
+    // 没有客户区，直接跳过。
     const visibleLinks = () => [...nav.querySelectorAll<HTMLElement>('.sy-nav-link')]
       .filter((el) => el.getClientRects().length > 0);
     const anchor = () => {
