@@ -4583,6 +4583,11 @@ html[data-theme='ShanYing'] .sy-dash-summary span {
 
 /* ── 通用小节 ── */
 
+html[data-theme='ShanYing'] .sy-dash-section {
+  border-top: 1px solid var(--sy-line);
+  padding-top: 20px;
+}
+
 html[data-theme='ShanYing'] .sy-dash-section > header {
   display: flex;
   align-items: baseline;
