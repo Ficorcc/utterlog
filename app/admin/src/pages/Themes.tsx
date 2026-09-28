@@ -8,6 +8,7 @@ import { themesApi, type AzureAccent, type ExtensionManifest } from '@/lib/api';
 import FooterIconsEditor from '@/components/FooterIconsEditor';
 import AzureProfileSettings from '@/components/AzureProfileSettings';
 import MenusPage from './Menus';
+import { HERO_SOCIAL_LINKS_KEY, heroSocialLinks } from '../../../shared/hero-social-links';
 import { DISCOVER_LINKS_KEY, discoverLinks } from '../../../shared/discover-links';
 import { Button, buttonVariants, Callout, Card, ConfirmDialog, LoadingState } from '@/components/ui/shadcn';
 import { cn } from '@/lib/utils';
@@ -26,7 +27,7 @@ const normalizeAzureAccent = (value: unknown): AzureAccent => {
 };
 
 export default function Themes() {
-  const [tab, setTab] = useState<'themes' | 'menus' | 'profile' | 'header' | 'footer' | 'hero' | 'discover'>('themes');
+  const [tab, setTab] = useState<'themes' | 'menus' | 'profile' | 'header' | 'footer' | 'hero' | 'discover' | 'social'>('themes');
   const [themes, setThemes] = useState<ExtensionManifest[]>([]);
   const [active, setActive] = useState<string>('');
   const [requestedTheme, setRequestedTheme] = useState<string | null>(null);
@@ -44,6 +45,7 @@ export default function Themes() {
     || activeManifest?.admin_panels
     || [];
   const showProfile = adminPanels.includes('profile_card');
+  const showSocial = adminPanels.includes('hero_social_links');
   const showDiscover = adminPanels.includes('discover_links');
   const showHeader = adminPanels.includes('header_buttons');
   const showFooter = adminPanels.includes('footer_icons');
@@ -123,6 +125,7 @@ export default function Themes() {
     { key: 'themes', label: '主题', Icon: Palette, visible: true },
     { key: 'menus', label: '菜单', Icon: List, visible: true },
     { key: 'profile', label: '资料卡', Icon: IdCard, visible: showProfile },
+    { key: 'social', label: 'Hero 社交网络', Icon: Share2, visible: showSocial },
     { key: 'discover', label: '发现更多博客', Icon: Share2, visible: showDiscover },
     { key: 'header', label: '头部按钮', Icon: AppWindow, visible: showHeader },
     { key: 'hero', label: '首页图块', Icon: LayoutGrid, visible: showHero },
@@ -133,7 +136,7 @@ export default function Themes() {
   useEffect(() => {
     if (!tabs.find(t => t.key === tab)) setTab('themes');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showProfile, showHeader, showFooter, showHero, showDiscover]);
+  }, [showProfile, showHeader, showFooter, showHero, showDiscover, showSocial]);
 
   return (
     <div>
@@ -161,7 +164,14 @@ export default function Themes() {
 
       {tab === 'menus' && <MenusPage />}
       {tab === 'profile' && showProfile && <AzureProfileSettings />}
-      {tab === 'discover' && showDiscover && (
+      {tab === 'social' && showSocial && (
+        <FooterIconsEditor optionKey={HERO_SOCIAL_LINKS_KEY} fallbackItems={heroSocialLinks}
+          title="Hero 社交网络" emptyText="暂无社交入口，保存后首页不显示社交图标。"
+          emptyRow={{ icon: 'fa-solid fa-link', label: '社交网络', href: '' }}
+          description="管理首页 Hero 问候语旁的社交图标，支持增删、排序、修改名称和链接、上传图片。Mastodon 使用 fa-brands fa-mastodon，QQ 使用 fa-brands fa-qq。填写复制文本后，点击图标可复制账号。"
+        />
+      )}
+      {tab === 'discover'  && showDiscover && (
         <FooterIconsEditor optionKey={DISCOVER_LINKS_KEY} fallbackItems={discoverLinks}
           title="发现更多博客" emptyText="暂无入口，保存后首页不显示任何发现链接。"
           emptyRow={{ icon: 'fa-solid fa-link', label: '博客入口', href: '' }}

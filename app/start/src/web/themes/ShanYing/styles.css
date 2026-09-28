@@ -798,7 +798,7 @@ html[data-theme='ShanYing'] .sy-hero-social {
   gap: 6px;
 }
 
-html[data-theme='ShanYing'] .sy-hero-social a {
+html[data-theme='ShanYing'] .sy-hero-social :is(a, button) {
   display: grid;
   place-items: center;
   width: 34px;
@@ -812,7 +812,7 @@ html[data-theme='ShanYing'] .sy-hero-social a {
   transition: transform 0.34s var(--sy-ease), background 0.3s, color 0.3s;
 }
 
-html[data-theme='ShanYing'] .sy-hero-social a:hover {
+html[data-theme='ShanYing'] .sy-hero-social :is(a, button):hover {
   transform: translateY(-3px);
   background: #fff;
   color: #15181f;
@@ -5414,3 +5414,6 @@ html[data-theme='ShanYing'] .sy-menu-tree a:hover,
 html[data-theme='ShanYing'] .sy-menu-tree summary:hover { background: var(--sy-soft); color: var(--sy-accent); }
 html[data-theme='ShanYing'] .sy-menu-tree .sy-menu-tree { margin-left: 12px; border-left: 1px solid var(--sy-line); }
 html[data-theme='ShanYing'] .sy-mobile-nav { max-height: calc(100dvh - 110px); overflow-y: auto; }
+
+html[data-theme='ShanYing'] .sy-hero-social { flex-wrap: wrap; }
+html[data-theme='ShanYing'] .sy-hero-social button { cursor: pointer; font-family: inherit; color: inherit; }

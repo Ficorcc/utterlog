@@ -1,6 +1,6 @@
 export interface DiscoverLink { icon: string; label: string; href?: string; copy?: string }
 export const DISCOVER_LINKS_KEY = 'shanying_discover_links';
-function parse(value: unknown): DiscoverLink[] {
+export function parseIconLinks(value: unknown): DiscoverLink[] {
   try {
     const items = typeof value === 'string' ? JSON.parse(value) : value;
     if (!Array.isArray(items)) return [];
@@ -13,10 +13,10 @@ function parse(value: unknown): DiscoverLink[] {
 }
 export function discoverLinks(options: Record<string, unknown>): DiscoverLink[] {
   // An explicitly saved empty list hides every link. Only unset settings inherit.
-  if (options[DISCOVER_LINKS_KEY] != null && options[DISCOVER_LINKS_KEY] !== '') return parse(options[DISCOVER_LINKS_KEY]);
+  if (options[DISCOVER_LINKS_KEY] != null && options[DISCOVER_LINKS_KEY] !== '') return parseIconLinks(options[DISCOVER_LINKS_KEY]);
   return [
     { icon: 'fa-solid fa-train', label: '开往 · 发现更多博客', href: 'https://www.travellings.cn/go.html' },
     { icon: 'fa-solid fa-blog', label: '十年之约 · 探索更多文章', href: 'https://www.foreverblog.cn/go.html' },
-    ...parse(options.theme_header_buttons),
+    ...parseIconLinks(options.theme_header_buttons),
   ];
 }

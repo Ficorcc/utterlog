@@ -40,6 +40,7 @@ import { currentSeason, resolveScene, sceneImageUrl, sceneImageSmallUrl, seasonI
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { heroSocialLinks } from '@shared/hero-social-links';
 import { discoverLinks, type DiscoverLink } from '@shared/discover-links';
 
 type SortKey = 'latest' | 'comments' | 'views';
@@ -50,17 +51,6 @@ const SORTS: { key: SortKey; label: string }[] = [
   { key: 'comments', label: '热评文章' },
   { key: 'views', label: '浏览最多' },
 ];
-
-const SOCIAL_LABELS: Record<string, { icon: string; label: string }> = {
-  github: { icon: 'fa-brands fa-github', label: 'GitHub' },
-  x: { icon: 'fa-brands fa-x-twitter', label: 'X' },
-  twitter: { icon: 'fa-brands fa-x-twitter', label: 'X' },
-  weibo: { icon: 'fa-brands fa-weibo', label: '微博' },
-  bilibili: { icon: 'fa-brands fa-bilibili', label: '哔哩哔哩' },
-  telegram: { icon: 'fa-brands fa-telegram', label: 'Telegram' },
-  email: { icon: 'fa-regular fa-envelope', label: '邮箱' },
-  rss: { icon: 'fa-regular fa-rss', label: 'RSS' },
-};
 
 type SiteLink = DiscoverLink;
 
@@ -191,14 +181,7 @@ export default function HomePage({
     return ordered[0] || null;
   }, [focused, ordered]);
 
-  const socials = useMemo(
-    () =>
-      Object.entries(ctx.owner.socials || {})
-        .map(([key, href]) => ({ key, href, ...(SOCIAL_LABELS[key] || { icon: 'fa-regular fa-link', label: key }) }))
-        .filter((item) => Boolean(item.href))
-        .slice(0, 4),
-    [ctx.owner.socials],
-  );
+  const socials = useMemo(() => heroSocialLinks(ctx.options || {}), [ctx.options]);
 
   const badges = [
     { label: '文章', value: stats?.post_count || posts.length || 0 },
@@ -246,16 +229,11 @@ export default function HomePage({
               </p>
               {socials.length > 0 && (
                 <div className="sy-hero-social">
-                  {socials.map((item) => (
-                    <a
-                      key={item.key}
-                      href={item.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={item.label}
-                      title={item.label}
-                    >
-                      <i className={item.icon} aria-hidden="true" />
+                  {socials.map((item, index) => item.copy ? (
+                    <button type="button" key={index} aria-label={item.label} title={item.label} onClick={event => copySiteLink(item, event)}>{renderSiteIcon(item.icon)}</button>
+                  ) : (
+                    <a key={index} href={item.href || '#'} target="_blank" rel="noopener noreferrer" aria-label={item.label} title={item.label}>
+                      {renderSiteIcon(item.icon)}
                     </a>
                   ))}
                 </div>

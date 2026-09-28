@@ -4,7 +4,7 @@
  * ShanYing · 归档页
  *
  * 对照原主题 pages/archives.php：头部统计 → 近一年更新热力图 → 分类总览
- * （四列，带图标、描述、最新一篇）→ 标签云 → 年/月/日时间线。
+ * （四列，带图标、描述、最新一篇）→ 年/月/日时间线 → 标签云。
  */
 
 import Link from '@/components/AppLink';
@@ -129,21 +129,6 @@ export default function ArchivePage({
         </div>
       </section>
 
-      <section className="sy-archive-block">
-        <header className="sy-archive-block-head">
-          <h2><i className="fa-solid fa-tag" aria-hidden="true" /> 标签</h2>
-          <span>{sortedTags.length} 个</span>
-        </header>
-        <div className="sy-archive-tags">
-          {sortedTags.map((tag: any) => (
-            <Link key={tag.id} href={`/tags/${tag.slug}`}>
-              #{tag.name}
-              <sup>{tag.count || 0}</sup>
-            </Link>
-          ))}
-        </div>
-      </section>
-
       <section className="sy-archive-timeline">
         {timeline.length === 0 && <p className="sy-archive-empty">这里还没有文章。</p>}
         {timeline.map((group) => (
@@ -181,6 +166,22 @@ export default function ArchivePage({
           </div>
         ))}
       </section>
+
+      <section className="sy-archive-block">
+        <header className="sy-archive-block-head">
+          <h2><i className="fa-solid fa-tag" aria-hidden="true" /> 标签</h2>
+          <span>{sortedTags.length} 个</span>
+        </header>
+        <div className="sy-archive-tags">
+          {sortedTags.map((tag: any) => (
+            <Link key={tag.id} href={`/tags/${tag.slug}`}>
+              #{tag.name}
+              <sup>{tag.count || 0}</sup>
+            </Link>
+          ))}
+        </div>
+      </section>
+
     </div>
   );
 }
