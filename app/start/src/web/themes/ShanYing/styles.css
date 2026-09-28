@@ -1003,9 +1003,8 @@ html[data-theme='ShanYing'] .sy-discover-col > small {
    无论后台配了几个站点入口都按同样的行列对齐，不会因 flex 换行而参差。 */
 html[data-theme='ShanYing'] .sy-discover-links {
   display: grid;
-  /* 固定 3 列：当前 6 个入口（开往 / 十年之约 + 后台 4 个）正好 2×3 排满，
-     多出来的会继续按同一网格往下对齐，不会出现 flex 换行时的参差。 */
-  grid-template-columns: repeat(3, 32px);
+  grid-template-columns: repeat(5, 32px);
+  grid-template-rows: repeat(2, 32px);
   justify-content: start;
   align-content: start;
   gap: 8px 6px;

@@ -327,7 +327,7 @@ export default function HomePage({
             <div className="sy-discover-col">
               <small>发现更多博客</small>
               <nav className="sy-discover-links" aria-label="发现更多博客">
-                {siteLinks.map((item, index) => (
+                {siteLinks.slice(0, 10).map((item, index) => (
                   item.copy ? (
                     <button
                       key={`${item.label}-${index}`}
