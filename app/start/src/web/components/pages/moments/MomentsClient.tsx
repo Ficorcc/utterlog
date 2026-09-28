@@ -392,7 +392,7 @@ export default function MomentsPage({
         meta={<><strong>{moments.length}</strong> 条说说</>}
       />
 
-      <div style={{ padding: isMobile ? '24px 16px 120px' : '32px 32px 120px' }}>
+      <div style={{ padding: theme.name === 'ShanYing' ? '24px 0 120px' : isMobile ? '24px 16px 120px' : '32px 32px 120px' }}>
       {loading ? (
         <div style={{ textAlign: 'center', padding: '80px 0' }}>
           <p style={{ fontSize: '13px', color: 'var(--community-muted, #999)' }}>加载中…</p>
@@ -529,6 +529,12 @@ export default function MomentsPage({
                 </div>
               );
             };
+
+            if (theme.name === 'ShanYing') {
+              return <div className="sy-moments-grid">
+                {filtered.map((m: any, i: number) => <div key={m.id} className="sy-moments-grid-item">{renderCard(m, i, false)}</div>)}
+              </div>;
+            }
 
             if (isMobile) {
               return (
