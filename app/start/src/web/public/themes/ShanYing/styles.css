@@ -158,15 +158,7 @@ html[data-theme='ShanYing'] .sy-frame {
   gap: 22px;
 }
 
-html[data-theme='ShanYing'] .sy-frame:has(> .sy-home) {
-  /* 首页：Hero 与下方内容同宽 —— 两者都由 .sy-frame 的
-     min(--sy-frame, 100% - 48px) 决定，这里不再给 Hero 单独放开宽度。
-     顶部内边距 = 白条高度 62px + 14px 间隙（白条现在是圆角矩形，
-     与 Hero 之间留一条缝才不会出现圆角处的月牙缺口）；
-     ≤700px 时头部降为 56px，对应 70px。 */
-  padding: 76px 0 0;
-  gap: 0;
-}
+
 
 html[data-theme='ShanYing'] .sy-sr-only {
   position: absolute;
@@ -687,48 +679,6 @@ html[data-theme='ShanYing'] .sy-mobile-nav a:hover,
 html[data-theme='ShanYing'] .sy-mobile-nav a.is-active {
   background: var(--sy-soft);
   color: var(--sy-accent);
-}
-
-/* ── 首页头部：通栏白条 + 白底深字 ──────────────────────────────────────
-   原设计是「与页面同宽的浮动胶囊 + 透明底 + 白字」，让 Hero 山水图从头部
-   后面透上来、靠 text-shadow 压对比度。2026-09-26 两次按需求调整：
-
-   1) 底色改白：删掉「透明态切浅色」的变量覆盖、回落到 `.sy-header` 默认的
-      「浅底深字」，并复用滚动胶囊那套 `::before` 显隐机制填上纯白。
-   2) 形状改通栏：不再居中悬浮，改成贴页面顶端、直角、左右不留白，
-      与下方 Hero 图片无缝相接。
-
-   判断条件刻意写成 `:has(.sy-frame > .sy-home)`，也就是 `.sy-frame` 里
-   「唯一那个页面就是首页」——和上面把首页容器放开到通栏的
-   `.sy-frame:has(> .sy-home)` 是同一件事，两条规则永远同步。
-   不用 `:has(.sy-hero)`：那是个后代选择器，只要页面上任何地方出现
-   `.sy-hero` 就会命中（比如把别的页面挂在同一个容器里时），
-   头部会在浅底上变成白字。
-
-   其余页面仍保留「浮动胶囊」造型：`.sy-frame` 有 100px 顶部内边距让开
-   固定头部，头部浮在普通底色上，走默认调色，本来就是白底深字。 */
-
-/* 首页顶部态保留通栏白条；滚动后「回归」到默认的浮动玻璃胶囊，
-   不再强制 100% 宽度与白底 —— 那条胶囊态才是原先为滚动设计的形态
-   （玻璃质感 + 收起「足迹 / 更多」与自定义图标）。 */
-html[data-theme='ShanYing'] .sy-theme:has(.sy-frame > .sy-home) .sy-header:not([data-scrolled='1']) {
-  top: 0;
-  left: 50%;
-  /* 与 Hero 同宽：和 .sy-frame / .sy-hero 共用同一条宽度公式，
-     左右边缘严格对齐（不再通栏）。 */
-  width: min(var(--sy-frame), calc(100% - 48px));
-  transform: translateX(-50%);
-  /* 圆角矩形（不是胶囊），圆角与下方 Hero 面板一致 */
-  border-radius: var(--sy-radius-panel);
-  padding: 0 24px;
-}
-
-html[data-theme='ShanYing'] .sy-theme:has(.sy-frame > .sy-home) .sy-header:not([data-scrolled='1'])::before {
-  opacity: 1;
-  border-color: var(--sy-line);
-  background: var(--sy-surface);
-  box-shadow: 0 6px 20px rgb(20 24 40 / 0.05);
-  backdrop-filter: none;
 }
 
 /* ═══ 4. 首页 Hero（山景档案） ═════════════════════════════════════════ */
@@ -4164,11 +4114,6 @@ html[data-theme='ShanYing'] .sy-auth-menu-item:hover i {
     width: calc(100% - 32px);
   }
 
-  /* 首页白条跟着 Hero 收窄到同一个宽度 */
-  html[data-theme='ShanYing'] .sy-theme:has(.sy-frame > .sy-home) .sy-header:not([data-scrolled='1']) {
-    width: calc(100% - 32px);
-    padding: 0 20px;
-  }
 
   html[data-theme='ShanYing'] .sy-hero {
     padding: 44px 24px 26px;
@@ -4213,11 +4158,6 @@ html[data-theme='ShanYing'] .sy-auth-menu-item:hover i {
     gap: 18px;
   }
 
-  /* 首页：头部在这个断点降为 56px，Hero 让开的顶部内边距跟着收（:has 选择器
-     优先级高于上面那条，必须写在媒体查询里、且用同一个 :has 选择器覆盖） */
-  html[data-theme='ShanYing'] .sy-frame:has(> .sy-home) {
-    padding-top: 70px;
-  }
 
   html[data-theme='ShanYing'] .sy-header {
     width: calc(100% - 24px);
@@ -4225,11 +4165,6 @@ html[data-theme='ShanYing'] .sy-auth-menu-item:hover i {
     padding: 0 6px 0 8px;
   }
 
-  /* 首页头部只在顶部态与 Hero 同宽（滚动后回归浮动胶囊） */
-  html[data-theme='ShanYing'] .sy-theme:has(.sy-frame > .sy-home) .sy-header:not([data-scrolled='1']) {
-    width: calc(100% - 24px);
-    padding: 0 14px;
-  }
 
 
   html[data-theme='ShanYing'] .sy-header[data-scrolled='1'] {
