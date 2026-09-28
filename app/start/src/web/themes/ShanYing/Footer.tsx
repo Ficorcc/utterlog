@@ -19,8 +19,9 @@ import Link from '@/components/AppLink';
 import { useEffect, useRef } from 'react';
 import { useThemeContext } from '@/lib/theme-context';
 import { usePathname } from '@/lib/navigation';
-import { datePartsInTimeZone, resolveSiteTimeZone } from '@/lib/timezone';
-import { currentSeason, seasonImageUrl } from './shanying-scene';
+import { resolveSiteTimeZone } from '@/lib/timezone';
+import { resolveScene, sceneImageUrl, sceneImageSmallUrl } from './shanying-scene';
+import { hourInTimeZone } from './shanying-shared';
 import HomeAuthDock from './HomeAuthDock';
 
 export default function Footer() {
@@ -55,10 +56,9 @@ export default function Footer() {
   const siteName = site.title || 'Utterlog';
   const footerItems = menus.footer || [];
 
-  // 四季底图：原主题按月份换图。月份取站点时区，避免服务端/浏览器时区
-  // 跨月时 SSR 与 hydration 拿到不一样的季节。
+  // Use the same site timezone and scene override as the homepage Hero.
   const tz = timeZone || resolveSiteTimeZone(options);
-  const season = currentSeason(datePartsInTimeZone(new Date(), tz).month);
+  const scene = resolveScene(options?.shanying_scene, hourInTimeZone(tz));
 
   // valueFirst：数字放在图标和标签之间。「篇文章 63」这种量词在前的写法不通，
   // 改成「63 篇文章」；「总浏览量 19,204」本来就顺，保持原样。
@@ -71,7 +71,7 @@ export default function Footer() {
   return (
     <footer ref={footerRef} className="sy-footer">
       <div className="sy-footer-landscape" aria-hidden="true">
-        <img src={seasonImageUrl(season)} alt="" loading="lazy" decoding="async" />
+        <img src={sceneImageUrl(scene)} srcSet={`${sceneImageSmallUrl(scene)} 1280w, ${sceneImageUrl(scene)} 1774w`} sizes="(min-width: 1048px) 1000px, calc(100vw - 48px)" alt="" loading="lazy" decoding="async" />
         <span className="sy-footer-veil" />
       </div>
 
