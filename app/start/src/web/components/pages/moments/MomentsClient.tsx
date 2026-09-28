@@ -166,7 +166,7 @@ export default function MomentsPage({
   const [cardZs, setCardZs] = useState<Record<number, number>>({});
   const [isMobile, setIsMobile] = useState(false);
   // 列数随视口宽度自适应：<640=1, <960=2, <1280=3, 否则 4
-  const [cols, setCols] = useState(4);
+  const [cols, setCols] = useState(theme.name === 'ShanYing' ? 3 : 4);
   // 工具栏滚动避让 footer 用的上移量（footer 进入视口时按可见高度提升 toolbar）
   const [toolbarLift, setToolbarLift] = useState(0);
 
@@ -200,7 +200,7 @@ export default function MomentsPage({
       setIsMobile(w < 768);
       if (w < 640) setCols(1);
       else if (w < 960) setCols(2);
-      else if (isNebula) setCols(3);
+      else if (isNebula || theme.name === 'ShanYing') setCols(3);
       else if (w < 1280) setCols(3);
       else setCols(4);
     };
@@ -529,12 +529,6 @@ export default function MomentsPage({
                 </div>
               );
             };
-
-            if (theme.name === 'ShanYing') {
-              return <div className="sy-moments-grid">
-                {filtered.map((m: any, i: number) => <div key={m.id} className="sy-moments-grid-item">{renderCard(m, i, false)}</div>)}
-              </div>;
-            }
 
             if (isMobile) {
               return (

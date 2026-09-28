@@ -5414,19 +5414,3 @@ html[data-theme='ShanYing'] .sy-menu-tree a:hover,
 html[data-theme='ShanYing'] .sy-menu-tree summary:hover { background: var(--sy-soft); color: var(--sy-accent); }
 html[data-theme='ShanYing'] .sy-menu-tree .sy-menu-tree { margin-left: 12px; border-left: 1px solid var(--sy-line); }
 html[data-theme='ShanYing'] .sy-mobile-nav { max-height: calc(100dvh - 110px); overflow-y: auto; }
-
-/* Keep moments aligned with the page-title divider instead of scattered cards. */
-html[data-theme='ShanYing'] .sy-moments-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
-  width: 100%;
-  align-items: start;
-}
-html[data-theme='ShanYing'] .sy-moments-grid-item { min-width: 0; }
-@media (max-width: 900px) {
-  html[data-theme='ShanYing'] .sy-moments-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-@media (max-width: 600px) {
-  html[data-theme='ShanYing'] .sy-moments-grid { grid-template-columns: minmax(0, 1fr); }
-}
