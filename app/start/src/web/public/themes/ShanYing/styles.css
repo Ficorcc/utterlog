@@ -17,7 +17,7 @@ html[data-theme='ShanYing'] {
   --sy-frame: 1000px;
   --sy-reading: 880px;
 
-  --sy-bg: #fafafa;
+  --sy-bg: #faf9f7;
   --sy-text: #202126;
   /* 原主题是 #757782，压在 #fafafa 上只有 4.26:1，达不到 WCAG AA 的 4.5:1。
      这里压深到 #676B76：在 #ffffff→#f0f0f0 的整段浅底上都有 ≥4.9:1，
@@ -5417,3 +5417,15 @@ html[data-theme='ShanYing'] .sy-mobile-nav { max-height: calc(100dvh - 110px); o
 
 html[data-theme='ShanYing'] .sy-hero-social { flex-wrap: wrap; }
 html[data-theme='ShanYing'] .sy-hero-social button { cursor: pointer; font-family: inherit; color: inherit; }
+
+/* Paper grid from warmpaper.pages.dev: 24px cells and 96px major lines. */
+html[data-theme='ShanYing'] .sy-theme,
+html[data-theme='ShanYing'] .sy-main {
+  background-image:
+    linear-gradient(#da775612 1px, transparent 1px),
+    linear-gradient(90deg, #da775612 1px, transparent 1px),
+    linear-gradient(#da77561f 1px, transparent 1px),
+    linear-gradient(90deg, #da77561f 1px, transparent 1px);
+  background-size: 24px 24px, 24px 24px, 96px 96px, 96px 96px;
+  background-attachment: fixed;
+}
