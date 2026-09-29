@@ -5418,6 +5418,136 @@ html[data-theme='ShanYing'] .sy-mobile-nav { max-height: calc(100dvh - 110px); o
 html[data-theme='ShanYing'] .sy-hero-social { flex-wrap: wrap; }
 html[data-theme='ShanYing'] .sy-hero-social button { cursor: pointer; font-family: inherit; color: inherit; }
 
+/* Article comments: avatar-led speech cards, matching the ShanYing discussion style. */
+html[data-theme='ShanYing'] .sy-comments .comment-thread {
+  margin-top: 22px !important;
+  border: 0 !important;
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-card {
+  gap: 14px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-avatar-wrap {
+  width: 44px;
+  padding-top: 10px;
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-avatar {
+  width: 42px !important;
+  height: 42px !important;
+  border: 1px solid color-mix(in srgb, var(--sy-line) 82%, transparent);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.08);
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-main {
+  position: relative;
+  min-height: 62px;
+  padding: 14px 18px 15px !important;
+  border: 1px solid var(--sy-line);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--sy-surface) 94%, var(--sy-soft));
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-main::before,
+html[data-theme='ShanYing'] .sy-comments .comment-main::after {
+  position: absolute;
+  top: 20px;
+  right: 100%;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  content: '';
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-main::before {
+  border-width: 7px 8px 7px 0;
+  border-color: transparent var(--sy-line) transparent transparent;
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-main::after {
+  top: 21px;
+  border-width: 6px 7px 6px 0;
+  border-color: transparent color-mix(in srgb, var(--sy-surface) 94%, var(--sy-soft)) transparent transparent;
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-meta {
+  min-height: 22px;
+  gap: 6px !important;
+  padding-right: 48px;
+  margin-bottom: 8px !important;
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-meta > span:not(.comment-author),
+html[data-theme='ShanYing'] .sy-comments .comment-meta > a + span,
+html[data-theme='ShanYing'] .sy-comments .comment-time,
+html[data-theme='ShanYing'] .sy-comments .comment-geo,
+html[data-theme='ShanYing'] .sy-comments .comment-tech {
+  min-height: 20px;
+  padding: 1px 7px !important;
+  border: 1px solid color-mix(in srgb, var(--sy-line) 75%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--sy-bg) 70%, transparent);
+  color: var(--sy-muted) !important;
+  line-height: 16px;
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-meta-separator { display: none !important; }
+html[data-theme='ShanYing'] .sy-comments .comment-author { color: var(--sy-text) !important; }
+html[data-theme='ShanYing'] .sy-comments .comment-body {
+  padding-right: 34px;
+  color: var(--sy-text) !important;
+  font-size: 14px !important;
+  line-height: 1.85 !important;
+}
+html[data-theme='ShanYing'] .sy-comments .comment-corner { top: 15px !important; right: 17px !important; }
+html[data-theme='ShanYing'] .sy-comments .comment-floor { color: var(--sy-muted) !important; font-size: 11px !important; font-weight: 400 !important; }
+
+html[data-theme='ShanYing'] .sy-comments .comment-thread-replies {
+  padding: 0 0 0 58px !important;
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-card--reply {
+  margin: 14px 0 0 !important;
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-card--reply .comment-main {
+  border-color: color-mix(in srgb, #5c9362 38%, var(--sy-line));
+  background: color-mix(in srgb, #315f37 18%, var(--sy-surface));
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-card--reply .comment-main::before {
+  border-right-color: color-mix(in srgb, #5c9362 38%, var(--sy-line));
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-card--reply .comment-main::after {
+  border-right-color: color-mix(in srgb, #315f37 18%, var(--sy-surface));
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-avatar--reply {
+  position: absolute;
+  top: 9px;
+  right: calc(100% + 16px);
+  width: 38px !important;
+  height: 38px !important;
+}
+
+@media (max-width: 700px) {
+  html[data-theme='ShanYing'] .sy-comments .comment-thread { margin-top: 18px !important; }
+  html[data-theme='ShanYing'] .sy-comments .comment-card { gap: 10px !important; }
+  html[data-theme='ShanYing'] .sy-comments .comment-avatar-wrap { width: 36px; padding-top: 8px; }
+  html[data-theme='ShanYing'] .sy-comments .comment-avatar { width: 34px !important; height: 34px !important; }
+  html[data-theme='ShanYing'] .sy-comments .comment-main { padding: 12px 13px 13px !important; border-radius: 14px; }
+  html[data-theme='ShanYing'] .sy-comments .comment-meta { padding-right: 34px; }
+  html[data-theme='ShanYing'] .sy-comments .comment-body { padding-right: 0; font-size: 13px !important; }
+  html[data-theme='ShanYing'] .sy-comments .comment-thread-replies { padding-left: 46px !important; }
+  html[data-theme='ShanYing'] .sy-comments .comment-avatar--reply { right: calc(100% + 11px); width: 32px !important; height: 32px !important; }
+  html[data-theme='ShanYing'] .sy-comments .comment-corner { top: 13px !important; right: 13px !important; }
+}
+
 /* Paper grid from warmpaper.pages.dev: 24px cells and 96px major lines. */
 html[data-theme='ShanYing'] .sy-theme,
 html[data-theme='ShanYing'] .sy-main {

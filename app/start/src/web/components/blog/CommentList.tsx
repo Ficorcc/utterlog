@@ -272,34 +272,36 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
       >
         {/* 头像 */}
         {!isReply && (
-          <div style={{ flexShrink: 0 }}>
+          <div className="comment-avatar-wrap" style={{ flexShrink: 0 }}>
             <img
               src={comment.avatar_url || 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=80'}
               alt=""
+              className="comment-avatar"
               style={{ width: '40px', height: '40px', objectFit: 'cover', background: '#f0f0f0', borderRadius: '50%', transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)', transform: hovered ? 'scale(1.15)' : 'scale(1)' }}
               onError={e => { (e.target as HTMLImageElement).src = 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=80'; }}
             />
           </div>
         )}
         {/* 内容 */}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="comment-main" style={{ flex: 1, minWidth: 0 }}>
           {/* Meta 行 */}
-          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px', marginBottom: '6px', fontSize: '12px' }}>
+          <div className="comment-meta" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px', marginBottom: '6px', fontSize: '12px' }}>
             {isReply && (
               <img
                 src={comment.avatar_url || 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=80'}
                 alt=""
+                className="comment-avatar comment-avatar--reply"
                 style={{ width: '24px', height: '24px', objectFit: 'cover', background: '#f0f0f0', borderRadius: '50%' }}
                 onError={e => { (e.target as HTMLImageElement).src = 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=80'; }}
               />
             )}
             {comment.url ? (
-              <a href={comment.url} target="_blank" rel="noopener noreferrer"
+              <a href={comment.url} target="_blank" rel="noopener noreferrer" className="comment-author"
                 style={{ fontWeight: 600, fontSize: '13px', color: 'var(--color-text-main, #333)', textDecoration: 'none' }}>
                 {comment.author}
               </a>
             ) : (
-              <span style={{ fontWeight: 600, fontSize: '13px', color: 'var(--color-text-main, #333)' }}>{comment.author}</span>
+              <span className="comment-author" style={{ fontWeight: 600, fontSize: '13px', color: 'var(--color-text-main, #333)' }}>{comment.author}</span>
             )}
             {comment.friend && (
               <span className="friend-badge" data-tip={`友链好友 · ${comment.friend.name}`} tabIndex={0}>
@@ -379,8 +381,9 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
               </span>
             )}
 
-            <span style={{ color: '#bbb' }}>&middot;</span>
+            <span className="comment-meta-separator" style={{ color: '#bbb' }}>&middot;</span>
             <span
+              className="comment-time"
               style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#aaa' }}
               title={comment.created_at ? formatDateTimeInTimeZone(comment.created_at * 1000, 'zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }, timeZone) : ''}
             >
@@ -390,7 +393,7 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
 
             {/* 地理位置常驻显示，系统 / 浏览器信息在 hover 时展开 */}
             {comment.geo?.country_code && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#aaa' }}>
+              <span className="comment-geo" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#aaa' }}>
                 <img
                   src={`https://flagcdn.io/flags/1x1/${comment.geo.country_code.toLowerCase()}.svg`}
                   alt="" style={{ width: '14px', height: '14px', objectFit: 'cover' }}
@@ -402,12 +405,12 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
             {hovered && (
               <>
                 {os && (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#aaa' }}>
+                  <span className="comment-tech" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#aaa' }}>
                     <OSIcon name={os} size={14} /> {os}
                   </span>
                 )}
                 {browser && (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#aaa' }}>
+                  <span className="comment-tech" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#aaa' }}>
                     <BrowserIcon name={browser} size={14} /> {browser}
                   </span>
                 )}
@@ -458,7 +461,7 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
               </div>
             </div>
           ) : (
-            <div style={{
+            <div className="comment-body" style={{
               fontSize: '14px', lineHeight: 1.8, color: 'var(--color-text-main, #333)',
               wordBreak: 'break-word', margin: 0,
             }}>
@@ -502,7 +505,7 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
         </div>
 
         {/* 右上角：编号 / 编辑+回复按钮 */}
-        <div style={{ position: 'absolute', top: '10px', right: '12px' }}>
+        <div className="comment-corner" style={{ position: 'absolute', top: '10px', right: '12px' }}>
           {hovered || showReply || isEditing ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
               {canEdit && remaining > 0 && !isEditing && (
@@ -535,7 +538,7 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
             </div>
           ) : (
             floor !== undefined && !isReply && (
-              <span style={{ fontSize: '12px', color: '#ddd', fontWeight: 500 }}>#{floor}</span>
+              <span className="comment-floor" style={{ fontSize: '12px', color: '#ddd', fontWeight: 500 }}>{floor} 楼</span>
             )
           )}
         </div>
@@ -543,7 +546,7 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
 
       {/* 子评论扁平渲染 — 仅在顶层做一次,避免深层链重复 */}
       {depth === 0 && comment.children && comment.children.length > 0 && (
-        <div style={{ paddingBottom: '12px' }}>
+        <div className="comment-thread-replies" style={{ paddingBottom: '12px' }}>
           {flattenReplies(comment).map(({ child, parent }) => (
             <CommentRow key={child.id} comment={child} postId={postId} depth={1} parentComment={parent} onReplySuccess={onReplySuccess} editableIds={editableIds} />
           ))}
