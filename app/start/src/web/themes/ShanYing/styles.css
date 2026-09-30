@@ -3845,7 +3845,7 @@ html[data-theme='ShanYing'] .sy-footer-presence {
   padding: 7px 11px;
   border: 0;
   border-radius: 999px;
-  background: rgb(11 17 25 / 0.44);
+  background: transparent;
   color: rgb(255 255 255 / 0.88);
   backdrop-filter: blur(10px);
   font-size: 10.5px;
@@ -3858,6 +3858,32 @@ html[data-theme='ShanYing'] .sy-footer-presence-location {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+}
+
+html[data-theme='ShanYing'] button.sy-footer-presence-online {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+html[data-theme='ShanYing'] button.sy-footer-presence-online:hover,
+html[data-theme='ShanYing'] button.sy-footer-presence-online:focus-visible {
+  color: #fff;
+}
+
+html[data-theme='ShanYing'] button.sy-footer-presence-online:focus-visible {
+  outline: 1px solid rgb(255 255 255 / 0.72);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+html[data-theme='ShanYing'] .sy-footer-presence-chevron {
+  margin-left: 2px;
+  color: rgb(255 255 255 / 0.58);
+  font-size: 8px;
 }
 
 html[data-theme='ShanYing'] .sy-footer-presence-dot {
@@ -3877,6 +3903,123 @@ html[data-theme='ShanYing'] .sy-footer-presence-location > i {
 html[data-theme='ShanYing'] .sy-footer-presence-flag {
   font-size: 14px;
   line-height: 1;
+}
+
+html[data-theme='ShanYing'] .sy-footer-online-panel {
+  position: fixed;
+  z-index: 2100;
+  width: min(292px, calc(100vw - 24px));
+  max-height: min(340px, calc(100dvh - 24px));
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 18px;
+  background: rgb(13 18 27 / 0.96);
+  box-shadow: 0 18px 48px rgb(0 0 0 / 0.35);
+  color: #f4f6f8;
+  font-family: var(--sy-font);
+  backdrop-filter: blur(18px);
+}
+
+html[data-theme='ShanYing'] .sy-footer-online-panel > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgb(255 255 255 / 0.1);
+}
+
+html[data-theme='ShanYing'] .sy-footer-online-panel > header > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  font-weight: 650;
+}
+
+html[data-theme='ShanYing'] .sy-footer-online-panel > header small {
+  color: rgb(255 255 255 / 0.56);
+  font-size: 10.5px;
+}
+
+html[data-theme='ShanYing'] .sy-footer-online-list {
+  max-height: 282px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.22) transparent;
+}
+
+html[data-theme='ShanYing'] .sy-footer-online-visitor {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 9px 14px;
+  border-bottom: 1px solid rgb(255 255 255 / 0.07);
+}
+
+html[data-theme='ShanYing'] .sy-footer-online-visitor:last-child {
+  border-bottom: 0;
+}
+
+html[data-theme='ShanYing'] .sy-footer-online-visitor > img,
+html[data-theme='ShanYing'] .sy-footer-online-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.1);
+  object-fit: cover;
+}
+
+html[data-theme='ShanYing'] .sy-footer-online-avatar {
+  color: rgb(255 255 255 / 0.58);
+  font-size: 11px;
+}
+
+html[data-theme='ShanYing'] .sy-footer-online-info {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+html[data-theme='ShanYing'] .sy-footer-online-info strong,
+html[data-theme='ShanYing'] .sy-footer-online-info small {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+html[data-theme='ShanYing'] .sy-footer-online-info strong {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+html[data-theme='ShanYing'] .sy-footer-online-info small {
+  color: rgb(255 255 255 / 0.56);
+  font-size: 10.5px;
+}
+
+html[data-theme='ShanYing'] .sy-footer-online-dot {
+  flex: 0 0 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #20c76a;
+  box-shadow: 0 0 8px rgb(32 199 106 / 0.58);
+}
+
+html[data-theme='ShanYing'] .sy-footer-online-empty {
+  margin: 0;
+  padding: 24px 14px;
+  color: rgb(255 255 255 / 0.56);
+  font-size: 11.5px;
+  text-align: center;
 }
 
 html[data-theme='ShanYing'] .sy-footer-legal .sy-auth-dock {

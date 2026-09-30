@@ -16,7 +16,8 @@
  */
 
 import Link from '@/components/AppLink';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useThemeContext } from '@/lib/theme-context';
 import { resolveSiteTimeZone } from '@/lib/timezone';
 import { resolveScene, sceneImageUrl, sceneImageSmallUrl } from './shanying-scene';
@@ -29,6 +30,15 @@ type FooterStatus = {
   latest: { country_code: string; country: string; region: string; city: string } | null;
 };
 
+type OnlineVisitor = {
+  visitor_id?: string;
+  name?: string;
+  avatar?: string;
+  country?: string;
+  country_code?: string;
+  city?: string;
+};
+
 function flagEmoji(code: string) {
   const normalized = code.trim().toUpperCase();
   if (!/^[A-Z]{2}$/.test(normalized)) return '';
@@ -37,6 +47,11 @@ function flagEmoji(code: string) {
 
 function FooterPresence() {
   const [status, setStatus] = useState<FooterStatus | null>(null);
+  const [visitors, setVisitors] = useState<OnlineVisitor[]>([]);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -55,6 +70,56 @@ function FooterPresence() {
     return () => { active = false; window.clearInterval(timer); };
   }, []);
 
+  const loadVisitors = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/v1/online', { cache: 'no-store' });
+      if (!response.ok) return;
+      const payload = await response.json();
+      const data = payload?.data || payload;
+      setVisitors(Array.isArray(data?.online) ? data.online : []);
+      setStatus((current) => current ? { ...current, count: Number(data?.count || 0), enabled: data?.enabled !== false } : current);
+    } catch {
+      // Keep the last successful list when a refresh fails.
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleVisitors = () => {
+    const next = !open;
+    setOpen(next);
+    if (next) void loadVisitors();
+  };
+
+  useLayoutEffect(() => {
+    if (!open || !triggerRef.current || !panelRef.current) return;
+    const trigger = triggerRef.current.getBoundingClientRect();
+    const panel = panelRef.current.getBoundingClientRect();
+    panelRef.current.style.left = `${Math.max(12, Math.min(trigger.left + trigger.width / 2 - panel.width / 2, window.innerWidth - panel.width - 12))}px`;
+    panelRef.current.style.top = `${Math.max(12, trigger.top - panel.height - 10)}px`;
+  }, [open, loading, visitors]);
+
+  useEffect(() => {
+    if (!open) return;
+    const closeOutside = (event: PointerEvent) => {
+      const node = event.target as Node;
+      if (!triggerRef.current?.contains(node) && !panelRef.current?.contains(node)) setOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') setOpen(false); };
+    const closeOnViewportChange = () => setOpen(false);
+    document.addEventListener('pointerdown', closeOutside, true);
+    document.addEventListener('keydown', closeOnEscape);
+    window.addEventListener('resize', closeOnViewportChange);
+    document.querySelector('.blog-main')?.addEventListener('scroll', closeOnViewportChange, { passive: true });
+    return () => {
+      document.removeEventListener('pointerdown', closeOutside, true);
+      document.removeEventListener('keydown', closeOnEscape);
+      window.removeEventListener('resize', closeOnViewportChange);
+      document.querySelector('.blog-main')?.removeEventListener('scroll', closeOnViewportChange);
+    };
+  }, [open]);
+
   if (!status?.enabled) return <span className="sy-footer-presence-slot" aria-hidden="true" />;
   const latest = status.latest;
   const locationParts = [latest?.region, latest?.city].map((part) => String(part || '').trim()).filter(Boolean);
@@ -63,7 +128,18 @@ function FooterPresence() {
 
   return (
     <div className="sy-footer-presence" aria-label="站点访客状态">
-      <span className="sy-footer-presence-online"><i className="sy-footer-presence-dot" aria-hidden="true" />{status.count} 人在线</span>
+      <button
+        ref={triggerRef}
+        type="button"
+        className="sy-footer-presence-online"
+        aria-expanded={open}
+        aria-haspopup="dialog"
+        onClick={toggleVisitors}
+      >
+        <i className="sy-footer-presence-dot" aria-hidden="true" />
+        {status.count} 人在线
+        <i className={`fa-solid fa-chevron-${open ? 'down' : 'up'} sy-footer-presence-chevron`} aria-hidden="true" />
+      </button>
       {location && (
         <span className="sy-footer-presence-location">
           <i className="fa-solid fa-location-dot" aria-hidden="true" />
@@ -71,6 +147,40 @@ function FooterPresence() {
           {flag && <span className="sy-footer-presence-flag" aria-hidden="true">{flag}</span>}
           <span>{location}</span>
         </span>
+      )}
+      {open && typeof document !== 'undefined' && createPortal(
+        <div ref={panelRef} className="sy-footer-online-panel" role="dialog" aria-label="当前在线访客">
+          <header>
+            <span><i className="sy-footer-presence-dot" aria-hidden="true" />当前在线</span>
+            <small>{visitors.length} 人</small>
+          </header>
+          <div className="sy-footer-online-list">
+            {loading && visitors.length === 0 ? (
+              <p className="sy-footer-online-empty">正在加载…</p>
+            ) : visitors.length === 0 ? (
+              <p className="sy-footer-online-empty">暂无在线访客</p>
+            ) : visitors.map((visitor, index) => {
+              const name = String(visitor.name || '').trim() || `匿名访客 ${index + 1}`;
+              const place = [...new Set([visitor.country, visitor.city].map((part) => String(part || '').trim()).filter(Boolean))].join(' · ');
+              const visitorFlag = flagEmoji(visitor.country_code || '');
+              return (
+                <div className="sy-footer-online-visitor" key={visitor.visitor_id || `${name}-${index}`}>
+                  {visitor.avatar ? (
+                    <img src={visitor.avatar} alt="" loading="lazy" referrerPolicy="no-referrer" />
+                  ) : (
+                    <span className="sy-footer-online-avatar" aria-hidden="true"><i className="fa-solid fa-user" /></span>
+                  )}
+                  <span className="sy-footer-online-info">
+                    <strong>{name}</strong>
+                    <small>{visitorFlag && <span aria-hidden="true">{visitorFlag} </span>}{place || '正在浏览本站'}</small>
+                  </span>
+                  <i className="sy-footer-online-dot" aria-label="在线" />
+                </div>
+              );
+            })}
+          </div>
+        </div>,
+        document.body,
       )}
     </div>
   );
