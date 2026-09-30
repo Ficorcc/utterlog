@@ -3836,10 +3836,11 @@ html[data-theme='ShanYing'] .sy-footer-presence {
   gap: 8px 14px;
   max-width: 100%;
   padding: 7px 11px;
-  border: 1px solid rgb(255 255 255 / 0.8);
+  border: 1px solid rgb(255 255 255 / 0.25);
   border-radius: 999px;
-  background: rgb(255 255 255 / 0.94);
-  color: #747985;
+  background: rgb(11 17 25 / 0.44);
+  color: rgb(255 255 255 / 0.88);
+  backdrop-filter: blur(10px);
   font-size: 10.5px;
   line-height: 1.3;
   white-space: nowrap;
@@ -3862,7 +3863,7 @@ html[data-theme='ShanYing'] .sy-footer-presence-dot {
 
 html[data-theme='ShanYing'] .sy-footer-presence-location > i {
   margin-left: 2px;
-  color: #8b909b;
+  color: rgb(255 255 255 / 0.68);
   font-size: 11px;
 }
 
@@ -5819,19 +5820,20 @@ html[data-theme='ShanYing'] .moments-page .sy-moments-overview .sy-heatmap-mini 
 
 html[data-theme='ShanYing'] .moments-page .sy-moments-overview .sy-heatmap-mini button {
   border-radius: 2px;
-  background: var(--sy-soft);
+  background: color-mix(in srgb, var(--sy-text) 13%, var(--sy-surface));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sy-text) 9%, transparent);
 }
 
 html[data-theme='ShanYing'] .moments-page .sy-moments-overview .sy-heatmap-mini button[data-level='1'] {
-  background: var(--sy-heat-1);
+  background: color-mix(in srgb, var(--sy-accent) 44%, var(--sy-surface));
 }
 
 html[data-theme='ShanYing'] .moments-page .sy-moments-overview .sy-heatmap-mini button[data-level='2'] {
-  background: var(--sy-heat-2);
+  background: color-mix(in srgb, var(--sy-accent) 64%, var(--sy-surface));
 }
 
 html[data-theme='ShanYing'] .moments-page .sy-moments-overview .sy-heatmap-mini button[data-level='3'] {
-  background: var(--sy-heat-3);
+  background: color-mix(in srgb, var(--sy-accent) 82%, var(--sy-surface));
 }
 
 html[data-theme='ShanYing'] .moments-page .sy-moments-overview .sy-heatmap-mini button[data-level='4'] {

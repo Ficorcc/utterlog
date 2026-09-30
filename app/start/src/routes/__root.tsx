@@ -15,6 +15,7 @@ import { DefaultNotFoundPage } from '@/components/blog/defaults';
 import { StartThemeShell } from '../components/StartThemeShell';
 import { loadStartDocument } from '../server/document';
 import { startDocumentLinks } from '../lib/document';
+import ContextMenu from '@/themes/ShanYing/ContextMenu';
 
 export const Route = createRootRoute({
   loader: () => loadStartDocument(),
@@ -89,6 +90,7 @@ function RootDocument({ children, ctx }: Readonly<{ children: ReactNode; ctx: Th
           </defs>
         </svg>
         {children}
+        {ctx?.theme.name === 'ShanYing' && <ContextMenu permalinkStructure={ctx.options.permalink_structure} />}
         <Scripts />
       </body>
     </html>

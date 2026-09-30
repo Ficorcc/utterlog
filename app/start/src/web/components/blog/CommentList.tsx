@@ -447,19 +447,7 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
               {relativeTime(comment.created_at)}
             </span>
 
-            {/* 地理位置常驻显示，系统 / 浏览器信息在 hover 时展开 */}
-            {location && (
-              <span className="comment-geo" title={`IP 属地：${location}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#aaa' }}>
-                {/^[a-z]{2}$/i.test(comment.geo?.country_code || '') && (
-                  <img
-                    src={`https://flagcdn.io/flags/1x1/${comment.geo!.country_code.toLowerCase()}.svg`}
-                    alt="" style={{ width: '14px', height: '14px', objectFit: 'cover' }}
-                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                  />
-                )}
-                {location}
-              </span>
-            )}
+            {/* 浏览器 / 系统图标和 IP 属地并排显示。 */}
             {isShanYing && (os || browser) ? (
               <span className="comment-tech comment-tech-icons" title={[browser, os].filter(Boolean).join(' · ')}>
                 {browser && <BrowserIcon name={browser} size={14} />}
@@ -478,6 +466,18 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
                   </span>
                 )}
               </>
+            )}
+            {location && (
+              <span className="comment-geo" title={`IP 属地：${location}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#aaa' }}>
+                {/^[a-z]{2}$/i.test(comment.geo?.country_code || '') && (
+                  <img
+                    src={`https://flagcdn.io/flags/1x1/${comment.geo!.country_code.toLowerCase()}.svg`}
+                    alt="" style={{ width: '14px', height: '14px', objectFit: 'cover' }}
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                )}
+                {location}
+              </span>
             )}
           </div>
 

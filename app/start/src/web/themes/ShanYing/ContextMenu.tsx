@@ -4,7 +4,6 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import toast from 'react-hot-toast';
 import { buildPermalink } from '@/lib/permalink';
-import { useThemeContext } from '@/lib/theme-context';
 import { Icon, resolveDark, useShanYingMode } from './shanying-shared';
 
 type MenuState = { x: number; y: number; href: string | null };
@@ -18,17 +17,16 @@ async function copyAddress(address: string, success: string) {
   }
 }
 
-export default function ContextMenu() {
+export default function ContextMenu({ permalinkStructure }: { permalinkStructure?: string }) {
   const [menu, setMenu] = useState<MenuState | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { options } = useThemeContext();
   const { mode, setMode } = useShanYingMode();
 
   useEffect(() => {
     const open = (event: MouseEvent) => {
       if (event.defaultPrevented) return;
       const target = event.target instanceof Element ? event.target : null;
-      if (!target?.closest('.sy-theme') || target.closest('.sy-context-menu')) return;
+      if (!target || target.closest('.sy-context-menu')) return;
       if (window.getSelection()?.toString()) return;
       const link = target.closest('a[href]') as HTMLAnchorElement | null;
       if (target.closest('input, textarea, select, button, [contenteditable], [role="textbox"]')) return;
@@ -96,7 +94,7 @@ export default function ContextMenu() {
         toast.error('暂无可访问文章');
         return;
       }
-      window.location.assign(buildPermalink(posts[0], options?.permalink_structure));
+      window.location.assign(buildPermalink(posts[0], permalinkStructure));
     } catch {
       toast.error('随机访问失败');
     }
