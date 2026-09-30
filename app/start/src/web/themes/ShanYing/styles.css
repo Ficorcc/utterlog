@@ -5432,8 +5432,32 @@ html[data-theme='ShanYing'] .sy-comments .comment-card {
 }
 
 html[data-theme='ShanYing'] .sy-comments .comment-avatar-wrap {
+  position: relative;
   width: 44px;
   padding-top: 10px;
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-avatar-check {
+  position: absolute;
+  top: 37px;
+  right: 0;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border: 1px solid var(--sy-surface);
+  border-radius: 50%;
+  background: #0877f5;
+  color: #fff;
+  font-size: 8px;
+  line-height: 1;
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-avatar-check--reply {
+  top: 37px;
+  right: calc(100% + 10px);
 }
 
 html[data-theme='ShanYing'] .sy-comments .comment-avatar {
@@ -5449,7 +5473,7 @@ html[data-theme='ShanYing'] .sy-comments .comment-main {
   padding: 14px 18px 15px !important;
   border: 1px solid var(--sy-line);
   border-radius: 16px;
-  background: color-mix(in srgb, var(--sy-surface) 94%, var(--sy-soft));
+  background: var(--sy-surface);
 }
 
 html[data-theme='ShanYing'] .sy-comments .comment-main::before,
@@ -5471,7 +5495,7 @@ html[data-theme='ShanYing'] .sy-comments .comment-main::before {
 html[data-theme='ShanYing'] .sy-comments .comment-main::after {
   top: 21px;
   border-width: 6px 7px 6px 0;
-  border-color: transparent color-mix(in srgb, var(--sy-surface) 94%, var(--sy-soft)) transparent transparent;
+  border-color: transparent var(--sy-surface) transparent transparent;
 }
 
 html[data-theme='ShanYing'] .sy-comments .comment-meta {
@@ -5506,13 +5530,16 @@ html[data-theme='ShanYing'] .sy-comments .comment-follow-badge {
 html[data-theme='ShanYing'] .sy-comments .comment-admin-badge {
   background: #075bd8 !important;
   color: #fff !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
 }
 
 html[data-theme='ShanYing'] .sy-comments .comment-meta > .friend-badge {
+  width: 18px;
+  height: 18px;
   border-radius: 999px;
-  background: var(--sy-accent) !important;
-  color: var(--sy-accent-text) !important;
+  background: #075bd8 !important;
+  color: #fff !important;
+  font-size: 10px;
 }
 
 html[data-theme='ShanYing'] .sy-comments .comment-meta-tip {
@@ -5531,7 +5558,14 @@ html[data-theme='ShanYing'] .sy-comments .comment-level-badge {
   padding: 1px 8px !important;
   border: 1px solid transparent;
   border-radius: 999px;
+  font-weight: 700 !important;
   line-height: 16px;
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-tech-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 html[data-theme='ShanYing'] .sy-comments .comment-meta-separator { display: none !important; }
@@ -5546,7 +5580,7 @@ html[data-theme='ShanYing'] .sy-comments .comment-corner { top: 15px !important;
 html[data-theme='ShanYing'] .sy-comments .comment-floor { color: var(--sy-muted) !important; font-size: 11px !important; font-weight: 400 !important; }
 
 html[data-theme='ShanYing'] .sy-comments .comment-thread-replies {
-  padding: 0 0 0 58px !important;
+  padding: 0 0 0 106px !important;
 }
 
 html[data-theme='ShanYing'] .sy-comments .comment-card--reply {
@@ -5554,16 +5588,72 @@ html[data-theme='ShanYing'] .sy-comments .comment-card--reply {
 }
 
 html[data-theme='ShanYing'] .sy-comments .comment-card--reply .comment-main {
-  border-color: color-mix(in srgb, #5c9362 38%, var(--sy-line));
-  background: color-mix(in srgb, #315f37 18%, var(--sy-surface));
+  border-color: color-mix(in srgb, #70aa71 42%, var(--sy-line));
+  background: color-mix(in srgb, #e7f5e6 92%, var(--sy-surface));
 }
 
 html[data-theme='ShanYing'] .sy-comments .comment-card--reply .comment-main::before {
-  border-right-color: color-mix(in srgb, #5c9362 38%, var(--sy-line));
+  border-right-color: color-mix(in srgb, #70aa71 42%, var(--sy-line));
 }
 
 html[data-theme='ShanYing'] .sy-comments .comment-card--reply .comment-main::after {
-  border-right-color: color-mix(in srgb, #315f37 18%, var(--sy-surface));
+  border-right-color: color-mix(in srgb, #e7f5e6 92%, var(--sy-surface));
+}
+
+html[data-theme='ShanYing'] .sy-comments .sy-comments-heading { display: none; }
+
+html[data-theme='ShanYing'] .sy-comments .sy-comment-list .comment-list-header {
+  margin: 0 0 12px !important;
+  padding: 0 0 14px !important;
+  border-bottom: 0 !important;
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-list-total {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--sy-muted);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-list-total i { font-size: 18px; font-weight: 400; }
+
+html[data-theme='ShanYing'] .sy-comments .comment-reply-to {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 1px 7px;
+  border: 1px solid color-mix(in srgb, #70aa71 32%, var(--sy-line));
+  border-radius: 999px;
+  background: color-mix(in srgb, #cce8ca 62%, var(--sy-surface));
+  color: var(--sy-muted);
+  font-size: 11px;
+  line-height: 16px;
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-card--reply .comment-time,
+html[data-theme='ShanYing'] .sy-comments .comment-card--reply .comment-geo,
+html[data-theme='ShanYing'] .sy-comments .comment-card--reply .comment-tech {
+  border-color: color-mix(in srgb, #70aa71 32%, var(--sy-line));
+  background: color-mix(in srgb, #cce8ca 62%, var(--sy-surface));
+}
+
+html[data-theme='ShanYing'][data-shanying-mode='dark'] .sy-comments .comment-card--reply .comment-main {
+  background: color-mix(in srgb, #315f37 23%, var(--sy-surface));
+}
+
+html[data-theme='ShanYing'][data-shanying-mode='dark'] .sy-comments .comment-card--reply .comment-main::after {
+  border-right-color: color-mix(in srgb, #315f37 23%, var(--sy-surface));
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme='ShanYing']:not([data-shanying-mode='light']) .sy-comments .comment-card--reply .comment-main {
+    background: color-mix(in srgb, #315f37 23%, var(--sy-surface));
+  }
+  html[data-theme='ShanYing']:not([data-shanying-mode='light']) .sy-comments .comment-card--reply .comment-main::after {
+    border-right-color: color-mix(in srgb, #315f37 23%, var(--sy-surface));
+  }
 }
 
 html[data-theme='ShanYing'] .sy-comments .comment-avatar--reply {
@@ -5578,11 +5668,13 @@ html[data-theme='ShanYing'] .sy-comments .comment-avatar--reply {
   html[data-theme='ShanYing'] .sy-comments .comment-thread { margin-top: 18px !important; }
   html[data-theme='ShanYing'] .sy-comments .comment-card { gap: 10px !important; }
   html[data-theme='ShanYing'] .sy-comments .comment-avatar-wrap { width: 36px; padding-top: 8px; }
+  html[data-theme='ShanYing'] .sy-comments .comment-avatar-check { top: 29px; width: 14px; height: 14px; }
+  html[data-theme='ShanYing'] .sy-comments .comment-avatar-check--reply { top: 29px; right: calc(100% + 7px); }
   html[data-theme='ShanYing'] .sy-comments .comment-avatar { width: 34px !important; height: 34px !important; }
   html[data-theme='ShanYing'] .sy-comments .comment-main { padding: 12px 13px 13px !important; border-radius: 14px; }
   html[data-theme='ShanYing'] .sy-comments .comment-meta { padding-right: 34px; }
   html[data-theme='ShanYing'] .sy-comments .comment-body { padding-right: 0; font-size: 13px !important; }
-  html[data-theme='ShanYing'] .sy-comments .comment-thread-replies { padding-left: 46px !important; }
+  html[data-theme='ShanYing'] .sy-comments .comment-thread-replies { padding-left: 90px !important; }
   html[data-theme='ShanYing'] .sy-comments .comment-avatar--reply { right: calc(100% + 11px); width: 32px !important; height: 32px !important; }
   html[data-theme='ShanYing'] .sy-comments .comment-corner { top: 13px !important; right: 13px !important; }
 }
@@ -5598,7 +5690,7 @@ html[data-theme='ShanYing'] .sy-main {
   background-size: 24px 24px, 24px 24px, 96px 96px, 96px 96px;
   background-attachment: fixed;
 }
-+
+
 /* Screenshot-matched moments overview: ruled title, one-line note and 90-day activity grid. */
 html[data-theme='ShanYing'] .moments-page .sy-moments-title {
   align-items: center;

@@ -41,6 +41,14 @@ interface GeoInfo {
   city: string;
 }
 
+function commentLocation(geo?: GeoInfo): string {
+  if (!geo) return '';
+  const region = [geo.province, geo.city].map((part) => String(part || '').trim()).filter(Boolean);
+  const place = region.filter((part, index) => index === 0 || part !== region[index - 1]);
+  if (place.length > 0) return place.join(' · ');
+  return String(geo.country || '').trim();
+}
+
 interface Comment {
   id: number;
   post_id: number;
@@ -189,6 +197,34 @@ function MetaTooltip({ children, label, detail, icon }: { children: React.ReactN
   );
 }
 
+function ReplyMention({ parent, compact = false }: { parent: Comment; compact?: boolean }) {
+  return (
+    <span className={`reply-mention${compact ? ' comment-reply-to' : ''}`} style={{ position: 'relative', display: 'inline-flex' }}>
+      <span style={compact
+        ? { cursor: 'help', whiteSpace: 'nowrap' }
+        : { color: 'var(--color-primary, #0052D9)', cursor: 'pointer', fontWeight: 500, fontSize: '13px', marginRight: '4px' }}>
+        {compact ? '↳ ' : ''}@{parent.author}
+      </span>
+      <span className="reply-mention-card" style={{
+        position: 'absolute', bottom: '100%', left: 0, marginBottom: '6px', zIndex: 50,
+        width: '280px', padding: '10px 12px',
+        background: 'var(--color-bg-card, #fff)', backdropFilter: 'blur(12px)',
+        border: '1px solid var(--color-border, #e5e5e5)', boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+        display: 'none', fontSize: '12px', lineHeight: 1.6, color: 'var(--color-text-sub, #666)',
+      }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+          <img src={parent.avatar_url || 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=40'} alt=""
+            style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#f0f0f0', objectFit: 'cover' }} />
+          <span style={{ fontWeight: 600, color: 'var(--color-text-main, #333)' }}>{parent.author}</span>
+        </span>
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' as const }}>
+          <CommentContent content={parent.content} />
+        </span>
+      </span>
+    </span>
+  );
+}
+
 /* 60 秒编辑倒计时 hook */
 function useEditCountdown(createdAt: number, editable: boolean) {
   const [remaining, setRemaining] = useState(() => {
@@ -226,11 +262,13 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
   const canEdit = editableIds.has(comment.id);
   const remaining = useEditCountdown(comment.created_at, canEdit);
   const ua = parseUA(comment.user_agent);
-  const { timeZone } = useThemeContext();
+  const { timeZone, theme } = useThemeContext();
   // Prefer Client Hints (accurate) over UA parsing (frozen versions)
   const os = comment.os_name || ua.os;
   const browser = comment.browser_name || ua.browser;
   const isReply = depth > 0;
+  const isShanYing = theme.name === 'ShanYing';
+  const location = commentLocation(comment.geo);
 
   const handleEditSubmit = async () => {
     if (!editContent.trim() || [...editContent.trim()].length < 5) {
@@ -283,6 +321,9 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
               style={{ width: '40px', height: '40px', objectFit: 'cover', background: '#f0f0f0', borderRadius: '50%', transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)', transform: hovered ? 'scale(1.15)' : 'scale(1)' }}
               onError={e => { (e.target as HTMLImageElement).src = 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=80'; }}
             />
+            {comment.is_admin && isShanYing && (
+              <span className="comment-avatar-check" title="博主" aria-label="博主"><i className="fa-solid fa-check" /></span>
+            )}
           </div>
         )}
         {/* 内容 */}
@@ -290,13 +331,18 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
           {/* Meta 行 */}
           <div className="comment-meta" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px', marginBottom: '6px', fontSize: '12px' }}>
             {isReply && (
-              <img
-                src={comment.avatar_url || 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=80'}
-                alt=""
-                className="comment-avatar comment-avatar--reply"
-                style={{ width: '24px', height: '24px', objectFit: 'cover', background: '#f0f0f0', borderRadius: '50%' }}
-                onError={e => { (e.target as HTMLImageElement).src = 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=80'; }}
-              />
+              <>
+                <img
+                  src={comment.avatar_url || 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=80'}
+                  alt=""
+                  className="comment-avatar comment-avatar--reply"
+                  style={{ width: '24px', height: '24px', objectFit: 'cover', background: '#f0f0f0', borderRadius: '50%' }}
+                  onError={e => { (e.target as HTMLImageElement).src = 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=80'; }}
+                />
+                {comment.is_admin && isShanYing && (
+                  <span className="comment-avatar-check comment-avatar-check--reply" title="博主" aria-label="博主"><i className="fa-solid fa-check" /></span>
+                )}
+              </>
             )}
             {comment.url ? (
               <a href={comment.url} target="_blank" rel="noopener noreferrer"
@@ -342,6 +388,7 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
                 <MetaTooltip label="等级" detail={`Lv.${comment.level}　累计 ${comment.comment_count || 0} 条评论`}>
                   <span
                     className="comment-level-badge"
+                    data-level={comment.level}
                     style={{
                       fontSize: '10px', padding: '1px 5px', fontWeight: 600, cursor: 'default',
                       ...(isMax
@@ -386,6 +433,10 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
               </span>
             )}
 
+            {isReply && parentComment && isShanYing && (
+              <ReplyMention parent={parentComment} compact />
+            )}
+
             <span className="comment-meta-separator" style={{ color: '#bbb' }}>&middot;</span>
             <span
               className="comment-time"
@@ -397,17 +448,24 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
             </span>
 
             {/* 地理位置常驻显示，系统 / 浏览器信息在 hover 时展开 */}
-            {comment.geo?.country_code && (
-              <span className="comment-geo" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#aaa' }}>
-                <img
-                  src={`https://flagcdn.io/flags/1x1/${comment.geo.country_code.toLowerCase()}.svg`}
-                  alt="" style={{ width: '14px', height: '14px', objectFit: 'cover' }}
-                  onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                />
-                {comment.geo.city || comment.geo.province || comment.geo.country || ''}
+            {location && (
+              <span className="comment-geo" title={`IP 属地：${location}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#aaa' }}>
+                {/^[a-z]{2}$/i.test(comment.geo?.country_code || '') && (
+                  <img
+                    src={`https://flagcdn.io/flags/1x1/${comment.geo!.country_code.toLowerCase()}.svg`}
+                    alt="" style={{ width: '14px', height: '14px', objectFit: 'cover' }}
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                )}
+                {location}
               </span>
             )}
-            {hovered && (
+            {isShanYing && (os || browser) ? (
+              <span className="comment-tech comment-tech-icons" title={[browser, os].filter(Boolean).join(' · ')}>
+                {browser && <BrowserIcon name={browser} size={14} />}
+                {os && <OSIcon name={os} size={14} />}
+              </span>
+            ) : hovered && (
               <>
                 {os && (
                   <span className="comment-tech" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#aaa' }}>
@@ -470,29 +528,8 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
               fontSize: '14px', lineHeight: 1.8, color: 'var(--color-text-main, #333)',
               wordBreak: 'break-word', margin: 0,
             }}>
-              {parentComment && (
-                <span style={{ position: 'relative', display: 'inline' }} className="reply-mention">
-                  <span style={{ color: 'var(--color-primary, #0052D9)', cursor: 'pointer', fontWeight: 500, fontSize: '13px', marginRight: '4px' }}>
-                    @{parentComment.author}
-                  </span>
-                  <span className="reply-mention-card" style={{
-                    position: 'absolute', bottom: '100%', left: 0, marginBottom: '6px', zIndex: 50,
-                    width: '280px', padding: '10px 12px',
-                    background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)',
-                    border: '1px solid var(--color-border, #e5e5e5)', boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-                    display: 'none', fontSize: '12px', lineHeight: 1.6, color: 'var(--color-text-sub, #666)',
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                      <img src={parentComment.avatar_url || 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=40'} alt=""
-                        style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#f0f0f0', objectFit: 'cover' }} />
-                      <span style={{ fontWeight: 600, color: 'var(--color-text-main, #333)' }}>{parentComment.author}</span>
-                    </div>
-                    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' as const }}>
-                      <CommentContent content={parentComment.content} />
-                    </div>
-                  </span>
-                </span>
-              )}<CommentContent content={comment.content} inline={!!parentComment} />
+              {parentComment && !isShanYing && <ReplyMention parent={parentComment} />}
+              <CommentContent content={comment.content} inline={!!parentComment && !isShanYing} />
             </div>
           )}
 
@@ -592,7 +629,7 @@ function CommentCard({ comment, postId, floor, onReplySuccess, editableIds }: {
 }
 
 export default function CommentList({ postId, title, onCommentCountChange }: { postId: number; title?: string; onCommentCountChange?: (count: number) => void }) {
-  const { options } = useThemeContext();
+  const { options, theme } = useThemeContext();
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(false);
   const [switching, setSwitching] = useState(false);
@@ -673,14 +710,14 @@ export default function CommentList({ postId, title, onCommentCountChange }: { p
   const topLevelCount = tree.length;
 
   return (
-    <div ref={listRef} style={{ marginTop: 0 }}>
+    <div ref={listRef} className={theme.name === 'ShanYing' ? 'sy-comment-list' : undefined} style={{ marginTop: 0 }}>
       {/* Comment header bar */}
-      <div style={{
+      <div className="comment-list-header" style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '10px 32px', borderBottom: '1px solid var(--color-border, #e5e5e5)',
         marginLeft: '-32px', marginRight: '-32px', marginBottom: '24px',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13px', color: 'var(--color-text-sub, #666)' }}>
+        <div className="comment-list-header-label" style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13px', color: 'var(--color-text-sub, #666)' }}>
           {loading ? (
             <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor" style={{ verticalAlign: 'middle' }}>
               <path d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" opacity=".25"/>
@@ -689,7 +726,9 @@ export default function CommentList({ postId, title, onCommentCountChange }: { p
               </path>
             </svg>
           ) : (
-            <>
+            theme.name === 'ShanYing' ? (
+              <span className="comment-list-total"><i className="fa-regular fa-comment" /> {total} 条评论</span>
+            ) : <>
               <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                 <i className="fa-regular fa-comments" style={{ fontSize: '14px', color: 'var(--color-primary, #0052D9)' }} />
                 {title && <span style={{ fontWeight: 600, color: 'var(--color-text-main)' }}>{title}</span>}

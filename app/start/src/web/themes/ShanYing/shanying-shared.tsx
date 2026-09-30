@@ -361,7 +361,9 @@ export function ShanYingRecentHeatmap({
   for (const item of data) counts.set(item.date, item.count);
 
   const cells: HeatCell[] = [];
-  const todayParts = datePartsInTimeZone(new Date(), timeZone || 'UTC');
+  const todayParts = timeZone
+    ? datePartsInTimeZone(new Date(), timeZone)
+    : { year: new Date().getFullYear(), month: new Date().getMonth() + 1, day: new Date().getDate() };
   const today = new Date(Date.UTC(todayParts.year, todayParts.month - 1, todayParts.day));
   for (let i = days - 1; i >= 0; i -= 1) {
     const d = new Date(today);
