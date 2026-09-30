@@ -338,3 +338,19 @@ export async function publicOnlineVisitors() {
   }
   return { count: online.length, online, enabled: true };
 }
+
+/** Public footer summary: count plus coarse location, without visitor identities or IPs. */
+export async function publicOnlineSummary() {
+  const enabled = !['0', 'false'].includes((await optionValue('show_online_visitors', '1')).toLowerCase());
+  if (!enabled) return { count: 0, latest: null, enabled: false };
+  const [keys, latest] = await Promise.all([
+    ephemeral.scan('online:').catch(() => [] as string[]),
+    one<{ country_code: string; country: string; region: string; city: string }>(
+      `select coalesce(country,'') as country_code, coalesce(country_name,'') as country,
+              coalesce(region,'') as region, coalesce(city,'') as city
+       from ${table('access_logs')} where coalesce(country,'') != ''
+       order by created_at desc, id desc limit 1`,
+    ).catch(() => null),
+  ]);
+  return { count: keys.length, latest, enabled: true };
+}
