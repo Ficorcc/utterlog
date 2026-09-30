@@ -36,7 +36,7 @@ import {
   useReveal,
 } from './shanying-shared';
 import { currentSeason, resolveScene, sceneImageUrl, sceneImageSmallUrl, seasonImageUrl } from './shanying-scene';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { heroSocialLinks } from '@shared/hero-social-links';
@@ -107,6 +107,34 @@ export default function HomePage({
   const [focused, setFocused] = useState<number | null>(null);
   const [hubPage, setHubPage] = useState(page);
   const [interactive, setInteractive] = useState(false);
+  const tagBarRef = useRef<HTMLElement>(null);
+  const [visibleTagCount, setVisibleTagCount] = useState(14);
+
+  // Wrapped links remain in the layout for measurement, but cannot be focused.
+  useEffect(() => {
+    const bar = tagBarRef.current;
+    if (!bar) return;
+    const links = Array.from(bar.querySelectorAll<HTMLAnchorElement>(':scope > a'));
+    const measure = () => {
+      const firstRow = links[0]?.offsetTop;
+      const rightEdge = bar.getBoundingClientRect().right;
+      const nextRow = links.findIndex((link) =>
+        link.offsetTop !== firstRow || link.getBoundingClientRect().right > rightEdge + 0.5);
+      setVisibleTagCount(firstRow === undefined ? 0 : nextRow < 0 ? links.length : nextRow);
+    };
+    measure();
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+    observer?.observe(bar);
+    links.forEach((link) => observer?.observe(link));
+    window.addEventListener('resize', measure);
+    let active = true;
+    void document.fonts?.ready.then(() => { if (active) measure(); });
+    return () => {
+      active = false;
+      observer?.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [ctx.tags]);
 
   // A router navigation to another home page restores that page's SSR state.
   useEffect(() => {
@@ -479,9 +507,16 @@ export default function HomePage({
           )}
 
           {sortedTags(ctx.tags).length > 0 && (
-            <footer className="sy-hub-tags" aria-label="标签">
-              {sortedTags(ctx.tags).slice(0, 14).map((tag: any) => (
-                <Link prefetch={false} key={tag.id} href={`/tags/${tag.slug}`}>
+            <footer ref={tagBarRef} className="sy-hub-tags" aria-label="标签">
+              {sortedTags(ctx.tags).slice(0, 14).map((tag: any, index: number) => (
+                <Link
+                  prefetch={false}
+                  key={tag.id}
+                  href={`/tags/${tag.slug}`}
+                  data-hidden={index >= visibleTagCount ? '1' : undefined}
+                  aria-hidden={index >= visibleTagCount ? true : undefined}
+                  tabIndex={index >= visibleTagCount ? -1 : undefined}
+                >
                   #{tag.name}
                   <sup>{tag.count || 0}</sup>
                 </Link>

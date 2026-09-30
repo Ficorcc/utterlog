@@ -62,7 +62,6 @@ export default function ArchivePage({
   timeZone?: string;
 }) {
   const sortedTags = [...tags].sort((a: any, b: any) => (b.count || 0) - (a.count || 0));
-  const timeline = groupByYearMonth(posts, timeZone);
   const latest = latestPerCategory(posts, categories);
 
   const headline = [
@@ -129,43 +128,7 @@ export default function ArchivePage({
         </div>
       </section>
 
-      <section className="sy-archive-timeline">
-        {timeline.length === 0 && <p className="sy-archive-empty">这里还没有文章。</p>}
-        {timeline.map((group) => (
-          <div className="sy-archive-year" key={group.year}>
-            <header>
-              <Link href={`/date/${group.year}`}>{group.year}</Link>
-              <span>{group.months.reduce((sum, month) => sum + month.posts.length, 0)} 篇</span>
-            </header>
-            {group.months.map((month) => (
-              <div className="sy-archive-month" key={month.month}>
-                <Link className="sy-archive-month-head" href={`/date/${group.year}/${String(month.month + 1).padStart(2, '0')}`}>
-                  <h3>{month.label}</h3>
-                  <span>{month.posts.length} 篇</span>
-                </Link>
-                <ol>
-                  {month.posts.map((post: any) => {
-                    const cat = post.categories?.[0];
-                    return (
-                      <li key={post.id}>
-                        <time dateTime={String(postDateInput(post))}>{formatMonthDayInTimeZone(postDateInput(post), timeZone)}</time>
-                        <PostLink post={post} prefetch className="sy-archive-post">
-                          {renderCatIcon(cat?.icon, 14)}
-                          <span>{post.title}</span>
-                        </PostLink>
-                        <span className="sy-archive-post-stats">
-                          <span><i className="fa-regular fa-comment" aria-hidden="true" /> {post.comment_count || 0}</span>
-                          <span><i className="fa-regular fa-eye" aria-hidden="true" /> {post.view_count || 0}</span>
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ol>
-              </div>
-            ))}
-          </div>
-        ))}
-      </section>
+      <ArchivePostTimeline posts={posts} timeZone={timeZone} />
 
       <section className="sy-archive-block">
         <header className="sy-archive-block-head">
@@ -183,5 +146,55 @@ export default function ArchivePage({
       </section>
 
     </div>
+  );
+}
+
+export function ArchivePostTimeline({
+  posts,
+  timeZone,
+}: {
+  posts: any[];
+  timeZone: string;
+}) {
+  const timeline = groupByYearMonth(posts, timeZone);
+
+  return (
+    <section className="sy-archive-timeline">
+      {timeline.length === 0 && <p className="sy-archive-empty">这里还没有文章。</p>}
+      {timeline.map((group) => (
+        <div className="sy-archive-year" key={group.year}>
+          <header>
+            <Link href={`/date/${group.year}`}>{group.year}</Link>
+            <span>{group.months.reduce((sum, month) => sum + month.posts.length, 0)} 篇</span>
+          </header>
+          {group.months.map((month) => (
+            <div className="sy-archive-month" key={month.month}>
+              <Link className="sy-archive-month-head" href={`/date/${group.year}/${String(month.month + 1).padStart(2, '0')}`}>
+                <h3>{month.label}</h3>
+                <span>{month.posts.length} 篇</span>
+              </Link>
+              <ol>
+                {month.posts.map((post: any) => {
+                  const cat = post.categories?.[0];
+                  return (
+                    <li key={post.id}>
+                      <time dateTime={String(postDateInput(post))}>{formatMonthDayInTimeZone(postDateInput(post), timeZone)}</time>
+                      <PostLink post={post} prefetch className="sy-archive-post">
+                        {renderCatIcon(cat?.icon, 14)}
+                        <span>{post.title}</span>
+                      </PostLink>
+                      <span className="sy-archive-post-stats">
+                        <span><i className="fa-regular fa-comment" aria-hidden="true" /> {post.comment_count || 0}</span>
+                        <span><i className="fa-regular fa-eye" aria-hidden="true" /> {post.view_count || 0}</span>
+                      </span>
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          ))}
+        </div>
+      ))}
+    </section>
   );
 }

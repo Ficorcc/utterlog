@@ -1505,17 +1505,18 @@ html[data-theme='ShanYing'] .sy-hub-preview-blank {
   font-size: 30px;
 }
 
-/* 标签云：恒为一行，超出容器的直接裁掉并在右缘做渐隐，绝不撑破布局 */
+/* 标签云只露出完整的第一行；放不下的标签整枚隐藏。 */
 html[data-theme='ShanYing'] .sy-hub-tags {
   display: flex;
   align-items: center;
   gap: 7px;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  box-sizing: border-box;
+  height: 47px;
   overflow: hidden;
   padding-top: 16px;
   border-top: 1px solid var(--sy-line);
-  mask-image: linear-gradient(to right, #000 calc(100% - 42px), transparent);
-  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 42px), transparent);
 }
 
 html[data-theme='ShanYing'] .sy-hub-tags a,
@@ -1540,6 +1541,7 @@ html[data-theme='ShanYing'] .sy-hub-tags a {
   border-radius: 999px;
   color: var(--sy-muted);
   font-size: 11.5px;
+  line-height: 18px;
   text-decoration: none;
   transition: transform 0.3s var(--sy-ease), border-color 0.3s, color 0.3s;
 }
@@ -1548,6 +1550,11 @@ html[data-theme='ShanYing'] .sy-hub-tags a:hover {
   transform: translateY(-2px);
   border-color: var(--sy-accent);
   color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-hub-tags a[data-hidden='1'] {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 html[data-theme='ShanYing'] .sy-hub-tags sup {
@@ -3836,7 +3843,7 @@ html[data-theme='ShanYing'] .sy-footer-presence {
   gap: 8px 14px;
   max-width: 100%;
   padding: 7px 11px;
-  border: 1px solid rgb(255 255 255 / 0.25);
+  border: 0;
   border-radius: 999px;
   background: rgb(11 17 25 / 0.44);
   color: rgb(255 255 255 / 0.88);

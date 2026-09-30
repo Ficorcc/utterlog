@@ -3,11 +3,12 @@
 /** ShanYing · 标签页 */
 
 import Link from '@/components/AppLink';
-import PostCard from './PostCard';
+import { ArchivePostTimeline } from './ArchivePage';
 
 export default function TagPage({
   tag,
   posts = [],
+  timeZone = 'UTC',
 }: {
   tag: any;
   posts?: any[];
@@ -31,16 +32,11 @@ export default function TagPage({
 
       <p className="sy-taxonomy-desc">带有 #{name} 标签的全部文章。</p>
 
-      <div className="sy-card-grid">
-        {posts.length === 0 && (
-          <p className="sy-archive-empty">
-            这个标签还没有文章，去 <Link prefetch={false} href="/archives">归档</Link> 看看别的吧。
-          </p>
-        )}
-        {posts.map((post: any, index: number) => (
-          <PostCard key={post.id} post={post} index={index + 1} />
-        ))}
-      </div>
+      {posts.length === 0 ? (
+        <p className="sy-archive-empty">
+          这个标签还没有文章，去 <Link prefetch={false} href="/archives">归档</Link> 看看别的吧。
+        </p>
+      ) : <ArchivePostTimeline posts={posts} timeZone={timeZone} />}
     </div>
   );
 }
