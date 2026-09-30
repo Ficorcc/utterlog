@@ -1,6 +1,7 @@
 import Header from './Header';
 import Footer from './Footer';
 import BackToTop from './BackToTop';
+import ContextMenu from './ContextMenu';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -11,6 +12,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <Footer />
       </main>
       <BackToTop />
+      <ContextMenu />
     </div>
   );
 }

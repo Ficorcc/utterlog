@@ -5785,3 +5785,75 @@ html[data-theme='ShanYing'] .moments-page .sy-moments-overview .sy-heatmap-mini 
     padding: 20px 16px 24px 24px;
   }
 }
+
+/* Link and page context menus, positioned against the viewport. */
+html[data-theme='ShanYing'] .sy-context-menu {
+  position: fixed;
+  z-index: 2000;
+  width: 266px;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid var(--sy-line);
+  border-radius: 21px;
+  background: var(--sy-surface);
+  box-shadow: 0 18px 48px rgb(0 0 0 / 0.15);
+  color: var(--sy-text);
+  font-family: var(--sy-font);
+}
+
+html[data-theme='ShanYing'] .sy-context-menu-toolbar {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 3px;
+}
+
+html[data-theme='ShanYing'] .sy-context-menu button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+html[data-theme='ShanYing'] .sy-context-menu button:hover,
+html[data-theme='ShanYing'] .sy-context-menu button:focus-visible {
+  outline: none;
+  border-radius: 9px;
+  background: var(--sy-soft);
+}
+
+html[data-theme='ShanYing'] .sy-context-menu-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 35px;
+  font-size: 16px;
+}
+
+html[data-theme='ShanYing'] .sy-context-menu-divider {
+  height: 1px;
+  margin: 7px 0 5px;
+  border-top: 1px dashed var(--sy-line);
+}
+
+html[data-theme='ShanYing'] .sy-context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 43px;
+  padding: 0 11px;
+  text-align: left;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+html[data-theme='ShanYing'] .sy-context-menu-item > .sy-icon,
+html[data-theme='ShanYing'] .sy-context-menu-item > .fa-solid {
+  flex: 0 0 16px;
+  width: 16px;
+  text-align: center;
+  font-size: 14px;
+}

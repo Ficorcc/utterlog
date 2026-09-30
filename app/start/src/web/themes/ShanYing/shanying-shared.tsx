@@ -19,6 +19,7 @@ export type ShanYingMode = 'light' | 'dark' | 'system';
 
 export const SHANYING_MODE_KEY = 'shanying-mode';
 export const SHANYING_MODE_ATTR = 'shanyingMode';
+const SHANYING_MODE_EVENT = 'shanying-mode-change';
 
 export function applyShanYingMode(mode: ShanYingMode) {
   if (typeof document === 'undefined') return;
@@ -41,6 +42,22 @@ export function useShanYingMode() {
     const next: ShanYingMode = saved === 'light' || saved === 'dark' ? saved : 'system';
     setModeState(next);
     applyShanYingMode(next);
+    const syncMode = (event: Event) => {
+      const changed = (event as CustomEvent<ShanYingMode>).detail;
+      if (changed === 'light' || changed === 'dark' || changed === 'system') setModeState(changed);
+    };
+    const syncStorage = (event: StorageEvent) => {
+      if (event.key !== SHANYING_MODE_KEY) return;
+      const changed: ShanYingMode = event.newValue === 'light' || event.newValue === 'dark' ? event.newValue : 'system';
+      setModeState(changed);
+      applyShanYingMode(changed);
+    };
+    window.addEventListener(SHANYING_MODE_EVENT, syncMode);
+    window.addEventListener('storage', syncStorage);
+    return () => {
+      window.removeEventListener(SHANYING_MODE_EVENT, syncMode);
+      window.removeEventListener('storage', syncStorage);
+    };
   }, []);
 
   const setMode = useCallback((next: ShanYingMode) => {
@@ -51,6 +68,7 @@ export function useShanYingMode() {
     } catch {
       /* 隐私模式下 localStorage 可能抛错，忽略即可 */
     }
+    window.dispatchEvent(new CustomEvent(SHANYING_MODE_EVENT, { detail: next }));
   }, []);
 
   return { mode, setMode };
