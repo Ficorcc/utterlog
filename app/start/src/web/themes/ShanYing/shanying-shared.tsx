@@ -344,28 +344,40 @@ export function ShanYingYearHeatmap({
 }
 
 /** 近 90 天热力图（首页 Hero 用，3 行 × 30 列）。 */
-export function ShanYingRecentHeatmap({ data, days = 90 }: { data: HeatCell[]; days?: number }) {
+export function ShanYingRecentHeatmap({
+  data,
+  days = 90,
+  timeZone,
+  label = '发布',
+  unit = '篇',
+}: {
+  data: HeatCell[];
+  days?: number;
+  timeZone?: string;
+  label?: string;
+  unit?: string;
+}) {
   const counts = new Map<string, number>();
   for (const item of data) counts.set(item.date, item.count);
 
   const cells: HeatCell[] = [];
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const todayParts = datePartsInTimeZone(new Date(), timeZone || 'UTC');
+  const today = new Date(Date.UTC(todayParts.year, todayParts.month - 1, todayParts.day));
   for (let i = days - 1; i >= 0; i -= 1) {
     const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    d.setUTCDate(d.getUTCDate() - i);
+    const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
     cells.push({ date: key, count: counts.get(key) || 0 });
   }
 
   return (
-    <div className="sy-heatmap-mini" role="img" aria-label={`近 ${days} 天发布记录`}>
+    <div className="sy-heatmap-mini" role="img" aria-label={`近 ${days} 天${label}记录`}>
       {cells.map((cell) => (
         <button
           key={cell.date}
           type="button"
-          title={`${cell.date}：${cell.count} 篇`}
-          aria-label={`${cell.date}：${cell.count} 篇`}
+          title={`${cell.date}：${cell.count} ${unit}${label === '发布' ? '' : label}`}
+          aria-label={`${cell.date}：${cell.count} ${unit}${label === '发布' ? '' : label}`}
           data-level={Math.min(4, cell.count)}
         />
       ))}

@@ -5598,3 +5598,98 @@ html[data-theme='ShanYing'] .sy-main {
   background-size: 24px 24px, 24px 24px, 96px 96px, 96px 96px;
   background-attachment: fixed;
 }
++
+/* Screenshot-matched moments overview: ruled title, one-line note and 90-day activity grid. */
+html[data-theme='ShanYing'] .moments-page .sy-moments-title {
+  align-items: center;
+  flex-direction: row;
+  margin: 0;
+  padding: 26px 28px 26px 40px;
+  border-top: 1px solid var(--sy-line);
+  border-bottom: 1px solid var(--sy-line);
+}
+
+html[data-theme='ShanYing'] .moments-page .sy-moments-title .blog-page-title-rail {
+  position: absolute;
+  top: 29px;
+  left: 0;
+  display: block;
+  width: 3px;
+  height: 28px;
+  background: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .moments-page .sy-moments-title .blog-page-title-icon {
+  color: var(--sy-accent);
+  font-size: 23px;
+}
+
+html[data-theme='ShanYing'] .moments-page .sy-moments-title .blog-page-title-meta {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--sy-muted);
+  font-size: 12px;
+}
+
+html[data-theme='ShanYing'] .moments-page .sy-moments-overview {
+  display: grid;
+  grid-template-columns: minmax(230px, 0.72fr) minmax(480px, 1.28fr);
+  align-items: center;
+  gap: 46px;
+  padding: 24px 28px 26px 40px;
+}
+
+html[data-theme='ShanYing'] .moments-page .sy-moments-overview p {
+  margin: 0;
+  color: var(--sy-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+html[data-theme='ShanYing'] .moments-page .sy-moments-overview .sy-heatmap-mini {
+  width: 100%;
+}
+
+html[data-theme='ShanYing'] .moments-page .sy-moments-overview .sy-heatmap-mini button {
+  border-radius: 2px;
+  background: var(--sy-soft);
+}
+
+html[data-theme='ShanYing'] .moments-page .sy-moments-overview .sy-heatmap-mini button[data-level='1'] {
+  background: var(--sy-heat-1);
+}
+
+html[data-theme='ShanYing'] .moments-page .sy-moments-overview .sy-heatmap-mini button[data-level='2'] {
+  background: var(--sy-heat-2);
+}
+
+html[data-theme='ShanYing'] .moments-page .sy-moments-overview .sy-heatmap-mini button[data-level='3'] {
+  background: var(--sy-heat-3);
+}
+
+html[data-theme='ShanYing'] .moments-page .sy-moments-overview .sy-heatmap-mini button[data-level='4'] {
+  background: var(--sy-heat-4);
+}
+
+@media (max-width: 760px) {
+  html[data-theme='ShanYing'] .moments-page .sy-moments-title {
+    gap: 12px;
+    padding: 20px 16px 20px 24px;
+  }
+
+  html[data-theme='ShanYing'] .moments-page .sy-moments-title .blog-page-title-rail {
+    top: 21px;
+    height: 25px;
+  }
+
+  html[data-theme='ShanYing'] .moments-page .sy-moments-title .blog-page-title-side {
+    margin-left: auto;
+  }
+
+  html[data-theme='ShanYing'] .moments-page .sy-moments-overview {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+    padding: 20px 16px 24px 24px;
+  }
+}

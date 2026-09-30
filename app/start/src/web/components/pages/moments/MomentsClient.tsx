@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { momentsApi, mediaApi, geoApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { useThemeContext } from '@/lib/theme-context';
@@ -8,6 +8,7 @@ import { datePartsInTimeZone } from '@/lib/timezone';
 import PageTitle from '@/components/blog/PageTitle';
 import Lightbox from '@/components/blog/Lightbox';
 import ResilientImage from '@/components/blog/ResilientImage';
+import { ShanYingRecentHeatmap } from '@/themes/ShanYing/shanying-shared';
 import toast from 'react-hot-toast';
 
 const MOMENTS_CACHE_TTL = 60_000;
@@ -181,6 +182,16 @@ export default function MomentsPage({
 
   const { isAuthenticated, user } = useAuthStore();
   const isAdmin = isAuthenticated && user?.role === 'admin';
+  const momentHeatmap = useMemo(() => {
+    const counts = new Map<string, number>();
+    moments.forEach((moment) => {
+      const parts = datePartsInTimeZone(moment.created_at, timeZone);
+      if (!parts.year || !parts.month || !parts.day) return;
+      const date = `${parts.year}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}`;
+      counts.set(date, (counts.get(date) || 0) + 1);
+    });
+    return Array.from(counts, ([date, count]) => ({ date, count }));
+  }, [moments, timeZone]);
 
   useEffect(() => {
     if (!momentsPageCache && initialLoaded) {
@@ -389,8 +400,16 @@ export default function MomentsPage({
       <PageTitle
         title="说说"
         icon="fa-sharp fa-light fa-comment-dots"
-        meta={<><strong>{moments.length}</strong> 条说说</>}
+        className={theme.name === 'ShanYing' ? 'sy-moments-title' : ''}
+        meta={<><strong>{moments.length}</strong> {theme.name === 'ShanYing' ? '条' : '条说说'}</>}
       />
+
+      {theme.name === 'ShanYing' && (
+        <section className="sy-moments-overview" aria-label="说说发布概览">
+          <p>不必写成一篇文章，也值得留在这里。</p>
+          <ShanYingRecentHeatmap data={momentHeatmap} days={90} timeZone={timeZone} label="说说" unit="条" />
+        </section>
+      )}
 
       <div style={{ padding: theme.name === 'ShanYing' ? '24px 0 120px' : isMobile ? '24px 16px 120px' : '32px 32px 120px' }}>
       {loading ? (
