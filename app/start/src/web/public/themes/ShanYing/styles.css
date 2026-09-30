@@ -3799,7 +3799,7 @@ html[data-theme='ShanYing'] .sy-footer-stats b {
   font-variant-numeric: tabular-nums;
 }
 
-/* 法务行：左边站点副标题那行，右边博主入口（HomeAuthDock，仅首页）。
+/* 法务行：左边站点副标题那行，右边博主入口（HomeAuthDock，全站可见）。
    窄屏放不下时换行，按钮掉到第二行右对齐。 */
 html[data-theme='ShanYing'] .sy-footer-legal {
   display: flex;
@@ -3867,7 +3867,7 @@ html[data-theme='ShanYing'] .sy-top:hover {
    后台入口收在弹出菜单里，不再单独占一格。
 
    2026-09-27 改版：原来是「固定在视口左下角的玻璃胶囊」，现在收进页脚右下角，
-   和页脚法务行同一排、右对齐，跟着页脚一起滚动，仍然只在首页出现。
+   和页脚法务行同一排、右对齐，跟着页脚一起滚动，并在所有页面显示。
 
    为什么不再用 --sy-glass 那套主题令牌：页脚底下常年压着四季山水图（偏暗），
    与页面自身的浅/深色无关，所以这里改用固定的白色透明系，跟页脚文字同语言。
@@ -5481,8 +5481,7 @@ html[data-theme='ShanYing'] .sy-comments .comment-meta {
   margin-bottom: 8px !important;
 }
 
-html[data-theme='ShanYing'] .sy-comments .comment-meta > span:not(.comment-author),
-html[data-theme='ShanYing'] .sy-comments .comment-meta > a + span,
+/* Comment metadata separates neutral pills from badges that provide their own colors. */
 html[data-theme='ShanYing'] .sy-comments .comment-time,
 html[data-theme='ShanYing'] .sy-comments .comment-geo,
 html[data-theme='ShanYing'] .sy-comments .comment-tech {
@@ -5492,6 +5491,46 @@ html[data-theme='ShanYing'] .sy-comments .comment-tech {
   border-radius: 999px;
   background: color-mix(in srgb, var(--sy-bg) 70%, transparent);
   color: var(--sy-muted) !important;
+  line-height: 16px;
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-admin-badge,
+html[data-theme='ShanYing'] .sy-comments .comment-follow-badge {
+  min-height: 20px;
+  padding: 1px 7px !important;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  line-height: 16px;
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-admin-badge {
+  background: #075bd8 !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-meta > .friend-badge {
+  border-radius: 999px;
+  background: var(--sy-accent) !important;
+  color: var(--sy-accent-text) !important;
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-meta-tip {
+  min-height: 0;
+  padding: 0 !important;
+  border: 0;
+  border-radius: 0;
+  background: transparent !important;
+  color: inherit !important;
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-level-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 1px 8px !important;
+  border: 1px solid transparent;
+  border-radius: 999px;
   line-height: 16px;
 }
 

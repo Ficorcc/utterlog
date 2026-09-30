@@ -9,8 +9,7 @@
  *   2. 文章分类台（feng-article-hub）—— 分类形图块标签条 + 最新/热评/浏览最多
  *      三个子标签 + 左侧文章行 + 右侧大封面预览 + 标签云。
  *
- * 另有一颗博主入口（HomeAuthDock），2026-09-27 起挂在页脚右下角、
- * 由 Footer 用 usePathname() 守住只在本页出现。
+ * 另有一颗博主入口（HomeAuthDock），挂在全站页脚右下角。
  *
  * 降级说明（Utterlog 没有对应数据的地方，一律显式降级，不留假交互）：
  *   - 原主题 Hero 有「最近分享的音乐」按钮（来自后台曲库），Utterlog 的曲库在
@@ -61,7 +60,7 @@ function renderSiteIcon(icon: string) {
     return <span className="sy-tool-icon" dangerouslySetInnerHTML={{ __html: icon }} />;
   }
   if (icon.startsWith('http') || icon.startsWith('/')) {
-    return <img src={icon} alt="" className="sy-tool-icon sy-tool-icon-img" />;
+    return <img src={icon} alt="" className="sy-tool-icon sy-tool-icon-img" loading="lazy" decoding="async" />;
   }
   return <i className={`${icon} sy-tool-icon`} aria-hidden="true" />;
 }

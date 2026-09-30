@@ -161,8 +161,11 @@ function buildCommentTree(comments: Comment[]): Comment[] {
 /* Meta 悬浮详情卡片 */
 function MetaTooltip({ children, label, detail, icon }: { children: React.ReactNode; label: string; detail: string; icon?: React.ReactNode }) {
   const [show, setShow] = useState(false);
+  /* 2026-09-29：外壳加了 comment-meta-tip 类名，让主题能把「定位容器」和
+     「里面真正带颜色的徽标」分开 —— 外壳不该被主题的 meta 药丸规则套上圆角/内边距。 */
   return (
     <span
+      className="comment-meta-tip"
       style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}
       onMouseEnter={() => setShow(true)}
       onMouseLeave={() => setShow(false)}
@@ -296,8 +299,8 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
               />
             )}
             {comment.url ? (
-              <a href={comment.url} target="_blank" rel="noopener noreferrer" className="comment-author"
-                style={{ fontWeight: 600, fontSize: '13px', color: 'var(--color-text-main, #333)', textDecoration: 'none' }}>
+              <a href={comment.url} target="_blank" rel="noopener noreferrer"
+                className="comment-author" style={{ fontWeight: 600, fontSize: '13px', color: 'var(--color-text-main, #333)', textDecoration: 'none' }}>
                 {comment.author}
               </a>
             ) : (
@@ -310,7 +313,7 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
             )}
 
             {comment.is_admin && (
-              <span style={{
+              <span className="comment-admin-badge" style={{
                 fontSize: '10px', padding: '1px 5px',
                 background: 'var(--color-primary, #0052D9)', color: '#fff', fontWeight: 500,
                 display: 'inline-flex', alignItems: 'center', gap: '2px',
@@ -338,6 +341,7 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
               return (
                 <MetaTooltip label="等级" detail={`Lv.${comment.level}　累计 ${comment.comment_count || 0} 条评论`}>
                   <span
+                    className="comment-level-badge"
                     style={{
                       fontSize: '10px', padding: '1px 5px', fontWeight: 600, cursor: 'default',
                       ...(isMax
@@ -352,9 +356,10 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
             })()}
 
 
-            {/* 网络用户 */}
+            {/* 网络用户。2026-09-29：三个徽标加 comment-follow-badge 类名，
+                主题只给它们补药丸的圆角/内边距，底色和文字色继续用下面的 inline 值。 */}
             {comment.follow_status === 'mutual' && (
-              <span style={{
+              <span className="comment-follow-badge" style={{
                 fontSize: '10px', padding: '1px 5px',
                 background: '#f3e5f5', color: '#7b1fa2', fontWeight: 500,
                 display: 'inline-flex', alignItems: 'center', gap: '2px',
@@ -363,7 +368,7 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
               </span>
             )}
             {comment.follow_status === 'follower' && (
-              <span style={{
+              <span className="comment-follow-badge" style={{
                 fontSize: '10px', padding: '1px 5px',
                 background: '#fff3e0', color: '#e65100', fontWeight: 500,
                 display: 'inline-flex', alignItems: 'center', gap: '2px',
@@ -372,7 +377,7 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
               </span>
             )}
             {comment.follow_status === 'following' && (
-              <span style={{
+              <span className="comment-follow-badge" style={{
                 fontSize: '10px', padding: '1px 5px',
                 background: '#e0f7fa', color: '#00838f', fontWeight: 500,
                 display: 'inline-flex', alignItems: 'center', gap: '2px',

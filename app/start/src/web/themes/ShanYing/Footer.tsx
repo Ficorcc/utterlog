@@ -12,13 +12,12 @@
  *   - 去掉 owner.bio 那一行，legal 区只留站点副标题那行
  *   - 统计项改成「图标 · 数字 · 标签」的顺序，数字紧跟图标
  *   - 博主入口（HomeAuthDock）从首页左下角浮层挪到 legal 行右侧，
- *     用 usePathname() 守住「只在首页出现」
+ *     在所有页面的统一页脚中显示
  */
 
 import Link from '@/components/AppLink';
 import { useEffect, useRef } from 'react';
 import { useThemeContext } from '@/lib/theme-context';
-import { usePathname } from '@/lib/navigation';
 import { resolveSiteTimeZone } from '@/lib/timezone';
 import { resolveScene, sceneImageUrl, sceneImageSmallUrl } from './shanying-scene';
 import { hourInTimeZone } from './shanying-shared';
@@ -27,10 +26,6 @@ import HomeAuthDock from './HomeAuthDock';
 export default function Footer() {
   const { site, menus, archiveStats, options, timeZone } = useThemeContext();
   const footerRef = useRef<HTMLElement>(null);
-  const pathname = usePathname();
-  // 博主入口原本挂在 HomePage 里，天然只在首页；挪进页脚（全局组件）之后
-  // 得自己判断，不然每页页脚都会多出一颗登录按钮。
-  const isHome = pathname === '/';
   // Keep the existing floating controls above the footer instead of covering its text.
   useEffect(() => {
     const footer = footerRef.current;
@@ -114,7 +109,7 @@ export default function Footer() {
             <span aria-hidden="true"> · </span>
             主题 ShanYing 移植自「山映」
           </p>
-          {isHome && <HomeAuthDock />}
+          <HomeAuthDock />
         </div>
       </div>
     </footer>
