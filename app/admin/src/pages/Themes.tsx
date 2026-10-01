@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   RefreshCw, Upload, Loader2, TriangleAlert, Lightbulb, Palette, Check,
-  ExternalLink, Trash2, List, IdCard, AppWindow, LayoutGrid, Share2, CalendarDays,
+  ExternalLink, Trash2, List, IdCard, AppWindow, LayoutGrid, Share2, CalendarDays, Bird,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { themesApi, type AzureAccent, type ExtensionManifest } from '@/lib/api';
@@ -13,6 +13,7 @@ import { DISCOVER_LINKS_KEY, discoverLinks } from '../../../shared/discover-link
 import { Button, buttonVariants, Callout, Card, ConfirmDialog, LoadingState } from '@/components/ui/shadcn';
 import { cn } from '@/lib/utils';
 import ShanYingJieqiSettings from '@/components/ShanYingJieqiSettings';
+import ShanYingCompanionSettings from '@/components/ShanYingCompanionSettings';
 
 /** Azure 可选配色。新增配色时同时要改 globals.css 的令牌块与 :not() 链。 */
 const AZURE_ACCENTS: { key: AzureAccent; label: string; color: string }[] = [
@@ -28,7 +29,7 @@ const normalizeAzureAccent = (value: unknown): AzureAccent => {
 };
 
 export default function Themes() {
-  const [tab, setTab] = useState<'themes' | 'menus' | 'profile' | 'header' | 'footer' | 'hero' | 'discover' | 'social' | 'jieqi'>('themes');
+  const [tab, setTab] = useState<'themes' | 'menus' | 'profile' | 'header' | 'footer' | 'hero' | 'discover' | 'social' | 'jieqi' | 'companion'>('themes');
   const [themes, setThemes] = useState<ExtensionManifest[]>([]);
   const [active, setActive] = useState<string>('');
   const [requestedTheme, setRequestedTheme] = useState<string | null>(null);
@@ -52,6 +53,7 @@ export default function Themes() {
   const showFooter = adminPanels.includes('footer_icons');
   const showHero = adminPanels.includes('hero_tiles');
   const showJieqi = adminPanels.includes('jieqi_notice');
+  const showCompanion = adminPanels.includes('companion_music');
 
   const fetchList = async () => {
     setLoading(true);
@@ -130,6 +132,7 @@ export default function Themes() {
     { key: 'social', label: 'Hero 社交网络', Icon: Share2, visible: showSocial },
     { key: 'discover', label: '发现更多博客', Icon: Share2, visible: showDiscover },
     { key: 'jieqi', label: '节气提醒', Icon: CalendarDays, visible: showJieqi },
+    { key: 'companion', label: '小鸟与音乐', Icon: Bird, visible: showCompanion },
     { key: 'header', label: '头部按钮', Icon: AppWindow, visible: showHeader },
     { key: 'hero', label: '首页图块', Icon: LayoutGrid, visible: showHero },
     { key: 'footer', label: '页脚图标', Icon: Share2, visible: showFooter },
@@ -139,7 +142,7 @@ export default function Themes() {
   useEffect(() => {
     if (!tabs.find(t => t.key === tab)) setTab('themes');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showProfile, showHeader, showFooter, showHero, showDiscover, showSocial, showJieqi]);
+  }, [showProfile, showHeader, showFooter, showHero, showDiscover, showSocial, showJieqi, showCompanion]);
 
   return (
     <div>
@@ -182,6 +185,7 @@ export default function Themes() {
         />
       )}
       {tab === 'jieqi' && showJieqi && <ShanYingJieqiSettings />}
+      {tab === 'companion' && showCompanion && <ShanYingCompanionSettings />}
       {tab === 'header'  && showHeader && (
         <FooterIconsEditor
           optionKey="theme_header_buttons"

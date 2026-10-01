@@ -6083,3 +6083,213 @@ html[data-theme='ShanYing'] .sy-context-menu-item > .fa-solid {
   text-align: center;
   font-size: 14px;
 }
+
+/* ShanYing bird companion and compact music player, adapted from the WordPress theme. */
+html[data-theme='ShanYing'] .global-mini-player {
+  display: none !important;
+}
+
+html[data-theme='ShanYing'] .sy-companion {
+  position: fixed;
+  z-index: 1100;
+  left: 14px;
+  bottom: max(14px, var(--sy-footer-clearance, 0px));
+  width: 214px;
+  color: var(--sy-text);
+  font-family: var(--sy-font);
+  transition: bottom 0.25s ease;
+  touch-action: none;
+}
+
+html[data-theme='ShanYing'] .sy-companion--right {
+  right: 14px;
+  left: auto;
+}
+
+html[data-theme='ShanYing'] .sy-companion.is-free {
+  position: fixed;
+  transition: none;
+}
+
+html[data-theme='ShanYing'] .sy-companion-bird {
+  position: absolute;
+  z-index: 2;
+  left: 27px;
+  bottom: 39px;
+  display: block;
+  width: 72px;
+  height: 72px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: grab;
+  filter: drop-shadow(0 5px 8px rgb(20 42 45 / 0.12));
+  transform-origin: 50% 88%;
+  animation: sy-pet-breathe 3.8s ease-in-out infinite;
+}
+
+html[data-theme='ShanYing'] .sy-companion-bird:active { cursor: grabbing; }
+html[data-theme='ShanYing'] .sy-companion-bird:hover .sy-pet-wing-left { animation: sy-pet-wave 0.7s ease-in-out 2; }
+html[data-theme='ShanYing'] .sy-companion-bird:hover .sy-pet-head { animation: sy-pet-nod 1s ease-in-out; }
+html[data-theme='ShanYing'] .sy-companion-bird:focus-visible { outline: 2px solid var(--sy-accent); outline-offset: 2px; border-radius: 50%; }
+html[data-theme='ShanYing'] .sy-companion-bird-art { display: block; width: 100%; height: 100%; overflow: visible; }
+html[data-theme='ShanYing'] .sy-pet-body { transform-origin: 60px 105px; }
+html[data-theme='ShanYing'] .sy-pet-tail { transform-origin: 38px 82px; animation: sy-pet-tail 3s ease-in-out infinite; }
+html[data-theme='ShanYing'] .sy-pet-torso { transform-origin: 60px 99px; }
+html[data-theme='ShanYing'] .sy-pet-head { transform-origin: 60px 62px; }
+html[data-theme='ShanYing'] .sy-pet-wing-left { transform-origin: 38px 59px; }
+html[data-theme='ShanYing'] .sy-pet-wing-right { transform-origin: 83px 64px; }
+html[data-theme='ShanYing'] .sy-pet-eye { transform-origin: 75px 49px; animation: sy-pet-blink 5s infinite; }
+
+html[data-theme='ShanYing'] .sy-companion-bubble {
+  position: absolute;
+  z-index: 4;
+  left: 72px;
+  bottom: 106px;
+  width: max-content;
+  max-width: 190px;
+  padding: 8px 12px;
+  border: 1px solid var(--sy-line);
+  border-radius: 13px 13px 13px 4px;
+  background: var(--sy-surface);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.1);
+  color: var(--sy-text);
+  font-size: 11px;
+  line-height: 1.5;
+  pointer-events: none;
+  animation: sy-pet-bubble 0.3s ease both;
+}
+
+html[data-theme='ShanYing'] .sy-companion-mini {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 5px 7px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--sy-line) 88%, transparent);
+  border-radius: 27px;
+  background: color-mix(in srgb, var(--sy-surface) 91%, transparent);
+  box-shadow: 0 12px 36px rgb(0 0 0 / 0.09);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-sizing: border-box;
+}
+
+html[data-theme='ShanYing'] .sy-companion-mini button { color: inherit; font-family: inherit; cursor: pointer; }
+html[data-theme='ShanYing'] .sy-companion-note {
+  display: grid;
+  place-items: center;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--sy-soft);
+  color: var(--sy-muted) !important;
+  font-size: 13px;
+}
+
+html[data-theme='ShanYing'] .sy-companion-copy {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 3px 7px 3px 11px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+html[data-theme='ShanYing'] .sy-companion-copy strong,
+html[data-theme='ShanYing'] .sy-companion-copy span {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html[data-theme='ShanYing'] .sy-companion-copy strong { font-size: 12px; font-weight: 600; }
+html[data-theme='ShanYing'] .sy-companion-copy span { margin-top: 1px; color: var(--sy-muted); font-size: 10px; }
+html[data-theme='ShanYing'] .sy-companion-toggle { flex: 0 0 28px; width: 28px; height: 32px; padding: 0; border: 0; background: transparent; color: var(--sy-muted) !important; font-size: 10px; }
+html[data-theme='ShanYing'] .sy-companion-progress { position: absolute; right: 22px; bottom: 2px; left: 22px; height: 2px; overflow: hidden; border-radius: 2px; background: transparent; }
+html[data-theme='ShanYing'] .sy-companion-progress i { display: block; height: 100%; border-radius: inherit; background: var(--sy-accent); transition: width 0.25s linear; }
+
+html[data-theme='ShanYing'] .sy-companion-panel {
+  position: absolute;
+  bottom: 58px;
+  left: 0;
+  width: 330px;
+  max-width: calc(100vw - 28px);
+  max-height: min(560px, calc(100dvh - 150px));
+  overflow: hidden auto;
+  padding: 18px;
+  border: 1px solid var(--sy-line);
+  border-radius: 22px;
+  background: var(--sy-surface);
+  box-shadow: 0 18px 54px rgb(0 0 0 / 0.15);
+  box-sizing: border-box;
+  touch-action: pan-y;
+  animation: sy-player-arrive 0.28s ease both;
+}
+
+html[data-theme='ShanYing'] .sy-companion--right .sy-companion-panel { right: 0; left: auto; }
+html[data-theme='ShanYing'] .sy-companion-panel header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+html[data-theme='ShanYing'] .sy-companion-panel header > div { display: flex; flex-direction: column; min-width: 0; }
+html[data-theme='ShanYing'] .sy-companion-panel header small { margin-bottom: 5px; color: var(--sy-muted); font-size: 9px; letter-spacing: 0.12em; }
+html[data-theme='ShanYing'] .sy-companion-panel header strong { overflow: hidden; font-size: 16px; text-overflow: ellipsis; white-space: nowrap; }
+html[data-theme='ShanYing'] .sy-companion-panel header span { margin-top: 3px; color: var(--sy-muted); font-size: 11px; }
+html[data-theme='ShanYing'] .sy-companion-panel header button,
+html[data-theme='ShanYing'] .sy-companion-controls button { display: grid; place-items: center; border: 0; background: transparent; color: var(--sy-text); cursor: pointer; }
+html[data-theme='ShanYing'] .sy-companion-panel header button { flex: 0 0 30px; width: 30px; height: 30px; border-radius: 50%; }
+html[data-theme='ShanYing'] .sy-companion-panel header button:hover { background: var(--sy-soft); }
+
+html[data-theme='ShanYing'] .sy-companion-seek { margin-top: 16px; }
+html[data-theme='ShanYing'] .sy-companion-seek input { width: 100%; height: 3px; margin: 0; accent-color: var(--sy-accent); cursor: pointer; }
+html[data-theme='ShanYing'] .sy-companion-seek div { display: flex; justify-content: space-between; margin-top: 3px; color: var(--sy-muted); font-size: 9px; }
+html[data-theme='ShanYing'] .sy-companion-controls { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 12px 0 14px; }
+html[data-theme='ShanYing'] .sy-companion-controls button { width: 34px; height: 34px; border-radius: 50%; }
+html[data-theme='ShanYing'] .sy-companion-controls button:hover { background: var(--sy-soft); }
+html[data-theme='ShanYing'] .sy-companion-controls button.is-primary { width: 42px; height: 42px; background: var(--sy-accent); color: #fff; }
+html[data-theme='ShanYing'] .sy-companion-controls label { display: flex; align-items: center; gap: 5px; margin-left: 5px; color: var(--sy-muted); font-size: 10px; }
+html[data-theme='ShanYing'] .sy-companion-controls label input { width: 55px; accent-color: var(--sy-accent); }
+
+html[data-theme='ShanYing'] .sy-companion-playlist { max-height: 210px; overflow-y: auto; margin: 0; padding: 0; border-top: 1px solid var(--sy-line); list-style: none; }
+html[data-theme='ShanYing'] .sy-companion-playlist button { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: center; gap: 7px; width: 100%; padding: 10px 7px; border: 0; border-bottom: 1px solid var(--sy-line); background: transparent; color: var(--sy-text); text-align: left; cursor: pointer; }
+html[data-theme='ShanYing'] .sy-companion-playlist button:hover,
+html[data-theme='ShanYing'] .sy-companion-playlist button.is-current { background: var(--sy-soft); }
+html[data-theme='ShanYing'] .sy-companion-playlist button > span { color: var(--sy-muted); font-size: 9px; }
+html[data-theme='ShanYing'] .sy-companion-playlist button > strong { overflow: hidden; font-size: 11px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+html[data-theme='ShanYing'] .sy-companion-playlist button > small { max-width: 92px; overflow: hidden; color: var(--sy-muted); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+html[data-theme='ShanYing'] .sy-companion-empty { display: block; margin-top: 14px; color: var(--sy-accent); font-size: 12px; text-align: center; text-decoration: none; }
+
+@keyframes sy-pet-breathe { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-2px) rotate(-1deg); } }
+@keyframes sy-pet-tail { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-10deg); } }
+@keyframes sy-pet-wave { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(65deg); } }
+@keyframes sy-pet-nod { 0%, 100% { transform: rotate(0); } 45% { transform: rotate(10deg); } }
+@keyframes sy-pet-blink { 0%, 44%, 48%, 100% { transform: scaleY(1); } 46% { transform: scaleY(0.08); } }
+@keyframes sy-pet-bubble { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes sy-player-arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 640px) {
+  html[data-theme='ShanYing'] .sy-companion { left: 10px; bottom: max(10px, var(--sy-footer-clearance, 0px)); width: 196px; }
+  html[data-theme='ShanYing'] .sy-companion--right { right: 10px; left: auto; }
+  html[data-theme='ShanYing'] .sy-companion--hide-mobile { display: none !important; }
+  html[data-theme='ShanYing'] .sy-companion-panel { width: min(330px, calc(100vw - 20px)); padding: 16px; }
+  html[data-theme='ShanYing'] .sy-companion-bird { left: 23px; width: 64px; height: 64px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme='ShanYing'] .sy-companion *,
+  html[data-theme='ShanYing'] .sy-companion *::before,
+  html[data-theme='ShanYing'] .sy-companion *::after { animation: none !important; transition: none !important; }
+}
+
+@media print {
+  html[data-theme='ShanYing'] .sy-companion { display: none !important; }
+}

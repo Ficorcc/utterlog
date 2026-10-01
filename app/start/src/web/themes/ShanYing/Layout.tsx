@@ -2,6 +2,7 @@ import Header from './Header';
 import Footer from './Footer';
 import BackToTop from './BackToTop';
 import JieqiNotice from './JieqiNotice';
+import ShanYingCompanion from './ShanYingCompanion';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -12,6 +13,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <Footer />
       </main>
       <BackToTop />
+      <ShanYingCompanion />
       <JieqiNotice />
     </div>
   );

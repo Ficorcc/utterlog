@@ -17,6 +17,6 @@
     { "key": "header", "label": "顶部导航", "description": "悬浮胶囊导航里的主菜单；未配置时回退到首页 / 归档 / 说说 / 分类 / 友链" },
     { "key": "footer", "label": "底部导航", "description": "页脚四季底图上的辅助链接" }
   ],
-  "adminPanels": ["discover_links", "hero_social_links", "jieqi_notice"],
-  "features": ["search", "random_post", "footer_menu", "dark_mode", "reading_tools", "archive_heatmap", "author_cards", "home_auth_entry", "site_dashboard", "jieqi_notice"]
+  "adminPanels": ["discover_links", "hero_social_links", "jieqi_notice", "companion_music"],
+  "features": ["search", "random_post", "footer_menu", "dark_mode", "reading_tools", "archive_heatmap", "author_cards", "home_auth_entry", "site_dashboard", "jieqi_notice", "music_player", "pet_bird"]
 }

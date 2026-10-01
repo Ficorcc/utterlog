@@ -71,7 +71,7 @@ export default function GlobalMiniPlayer() {
         onLoadedMetadata={() => setDur(audioRef.current?.duration || 0)}
         onEnded={next}
       />
-      <div ref={playerRef} style={{
+      <div ref={playerRef} className="global-mini-player" style={{
         position: 'fixed', left: 16, zIndex: 9999,
         bottom: bottomOffset, transition: 'bottom 0.25s ease',
         width: 300, overflow: 'hidden',
