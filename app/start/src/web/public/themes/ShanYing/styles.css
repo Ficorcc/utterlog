@@ -1,3 +1,5 @@
+@import url('https://static.bluecdn.com/fonts/lxgw-wenkai.css');
+
 /* ============================================================================
  *  ShanYing · 山映
  *  移植自 WordPress 主题「山映 · ShanYing」（作者：西风，GPL-2.0）
@@ -326,7 +328,7 @@ html[data-theme='ShanYing'] .sy-nav-link {
   border-radius: 999px;
   color: var(--sy-hd-muted);
   font-size: 13.5px;
-  font-weight: 500;
+  font-weight: 300;
   text-decoration: none;
   white-space: nowrap;
   transition: color 0.3s var(--sy-gentle), background 0.3s;
@@ -820,12 +822,12 @@ html[data-theme='ShanYing'] .sy-hero-social :is(a, button):hover {
 
 html[data-theme='ShanYing'] .sy-hero-identity h1 {
   margin: 0;
-  font-family: var(--sy-brand-font);
+  font-family: 'LXGW WenKai', 'LXGW WenKai Screen', 'Kaiti SC', STKaiti, cursive;
   /* 较原稿缩小 30%：clamp(34px, 5.4vw, 62px) → clamp(24px, 3.8vw, 43px) */
   font-size: clamp(24px, 3.8vw, 43px);
-  font-weight: 700;
-  line-height: 1.06;
-  letter-spacing: -0.015em;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.035em;
   color: #fff;
   text-shadow: 0 2px 28px rgb(0 0 0 / 0.36);
 }
@@ -1150,6 +1152,25 @@ html[data-theme='ShanYing'] .sy-discover-links .sy-tool-link .sy-tool-icon > svg
 html[data-theme='ShanYing'] .sy-discover-links .sy-tool-link:hover .sy-tool-icon-img,
 html[data-theme='ShanYing'] .sy-discover-links .sy-tool-link:hover .sy-tool-icon > svg {
   opacity: 1;
+}
+
+/* Hero 内的小版块只勾勒边框，让山景完整透出。 */
+html[data-theme='ShanYing'] .sy-welcome,
+html[data-theme='ShanYing'] .sy-hero-social :is(a, button),
+html[data-theme='ShanYing'] .sy-hero-note,
+html[data-theme='ShanYing'] .sy-stack-front,
+html[data-theme='ShanYing'] .sy-hero-calendar,
+html[data-theme='ShanYing'] .sy-hero-visitors,
+html[data-theme='ShanYing'] .sy-discover-links .sy-icon-button,
+html[data-theme='ShanYing'] .sy-visitor {
+  background: transparent;
+}
+
+html[data-theme='ShanYing'] .sy-hero-note:hover,
+html[data-theme='ShanYing'] .sy-hero-social :is(a, button):hover,
+html[data-theme='ShanYing'] .sy-discover-links .sy-icon-button:hover {
+  background: transparent;
+  color: #fff;
 }
 
 /* ═══ 5. 文章分类台（feng-article-hub） ═══════════════════════════════ */
