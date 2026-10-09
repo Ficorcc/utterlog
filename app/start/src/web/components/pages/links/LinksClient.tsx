@@ -16,6 +16,7 @@
 import { useThemeContext } from '@/lib/theme-context';
 import NebulaLinksView from './NebulaLinksView';
 import LegacyLinksView from './LegacyLinksView';
+import ShanYingLinksView from './ShanYingLinksView';
 
 export default function LinksClient({
   initialLinks,
@@ -27,6 +28,9 @@ export default function LinksClient({
 } = {}) {
   const { theme } = useThemeContext();
   const isNebula = theme?.name === 'Nebula';
+  const isShanYing = theme?.name === 'ShanYing';
   const props = { initialLinks, initialOptions };
-  return isNebula ? <NebulaLinksView {...props} /> : <LegacyLinksView {...props} />;
+  if (isNebula) return <NebulaLinksView {...props} />;
+  if (isShanYing) return <ShanYingLinksView {...props} />;
+  return <LegacyLinksView {...props} />;
 }

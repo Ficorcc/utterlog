@@ -3639,6 +3639,541 @@ html[data-theme='ShanYing'] .sy-archive-empty a {
   color: var(--sy-accent);
 }
 
+/* ── 标签详情：关键词标题 + 横向文章行 ── */
+
+html[data-theme='ShanYing'] .sy-tag-browser {
+  padding: 34px 36px 28px;
+  border: 1px solid var(--sy-line);
+  border-radius: var(--sy-radius-panel);
+  background: var(--sy-surface);
+  box-shadow: var(--sy-shadow);
+}
+
+html[data-theme='ShanYing'] .sy-tag-browser-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(230px, 320px);
+  gap: 28px;
+  align-items: center;
+  padding-bottom: 26px;
+}
+
+html[data-theme='ShanYing'] .sy-tag-browser-kicker {
+  margin: 0 0 12px;
+  color: var(--sy-muted);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+}
+
+html[data-theme='ShanYing'] .sy-tag-browser h1 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-family: var(--sy-brand-font);
+  font-size: 30px;
+  line-height: 1.4;
+}
+
+html[data-theme='ShanYing'] .sy-tag-browser h1 i {
+  flex: none;
+  color: var(--sy-accent);
+  font-size: 24px;
+}
+
+html[data-theme='ShanYing'] .sy-tag-search {
+  position: relative;
+  display: block;
+}
+
+html[data-theme='ShanYing'] .sy-tag-search input {
+  width: 100%;
+  height: 42px;
+  padding: 8px 42px 8px 13px;
+  border: 1px solid var(--sy-line);
+  border-radius: 11px;
+  outline: 0;
+  background: var(--sy-soft);
+  color: var(--sy-text);
+  font: inherit;
+  font-size: 12.5px;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+html[data-theme='ShanYing'] .sy-tag-search input:focus {
+  border-color: var(--sy-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sy-accent) 12%, transparent);
+}
+
+html[data-theme='ShanYing'] .sy-tag-search > i {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  color: var(--sy-accent);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+html[data-theme='ShanYing'] .sy-tag-browser-count {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 0;
+  border-top: 1px solid var(--sy-line);
+  color: var(--sy-muted);
+  font-size: 11.5px;
+}
+
+html[data-theme='ShanYing'] .sy-tag-browser-count strong {
+  color: var(--sy-text);
+}
+
+html[data-theme='ShanYing'] .sy-tag-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  gap: 28px;
+  align-items: center;
+  min-height: 138px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--sy-line);
+}
+
+html[data-theme='ShanYing'] .sy-tag-row:last-child {
+  border-bottom: 0;
+}
+
+html[data-theme='ShanYing'] .sy-tag-row-meta {
+  display: flex;
+  gap: 12px;
+  color: var(--sy-muted);
+  font-size: 10.5px;
+}
+
+html[data-theme='ShanYing'] .sy-tag-row h2 {
+  margin: 8px 0;
+  font-size: 19px;
+  line-height: 1.5;
+}
+
+html[data-theme='ShanYing'] .sy-tag-row h2 a {
+  color: var(--sy-text);
+  text-decoration: none;
+}
+
+html[data-theme='ShanYing'] .sy-tag-row h2 a:hover {
+  color: var(--sy-accent);
+}
+
+html[data-theme='ShanYing'] .sy-tag-row-copy > p {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: var(--sy-muted);
+  font-size: 12.5px;
+  line-height: 1.8;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+html[data-theme='ShanYing'] .sy-tag-row-image {
+  display: block;
+  aspect-ratio: 1.6;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--sy-soft);
+}
+
+html[data-theme='ShanYing'] .sy-tag-row-image img,
+html[data-theme='ShanYing'] .sy-tag-row-image > span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s var(--sy-ease);
+}
+
+html[data-theme='ShanYing'] .sy-tag-row-image:hover img {
+  transform: scale(1.045);
+}
+
+html[data-theme='ShanYing'] .sy-tag-browser-empty {
+  margin: 0;
+  padding: 70px 16px;
+  color: var(--sy-muted);
+  text-align: center;
+}
+
+html[data-theme='ShanYing'] .sy-tag-browser-empty a {
+  color: var(--sy-accent);
+}
+
+/* ── 友链：统一标题栏 + 分组头像胶囊 ── */
+
+html[data-theme='ShanYing'] .sy-links-page {
+  --sy-link-accent: #0656da;
+  min-height: calc(100vh - 220px);
+}
+
+html[data-theme='ShanYing'] .sy-links-head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 88px;
+  padding: 0;
+  border-bottom: 1px solid var(--sy-line);
+}
+
+html[data-theme='ShanYing'] .sy-links-head::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -28px;
+  width: 3px;
+  height: 28px;
+  background: var(--sy-link-accent);
+  transform: translateY(-50%);
+}
+
+html[data-theme='ShanYing'] .sy-links-head h1 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-family: var(--sy-brand-font);
+  font-size: 25px;
+  font-weight: 700;
+}
+
+html[data-theme='ShanYing'] .sy-links-head h1 i {
+  color: var(--sy-link-accent);
+  font-size: 23px;
+}
+
+html[data-theme='ShanYing'] .sy-links-apply-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 15px;
+  border: 1px solid var(--sy-link-accent);
+  border-radius: 0;
+  background: var(--sy-link-accent);
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+html[data-theme='ShanYing'] .sy-links-apply-button:hover {
+  filter: brightness(1.08);
+}
+
+html[data-theme='ShanYing'] .sy-links-intro {
+  margin: 26px 0 36px;
+  color: var(--sy-muted);
+  font-size: 13px;
+}
+
+html[data-theme='ShanYing'] .sy-links-group + .sy-links-group {
+  margin-top: 38px;
+}
+
+html[data-theme='ShanYing'] .sy-links-group > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+html[data-theme='ShanYing'] .sy-links-group > header h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--sy-text);
+  font-size: 18px;
+  font-weight: 650;
+}
+
+html[data-theme='ShanYing'] .sy-links-group > header h2 i {
+  display: inline-grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  color: var(--sy-link-accent);
+  font-size: 19px;
+}
+
+html[data-theme='ShanYing'] .sy-links-group > header > span {
+  color: var(--sy-muted);
+  font-size: 11px;
+}
+
+html[data-theme='ShanYing'] .sy-links-grid {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+html[data-theme='ShanYing'] .sy-link-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 5px 13px 5px 5px;
+  border: 1px solid var(--sy-line);
+  border-radius: 999px;
+  color: var(--sy-text);
+  text-decoration: none;
+  transition: border-color 0.25s, background 0.25s, transform 0.25s var(--sy-ease);
+}
+
+html[data-theme='ShanYing'] .sy-link-chip:hover {
+  border-color: color-mix(in srgb, var(--sy-link-accent) 45%, var(--sy-line));
+  background: var(--sy-soft);
+  transform: translateY(-2px);
+}
+
+html[data-theme='ShanYing'] .sy-link-avatar {
+  display: grid;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  overflow: hidden;
+  border-radius: 50%;
+  place-items: center;
+  background: var(--sy-soft);
+}
+
+html[data-theme='ShanYing'] .sy-link-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+html[data-theme='ShanYing'] .sy-link-chip strong {
+  max-width: 190px;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html[data-theme='ShanYing'] .sy-link-status {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #28bc72;
+}
+
+html[data-theme='ShanYing'] .sy-links-empty {
+  margin: 0;
+  padding: 80px 0;
+  color: var(--sy-muted);
+  text-align: center;
+}
+
+html[data-theme='ShanYing'] .sy-link-modal-backdrop {
+  position: fixed;
+  z-index: 220;
+  inset: 0;
+  display: grid;
+  padding: 24px;
+  background: rgb(0 0 0 / 45%);
+  place-items: center;
+  backdrop-filter: blur(3px);
+}
+
+html[data-theme='ShanYing'] .sy-link-modal {
+  width: min(640px, 100%);
+  max-height: calc(100dvh - 48px);
+  overflow: auto;
+  border: 1px solid var(--sy-line);
+  border-radius: 16px;
+  background: var(--sy-surface);
+  color: var(--sy-text);
+  box-shadow: 0 24px 70px rgb(0 0 0 / 22%);
+}
+
+html[data-theme='ShanYing'] .sy-link-modal > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 22px;
+  border-bottom: 1px solid var(--sy-line);
+}
+
+html[data-theme='ShanYing'] .sy-link-modal > header p {
+  margin: 0 0 5px;
+  color: var(--sy-muted);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+}
+
+html[data-theme='ShanYing'] .sy-link-modal > header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+html[data-theme='ShanYing'] .sy-link-modal > header button {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--sy-soft);
+  color: var(--sy-text);
+  cursor: pointer;
+}
+
+html[data-theme='ShanYing'] .sy-link-modal-intro {
+  margin: 0;
+  padding: 18px 22px 0;
+  color: var(--sy-muted);
+  font-size: 12.5px;
+}
+
+html[data-theme='ShanYing'] .sy-link-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 18px 22px 22px;
+}
+
+html[data-theme='ShanYing'] .sy-link-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--sy-muted);
+  font-size: 11.5px;
+}
+
+html[data-theme='ShanYing'] .sy-link-form-wide {
+  grid-column: 1 / -1;
+}
+
+html[data-theme='ShanYing'] .sy-link-form :is(input, textarea) {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 11px;
+  border: 1px solid var(--sy-line);
+  border-radius: 8px;
+  outline: 0;
+  background: var(--sy-soft);
+  color: var(--sy-text);
+  font: inherit;
+  font-size: 12.5px;
+  resize: vertical;
+}
+
+html[data-theme='ShanYing'] .sy-link-form :is(input, textarea):focus {
+  border-color: var(--sy-link-accent);
+}
+
+html[data-theme='ShanYing'] .sy-link-modal > footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  padding: 14px 22px;
+  border-top: 1px solid var(--sy-line);
+  background: var(--sy-soft);
+}
+
+html[data-theme='ShanYing'] .sy-link-modal > footer button {
+  min-width: 88px;
+  padding: 8px 16px;
+  border: 1px solid var(--sy-line);
+  border-radius: 8px;
+  background: var(--sy-surface);
+  color: var(--sy-text);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+html[data-theme='ShanYing'] .sy-link-modal > footer .primary {
+  border-color: var(--sy-link-accent);
+  background: var(--sy-link-accent);
+  color: #fff;
+}
+
+html[data-theme='ShanYing'] .sy-link-modal > footer button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+@media (max-width: 720px) {
+  html[data-theme='ShanYing'] .sy-tag-browser {
+    padding: 22px 18px;
+    border-radius: 18px;
+  }
+
+  html[data-theme='ShanYing'] .sy-tag-browser-head {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  html[data-theme='ShanYing'] .sy-tag-browser h1 {
+    font-size: 24px;
+  }
+
+  html[data-theme='ShanYing'] .sy-tag-row {
+    grid-template-columns: minmax(0, 1fr) 100px;
+    gap: 14px;
+    min-height: 110px;
+    padding: 18px 0;
+  }
+
+  html[data-theme='ShanYing'] .sy-tag-row h2 {
+    font-size: 15px;
+  }
+
+  html[data-theme='ShanYing'] .sy-tag-row-copy > p {
+    font-size: 11px;
+    -webkit-line-clamp: 1;
+  }
+
+  html[data-theme='ShanYing'] .sy-tag-row-image {
+    aspect-ratio: 1.15;
+  }
+
+  html[data-theme='ShanYing'] .sy-links-head {
+    min-height: 80px;
+  }
+
+  html[data-theme='ShanYing'] .sy-links-head::before {
+    left: -18px;
+  }
+
+  html[data-theme='ShanYing'] .sy-links-head h1 {
+    font-size: 23px;
+  }
+
+  html[data-theme='ShanYing'] .sy-links-apply-button {
+    width: 38px;
+    padding: 0;
+  }
+
+  html[data-theme='ShanYing'] .sy-links-apply-button span {
+    display: none;
+  }
+
+  html[data-theme='ShanYing'] .sy-link-form {
+    grid-template-columns: 1fr;
+  }
+
+  html[data-theme='ShanYing'] .sy-link-form-wide {
+    grid-column: auto;
+  }
+}
+
 /* ═══ 10. 404 ═══════════════════════════════════════════════════════════ */
 
 html[data-theme='ShanYing'] .sy-notfound {
