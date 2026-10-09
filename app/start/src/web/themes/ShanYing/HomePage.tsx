@@ -20,6 +20,7 @@
 
 import Link from '@/components/AppLink';
 import PostLink from '@/components/blog/PostLink';
+import { randomCoverUrl } from '@/lib/blog-image';
 import { useThemeContext } from '@/lib/theme-context';
 import { datePartsInTimeZone, formatDateInTimeZone, resolveSiteTimeZone } from '@/lib/timezone';
 import { postDateInput } from '@/lib/post-date';
@@ -231,7 +232,7 @@ export default function HomePage({
   };
 
   const visitors = (latestComments || []).slice(0, 10);
-  const heroCover = heroPost?.cover_url || '';
+  const heroCover = heroPost?.cover_url || (heroPost ? randomCoverUrl(heroPost.id, ctx.options) : "");
   const heroExcerpt = heroPost ? plainText(heroPost.excerpt || heroPost.content).slice(0, 220) : '';
   const momentText = latestMoment ? plainText(latestMoment.content).slice(0, 90) : '';
 

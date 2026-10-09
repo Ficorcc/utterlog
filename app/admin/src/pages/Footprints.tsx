@@ -362,7 +362,7 @@ export default function FootprintsPage() {
         </form>
       </Card>
 
-      <Card className="overflow-hidden">
+      <Card className="overflow-x-auto md:overflow-hidden">
         {loading ? (
           <LoadingState label={t('common.loading', '加载中…')} />
         ) : rows.length === 0 ? (

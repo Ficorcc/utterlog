@@ -91,7 +91,8 @@ export default function AiLogsPage() {
       )}
 
       {/* Logs table */}
-      <Card className="overflow-hidden">
+      <Card className="overflow-x-auto md:overflow-hidden">
+        <div className="max-md:overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -129,6 +130,7 @@ export default function AiLogsPage() {
             )}
           </TableBody>
         </Table>
+        </div>
       </Card>
 
       {/* Pagination */}

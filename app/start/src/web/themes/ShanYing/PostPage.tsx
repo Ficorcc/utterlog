@@ -28,6 +28,7 @@ import { useThemeContext } from '@/lib/theme-context';
 import { formatDateInTimeZone, formatDateTimeInTimeZone, resolveSiteTimeZone } from '@/lib/timezone';
 import { postDateInput } from '@/lib/post-date';
 import ReadingTools from './ReadingTools';
+import FloatingSidebar from './FloatingSidebar';
 import { plainText, renderCatIcon } from './shanying-shared';
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -304,6 +305,8 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
       </article>
 
       <ReadingTools content={post?.content || ''} />
+
+      <FloatingSidebar content={post?.content || ''} postId={post?.id} />
 
       <section className="sy-related" aria-label="继续阅读">
         <header className="sy-related-heading">

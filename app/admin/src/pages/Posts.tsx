@@ -243,7 +243,7 @@ export default function PostsPage() {
 
         {/* 搜索框 */}
         <div className="flex items-center gap-1.5">
-          <Input placeholder={t('admin.posts.searchPlaceholder', '检索标题 / 摘要 / 正文')} value={search} onChange={(e: any) => setSearch(e.target.value)} onKeyDown={(e: any) => e.key === 'Enter' && (setPage(1), fetchPosts())} className="w-56" />
+          <Input placeholder={t("admin.posts.searchPlaceholder", "检索标题 / 摘要 / 正文")} value={search} onChange={(e: any) => setSearch(e.target.value)} onKeyDown={(e: any) => e.key === "Enter" && (setPage(1), fetchPosts())} className="w-56 max-md:w-40" />
           <Button variant="outline" size="icon" title={t('common.search', '搜索')} onClick={() => { setPage(1); fetchPosts(); }}>
             <Search />
           </Button>
@@ -255,7 +255,7 @@ export default function PostsPage() {
 
   return (
     <div>
-      <Card className="overflow-hidden">
+      <Card className="overflow-x-auto md:overflow-hidden">
         {/* 批量操作条：贴在表格上沿，选中才出现（Posts / Comments 同一形态） */}
         {selected.size > 0 && (
           <div className="flex flex-wrap items-center gap-2 border-b border-border bg-muted px-4 py-2">
@@ -278,6 +278,7 @@ export default function PostsPage() {
           </div>
         )}
 
+        <div className="max-md:overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -420,6 +421,7 @@ export default function PostsPage() {
             )}
           </TableBody>
         </Table>
+        </div>
 
         {/* 表格页脚：每页条数在左、翻页在右（Posts / Comments 同一落位） */}
         <div className="flex items-center justify-between border-t border-border px-4 py-2">

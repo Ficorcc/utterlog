@@ -2165,3 +2165,194 @@ div:hover > .comment-hint { opacity: 0.75 !important; }
   60%  { transform: translateY(-5px); }
   100% { transform: translateY(-3px); }
 }
+
+/* ========================================
+   Admin Dashboard - Mobile Responsive
+   ======================================== */
+
+/* Mobile: hide sidebar toggle button (it's inside the drawer now) */
+@media (max-width: 767px) {
+  .sidebar-toggle {
+    display: none !important;
+  }
+}
+
+/* Mobile: make header title truncate earlier */
+@media (max-width: 640px) {
+  .dashboard-shell header h1 {
+    max-width: 120px;
+  }
+}
+
+/* Mobile: toast container adjustment */
+@media (max-width: 640px) {
+  .react-hot-toast {
+    max-width: calc(100vw - 32px) !important;
+  }
+}
+
+/* ========================================
+   Mobile Responsive — Comprehensive
+   ======================================== */
+
+/* Mobile: tables need horizontal scroll */
+@media (max-width: 767px) {
+  .dashboard-shell main .overflow-hidden {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Table cells: allow wrapping on mobile */
+  .dashboard-shell .table td {
+    white-space: normal;
+    font-size: 0.8125rem;
+    padding: 0.5rem;
+  }
+
+  .dashboard-shell .table th {
+    font-size: 0.6875rem;
+    padding: 0.5rem;
+  }
+
+  /* Posts table: hide less important columns */
+  .dashboard-shell .table th:nth-child(n+6),
+  .dashboard-shell .table td:nth-child(n+6) {
+    display: none;
+  }
+}
+
+/* Mobile: search inputs full width */
+@media (max-width: 640px) {
+  .dashboard-shell input[placeholder*="检索"] {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Toolbar buttons: compact */
+  .dashboard-shell .btn-sm {
+    padding: 0 8px;
+    font-size: 0.6875rem;
+  }
+
+  /* Dialog: full width on mobile */
+  .dashboard-shell [role="dialog"] {
+    max-width: calc(100vw - 16px) !important;
+    width: calc(100vw - 16px) !important;
+  }
+}
+
+/* Mobile: header adjustments */
+@media (max-width: 640px) {
+  .dashboard-shell header {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .dashboard-shell header h1 {
+    font-size: 0.875rem;
+  }
+
+  /* User menu: compact */
+  .dashboard-shell header [class*="border"][class*="bg-card"] {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* Mobile: main content area padding */
+@media (max-width: 640px) {
+  .dashboard-shell main > div {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Mobile: settings rows already handled at 760px, but add extra compact on very small */
+@media (max-width: 480px) {
+  .settings-row-label-cell {
+    padding: 8px 12px 2px;
+    font-size: 0.8125rem;
+  }
+
+  .settings-row-control-cell {
+    padding: 4px 12px 10px;
+  }
+
+  .settings-field-label {
+    font-size: 0.8125rem;
+  }
+
+  .settings-field-hint {
+    font-size: 0.6875rem;
+  }
+}
+
+/* Mobile: pagination compact */
+@media (max-width: 640px) {
+  .dashboard-shell [class*="Pagination"] {
+    font-size: 0.75rem;
+  }
+
+  .dashboard-shell [class*="Pagination"] button {
+    padding: 0.25rem 0.5rem;
+    min-width: auto;
+  }
+}
+
+/* Mobile: badges compact */
+@media (max-width: 640px) {
+  .dashboard-shell .badge {
+    font-size: 0.6875rem;
+    padding: 0.125rem 0.375rem;
+  }
+}
+
+/* Mobile: card padding */
+@media (max-width: 640px) {
+  .dashboard-shell .card {
+    font-size: 0.875rem;
+  }
+}
+
+/* Mobile: form inputs */
+@media (max-width: 640px) {
+  .dashboard-shell .input {
+    font-size: 0.875rem;
+    padding: 0 0.625rem;
+  }
+
+  .dashboard-shell textarea.input {
+    padding: 0.5rem 0.625rem;
+    font-size: 0.875rem;
+  }
+
+  .dashboard-shell select.input {
+    font-size: 0.875rem;
+  }
+}
+
+/* Mobile: buttons */
+@media (max-width: 640px) {
+  .dashboard-shell .btn {
+    font-size: 0.8125rem;
+    padding: 0 0.75rem;
+    min-width: auto;
+  }
+
+  .dashboard-shell .btn-lg {
+    padding: 0 1rem;
+    min-width: auto;
+  }
+}
+
+/* Very small screens: further reductions */
+@media (max-width: 375px) {
+  .dashboard-shell main > div {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .dashboard-shell .card {
+    font-size: 0.8125rem;
+  }
+}

@@ -178,10 +178,10 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="flex flex-col gap-7">
+    <div className="flex flex-col gap-4 md:gap-7">
       {/* 待办 —— 只在真有事情要处理时出现。用主色点一下，不铺底色。 */}
       {!loading && todoItems.length > 0 && (
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-l-2 border-primary bg-muted/40 py-2.5 pl-4 pr-5">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-l-2 border-primary bg-muted/40 py-2.5 pl-3 pr-4 md:gap-x-6 md:pl-4 md:pr-5">
           <span className="text-2xs font-semibold uppercase tracking-[0.06em] text-muted-foreground">
             {t('admin.dashboard.todo.title', '待处理')}
           </span>
@@ -202,21 +202,21 @@ export default function DashboardPage() {
       {/* 指标区：主指标一行大数字，次要指标同容器第二行。整块只有一圈边框、
           内部靠分隔线切分——比 8 张各带边框和阴影的卡片安静得多。 */}
       <div className="border border-border bg-card">
-        <div className="grid grid-cols-4 divide-x divide-border">
+        <div className="grid grid-cols-2 max-md:divide-y max-md:divide-border md:grid-cols-4 md:divide-x divide-border">
           {statCards.map((c) => (
-            <div key={c.title} className="px-5 py-4">
+            <div key={c.title} className="px-3 py-3 md:px-5 md:py-4">
               <div className="flex items-center gap-1.5">
                 <c.Icon className="size-3.5 shrink-0 text-primary" />
                 <p className="text-xs font-medium text-muted-foreground">{c.title}</p>
               </div>
-              <p className="mt-2 text-2xl font-semibold tabular-nums leading-none text-foreground">
+              <p className="mt-2 text-xl font-semibold tabular-nums leading-none text-foreground md:text-2xl">
                 {loading ? '—' : typeof c.value === 'number' ? <AnimatedNumber value={c.value} /> : c.value}
               </p>
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-4 divide-x divide-border border-t border-border">
+        <div className="grid grid-cols-2 max-md:divide-y max-md:divide-border md:grid-cols-4 md:divide-x divide-border border-t border-border">
           {secondaryStats.map((s) => {
             const body = (
               <>
@@ -232,24 +232,24 @@ export default function DashboardPage() {
                 key={s.label}
                 type="button"
                 onClick={() => navigate(s.href!)}
-                className="flex items-baseline justify-between gap-2 bg-transparent px-5 py-2.5 transition-colors hover:bg-muted/40"
+                className="flex items-baseline justify-between gap-2 bg-transparent px-3 py-2.5 transition-colors hover:bg-muted/40 md:px-5"
               >
                 {body}
               </button>
             ) : (
-              <span key={s.label} className="flex items-baseline justify-between gap-2 px-5 py-2.5">{body}</span>
+              <span key={s.label} className="flex items-baseline justify-between gap-2 px-3 py-2.5 md:px-5">{body}</span>
             );
           })}
         </div>
       </div>
 
       {/* Trend + Quick actions */}
-      <div className="grid grid-cols-[2fr_1fr] items-stretch gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-[2fr_1fr] items-stretch">
         {/* Trend chart */}
-        <div className="flex flex-col border border-border bg-card p-5 pb-2.5">
+        <div className="flex flex-col border border-border bg-card p-3 pb-2.5 md:p-5 md:pb-2.5">
           <div className="mb-4 flex items-center justify-between">
             <SectionTitle icon={BarChart3}>{t('admin.dashboard.trendTitle', '近 30 天访问趋势')}</SectionTitle>
-            <div className="flex items-center gap-4">
+            <div className="hidden items-center gap-4 sm:flex">
               <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
                 <span className="size-2.5 bg-primary" />{t('admin.dashboard.visitors', '访客')}
               </span>
@@ -286,7 +286,7 @@ export default function DashboardPage() {
 
         {/* Quick actions —— 从 4 个大图标块改成一列可点的行，靠分隔线区分 */}
         <div className="flex flex-col border border-border bg-card">
-          <div className="px-5 py-4">
+          <div className="px-4 py-3 md:px-5 md:py-4">
             <SectionTitle icon={Zap}>{t('admin.dashboard.quickActions', '快捷操作')}</SectionTitle>
           </div>
           <div className="flex flex-1 flex-col divide-y divide-border border-t border-border">
@@ -295,7 +295,7 @@ export default function DashboardPage() {
                 key={a.label}
                 type="button"
                 onClick={() => navigate(a.href)}
-                className="group flex flex-1 items-center gap-3 bg-transparent px-5 py-3 text-left transition-colors hover:bg-muted/40"
+                className="group flex flex-1 items-center gap-3 bg-transparent px-4 py-2.5 text-left transition-colors hover:bg-muted/40 md:px-5 md:py-3"
               >
                 <a.Icon className="size-4 shrink-0 text-muted-foreground group-hover:text-primary" />
                 <span className="text-xs-plus text-foreground">{a.label}</span>
@@ -307,10 +307,10 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent content */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {/* Recent posts */}
         <div className="overflow-hidden border border-border bg-card">
-          <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <div className="flex items-center justify-between border-b border-border px-4 py-3 md:px-5 md:py-4">
             <SectionTitle icon={SquarePen}>{t('admin.dashboard.recentPosts', '最近文章')}</SectionTitle>
             <ViewAll to="/posts" label={t('admin.dashboard.viewAll', '全部')} />
           </div>
@@ -327,7 +327,7 @@ export default function DashboardPage() {
               const st = statusMap[post.status] || statusMap.draft;
               return (
                 <div key={post.id} onClick={() => openPostPage(post)}
-                  className={`flex min-h-18 cursor-pointer items-center px-5 py-3.5 transition-colors hover:bg-muted/50 ${idx < recentPosts.length - 1 ? 'border-b border-border' : ''}`}>
+                  className={`flex min-h-18 cursor-pointer items-center px-4 py-3 transition-colors hover:bg-muted/50 md:px-5 md:py-3.5 ${idx < recentPosts.length - 1 ? 'border-b border-border' : ''}`}>
                   <div className="flex w-full items-center justify-between gap-4">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 overflow-hidden">
@@ -350,7 +350,7 @@ export default function DashboardPage() {
 
         {/* Recent comments */}
         <div className="overflow-hidden border border-border bg-card">
-          <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <div className="flex items-center justify-between border-b border-border px-4 py-3 md:px-5 md:py-4">
             <SectionTitle icon={MessageSquare}>{t('admin.dashboard.recentComments', '最新评论')}</SectionTitle>
             <ViewAll to="/comments" label={t('admin.dashboard.viewAll', '全部')} />
           </div>
@@ -358,7 +358,7 @@ export default function DashboardPage() {
             <div className="px-5 py-12 text-center text-sm text-muted-foreground">{t('admin.dashboard.noComments', '暂无评论')}</div>
           ) : (
             recentComments.map((comment, idx) => (
-              <div key={comment.id} className={`flex min-h-18 items-center px-5 py-3.5 ${idx < recentComments.length - 1 ? 'border-b border-border' : ''}`}>
+              <div key={comment.id} className={`flex min-h-18 items-center px-4 py-3 md:px-5 md:py-3.5 ${idx < recentComments.length - 1 ? 'border-b border-border' : ''}`}>
                 <div className="flex w-full items-center gap-2.5">
                   {comment.avatar_url ? (
                     <img src={comment.avatar_url} alt="" className="size-8 shrink-0 rounded-full object-cover" />

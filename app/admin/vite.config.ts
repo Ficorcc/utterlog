@@ -49,6 +49,19 @@ export default defineConfig({
   define: {
     __UTTERLOG_VERSION__: JSON.stringify(appVersion),
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes("node_modules")) {
+            if (id.includes("react") || id.includes("@tanstack")) return "vendor";
+            if (id.includes("@base-ui") || id.includes("lucide") || id.includes("clsx") || id.includes("tailwind-merge")) return "ui";
+            if (id.includes("react-hook-form") || id.includes("hookform") || id.includes("zod")) return "form";
+          }
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     proxy: {

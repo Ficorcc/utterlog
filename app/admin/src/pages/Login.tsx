@@ -196,12 +196,11 @@ export default function Login() {
     <div className="flex min-h-screen items-center justify-center bg-background p-6">
       <form
         onSubmit={needTotp ? handle2FA : handleSubmit}
-        className="w-full max-w-95 rounded-md border border-border bg-card px-7 py-8"
+        className="w-full max-w-95 rounded-md border border-border bg-card px-5 py-6 sm:px-7 sm:py-8"
       >
         <div className="mb-7 text-center">
           <svg
-            width="64" height="64" viewBox="0 0 24 24"
-            className="login-logo mx-auto block"
+            width="56" height="56" viewBox="0 0 24 24" className="login-logo mx-auto block w-14 h-14 sm:w-16 sm:h-16"
           >
             <path d="M12 0c9.601 0 12 2.399 12 12 0 9.601-2.399 12-12 12-9.601 0-12-2.399-12-12C0 2.399 2.399 0 12 0z" fill="var(--primary)" />
             <path d="M17.008 17.29H11.44a5.57 5.57 0 0 1-5.562-5.567A5.57 5.57 0 0 1 11.44 6.16a5.57 5.57 0 0 1 5.567 5.563Z" fill="white" />

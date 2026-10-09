@@ -422,7 +422,7 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
             onChange={e => setSearch(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && (setPage(1), fetchComments())}
             placeholder={t('admin.comments.searchPlaceholder', '搜索评论内容 / 昵称 / 邮箱')}
-            className="w-56"
+            className="w-56 max-md:w-40"
           />
           <Button variant="outline" size="icon" title={t('admin.common.search', '搜索')} onClick={() => { setPage(1); fetchComments(); }}>
             <Search />
@@ -430,7 +430,7 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
         </div>
       </div>
 
-      <Card className="overflow-hidden">
+      <Card className="overflow-x-auto md:overflow-hidden">
         {/* 批量操作条：贴在表格上沿，选中才出现（Posts / Comments 同一形态） */}
         {selectedIds.size > 0 && (
           <div className="flex flex-wrap items-center gap-2 border-b border-border bg-muted px-4 py-2">
@@ -450,6 +450,7 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
           </div>
         )}
 
+        <div className="max-md:overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -595,6 +596,7 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
             )}
           </TableBody>
         </Table>
+        </div>
 
         {/* 表格页脚：每页条数在左、翻页在右（Posts / Comments 同一落位） */}
         <div className="flex items-center justify-between border-t border-border px-4 py-2">

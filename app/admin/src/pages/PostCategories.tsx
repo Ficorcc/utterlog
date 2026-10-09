@@ -170,7 +170,7 @@ export default function CategoriesPage() {
           onAction={openCreate}
         />
       ) : (
-        <Card className="overflow-hidden">
+        <Card className="overflow-x-auto md:overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>

@@ -333,7 +333,8 @@ export default function PagesPage() {
       />
 
       {/* All pages in one table */}
-      <Card className="overflow-hidden">
+      <Card className="overflow-x-auto md:overflow-hidden">
+        <div className="max-md:overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -393,6 +394,7 @@ export default function PagesPage() {
             })}
           </TableBody>
         </Table>
+        </div>
       </Card>
 
       <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} onConfirm={handleDelete} title={t('admin.posts.confirmDeleteTitle', '确认删除')} message={t('admin.common.deleteIrreversible', '删除后无法恢复')} />

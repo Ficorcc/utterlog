@@ -101,7 +101,7 @@ export default function FilmsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && (setPage(1), fetchFilms())}
-            className="w-56"
+            className="w-56 max-md:w-40"
           />
           <Button variant="outline" size="icon" title="搜索" onClick={() => { setPage(1); fetchFilms(); }}>
             <Search />
@@ -109,7 +109,8 @@ export default function FilmsPage() {
         </div>
       </div>
 
-      <Card className="overflow-hidden">
+      <Card className="overflow-x-auto md:overflow-hidden">
+        <div className="max-md:overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -167,6 +168,7 @@ export default function FilmsPage() {
             )}
           </TableBody>
         </Table>
+        </div>
       </Card>
 
       {totalPages > 1 && (

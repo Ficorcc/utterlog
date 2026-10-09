@@ -113,7 +113,8 @@ export default function BackupPage() {
       </p>
 
       {/* Backup list */}
-      <Card className="overflow-hidden">
+      <Card className="overflow-x-auto md:overflow-hidden">
+        <div className="max-md:overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -154,6 +155,7 @@ export default function BackupPage() {
             )}
           </TableBody>
         </Table>
+        </div>
       </Card>
 
       <ConfirmDialog

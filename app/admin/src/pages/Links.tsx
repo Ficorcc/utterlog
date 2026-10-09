@@ -577,7 +577,7 @@ export default function LinksPage() {
             placeholder={t('admin.links.searchPlaceholder', '检索名称 / 网址 / 描述')}
             value={search}
             onChange={(e: any) => setSearch(e.target.value)}
-            className="w-56"
+            className="w-56 max-md:w-40"
           />
           <Button
             variant="outline"
@@ -670,7 +670,7 @@ export default function LinksPage() {
         </Card>
       )}
 
-      <Card className="overflow-hidden">
+      <Card className="overflow-x-auto md:overflow-hidden">
         <Table style={{ tableLayout: 'fixed' }}>
           <TableHeader>
             <TableRow>

@@ -4,7 +4,7 @@ import {
   MessageCircle, MapPin, MessagesSquare, Bot, Link as LinkIcon, Images,
   GalleryVerticalEnd, Music, ListMusic, Film, Video, BookOpen, Gamepad2,
   ShoppingBag, LineChart, Palette, Database,
-  Settings, User, ScrollText, SlidersHorizontal, Pencil,
+  Settings, User, ScrollText, SlidersHorizontal, Pencil, Menu,
   Clock, Ban, Trash2, UserPen, ChevronUp, ChevronDown, LogOut,
   type LucideIcon,
 } from 'lucide-react';
@@ -140,6 +140,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { user, logout } = useAuthStore();
   const { locale, t } = useI18n();
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [siteUrl, setSiteUrl] = useState(() => resolveVisitSiteUrl());
   const [siteTitle, setSiteTitle] = useState('Utterlog');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -251,17 +252,39 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     pathname.startsWith('/comments/');
 
   return (
-    <div className="dashboard-shell" style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
+    <div className="dashboard-shell flex max-md:block md:h-screen md:overflow-hidden" style={{ display: 'flex' }}>
+      {/* Mobile backdrop */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 md:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+      {/* Sidebar: inline on desktop, fixed drawer on mobile */}
+      <div className="hidden md:flex">
+        <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
+      </div>
+      <div className={cn('fixed inset-y-0 left-0 z-40 md:hidden', mobileOpen ? 'block' : 'hidden')}>
+        <Sidebar collapsed={false} onToggle={() => setMobileOpen(false)} />
+      </div>
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         <header
-          className="border-b border-border bg-card px-5"
+          className="border-b border-border bg-card px-3 md:px-5"
           style={{
             height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             flexShrink: 0,
           }}
         >
+          {/* Mobile menu toggle */}
+          <button
+            type="button"
+            onClick={() => setMobileOpen(true)}
+            className="md:hidden inline-flex size-8.5 items-center justify-center text-muted-foreground hover:bg-muted hover:text-primary"
+            aria-label="打开菜单"
+          >
+            <Menu className="size-4" />
+          </button>
           {/* Left: current page icon + title (中文 + English) */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
             {PageIcon && <PageIcon className="size-3.5 shrink-0 text-primary" />}
@@ -396,15 +419,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         <main
-          className="bg-background"
+          className="bg-background max-md:overflow-y-visible md:overflow-y-scroll flex-1"
           style={{
             flex: 1,
             minHeight: 0,
             overflowX: 'hidden',
-            // Regular pages: always reserve scrollbar gutter (overflowY: scroll)
-            // so page content doesn't shift when it grows past viewport height.
-            // Full-width pages (editor/chat) manage their own scroll.
-            overflowY: fullWidth ? 'hidden' : 'scroll',
+            overflowY: fullWidth ? 'hidden' : undefined,
           }}
         >
           <PageLoadingContext.Provider value={pageLoadingCtx}>
@@ -418,12 +438,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               // Wide pages: roomier than the 1280 default so dense tables keep
               // their rightmost columns, but still capped — unbounded width on
               // an ultrawide monitor just spreads a list into sparse columns.
-              <div className="mx-auto px-8 py-6" style={{ maxWidth: 1600 }}>
+              <div className="mx-auto px-4 py-4 md:px-8 md:py-6" style={{ maxWidth: 1600 }}>
                 {children}
               </div>
             ) : (
               // Regular pages: centered with max-width
-              <div className="mx-auto px-8 py-6" style={{ maxWidth: 1280 }}>
+              <div className="mx-auto px-4 py-4 md:px-8 md:py-6" style={{ maxWidth: 1280 }}>
                 {children}
               </div>
             )}
