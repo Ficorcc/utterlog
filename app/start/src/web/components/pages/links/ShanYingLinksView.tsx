@@ -2,6 +2,7 @@
 
 import api from '@/lib/api';
 import { siteFaviconUrl } from '@/lib/site-favicon';
+import { useThemeContext } from '@/lib/theme-context';
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -68,13 +69,38 @@ export default function ShanYingLinksView({
   initialLinks?: FriendLink[];
   initialOptions?: Record<string, string>;
 } = {}) {
+  const { site, owner } = useThemeContext();
   const hasInitialData = initialLinks !== undefined;
   const [links, setLinks] = useState(initialLinks || []);
   const [groups, setGroups] = useState<LinkGroup[]>(parseGroups(initialOptions?.link_groups));
   const [loading, setLoading] = useState(!hasInitialData);
   const [showApply, setShowApply] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [currentOrigin, setCurrentOrigin] = useState('');
   const [applying, setApplying] = useState(false);
   const [form, setForm] = useState({ name: '', url: '', description: '', logo: '', avatar: '', rss_url: '', email: '' });
+
+  useEffect(() => setCurrentOrigin(window.location.origin), []);
+
+  const siteUrl = (site.url || currentOrigin).replace(/\/+$/, '');
+  const avatarSource = owner.avatar || site.logo || site.favicon;
+  const avatarUrl = avatarSource && siteUrl ? new URL(avatarSource, `${siteUrl}/`).href : avatarSource || '';
+  const profileRows = [
+    { label: '站点名称', value: site.title || owner.nickname || '我的博客' },
+    { label: '站点描述', value: site.description || site.subtitle || owner.bio || '' },
+    { label: '站点网址', value: siteUrl ? `${siteUrl}/` : '' },
+    { label: 'RSS 链接', value: siteUrl ? `${siteUrl}/feed` : '' },
+    { label: '头像地址', value: avatarUrl },
+  ].filter((row) => row.value);
+
+  const copyText = async (value: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success(`已复制${label}`);
+    } catch {
+      toast.error('复制失败，请检查浏览器剪贴板权限');
+    }
+  };
 
   useEffect(() => {
     if (hasInitialData) return;
@@ -90,9 +116,12 @@ export default function ShanYingLinksView({
   }, [hasInitialData]);
 
   useEffect(() => {
-    if (!showApply) return;
+    if (!showApply && !showProfile) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !applying) setShowApply(false);
+      if (event.key === 'Escape') {
+        if (!applying) setShowApply(false);
+        setShowProfile(false);
+      }
     };
     const previous = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -101,7 +130,7 @@ export default function ShanYingLinksView({
       document.body.style.overflow = previous;
       window.removeEventListener('keydown', onKey);
     };
-  }, [showApply, applying]);
+  }, [showApply, showProfile, applying]);
 
   const sections = useMemo(() => {
     const groupMap = new Map(groups.map((group) => [group.key, group]));
@@ -153,10 +182,15 @@ export default function ShanYingLinksView({
     <div className="sy-links-page">
       <header className="sy-links-head">
         <h1><i className="fa-solid fa-link" aria-hidden="true" />友链</h1>
-        <button type="button" className="sy-links-apply-button" onClick={() => setShowApply(true)}>
-          <i className="fa-solid fa-plus" aria-hidden="true" />
-          <span>申请友链</span>
-        </button>
+        <div className="sy-links-head-actions">
+          <button type="button" className="sy-links-profile-button" onClick={() => setShowProfile(true)} aria-label="查看我的站点资料" title="我的站点资料">
+            <i className="fa-regular fa-address-card" aria-hidden="true" />
+          </button>
+          <button type="button" className="sy-links-apply-button" onClick={() => setShowApply(true)}>
+            <i className="fa-solid fa-plus" aria-hidden="true" />
+            <span>申请友链</span>
+          </button>
+        </div>
       </header>
 
       <p className="sy-links-intro">在独立的角落，遇见同样认真记录生活的人。</p>
@@ -197,6 +231,37 @@ export default function ShanYingLinksView({
           </div>
         </section>
       ))}
+
+      {showProfile && (
+        <div className="sy-link-modal-backdrop" onClick={() => setShowProfile(false)}>
+          <div className="sy-link-modal sy-link-profile-modal" role="dialog" aria-modal="true" aria-labelledby="sy-link-profile-title" onClick={(event) => event.stopPropagation()}>
+            <header>
+              <h2 id="sy-link-profile-title">我的站点资料</h2>
+              <div className="sy-link-profile-actions">
+                <button type="button" aria-label="复制全部站点资料" title="复制全部" onClick={() => void copyText(profileRows.map((row) => `${row.label}：${row.value}`).join('\n'), '全部资料')}><i className="fa-regular fa-copy" aria-hidden="true" /></button>
+                <button type="button" aria-label="关闭站点资料" title="关闭" onClick={() => setShowProfile(false)}><i className="fa-regular fa-xmark" aria-hidden="true" /></button>
+              </div>
+            </header>
+            <div className="sy-link-profile-hero">
+              <img src={avatarUrl || (siteUrl ? siteFaviconUrl(siteUrl) : '')} alt="" />
+              <div>
+                <strong>{site.title || owner.nickname || '我的博客'}</strong>
+                <p>{site.description || site.subtitle || owner.bio}</p>
+                {owner.nickname && <span>{owner.nickname}</span>}
+              </div>
+            </div>
+            <dl className="sy-link-profile-rows">
+              {profileRows.map((row) => (
+                <div className="sy-link-profile-row" key={row.label}>
+                  <dt>{row.label}</dt>
+                  <dd>{row.value}</dd>
+                  <button type="button" aria-label={`复制${row.label}`} title={`复制${row.label}`} onClick={() => void copyText(row.value, row.label)}><i className="fa-regular fa-copy" aria-hidden="true" /></button>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </div>
+      )}
 
       {showApply && (
         <div className="sy-link-modal-backdrop" onClick={() => !applying && setShowApply(false)}>

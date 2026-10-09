@@ -3925,6 +3925,28 @@ html[data-theme='ShanYing'] .sy-links-apply-button {
   cursor: pointer;
 }
 
+html[data-theme='ShanYing'] .sy-links-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+html[data-theme='ShanYing'] .sy-links-profile-button {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--sy-link-accent);
+  border-radius: 0;
+  place-items: center;
+  background: var(--sy-link-accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+html[data-theme='ShanYing'] .sy-links-profile-button:hover {
+  filter: brightness(1.08);
+}
+
 html[data-theme='ShanYing'] .sy-links-apply-button:hover {
   filter: brightness(1.08);
 }
@@ -4165,6 +4187,121 @@ html[data-theme='ShanYing'] .sy-link-modal > footer .primary {
 html[data-theme='ShanYing'] .sy-link-modal > footer button:disabled {
   cursor: wait;
   opacity: 0.55;
+}
+
+/* 我的站点资料：山景名片和可逐项复制的友链信息 */
+html[data-theme='ShanYing'] .sy-link-profile-modal {
+  width: min(560px, 100%);
+  border-radius: 17px;
+}
+
+html[data-theme='ShanYing'] .sy-link-profile-modal > header {
+  min-height: 84px;
+  box-sizing: border-box;
+  padding: 20px 24px;
+  background: var(--sy-surface);
+}
+
+html[data-theme='ShanYing'] .sy-link-profile-modal > header h2 {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+html[data-theme='ShanYing'] .sy-link-profile-actions {
+  display: flex;
+  gap: 4px;
+}
+
+html[data-theme='ShanYing'] .sy-link-profile-modal > header button {
+  background: transparent;
+  color: var(--sy-muted);
+  font-size: 17px;
+}
+
+html[data-theme='ShanYing'] .sy-link-profile-modal > header button:hover,
+html[data-theme='ShanYing'] .sy-link-profile-row button:hover {
+  color: var(--sy-link-accent);
+}
+
+html[data-theme='ShanYing'] .sy-link-profile-hero {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 142px;
+  box-sizing: border-box;
+  padding: 24px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--sy-surface) 96%, transparent) 0%, color-mix(in srgb, var(--sy-surface) 76%, transparent) 57%, color-mix(in srgb, var(--sy-surface) 40%, transparent) 100%), url('/themes/ShanYing/scenes/day-1280.webp') center / cover;
+}
+
+html[data-theme='ShanYing'] .sy-link-profile-hero > img {
+  flex: none;
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: var(--sy-soft);
+}
+
+html[data-theme='ShanYing'] .sy-link-profile-hero > div {
+  min-width: 0;
+}
+
+html[data-theme='ShanYing'] .sy-link-profile-hero strong {
+  display: block;
+  color: var(--sy-text);
+  font-size: 23px;
+  font-weight: 750;
+}
+
+html[data-theme='ShanYing'] .sy-link-profile-hero p {
+  margin: 7px 0;
+  color: var(--sy-text);
+  font-size: 12px;
+}
+
+html[data-theme='ShanYing'] .sy-link-profile-hero span {
+  color: var(--sy-muted);
+  font-size: 11px;
+}
+
+html[data-theme='ShanYing'] .sy-link-profile-rows {
+  margin: 0;
+  padding: 14px 24px 26px;
+}
+
+html[data-theme='ShanYing'] .sy-link-profile-row {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) 32px;
+  align-items: center;
+  gap: 12px;
+  min-height: 61px;
+  border-bottom: 1px solid var(--sy-line);
+  font-size: 12px;
+}
+
+html[data-theme='ShanYing'] .sy-link-profile-row:last-child {
+  border-bottom: 0;
+}
+
+html[data-theme='ShanYing'] .sy-link-profile-row dt {
+  color: var(--sy-text);
+}
+
+html[data-theme='ShanYing'] .sy-link-profile-row dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--sy-text);
+  line-height: 1.6;
+}
+
+html[data-theme='ShanYing'] .sy-link-profile-row button {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  background: transparent;
+  color: var(--sy-muted);
+  cursor: pointer;
 }
 
 @media (max-width: 720px) {
