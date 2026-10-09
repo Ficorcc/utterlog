@@ -3644,9 +3644,9 @@ html[data-theme='ShanYing'] .sy-archive-empty a {
 html[data-theme='ShanYing'] .sy-tag-browser {
   padding: 34px 36px 28px;
   border: 1px solid var(--sy-line);
-  border-radius: var(--sy-radius-panel);
+  border-radius: 0;
   background: var(--sy-surface);
-  box-shadow: var(--sy-shadow);
+  box-shadow: none;
 }
 
 html[data-theme='ShanYing'] .sy-tag-browser-head {
@@ -4112,7 +4112,7 @@ html[data-theme='ShanYing'] .sy-link-modal > footer button:disabled {
 @media (max-width: 720px) {
   html[data-theme='ShanYing'] .sy-tag-browser {
     padding: 22px 18px;
-    border-radius: 18px;
+    border-radius: 0;
   }
 
   html[data-theme='ShanYing'] .sy-tag-browser-head {
