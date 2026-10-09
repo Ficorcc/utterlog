@@ -26,10 +26,26 @@ export default function FloatingSidebar({ content }: { content: string; postId: 
 
   // Extract headings from rendered DOM
   useEffect(() => {
-    const timer = setTimeout(() => {
+    let timer = 0;
+    let attempts = 0;
+    let observer: MutationObserver | null = null;
+
+    const collectHeadings = () => {
       const prose = document.querySelector('.sy-article-text .blog-prose');
-      if (!prose) return;
-      const els = prose.querySelectorAll('h1, h2, h3');
+      if (!prose) {
+        if (attempts < 24) {
+          attempts += 1;
+          timer = window.setTimeout(collectHeadings, 250);
+        }
+        return;
+      }
+      const els = Array.from(prose.querySelectorAll('h1, h2, h3, p')).filter((el) => {
+        if (/^H[1-3]$/.test(el.tagName)) return true;
+        const strong = el.firstElementChild;
+        return strong?.tagName === 'STRONG'
+          && strong === el.lastElementChild
+          && /^\s*(?:\d+|[一二三四五六七八九十]+)[.、．]\s*\S/u.test(el.textContent || '');
+      });
       const items: TocItem[] = [];
       const usedIds = new Set<string>();
       els.forEach((el, index) => {
@@ -41,13 +57,23 @@ export default function FloatingSidebar({ content }: { content: string; postId: 
         usedIds.add(id);
         items.push({
           id,
-          text: el.textContent || '',
-          level: parseInt(el.tagName[1]),
+          text: el.textContent?.trim() || '',
+          level: el.tagName === 'P' ? 2 : parseInt(el.tagName[1]),
         });
       });
       setHeadings(items);
-    }, 150);
-    return () => clearTimeout(timer);
+      if (!observer) {
+        observer = new MutationObserver(collectHeadings);
+        observer.observe(prose, { childList: true, subtree: true });
+      }
+    };
+
+    collectHeadings();
+
+    return () => {
+      window.clearTimeout(timer);
+      observer?.disconnect();
+    };
   }, [content]);
 
   useEffect(() => {
