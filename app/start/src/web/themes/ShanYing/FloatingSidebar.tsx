@@ -29,11 +29,18 @@ export default function FloatingSidebar({ content }: { content: string; postId: 
     const timer = setTimeout(() => {
       const prose = document.querySelector('.sy-article-text .blog-prose');
       if (!prose) return;
-      const els = prose.querySelectorAll('h1[id], h2[id], h3[id]');
+      const els = prose.querySelectorAll('h1, h2, h3');
       const items: TocItem[] = [];
-      els.forEach((el) => {
+      const usedIds = new Set<string>();
+      els.forEach((el, index) => {
+        let id = el.id.trim();
+        if (!id || usedIds.has(id)) {
+          id = `sy-section-${index + 1}`;
+          el.id = id;
+        }
+        usedIds.add(id);
         items.push({
-          id: el.id,
+          id,
           text: el.textContent || '',
           level: parseInt(el.tagName[1]),
         });
