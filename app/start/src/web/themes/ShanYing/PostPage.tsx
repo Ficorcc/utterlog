@@ -17,7 +17,6 @@
  */
 
 import Link from '@/components/AppLink';
-import AISummary from '@/components/blog/AISummary';
 import CommentList from '@/components/blog/CommentList';
 import FootprintFlags from '@/components/blog/FootprintFlags';
 import PostContent from '@/components/blog/PostContent';
@@ -32,6 +31,20 @@ import FloatingSidebar from './FloatingSidebar';
 import { plainText, renderCatIcon } from './shanying-shared';
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
+
+function CollapsibleSummary({ text }: { text: string }) {
+  if (!text) return null;
+  return (
+    <details className="sy-reading-summary" open>
+      <summary>
+        <i className="fa-regular fa-file-lines" aria-hidden="true" />
+        <span>内容提要</span>
+        <i className="fa-regular fa-chevron-down sy-reading-summary-chevron" aria-hidden="true" />
+      </summary>
+      <div><p>{text}</p></div>
+    </details>
+  );
+}
 
 function ShareCluster({ title }: { title: string }) {
   const [open, setOpen] = useState(false);
@@ -112,6 +125,7 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
   const updatedRaw = post?.updated_at;
   const updated = updatedRaw ? formatDateTimeInTimeZone(updatedRaw, 'zh-CN', dateTimeOptions, timeZone) : '';
   const excerpt = plainText(post?.excerpt || post?.ai_summary).slice(0, 220);
+  const summary = plainText(post?.ai_summary || post?.excerpt).slice(0, 520);
 
   // 时效提醒：与原主题一致，只在「最后一次更新距今超过一年」时出现。
   const ageDays = (() => {
@@ -192,6 +206,15 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
                     {renderCatIcon(category.icon, 17)}
                   </Link>
                 )}
+                <button
+                  type="button"
+                  className="sy-entry-round sy-entry-toc-toggle"
+                  title="文章目录"
+                  aria-label="打开文章目录"
+                  onClick={() => window.dispatchEvent(new CustomEvent('sy:toc-open'))}
+                >
+                  <i className="fa-solid fa-list-ul" aria-hidden="true" />
+                </button>
               </nav>
             </div>
           </div>
@@ -214,6 +237,8 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
             </aside>
           )}
 
+          {!isVideo && <CollapsibleSummary text={summary} />}
+
           <div id="sy-article-text" className="sy-article-text">
             {isVideo ? (
               <>
@@ -222,7 +247,6 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
               </>
             ) : (
               <>
-                <AISummary postId={post?.id} aiSummary={post?.ai_summary} excerpt={post?.excerpt} />
                 <PostContent content={post?.content || ''} />
               </>
             )}

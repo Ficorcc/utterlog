@@ -2298,6 +2298,64 @@ html[data-theme='ShanYing'] .sy-article-text {
   font-family: var(--sy-reading-font);
 }
 
+/* 参考原主题文章页：默认展开、可原生收缩的内容提要。 */
+html[data-theme='ShanYing'] .sy-reading-summary {
+  width: 100%;
+  margin: 0 0 32px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--sy-accent) 24%, var(--sy-line));
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--sy-accent) 3%, var(--sy-surface));
+  color: var(--sy-text);
+}
+
+html[data-theme='ShanYing'] .sy-reading-summary summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 16px 20px;
+  list-style: none;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+}
+
+html[data-theme='ShanYing'] .sy-reading-summary summary::-webkit-details-marker {
+  display: none;
+}
+
+html[data-theme='ShanYing'] .sy-reading-summary summary > i:first-child {
+  color: var(--sy-accent);
+  font-size: 15px;
+}
+
+html[data-theme='ShanYing'] .sy-reading-summary-chevron {
+  margin-left: auto;
+  color: var(--sy-muted);
+  transition: transform 0.35s var(--sy-ease);
+}
+
+html[data-theme='ShanYing'] .sy-reading-summary[open] .sy-reading-summary-chevron {
+  transform: rotate(180deg);
+}
+
+html[data-theme='ShanYing'] .sy-reading-summary > div {
+  padding: 0 20px 18px;
+  animation: sy-summary-open 0.32s var(--sy-gentle) both;
+}
+
+html[data-theme='ShanYing'] .sy-reading-summary p {
+  margin: 0;
+  color: var(--sy-text);
+  font-size: 15px;
+  line-height: 1.85;
+}
+
+@keyframes sy-summary-open {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: none; }
+}
+
 /* ── 7.6 正文长文排版 ──
  * 段落节奏直接对齐原主题 typography.css 的「中文长文阅读」一节：
  * 17px / 行高 1.85 / 标题 600 字重 / 段间距 1.2em。
@@ -6855,41 +6913,68 @@ html[data-theme='ShanYing'] .sy-companion-empty { display: block; margin-top: 14
 @media print {
   html[data-theme='ShanYing'] .sy-companion { display: none !important; }
 }
-/* ═══ 浮动侧边栏：大纲目录 + 四箭头导航 ══════════════════════════════════════ */
+/* ═══ 浮动侧边栏：文章右侧大纲目录 ══════════════════════════════════════════ */
 
-/* 整体容器：fixed 右侧，垂直居中，只在宽屏显示 */
 html[data-theme='ShanYing'] .sy-floating-sidebar {
   position: fixed;
-  right: 24px;
-  top: 50%;
+  top: 150px;
+  right: max(16px, calc((100vw - var(--sy-frame)) / 2 - 216px));
   z-index: 40;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  max-height: calc(100vh - 120px);
-  transform: translateY(-50%) translateX(20px);
+  width: 190px;
+  max-height: calc(100dvh - 300px);
+  padding: 12px;
+  overflow: hidden;
+  border: 1px solid var(--sy-line);
+  border-radius: 8px;
+  background: var(--sy-surface);
+  box-shadow: 0 6px 28px rgb(20 24 40 / 0.08);
   opacity: 0;
+  transform: translateX(16px);
   pointer-events: none;
-  transition: opacity 0.4s var(--sy-gentle), transform 0.5s var(--sy-ease);
+  transition: opacity 0.32s var(--sy-gentle), transform 0.42s var(--sy-ease);
 }
 
 html[data-theme='ShanYing'] .sy-floating-sidebar--visible {
   opacity: 1;
-  transform: translateY(-50%) translateX(0);
+  transform: none;
   pointer-events: auto;
 }
 
-/* 大纲目录区 */
+html[data-theme='ShanYing'] .sy-floating-toc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 28px;
+  margin-bottom: 6px;
+  color: var(--sy-muted);
+  font-size: 12px;
+}
+
+html[data-theme='ShanYing'] .sy-floating-toc-header button {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--sy-muted);
+  font-size: 14px;
+  cursor: pointer;
+  place-items: center;
+}
+
+html[data-theme='ShanYing'] .sy-floating-toc-header button:hover {
+  color: var(--sy-text);
+}
+
 html[data-theme='ShanYing'] .sy-floating-toc {
-  width: 200px;
-  max-height: 50vh;
+  width: 100%;
+  max-height: calc(100dvh - 246px);
   overflow-y: auto;
-  padding: 14px 0;
-  border: 1px solid var(--sy-line);
-  border-radius: var(--sy-radius-card);
-  background: color-mix(in srgb, var(--sy-glass) 90%, transparent);
-  backdrop-filter: saturate(160%) blur(18px);
-  box-shadow: 0 8px 32px rgb(20 24 40 / 0.08);
+  overscroll-behavior: contain;
   scrollbar-width: thin;
   scrollbar-color: var(--sy-line) transparent;
 }
@@ -6897,85 +6982,53 @@ html[data-theme='ShanYing'] .sy-floating-toc {
 html[data-theme='ShanYing'] .sy-floating-toc::-webkit-scrollbar {
   width: 4px;
 }
+
 html[data-theme='ShanYing'] .sy-floating-toc::-webkit-scrollbar-thumb {
-  background: var(--sy-line);
   border-radius: 2px;
-}
-
-html[data-theme='ShanYing'] .sy-floating-toc-header {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 14px 10px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--sy-muted);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--sy-line);
-  margin-bottom: 6px;
-}
-
-html[data-theme='ShanYing'] .sy-floating-toc-header i {
-  font-size: 12px;
+  background: var(--sy-line);
 }
 
 html[data-theme='ShanYing'] .sy-floating-toc-list {
-  list-style: none;
-  padding: 0;
   margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 html[data-theme='ShanYing'] .sy-floating-toc-item {
   display: block;
-  padding: 4px 12px 4px 10px;
+  margin-left: 0;
+  padding: 6px 8px 6px 10px;
+  border-left: 2px solid var(--sy-line);
   font-size: 12px;
-  line-height: 1.5;
+  line-height: 1.6;
   color: var(--sy-muted);
   text-decoration: none;
-  border-left: 2px solid transparent;
-  margin-left: -1px;
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
   cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
 }
 
 html[data-theme='ShanYing'] .sy-floating-toc-item:hover {
   color: var(--sy-text);
-  background: var(--sy-soft);
 }
 
 html[data-theme='ShanYing'] .sy-floating-toc-item.active {
-  color: var(--sy-accent);
   border-left-color: var(--sy-accent);
-  font-weight: 500;
+  color: var(--sy-accent);
+  font-weight: 650;
 }
 
-/* 四箭头导航区 */
-html[data-theme='ShanYing'] .sy-floating-nav {
+html[data-theme='ShanYing'] .sy-floating-toc-actions {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 8px;
-  border: 1px solid var(--sy-line);
-  border-radius: var(--sy-radius-card);
-  background: color-mix(in srgb, var(--sy-glass) 90%, transparent);
-  backdrop-filter: saturate(160%) blur(18px);
-  box-shadow: 0 8px 32px rgb(20 24 40 / 0.08);
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--sy-line);
 }
 
-html[data-theme='ShanYing'] .sy-floating-nav-row {
-  display: flex;
-  justify-content: center;
-  gap: 4px;
-}
-
-html[data-theme='ShanYing'] .sy-floating-nav-btn {
+html[data-theme='ShanYing'] .sy-floating-toc-actions button {
   display: grid;
-  place-items: center;
   width: 34px;
   height: 34px;
   padding: 0;
@@ -6983,34 +7036,54 @@ html[data-theme='ShanYing'] .sy-floating-nav-btn {
   border-radius: 50%;
   background: transparent;
   color: var(--sy-muted);
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s, transform 0.15s;
-  text-decoration: none;
+  place-items: center;
 }
 
-html[data-theme='ShanYing'] .sy-floating-nav-btn:hover {
+html[data-theme='ShanYing'] .sy-floating-toc-actions button:hover,
+html[data-theme='ShanYing'] .sy-floating-toc-actions button[data-pressed='true'] {
   background: var(--sy-soft);
-  color: var(--sy-text);
-  transform: scale(1.08);
+  color: var(--sy-accent);
 }
 
-html[data-theme='ShanYing'] .sy-floating-nav-btn--disabled {
-  opacity: 0.3;
-  cursor: default;
-  pointer-events: none;
+html[data-theme='ShanYing'] .sy-floating-toc-open {
+  position: fixed;
+  top: 164px;
+  right: 22px;
+  z-index: 40;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid var(--sy-line);
+  border-radius: 50%;
+  background: var(--sy-surface);
+  box-shadow: 0 6px 24px rgb(20 24 40 / 0.09);
+  color: var(--sy-accent);
+  cursor: pointer;
+  place-items: center;
 }
 
 /* 宽屏才显示：文章区 max-width ~948px + 两侧各 200px 才不挤 */
 @media (max-width: 1399px) {
-  html[data-theme='ShanYing'] .sy-floating-sidebar {
+  html[data-theme='ShanYing'] .sy-floating-sidebar,
+  html[data-theme='ShanYing'] .sy-floating-toc-open,
+  html[data-theme='ShanYing'] .sy-entry-toc-toggle {
+    display: none;
+  }
+}
+
+@media (min-width: 1400px) {
+  html[data-theme='ShanYing'] .sy-reading-tools {
     display: none;
   }
 }
 
 /* 打印时隐藏 */
 @media print {
-  html[data-theme='ShanYing'] .sy-floating-sidebar {
+  html[data-theme='ShanYing'] .sy-floating-sidebar,
+  html[data-theme='ShanYing'] .sy-floating-toc-open {
     display: none !important;
   }
 }
