@@ -43,6 +43,7 @@ import {
   type BlogThemeAccent,
 } from '@shared/blog-theme';
 import AzureManifest from '@/themes/Azure/theme.json';
+import EmberManifest from '@/themes/Ember/theme.json';
 import RenascentManifest from '@/themes/Renascent/theme.json';
 import ShanYingManifest from '@/themes/ShanYing/theme.json';
 
@@ -79,6 +80,16 @@ const Azure: ThemeComponents = {
   CommentSection: SharedCommentSection,
 };
 
+const Ember: ThemeComponents = {
+  Header: lazy(() => import('@/themes/Ember/Header')),
+  Footer: lazy(() => import('@/themes/Ember/Footer')),
+  Layout: lazy(() => import('@/themes/Ember/Layout')),
+  HomePage: lazy(() => import('@/themes/Ember/HomePage')),
+  PostPage: lazy(() => import('@/themes/Ember/PostPage')),
+  PostCard: lazy(() => import('@/themes/Ember/PostCard')),
+  CommentSection: SharedCommentSection,
+};
+
 const Renascent: ThemeComponents = {
   Header: lazy(() => import('@/themes/Renascent/Header')),
   Footer: lazy(() => import('@/themes/Renascent/Footer')),
@@ -108,12 +119,14 @@ const ShanYing: ThemeComponents = {
 
 const themeRegistry: Record<string, ThemeComponents> = {
   Azure,
+  Ember,
   Renascent,
   ShanYing,
 };
 
 const manifestRegistry: Record<string, ThemeManifest> = {
   Azure: AzureManifest as ThemeManifest,
+  Ember: EmberManifest as ThemeManifest,
   Renascent: RenascentManifest as ThemeManifest,
   ShanYing: ShanYingManifest as ThemeManifest,
 };

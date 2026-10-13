@@ -1,0 +1,11 @@
+{
+  "name": "Ember",
+  "version": "1.0.0",
+  "description": "移植自 LiteNote Ember 的温暖纸张风格主题",
+  "author": "LiteNote / Utterlog",
+  "screenshot": "screenshot.svg",
+  "colors": { "primary": "#b85f3f", "background": "#f3eee6" },
+  "layout": { "maxWidth": "920px", "headerStyle": "paper" },
+  "menuPositions": [{ "key": "header", "label": "顶部导航", "description": "网站顶部导航菜单" }],
+  "features": ["darkMode", "responsive", "comments"]
+}
