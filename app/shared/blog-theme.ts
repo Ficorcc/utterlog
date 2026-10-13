@@ -1,4 +1,4 @@
-export const BLOG_THEME_NAMES = ['Azure', 'Ember', 'Renascent', 'ShanYing', 'Whono'] as const;
+export const BLOG_THEME_NAMES = ['Azure', 'Renascent', 'ShanYing', 'Whono'] as const;
 
 export const SUPPORTED_BLOG_THEMES = new Set<string>(BLOG_THEME_NAMES);
 
