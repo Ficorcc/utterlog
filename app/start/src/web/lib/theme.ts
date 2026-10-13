@@ -43,6 +43,7 @@ import {
   type BlogThemeAccent,
 } from '@shared/blog-theme';
 import AzureManifest from '@/themes/Azure/theme.json';
+import EmberManifest from '@/theme-renderers/Ember/theme.json';
 import RenascentManifest from '@/themes/Renascent/theme.json';
 import ShanYingManifest from '@/themes/ShanYing/theme.json';
 
@@ -79,6 +80,18 @@ const Azure: ThemeComponents = {
   CommentSection: SharedCommentSection,
 };
 
+// Ember's renderer is compiled once into Utterlog. Its installable ZIP lives
+// separately under content/themes/Ember and supplies the runtime assets.
+const Ember: ThemeComponents = {
+  Header: lazy(() => import('@/theme-renderers/Ember/Header')),
+  Footer: lazy(() => import('@/theme-renderers/Ember/Footer')),
+  Layout: lazy(() => import('@/theme-renderers/Ember/Layout')),
+  HomePage: lazy(() => import('@/theme-renderers/Ember/HomePage')),
+  PostPage: lazy(() => import('@/theme-renderers/Ember/PostPage')),
+  PostCard: lazy(() => import('@/theme-renderers/Ember/PostCard')),
+  CommentSection: SharedCommentSection,
+};
+
 const Renascent: ThemeComponents = {
   Header: lazy(() => import('@/themes/Renascent/Header')),
   Footer: lazy(() => import('@/themes/Renascent/Footer')),
@@ -108,12 +121,14 @@ const ShanYing: ThemeComponents = {
 
 const themeRegistry: Record<string, ThemeComponents> = {
   Azure,
+  Ember,
   Renascent,
   ShanYing,
 };
 
 const manifestRegistry: Record<string, ThemeManifest> = {
   Azure: AzureManifest as ThemeManifest,
+  Ember: EmberManifest as ThemeManifest,
   Renascent: RenascentManifest as ThemeManifest,
   ShanYing: ShanYingManifest as ThemeManifest,
 };
