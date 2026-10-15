@@ -562,7 +562,7 @@ export default function MomentsPage({
             return (
               <div
                 onClick={() => setActiveCard(null)}
-                style={{ position: 'relative', maxWidth: `${containerW}px`, margin: '0 auto', height: containerH }}
+                style={{ position: 'relative', isolation: 'isolate', maxWidth: `${containerW}px`, margin: '0 auto', height: containerH }}
               >
                 {filtered.map((m: any, i: number) => {
                   const pos = positions[i];
