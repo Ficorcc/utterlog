@@ -24,6 +24,7 @@ import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as LlmsFullDottxtRouteImport } from './routes/llms-full[.]txt'
 import { Route as LinksRouteImport } from './routes/links'
 import { Route as InstallRouteImport } from './routes/install'
+import { Route as GuestbookRouteImport } from './routes/guestbook'
 import { Route as GoodsRouteImport } from './routes/goods'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as FootprintsRouteImport } from './routes/footprints'
@@ -285,6 +286,11 @@ const LinksRoute = LinksRouteImport.update({
 const InstallRoute = InstallRouteImport.update({
   id: '/install',
   path: '/install',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuestbookRoute = GuestbookRouteImport.update({
+  id: '/guestbook',
+  path: '/guestbook',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GoodsRoute = GoodsRouteImport.update({
@@ -1273,6 +1279,7 @@ export interface FileRoutesByFullPath {
   '/footprints': typeof FootprintsRoute
   '/games': typeof GamesRoute
   '/goods': typeof GoodsRoute
+  '/guestbook': typeof GuestbookRoute
   '/install': typeof InstallRoute
   '/links': typeof LinksRoute
   '/llms-full.txt': typeof LlmsFullDottxtRoute
@@ -1477,6 +1484,7 @@ export interface FileRoutesByTo {
   '/footprints': typeof FootprintsRoute
   '/games': typeof GamesRoute
   '/goods': typeof GoodsRoute
+  '/guestbook': typeof GuestbookRoute
   '/install': typeof InstallRoute
   '/links': typeof LinksRoute
   '/llms-full.txt': typeof LlmsFullDottxtRoute
@@ -1682,6 +1690,7 @@ export interface FileRoutesById {
   '/footprints': typeof FootprintsRoute
   '/games': typeof GamesRoute
   '/goods': typeof GoodsRoute
+  '/guestbook': typeof GuestbookRoute
   '/install': typeof InstallRoute
   '/links': typeof LinksRoute
   '/llms-full.txt': typeof LlmsFullDottxtRoute
@@ -1888,6 +1897,7 @@ export interface FileRouteTypes {
     | '/footprints'
     | '/games'
     | '/goods'
+    | '/guestbook'
     | '/install'
     | '/links'
     | '/llms-full.txt'
@@ -2092,6 +2102,7 @@ export interface FileRouteTypes {
     | '/footprints'
     | '/games'
     | '/goods'
+    | '/guestbook'
     | '/install'
     | '/links'
     | '/llms-full.txt'
@@ -2296,6 +2307,7 @@ export interface FileRouteTypes {
     | '/footprints'
     | '/games'
     | '/goods'
+    | '/guestbook'
     | '/install'
     | '/links'
     | '/llms-full.txt'
@@ -2501,6 +2513,7 @@ export interface RootRouteChildren {
   FootprintsRoute: typeof FootprintsRoute
   GamesRoute: typeof GamesRoute
   GoodsRoute: typeof GoodsRoute
+  GuestbookRoute: typeof GuestbookRoute
   InstallRoute: typeof InstallRoute
   LinksRoute: typeof LinksRoute
   LlmsFullDottxtRoute: typeof LlmsFullDottxtRoute
@@ -2760,6 +2773,13 @@ declare module '@tanstack/react-router' {
       path: '/install'
       fullPath: '/install'
       preLoaderRoute: typeof InstallRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guestbook': {
+      id: '/guestbook'
+      path: '/guestbook'
+      fullPath: '/guestbook'
+      preLoaderRoute: typeof GuestbookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/goods': {
@@ -4381,6 +4401,7 @@ const rootRouteChildren: RootRouteChildren = {
   FootprintsRoute: FootprintsRoute,
   GamesRoute: GamesRoute,
   GoodsRoute: GoodsRoute,
+  GuestbookRoute: GuestbookRoute,
   InstallRoute: InstallRoute,
   LinksRoute: LinksRoute,
   LlmsFullDottxtRoute: LlmsFullDottxtRoute,

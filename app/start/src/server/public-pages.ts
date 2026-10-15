@@ -19,12 +19,13 @@ import {
 } from '@backend/public-read';
 import { requestIp } from '@backend/request-ip';
 import { bumpSiteViewOnRender, type ReadVisitor } from '@backend/services/tracking';
+import { guestbookThread } from '@backend/services/guestbook';
 import { loadStartThemeContextDirect } from './theme';
 
 export type PublicPageRequest =
   | { kind: 'home'; page?: number }
   | { kind: 'post' | 'film'; slug: string }
-  | { kind: 'archives' | 'categories' | 'tags' | 'about' | 'coding' | 'footprints' | 'moments' | 'links' | 'feeds' | 'albums' | 'music' | 'dashboard' }
+  | { kind: 'archives' | 'categories' | 'tags' | 'about' | 'coding' | 'footprints' | 'moments' | 'guestbook' | 'links' | 'feeds' | 'albums' | 'music' | 'dashboard' }
   | { kind: 'category' | 'tag'; slug: string }
   | { kind: 'search'; query?: string }
   | { kind: 'shelf'; shelf: 'movies' | 'books' | 'games' | 'goods' }
@@ -34,7 +35,7 @@ export type PublicPageRequest =
 
 const staticPageKinds = new Set([
   'archives', 'categories', 'tags', 'about', 'coding', 'footprints',
-  'moments', 'links', 'feeds', 'albums', 'music', 'dashboard',
+  'moments', 'guestbook', 'links', 'feeds', 'albums', 'music', 'dashboard',
 ]);
 const shelfKinds = new Set(['movies', 'books', 'games', 'goods']);
 
@@ -143,6 +144,7 @@ export type PublicPageBody =
   | { kind: 'tags' }
   | { kind: 'tag'; tag: any; posts: any[] }
   | { kind: 'about' }
+  | { kind: 'guestbook'; postId: number; commentCount: number }
   | { kind: 'coding'; data: any; timeZone: string }
   | { kind: 'footprints'; rows: any[] }
   | { kind: 'moments'; moments: any[]; tags: string[]; fetchedAt: number }
@@ -382,6 +384,12 @@ async function resolvePublicPage(ctx: ThemeContextData | null, data: PublicPageR
     }
 
     if (data.kind === 'about') return { kind: 'about' };
+
+    if (data.kind === 'guestbook') {
+      if (ctx?.options.page_guestbook === 'false') return { kind: 'not-found', pathname: '/guestbook' };
+      const thread = await guestbookThread();
+      return { kind: 'guestbook', postId: thread.id, commentCount: Number(thread.comment_count || 0) };
+    }
 
     if (data.kind === 'coding') {
       const coding = await safe(codingPayload(false), {}, 10_000);

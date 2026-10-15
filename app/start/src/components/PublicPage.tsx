@@ -25,6 +25,7 @@ const FeedsClient = lazy(() => import('@/components/pages/feeds/FeedsClient'));
 const AlbumsClient = lazy(() => import('@/components/pages/albums/AlbumsClient'));
 const MusicClient = lazy(() => import('@/components/pages/music/MusicClient'));
 const AboutContent = lazy(() => import('@/components/pages/about/AboutContent'));
+const DefaultGuestbookComments = lazy(() => import('@/components/blog/CommentList'));
 const CodingPage = lazy(() => import('@/components/pages/coding/CodingPage'));
 
 const shelfMeta = {
@@ -280,6 +281,14 @@ export function PublicPage({ data }: { data: PublicPageData }) {
           }
         }
         if (data.kind === 'about') return <AboutContent />;
+        if (data.kind === 'guestbook') {
+          const Component = ctx ? getThemeComponents(ctx.theme.name).GuestbookPage : undefined;
+          if (Component) return <Component postId={data.postId} commentCount={data.commentCount} />;
+          return <div style={{ maxWidth: 960, margin: '0 auto', padding: 32 }}>
+            <PageTitle title="留言板" icon="fa-regular fa-message-lines" />
+            <DefaultGuestbookComments postId={data.postId} title="留言板" />
+          </div>;
+        }
         if (data.kind === 'coding') return <CodingPage data={data.data} timeZone={data.timeZone} />;
         if (data.kind === 'footprints') return <FootprintsClient initialRows={data.rows} options={ctx?.options || {}} />;
         if (data.kind === 'moments') return <MomentsClient initialLoaded initialMoments={data.moments} initialTags={data.tags} initialFetchedAt={data.fetchedAt} />;

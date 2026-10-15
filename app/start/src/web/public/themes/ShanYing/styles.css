@@ -7204,3 +7204,60 @@ html[data-theme='ShanYing'] .sy-floating-toc-actions button[data-pressed='true']
     display: none !important;
   }
 }
+
+/* Guestbook uses the same ruled heading and conversation cards as ShanYing posts. */
+html[data-theme='ShanYing'] .sy-guestbook {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-height: calc(100dvh - 180px);
+}
+html[data-theme='ShanYing'] .sy-guestbook .sy-guestbook-title {
+  margin: 0;
+  padding: 26px 28px 26px 40px;
+  border-top: 1px solid var(--sy-line);
+  border-bottom: 1px solid var(--sy-line);
+  background: transparent;
+}
+html[data-theme='ShanYing'] .sy-guestbook-title .blog-page-title-rail {
+  position: absolute;
+  top: 29px;
+  left: 0;
+  display: block;
+  width: 3px;
+  height: 28px;
+  background: var(--sy-accent);
+}
+html[data-theme='ShanYing'] .sy-guestbook-title .blog-page-title-icon { color: var(--sy-accent); }
+html[data-theme='ShanYing'] .sy-guestbook-title .blog-page-title-meta {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--sy-muted);
+}
+html[data-theme='ShanYing'] .sy-guestbook-intro {
+  padding: 26px 32px;
+  border: 1px solid var(--sy-line);
+  border-radius: var(--sy-radius-panel);
+  background: var(--sy-surface);
+}
+html[data-theme='ShanYing'] .sy-guestbook-intro h2 {
+  margin: 7px 0 12px;
+  color: var(--sy-text);
+  font-family: var(--sy-brand-font);
+  font-size: clamp(22px, 3vw, 30px);
+}
+html[data-theme='ShanYing'] .sy-guestbook-intro > p:last-child {
+  margin: 0;
+  color: var(--sy-muted);
+  font-size: 14px;
+  line-height: 1.85;
+}
+html[data-theme='ShanYing'] .sy-guestbook .sy-guestbook-comments { margin-bottom: 40px; }
+html[data-theme='ShanYing'] .sy-guestbook [id^='comment-'] { scroll-margin-top: 100px; }
+@media (max-width: 700px) {
+  html[data-theme='ShanYing'] .sy-guestbook { gap: 16px; }
+  html[data-theme='ShanYing'] .sy-guestbook .sy-guestbook-title { padding: 20px 16px 20px 28px; }
+  html[data-theme='ShanYing'] .sy-guestbook-title .blog-page-title-rail { top: 21px; height: 26px; }
+  html[data-theme='ShanYing'] .sy-guestbook-intro { padding: 22px 18px; }
+}

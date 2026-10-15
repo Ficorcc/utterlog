@@ -30,6 +30,7 @@ const builtinPages = [
   { key: 'page_about', label: '关于', slug: '/about', icon: User, contentKey: 'page_about_content' as const },
   { key: 'page_coding', label: 'Coding', slug: '/coding', icon: CodeXml, settingsKey: 'coding' as const },
   { key: 'page_moments', label: '说说', slug: '/moments', icon: MessageSquare },
+  { key: 'page_guestbook', label: '留言板', slug: '/guestbook', icon: MessageSquare },
   { key: 'page_archives', label: '归档', slug: '/archives', icon: Archive },
   { key: 'page_music', label: '音乐', slug: '/music', icon: Music },
   { key: 'page_movies', label: '电影', slug: '/movies', icon: Film },

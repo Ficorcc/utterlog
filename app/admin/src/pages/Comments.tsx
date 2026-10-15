@@ -21,6 +21,7 @@ import { usePageBadge } from '@/layouts/DashboardLayout';
 const defaultAvatar = 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=64';
 
 function commentPostUrl(row: any) {
+  if (row.post_type === 'guestbook') return `/guestbook#comment-${row.id}`;
   return postUrlOf({
     id: row.post_id,
     display_id: row.post_display_id,

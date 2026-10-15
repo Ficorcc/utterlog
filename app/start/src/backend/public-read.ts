@@ -450,7 +450,7 @@ async function getPostBy(column: 'id' | 'display_id' | 'slug', value: string | n
     `select * from ${table('posts')} where ${column} = $1${statusSql}${typeSql} limit 1`,
     [value],
   ).catch(() => null);
-  if (!post || (!authed && post.status !== 'publish')) return null;
+  if (!post || post.type === 'guestbook' || (!authed && post.status !== 'publish')) return null;
   void reader;
   const metas = await many<Record<string, unknown>>(
     `select m.* from ${table('relationships')} r join ${table('metas')} m on m.id = r.meta_id where r.post_id = $1 order by m.type, m.name`,
@@ -768,7 +768,7 @@ export async function listComments(params: {
   ).catch(() => null);
   const rows = await many<Record<string, unknown>>(
     `select c.*,
-            p.title as post_title, p.slug as post_slug, p.display_id as post_display_id,
+            p.title as post_title, p.slug as post_slug, p.type as post_type, p.display_id as post_display_id,
             p.created_at as post_created_at, p.published_at as post_published_at,
             p.comment_count as post_comment_count,
             coalesce(u.role,'') as user_role,

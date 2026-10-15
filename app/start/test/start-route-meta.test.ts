@@ -17,6 +17,7 @@ describe('TanStack Start route metadata', () => {
 
   test('names collection and dated archive pages', () => {
     expect(publicPageMeta({ kind: 'moments', site, moments: [], tags: [], fetchedAt: 0 }).title).toBe('说说 - 示例站点');
+    expect(publicPageMeta({ kind: 'guestbook', site, postId: 12, commentCount: 0 }).title).toBe('留言板 - 示例站点');
     expect(publicPageMeta({ kind: 'date', site, posts: [], year: 2026, month: 7, timeZone: 'UTC' }).title).toBe('2026/07 归档 - 示例站点');
     expect(publicPageMeta({ kind: 'about', site }).title).toBe('关于 - 示例站点');
     expect(publicPageMeta({ kind: 'coding', site, data: {}, timeZone: 'UTC' }).title).toBe('Coding - 示例站点');

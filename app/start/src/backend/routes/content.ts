@@ -310,7 +310,8 @@ export async function sitemapXmlResponse() {
   const items: { loc: string; lastmod: string; changefreq: string; priority: string }[] = [
     { loc: `${site}/`, lastmod: now, changefreq: 'daily', priority: '1.0' },
   ];
-  for (const path of ['/about', '/archives', '/films', '/moments', '/footprints', '/coding', '/links', '/albums', '/music', '/books', '/games', '/movies', '/goods', '/feeds']) {
+  for (const path of ['/about', '/archives', '/films', '/moments', '/guestbook', '/footprints', '/coding', '/links', '/albums', '/music', '/books', '/games', '/movies', '/goods', '/feeds']) {
+    if (path === '/guestbook' && opts.page_guestbook === 'false') continue;
     items.push({ loc: `${site}${path}`, lastmod: now, changefreq: 'weekly', priority: '0.6' });
   }
   const posts = await many<Record<string, unknown>>(
@@ -321,7 +322,7 @@ export async function sitemapXmlResponse() {
               where r.post_id = p.id order by m.id asc limit 1
             ), '') as category_slug
      from ${table('posts')} p
-     where p.status = 'publish'
+     where p.status = 'publish' and p.type <> 'guestbook'
      order by coalesce(p.published_at, to_timestamp(p.created_at)) desc
      limit 5000`,
   ).catch(() => []);

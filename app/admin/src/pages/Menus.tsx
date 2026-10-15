@@ -29,6 +29,7 @@ const BUILTIN_PAGES: { key: string; label: string; href: string }[] = [
   { key: 'archives', label: '归档',   href: '/archives' },
   { key: 'footprints', label: '足迹', href: '/footprints' },
   { key: 'moments', label: '说说',   href: '/moments' },
+  { key: 'guestbook', label: '留言板', href: '/guestbook' },
   { key: 'albums', label: '相册',   href: '/albums' },
   { key: 'music', label: '音乐',   href: '/music' },
   { key: 'movies', label: '电影',   href: '/movies' },
@@ -230,6 +231,7 @@ export default function MenusPage() {
         { href: '/coding', label: t('admin.menus.builtin.coding', 'Coding') },
         { href: '/archives', label: t('admin.menus.builtin.archives', '归档') },
         { href: '/moments', label: t('admin.menus.builtin.moments', '说说') },
+        { href: '/guestbook', label: t('admin.menus.builtin.guestbook', '留言板') },
         { href: '/links', label: t('admin.menus.builtin.links', '友链') },
         { href: '/feeds', label: t('admin.menus.builtin.feeds', '订阅') },
       ]);

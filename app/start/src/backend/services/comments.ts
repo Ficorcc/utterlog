@@ -1,4 +1,5 @@
 import { config, table } from '../config';
+import { commentPagePath } from './guestbook';
 import { sql } from '../db/client';
 import { exec, many, nowUnix, one } from '../db/helpers';
 import { optionValue } from '../db/options';
@@ -230,12 +231,12 @@ export async function notifyCommentReply(args: {
   if (await isCommentReplyOptedOut(recipient)) return { notified: false, notifyReason: '对方已退订回复通知' };
 
   try {
-    const post = await one<{ title: string; slug: string | null }>(
-      `select title, slug from ${table('posts')} where id = $1`, [parent.post_id],
+    const post = await one<{ title: string; slug: string | null; type: string }>(
+      `select title, slug, type from ${table('posts')} where id = $1`, [parent.post_id],
     ).catch(() => null);
     const siteTitle = await optionValue('site_title', 'Utterlog');
     const siteUrl = (await optionValue('site_url', config.appUrl)).replace(/\/+$/, '');
-    const postUrl = `${siteUrl}/posts/${encodeURIComponent(post?.slug || String(parent.post_id))}#comment-${replyId}`;
+    const postUrl = `${siteUrl}${commentPagePath(post, parent.post_id, replyId)}`;
     const unsubscribe = await commentReplyUnsubscribeUrl(siteUrl, recipient);
     const site = await emailSite();
     await sendConfiguredEmail(

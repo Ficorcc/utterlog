@@ -18,6 +18,7 @@ const publicRoutes = [
   '/films/$slug',
   '/footprints',
   '/games',
+  '/guestbook',
   '/goods',
   '/links',
   '/moments',
@@ -45,6 +46,7 @@ describe('TanStack Start public route topology', () => {
   });
 
   test('rejects forged page requests before they reach database helpers', () => {
+    expect(validatePublicPageRequest({ kind: 'guestbook' })).toEqual({ kind: 'guestbook', preload: false });
     expect(() => validatePublicPageRequest({ kind: 'shelf', shelf: 'users' })).toThrow();
     expect(() => validatePublicPageRequest({ kind: 'permalink', pathname: 'missing-slash' })).toThrow();
     expect(validatePublicPageRequest({ kind: 'films', page: 2, videoType: 'movie' })).toEqual({

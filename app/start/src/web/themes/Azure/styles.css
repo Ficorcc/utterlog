@@ -2128,3 +2128,52 @@
 /* Cover hover-zoom is now system-level: see .cover-zoom in
    app/globals.css. Theme-prefixed .azure-img-hover* classes were
    removed; main-content covers should wrap in .cover-zoom instead. */
+
+/* Guestbook keeps Azure's square, content-first layout and comment cards. */
+[data-theme="Azure"] .azure-guestbook { min-height: calc(100dvh - 160px); }
+[data-theme="Azure"] .azure-guestbook-body {
+  width: min(100%, 980px);
+  margin: 0 auto;
+  padding: 0 32px 72px;
+}
+[data-theme="Azure"] .azure-guestbook-intro {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 28px;
+  padding: 24px 28px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-soft);
+}
+[data-theme="Azure"] .azure-guestbook-intro-icon {
+  display: grid;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  background: var(--color-primary);
+  color: #fff;
+  place-items: center;
+}
+[data-theme="Azure"] .azure-guestbook-intro h2 {
+  margin: 0 0 7px;
+  color: var(--color-text-main);
+  font-size: 19px;
+}
+[data-theme="Azure"] .azure-guestbook-intro p {
+  margin: 0;
+  color: var(--color-text-sub);
+  font-size: 14px;
+  line-height: 1.8;
+}
+[data-theme="Azure"] .azure-guestbook-comments {
+  padding: 22px 32px 32px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-card);
+}
+[data-theme="Azure"] .azure-guestbook [id^="comment-"] { scroll-margin-top: 86px; }
+@media (max-width: 700px) {
+  [data-theme="Azure"] .azure-guestbook-body { padding: 0 16px 48px; }
+  [data-theme="Azure"] .azure-guestbook-intro { padding: 18px; gap: 12px; }
+  [data-theme="Azure"] .azure-guestbook-comments { padding: 16px 20px 24px; }
+  [data-theme="Azure"] .azure-guestbook-comments > div > div:first-child { margin-inline: -20px !important; padding-inline: 20px !important; }
+}

@@ -288,7 +288,7 @@ export default function DashboardPage({
                   <Link
                     key={comment.id || index}
                     prefetch={false}
-                    href={`${comment.post_slug ? `/posts/${comment.post_slug}` : '/'}#comment-${comment.id}`}
+                    href={`${comment.post_type === 'guestbook' ? '/guestbook' : comment.post_slug ? `/posts/${comment.post_slug}` : '/'}#comment-${comment.id}`}
                     className="sy-dash-comment"
                   >
                     <span className="sy-dash-avatar" aria-hidden="true">

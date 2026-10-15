@@ -26,5 +26,5 @@
     { "key": "sidebar", "label": "侧栏导航", "description": "首页左侧分类标签导航" }
   ],
   "adminPanels": ["profile_card", "header_buttons", "footer_icons"],
-  "features": ["sidebar", "search", "darkMode"]
+  "features": ["sidebar", "search", "darkMode", "guestbook"]
 }

@@ -321,7 +321,7 @@ export default function HomePage({
                   <Link
                     key={comment.id || index}
                     prefetch={false}
-                    href={`${comment.post_slug ? `/posts/${comment.post_slug}` : '/'}#comment-${comment.id}`}
+                    href={`${comment.post_type === 'guestbook' ? '/guestbook' : comment.post_slug ? `/posts/${comment.post_slug}` : '/'}#comment-${comment.id}`}
                     className="sy-visitor"
                     title={`${comment.author || '访客'}：${plainText(comment.content).slice(0, 40)}`}
                   >

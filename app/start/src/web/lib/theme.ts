@@ -64,6 +64,7 @@ export interface ThemeComponents {
   TagsPage?: ThemeComponent;
   NotFoundPage?: ThemeComponent;
   DashboardPage?: ThemeComponent;
+  GuestbookPage?: ThemeComponent<{ postId: number; commentCount: number }>;
 }
 
 const SharedCommentSection = lazy(() => import('@/components/blog/CommentList'));
@@ -78,6 +79,7 @@ const Azure: ThemeComponents = {
   PostPage: lazy(() => import('@/themes/Azure/PostPage')),
   PostCard: lazy(() => import('@/themes/Azure/PostCard')),
   CommentSection: SharedCommentSection,
+  GuestbookPage: lazy(() => import('@/themes/Azure/GuestbookPage')),
 };
 
 // Ember's renderer is compiled once into Utterlog. Its installable ZIP lives
@@ -117,6 +119,7 @@ const ShanYing: ThemeComponents = {
   TagsPage: lazy(() => import('@/themes/ShanYing/TagsPage')),
   NotFoundPage: lazy(() => import('@/themes/ShanYing/NotFoundPage')),
   DashboardPage: lazy(() => import('@/themes/ShanYing/DashboardPage')),
+  GuestbookPage: lazy(() => import('@/themes/ShanYing/GuestbookPage')),
 };
 
 const themeRegistry: Record<string, ThemeComponents> = {

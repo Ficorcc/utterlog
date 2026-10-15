@@ -297,6 +297,7 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
   return (
     <>
       <div
+        id={`comment-${comment.id}`}
         className={`comment-card${isReply ? ' comment-card--reply' : ''}`}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}

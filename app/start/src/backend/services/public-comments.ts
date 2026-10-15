@@ -8,6 +8,7 @@ import { emailSite, newCommentEmail } from '../email/templates';
 import { aiAuditFailAction, auditCommentContent, enqueueAiCommentReply, logAuditDecision } from '../ai/comments';
 import { sendCommentModerationTelegram } from '../telegram';
 import { notifyCommentReply } from './comments';
+import { commentPagePath } from './guestbook';
 import { createNotification } from './notifications';
 import { PublicWriteError } from './public-write';
 import { verifyCommentCaptcha } from './comment-captcha';
@@ -99,11 +100,14 @@ export async function createPublicComment(input: unknown, request: PublicComment
     throw new PublicWriteError(400, 'BAD_REQUEST', '请填写邮箱');
   }
   const postId = Number.parseInt(String(body.post_id || body.postId || ''), 10) || 0;
-  const post = await one<{ id: number; title: string; slug: string | null; allow_comment: boolean | null }>(
-    `select id, title, slug, allow_comment from ${table('posts')} where id = $1 and status = 'publish' limit 1`,
+  const post = await one<{ id: number; title: string; slug: string | null; type: string; allow_comment: boolean | null }>(
+    `select id, title, slug, type, allow_comment from ${table('posts')} where id = $1 and status = 'publish' limit 1`,
     [postId],
   );
   if (!post) throw new PublicWriteError(404, 'NOT_FOUND', '文章');
+  if (post.type === 'guestbook' && (await optionValue('page_guestbook', 'true')) === 'false') {
+    throw new PublicWriteError(404, 'NOT_FOUND', '留言板');
+  }
   if (post.allow_comment === false) throw new PublicWriteError(400, 'BAD_REQUEST', '该文章已关闭评论');
 
   const parentId = Number.parseInt(String(body.parent_id || body.parentId || ''), 10) || 0;
@@ -245,7 +249,7 @@ export async function createPublicComment(input: unknown, request: PublicComment
           postedAt: now,
           approveUrl,
           spamUrl,
-          postUrl: `${siteUrl}/posts/${encodeURIComponent(post.slug || String(postId))}#comment-${id}`,
+          postUrl: `${siteUrl}${commentPagePath(post, postId, id)}`,
           manageUrl: `${siteUrl}/admin/comments`,
         }),
       ).catch(() => {});

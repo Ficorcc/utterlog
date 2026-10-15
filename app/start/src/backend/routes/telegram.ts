@@ -9,6 +9,7 @@ import {
 } from '../email/comment-reply-unsubscribe';
 import { storeUploadedBytes } from '../media/storage';
 import { siteTotalViews } from '../services/analytics';
+import { commentPagePath } from '../services/guestbook';
 import { commentReplyEmail, emailSite } from '../email/templates';
 import { callAiText } from './ai';
 
@@ -129,10 +130,10 @@ async function publishTelegramCommentReply(commentId: number, content: string) {
 
   const recipient = String(parent.author_email || '').trim().toLowerCase();
   if (recipient && parent.role !== 'admin' && recipient !== String(admin?.email || '').trim().toLowerCase() && !(await isCommentReplyOptedOut(recipient))) {
-    const post = await one<{ title: string; slug: string | null }>(`select title, slug from ${table('posts')} where id = $1`, [parent.post_id]).catch(() => null);
+    const post = await one<{ title: string; slug: string | null; type: string }>(`select title, slug, type from ${table('posts')} where id = $1`, [parent.post_id]).catch(() => null);
     const siteTitle = await optionValue('site_title', 'Utterlog');
     const siteUrl = (await optionValue('site_url', config.appUrl)).replace(/\/+$/, '');
-    const postUrl = `${siteUrl}/posts/${encodeURIComponent(post?.slug || String(parent.post_id))}#comment-${inserted?.id || ''}`;
+    const postUrl = `${siteUrl}${commentPagePath(post, parent.post_id, Number(inserted?.id || 0))}`;
     const unsubscribe = await commentReplyUnsubscribeUrl(siteUrl, recipient);
     const site = await emailSite();
     await sendConfiguredEmail(

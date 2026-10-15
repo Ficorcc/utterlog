@@ -6,6 +6,7 @@ const pageTitles: Partial<Record<PublicPageData['kind'], string>> = {
   tags: '标签',
   footprints: '足迹',
   moments: '说说',
+  guestbook: '留言板',
   about: '关于',
   coding: 'Coding',
   search: '搜索',
