@@ -17,10 +17,9 @@ interface TocItem {
 
 const SCROLL_OFFSET = 88;
 
-export default function FloatingSidebar({ content }: { content: string; postId: number }) {
+export default function FloatingSidebar({ content, open, onClose }: { content: string; postId: number; open: boolean; onClose: () => void }) {
   const [headings, setHeadings] = useState<TocItem[]>([]);
   const [activeId, setActiveId] = useState('');
-  const [open, setOpen] = useState(true);
   const [focus, setFocus] = useState(false);
   const tocRef = useRef<HTMLElement>(null);
 
@@ -76,15 +75,16 @@ export default function FloatingSidebar({ content }: { content: string; postId: 
     };
   }, [content]);
 
-  useEffect(() => {
-    const show = () => setOpen(true);
-    window.addEventListener('sy:toc-open', show);
-    return () => window.removeEventListener('sy:toc-open', show);
-  }, []);
-
   useEffect(() => () => {
     delete document.documentElement.dataset.syFocus;
   }, []);
+
+  useEffect(() => {
+    if (!open && focus) {
+      setFocus(false);
+      delete document.documentElement.dataset.syFocus;
+    }
+  }, [open, focus]);
 
   // Scroll spy
   useEffect(() => {
@@ -136,22 +136,14 @@ export default function FloatingSidebar({ content }: { content: string; postId: 
     else delete document.documentElement.dataset.syFocus;
   };
 
-  if (headings.length < 2) return null;
+  if (!open || headings.length < 2) return null;
   const baseLevel = Math.min(...headings.map((item) => item.level));
-
-  if (!open) {
-    return (
-      <button type="button" className="sy-floating-toc-open" onClick={() => setOpen(true)} aria-label="打开文章目录" title="文章目录">
-        <i className="fa-solid fa-list-ul" aria-hidden="true" />
-      </button>
-    );
-  }
 
   return (
     <aside className="sy-floating-sidebar sy-floating-sidebar--visible" ref={tocRef} aria-label="文章目录">
       <header className="sy-floating-toc-header">
         <span>文章目录</span>
-        <button type="button" onClick={() => setOpen(false)} aria-label="关闭文章目录"><i className="fa-regular fa-xmark" aria-hidden="true" /></button>
+        <button type="button" onClick={onClose} aria-label="关闭文章目录"><i className="fa-regular fa-xmark" aria-hidden="true" /></button>
       </header>
       <nav className="sy-floating-toc" aria-label="文章大纲">
         <ul className="sy-floating-toc-list">

@@ -105,6 +105,7 @@ function ShareCluster({ title }: { title: string }) {
 }
 
 export default function PostPage({ post, options }: { post: any; options?: Record<string, string> }) {
+  const [tocOpen, setTocOpen] = useState(true);
   const ctx = useThemeContext();
   const mergedOptions = options || ctx.options || {};
   const timeZone = ctx.timeZone || resolveSiteTimeZone(mergedOptions);
@@ -210,8 +211,9 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
                   type="button"
                   className="sy-entry-round sy-entry-toc-toggle"
                   title="文章目录"
-                  aria-label="打开文章目录"
-                  onClick={() => window.dispatchEvent(new CustomEvent('sy:toc-open'))}
+                  aria-label={tocOpen ? '收起文章目录' : '打开文章目录'}
+                  aria-expanded={tocOpen}
+                  onClick={() => setTocOpen((value) => !value)}
                 >
                   <i className="fa-solid fa-list-ul" aria-hidden="true" />
                 </button>
@@ -330,7 +332,7 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
 
       <ReadingTools content={post?.content || ''} />
 
-      <FloatingSidebar content={post?.content || ''} postId={post?.id} />
+      <FloatingSidebar content={post?.content || ''} postId={post?.id} open={tocOpen} onClose={() => setTocOpen(false)} />
 
       <section className="sy-related" aria-label="继续阅读">
         <header className="sy-related-heading">

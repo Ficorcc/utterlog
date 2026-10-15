@@ -5476,7 +5476,7 @@ html[data-theme='ShanYing'] .sy-dash-summary {
   min-width: min(460px, 100%);
   padding: 22px 28px;
   border-radius: var(--sy-radius-card);
-  background: var(--sy-soft);
+  background: transparent;
 }
 
 html[data-theme='ShanYing'] .sy-dash-summary > div {
@@ -7184,28 +7184,9 @@ html[data-theme='ShanYing'] .sy-floating-toc-actions button[data-pressed='true']
   color: var(--sy-accent);
 }
 
-html[data-theme='ShanYing'] .sy-floating-toc-open {
-  position: fixed;
-  top: 164px;
-  right: 22px;
-  z-index: 40;
-  display: grid;
-  width: 42px;
-  height: 42px;
-  padding: 0;
-  border: 1px solid var(--sy-line);
-  border-radius: 50%;
-  background: var(--sy-surface);
-  box-shadow: 0 6px 24px rgb(20 24 40 / 0.09);
-  color: var(--sy-accent);
-  cursor: pointer;
-  place-items: center;
-}
-
 /* 宽屏才显示：文章区 max-width ~948px + 两侧各 200px 才不挤 */
 @media (max-width: 1399px) {
   html[data-theme='ShanYing'] .sy-floating-sidebar,
-  html[data-theme='ShanYing'] .sy-floating-toc-open,
   html[data-theme='ShanYing'] .sy-entry-toc-toggle {
     display: none;
   }
@@ -7219,8 +7200,7 @@ html[data-theme='ShanYing'] .sy-floating-toc-open {
 
 /* 打印时隐藏 */
 @media print {
-  html[data-theme='ShanYing'] .sy-floating-sidebar,
-  html[data-theme='ShanYing'] .sy-floating-toc-open {
+  html[data-theme='ShanYing'] .sy-floating-sidebar {
     display: none !important;
   }
 }
