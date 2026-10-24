@@ -478,7 +478,12 @@ export default function HomePage({
                     <span className="sy-hub-list-index">{String((hubPage - 1) * perPage + index + 1).padStart(2, '0')}</span>
                     <PostLink post={post} className="sy-hub-list-title">{post.title}</PostLink>
                     <span className="sy-hub-list-date">
-                      {formatDateInTimeZone(postDateInput(post), 'en-GB', { year: 'numeric', month: '2-digit', day: '2-digit' }, tz).replace(/\//g, '.')}
+                      {/* 热评/浏览最多排序下，标题后展示对应计数而非日期，与排序语义一致 */}
+                      {sort === 'comments'
+                        ? `${Number(post.comment_count) || 0} 评论`
+                        : sort === 'views'
+                          ? `${Number(post.view_count) || 0} 浏览`
+                          : formatDateInTimeZone(postDateInput(post), 'en-GB', { year: 'numeric', month: '2-digit', day: '2-digit' }, tz).replace(/\//g, '.')}
                     </span>
                   </div>
                 ))}
