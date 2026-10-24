@@ -134,6 +134,19 @@ body {
   margin: 0;
 }
 
+/* 手机端布局退回普通文档流（.dashboard-shell 为 max-md:block、内容区
+   max-md:overflow-y-visible），必须同步解除 html 的内部滚动锁定，
+   否则仪表盘在手机上无法下拉查看最近文章和评论。 */
+@media (max-width: 767px) {
+  html {
+    overflow-y: auto;
+    height: auto;
+  }
+  body {
+    height: auto;
+  }
+}
+
 /* Blog main: scrollbar always visible, footer sticks to bottom */
 .blog-main {
   overflow-y: scroll !important;
@@ -2354,5 +2367,28 @@ div:hover > .comment-hint { opacity: 0.75 !important; }
 
   .dashboard-shell .card {
     font-size: 0.8125rem;
+  }
+}
+
+/* NotificationBell 下拉：桌面锚定在铃铛下方；铃铛右侧还有用户菜单，
+   手机上 340px 宽的锚定下拉会伸出屏幕左缘，改为视口居中弹层。 */
+.admin-notif-pop {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 8px;
+  width: 340px;
+  max-height: 400px;
+}
+
+@media (max-width: 767px) {
+  .admin-notif-pop {
+    position: fixed;
+    top: 64px;
+    right: auto;
+    left: 50%;
+    margin-top: 0;
+    transform: translateX(-50%);
+    width: min(340px, calc(100vw - 16px));
   }
 }

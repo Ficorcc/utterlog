@@ -147,11 +147,8 @@ export default function NotificationBell() {
         <>
           <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 40 }} />
           <div
-            className="mt-2 flex flex-col overflow-hidden rounded-md border border-border bg-card shadow-lg"
-            style={{
-              position: 'absolute', right: 0, top: '100%',
-              width: '340px', maxHeight: '400px', zIndex: 41,
-            }}
+            className="admin-notif-pop flex flex-col overflow-hidden rounded-md border border-border bg-card shadow-lg"
+            style={{ zIndex: 41 }}
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-border py-3 px-4">
