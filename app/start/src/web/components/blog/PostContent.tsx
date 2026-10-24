@@ -108,8 +108,8 @@ function ExternalLink({ href, children, ...props }: React.AnchorHTMLAttributes<H
 
   return (
     <a
-      href={href}
-      target="_blank"
+      // 外链一律经过 /go 确认页：同页跳转，确认后再前往目标站。
+      href={`/go?url=${encodeURIComponent(href!)}`}
       rel="noopener noreferrer"
       className="blog-external-link"
       style={{ position: 'relative' }}
