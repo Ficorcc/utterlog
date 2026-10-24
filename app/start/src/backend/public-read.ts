@@ -500,6 +500,88 @@ export async function listPostEpisodes(postId: number, authed = false) {
   return { episodes, total: episodes.length };
 }
 
+// 年度报告：把一年的写作、互动与足迹聚合成分页面的数据。
+// 全部按站点时区的「墙上时间」归年：文章用发布时间，评论/说说/足迹
+// 用各自的创建时间。
+export async function getAnnualReport(year: number) {
+  if (!Number.isInteger(year) || year < 2000 || year > new Date().getUTCFullYear() + 1) return null;
+  const timeZone = await siteTimeZone();
+  const adminNames = (await many<Record<string, unknown>>(
+    `select coalesce(nullif(nickname, ''), username) as name
+     from ${table('users')} where role = 'admin'`,
+  ).catch(() => [])).map((row) => String(row.name || '').trim()).filter(Boolean);
+
+  const posts = await many<Record<string, unknown>>(
+    `select id, title, slug, display_id, view_count, comment_count, word_count,
+            coalesce(published_at, to_timestamp(created_at)::timestamp) as published_at,
+            extract(month from coalesce(published_at, to_timestamp(created_at)::timestamp)) as month_num
+     from ${table('posts')}
+     where status = 'publish' and type = 'post'
+       and extract(year from coalesce(published_at, to_timestamp(created_at)::timestamp)) = $1
+     order by coalesce(published_at, to_timestamp(created_at)::timestamp) asc`,
+    [year],
+  ).catch(() => []);
+
+  const monthly = Array.from({ length: 12 }, (_, i) => ({ month: i + 1, count: 0 }));
+  let words = 0;
+  let views = 0;
+  let commentsOnPosts = 0;
+  for (const post of posts) {
+    const m = Number(post.month_num);
+    if (m >= 1 && m <= 12) monthly[m - 1].count += 1;
+    words += Number(post.word_count) || 0;
+    views += Number(post.view_count) || 0;
+    commentsOnPosts += Number(post.comment_count) || 0;
+  }
+  const top = [...posts]
+    .sort((a, b) => Number(b.view_count) - Number(a.view_count))
+    .slice(0, 5)
+    .map((row) => sanitizePostForResponse(row, false, timeZone));
+
+  const commentCount = Number((await one<Record<string, unknown>>(
+    `select count(*) as c from ${table('comments')}
+     where status = 'approved' and extract(year from to_timestamp(created_at)) = $1`,
+    [year],
+  ).catch(() => ({ c: 0 })))?.c) || 0;
+
+  const excludeAdmin = adminNames.length ? `and author_name <> all($2)` : '';
+  const topCommenters = await many<Record<string, unknown>>(
+    `select author_name, count(*) as c
+     from ${table('comments')}
+     where status = 'approved' and extract(year from to_timestamp(created_at)) = $1
+       and coalesce(author_name, '') <> '' ${excludeAdmin}
+     group by author_name order by c desc, author_name limit 5`,
+    adminNames.length ? [year, adminNames] : [year],
+  ).catch(() => []);
+
+  const momentsCount = Number((await one<Record<string, unknown>>(
+    `select count(*) as c from ${table('moments')}
+     where extract(year from to_timestamp(created_at)) = $1`,
+    [year],
+  ).catch(() => ({ c: 0 })))?.c) || 0;
+
+  const places = await many<Record<string, unknown>>(
+    `select city_name, country_name, count(*) as c
+     from ${table('footprint_places')}
+     where extract(year from to_timestamp(created_at)) = $1
+       and coalesce(city_name, '') <> ''
+     group by city_name, country_name
+     order by c desc, city_name limit 12`,
+    [year],
+  ).catch(() => []);
+
+  return {
+    year,
+    posts: { count: posts.length, words, views, monthly, top },
+    comments: {
+      count: commentCount,
+      topCommenters: topCommenters.map((row) => ({ name: String(row.author_name), count: Number(row.c) })),
+    },
+    moments: momentsCount,
+    places: places.map((row) => ({ city: String(row.city_name), country: String(row.country_name || ''), count: Number(row.c) })),
+  };
+}
+
 // 「往年今天」：与文章同月同日发布的历史文章（按站点时区的墙上时间
 // 匹配周年，排除当年与目标文章自身）。
 export async function getOnThisDayPosts(postId: number, limit = 4) {

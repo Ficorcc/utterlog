@@ -41,6 +41,7 @@ import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as BooksRouteImport } from './routes/books'
 import { Route as AtomDotxmlRouteImport } from './routes/atom[.]xml'
 import { Route as ArchivesRouteImport } from './routes/archives'
+import { Route as AnnualRouteImport } from './routes/annual'
 import { Route as AlbumsRouteImport } from './routes/albums'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
@@ -100,6 +101,7 @@ import { Route as ApiV1TelegramGetChatIdRouteImport } from './routes/api/v1/tele
 import { Route as ApiV1TagsIdRouteImport } from './routes/api/v1/tags/$id'
 import { Route as ApiV1SystemUpdateCheckRouteImport } from './routes/api/v1/system/update-check'
 import { Route as ApiV1SystemStatusRouteImport } from './routes/api/v1/system/status'
+import { Route as ApiV1StatsAnnualRouteImport } from './routes/api/v1/stats/annual'
 import { Route as ApiV1SocialFetchFeedsRouteImport } from './routes/api/v1/social/fetch-feeds'
 import { Route as ApiV1SocialFeedTimelineRouteImport } from './routes/api/v1/social/feed-timeline'
 import { Route as ApiV1SocialFeedStatsRouteImport } from './routes/api/v1/social/feed-stats'
@@ -373,6 +375,11 @@ const AtomDotxmlRoute = AtomDotxmlRouteImport.update({
 const ArchivesRoute = ArchivesRouteImport.update({
   id: '/archives',
   path: '/archives',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnnualRoute = AnnualRouteImport.update({
+  id: '/annual',
+  path: '/annual',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AlbumsRoute = AlbumsRouteImport.update({
@@ -670,6 +677,11 @@ const ApiV1SystemUpdateCheckRoute = ApiV1SystemUpdateCheckRouteImport.update({
 const ApiV1SystemStatusRoute = ApiV1SystemStatusRouteImport.update({
   id: '/api/v1/system/status',
   path: '/api/v1/system/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1StatsAnnualRoute = ApiV1StatsAnnualRouteImport.update({
+  id: '/api/v1/stats/annual',
+  path: '/api/v1/stats/annual',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1SocialFetchFeedsRoute = ApiV1SocialFetchFeedsRouteImport.update({
@@ -1276,6 +1288,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/albums': typeof AlbumsRoute
+  '/annual': typeof AnnualRoute
   '/archives': typeof ArchivesRoute
   '/atom.xml': typeof AtomDotxmlRoute
   '/books': typeof BooksRoute
@@ -1413,6 +1426,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/social/feed-stats': typeof ApiV1SocialFeedStatsRoute
   '/api/v1/social/feed-timeline': typeof ApiV1SocialFeedTimelineRoute
   '/api/v1/social/fetch-feeds': typeof ApiV1SocialFetchFeedsRouteWithChildren
+  '/api/v1/stats/annual': typeof ApiV1StatsAnnualRoute
   '/api/v1/system/status': typeof ApiV1SystemStatusRoute
   '/api/v1/system/update-check': typeof ApiV1SystemUpdateCheckRoute
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
@@ -1483,6 +1497,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/albums': typeof AlbumsRoute
+  '/annual': typeof AnnualRoute
   '/archives': typeof ArchivesRoute
   '/atom.xml': typeof AtomDotxmlRoute
   '/books': typeof BooksRoute
@@ -1620,6 +1635,7 @@ export interface FileRoutesByTo {
   '/api/v1/social/feed-stats': typeof ApiV1SocialFeedStatsRoute
   '/api/v1/social/feed-timeline': typeof ApiV1SocialFeedTimelineRoute
   '/api/v1/social/fetch-feeds': typeof ApiV1SocialFetchFeedsRouteWithChildren
+  '/api/v1/stats/annual': typeof ApiV1StatsAnnualRoute
   '/api/v1/system/status': typeof ApiV1SystemStatusRoute
   '/api/v1/system/update-check': typeof ApiV1SystemUpdateCheckRoute
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
@@ -1691,6 +1707,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/albums': typeof AlbumsRoute
+  '/annual': typeof AnnualRoute
   '/archives': typeof ArchivesRoute
   '/atom.xml': typeof AtomDotxmlRoute
   '/books': typeof BooksRoute
@@ -1828,6 +1845,7 @@ export interface FileRoutesById {
   '/api/v1/social/feed-stats': typeof ApiV1SocialFeedStatsRoute
   '/api/v1/social/feed-timeline': typeof ApiV1SocialFeedTimelineRoute
   '/api/v1/social/fetch-feeds': typeof ApiV1SocialFetchFeedsRouteWithChildren
+  '/api/v1/stats/annual': typeof ApiV1StatsAnnualRoute
   '/api/v1/system/status': typeof ApiV1SystemStatusRoute
   '/api/v1/system/update-check': typeof ApiV1SystemUpdateCheckRoute
   '/api/v1/tags/$id': typeof ApiV1TagsIdRoute
@@ -1900,6 +1918,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/albums'
+    | '/annual'
     | '/archives'
     | '/atom.xml'
     | '/books'
@@ -2037,6 +2056,7 @@ export interface FileRouteTypes {
     | '/api/v1/social/feed-stats'
     | '/api/v1/social/feed-timeline'
     | '/api/v1/social/fetch-feeds'
+    | '/api/v1/stats/annual'
     | '/api/v1/system/status'
     | '/api/v1/system/update-check'
     | '/api/v1/tags/$id'
@@ -2107,6 +2127,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/albums'
+    | '/annual'
     | '/archives'
     | '/atom.xml'
     | '/books'
@@ -2244,6 +2265,7 @@ export interface FileRouteTypes {
     | '/api/v1/social/feed-stats'
     | '/api/v1/social/feed-timeline'
     | '/api/v1/social/fetch-feeds'
+    | '/api/v1/stats/annual'
     | '/api/v1/system/status'
     | '/api/v1/system/update-check'
     | '/api/v1/tags/$id'
@@ -2314,6 +2336,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/albums'
+    | '/annual'
     | '/archives'
     | '/atom.xml'
     | '/books'
@@ -2451,6 +2474,7 @@ export interface FileRouteTypes {
     | '/api/v1/social/feed-stats'
     | '/api/v1/social/feed-timeline'
     | '/api/v1/social/fetch-feeds'
+    | '/api/v1/stats/annual'
     | '/api/v1/system/status'
     | '/api/v1/system/update-check'
     | '/api/v1/tags/$id'
@@ -2522,6 +2546,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
   AlbumsRoute: typeof AlbumsRoute
+  AnnualRoute: typeof AnnualRoute
   ArchivesRoute: typeof ArchivesRoute
   AtomDotxmlRoute: typeof AtomDotxmlRoute
   BooksRoute: typeof BooksRoute
@@ -2648,6 +2673,7 @@ export interface RootRouteChildren {
   ApiV1SocialFeedStatsRoute: typeof ApiV1SocialFeedStatsRoute
   ApiV1SocialFeedTimelineRoute: typeof ApiV1SocialFeedTimelineRoute
   ApiV1SocialFetchFeedsRoute: typeof ApiV1SocialFetchFeedsRouteWithChildren
+  ApiV1StatsAnnualRoute: typeof ApiV1StatsAnnualRoute
   ApiV1SystemStatusRoute: typeof ApiV1SystemStatusRoute
   ApiV1SystemUpdateCheckRoute: typeof ApiV1SystemUpdateCheckRoute
   ApiV1TelegramGetChatIdRoute: typeof ApiV1TelegramGetChatIdRoute
@@ -2917,6 +2943,13 @@ declare module '@tanstack/react-router' {
       path: '/archives'
       fullPath: '/archives'
       preLoaderRoute: typeof ArchivesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/annual': {
+      id: '/annual'
+      path: '/annual'
+      fullPath: '/annual'
+      preLoaderRoute: typeof AnnualRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/albums': {
@@ -3330,6 +3363,13 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/system/status'
       fullPath: '/api/v1/system/status'
       preLoaderRoute: typeof ApiV1SystemStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/stats/annual': {
+      id: '/api/v1/stats/annual'
+      path: '/api/v1/stats/annual'
+      fullPath: '/api/v1/stats/annual'
+      preLoaderRoute: typeof ApiV1StatsAnnualRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/social/fetch-feeds': {
@@ -4427,6 +4467,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
   AlbumsRoute: AlbumsRoute,
+  AnnualRoute: AnnualRoute,
   ArchivesRoute: ArchivesRoute,
   AtomDotxmlRoute: AtomDotxmlRoute,
   BooksRoute: BooksRoute,
@@ -4553,6 +4594,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1SocialFeedStatsRoute: ApiV1SocialFeedStatsRoute,
   ApiV1SocialFeedTimelineRoute: ApiV1SocialFeedTimelineRoute,
   ApiV1SocialFetchFeedsRoute: ApiV1SocialFetchFeedsRouteWithChildren,
+  ApiV1StatsAnnualRoute: ApiV1StatsAnnualRoute,
   ApiV1SystemStatusRoute: ApiV1SystemStatusRoute,
   ApiV1SystemUpdateCheckRoute: ApiV1SystemUpdateCheckRoute,
   ApiV1TelegramGetChatIdRoute: ApiV1TelegramGetChatIdRoute,

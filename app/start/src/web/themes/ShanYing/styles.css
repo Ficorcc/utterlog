@@ -7433,3 +7433,234 @@ html[data-theme='ShanYing'] .sy-otd-item:hover .sy-otd-arrow {
     margin-left: auto;
   }
 }
+
+/* 「年度报告」页：/annual —— 深色默认观感，浅色跟随系统偏好。 */
+html[data-theme='ShanYing'] .sy-annual {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 40px 20px 64px;
+}
+html[data-theme='ShanYing'] .sy-annual-hero {
+  text-align: center;
+  padding: 38px 26px 30px;
+  border: 1px solid var(--sy-line);
+  border-radius: var(--sy-radius-panel);
+  background: var(--sy-surface);
+}
+html[data-theme='ShanYing'] .sy-annual-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--sy-accent-text);
+  background: var(--sy-accent);
+}
+html[data-theme='ShanYing'] .sy-annual-title {
+  margin: 16px 0 6px;
+  font-size: 30px;
+  color: var(--sy-text);
+}
+html[data-theme='ShanYing'] .sy-annual-year {
+  margin-left: 12px;
+  color: var(--sy-accent);
+  font-style: italic;
+}
+html[data-theme='ShanYing'] .sy-annual-sub {
+  margin: 0;
+  font-size: 13px;
+  color: var(--sy-muted);
+}
+html[data-theme='ShanYing'] .sy-annual-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 18px;
+}
+html[data-theme='ShanYing'] .sy-annual-nav button {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--sy-line);
+  border-radius: 50%;
+  background: var(--sy-soft);
+  color: var(--sy-text);
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.2s var(--sy-ease, ease), color 0.2s var(--sy-ease, ease);
+}
+html[data-theme='ShanYing'] .sy-annual-nav button:hover:not(:disabled) {
+  border-color: var(--sy-accent);
+  color: var(--sy-accent);
+}
+html[data-theme='ShanYing'] .sy-annual-nav button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+html[data-theme='ShanYing'] .sy-annual-nav-year {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--sy-text);
+}
+html[data-theme='ShanYing'] .sy-annual-state {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--sy-muted);
+  font-size: 13px;
+}
+html[data-theme='ShanYing'] .sy-annual-empty {
+  border: 1px dashed var(--sy-line);
+  border-radius: var(--sy-radius-panel);
+  background: var(--sy-surface);
+}
+html[data-theme='ShanYing'] .sy-annual-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 24px;
+}
+html[data-theme='ShanYing'] .sy-annual-stat {
+  padding: 18px 12px;
+  text-align: center;
+  border: 1px solid var(--sy-line);
+  border-radius: var(--sy-radius-row);
+  background: var(--sy-surface);
+}
+html[data-theme='ShanYing'] .sy-annual-stat strong {
+  display: block;
+  font-size: 24px;
+  color: var(--sy-accent);
+}
+html[data-theme='ShanYing'] .sy-annual-stat span {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--sy-muted);
+}
+html[data-theme='ShanYing'] .sy-annual-block {
+  margin-top: 28px;
+  padding: 24px 24px 26px;
+  border: 1px solid var(--sy-line);
+  border-radius: var(--sy-radius-panel);
+  background: var(--sy-surface);
+}
+html[data-theme='ShanYing'] .sy-annual-block h2 {
+  margin: 0 0 18px;
+  font-size: 16px;
+  color: var(--sy-text);
+}
+html[data-theme='ShanYing'] .sy-annual-chart {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  height: 140px;
+}
+html[data-theme='ShanYing'] .sy-annual-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+html[data-theme='ShanYing'] .sy-annual-bar-track {
+  flex: 1;
+  width: 100%;
+  max-width: 34px;
+  display: flex;
+  align-items: flex-end;
+  border-radius: 8px;
+  background: var(--sy-soft);
+  overflow: hidden;
+}
+html[data-theme='ShanYing'] .sy-annual-bar {
+  width: 100%;
+  min-height: 2px;
+  border-radius: 8px 8px 0 0;
+  background: var(--sy-accent);
+  opacity: 0.85;
+  transition: height 0.4s var(--sy-ease, ease);
+}
+html[data-theme='ShanYing'] .sy-annual-bar:hover {
+  opacity: 1;
+}
+html[data-theme='ShanYing'] .sy-annual-bar-label {
+  font-size: 10px;
+  color: var(--sy-muted);
+}
+html[data-theme='ShanYing'] .sy-annual-top {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+html[data-theme='ShanYing'] .sy-annual-top-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--sy-line);
+  border-radius: var(--sy-radius-row);
+  background: var(--sy-soft);
+  text-decoration: none;
+  transition: border-color 0.2s var(--sy-ease, ease);
+}
+html[data-theme='ShanYing'] .sy-annual-top-item:hover {
+  border-color: var(--sy-accent);
+}
+html[data-theme='ShanYing'] .sy-annual-top-rank {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--sy-accent);
+}
+html[data-theme='ShanYing'] .sy-annual-top-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sy-text);
+}
+html[data-theme='ShanYing'] .sy-annual-top-meta {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--sy-muted);
+}
+html[data-theme='ShanYing'] .sy-annual-places,
+html[data-theme='ShanYing'] .sy-annual-people {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+html[data-theme='ShanYing'] .sy-annual-place,
+html[data-theme='ShanYing'] .sy-annual-person {
+  padding: 7px 16px;
+  border: 1px solid var(--sy-line);
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--sy-text);
+  background: var(--sy-soft);
+}
+html[data-theme='ShanYing'] .sy-annual-place em,
+html[data-theme='ShanYing'] .sy-annual-person em {
+  margin-left: 4px;
+  font-style: normal;
+  font-size: 11px;
+  color: var(--sy-muted);
+}
+html[data-theme='ShanYing'] .sy-annual-foot {
+  margin-top: 28px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--sy-muted);
+}
+@media (max-width: 640px) {
+  html[data-theme='ShanYing'] .sy-annual-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  html[data-theme='ShanYing'] .sy-annual-title {
+    font-size: 24px;
+  }
+}
