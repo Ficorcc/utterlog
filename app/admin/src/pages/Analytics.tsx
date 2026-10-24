@@ -111,8 +111,10 @@ export default function AnalyticsPage() {
 
   return (
     <div>
-      {/* Visitor Map — full width with overlay controls */}
-      <div className="relative mb-5">
+      {/* Visitor Map — full width with overlay controls。isolate 建立独立
+          堆叠上下文：地图内部控件的高 z-index（含悬浮条 z-[1000]）只在
+          容器内生效，不会盖过手机端 z-40 的侧边导航栏。 */}
+      <div className="relative isolate mb-5">
         {/* Map header bar */}
         <div className="absolute inset-x-0 top-0 z-[1000] flex items-center justify-between px-4 py-3">
           <div className="flex gap-1.5">
