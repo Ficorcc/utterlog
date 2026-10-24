@@ -671,7 +671,7 @@ export default function LinksPage() {
       )}
 
       <Card className="overflow-x-auto md:overflow-hidden">
-        <Table style={{ tableLayout: 'fixed' }}>
+        <Table style={{ tableLayout: 'fixed', minWidth: 960 }}>
           <TableHeader>
             <TableRow>
               <TableHead className="w-11">#</TableHead>

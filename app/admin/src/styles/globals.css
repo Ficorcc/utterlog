@@ -2392,3 +2392,11 @@ div:hover > .comment-hint { opacity: 0.75 !important; }
     width: min(340px, calc(100vw - 16px));
   }
 }
+
+/* Themes 页设置面板 tab 栏：手机上单行横向滑动，隐藏滚动条。 */
+.admin-tab-scroll {
+  scrollbar-width: none;
+}
+.admin-tab-scroll::-webkit-scrollbar {
+  display: none;
+}

@@ -129,8 +129,8 @@ export default function Themes() {
     { key: 'themes', label: '主题', Icon: Palette, visible: true },
     { key: 'menus', label: '菜单', Icon: List, visible: true },
     { key: 'profile', label: '资料卡', Icon: IdCard, visible: showProfile },
-    { key: 'social', label: 'Hero 社交网络', Icon: Share2, visible: showSocial },
-    { key: 'discover', label: '发现更多博客', Icon: Share2, visible: showDiscover },
+    { key: 'social', label: '社交', Icon: Share2, visible: showSocial },
+    { key: 'discover', label: '发现', Icon: Share2, visible: showDiscover },
     { key: 'jieqi', label: '节气提醒', Icon: CalendarDays, visible: showJieqi },
     { key: 'companion', label: '小鸟与音乐', Icon: Bird, visible: showCompanion },
     { key: 'header', label: '头部按钮', Icon: AppWindow, visible: showHeader },
@@ -146,7 +146,7 @@ export default function Themes() {
 
   return (
     <div>
-      <div className="mb-5 flex gap-1 border-b border-border">
+      <div className="admin-tab-scroll mb-5 flex gap-1 overflow-x-auto border-b border-border">
         {tabs.map(ti => {
           const TabIcon = ti.Icon;
           const isActive = tab === ti.key;
@@ -155,7 +155,7 @@ export default function Themes() {
               key={ti.key}
               onClick={() => setTab(ti.key)}
               className={cn(
-                'inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm transition-colors',
+                'inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 px-4 py-2.5 text-sm transition-colors',
                 isActive
                   ? 'border-primary font-semibold text-primary'
                   : 'border-transparent font-normal text-muted-foreground hover:text-foreground',
