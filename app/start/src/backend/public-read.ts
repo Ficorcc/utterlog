@@ -73,7 +73,7 @@ function gravatarUrlForEmail(email: string, size = 64) {
   const normalized = email.trim().toLowerCase();
   if (!normalized) return '';
   const hash = createHash('md5').update(normalized).digest('hex');
-  return `https://gravatar.bluecdn.com/avatar/${hash}?s=${size}&d=mp`;
+  return `https://img.ficor.net/avatar/${hash}?s=${size}&d=mp`;
 }
 
 function utterlogAvatarUrlForEmail(email: string) {
