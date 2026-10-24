@@ -29,6 +29,30 @@ function siteOrigin(opts: Record<string, string>) {
   return String(opts.site_url || config.appUrl || '').replace(/\/+$/, '');
 }
 
+// 订阅源的摘要要的是纯文本：Markdown 符号（#、**、[]() 等）与 HTML 标签
+// 在阅读器里只会成为噪音，统一清洗掉。
+function stripFeedMarkup(value: string) {
+  return String(value || '')
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/`([^`]*)`/g, '$1')
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/^#{1,6}\s+/gm, ' ')
+    .replace(/[*_~]{1,3}([^*_~\n]+)[*_~]{1,3}/g, '$1')
+    .replace(/^>\s?/gm, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// 摘要来源优先级：AI 摘要 > 文章摘要 > 清洗后的正文。
+function feedSummaryText(post: Record<string, unknown>) {
+  const ai = String(post.ai_summary || '').trim();
+  const excerpt = String(post.excerpt || '').trim();
+  const content = String(post.content || '').trim();
+  return oneLine(ai || excerpt || stripFeedMarkup(content), 500);
+}
+
 function oneLine(value: string, limit = 240) {
   let text = String(value || '').trim().replace(/\r?\n/g, ' ');
   while (text.includes('  ')) text = text.replaceAll('  ', ' ');
@@ -178,12 +202,14 @@ function cdata(value: string) {
 async function loadPublishedPostsForFeed(limit = 50) {
   return many<Record<string, unknown>>(
     `select p.id, p.slug, p.display_id, p.title, p.excerpt, p.content, p.created_at, p.published_at,
+            p.ai_summary, coalesce(nullif(au.nickname, ''), au.username, '') as author_name,
             coalesce((
               select m.slug from ${table('relationships')} r
               join ${table('metas')} m on m.id = r.meta_id and m.type = 'category'
               where r.post_id = p.id order by m.id asc limit 1
             ), '') as category_slug
      from ${table('posts')} p
+     left join ${table('users')} au on au.id = p.author_id
      where p.status = 'publish' and p.type = 'post'
      order by coalesce(p.published_at, to_timestamp(p.created_at)) desc nulls last, p.id desc
      limit $1`,
@@ -200,12 +226,13 @@ function buildRssFeedXml(opts: Record<string, string>, posts: Record<string, unk
   const feedUrl = `${site}/feed`;
   const now = new Date();
   const lastBuildDate = formatRfc822InTimeZone(now, timeZone);
+  const feedAuthor = String(posts.find((post) => String(post.author_name || '').trim())?.author_name || '').trim() || channelTitle;
   const items = posts.map((post) => {
     const path = buildPostPath(post, permalink, timeZone);
     const link = `${site}${path}`;
     const guid = `${site}/?p=${post.id}`;
     const publishedAt = parsePostPublishedDate(post, timeZone);
-    const description = oneLine(String(post.excerpt || post.content || '').trim(), 500);
+    const itemAuthor = String(post.author_name || '').trim() || feedAuthor;
     return [
       '  <item>',
       `    <title>${cdata(String(post.title || ''))}</title>`,
@@ -213,7 +240,8 @@ function buildRssFeedXml(opts: Record<string, string>, posts: Record<string, unk
       `    <guid isPermaLink="false">${xmlEscape(guid)}</guid>`,
       `    <pubDate>${formatRssPubDate(post, timeZone)}</pubDate>`,
       `    <dc:date>${formatIso8601InTimeZone(publishedAt, timeZone)}</dc:date>`,
-      `    <description>${cdata(description)}</description>`,
+      `    <dc:creator>${cdata(itemAuthor)}</dc:creator>`,
+      `    <description>${cdata(feedSummaryText(post))}</description>`,
       '  </item>',
     ].join('\n');
   }).join('\n');
@@ -224,6 +252,7 @@ function buildRssFeedXml(opts: Record<string, string>, posts: Record<string, unk
 <link>${xmlEscape(site)}</link>
 <description>${xmlEscape(channelDescription)}</description>
 <language>zh-CN</language>
+<dc:creator>${cdata(feedAuthor)}</dc:creator>
 <lastBuildDate>${lastBuildDate}</lastBuildDate>
 <ttl>60</ttl>
 <atom:link href="${xmlEscape(feedUrl)}" rel="self" type="application/rss+xml"/>

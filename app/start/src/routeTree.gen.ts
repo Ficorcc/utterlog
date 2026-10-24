@@ -26,6 +26,7 @@ import { Route as LinksRouteImport } from './routes/links'
 import { Route as InstallRouteImport } from './routes/install'
 import { Route as GuestbookRouteImport } from './routes/guestbook'
 import { Route as GoodsRouteImport } from './routes/goods'
+import { Route as GoRouteImport } from './routes/go'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as FootprintsRouteImport } from './routes/footprints'
 import { Route as FilmsRouteImport } from './routes/films'
@@ -296,6 +297,11 @@ const GuestbookRoute = GuestbookRouteImport.update({
 const GoodsRoute = GoodsRouteImport.update({
   id: '/goods',
   path: '/goods',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GoRoute = GoRouteImport.update({
+  id: '/go',
+  path: '/go',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GamesRoute = GamesRouteImport.update({
@@ -1278,6 +1284,7 @@ export interface FileRoutesByFullPath {
   '/films': typeof FilmsRouteWithChildren
   '/footprints': typeof FootprintsRoute
   '/games': typeof GamesRoute
+  '/go': typeof GoRoute
   '/goods': typeof GoodsRoute
   '/guestbook': typeof GuestbookRoute
   '/install': typeof InstallRoute
@@ -1483,6 +1490,7 @@ export interface FileRoutesByTo {
   '/films': typeof FilmsRouteWithChildren
   '/footprints': typeof FootprintsRoute
   '/games': typeof GamesRoute
+  '/go': typeof GoRoute
   '/goods': typeof GoodsRoute
   '/guestbook': typeof GuestbookRoute
   '/install': typeof InstallRoute
@@ -1689,6 +1697,7 @@ export interface FileRoutesById {
   '/films': typeof FilmsRouteWithChildren
   '/footprints': typeof FootprintsRoute
   '/games': typeof GamesRoute
+  '/go': typeof GoRoute
   '/goods': typeof GoodsRoute
   '/guestbook': typeof GuestbookRoute
   '/install': typeof InstallRoute
@@ -1896,6 +1905,7 @@ export interface FileRouteTypes {
     | '/films'
     | '/footprints'
     | '/games'
+    | '/go'
     | '/goods'
     | '/guestbook'
     | '/install'
@@ -2101,6 +2111,7 @@ export interface FileRouteTypes {
     | '/films'
     | '/footprints'
     | '/games'
+    | '/go'
     | '/goods'
     | '/guestbook'
     | '/install'
@@ -2306,6 +2317,7 @@ export interface FileRouteTypes {
     | '/films'
     | '/footprints'
     | '/games'
+    | '/go'
     | '/goods'
     | '/guestbook'
     | '/install'
@@ -2512,6 +2524,7 @@ export interface RootRouteChildren {
   FilmsRoute: typeof FilmsRouteWithChildren
   FootprintsRoute: typeof FootprintsRoute
   GamesRoute: typeof GamesRoute
+  GoRoute: typeof GoRoute
   GoodsRoute: typeof GoodsRoute
   GuestbookRoute: typeof GuestbookRoute
   InstallRoute: typeof InstallRoute
@@ -2787,6 +2800,13 @@ declare module '@tanstack/react-router' {
       path: '/goods'
       fullPath: '/goods'
       preLoaderRoute: typeof GoodsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/go': {
+      id: '/go'
+      path: '/go'
+      fullPath: '/go'
+      preLoaderRoute: typeof GoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/games': {
@@ -4400,6 +4420,7 @@ const rootRouteChildren: RootRouteChildren = {
   FilmsRoute: FilmsRouteWithChildren,
   FootprintsRoute: FootprintsRoute,
   GamesRoute: GamesRoute,
+  GoRoute: GoRoute,
   GoodsRoute: GoodsRoute,
   GuestbookRoute: GuestbookRoute,
   InstallRoute: InstallRoute,

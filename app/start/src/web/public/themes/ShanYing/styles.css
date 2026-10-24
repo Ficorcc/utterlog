@@ -7261,3 +7261,98 @@ html[data-theme='ShanYing'] .sy-guestbook [id^='comment-'] { scroll-margin-top: 
   html[data-theme='ShanYing'] .sy-guestbook-title .blog-page-title-rail { top: 21px; height: 26px; }
   html[data-theme='ShanYing'] .sy-guestbook-intro { padding: 22px 18px; }
 }
+
+/* /go 外链跳转确认页 —— 复用主题卡片语言（surface/line/radius/shadow）。 */
+html[data-theme='ShanYing'] .sy-go-wrap {
+  min-height: 62vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+}
+html[data-theme='ShanYing'] .sy-go-card {
+  width: min(480px, 100%);
+  padding: 34px 30px 30px;
+  text-align: center;
+  border: 1px solid var(--sy-line);
+  border-radius: var(--sy-radius-panel);
+  background: var(--sy-surface);
+  box-shadow: var(--sy-shadow);
+}
+html[data-theme='ShanYing'] .sy-go-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  font-size: 20px;
+  color: var(--sy-accent-text);
+  background: var(--sy-accent);
+  box-shadow: var(--sy-shadow);
+}
+html[data-theme='ShanYing'] .sy-go-title {
+  margin: 0 0 10px;
+  font-family: var(--sy-brand-font);
+  font-size: 20px;
+  color: var(--sy-text);
+}
+html[data-theme='ShanYing'] .sy-go-text {
+  margin: 0 0 16px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--sy-muted);
+}
+html[data-theme='ShanYing'] .sy-go-domain {
+  display: inline-block;
+  margin: 0 0 10px;
+  padding: 5px 14px;
+  border: 1px solid var(--sy-line);
+  border-radius: var(--sy-radius-row);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sy-accent-text);
+  background: var(--sy-soft);
+}
+html[data-theme='ShanYing'] .sy-go-url {
+  margin: 0 0 22px;
+  padding: 10px 12px;
+  border: 1px dashed var(--sy-line);
+  border-radius: var(--sy-radius-row);
+  font-size: 12px;
+  word-break: break-all;
+  color: var(--sy-muted);
+  background: var(--sy-bg);
+}
+html[data-theme='ShanYing'] .sy-go-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+html[data-theme='ShanYing'] .sy-go-btn {
+  padding: 10px 22px;
+  border: 1px solid var(--sy-line);
+  border-radius: var(--sy-radius-row);
+  font-size: 13px;
+  color: var(--sy-text);
+  background: var(--sy-soft);
+  cursor: pointer;
+  transition: filter 0.2s var(--sy-ease, ease);
+}
+html[data-theme='ShanYing'] .sy-go-btn:hover {
+  filter: brightness(1.1);
+}
+html[data-theme='ShanYing'] .sy-go-primary {
+  border-color: transparent;
+  color: var(--sy-accent-text);
+  background: var(--sy-accent);
+}
+
+/* 评论正文里的自动链接（裸 URL → /go 确认页）。 */
+html[data-theme='ShanYing'] .sy-comment-link {
+  color: var(--sy-link-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  word-break: break-all;
+}
