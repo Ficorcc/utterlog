@@ -261,9 +261,155 @@ ${items}
 </rss>`;
 }
 
+// feed 的浏览器形态：标题 / 作者 / 发布时间 / 摘要 的主题风格预览页。
+// 深色为默认观感（与 ShanYing 线上呈现一致），浅色跟随系统偏好；
+// 设计令牌（bg/surface/line/accent/radius）取自主题 styles.css。
+function buildFeedHtmlPage(opts: Record<string, string>, posts: Record<string, unknown>[]) {
+  const site = siteOrigin(opts);
+  const timeZone = String(opts.site_timezone || 'Asia/Shanghai').trim() || 'Asia/Shanghai';
+  const channelTitle = String(opts.site_title || 'Utterlog').trim() || 'Utterlog';
+  const channelDescription = String(opts.site_description || opts.seo_default_description || channelTitle).trim();
+  const feedAuthor = String(posts.find((post) => String(post.author_name || '').trim())?.author_name || '').trim() || channelTitle;
+  const permalink = opts.permalink_structure || '/posts/%postname%';
+  const dateFormatter = new Intl.DateTimeFormat('zh-CN', {
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false, timeZone,
+  });
+  const items = posts.map((post) => {
+    const link = `${site}${buildPostPath(post, permalink, timeZone)}`;
+    const date = parsePostPublishedDate(post, timeZone);
+    const author = String(post.author_name || '').trim() || feedAuthor;
+    return `    <article class="entry">
+      <h2><a href="${xmlEscape(link)}">${xmlEscape(String(post.title || ''))}</a></h2>
+      <div class="meta">
+        <span>作者 <strong>${xmlEscape(author)}</strong></span>
+        <span class="dot"></span>
+        <time>${xmlEscape(date ? dateFormatter.format(date) : '')}</time>
+      </div>
+      <p class="summary">${xmlEscape(feedSummaryText(post))}</p>
+    </article>`;
+  }).join('\n');
+  return `<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>${xmlEscape(channelTitle)} · RSS 订阅</title>
+<style>
+:root {
+  --bg: #0a0a0a; --text: #eeeeee; --muted: #a3a3a3;
+  --surface: #191919; --soft: #242424;
+  --line: rgba(255, 255, 255, 0.09);
+  --accent: #90ff3a; --accent-text: #0a0a0a;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #faf9f7; --text: #202126; --muted: #676b76;
+    --surface: #ffffff; --soft: #f1f2f5;
+    --line: rgba(25, 28, 40, 0.1);
+    --accent: #0052d9; --accent-text: #ffffff;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 760px; margin: 0 auto; padding: 48px 20px 64px; }
+.hero {
+  text-align: center;
+  padding: 34px 26px 30px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--surface);
+}
+.badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.22em;
+  color: var(--accent-text); background: var(--accent);
+}
+h1 { margin: 16px 0 8px; font-size: 27px; }
+.lede { margin: 0; font-size: 13px; line-height: 1.8; color: var(--muted); }
+.hero-meta {
+  display: flex; align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: 10px;
+  margin-top: 16px; font-size: 12px; color: var(--muted);
+}
+.hero-meta .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--muted); }
+.hero-meta strong { color: var(--accent); font-weight: 700; }
+.hero-meta a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--line); }
+.hero-meta a:hover { color: var(--accent); }
+.entries { margin-top: 24px; }
+.entry {
+  padding: 19px 22px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.entry + .entry { margin-top: 12px; }
+.entry:hover { border-color: var(--accent); transform: translateY(-1px); }
+.entry h2 { margin: 0; font-size: 15.5px; font-weight: 600; line-height: 1.55; }
+.entry h2 a { color: var(--text); text-decoration: none; }
+.entry h2 a:hover { color: var(--accent); }
+.meta {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 10px; margin-top: 9px; font-size: 12px; color: var(--muted);
+}
+.meta .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--muted); }
+.meta strong { color: var(--text); font-weight: 600; }
+.summary {
+  margin: 10px 0 0;
+  font-size: 13px; line-height: 1.8; color: var(--muted);
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
+}
+footer { margin-top: 30px; text-align: center; font-size: 12px; line-height: 2; color: var(--muted); }
+footer a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <span class="badge">RSS</span>
+    <h1>${xmlEscape(channelTitle)}</h1>
+    <p class="lede">${xmlEscape(channelDescription)}</p>
+    <div class="hero-meta">
+      <span>作者 <strong>${xmlEscape(feedAuthor)}</strong></span>
+      <span class="dot"></span>
+      <span>收录 <strong>${posts.length}</strong> 篇</span>
+      <span class="dot"></span>
+      <a href="${xmlEscape(site)}">访问网站 →</a>
+    </div>
+  </header>
+  <main class="entries">
+${items}
+  </main>
+  <footer>
+    <p>把本页地址粘贴到 RSS 阅读器（Feedly / Follow / Reeder 等），即可自动收到本站更新。</p>
+    <a href="${xmlEscape(site)}">← 返回 ${xmlEscape(channelTitle)}</a>
+  </footer>
+</div>
+</body>
+</html>`;
+}
+
 export async function publicFeedResponse(request: Request) {
   const opts: Record<string, string> = await optionMap(false).catch(() => ({}));
   const posts = await loadPublishedPostsForFeed(rssItemLimit(opts));
+  // 同一个地址两种形态：浏览器直接打开（Accept 含 text/html）时返回
+  // 主题风格的预览页；RSS 阅读器与脚本按 Accept 拿到 XML 本体。
+  const accept = request.headers.get('accept') || '';
+  if (accept.includes('text/html')) {
+    return new Response(buildFeedHtmlPage(opts, posts), {
+      headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=300, must-revalidate' },
+    });
+  }
   const xml = buildRssFeedXml(opts, posts);
   const etag = `"${createHash('sha1').update(xml).digest('hex')}"`;
   if (request.headers.get('if-none-match') === etag) {
