@@ -677,8 +677,8 @@ export default function LinksPage() {
               <TableHead className="w-11">#</TableHead>
               <TableHead className="w-12"></TableHead>
               <TableHead className="w-47.5">{t('admin.links.columns.name', '站点名称')}</TableHead>
-              <TableHead className="w-[28%]">{t('admin.links.columns.description', '描述')}</TableHead>
-              <TableHead className="w-[22%]">{t('admin.links.columns.url', '网址')}</TableHead>
+              <TableHead className="w-[28%]">{t('admin.links.columns.url', '网址')}</TableHead>
+              <TableHead className="w-[22%]">{t('admin.links.columns.description', '描述')}</TableHead>
               <TableHead className="w-1/5">RSS</TableHead>
               <TableHead className="w-22">{t('admin.links.columns.group', '分组')}</TableHead>
               <TableHead className="w-40 text-right">{t('admin.common.actions', '操作')}</TableHead>
@@ -723,8 +723,8 @@ export default function LinksPage() {
                     <span className="block truncate font-medium">{link.name}</span>
                     {Number(link.status) === 0 && <span className="text-2xs font-medium text-primary">待审核</span>}
                   </TableCell>
-                  <TableCell><span className="block truncate text-xs text-muted-foreground">{link.description || '—'}</span></TableCell>
                   <TableCell><a href={link.url} target="_blank" rel="noopener noreferrer" className="block truncate text-xs text-primary hover:underline">{link.url}</a></TableCell>
+                  <TableCell><span className="block truncate text-xs text-muted-foreground">{link.description || '—'}</span></TableCell>
                   <TableCell>
                     {link.rss_url ? (
                       <span className="inline-flex min-w-0 max-w-full items-center gap-1.5">
