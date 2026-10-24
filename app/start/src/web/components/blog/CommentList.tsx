@@ -371,7 +371,8 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
               </>
             )}
             {comment.url ? (
-              <a href={comment.url} target="_blank" rel="noopener noreferrer"
+              // 评论者主页同样经 /go 确认页跳转，与评论内链接一致。
+              <a href={`/go?url=${encodeURIComponent(comment.url)}`} rel="noopener noreferrer"
                 className="comment-author" style={{ fontWeight: 600, fontSize: '13px', color: 'var(--color-text-main, #333)', textDecoration: 'none' }}>
                 {comment.author}
               </a>
