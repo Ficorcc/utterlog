@@ -1,21 +1,27 @@
 import { useEffect, useState } from 'react';
 import PostLink from '@/components/blog/PostLink';
+import FadeCover from '@/components/blog/FadeCover';
+import { randomCoverUrl } from '@/lib/blog-image';
 import { useThemeContext } from '@/lib/theme-context';
 import { postDateInput } from '@/lib/post-date';
-import { datePartsInTimeZone, formatDateInTimeZone } from '@/lib/timezone';
+import { datePartsInTimeZone } from '@/lib/timezone';
 
 interface OtdPost {
   id: number;
   title: string;
   slug?: string;
+  cover_url?: string | null;
   published_at?: string | number | null;
   created_at?: string | number | null;
 }
 
-// 「往年今天」：拉取与当前文章同月同日发布的历史文章，
-// 没有命中就整个不渲染，不占版面。
+const pad2 = (n: number) => (n < 10 ? `0${n}` : String(n));
+
+// 「往年今天」：与当前文章同月同日发布的历史文章。卡片直接复用
+// 上一篇/下一篇导航的 post-prev-next 体系（封面全出血 + 黑纱 + 白字），
+// 保持同一视觉语言；没有命中就整个不渲染。
 export default function OnThisDay({ postId }: { postId?: number }) {
-  const { timeZone } = useThemeContext();
+  const { options, timeZone } = useThemeContext();
   const [posts, setPosts] = useState<OtdPost[] | null>(null);
 
   useEffect(() => {
@@ -39,18 +45,22 @@ export default function OnThisDay({ postId }: { postId?: number }) {
           <h2>往年今天</h2>
         </div>
       </header>
-      <div className="sy-otd-list">
+      <div className="post-prev-next">
         {posts.map((post) => {
           const parts = datePartsInTimeZone(postDateInput(post), timeZone);
           const yearsAgo = thisYear - parts.year;
           return (
-            <PostLink key={post.id} post={post} className="sy-otd-item">
-              <span className="sy-otd-badge">{yearsAgo > 0 ? `${yearsAgo} 年前` : '今天'}</span>
-              <span className="sy-otd-title">{post.title}</span>
-              <span className="sy-otd-date">
-                {formatDateInTimeZone(postDateInput(post), 'zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }, timeZone)}
-              </span>
-              <i className="fa-regular fa-arrow-right sy-otd-arrow" aria-hidden="true" />
+            <PostLink key={post.id} post={post} className="post-prev-next-link prev cover-zoom">
+              <div className="post-prev-next-text">
+                <span className="post-prev-next-label">
+                  <i className="fa-regular fa-clock" style={{ fontSize: '12px' }} />
+                  {yearsAgo > 0 ? `${yearsAgo} 年前的今天 · ${parts.year}.${pad2(parts.month)}.${pad2(parts.day)}` : '今天发布'}
+                </span>
+                <span className="post-prev-next-title">{post.title}</span>
+              </div>
+              <div className="post-prev-next-cover">
+                <FadeCover src={post.cover_url || randomCoverUrl(post.id, options)} />
+              </div>
             </PostLink>
           );
         })}
