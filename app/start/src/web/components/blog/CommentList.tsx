@@ -14,13 +14,38 @@ import emojiPack from '@/public/emoji/bilibili/pack-bilibili.json';
 const emojiMap = new Map(emojiPack.emojis.map(e => [e.slug, e]));
 
 // 渲染评论纯文本 + 表情图片（不使用 Markdown）
+// 评论里的裸 URL 转成可点击链接：外链统一经 /go 确认页跳转。
+function linkifyCommentText(text: string, keyBase: string) {
+  const nodes: (string | React.ReactElement)[] = [];
+  const urlRegex = /https?:\/\/[^\s<>（）【】\u201c\u201d，。；！？、]+/g;
+  let last = 0, match;
+  while ((match = urlRegex.exec(text)) !== null) {
+    if (match.index > last) nodes.push(text.slice(last, match.index));
+    const raw = match[0];
+    const url = raw.replace(/[.,;:!?）\"'～]+$/, "");
+    if (/^https?:\/\/\S+$/.test(url)) {
+      nodes.push(
+        <a key={`${keyBase}-${match.index}`} className="sy-comment-link" href={`/go?url=${encodeURIComponent(url)}`} rel="noopener noreferrer">
+          {url}
+        </a>,
+      );
+    } else {
+      nodes.push(raw);
+    }
+    if (url.length < raw.length) nodes.push(raw.slice(url.length));
+    last = match.index + raw.length;
+  }
+  if (last < text.length) nodes.push(text.slice(last));
+  return nodes;
+}
+
 function CommentContent({ content, inline }: { content: string; inline?: boolean }) {
   // 将 [:slug:] 替换为 React 元素
   const parts: (string | React.ReactElement)[] = [];
   const regex = /\[:([\w]+):\]/g;
   let last = 0, match;
   while ((match = regex.exec(content)) !== null) {
-    if (match.index > last) parts.push(content.slice(last, match.index));
+    if (match.index > last) parts.push(...linkifyCommentText(content.slice(last, match.index), `pre-${match.index}`));
     const emoji = emojiMap.get(match[1]);
     if (emoji) {
       parts.push(<img key={match.index} src={`/emoji/bilibili/${emoji.file}`} alt={emoji.name} title={emoji.name} style={{ width: '24px', height: '24px', verticalAlign: 'middle', display: 'inline-block', margin: '0 1px' }} />);
@@ -29,7 +54,7 @@ function CommentContent({ content, inline }: { content: string; inline?: boolean
     }
     last = regex.lastIndex;
   }
-  if (last < content.length) parts.push(content.slice(last));
+  if (last < content.length) parts.push(...linkifyCommentText(content.slice(last), 'tail'));
 
   return <span style={{ display: inline ? 'inline' : 'block' }}>{parts}</span>;
 }

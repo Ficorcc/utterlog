@@ -7348,3 +7348,11 @@ html[data-theme='ShanYing'] .sy-go-primary {
   color: var(--sy-accent-text);
   background: var(--sy-accent);
 }
+
+/* 评论正文里的自动链接（裸 URL → /go 确认页）。 */
+html[data-theme='ShanYing'] .sy-comment-link {
+  color: var(--sy-link-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  word-break: break-all;
+}
