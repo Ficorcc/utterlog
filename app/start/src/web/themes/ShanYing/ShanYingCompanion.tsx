@@ -112,8 +112,33 @@ export default function ShanYingCompanion() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem('shanying-companion-position');
-      if (saved) setFreePosition(JSON.parse(saved));
+      if (!saved) return;
+      const parsed = JSON.parse(saved) as { left?: unknown; top?: unknown };
+      if (typeof parsed?.left !== 'number' || typeof parsed?.top !== 'number') return;
+      const width = rootRef.current?.offsetWidth || 210;
+      // 恢复历史位置时必须按当前视口收口：坐标是在旧窗口尺寸下保存的，
+      // 直接回放会落在屏幕外，小鸟和音乐会一起消失。小鸟图案凸出容器
+      // 上沿约 51px，top 下限要预留这段高度才能保证小鸟完整可见。
+      setFreePosition({
+        left: Math.max(8, Math.min(parsed.left, window.innerWidth - width - 8)),
+        top: Math.max(64, Math.min(parsed.top, window.innerHeight - 74)),
+      });
     } catch {}
+  }, []);
+
+  useEffect(() => {
+    const onResize = () => {
+      setFreePosition((prev) => {
+        if (!prev) return prev;
+        const width = rootRef.current?.offsetWidth || 210;
+        return {
+          left: Math.max(8, Math.min(prev.left, window.innerWidth - width - 8)),
+          top: Math.max(8, Math.min(prev.top, window.innerHeight - 74)),
+        };
+      });
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, []);
 
   useEffect(() => {
