@@ -183,6 +183,7 @@ import { Route as ApiV1SocialFetchFeedsStatusRouteImport } from './routes/api/v1
 import { Route as ApiV1PublicAlbumsIdRouteImport } from './routes/api/v1/public/albums/$id'
 import { Route as ApiV1PostsSlugSlugRouteImport } from './routes/api/v1/posts/slug/$slug'
 import { Route as ApiV1PostsByDisplayIdDisplayIdRouteImport } from './routes/api/v1/posts/by-display-id/$displayId'
+import { Route as ApiV1PostsIdOnThisDayRouteImport } from './routes/api/v1/posts/$id/on-this-day'
 import { Route as ApiV1PostsIdNavigationRouteImport } from './routes/api/v1/posts/$id/navigation'
 import { Route as ApiV1PostsIdEpisodesRouteImport } from './routes/api/v1/posts/$id/episodes'
 import { Route as ApiV1PostsIdCommentsRouteImport } from './routes/api/v1/posts/$id/comments'
@@ -1097,6 +1098,11 @@ const ApiV1PostsByDisplayIdDisplayIdRoute =
     path: '/by-display-id/$displayId',
     getParentRoute: () => ApiV1PostsRoute,
   } as any)
+const ApiV1PostsIdOnThisDayRoute = ApiV1PostsIdOnThisDayRouteImport.update({
+  id: '/on-this-day',
+  path: '/on-this-day',
+  getParentRoute: () => ApiV1PostsIdRoute,
+} as any)
 const ApiV1PostsIdNavigationRoute = ApiV1PostsIdNavigationRouteImport.update({
   id: '/navigation',
   path: '/navigation',
@@ -1451,6 +1457,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/posts/$id/comments': typeof ApiV1PostsIdCommentsRoute
   '/api/v1/posts/$id/episodes': typeof ApiV1PostsIdEpisodesRoute
   '/api/v1/posts/$id/navigation': typeof ApiV1PostsIdNavigationRoute
+  '/api/v1/posts/$id/on-this-day': typeof ApiV1PostsIdOnThisDayRoute
   '/api/v1/posts/by-display-id/$displayId': typeof ApiV1PostsByDisplayIdDisplayIdRoute
   '/api/v1/posts/slug/$slug': typeof ApiV1PostsSlugSlugRoute
   '/api/v1/public/albums/$id': typeof ApiV1PublicAlbumsIdRoute
@@ -1657,6 +1664,7 @@ export interface FileRoutesByTo {
   '/api/v1/posts/$id/comments': typeof ApiV1PostsIdCommentsRoute
   '/api/v1/posts/$id/episodes': typeof ApiV1PostsIdEpisodesRoute
   '/api/v1/posts/$id/navigation': typeof ApiV1PostsIdNavigationRoute
+  '/api/v1/posts/$id/on-this-day': typeof ApiV1PostsIdOnThisDayRoute
   '/api/v1/posts/by-display-id/$displayId': typeof ApiV1PostsByDisplayIdDisplayIdRoute
   '/api/v1/posts/slug/$slug': typeof ApiV1PostsSlugSlugRoute
   '/api/v1/public/albums/$id': typeof ApiV1PublicAlbumsIdRoute
@@ -1864,6 +1872,7 @@ export interface FileRoutesById {
   '/api/v1/posts/$id/comments': typeof ApiV1PostsIdCommentsRoute
   '/api/v1/posts/$id/episodes': typeof ApiV1PostsIdEpisodesRoute
   '/api/v1/posts/$id/navigation': typeof ApiV1PostsIdNavigationRoute
+  '/api/v1/posts/$id/on-this-day': typeof ApiV1PostsIdOnThisDayRoute
   '/api/v1/posts/by-display-id/$displayId': typeof ApiV1PostsByDisplayIdDisplayIdRoute
   '/api/v1/posts/slug/$slug': typeof ApiV1PostsSlugSlugRoute
   '/api/v1/public/albums/$id': typeof ApiV1PublicAlbumsIdRoute
@@ -2072,6 +2081,7 @@ export interface FileRouteTypes {
     | '/api/v1/posts/$id/comments'
     | '/api/v1/posts/$id/episodes'
     | '/api/v1/posts/$id/navigation'
+    | '/api/v1/posts/$id/on-this-day'
     | '/api/v1/posts/by-display-id/$displayId'
     | '/api/v1/posts/slug/$slug'
     | '/api/v1/public/albums/$id'
@@ -2278,6 +2288,7 @@ export interface FileRouteTypes {
     | '/api/v1/posts/$id/comments'
     | '/api/v1/posts/$id/episodes'
     | '/api/v1/posts/$id/navigation'
+    | '/api/v1/posts/$id/on-this-day'
     | '/api/v1/posts/by-display-id/$displayId'
     | '/api/v1/posts/slug/$slug'
     | '/api/v1/public/albums/$id'
@@ -2484,6 +2495,7 @@ export interface FileRouteTypes {
     | '/api/v1/posts/$id/comments'
     | '/api/v1/posts/$id/episodes'
     | '/api/v1/posts/$id/navigation'
+    | '/api/v1/posts/$id/on-this-day'
     | '/api/v1/posts/by-display-id/$displayId'
     | '/api/v1/posts/slug/$slug'
     | '/api/v1/public/albums/$id'
@@ -3901,6 +3913,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1PostsByDisplayIdDisplayIdRouteImport
       parentRoute: typeof ApiV1PostsRoute
     }
+    '/api/v1/posts/$id/on-this-day': {
+      id: '/api/v1/posts/$id/on-this-day'
+      path: '/on-this-day'
+      fullPath: '/api/v1/posts/$id/on-this-day'
+      preLoaderRoute: typeof ApiV1PostsIdOnThisDayRouteImport
+      parentRoute: typeof ApiV1PostsIdRoute
+    }
     '/api/v1/posts/$id/navigation': {
       id: '/api/v1/posts/$id/navigation'
       path: '/navigation'
@@ -4222,12 +4241,14 @@ interface ApiV1PostsIdRouteChildren {
   ApiV1PostsIdCommentsRoute: typeof ApiV1PostsIdCommentsRoute
   ApiV1PostsIdEpisodesRoute: typeof ApiV1PostsIdEpisodesRoute
   ApiV1PostsIdNavigationRoute: typeof ApiV1PostsIdNavigationRoute
+  ApiV1PostsIdOnThisDayRoute: typeof ApiV1PostsIdOnThisDayRoute
 }
 
 const ApiV1PostsIdRouteChildren: ApiV1PostsIdRouteChildren = {
   ApiV1PostsIdCommentsRoute: ApiV1PostsIdCommentsRoute,
   ApiV1PostsIdEpisodesRoute: ApiV1PostsIdEpisodesRoute,
   ApiV1PostsIdNavigationRoute: ApiV1PostsIdNavigationRoute,
+  ApiV1PostsIdOnThisDayRoute: ApiV1PostsIdOnThisDayRoute,
 }
 
 const ApiV1PostsIdRouteWithChildren = ApiV1PostsIdRoute._addFileChildren(

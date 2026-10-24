@@ -7356,3 +7356,80 @@ html[data-theme='ShanYing'] .sy-comment-link {
   text-underline-offset: 2px;
   word-break: break-all;
 }
+
+/* 「往年今天」：再读一篇与评论区之间的周年回顾。 */
+html[data-theme='ShanYing'] .sy-otd {
+  margin-top: 34px;
+}
+html[data-theme='ShanYing'] .sy-otd-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+html[data-theme='ShanYing'] .sy-otd-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border: 1px solid var(--sy-line);
+  border-radius: var(--sy-radius-row);
+  background: var(--sy-surface);
+  text-decoration: none;
+  transition: border-color 0.2s var(--sy-ease, ease), transform 0.2s var(--sy-ease, ease);
+}
+html[data-theme='ShanYing'] .sy-otd-item:hover {
+  border-color: var(--sy-accent);
+  transform: translateX(2px);
+}
+html[data-theme='ShanYing'] .sy-otd-badge {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border: 1px solid var(--sy-accent);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sy-accent);
+  white-space: nowrap;
+}
+html[data-theme='ShanYing'] .sy-otd-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sy-text);
+}
+html[data-theme='ShanYing'] .sy-otd-item:hover .sy-otd-title {
+  color: var(--sy-accent);
+}
+html[data-theme='ShanYing'] .sy-otd-date {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--sy-muted);
+}
+html[data-theme='ShanYing'] .sy-otd-arrow {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--sy-muted);
+  transition: transform 0.2s var(--sy-ease, ease), color 0.2s var(--sy-ease, ease);
+}
+html[data-theme='ShanYing'] .sy-otd-item:hover .sy-otd-arrow {
+  color: var(--sy-accent);
+  transform: translateX(2px);
+}
+@media (max-width: 640px) {
+  html[data-theme='ShanYing'] .sy-otd-item {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  html[data-theme='ShanYing'] .sy-otd-title {
+    flex-basis: 100%;
+    order: 3;
+    white-space: normal;
+  }
+  html[data-theme='ShanYing'] .sy-otd-date {
+    margin-left: auto;
+  }
+}

@@ -18,6 +18,7 @@
 
 import Link from '@/components/AppLink';
 import CommentList from '@/components/blog/CommentList';
+import OnThisDay from './OnThisDay';
 import FootprintFlags from '@/components/blog/FootprintFlags';
 import PostContent from '@/components/blog/PostContent';
 import PostNavigation from '@/components/blog/PostNavigation';
@@ -343,6 +344,8 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
         </header>
         <PostNavigation postId={post?.id} coverUrl={cover} pageSize={6} />
       </section>
+
+      <OnThisDay postId={post?.id} />
 
       <section className="sy-comments" aria-label="评论">
         <header className="sy-comments-heading">

@@ -500,6 +500,33 @@ export async function listPostEpisodes(postId: number, authed = false) {
   return { episodes, total: episodes.length };
 }
 
+// 「往年今天」：与文章同月同日发布的历史文章（按站点时区的墙上时间
+// 匹配周年，排除当年与目标文章自身）。
+export async function getOnThisDayPosts(postId: number, limit = 4) {
+  if (!Number.isFinite(postId)) return { date: '', posts: [] };
+  const timeZone = await siteTimeZone();
+  const today = new Intl.DateTimeFormat('en-CA', {
+    timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(new Date());
+  const [todayYear, todayMonth, todayDay] = today.split('-').map((v) => Number(v));
+  if (!todayMonth || !todayDay) return { date: today, posts: [] };
+  const rows = await many<Record<string, unknown>>(
+    `select id, title, slug, display_id, cover_url, excerpt, published_at, created_at
+     from ${table('posts')}
+     where status = 'publish' and type = 'post' and id <> $1
+       and extract(month from coalesce(published_at, to_timestamp(created_at)::timestamp)) = $2
+       and extract(day from coalesce(published_at, to_timestamp(created_at)::timestamp)) = $3
+       and extract(year from coalesce(published_at, to_timestamp(created_at)::timestamp)) < $4
+     order by coalesce(published_at, to_timestamp(created_at)::timestamp) desc, id desc
+     limit $5`,
+    [postId, todayMonth, todayDay, todayYear, Math.min(Math.max(limit, 1), 10)],
+  ).catch(() => []);
+  return {
+    date: today,
+    posts: rows.map((row) => sanitizePostForResponse(row, false, timeZone)),
+  };
+}
+
 export async function getPostNavigation(postId: number) {
   const current = await one<Record<string, unknown>>(
     `select id, published_at, created_at from ${table('posts')} where id = $1 and status = 'publish'`, [postId],
