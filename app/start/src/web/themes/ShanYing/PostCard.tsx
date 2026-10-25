@@ -11,6 +11,7 @@
  */
 
 import PostLink from '@/components/blog/PostLink';
+import Link from '@/components/AppLink';
 import { coverProps, randomCoverUrl } from '@/lib/blog-image';
 import { useThemeContext } from '@/lib/theme-context';
 import { formatDateInTimeZone } from '@/lib/timezone';
@@ -62,7 +63,7 @@ export default function PostCard({ post, index }: { post: any; index?: number })
         {cover ? <img {...coverProps({ src: cover, alt: '' })} /> : <span className="sy-cover-card-blank" />}
       </PostLink>
 
-      {category && <span className="sy-cover-card-category">{category.name}</span>}
+      {category && <Link className="sy-cover-card-category" href={`/categories/${encodeURIComponent(category.slug)}`}>{category.name}</Link>}
 
       <div className="sy-cover-card-body">
         <div className="sy-cover-card-meta">

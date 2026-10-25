@@ -383,12 +383,9 @@ export default function HomePage({
             </span>
           </button>
           {visibleCategories.map((category: any) => (
-            <button
+            <Link
               key={category.id}
-              type="button"
-              data-active={activeCategory === category.id ? '1' : undefined}
-              aria-pressed={activeCategory === category.id}
-              onClick={() => selectCategory(category.id)}
+              href={`/categories/${encodeURIComponent(category.slug)}`}
               title={category.description || category.name}
             >
               <span className="sy-hub-tab-image" aria-hidden="true">
@@ -397,7 +394,7 @@ export default function HomePage({
                   : <i className={category.icon && /^fa[a-z-]*\s/.test(category.icon) ? category.icon : 'fa-regular fa-folder'} />}
               </span>
               <span className="sy-hub-tab-label">{category.name}</span>
-            </button>
+            </Link>
           ))}
         </nav>
 

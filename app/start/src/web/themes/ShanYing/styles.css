@@ -1196,7 +1196,8 @@ html[data-theme='ShanYing'] .sy-hub-tabs::-webkit-scrollbar {
   display: none;
 }
 
-html[data-theme='ShanYing'] .sy-hub-tabs button {
+html[data-theme='ShanYing'] .sy-hub-tabs button,
+html[data-theme='ShanYing'] .sy-hub-tabs a {
   display: flex;
   /* 铺满整行：各卡均分容器宽度，与页面同宽；放不下时保持最小宽并横向滚动 */
   flex: 1 1 0;
@@ -1215,7 +1216,8 @@ html[data-theme='ShanYing'] .sy-hub-tabs button {
   transition: transform 0.38s var(--sy-ease), border-color 0.3s, background 0.3s, color 0.3s;
 }
 
-html[data-theme='ShanYing'] .sy-hub-tabs button:hover {
+html[data-theme='ShanYing'] .sy-hub-tabs button:hover,
+html[data-theme='ShanYing'] .sy-hub-tabs a:hover {
   transform: translateY(-3px);
   color: var(--sy-text);
 }
@@ -5205,7 +5207,8 @@ html[data-theme='ShanYing'] .sy-auth-menu-item:hover i {
     padding: 18px 16px;
   }
 
-  html[data-theme='ShanYing'] .sy-hub-tabs button {
+  html[data-theme='ShanYing'] .sy-hub-tabs button,
+html[data-theme='ShanYing'] .sy-hub-tabs a {
     min-width: 84px;
   }
 
@@ -7592,4 +7595,13 @@ html[data-theme='ShanYing'] .sy-annual-foot {
   html[data-theme='ShanYing'] .sy-annual-title {
     font-size: 24px;
   }
+}
+
+/* 分类 tab 改为链接后的基础形态与卡片分类角标链接。 */
+html[data-theme='ShanYing'] .sy-hub-tabs a {
+  text-decoration: none;
+  color: inherit;
+}
+html[data-theme='ShanYing'] a.sy-cover-card-category {
+  text-decoration: none;
 }

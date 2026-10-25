@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Outlet, useRouterState } from '@tanstack/react-router';
 import { PublicPage } from '../components/PublicPage';
 import { loadPublicPage, publicPageHead } from '../lib/public-route';
 
@@ -26,5 +26,11 @@ export const Route = createFileRoute('/films')({
 });
 
 function FilmsPage() {
-  return <PublicPage data={Route.useLoaderData()} />;
+  // /films/$slug 是本路由的子级；命中子级时渲染 Outlet，
+  // 否则具体影片页永远被列表页盖住（tags.tsx 同款处理）。
+  const hasFilmPage = useRouterState({
+    select: (state) => state.matches.some((match) => match.routeId === '/films/$slug'),
+  });
+  const data = Route.useLoaderData();
+  return hasFilmPage ? <Outlet /> : <PublicPage data={data} />;
 }
