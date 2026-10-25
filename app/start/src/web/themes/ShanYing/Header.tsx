@@ -181,6 +181,17 @@ export default function Header() {
     window.location.href = `/search?q=${encodeURIComponent(q)}`;
   };
 
+  const subscribeFeed = async () => {
+    const feedUrl = `${window.location.origin}/feed`;
+    try {
+      await navigator.clipboard.writeText(feedUrl);
+      toast.success("订阅地址已复制，正在打开 Feed…");
+    } catch {
+      toast.error("复制失败，可在 Feed 页手动复制");
+    }
+    window.setTimeout(() => { window.location.assign("/feed"); }, 400);
+  };
+
   const visitRandomPost = async () => {
     if (randomLoading) return;
     setRandomLoading(true);
@@ -308,9 +319,17 @@ export default function Header() {
             <i className="fa-regular fa-sun sy-mode-icon sy-mode-sun" aria-hidden="true" />
           </button>
 
-          <a className="sy-icon-button" href="https://ficor.net/feed" title="RSS 订阅" aria-label="RSS 订阅">
+          {/* RSS：点击先把订阅地址复制到剪贴板，再打开 Feed 预览页。
+              导航延后一拍，等剪贴板写入与 toast 都落地。 */}
+          <button
+            type="button"
+            className="sy-icon-button"
+            title="RSS 订阅（点击复制订阅地址）"
+            aria-label="RSS 订阅，复制订阅地址并打开 Feed 页"
+            onClick={subscribeFeed}
+          >
             <i className="fa-regular fa-rss" aria-hidden="true" />
-          </a>
+          </button>
 
           {/* 站点控制面板入口：三条横线（对照原主题头部网格按钮，这里按需求
               用三横线造型），点开独立页面而不是原主题的浮层。 */}
