@@ -535,7 +535,7 @@ export async function getAnnualReport(year: number) {
   }
   const top = [...posts]
     .sort((a, b) => Number(b.view_count) - Number(a.view_count))
-    .slice(0, 5)
+    .slice(0, 10)
     .map((row) => sanitizePostForResponse(row, false, timeZone));
 
   const commentCount = Number((await one<Record<string, unknown>>(
@@ -550,7 +550,7 @@ export async function getAnnualReport(year: number) {
      from ${table('comments')}
      where status = 'approved' and extract(year from to_timestamp(created_at)) = $1
        and coalesce(author_name, '') <> '' ${excludeAdmin}
-     group by author_name order by c desc, author_name limit 5`,
+     group by author_name order by c desc, author_name limit 10`,
     adminNames.length ? [year, adminNames] : [year],
   ).catch(() => []);
 
