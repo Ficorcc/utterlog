@@ -46,6 +46,7 @@ import AzureManifest from '@/themes/Azure/theme.json';
 import EmberManifest from '@/theme-renderers/Ember/theme.json';
 import RenascentManifest from '@/themes/Renascent/theme.json';
 import ShanYingManifest from '@/themes/ShanYing/theme.json';
+import WhonoManifest from '@/themes/Whono/theme.json';
 
 type ThemeComponent<Props = any> = ComponentType<Props> | LazyExoticComponent<ComponentType<Props>>;
 
@@ -122,11 +123,28 @@ const ShanYing: ThemeComponents = {
   GuestbookPage: lazy(() => import('@/themes/ShanYing/GuestbookPage')),
 };
 
+const Whono: ThemeComponents = {
+  Header: lazy(() => import('@/themes/Whono/Header')),
+  Footer: lazy(() => import('@/themes/Whono/Footer')),
+  Layout: lazy(() => import('@/themes/Whono/Layout')),
+  HomePage: lazy(() => import('@/themes/Whono/HomePage')),
+  PostPage: lazy(() => import('@/themes/Whono/PostPage')),
+  PostCard: lazy(() => import('@/themes/Whono/PostCard')),
+  CommentSection: SharedCommentSection,
+  ArchivePage: lazy(() => import('@/themes/Whono/ArchivePage')),
+  CategoryPage: lazy(() => import('@/themes/Whono/CategoryPage')),
+  TagPage: lazy(() => import('@/themes/Whono/TagPage')),
+  CategoriesPage: lazy(() => import('@/themes/Whono/CategoriesPage')),
+  TagsPage: lazy(() => import('@/themes/Whono/TagsPage')),
+  NotFoundPage: lazy(() => import('@/themes/Whono/NotFoundPage')),
+};
+
 const themeRegistry: Record<string, ThemeComponents> = {
   Azure,
   Ember,
   Renascent,
   ShanYing,
+  Whono,
 };
 
 const manifestRegistry: Record<string, ThemeManifest> = {
@@ -134,6 +152,7 @@ const manifestRegistry: Record<string, ThemeManifest> = {
   Ember: EmberManifest as ThemeManifest,
   Renascent: RenascentManifest as ThemeManifest,
   ShanYing: ShanYingManifest as ThemeManifest,
+  Whono: WhonoManifest as ThemeManifest,
 };
 
 export { DEFAULT_BLOG_THEME, blogThemeAccentAttr, normalizeThemeName, resolveBlogTheme, type BlogThemeAccent };
