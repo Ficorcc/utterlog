@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import toast from 'react-hot-toast';
-import { buildPermalink } from '@/lib/permalink';
+import { buildPermalink, parsePermalink } from '@/lib/permalink';
 import { Icon, resolveDark, useShanYingMode } from './shanying-shared';
 
 type MenuState = { x: number; y: number; href: string | null };
@@ -84,6 +84,42 @@ export default function ContextMenu({ permalinkStructure }: { permalinkStructure
     if (scroller) scroller.scrollTo({ top: 0, behavior: 'smooth' });
     else window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+  const scrollToComments = () => {
+    const target = document.querySelector('.sy-comments, #comments');
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    else toast.error('当前页面没有评论区');
+  };
+
+  // slug 型 permalink（导航接口只认数字 id）时按发布序列扫描兜底：
+  // 找到当前文章在时间倒序列表中的位置，取下一位（更早一篇）。
+  const prevByScan = async (): Promise<Record<string, unknown> | null> => {
+    const r = await fetch('/api/v1/posts?type=post&status=publish&per_page=100&order_by=published_at&order=desc')
+      .then((res) => res.json())
+      .catch(() => null);
+    const posts = Array.isArray(r?.data) ? r.data : (r?.data?.posts || []);
+    const pathname = window.location.pathname.replace(/\/+$/, '');
+    const i = posts.findIndex((p: Record<string, unknown>) => buildPermalink(p, permalinkStructure) === pathname);
+    return i >= 0 ? (posts[i + 1] || null) : null;
+  };
+  const gotoPrevPost = async () => {
+    try {
+      const parsed = parsePermalink(window.location.pathname, permalinkStructure);
+      const id = parsed?.id ?? parsed?.display_id;
+      let prev: Record<string, unknown> | null = null;
+      if (id) {
+        const r = await fetch(`/api/v1/posts/${id}/navigation`).then((res) => res.json()).catch(() => null);
+        prev = r?.data?.prev || null;
+      }
+      if (!prev) prev = await prevByScan();
+      if (!prev) {
+        toast.error('已是最早一篇');
+        return;
+      }
+      window.location.assign(buildPermalink(prev, permalinkStructure));
+    } catch {
+      toast.error('上一篇获取失败');
+    }
+  };
   const visitRandomPost = async () => {
     try {
       const response = await fetch(`/api/v1/posts?type=post&status=publish&per_page=1&order_by=random&_t=${Date.now()}`);
@@ -113,6 +149,10 @@ export default function ContextMenu({ permalinkStructure }: { permalinkStructure
     buttons[next]?.focus();
   };
 
+  // 「上一篇 / 留言」只在文章页出现，与参考样式一致。
+  const onPostPage = !!parsePermalink(window.location.pathname, permalinkStructure);
+  const hasComments = !!document.querySelector('.sy-comments, #comments');
+
   return createPortal(
     <div
       ref={menuRef}
@@ -130,6 +170,12 @@ export default function ContextMenu({ permalinkStructure }: { permalinkStructure
         <button type="button" role="menuitem" aria-label="返回顶部" title="返回顶部" onClick={() => run(scrollTop)}><Icon name="arrow-up" /></button>
       </div>
       <div className="sy-context-menu-divider" />
+      {onPostPage && (
+        <button type="button" role="menuitem" className="sy-context-menu-item" onClick={() => run(gotoPrevPost)}><Icon name="previous" /><span>上一篇</span></button>
+      )}
+      {hasComments && (
+        <button type="button" role="menuitem" className="sy-context-menu-item" onClick={() => run(scrollToComments)}><Icon name="comment" /><span>留言</span></button>
+      )}
       {menu.href && (
         <>
           <button type="button" role="menuitem" className="sy-context-menu-item" onClick={() => run(() => openLink(false))}><Icon name="arrow-up-right" /><span>在新标签页打开</span></button>

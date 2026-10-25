@@ -6818,7 +6818,7 @@ html[data-theme='ShanYing'] .sy-context-menu-toolbar button {
 html[data-theme='ShanYing'] .sy-context-menu-divider {
   height: 1px;
   margin: 7px 0 5px;
-  border-top: 1px dashed var(--sy-line);
+  border-top: 1px solid var(--sy-line);
 }
 
 html[data-theme='ShanYing'] .sy-context-menu-item {
