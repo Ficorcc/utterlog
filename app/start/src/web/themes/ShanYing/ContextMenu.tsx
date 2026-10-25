@@ -29,9 +29,9 @@ export default function ContextMenu({ permalinkStructure }: { permalinkStructure
       if (!target || target.closest('.sy-context-menu')) return;
       if (window.getSelection()?.toString()) return;
       const link = target.closest('a[href]') as HTMLAnchorElement | null;
-      if (target.closest('input, textarea, select, button, [contenteditable], [role="textbox"]')) return;
-      if (!link && target.closest('img, video, audio, canvas, pre, code')) return;
-      if (!link && target.closest('p, h1, h2, h3, h4, h5, h6, blockquote')) return;
+      // 正文里任意位置（图片、代码块、留白处…）右键都唤起菜单；只把
+      // 表单/可编辑控件留给浏览器原生菜单（粘贴等操作依赖它）。
+      if (target.closest('input, textarea, select, [contenteditable], [role="textbox"]')) return;
       if (link && !/^https?:$/.test(link.protocol)) return;
 
       event.preventDefault();
