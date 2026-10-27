@@ -3,6 +3,8 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import api from '@/lib/api';
 import CommentForm from './CommentForm';
+import CommentPagination from '@/components/blog/CommentPagination';
+import { commentFloorPage, commentPageForId, loadApprovedComments } from '@/lib/comment-pages';
 import { BrowserIcon, OSIcon } from '@/lib/tech-icons';
 import { getVisitorId } from '@/lib/fingerprint';
 import { useThemeContext } from '@/lib/theme-context';
@@ -264,7 +266,7 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
         style={{
           display: 'flex', alignItems: 'flex-start', gap: isReply ? '0' : '12px',
           padding: isReply ? '10px 12px 10px 12px' : '12px 16px',
-          position: 'relative',
+          position: 'relative', scrollMarginTop: '100px',
           ...(isReply ? {
             marginLeft: '16px', marginRight: '16px', marginTop: '8px',
             background: 'rgba(0, 82, 217, 0.03)',
@@ -589,7 +591,7 @@ function CommentCard({ comment, postId, floor, onReplySuccess, editableIds }: {
   editableIds: Set<number>;
 }) {
   return (
-    <div style={{ marginTop: '16px', border: '1px solid var(--color-border, #eee)' }}>
+    <div className="comment-thread" style={{ marginTop: '16px', border: '1px solid var(--color-border, #eee)', scrollMarginTop: '100px' }}>
       <CommentRow comment={comment} postId={postId} depth={0} floor={floor} onReplySuccess={onReplySuccess} editableIds={editableIds} />
     </div>
   );
@@ -601,6 +603,7 @@ export default function CommentList({ postId, title, onCommentCountChange, formP
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   // 初始排序解析：访客本地切换过 → localStorage；
   // 没切换过 → 后台「常规设置 → 评论设置 → 排序 → 默认排序」option；
   // 后台也没设过 → 兜底 'oldest'。
@@ -616,6 +619,7 @@ export default function CommentList({ postId, title, onCommentCountChange, formP
     return 'oldest';
   });
   const listRef = useRef<HTMLDivElement>(null);
+  const requestVersion = useRef(0);
   // Track comment IDs posted by this visitor in this session (for 60s edit)
   const [editableIds, setEditableIds] = useState<Set<number>>(new Set());
   const addEditableId = useCallback((id: number) => {
@@ -628,31 +632,53 @@ export default function CommentList({ postId, title, onCommentCountChange, formP
 
   const loadedPostId = useRef<number | null>(null);
   const fetchComments = async (mode: 'initial' | 'background' = 'background') => {
+    const version = ++requestVersion.current;
     if (mode === 'initial') setLoading(true);
     else setRefreshing(true);
     try {
-      const r: any = await api.get('/comments', { params: {
-        post_id: postId, status: 'approved', per_page: 500,
-        order: order === 'oldest' ? 'asc' : 'desc',
-      }});
-      const data = r.data || r.comments || [];
-      setComments(Array.isArray(data) ? data : []);
-      const count = Array.isArray(data) ? data.length : 0;
-      setTotal(count);
-      onCommentCountChange?.(count);
+      const data = await loadApprovedComments<Comment>(postId, order === 'oldest' ? 'asc' : 'desc');
+      if (version !== requestVersion.current) return;
+      setComments(data);
+      setTotal(data.length);
+      onCommentCountChange?.(data.length);
     } catch {} finally {
-      setLoading(false);
-      setRefreshing(false);
+      if (version === requestVersion.current) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
   };
 
   useEffect(() => {
     const isNewPost = loadedPostId.current !== postId;
     loadedPostId.current = postId;
+    setPage(1);
     fetchComments(isNewPost ? 'initial' : 'background');
   }, [postId, order]);
 
   const tree = buildCommentTree(comments);
+  const paged = commentFloorPage(tree, page, order);
+
+  useEffect(() => {
+    let scrollTimer: ReturnType<typeof setTimeout> | undefined;
+    const openLinkedComment = () => {
+      const id = Number(window.location.hash.match(/^#comment-(\d+)$/)?.[1]);
+      if (!id) return;
+      const targetPage = commentPageForId(tree, id);
+      if (!targetPage) return;
+      setPage(targetPage);
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => document.getElementById(`comment-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+    };
+    openLinkedComment();
+    window.addEventListener('hashchange', openLinkedComment);
+    return () => { window.removeEventListener('hashchange', openLinkedComment); clearTimeout(scrollTimer); };
+  }, [comments, order]);
+
+  const handlePageChange = (nextPage: number) => {
+    setPage(nextPage);
+    setTimeout(() => listRef.current?.querySelector('.comment-thread')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
+  };
 
   const handleOrderToggle = () => {
     setOrder(prev => {
@@ -708,8 +734,7 @@ export default function CommentList({ postId, title, onCommentCountChange, formP
 
       {!loading && tree.length > 0 && (
         <div style={{ position: 'relative' }}>
-          {tree.map((comment, idx) => {
-            const floor = order === 'oldest' ? idx + 1 : tree.length - idx;
+          {paged.floors.map(({ comment, floor }) => {
             return <CommentCard key={comment.id} comment={comment} postId={postId} floor={floor} onReplySuccess={(id) => { if (id) addEditableId(id); fetchComments('background'); }} editableIds={editableIds} />;
           })}
         </div>
@@ -723,6 +748,8 @@ export default function CommentList({ postId, title, onCommentCountChange, formP
           </p>
         </div>
       )}
+
+      {!loading && <CommentPagination page={paged.page} totalPages={paged.totalPages} onPageChange={handlePageChange} />}
 
       {formPlacement === 'bottom' && <CommentForm postId={postId} onSuccess={handleCommentSuccess} />}
     </div>
