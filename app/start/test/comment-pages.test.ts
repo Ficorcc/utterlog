@@ -19,9 +19,17 @@ describe('comment floor pagination', () => {
 
   test('keeps floor numbers stable across newest-first pages', () => {
     expect(commentFloorPage([...roots].reverse(), 1, 'newest').floors.map(({ floor }) => floor))
-      .toEqual([7, 6, 5, 4, 3, 2]);
+      .toEqual([2, 3, 4, 5, 6, 7]);
     expect(commentFloorPage([...roots].reverse(), 2, 'newest').floors.map(({ floor }) => floor))
       .toEqual([1]);
+  });
+
+  test('starts the last full page at floor one', () => {
+    const twelve = Array.from({ length: 12 }, (_, index) => ({ id: 12 - index }));
+    expect(commentFloorPage(twelve, 1, 'newest').floors.map(({ floor }) => floor))
+      .toEqual([7, 8, 9, 10, 11, 12]);
+    expect(commentFloorPage(twelve, 2, 'newest').floors.map(({ floor }) => floor))
+      .toEqual([1, 2, 3, 4, 5, 6]);
   });
 
   test('opens a linked reply on the page containing its parent floor', () => {

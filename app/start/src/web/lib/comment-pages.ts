@@ -30,13 +30,16 @@ export function commentFloorPage<T>(roots: T[], requestedPage: number, order: 'o
   const totalPages = Math.max(1, Math.ceil(roots.length / COMMENT_FLOORS_PER_PAGE));
   const page = Math.min(totalPages, Math.max(1, Math.trunc(requestedPage) || 1));
   const offset = (page - 1) * COMMENT_FLOORS_PER_PAGE;
+  const floors = roots.slice(offset, offset + COMMENT_FLOORS_PER_PAGE).map((comment, index) => ({
+    comment,
+    floor: order === 'oldest' ? offset + index + 1 : roots.length - offset - index,
+  }));
   return {
     page,
     totalPages,
-    floors: roots.slice(offset, offset + COMMENT_FLOORS_PER_PAGE).map((comment, index) => ({
-      comment,
-      floor: order === 'oldest' ? offset + index + 1 : roots.length - offset - index,
-    })),
+    // Page numbers run newest to oldest, but each page reads from its lowest
+    // floor upward. The last page therefore begins with floor 1.
+    floors: order === 'newest' ? floors.reverse() : floors,
   };
 }
 
