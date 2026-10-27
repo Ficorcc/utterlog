@@ -2,7 +2,6 @@
 
 import type { CSSProperties } from 'react';
 import { useThemeContext } from '@/lib/theme-context';
-import { COMMENT_FLOORS_PER_PAGE } from '@/lib/comment-pages';
 
 export default function CommentPagination({ page, totalPages, onPageChange }: {
   page: number;
@@ -47,7 +46,7 @@ export default function CommentPagination({ page, totalPages, onPageChange }: {
           onClick={() => onPageChange(item)} style={buttonStyle(item === page)}>{item}</button>
       ) : <span key={item} aria-hidden="true" style={{ padding: '0 3px', color: 'var(--color-text-sub, #777)' }}>…</span>)}
       <button type="button" disabled={page >= totalPages} onClick={() => onPageChange(page + 1)} style={buttonStyle(false, page >= totalPages)}>下一页</button>
-      <span style={{ marginLeft: 5, fontSize: 12, color: 'var(--color-text-sub, #777)' }}>每页 {COMMENT_FLOORS_PER_PAGE} 楼</span>
+      <button type="button" disabled={page >= totalPages} onClick={() => onPageChange(totalPages)} style={buttonStyle(false, page >= totalPages)}>最后一页</button>
     </nav>
   );
 }

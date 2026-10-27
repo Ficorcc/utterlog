@@ -1,6 +1,6 @@
 import api from './api';
 
-export const COMMENT_FLOORS_PER_PAGE = 6;
+export const COMMENT_FLOORS_PER_PAGE = 10;
 const COMMENT_FETCH_BATCH = 500;
 
 // The API paginates individual comments. Gather its batches before paginating
@@ -30,7 +30,7 @@ export function commentFloorPage<T>(roots: T[], requestedPage: number, order: 'o
   const totalPages = Math.max(1, Math.ceil(roots.length / COMMENT_FLOORS_PER_PAGE));
   const page = Math.min(totalPages, Math.max(1, Math.trunc(requestedPage) || 1));
   // In newest-first mode the first page takes the remainder, so the oldest
-  // page always holds a full six floors when at least six floors exist.
+  // page always holds a full page when enough floors exist.
   const offset = order === 'newest'
     ? Math.max(0, roots.length - (totalPages - page + 1) * COMMENT_FLOORS_PER_PAGE)
     : (page - 1) * COMMENT_FLOORS_PER_PAGE;
