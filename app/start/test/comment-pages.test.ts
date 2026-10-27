@@ -17,26 +17,36 @@ describe('comment floor pagination', () => {
     expect(second.totalPages).toBe(2);
   });
 
-  test('keeps floor numbers stable across newest-first pages', () => {
+  test('puts the remainder on page one and fills the final page in descending order', () => {
     expect(commentFloorPage([...roots].reverse(), 1, 'newest').floors.map(({ floor }) => floor))
-      .toEqual([2, 3, 4, 5, 6, 7]);
+      .toEqual([7]);
     expect(commentFloorPage([...roots].reverse(), 2, 'newest').floors.map(({ floor }) => floor))
-      .toEqual([1]);
+      .toEqual([6, 5, 4, 3, 2, 1]);
   });
 
-  test('starts the last full page at floor one', () => {
+  test('keeps complete six-floor pages when the count divides evenly', () => {
     const twelve = Array.from({ length: 12 }, (_, index) => ({ id: 12 - index }));
     expect(commentFloorPage(twelve, 1, 'newest').floors.map(({ floor }) => floor))
-      .toEqual([7, 8, 9, 10, 11, 12]);
+      .toEqual([12, 11, 10, 9, 8, 7]);
     expect(commentFloorPage(twelve, 2, 'newest').floors.map(({ floor }) => floor))
-      .toEqual([1, 2, 3, 4, 5, 6]);
+      .toEqual([6, 5, 4, 3, 2, 1]);
+  });
+
+  test('keeps the final page full when the first page has one floor', () => {
+    const twentyFive = Array.from({ length: 25 }, (_, index) => ({ id: 25 - index }));
+    expect(commentFloorPage(twentyFive, 1, 'newest').floors.map(({ floor }) => floor)).toEqual([25]);
+    expect(commentFloorPage(twentyFive, 5, 'newest').floors.map(({ floor }) => floor))
+      .toEqual([6, 5, 4, 3, 2, 1]);
   });
 
   test('opens a linked reply on the page containing its parent floor', () => {
     const withReply = roots.map((root, index) => index === 6
       ? { ...root, children: [{ id: 101, is_admin: true }] }
       : root);
-    expect(commentPageForId(withReply, 101)).toBe(2);
-    expect(commentPageForId(withReply, 999)).toBeNull();
+    expect(commentPageForId(withReply, 101, 'oldest')).toBe(2);
+    expect(commentPageForId(withReply, 999, 'oldest')).toBeNull();
+    const newest = [...withReply].reverse();
+    expect(commentPageForId(newest, 101, 'newest')).toBe(1);
+    expect(commentPageForId(newest, 100, 'newest')).toBe(2);
   });
 });

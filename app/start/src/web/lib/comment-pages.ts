@@ -29,22 +29,29 @@ export async function loadApprovedComments<T>(postId: number, order: 'asc' | 'de
 export function commentFloorPage<T>(roots: T[], requestedPage: number, order: 'oldest' | 'newest') {
   const totalPages = Math.max(1, Math.ceil(roots.length / COMMENT_FLOORS_PER_PAGE));
   const page = Math.min(totalPages, Math.max(1, Math.trunc(requestedPage) || 1));
-  const offset = (page - 1) * COMMENT_FLOORS_PER_PAGE;
-  const floors = roots.slice(offset, offset + COMMENT_FLOORS_PER_PAGE).map((comment, index) => ({
-    comment,
-    floor: order === 'oldest' ? offset + index + 1 : roots.length - offset - index,
-  }));
+  // In newest-first mode the first page takes the remainder, so the oldest
+  // page always holds a full six floors when at least six floors exist.
+  const offset = order === 'newest'
+    ? Math.max(0, roots.length - (totalPages - page + 1) * COMMENT_FLOORS_PER_PAGE)
+    : (page - 1) * COMMENT_FLOORS_PER_PAGE;
+  const end = order === 'newest'
+    ? roots.length - (totalPages - page) * COMMENT_FLOORS_PER_PAGE
+    : offset + COMMENT_FLOORS_PER_PAGE;
   return {
     page,
     totalPages,
-    // Page numbers run newest to oldest, but each page reads from its lowest
-    // floor upward. The last page therefore begins with floor 1.
-    floors: order === 'newest' ? floors.reverse() : floors,
+    floors: roots.slice(offset, end).map((comment, index) => ({
+      comment,
+      floor: order === 'oldest' ? offset + index + 1 : roots.length - offset - index,
+    })),
   };
 }
 
-export function commentPageForId<T extends { id: number; children?: T[] }>(roots: T[], commentId: number): number | null {
+export function commentPageForId<T extends { id: number; children?: T[] }>(roots: T[], commentId: number, order: 'oldest' | 'newest'): number | null {
   const contains = (comment: T): boolean => comment.id === commentId || !!comment.children?.some(contains);
   const rootIndex = roots.findIndex(contains);
-  return rootIndex < 0 ? null : Math.floor(rootIndex / COMMENT_FLOORS_PER_PAGE) + 1;
+  if (rootIndex < 0) return null;
+  if (order === 'oldest') return Math.floor(rootIndex / COMMENT_FLOORS_PER_PAGE) + 1;
+  const totalPages = Math.ceil(roots.length / COMMENT_FLOORS_PER_PAGE);
+  return totalPages - Math.floor((roots.length - rootIndex - 1) / COMMENT_FLOORS_PER_PAGE);
 }

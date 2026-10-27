@@ -664,7 +664,7 @@ export default function CommentList({ postId, title, onCommentCountChange, formP
     const openLinkedComment = () => {
       const id = Number(window.location.hash.match(/^#comment-(\d+)$/)?.[1]);
       if (!id) return;
-      const targetPage = commentPageForId(tree, id);
+      const targetPage = commentPageForId(tree, id, order);
       if (!targetPage) return;
       setPage(targetPage);
       clearTimeout(scrollTimer);
