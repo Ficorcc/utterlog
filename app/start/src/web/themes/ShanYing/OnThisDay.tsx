@@ -50,7 +50,7 @@ export default function OnThisDay({ postId }: { postId?: number }) {
           const parts = datePartsInTimeZone(postDateInput(post), timeZone);
           const yearsAgo = thisYear - parts.year;
           return (
-            <PostLink key={post.id} post={post} className="post-prev-next-link prev cover-zoom">
+            <PostLink key={post.id} post={{ ...post, created_at: post.created_at ?? undefined }} className="post-prev-next-link prev cover-zoom">
               <div className="post-prev-next-text">
                 <span className="post-prev-next-label">
                   <i className="fa-regular fa-clock" style={{ fontSize: '12px' }} />

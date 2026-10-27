@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import toast from 'react-hot-toast';
-import { buildPermalink, parsePermalink } from '@/lib/permalink';
+import { DEFAULT_PERMALINK, buildPermalink, parsePermalink } from '@/lib/permalink';
 import { Icon, resolveDark, useShanYingMode } from './shanying-shared';
 
 type MenuState = { x: number; y: number; href: string | null };
@@ -17,7 +17,7 @@ async function copyAddress(address: string, success: string) {
   }
 }
 
-export default function ContextMenu({ permalinkStructure }: { permalinkStructure?: string }) {
+export default function ContextMenu({ permalinkStructure = DEFAULT_PERMALINK }: { permalinkStructure?: string }) {
   const [menu, setMenu] = useState<MenuState | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const { mode, setMode } = useShanYingMode();

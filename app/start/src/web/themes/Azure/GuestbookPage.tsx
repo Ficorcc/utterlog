@@ -18,7 +18,7 @@ export default function GuestbookPage({ postId, commentCount }: { postId: number
           </div>
         </header>
         <section className="azure-guestbook-comments" aria-label="留言与回复">
-          <CommentList postId={postId} title="留言板" onCommentCountChange={setCount} />
+          <CommentList postId={postId} title="留言板" onCommentCountChange={setCount} formPlacement="bottom" />
         </section>
       </div>
     </div>

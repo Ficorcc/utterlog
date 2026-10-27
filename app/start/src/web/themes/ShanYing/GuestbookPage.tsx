@@ -15,7 +15,7 @@ export default function GuestbookPage({ postId, commentCount }: { postId: number
         <p>关于这里的文章、路上的风景，或是今天的心情，都欢迎写下来。每一句留言都能在这里继续对话。</p>
       </div>
       <section className="sy-comments sy-guestbook-comments" aria-label="留言与回复">
-        <CommentList postId={postId} title="留言板" onCommentCountChange={setCount} />
+        <CommentList postId={postId} title="留言板" onCommentCountChange={setCount} formPlacement="bottom" />
       </section>
     </div>
   );

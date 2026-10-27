@@ -655,7 +655,7 @@ function CommentCard({ comment, postId, floor, onReplySuccess, editableIds }: {
   );
 }
 
-export default function CommentList({ postId, title, onCommentCountChange }: { postId: number; title?: string; onCommentCountChange?: (count: number) => void }) {
+export default function CommentList({ postId, title, onCommentCountChange, formPlacement = 'top' }: { postId: number; title?: string; onCommentCountChange?: (count: number) => void; formPlacement?: 'top' | 'bottom' }) {
   const { options, theme } = useThemeContext();
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(false);
@@ -777,6 +777,8 @@ export default function CommentList({ postId, title, onCommentCountChange }: { p
         )}
       </div>
 
+      {formPlacement === 'top' && <CommentForm postId={postId} onSuccess={handleCommentSuccess} />}
+
       {!loading && tree.length > 0 && (
         <div style={{ position: 'relative' }}>
           {switching && (
@@ -805,7 +807,7 @@ export default function CommentList({ postId, title, onCommentCountChange }: { p
         </div>
       )}
 
-      <CommentForm postId={postId} onSuccess={handleCommentSuccess} />
+      {formPlacement === 'bottom' && <CommentForm postId={postId} onSuccess={handleCommentSuccess} />}
     </div>
   );
 }

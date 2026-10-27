@@ -286,7 +286,7 @@ export function PublicPage({ data }: { data: PublicPageData }) {
           if (Component) return <Component postId={data.postId} commentCount={data.commentCount} />;
           return <div style={{ maxWidth: 960, margin: '0 auto', padding: 32 }}>
             <PageTitle title="留言板" icon="fa-regular fa-message-lines" />
-            <DefaultGuestbookComments postId={data.postId} title="留言板" />
+            <DefaultGuestbookComments postId={data.postId} title="留言板" formPlacement="bottom" />
           </div>;
         }
         if (data.kind === 'coding') return <CodingPage data={data.data} timeZone={data.timeZone} />;
