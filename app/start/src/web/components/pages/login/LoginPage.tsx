@@ -207,7 +207,7 @@ export default function LoginPage() {
         </div>
 
         {/* Form Card */}
-        <div style={{ maxWidth: '380px', width: '100%', margin: '0 auto', background: '#fff', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '40px 32px', boxShadow: '0 10px 40px -10px rgba(0,0,0,0.05)' }}>
+        <div style={{ maxWidth: '380px', width: '100%', margin: '0 auto', background: 'var(--color-bg-card)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '40px 32px', boxShadow: '0 10px 40px -12px rgba(0,0,0,0.08)' }}>
           {show2FA ? (
             /* 2FA Verification */
             <div>

@@ -512,20 +512,83 @@ function parseFeedDate(value: string, fallback = 0) {
   return ts > 0 && ts < 2147483000 ? ts : fallback;
 }
 
-async function fetchRssFeed(feedUrl: string) {
-  const safeFeedUrl = await assertPublicHttpUrl(feedUrl);
-  const res = await fetch(safeFeedUrl, {
+const feedBrowserUa =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36';
+
+async function fetchFeedXml(url: string, timeoutMs = 15000) {
+  const safeUrl = await assertPublicHttpUrl(url);
+  let res = await fetch(safeUrl, {
     headers: {
       'user-agent': 'Mozilla/5.0 (compatible; Utterlog RSS Fetcher/1.0)',
       accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.8',
     },
-    signal: AbortSignal.timeout(15000),
+    signal: AbortSignal.timeout(timeoutMs),
   });
+  // 反爬拦截：部分 WAF 只放行浏览器 UA，改用浏览器 UA 再试一次
+  if (res.status === 401 || res.status === 403 || res.status === 429) {
+    res = await fetch(safeUrl, {
+      headers: { 'user-agent': feedBrowserUa, accept: '*/*' },
+      signal: AbortSignal.timeout(timeoutMs),
+    }).catch(() => res);
+  }
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const contentLength = Number(res.headers.get('content-length') || 0);
   if (contentLength > 5 * 1024 * 1024) throw new Error('RSS 响应过大');
   const xml = await res.text();
   if (xml.length > 5 * 1024 * 1024) throw new Error('RSS 响应过大');
+  return xml;
+}
+
+function feedLooksValid(xml: string) {
+  const head = xml.slice(0, 2048).toLowerCase();
+  if (/<html[\s>]/.test(head)) return false;
+  return /<(rss[\s>]|feed[\s>]|rdf:rdf[\s>])/.test(head);
+}
+
+function absoluteFeedUrl(href: string, base: string) {
+  try {
+    return new URL(href, base).toString();
+  } catch {
+    return '';
+  }
+}
+
+// feed 地址失效时的候选：首页 <link rel="alternate"> 声明 + 常见路径探测
+const feedProbePaths = ['/feed', '/feed/', '/rss.xml', '/rss', '/atom.xml', '/feed.xml', '/index.xml', '/rss.php', '/feed.php'];
+
+async function discoverFeedUrl(feedUrl: string) {
+  let origin = '';
+  try {
+    origin = new URL(feedUrl).origin;
+  } catch {
+    return '';
+  }
+  const candidates: string[] = [];
+  try {
+    const home = await fetchFeedXml(origin, 10000);
+    for (const m of home.matchAll(/<link\b[^>]*>/gi)) {
+      const tag = m[0];
+      const rel = (/rel=["']?([^"'\s>]+)/i.exec(tag)?.[1] || '').toLowerCase();
+      const type = (/type=["']?([^"'\s>]+)/i.exec(tag)?.[1] || '').toLowerCase();
+      const href = /href=["']([^"']+)["']/i.exec(tag)?.[1] || '';
+      if (!href) continue;
+      if (rel.split(/[\s,]+/).includes('alternate') && /rss|atom|feed/i.test(type)) {
+        const abs = absoluteFeedUrl(href, origin);
+        if (abs) candidates.push(abs);
+      }
+    }
+  } catch {}
+  for (const path of feedProbePaths) candidates.push(absoluteFeedUrl(path, origin));
+  for (const candidate of [...new Set(candidates)].filter((c) => c && c !== feedUrl).slice(0, 12)) {
+    try {
+      const xml = await fetchFeedXml(candidate, 8000);
+      if (feedLooksValid(xml)) return candidate;
+    } catch {}
+  }
+  return '';
+}
+
+function parseFeedItems(xml: string) {
   const itemBlocks = [...xml.matchAll(/<item(?:\s[^>]*)?>[\s\S]*?<\/item>/gi)].map((m) => m[0]);
   const entryBlocks = itemBlocks.length ? itemBlocks : [...xml.matchAll(/<entry(?:\s[^>]*)?>[\s\S]*?<\/entry>/gi)].map((m) => m[0]);
   return entryBlocks.map((block) => {
@@ -540,6 +603,29 @@ async function fetchRssFeed(feedUrl: string) {
       guid,
     };
   }).filter((item) => item.title || item.link);
+}
+
+async function fetchRssFeed(feedUrl: string) {
+  let xml = '';
+  try {
+    xml = await fetchFeedXml(feedUrl);
+  } catch (err) {
+    // 主地址直接失败：尝试自动发现新地址
+    const discovered = await discoverFeedUrl(feedUrl).catch(() => '');
+    if (!discovered) throw err;
+    xml = await fetchFeedXml(discovered);
+    return { items: parseFeedItems(xml), feedUrl: discovered };
+  }
+  if (!feedLooksValid(xml)) {
+    // 200 但返回的是 HTML（站点迁移/跳转页）：同样尝试自动发现
+    const discovered = await discoverFeedUrl(feedUrl).catch(() => '');
+    if (discovered) {
+      xml = await fetchFeedXml(discovered);
+      if (feedLooksValid(xml)) return { items: parseFeedItems(xml), feedUrl: discovered };
+    }
+    throw new Error('订阅源返回的不是有效 Feed');
+  }
+  return { items: parseFeedItems(xml), feedUrl: '' };
 }
 
 async function mirrorLinkSubscriptions() {
@@ -626,9 +712,9 @@ export async function runFeedFetch(options: number | FeedFetchOptions = 0) {
     feedFetchProgress.current_url = sub.feed_url;
     feedFetchProgress.message = `正在刷新 ${sub.feed_url}`;
     saveFeedFetchProgress();
-    let items: Awaited<ReturnType<typeof fetchRssFeed>> = [];
+    let feedResult: Awaited<ReturnType<typeof fetchRssFeed>> = { items: [], feedUrl: '' };
     try {
-      items = await fetchRssFeed(sub.feed_url);
+      feedResult = await fetchRssFeed(sub.feed_url);
     } catch (err) {
       failed++;
       failures.push({ id: sub.id, feed_url: sub.feed_url, error: feedErrorMessage(err) });
@@ -637,6 +723,12 @@ export async function runFeedFetch(options: number | FeedFetchOptions = 0) {
       feedFetchProgress.done++;
       saveFeedFetchProgress();
       continue;
+    }
+    const items = feedResult.items;
+    if (feedResult.feedUrl && feedResult.feedUrl !== sub.feed_url) {
+      // 自动发现的新 feed 地址回写，后续刷新直接使用新地址
+      await exec(`update ${table('rss_subscriptions')} set feed_url = $1 where id = $2`, [feedResult.feedUrl, sub.id]).catch(() => {});
+      await exec(`update ${table('links')} set rss_url = $1 where coalesce(rss_url, '') = $2`, [feedResult.feedUrl, sub.feed_url]).catch(() => {});
     }
     fetched++;
     const now = nowUnix();

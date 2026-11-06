@@ -1,41 +1,21 @@
-import Link from '@/components/AppLink';
 import { useThemeContext } from '@/lib/theme-context';
-import { safeHref } from './utils';
 
+/**
+ * 页脚：对齐 astro-whono 原版 —— 单行淡色版权文字，无导航菜单。
+ * 格式：© {年份} {站名} · Power by Utterlog & Theme by Whono
+ */
 export default function Footer() {
-  const { site, menus, archiveStats } = useThemeContext();
-  const links = (menus.footer || []).filter((item) => safeHref(item.href));
-  const postCount = Number(archiveStats?.post_count || 0);
-  const views = Number(archiveStats?.total_views || 0);
+  const { site } = useThemeContext();
+  const year = new Date().getFullYear();
 
   return (
     <footer className="wh-footer">
-      {links.length > 0 ? (
-        <nav aria-label="页脚导航">
-          {links.map((item, index) => (
-            <Link
-              key={`${item.href}-${index}`}
-              href={item.href}
-              target={item.target}
-              rel={item.target === '_blank' ? 'noopener noreferrer' : undefined}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-      ) : null}
-
       <span>
-        © {site.title}
-        {postCount > 0 ? ` · 共 ${postCount} 篇` : ''}
-        {views > 0 ? ` · ${views.toLocaleString()} 次浏览` : ''}
-      </span>
-
-      <span>
-        Whono 主题 · Powered by{' '}
+        © {year} {site.title} · Power by{' '}
         <a href="https://utterlog.com" target="_blank" rel="noopener noreferrer">
           Utterlog
-        </a>
+        </a>{' '}
+        &amp; Theme by Whono
       </span>
     </footer>
   );

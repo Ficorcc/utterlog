@@ -7606,3 +7606,27 @@ html[data-theme='ShanYing'] .sy-hub-tabs a {
 html[data-theme='ShanYing'] a.sy-cover-card-category {
   text-decoration: none;
 }
+
+/* ── 夜间模式：导航与站标悬停使用强调绿（与首页文章列表标题 hover 一致）── */
+html[data-theme="ShanYing"][data-shanying-mode="dark"] .sy-nav-link:hover {
+  color: var(--sy-accent);
+}
+
+html[data-theme="ShanYing"][data-shanying-mode="dark"] .sy-brand:hover {
+  color: var(--sy-accent);
+}
+
+/* 2026-11-06 v2：账号菜单向右弹出。位置由 HomeAuthDock 用 JS 计算 fixed 坐标
+   （Portal 挂 body，脱离页脚 overflow:hidden 与 isolation 层叠上下文）。
+   这里的 absolute 规则仅作 JS 未注入前的兜底，z-index 60 压过回到顶部(z-54)。 */
+html[data-theme="ShanYing"] .sy-auth-menu,
+html[data-theme="ShanYing"] .sy-footer-legal .sy-auth-menu {
+  left: calc(100% + 10px);
+  right: auto;
+  bottom: 0;
+  z-index: 60;
+}
+
+html[data-theme="ShanYing"] .sy-auth-user[aria-expanded="true"] .sy-auth-caret {
+  transform: rotate(90deg);
+}

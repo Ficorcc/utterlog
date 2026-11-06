@@ -16,15 +16,21 @@
  * 主题署名、访客状态处于同一区域，跟着页脚一起滚动。挂载点也从 HomePage 移到 Footer，
  * 因而在所有使用 ShanYing 全局布局的页面显示。
  *
- * 位置沿革（留着，免得以后又踩）：头部胶囊占了顶部（fixed top:18 居中），
- * 返回顶部占了右下（right:26 / bottom:26），文章页的阅读工具条占了下缘中间
- * （left:50% / bottom:22）—— 当初左下角是唯一常年空着的角，所以浮层放那儿。
- * 现在收进页脚，这些都不冲突了。
+ * 2026-11-06 弹出方向改版：菜单改为**向右弹出**（bottom 与按钮对齐），不再
+ * 遮住页脚上方的行。实现上用 Portal 挂到 body + JS 计算 fixed 定位 —— 页脚
+ * 有 overflow:hidden（向右弹会被裁切）和 isolation:isolate（内部 z-index 压
+ * 不过右下角 z-54 的回到顶部按钮），CSS 定位在这两个限制下无解：
+ *   - fixed 定位 + 先渲染后用 useLayoutEffect 量测（菜单与按钮 rect 均可测），
+ *     left 夹在视口右缘内（贴边时自动改为「右对齐视口」），top 保证 ≥ 12px；
+ *   - Portal 挂 body 后菜单脱离页脚层叠上下文，z-index 60 稳压回到顶部按钮；
+ *   - 滚动/改窗口尺寸时直接收起，避免 fixed 菜单与按钮脱节。
  */
 
 import Link from '@/components/AppLink';
 import { useAuthStore } from '@/lib/store';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
+import { createPortal } from 'react-dom';
 
 /* 水合守卫。注意**不能**拿 `persist.hasHydrated()` 当 useState 的初始值：
    zustand/persist 对 localStorage 是**同步**水合（`toThenable` 遇到同步 storage
@@ -39,25 +45,52 @@ export default function HomeAuthDock() {
   const [hydrated, setHydrated] = useState(false);
   const [open, setOpen] = useState(false);
   const dockRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [menuStyle, setMenuStyle] = useState<CSSProperties | undefined>(undefined);
 
   useEffect(() => {
     setHydrated(true);
   }, []);
 
-  // 弹出层：点外部或按 Esc 收起
+  // 向右弹出：位置按按钮 rect 计算，横向夹在视口内，纵向与按钮底对齐
+  useLayoutEffect(() => {
+    if (!open) {
+      setMenuStyle(undefined);
+      return;
+    }
+    const btn = dockRef.current?.querySelector('.sy-auth-user');
+    const menu = menuRef.current;
+    if (!btn || !menu) return;
+    const rect = btn.getBoundingClientRect();
+    const mw = menu.offsetWidth;
+    const mh = menu.offsetHeight;
+    let left = rect.right + 10;
+    if (left + mw > window.innerWidth - 12) left = Math.max(12, window.innerWidth - mw - 12);
+    let top = rect.bottom - mh;
+    if (top < 12) top = 12;
+    setMenuStyle({ position: 'fixed', left: Math.round(left), top: Math.round(top), bottom: 'auto' });
+  }, [open]);
+
+  // 弹出层：点外部或按 Esc 收起；滚动 / 改窗口尺寸时也收起（fixed 菜单会与按钮脱节）
   useEffect(() => {
     if (!open) return;
     const onPointerDown = (event: MouseEvent) => {
-      if (!dockRef.current?.contains(event.target as Node)) setOpen(false);
+      const target = event.target as Node;
+      if (!dockRef.current?.contains(target) && !menuRef.current?.contains(target)) setOpen(false);
     };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setOpen(false);
     };
+    const onScrollOrResize = () => setOpen(false);
     document.addEventListener('mousedown', onPointerDown);
     document.addEventListener('keydown', onKeyDown);
+    window.addEventListener('scroll', onScrollOrResize, { passive: true });
+    window.addEventListener('resize', onScrollOrResize);
     return () => {
       document.removeEventListener('mousedown', onPointerDown);
       document.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('scroll', onScrollOrResize);
+      window.removeEventListener('resize', onScrollOrResize);
     };
   }, [open]);
 
@@ -65,6 +98,34 @@ export default function HomeAuthDock() {
 
   const name = user?.nickname || user?.username || '博主';
   const avatar = user?.avatar || '';
+
+  const menu =
+    user && open ? (
+      <div
+        ref={menuRef}
+        className="sy-auth-menu"
+        style={menuStyle}
+        role="menu"
+        aria-label="账号"
+      >
+        <Link prefetch={false} className="sy-auth-menu-item" role="menuitem" href="/admin">
+          <i className="fa-solid fa-gauge" aria-hidden="true" />
+          后台管理
+        </Link>
+        <button
+          type="button"
+          className="sy-auth-menu-item"
+          role="menuitem"
+          onClick={() => {
+            setOpen(false);
+            logout();
+          }}
+        >
+          <i className="fa-solid fa-right-from-bracket" aria-hidden="true" />
+          退出登录
+        </button>
+      </div>
+    ) : null;
 
   return (
     <div className="sy-auth-dock" ref={dockRef} data-open={open ? '1' : undefined}>
@@ -82,29 +143,9 @@ export default function HomeAuthDock() {
               {avatar ? <img src={avatar} alt="" /> : <b>{name.slice(0, 1)}</b>}
             </span>
             <span className="sy-auth-label">{name}</span>
-            <i className="fa-solid fa-angle-up sy-auth-caret" aria-hidden="true" />
+            <i className="fa-solid fa-angle-right sy-auth-caret" aria-hidden="true" />
           </button>
-
-          {open && (
-            <div className="sy-auth-menu" role="menu" aria-label="账号">
-              <Link prefetch={false} className="sy-auth-menu-item" role="menuitem" href="/admin">
-                <i className="fa-solid fa-gauge" aria-hidden="true" />
-                后台管理
-              </Link>
-              <button
-                type="button"
-                className="sy-auth-menu-item"
-                role="menuitem"
-                onClick={() => {
-                  setOpen(false);
-                  logout();
-                }}
-              >
-                <i className="fa-solid fa-right-from-bracket" aria-hidden="true" />
-                退出登录
-              </button>
-            </div>
-          )}
+          {menu && createPortal(menu, document.body)}
         </div>
       ) : (
         <Link prefetch={false} className="sy-auth-item" href="/login?next=/admin" title="登录后进入后台">

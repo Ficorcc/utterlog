@@ -28,8 +28,8 @@ html[data-theme="Whono"] {
   color-scheme: light;
   background: var(--wh-bg);
   color: var(--wh-text);
-  overflow-y: auto;
-  height: auto;
+  overflow: hidden;
+  height: 100%;
 }
 
 html[data-theme="Whono"][data-whono-color="dark"] {
@@ -87,8 +87,8 @@ html[data-theme="Whono"] body {
   font-family: var(--wh-serif);
   font-size: 16px;
   line-height: 1.75;
-  height: auto;
-  min-height: 100vh;
+  height: 100%;
+  overflow: hidden;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
@@ -188,7 +188,7 @@ html[data-theme="Whono"] .wh-shell {
   display: grid;
   grid-template-columns: var(--wh-sidebar) 1px minmax(0, 1fr);
   max-width: 1100px;
-  min-height: 100vh;
+  height: 100vh;
   margin: 0 auto;
 }
 
@@ -201,9 +201,7 @@ html[data-theme="Whono"] .wh-divider {
    4. 侧栏
    -------------------------------------------------------------------------- */
 html[data-theme="Whono"] .wh-sidebar {
-  position: sticky;
-  top: 0;
-  height: 100vh;
+  height: 100%;
   padding: 55px 24px;
   display: flex;
   flex-direction: column;
@@ -363,9 +361,19 @@ html[data-theme="Whono"] .wh-menu-toggle {
 html[data-theme="Whono"] .wh-content {
   min-width: 0;
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
   padding: 56px var(--wh-pad-x);
   display: flex;
+  overflow-y: auto;
+  /* 隐藏滚动条但保留滚动能力（滚轮 / 触控板 / 键盘照常） */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html[data-theme="Whono"] .wh-content::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 html[data-theme="Whono"] .wh-content-inner {
@@ -381,7 +389,7 @@ html[data-theme="Whono"] .wh-footer {
   margin-top: auto;
   padding: 40px 0 10px;
   text-align: center;
-  font-family: var(--wh-kai);
+  font-family: var(--wh-serif);
   font-size: 12px;
   color: var(--wh-faint);
   display: flex;
@@ -428,7 +436,8 @@ html[data-theme="Whono"] .wh-meta {
 
 html[data-theme="Whono"] .wh-intro {
   margin: 28px 0 32px;
-  font-size: 16px;
+  font-family: var(--wh-serif);
+  font-size: 15px;
   line-height: 1.9;
   letter-spacing: 0.02em;
   white-space: pre-line;
@@ -518,7 +527,7 @@ html[data-theme="Whono"] .wh-item-title {
 }
 
 html[data-theme="Whono"] .wh-list-item:hover .wh-item-title {
-  color: var(--wh-accent);
+  color: #b88f8f;
 }
 
 html[data-theme="Whono"] .wh-item-date {
@@ -530,9 +539,9 @@ html[data-theme="Whono"] .wh-item-date {
 
 html[data-theme="Whono"] .wh-item-excerpt {
   margin: 10px 0 0;
-  color: var(--wh-muted);
+  color: #666;
   font-size: 15px;
-  line-height: 1.7;
+  line-height: 1.6;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
@@ -570,7 +579,8 @@ html[data-theme="Whono"] .wh-empty {
 /* 归档行：日期 / 标题 / 标签 */
 html[data-theme="Whono"] .wh-archive-row {
   display: grid;
-  grid-template-columns: 56px minmax(0, 1fr) auto;
+  /* 日期列按实际文字宽度收口：曾固定 56px，装不下 2026/09/29 会压到标题上 */
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 14px;
   align-items: baseline;
   padding: 8px 0;
@@ -581,6 +591,7 @@ html[data-theme="Whono"] .wh-archive-date {
   color: var(--wh-faint);
   font-family: var(--wh-kai);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 html[data-theme="Whono"] .wh-archive-title {
@@ -895,6 +906,7 @@ html[data-theme="Whono"] body[data-whono-reading="immersive"] .wh-reader-exit {
 
   html[data-theme="Whono"] .wh-shell {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
   }
 
   html[data-theme="Whono"] .wh-divider {
@@ -1154,4 +1166,61 @@ html[data-theme="Whono"],
 html[data-theme="Whono"] body {
   overflow-y: auto;
   height: auto;
+}
+
+/* --------------------------------------------------------------------------
+   14. 对齐 vii.ink 原版：索引标题 / 回顶按钮
+   -------------------------------------------------------------------------- */
+html[data-theme="Whono"] .wh-section-title--index {
+  margin-top: 4px;
+  margin-left: 14px;
+}
+
+html[data-theme="Whono"] .wh-float-action {
+  --float-bottom: calc(16px + env(safe-area-inset-bottom));
+  position: fixed;
+  right: calc(var(--wh-pad-x) + env(safe-area-inset-right));
+  bottom: var(--float-bottom);
+  width: 44px;
+  height: 44px;
+  color: var(--wh-text);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 6;
+  background: none;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease, color 0.2s ease;
+  transform: translateY(8px);
+}
+
+html[data-theme="Whono"] .wh-float-action::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1px solid var(--wh-border);
+  background: var(--wh-panel);
+  border-radius: 999px;
+  pointer-events: none;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+html[data-theme="Whono"] .wh-float-action[data-visible="true"] {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+html[data-theme="Whono"] .wh-float-action:hover {
+  color: var(--wh-accent);
+}
+
+html[data-theme="Whono"] .wh-float-icon {
+  position: relative;
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  margin: auto;
+  display: block;
 }

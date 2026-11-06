@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import Header from './Header';
 import Footer from './Footer';
+import ScrollTop from './ScrollTop';
 
 /**
  * 双栏壳：侧栏 | 1px 分隔线 | 正文。
@@ -11,12 +12,13 @@ export default function Layout({ children }: { children: ReactNode }) {
     <div className="wh-shell">
       <Header />
       <div className="wh-divider" aria-hidden="true" />
-      <main id="wh-main" className="wh-content" tabIndex={-1}>
+      <main id="wh-main" className="wh-content blog-main" tabIndex={-1}>
         <div className="wh-content-inner">
           {children}
           <Footer />
         </div>
       </main>
+      <ScrollTop />
     </div>
   );
 }

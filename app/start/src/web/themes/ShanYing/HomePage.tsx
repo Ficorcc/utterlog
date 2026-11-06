@@ -36,7 +36,7 @@ import {
   ShanYingRecentHeatmap,
   useReveal,
 } from './shanying-shared';
-import { currentSeason, resolveScene, sceneImageUrl, sceneImageSmallUrl, seasonImageUrl } from './shanying-scene';
+import { resolveScene, sceneImageUrl, sceneImageSmallUrl } from './shanying-scene';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
@@ -194,7 +194,6 @@ export default function HomePage({
   const tz = ctx.timeZone || resolveSiteTimeZone(ctx.options);
   const hour = hourInTimeZone(tz);
   const scene = resolveScene(ctx.options?.shanying_scene, hour);
-  const season = currentSeason(datePartsInTimeZone(new Date(), tz).month);
 
   const visibleCategories = useMemo(
     () => categories.filter((category: any) => Number(category.count) > 0),
@@ -375,7 +374,7 @@ export default function HomePage({
         <nav className="sy-hub-tabs" aria-label="文章分类">
           <button type="button" data-active={activeCategory === 'all' ? '1' : undefined} aria-pressed={activeCategory === 'all'} onClick={() => selectCategory('all')}>
             <span className="sy-hub-tab-image" aria-hidden="true">
-              <img src={seasonImageUrl(season)} alt="" loading="lazy" decoding="async" />
+              <img src={sceneImageSmallUrl(scene)} alt="" loading="lazy" decoding="async" />
             </span>
             <span className="sy-hub-tab-label">
               <Icon name="grid" />

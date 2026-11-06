@@ -1,7 +1,7 @@
 {
   "id": "Whono",
   "name": "Whono · 素笺双栏",
-  "version": "1.0.0",
+  "version": "1.0.6",
   "description": "移植自 astro-whono 的极简双栏主题：左侧栏导航、衬线正文、楷体注解，支持浅色/深色与阅读模式。",
   "author": "cxro（astro-whono 原作） / Utterlog 移植",
   "license": "MIT",

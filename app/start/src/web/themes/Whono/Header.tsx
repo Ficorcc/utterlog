@@ -5,6 +5,7 @@ import Link from '@/components/AppLink';
 import { usePathname } from '@/lib/navigation';
 import { useThemeContext, type MenuItem } from '@/lib/theme-context';
 import { IconMenu, IconMoon, IconRss, IconSearch, IconSun } from './Icons';
+import AdminEntry from './AdminEntry';
 import { safeHref } from './utils';
 
 const COLOR_KEY = 'whono-color';
@@ -137,6 +138,7 @@ export default function Header() {
         >
           {dark ? <IconSun /> : <IconMoon />}
         </button>
+        <AdminEntry />
         <button
           type="button"
           className="wh-icon-btn wh-menu-toggle"

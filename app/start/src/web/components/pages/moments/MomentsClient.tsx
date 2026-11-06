@@ -167,7 +167,11 @@ export default function MomentsPage({
   const [cardZs, setCardZs] = useState<Record<number, number>>({});
   const [isMobile, setIsMobile] = useState(false);
   // 列数随视口宽度自适应：<640=1, <960=2, <1280=3, 否则 4
-  const [cols, setCols] = useState(theme.name === 'ShanYing' ? 3 : 4);
+  // Whono 是 900px 双栏壳：正文列可用宽约 620px，两张 250px 卡片刚好放得下；
+  // 沿用视口断点会给到 4 列（墙宽 1155px），右侧两列会被裁掉。
+  const [cols, setCols] = useState(
+    theme.name === 'Whono' ? 2 : theme.name === 'ShanYing' ? 3 : 4,
+  );
   // 工具栏滚动避让 footer 用的上移量（footer 进入视口时按可见高度提升 toolbar）
   const [toolbarLift, setToolbarLift] = useState(0);
 
@@ -206,9 +210,17 @@ export default function MomentsPage({
     fetchTags();
     // Nebula 主题强制对齐 960px 内容容器，最多 3 列；其他主题按视口断点
     const isNebula = theme?.name === 'Nebula';
+    const isWhono = theme?.name === 'Whono';
     const check = () => {
       const w = window.innerWidth;
       setIsMobile(w < 768);
+      if (isWhono) {
+        // Whono 双栏：正文列窄，列数按「真实可用宽度」算，不看视口断点。
+        // 可用宽 = min(视口, 1100 壳宽) - 320 侧栏 - 1 分隔线 - 96(正文左右内边距) - 64(说说页内边距)
+        const available = Math.max(0, Math.min(w, 1100) - 320 - 1 - 96 - 64);
+        setCols(w < 640 || available < 560 ? 1 : 2);
+        return;
+      }
       if (w < 640) setCols(1);
       else if (w < 960) setCols(2);
       else if (isNebula || theme.name === 'ShanYing') setCols(3);

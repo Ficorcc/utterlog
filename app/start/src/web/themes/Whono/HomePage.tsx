@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from '@/components/AppLink';
 import PostCard from './PostCard';
 import { useThemeContext } from '@/lib/theme-context';
@@ -27,28 +28,51 @@ function pageHref(page: number) {
   return page <= 1 ? '/' : `/page/${page}`;
 }
 
+/** 首页头图兜底：主题自带一张，可在后台主题选项 whono_hero 里替换。 */
+const DEFAULT_HERO = '/themes/Whono/hero.webp';
+
+/** 随机占位图（picsum.photos，带固定 seed 前缀方便排查）。 */
+function randomHero() {
+  return `https://picsum.photos/seed/whono${Math.floor(Math.random() * 900) + 100}/1200/480`;
+}
+
 export default function HomePage({ posts, page, totalPages }: HomeProps) {
-  const { site, owner, tags } = useThemeContext();
+  const { site, owner, options } = useThemeContext();
   const list = Array.isArray(posts) ? posts : [];
   const total = Math.max(1, Number(totalPages) || 1);
-  const hero = list.find((post) => post?.cover_url)?.cover_url;
+
+  // 头图优先级：主题选项指定 → 首篇有封面的文章 → 随机占位图
+  const hero =
+    options.whono_hero ||
+    list.find((post) => post?.cover_url)?.cover_url ||
+    DEFAULT_HERO;
+
+  // 没有指定图时，挂载后换一张随机占位图（SSR 首帧仍用默认图，避免水合不一致）
+  const [heroSrc, setHeroSrc] = useState(hero);
+  useEffect(() => {
+    setHeroSrc(hero === DEFAULT_HERO ? randomHero() : hero);
+  }, [hero]);
+
   const intro = site.description || owner.bio || '';
-  const hotTags = (tags || []).filter((tag) => tag.count > 0).slice(0, 16);
 
   return (
     <>
       {hero ? (
         <div className="wh-hero">
-          <img src={hero} alt="" loading="eager" fetchPriority="high" />
+          <img
+            src={heroSrc}
+            alt=""
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            onError={() => setHeroSrc(DEFAULT_HERO)}
+          />
         </div>
       ) : null}
 
       {intro ? <p className="wh-intro">{plainText(intro)}</p> : null}
 
-      <div className="wh-page-header">
-        <h1 className="wh-page-title">文章</h1>
-        <p className="wh-page-subtitle">{list.length ? `第 ${page} / ${total} 页` : '还没有发布内容'}</p>
-      </div>
+      <h2 className="wh-section-title wh-section-title--index">索引</h2>
 
       <div className="wh-list">
         {list.length ? (
@@ -73,16 +97,6 @@ export default function HomePage({ posts, page, totalPages }: HomeProps) {
               下一页 ›
             </Link>
           ) : null}
-        </nav>
-      ) : null}
-
-      {hotTags.length ? (
-        <nav className="wh-article-tags" aria-label="关键词" style={{ marginTop: 36 }}>
-          {hotTags.map((tag) => (
-            <Link key={tag.id} href={`/tags/${encodeURIComponent(tag.slug)}`}>
-              #{tag.name}
-            </Link>
-          ))}
         </nav>
       ) : null}
     </>
