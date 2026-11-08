@@ -733,19 +733,26 @@ export async function listPostComments(postId: number) {
   }));
 }
 
-export async function listMoments(params: { page?: number; perPage?: number; authed?: boolean; visibility?: string } = {}) {
+export async function listMoments(params: { page?: number; perPage?: number; authed?: boolean; visibility?: string; likeVisitor?: string } = {}) {
   const page = Math.max(1, params.page || 1);
   const perPage = Math.min(500, Math.max(1, params.perPage || 20));
   const offset = (page - 1) * perPage;
   const visibility = params.authed ? String(params.visibility || '').trim() : 'public';
   const whereSql = visibility ? 'where visibility = $1' : '';
-  const queryParams: unknown[] = visibility ? [visibility] : [];
+  const filterParams: unknown[] = visibility ? [visibility] : [];
+  const visitorParam = filterParams.length + 1;
+  const queryParams: unknown[] = [...filterParams, params.likeVisitor || ''];
   const total = await one<{ count: string }>(
     `select count(*)::text as count from ${table('moments')} ${whereSql}`,
-    queryParams,
+    filterParams,
   ).catch(() => null);
   const rows = await many<Record<string, unknown>>(
-    `select * from ${table('moments')} ${whereSql}
+    `select m.*,
+       (select count(*)::integer from ${table('moment_likes')} ml where ml.moment_id = m.id) as like_count,
+       case when $${visitorParam} = '' then false else exists (
+         select 1 from ${table('moment_likes')} ml where ml.moment_id = m.id and ml.visitor_token = $${visitorParam}
+       ) end as liked
+     from ${table('moments')} m ${whereSql}
      order by is_pinned desc, created_at desc, id desc
      limit $${queryParams.length + 1} offset $${queryParams.length + 2}`,
     [...queryParams, perPage, offset],

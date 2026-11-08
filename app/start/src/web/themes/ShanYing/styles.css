@@ -6623,6 +6623,12 @@ html[data-theme='ShanYing'] .sy-comments .comment-card--reply .comment-geo,
 html[data-theme='ShanYing'] .sy-comments .comment-card--reply .comment-tech {
   border-color: color-mix(in srgb, #70aa71 32%, var(--sy-line));
   background: color-mix(in srgb, #cce8ca 62%, var(--sy-surface));
+  color: #315f37 !important;
+}
+
+html[data-theme='ShanYing'] .sy-comments .comment-card--reply .comment-reply-to {
+  color: #245c2d !important;
+  font-weight: 600;
 }
 
 html[data-theme='ShanYing'][data-shanying-mode='dark'] .sy-comments .comment-card--reply .comment-main {
@@ -6633,12 +6639,31 @@ html[data-theme='ShanYing'][data-shanying-mode='dark'] .sy-comments .comment-car
   border-right-color: color-mix(in srgb, #315f37 23%, var(--sy-surface));
 }
 
+html[data-theme='ShanYing'][data-shanying-mode='dark'] .sy-comments .comment-card--reply .comment-reply-to,
+html[data-theme='ShanYing'][data-shanying-mode='dark'] .sy-comments .comment-card--reply .comment-time,
+html[data-theme='ShanYing'][data-shanying-mode='dark'] .sy-comments .comment-card--reply .comment-geo,
+html[data-theme='ShanYing'][data-shanying-mode='dark'] .sy-comments .comment-card--reply .comment-tech {
+  border-color: rgb(124 192 133 / 0.72);
+  background: rgb(47 93 54 / 0.82);
+  color: #e5f8e7 !important;
+  font-weight: 600;
+}
+
 @media (prefers-color-scheme: dark) {
   html[data-theme='ShanYing']:not([data-shanying-mode='light']) .sy-comments .comment-card--reply .comment-main {
     background: color-mix(in srgb, #315f37 23%, var(--sy-surface));
   }
   html[data-theme='ShanYing']:not([data-shanying-mode='light']) .sy-comments .comment-card--reply .comment-main::after {
     border-right-color: color-mix(in srgb, #315f37 23%, var(--sy-surface));
+  }
+  html[data-theme='ShanYing']:not([data-shanying-mode='light']) .sy-comments .comment-card--reply .comment-reply-to,
+  html[data-theme='ShanYing']:not([data-shanying-mode='light']) .sy-comments .comment-card--reply .comment-time,
+  html[data-theme='ShanYing']:not([data-shanying-mode='light']) .sy-comments .comment-card--reply .comment-geo,
+  html[data-theme='ShanYing']:not([data-shanying-mode='light']) .sy-comments .comment-card--reply .comment-tech {
+    border-color: rgb(124 192 133 / 0.72);
+    background: rgb(47 93 54 / 0.82);
+    color: #e5f8e7 !important;
+    font-weight: 600;
   }
 }
 

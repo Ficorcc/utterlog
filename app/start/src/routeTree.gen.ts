@@ -192,6 +192,7 @@ import { Route as ApiV1PostsIdCommentsRouteImport } from './routes/api/v1/posts/
 import { Route as ApiV1PluginsIdActionRouteImport } from './routes/api/v1/plugins/$id/$action'
 import { Route as ApiV1PlaylistsIdSongsRouteImport } from './routes/api/v1/playlists/$id/songs'
 import { Route as ApiV1NotificationsIdReadRouteImport } from './routes/api/v1/notifications/$id/read'
+import { Route as ApiV1MomentsIdLikeRouteImport } from './routes/api/v1/moments/$id/like'
 import { Route as ApiV1CommentsIdReplyRouteImport } from './routes/api/v1/comments/$id/reply'
 import { Route as ApiV1CommentsIdEditRouteImport } from './routes/api/v1/comments/$id/edit'
 import { Route as ApiV1CommentsIdApproveRouteImport } from './routes/api/v1/comments/$id/approve'
@@ -1146,6 +1147,11 @@ const ApiV1NotificationsIdReadRoute =
     path: '/read',
     getParentRoute: () => ApiV1NotificationsIdRoute,
   } as any)
+const ApiV1MomentsIdLikeRoute = ApiV1MomentsIdLikeRouteImport.update({
+  id: '/like',
+  path: '/like',
+  getParentRoute: () => ApiV1MomentsIdRoute,
+} as any)
 const ApiV1CommentsIdReplyRoute = ApiV1CommentsIdReplyRouteImport.update({
   id: '/reply',
   path: '/reply',
@@ -1401,7 +1407,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/media/test-connection': typeof ApiV1MediaTestConnectionRoute
   '/api/v1/media/upload': typeof ApiV1MediaUploadRoute
   '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
-  '/api/v1/moments/$id': typeof ApiV1MomentsIdRoute
+  '/api/v1/moments/$id': typeof ApiV1MomentsIdRouteWithChildren
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/music/search': typeof ApiV1MusicSearchRoute
   '/api/v1/notifications/$id': typeof ApiV1NotificationsIdRouteWithChildren
@@ -1465,6 +1471,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/comments/$id/approve': typeof ApiV1CommentsIdApproveRoute
   '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
   '/api/v1/comments/$id/reply': typeof ApiV1CommentsIdReplyRoute
+  '/api/v1/moments/$id/like': typeof ApiV1MomentsIdLikeRoute
   '/api/v1/notifications/$id/read': typeof ApiV1NotificationsIdReadRoute
   '/api/v1/playlists/$id/songs': typeof ApiV1PlaylistsIdSongsRoute
   '/api/v1/plugins/$id/$action': typeof ApiV1PluginsIdActionRoute
@@ -1610,7 +1617,7 @@ export interface FileRoutesByTo {
   '/api/v1/media/test-connection': typeof ApiV1MediaTestConnectionRoute
   '/api/v1/media/upload': typeof ApiV1MediaUploadRoute
   '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
-  '/api/v1/moments/$id': typeof ApiV1MomentsIdRoute
+  '/api/v1/moments/$id': typeof ApiV1MomentsIdRouteWithChildren
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/music/search': typeof ApiV1MusicSearchRoute
   '/api/v1/notifications/$id': typeof ApiV1NotificationsIdRouteWithChildren
@@ -1674,6 +1681,7 @@ export interface FileRoutesByTo {
   '/api/v1/comments/$id/approve': typeof ApiV1CommentsIdApproveRoute
   '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
   '/api/v1/comments/$id/reply': typeof ApiV1CommentsIdReplyRoute
+  '/api/v1/moments/$id/like': typeof ApiV1MomentsIdLikeRoute
   '/api/v1/notifications/$id/read': typeof ApiV1NotificationsIdReadRoute
   '/api/v1/playlists/$id/songs': typeof ApiV1PlaylistsIdSongsRoute
   '/api/v1/plugins/$id/$action': typeof ApiV1PluginsIdActionRoute
@@ -1820,7 +1828,7 @@ export interface FileRoutesById {
   '/api/v1/media/test-connection': typeof ApiV1MediaTestConnectionRoute
   '/api/v1/media/upload': typeof ApiV1MediaUploadRoute
   '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
-  '/api/v1/moments/$id': typeof ApiV1MomentsIdRoute
+  '/api/v1/moments/$id': typeof ApiV1MomentsIdRouteWithChildren
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/music/search': typeof ApiV1MusicSearchRoute
   '/api/v1/notifications/$id': typeof ApiV1NotificationsIdRouteWithChildren
@@ -1884,6 +1892,7 @@ export interface FileRoutesById {
   '/api/v1/comments/$id/approve': typeof ApiV1CommentsIdApproveRoute
   '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
   '/api/v1/comments/$id/reply': typeof ApiV1CommentsIdReplyRoute
+  '/api/v1/moments/$id/like': typeof ApiV1MomentsIdLikeRoute
   '/api/v1/notifications/$id/read': typeof ApiV1NotificationsIdReadRoute
   '/api/v1/playlists/$id/songs': typeof ApiV1PlaylistsIdSongsRoute
   '/api/v1/plugins/$id/$action': typeof ApiV1PluginsIdActionRoute
@@ -2095,6 +2104,7 @@ export interface FileRouteTypes {
     | '/api/v1/comments/$id/approve'
     | '/api/v1/comments/$id/edit'
     | '/api/v1/comments/$id/reply'
+    | '/api/v1/moments/$id/like'
     | '/api/v1/notifications/$id/read'
     | '/api/v1/playlists/$id/songs'
     | '/api/v1/plugins/$id/$action'
@@ -2304,6 +2314,7 @@ export interface FileRouteTypes {
     | '/api/v1/comments/$id/approve'
     | '/api/v1/comments/$id/edit'
     | '/api/v1/comments/$id/reply'
+    | '/api/v1/moments/$id/like'
     | '/api/v1/notifications/$id/read'
     | '/api/v1/playlists/$id/songs'
     | '/api/v1/plugins/$id/$action'
@@ -2513,6 +2524,7 @@ export interface FileRouteTypes {
     | '/api/v1/comments/$id/approve'
     | '/api/v1/comments/$id/edit'
     | '/api/v1/comments/$id/reply'
+    | '/api/v1/moments/$id/like'
     | '/api/v1/notifications/$id/read'
     | '/api/v1/playlists/$id/songs'
     | '/api/v1/plugins/$id/$action'
@@ -2652,7 +2664,7 @@ export interface RootRouteChildren {
   ApiV1MediaTestConnectionRoute: typeof ApiV1MediaTestConnectionRoute
   ApiV1MediaUploadRoute: typeof ApiV1MediaUploadRoute
   ApiV1MediaUploadBrandingRoute: typeof ApiV1MediaUploadBrandingRoute
-  ApiV1MomentsIdRoute: typeof ApiV1MomentsIdRoute
+  ApiV1MomentsIdRoute: typeof ApiV1MomentsIdRouteWithChildren
   ApiV1MomentsRecentTagsRoute: typeof ApiV1MomentsRecentTagsRoute
   ApiV1MusicSearchRoute: typeof ApiV1MusicSearchRoute
   ApiV1NotificationsIdRoute: typeof ApiV1NotificationsIdRouteWithChildren
@@ -4002,6 +4014,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1NotificationsIdReadRouteImport
       parentRoute: typeof ApiV1NotificationsIdRoute
     }
+    '/api/v1/moments/$id/like': {
+      id: '/api/v1/moments/$id/like'
+      path: '/like'
+      fullPath: '/api/v1/moments/$id/like'
+      preLoaderRoute: typeof ApiV1MomentsIdLikeRouteImport
+      parentRoute: typeof ApiV1MomentsIdRoute
+    }
     '/api/v1/comments/$id/reply': {
       id: '/api/v1/comments/$id/reply'
       path: '/reply'
@@ -4374,6 +4393,18 @@ const ApiV1CommentsIdRouteWithChildren = ApiV1CommentsIdRoute._addFileChildren(
   ApiV1CommentsIdRouteChildren,
 )
 
+interface ApiV1MomentsIdRouteChildren {
+  ApiV1MomentsIdLikeRoute: typeof ApiV1MomentsIdLikeRoute
+}
+
+const ApiV1MomentsIdRouteChildren: ApiV1MomentsIdRouteChildren = {
+  ApiV1MomentsIdLikeRoute: ApiV1MomentsIdLikeRoute,
+}
+
+const ApiV1MomentsIdRouteWithChildren = ApiV1MomentsIdRoute._addFileChildren(
+  ApiV1MomentsIdRouteChildren,
+)
+
 interface ApiV1NotificationsIdRouteChildren {
   ApiV1NotificationsIdReadRoute: typeof ApiV1NotificationsIdReadRoute
 }
@@ -4573,7 +4604,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1MediaTestConnectionRoute: ApiV1MediaTestConnectionRoute,
   ApiV1MediaUploadRoute: ApiV1MediaUploadRoute,
   ApiV1MediaUploadBrandingRoute: ApiV1MediaUploadBrandingRoute,
-  ApiV1MomentsIdRoute: ApiV1MomentsIdRoute,
+  ApiV1MomentsIdRoute: ApiV1MomentsIdRouteWithChildren,
   ApiV1MomentsRecentTagsRoute: ApiV1MomentsRecentTagsRoute,
   ApiV1MusicSearchRoute: ApiV1MusicSearchRoute,
   ApiV1NotificationsIdRoute: ApiV1NotificationsIdRouteWithChildren,

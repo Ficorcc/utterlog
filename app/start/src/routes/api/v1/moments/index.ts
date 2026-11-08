@@ -4,6 +4,12 @@ import { listMoments } from '@backend/public-read';
 import { createMoment, MomentServiceError } from '@backend/services/moments';
 import { apiFail, apiOk, apiPaginated, withAdmin } from '../../../../server/http';
 
+function likeVisitor(request: Request) {
+  const raw = request.headers.get('cookie') || '';
+  const value = raw.split(';').map((part) => part.trim()).find((part) => part.startsWith('utterlog_moment_like='))?.slice('utterlog_moment_like='.length) || '';
+  return /^[a-f0-9]{32}$/i.test(value) ? value : '';
+}
+
 export const Route = createFileRoute('/api/v1/moments/')({
   server: { handlers: {
     GET: async ({ request }) => {
@@ -11,7 +17,7 @@ export const Route = createFileRoute('/api/v1/moments/')({
       const session = await authenticateRequest(request).catch(() => null);
       const page = Math.max(1, Number(query.get('page') || 1) || 1);
       const perPage = Math.min(500, Math.max(1, Number(query.get('per_page') || 20) || 20));
-      const result = await listMoments({ page, perPage, authed: Boolean(session), visibility: query.get('visibility') || '' });
+      const result = await listMoments({ page, perPage, authed: Boolean(session), visibility: query.get('visibility') || '', likeVisitor: likeVisitor(request) });
       return apiPaginated(result.data.moments, result.meta);
     },
     POST: ({ request }) => withAdmin(request, async (session) => {

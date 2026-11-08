@@ -30,6 +30,7 @@ ALTER TABLE IF EXISTS ONLY public.ul_notifications DROP CONSTRAINT IF EXISTS ul_
 ALTER TABLE IF EXISTS ONLY public.ul_music DROP CONSTRAINT IF EXISTS ul_music_author_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.ul_movies DROP CONSTRAINT IF EXISTS ul_movies_author_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.ul_moments DROP CONSTRAINT IF EXISTS ul_moments_author_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.ul_moment_likes DROP CONSTRAINT IF EXISTS ul_moment_likes_moment_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.ul_goods DROP CONSTRAINT IF EXISTS ul_goods_author_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.ul_followers DROP CONSTRAINT IF EXISTS ul_followers_user_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.ul_followers DROP CONSTRAINT IF EXISTS ul_followers_follower_id_fkey;
@@ -233,6 +234,7 @@ DROP SEQUENCE IF EXISTS public.ul_movies_id_seq;
 DROP TABLE IF EXISTS public.ul_movies;
 DROP SEQUENCE IF EXISTS public.ul_moments_id_seq;
 DROP TABLE IF EXISTS public.ul_moments;
+DROP TABLE IF EXISTS public.ul_moment_likes;
 DROP SEQUENCE IF EXISTS public.ul_metas_id_seq;
 DROP TABLE IF EXISTS public.ul_metas;
 DROP SEQUENCE IF EXISTS public.ul_media_id_seq;
@@ -1098,6 +1100,17 @@ CREATE TABLE public.ul_moments (
     created_at integer DEFAULT 0,
     updated_at integer DEFAULT 0,
     display_id integer DEFAULT 0
+);
+
+
+--
+-- Name: ul_moment_likes; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.ul_moment_likes (
+    moment_id integer NOT NULL,
+    visitor_token character varying(64) NOT NULL,
+    created_at integer DEFAULT 0 NOT NULL
 );
 
 
@@ -2055,6 +2068,14 @@ ALTER TABLE ONLY public.ul_moments
 
 
 --
+-- Name: ul_moment_likes ul_moment_likes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ul_moment_likes
+    ADD CONSTRAINT ul_moment_likes_pkey PRIMARY KEY (moment_id, visitor_token);
+
+
+--
 -- Name: ul_movies ul_movies_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2909,6 +2930,14 @@ ALTER TABLE ONLY public.ul_goods
 
 ALTER TABLE ONLY public.ul_moments
     ADD CONSTRAINT ul_moments_author_id_fkey FOREIGN KEY (author_id) REFERENCES public.ul_users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: ul_moment_likes ul_moment_likes_moment_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ul_moment_likes
+    ADD CONSTRAINT ul_moment_likes_moment_id_fkey FOREIGN KEY (moment_id) REFERENCES public.ul_moments(id) ON DELETE CASCADE;
 
 
 --

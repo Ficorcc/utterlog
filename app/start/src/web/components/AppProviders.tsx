@@ -3,7 +3,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
-import GlobalMiniPlayer from '@/components/layout/GlobalMiniPlayer';
 import { useThemeStore } from '@/lib/store';
 
 // Rehydrate the optional dashboard color preference after React owns the root.
@@ -61,7 +60,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
           },
         }}
       />
-      <GlobalMiniPlayer />
     </QueryClientProvider>
   );
 }

@@ -95,13 +95,30 @@ function formatMomentSource(source?: string | null) {
   return raw;
 }
 
-function getMomentPositions(count: number, cols = 4) {
+function momentCardHeight(moment: any) {
+  const imageCount = parseImages(moment).length;
+  if (imageCount >= 3) return 440;
+  if (imageCount > 0) return 330;
+  return 310;
+}
+
+function getMomentPositions(moments: any[], cols = 4) {
   const cardW = 250;
-  const cardH = 280;
   const gapX = 35;
-  const gapY = 25;
+  const gapY = 30;
+  const rowHeights: number[] = [];
+  moments.forEach((moment, index) => {
+    const row = Math.floor(index / cols);
+    rowHeights[row] = Math.max(rowHeights[row] || 0, momentCardHeight(moment));
+  });
+  const rowOffsets: number[] = [];
+  let nextOffset = 0;
+  rowHeights.forEach((height, index) => {
+    rowOffsets[index] = nextOffset;
+    nextOffset += height + gapY;
+  });
   const positions: { x: number; y: number; rotation: number }[] = [];
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i < moments.length; i++) {
     const col = i % cols;
     const row = Math.floor(i / cols);
     const seed = i * 11 + 7;
@@ -109,11 +126,11 @@ function getMomentPositions(count: number, cols = 4) {
     const offsetY = ((seed * 19) % 40) - 20;
     positions.push({
       x: col * (cardW + gapX) + offsetX,
-      y: row * (cardH + gapY) + offsetY,
+      y: rowOffsets[row] + offsetY,
       rotation: rotations[i % rotations.length],
     });
   }
-  return positions;
+  return { positions, height: Math.max(0, nextOffset - gapY) + 80 };
 }
 
 type MomentsPageProps = {
@@ -145,6 +162,7 @@ export default function MomentsPage({
   const [uploading, setUploading] = useState(false);
   const [locating, setLocating] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [likingIds, setLikingIds] = useState<number[]>([]);
   const source = '网页'; // Auto-detected: 网页 for web, Telegram for bot
   const [tags, setTags] = useState<string[]>(seededTags);
   const [filterTag, setFilterTag] = useState<string | null>(null);
@@ -339,6 +357,26 @@ export default function MomentsPage({
     }
   };
 
+  const handleMomentLike = async (event: React.MouseEvent<HTMLButtonElement>, moment: any) => {
+    event.stopPropagation();
+    const id = Number(moment.id);
+    if (!Number.isInteger(id) || likingIds.includes(id)) return;
+    setLikingIds((ids) => [...ids, id]);
+    try {
+      const response: any = await momentsApi.toggleLike(id);
+      const result = response?.data || response;
+      const update = (items: any[]) => items.map((item) => item.id === id
+        ? { ...item, liked: Boolean(result.liked), like_count: Number(result.like_count || 0) }
+        : item);
+      setMoments(update);
+      if (momentsPageCache) momentsPageCache = { ...momentsPageCache, moments: update(momentsPageCache.moments) };
+    } catch {
+      toast.error('点赞失败，请稍后再试');
+    } finally {
+      setLikingIds((ids) => ids.filter((value) => value !== id));
+    }
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -461,9 +499,7 @@ export default function MomentsPage({
                 return true;
               });
             }
-            const positions = getMomentPositions(filtered.length, cols);
-            const totalRows = Math.ceil(filtered.length / cols);
-            const containerH = totalRows * 305 + 100;
+            const { positions, height: containerH } = getMomentPositions(filtered, cols);
             // 容器宽度随列数收口，少几列时不留大片右侧空白：cols*250 + (cols-1)*35 + 50 噪声余量
             const containerW = cols * 250 + (cols - 1) * 35 + 50;
 
@@ -482,6 +518,7 @@ export default function MomentsPage({
               const imgs = parseImages(m);
               const isActive = activeCard === i;
               const sourceLabel = formatMomentSource(m.source);
+              const compactHeight = momentCardHeight(m);
 
               // 散落布局里卡片不许跨行覆盖：未激活时硬限制总高度并裁
                 // 掉超长内容（文字配合 line-clamp 平滑截断），激活时解除
@@ -512,7 +549,7 @@ export default function MomentsPage({
                     background: 'var(--community-surface, #fff)',
                     borderRadius: '2px',
                     boxShadow: isActive ? '0 12px 40px rgba(0,0,0,0.15)' : '0 2px 12px rgba(0,0,0,0.06)',
-                    maxHeight: scattered && !isActive ? '280px' : 'none',
+                    maxHeight: scattered && !isActive ? `${compactHeight}px` : 'none',
                     overflow: scattered && !isActive ? 'hidden' : 'visible',
                   }}>
                     {/* Text content */}
@@ -556,6 +593,25 @@ export default function MomentsPage({
                         ))}
                       </div>
                     )}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '54px', padding: '10px 16px 14px', borderTop: '1px solid var(--community-border, #eee)' }}>
+                      <button
+                        type="button"
+                        onClick={(event) => handleMomentLike(event, m)}
+                        disabled={likingIds.includes(Number(m.id))}
+                        aria-pressed={Boolean(m.liked)}
+                        aria-label={m.liked ? '取消点赞' : '点赞'}
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '6px', minHeight: '30px', padding: '4px 10px',
+                          border: `1px solid ${m.liked ? '#d94f66' : 'var(--community-border, #dedad4)'}`,
+                          borderRadius: '999px', background: m.liked ? '#d94f66' : 'transparent',
+                          color: m.liked ? '#fff' : 'var(--community-muted, #7a7670)', cursor: likingIds.includes(Number(m.id)) ? 'wait' : 'pointer',
+                          font: 'inherit', fontSize: '12px', fontWeight: 600, opacity: likingIds.includes(Number(m.id)) ? 0.7 : 1,
+                        }}
+                      >
+                        <i className={m.liked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'} aria-hidden="true" />
+                        <span>{Number(m.like_count || 0)}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               );

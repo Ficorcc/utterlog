@@ -150,7 +150,7 @@ const publicPageCache = createMiddleware().server(async ({ next, request, pathna
   const headers = new Headers(result.response.headers);
   if (headers.has('cache-control')) return result;
   if (headers.has('set-cookie')) return result;
-  headers.set('cache-control', 'public, max-age=60, stale-while-revalidate=300');
+  headers.set('cache-control', 'public, max-age=300, stale-while-revalidate=300');
   headers.set('x-utterlog-cache', 'public');
   return new Response(result.response.body, {
     status: result.response.status,

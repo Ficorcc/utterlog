@@ -99,3 +99,34 @@ export async function deleteMoment(id: number) {
   if (!await getMoment(id, true)) throw new MomentServiceError(404, '说说不存在');
   await exec(`delete from ${table('moments')} where id = $1`, [id]);
 }
+
+export async function toggleMomentLike(id: number, visitorToken: string) {
+  if (!Number.isInteger(id) || id <= 0) throw new MomentServiceError(400, '无效的说说 ID');
+  if (!/^[a-f0-9]{32}$/i.test(visitorToken)) throw new MomentServiceError(400, '无效的点赞标识');
+
+  const moment = await one<{ id: number }>(
+    `select id from ${table('moments')} where id = $1 and visibility = 'public'`,
+    [id],
+  );
+  if (!moment) throw new MomentServiceError(404, '说说不存在');
+
+  const removed = await one<{ moment_id: number }>(
+    `delete from ${table('moment_likes')} where moment_id = $1 and visitor_token = $2 returning moment_id`,
+    [id, visitorToken],
+  );
+  let liked = false;
+  if (!removed) {
+    await exec(
+      `insert into ${table('moment_likes')} (moment_id, visitor_token, created_at)
+       values ($1, $2, $3) on conflict (moment_id, visitor_token) do nothing`,
+      [id, visitorToken, nowUnix()],
+    );
+    liked = true;
+  }
+
+  const count = await one<{ count: string }>(
+    `select count(*)::text as count from ${table('moment_likes')} where moment_id = $1`,
+    [id],
+  );
+  return { id, liked, like_count: Number(count?.count || 0) };
+}

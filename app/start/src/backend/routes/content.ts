@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { config, table } from '../config';
-import { many } from '../db/helpers';
+import { many, one } from '../db/helpers';
 import { readResolvedOptionMap } from '../services/options';
 
 async function optionMap(includeSensitive: boolean) {
@@ -217,15 +217,30 @@ async function loadPublishedPostsForFeed(limit = 50) {
   ).catch(() => []);
 }
 
-function buildRssFeedXml(opts: Record<string, string>, posts: Record<string, unknown>[]) {
+// 没有文章时，采用站点设置最近一次保存的时间作为 feed 的更新时间。
+// 它来自数据库而非请求时钟，所以不会让相同内容的 ETag 每次变化。
+async function loadSiteUpdatedAt() {
+  const row = await one<{ updated_at?: unknown }>(
+    `select max(updated_at) as updated_at from ${table('options')}`,
+  ).catch(() => null);
+  return row?.updated_at ?? 0;
+}
+
+function buildRssFeedXml(
+  opts: Record<string, string>,
+  posts: Record<string, unknown>[],
+  siteUpdatedAt: unknown,
+) {
   const site = siteOrigin(opts);
   const timeZone = String(opts.site_timezone || 'Asia/Shanghai').trim() || 'Asia/Shanghai';
   const channelTitle = String(opts.site_title || 'Utterlog').trim() || 'Utterlog';
   const channelDescription = String(opts.site_description || opts.seo_default_description || channelTitle).trim();
   const permalink = opts.permalink_structure || '/posts/%postname%';
   const feedUrl = `${site}/feed`;
-  const now = new Date();
-  const lastBuildDate = formatRfc822InTimeZone(now, timeZone);
+  const feedUpdatedAt = posts.length > 0
+    ? parsePostPublishedDate(posts[0], timeZone)
+    : parsePostPublishedDate({ created_at: siteUpdatedAt }, timeZone);
+  const lastBuildDate = formatRfc822InTimeZone(feedUpdatedAt, timeZone);
   const feedAuthor = String(posts.find((post) => String(post.author_name || '').trim())?.author_name || '').trim() || channelTitle;
   const items = posts.map((post) => {
     const path = buildPostPath(post, permalink, timeZone);
@@ -401,7 +416,10 @@ ${items}
 
 export async function publicFeedResponse(request: Request) {
   const opts: Record<string, string> = await optionMap(false).catch(() => ({}));
-  const posts = await loadPublishedPostsForFeed(rssItemLimit(opts));
+  const [posts, siteUpdatedAt] = await Promise.all([
+    loadPublishedPostsForFeed(rssItemLimit(opts)),
+    loadSiteUpdatedAt(),
+  ]);
   // 同一个地址两种形态：浏览器直接打开（Accept 含 text/html）时返回
   // 主题风格的预览页；RSS 阅读器与脚本按 Accept 拿到 XML 本体。
   const accept = request.headers.get('accept') || '';
@@ -410,7 +428,7 @@ export async function publicFeedResponse(request: Request) {
       headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=300, must-revalidate' },
     });
   }
-  const xml = buildRssFeedXml(opts, posts);
+  const xml = buildRssFeedXml(opts, posts, siteUpdatedAt);
   const etag = `"${createHash('sha1').update(xml).digest('hex')}"`;
   if (request.headers.get('if-none-match') === etag) {
     return new Response(null, { status: 304, headers: { etag, 'cache-control': 'public, max-age=300, must-revalidate' } });

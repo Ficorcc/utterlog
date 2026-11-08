@@ -35,9 +35,10 @@ function GoConfirmPage() {
     if (!target) return false;
     let siteHost = '';
     try {
-      siteHost = new URL(ctx?.site.url || '', window.location.origin).hostname;
+      const siteUrl = ctx?.site.url;
+      siteHost = siteUrl ? new URL(siteUrl).hostname : '';
     } catch {}
-    const host = window.location.hostname;
+    const host = typeof window === 'undefined' ? siteHost : window.location.hostname;
     return (
       target.hostname === host ||
       (!!siteHost && (target.hostname === siteHost || target.hostname.endsWith(`.${siteHost}`))) ||
