@@ -130,3 +130,47 @@ export async function toggleMomentLike(id: number, visitorToken: string) {
   );
   return { id, liked, like_count: Number(count?.count || 0) };
 }
+
+// ── 说说评论 ──────────────────────────────────────────────
+// 轻量评论区：无嵌套回复、默认过审（垃圾过滤后续可加 status 过滤）。
+
+export async function listMomentComments(momentId: number) {
+  if (!Number.isInteger(momentId) || momentId <= 0) throw new MomentServiceError(400, '无效的说说 ID');
+  return many(
+    `select id, author_name, author_email, author_url, content, created_at
+     from ${table('moment_comments')}
+     where moment_id = $1 and status = 'approved'
+     order by created_at asc, id asc
+     limit 200`,
+    [momentId],
+  ).catch(() => []);
+}
+
+function commentAuthorField(value: unknown, label: string, max: number) {
+  const text = String(value || '').trim();
+  if (text.length > max) throw new MomentServiceError(400, `${label}过长`);
+  return text;
+}
+
+export async function createMomentComment(momentId: number, body: Record<string, unknown>, visitorId = '') {
+  if (!Number.isInteger(momentId) || momentId <= 0) throw new MomentServiceError(400, '无效的说说 ID');
+  const exists = await one<{ id: number }>(
+    `select id from ${table('moments')} where id = $1`, [momentId],
+  ).catch(() => null);
+  if (!exists) throw new MomentServiceError(404, '说说不存在');
+  const name = commentAuthorField(body.author_name, '昵称', 30);
+  if (!name) throw new MomentServiceError(400, '昵称不能为空');
+  const email = commentAuthorField(body.author_email, '邮箱', 100);
+  if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new MomentServiceError(400, '邮箱格式不正确');
+  const url = commentAuthorField(body.author_url, '网址', 200);
+  if (url && !/^https?:\/\//i.test(url)) throw new MomentServiceError(400, '网址需以 http(s):// 开头');
+  const content = String(body.content || '').trim();
+  if (!content) throw new MomentServiceError(400, '评论内容不能为空');
+  if (content.length > 1000) throw new MomentServiceError(400, '评论内容过长（最多 1000 字）');
+  const rows = await many<{ id: number }>(
+    `insert into ${table('moment_comments')} (moment_id, author_name, author_email, author_url, content, visitor_id, created_at)
+     values ($1, $2, $3, $4, $5, $6, $7) returning id`,
+    [momentId, name, email, url, content, String(visitorId || '').slice(0, 64), nowUnix()],
+  );
+  return { id: rows[0]?.id || 0 };
+}

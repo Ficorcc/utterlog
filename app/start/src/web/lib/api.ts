@@ -107,6 +107,8 @@ export const momentsApi = {
   delete: (id: number) => api.delete(`/moments/${id}`),
   toggleLike: (id: number) => api.post(`/moments/${id}/like`),
   recentTags: (limit = 8) => api.get('/moments/recent-tags', { params: { limit } }),
+  comments: (id: number) => api.get(`/moments/${id}/comments`),
+  addComment: (id: number, data: any) => api.post(`/moments/${id}/comments`, data),
 };
 
 export const geoApi = {

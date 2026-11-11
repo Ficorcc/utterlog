@@ -749,6 +749,7 @@ export async function listMoments(params: { page?: number; perPage?: number; aut
   const rows = await many<Record<string, unknown>>(
     `select m.*,
        (select count(*)::integer from ${table('moment_likes')} ml where ml.moment_id = m.id) as like_count,
+       (select count(*)::integer from ${table('moment_comments')} mc where mc.moment_id = m.id and mc.status = 'approved') as comment_count,
        case when $${visitorParam} = '' then false else exists (
          select 1 from ${table('moment_likes')} ml where ml.moment_id = m.id and ml.visitor_token = $${visitorParam}
        ) end as liked

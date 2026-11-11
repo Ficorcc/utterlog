@@ -228,6 +228,20 @@ export async function runCoreMigrations() {
     ai_audit_reason text
   )`);
   await sql.unsafe(`create index if not exists idx_ai_comment_queue_status on ${table('ai_comment_queue')} (status, created_at desc)`);
+
+  // 说说评论：与文章评论（ul_comments，post_id 非空）分离的轻量表。
+  await sql.unsafe(`create table if not exists ${table('moment_comments')} (
+    id serial primary key,
+    moment_id integer not null references ${table('moments')}(id) on delete cascade,
+    author_name varchar(80) not null,
+    author_email varchar(200) not null default '',
+    author_url varchar(500) not null default '',
+    content text not null,
+    status varchar(20) not null default 'approved',
+    visitor_id varchar(64) not null default '',
+    created_at bigint not null
+  )`);
+  await sql.unsafe(`create index if not exists idx_moment_comments_moment on ${table('moment_comments')} (moment_id, created_at asc)`);
   // comment_id 要唯一：原来的去重是「先查后插」，两步之间没有锁，并发重复提交
   // （双击 / 客户端重试）会给同一条评论生成两次回复。换成唯一索引 + insert 端
   // on conflict do nothing，数据库层兜底。先清掉可能已存在的重复行（保留最早的）。

@@ -163,6 +163,87 @@ export default function MomentsPage({
   const [locating, setLocating] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [likingIds, setLikingIds] = useState<number[]>([]);
+
+  // ── 说说评论：收缩面板 + 弹窗表单 ──
+  const [openComments, setOpenComments] = useState<Set<number>>(new Set());
+  const [commentsCache, setCommentsCache] = useState<Record<number, any[]>>({});
+  const [commentLoadingIds, setCommentLoadingIds] = useState<number[]>([]);
+  const [commentModal, setCommentModal] = useState<number | null>(null);
+  const [commentForm, setCommentForm] = useState({ author_name: '', author_email: '', author_url: '', content: '' });
+  const [commentFormError, setCommentFormError] = useState('');
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
+
+  const loadMomentComments = async (momentId: number) => {
+    if (commentLoadingIds.includes(momentId)) return;
+    setCommentLoadingIds((ids) => [...ids, momentId]);
+    try {
+      const r: any = await momentsApi.comments(momentId);
+      setCommentsCache((cache) => ({ ...cache, [momentId]: r.data || [] }));
+    } catch {} finally {
+      setCommentLoadingIds((ids) => ids.filter((x) => x !== momentId));
+    }
+  };
+
+  const toggleMomentComments = (event: React.MouseEvent, m: any, index: number) => {
+    event.stopPropagation();
+    const id = Number(m.id);
+    if (!Number.isInteger(id)) return;
+    setActiveCard(index); // 桌面散落模式下激活卡片，避免展开面板被高度裁剪裁掉
+    setOpenComments((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else {
+        next.add(id);
+        if (!commentsCache[id]) void loadMomentComments(id);
+      }
+      return next;
+    });
+  };
+
+  const openCommentModal = (event: React.MouseEvent, momentId: number) => {
+    event.stopPropagation();
+    setCommentFormError('');
+    try {
+      const saved = JSON.parse(localStorage.getItem('moment_commenter') || '{}');
+      setCommentForm((f) => ({ ...f, author_name: saved.n || '', author_email: saved.e || '', author_url: saved.u || '' }));
+    } catch {}
+    setCommentModal(momentId);
+  };
+
+  const submitMomentComment = async () => {
+    if (commentModal === null || commentSubmitting) return;
+    if (!commentForm.author_name.trim()) { setCommentFormError('昵称不能为空'); return; }
+    if (!commentForm.content.trim()) { setCommentFormError('评论内容不能为空'); return; }
+    setCommentSubmitting(true);
+    setCommentFormError('');
+    const momentId = commentModal;
+    try {
+      await momentsApi.addComment(momentId, commentForm);
+      try {
+        localStorage.setItem('moment_commenter', JSON.stringify({
+          n: commentForm.author_name.trim(), e: commentForm.author_email.trim(), u: commentForm.author_url.trim(),
+        }));
+      } catch {}
+      toast.success('评论成功');
+      setCommentModal(null);
+      setCommentForm((f) => ({ ...f, content: '' }));
+      setCommentsCache((cache) => ({ ...cache, [momentId]: undefined as any })); // 强制重拉
+      void loadMomentComments(momentId);
+      setMoments((prev) => prev.map((x: any) => Number(x.id) === momentId
+        ? { ...x, comment_count: Number(x.comment_count || 0) + 1 } : x));
+    } catch (err: any) {
+      setCommentFormError(err?.response?.data?.error?.message || '评论失败，请稍后再试');
+    } finally {
+      setCommentSubmitting(false);
+    }
+  };
+
+  useEffect(() => {
+    if (commentModal === null) return;
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setCommentModal(null); };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [commentModal]);
   const source = '网页'; // Auto-detected: 网页 for web, Telegram for bot
   const [tags, setTags] = useState<string[]>(seededTags);
   const [filterTag, setFilterTag] = useState<string | null>(null);
@@ -593,7 +674,7 @@ export default function MomentsPage({
                         ))}
                       </div>
                     )}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '54px', padding: '10px 16px 14px', borderTop: '1px solid var(--community-border, #eee)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', minHeight: '54px', padding: '10px 16px 14px', borderTop: '1px solid var(--community-border, #eee)' }}>
                       <button
                         type="button"
                         onClick={(event) => handleMomentLike(event, m)}
@@ -611,7 +692,66 @@ export default function MomentsPage({
                         <i className={m.liked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'} aria-hidden="true" />
                         <span>{Number(m.like_count || 0)}</span>
                       </button>
+                      <button
+                        type="button"
+                        onClick={(event) => toggleMomentComments(event, m, i)}
+                        aria-expanded={openComments.has(Number(m.id))}
+                        aria-label={openComments.has(Number(m.id)) ? '收起评论' : '展开评论'}
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '6px', minHeight: '30px', padding: '4px 10px',
+                          border: `1px solid ${openComments.has(Number(m.id)) ? '#4a9e8e' : 'var(--community-border, #dedad4)'}`,
+                          borderRadius: '999px', background: openComments.has(Number(m.id)) ? '#4a9e8e' : 'transparent',
+                          color: openComments.has(Number(m.id)) ? '#fff' : 'var(--community-muted, #7a7670)', cursor: 'pointer',
+                          font: 'inherit', fontSize: '12px', fontWeight: 600,
+                        }}
+                      >
+                        <i className="fa-regular fa-comment" aria-hidden="true" />
+                        <span>{Number(m.comment_count || 0)}</span>
+                      </button>
                     </div>
+                    {openComments.has(Number(m.id)) && (
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ borderTop: '1px solid var(--community-border, #eee)', padding: '14px 20px 16px', background: 'var(--community-soft, #faf9f6)' }}
+                      >
+                        {commentLoadingIds.includes(Number(m.id)) ? (
+                          <p style={{ margin: 0, fontSize: '12px', color: 'var(--community-muted, #9e9a93)', textAlign: 'center', padding: '10px 0' }}>评论加载中…</p>
+                        ) : (commentsCache[Number(m.id)] || []).length === 0 ? (
+                          <p style={{ margin: '0 0 10px', fontSize: '12px', color: 'var(--community-muted, #9e9a93)', textAlign: 'center', padding: '6px 0' }}>还没有评论，来抢沙发～</p>
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '12px' }}>
+                            {(commentsCache[Number(m.id)] || []).map((c: any) => (
+                              <div key={c.id} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                                <span aria-hidden="true" style={{
+                                  flexShrink: 0, width: '26px', height: '26px', borderRadius: '50%',
+                                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                  fontSize: '12px', fontWeight: 700, color: '#fff',
+                                  background: ['#4a9e8e', '#c4956a', '#8b7ec8', '#d4837a', '#6b9dbd'][String(c.author_name || '?').length % 5],
+                                }}>{String(c.author_name || '?').slice(0, 1).toUpperCase()}</span>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                                    <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--community-text, #2b2a28)' }}>{c.author_name}</span>
+                                    <span style={{ fontSize: '10px', color: 'var(--community-muted, #b8b4ad)' }}>{relativeTime(Number(c.created_at))}</span>
+                                  </div>
+                                  <p style={{ margin: '2px 0 0', fontSize: '12.5px', lineHeight: 1.7, color: 'var(--community-text, #3a3936)', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{c.content}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <button
+                          type="button"
+                          onClick={(event) => openCommentModal(event, Number(m.id))}
+                          style={{
+                            width: '100%', padding: '7px 0', fontSize: '12px', fontWeight: 600,
+                            border: '1px dashed var(--community-border, #dedad4)', borderRadius: '8px',
+                            background: 'transparent', color: 'var(--community-muted, #7a7670)', cursor: 'pointer',
+                          }}
+                        >
+                          <i className="fa-regular fa-pen-to-square" aria-hidden="true" style={{ marginRight: '5px' }} />写评论
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -1021,6 +1161,52 @@ export default function MomentsPage({
           全站共享 <Lightbox> 组件 —— FLIP 缩放（从被点缩略图位置放大
           / 飞回）+ 键盘导航 + 滚动锁定 + UI 工具栏 + 加载指示 ……
           全部由组件负责。说说 / 文章正文用同一份代码同一种体感。 */}
+      {commentModal !== null && (
+        <div
+          onClick={() => setCommentModal(null)}
+          style={{ position: 'fixed', inset: 0, zIndex: 3000, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-label="评论说说"
+            style={{ width: 'min(440px, 100%)', background: 'var(--community-surface, #fff)', borderRadius: '14px', boxShadow: '0 24px 80px rgba(0,0,0,0.3)', padding: '22px 24px 20px', maxHeight: '86vh', overflowY: 'auto' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <strong style={{ fontSize: '15px', color: 'var(--community-text, #2b2a28)' }}>评论说说</strong>
+              <button type="button" onClick={() => setCommentModal(null)} aria-label="关闭" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--community-muted, #9e9a93)', fontSize: '16px', padding: '2px 6px' }}>
+                <i className="fa-regular fa-xmark" aria-hidden="true" />
+              </button>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+              <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px', color: 'var(--community-muted, #7a7670)' }}>
+                昵称 *
+                <input value={commentForm.author_name} maxLength={30} onChange={(e) => setCommentForm((f) => ({ ...f, author_name: e.target.value }))} placeholder="怎么称呼你" style={{ padding: '8px 10px', fontSize: '13px', border: '1px solid var(--community-border, #dedad4)', borderRadius: '8px', background: 'var(--community-soft, #faf9f6)', color: 'var(--community-text, #2b2a28)', font: 'inherit', outline: 'none' }} />
+              </label>
+              <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px', color: 'var(--community-muted, #7a7670)' }}>
+                邮箱（不公开）
+                <input value={commentForm.author_email} maxLength={100} onChange={(e) => setCommentForm((f) => ({ ...f, author_email: e.target.value }))} placeholder="选填" style={{ padding: '8px 10px', fontSize: '13px', border: '1px solid var(--community-border, #dedad4)', borderRadius: '8px', background: 'var(--community-soft, #faf9f6)', color: 'var(--community-text, #2b2a28)', font: 'inherit', outline: 'none' }} />
+              </label>
+            </div>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px', color: 'var(--community-muted, #7a7670)', marginBottom: '10px' }}>
+              网站
+              <input value={commentForm.author_url} maxLength={200} onChange={(e) => setCommentForm((f) => ({ ...f, author_url: e.target.value }))} placeholder="https://（选填）" style={{ padding: '8px 10px', fontSize: '13px', border: '1px solid var(--community-border, #dedad4)', borderRadius: '8px', background: 'var(--community-soft, #faf9f6)', color: 'var(--community-text, #2b2a28)', font: 'inherit', outline: 'none' }} />
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px', color: 'var(--community-muted, #7a7670)', marginBottom: '6px' }}>
+              评论 *
+              <textarea value={commentForm.content} maxLength={1000} rows={4} onChange={(e) => setCommentForm((f) => ({ ...f, content: e.target.value }))} placeholder="理性讨论，友善交流…" style={{ padding: '8px 10px', fontSize: '13px', lineHeight: 1.7, border: '1px solid var(--community-border, #dedad4)', borderRadius: '8px', background: 'var(--community-soft, #faf9f6)', color: 'var(--community-text, #2b2a28)', font: 'inherit', outline: 'none', resize: 'vertical' }} />
+            </label>
+            {commentFormError && <p style={{ margin: '0 0 8px', fontSize: '12px', color: '#d94f66' }}>{commentFormError}</p>}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button type="button" onClick={() => setCommentModal(null)} style={{ padding: '7px 16px', fontSize: '12px', border: '1px solid var(--community-border, #dedad4)', borderRadius: '999px', background: 'transparent', color: 'var(--community-muted, #7a7670)', cursor: 'pointer', font: 'inherit' }}>取消</button>
+              <button type="button" onClick={submitMomentComment} disabled={commentSubmitting} style={{ padding: '7px 18px', fontSize: '12px', fontWeight: 600, border: 'none', borderRadius: '999px', background: '#4a9e8e', color: '#fff', cursor: commentSubmitting ? 'wait' : 'pointer', font: 'inherit', opacity: commentSubmitting ? 0.6 : 1 }}>
+                {commentSubmitting ? '发布中…' : '发表评论'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {lightbox && (
         <Lightbox
           list={lightbox.list}
