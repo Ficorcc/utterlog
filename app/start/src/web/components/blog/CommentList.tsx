@@ -390,7 +390,7 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
             {comment.is_admin && (
               <span className="comment-admin-badge" style={{
                 fontSize: '10px', padding: '1px 5px',
-                background: 'var(--color-primary, #0052D9)', color: '#fff', fontWeight: 500,
+                background: 'var(--color-primary, #0052D9)', color: 'var(--color-primary-text, #fff)', fontWeight: 500,
                 display: 'inline-flex', alignItems: 'center', gap: '2px',
               }}>
                 <i className="fa-solid fa-crown" style={{ fontSize: '8px' }} /> 博主

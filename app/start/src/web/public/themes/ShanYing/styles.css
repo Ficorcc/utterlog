@@ -62,6 +62,8 @@ html[data-theme='ShanYing'] {
 
   /* 覆盖 Utterlog 通用令牌，让评论 / AI 摘要 / 目录跟随主题配色 */
   --color-primary: var(--sy-accent);
+  /* 强调色背景上的文字用色：暗色荧光绿下必须用深色字而不是白字 */
+  --color-primary-text: var(--sy-accent-text);
   --color-primary-hover: #0044b8;
   --color-primary-active: #003a9e;
   --color-text-main: var(--sy-text);

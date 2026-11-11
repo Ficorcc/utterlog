@@ -187,7 +187,7 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel, com
       : passportIdentity?.identified ? passportIdentity.nickname
       : name;
 
-    const linkBtn: React.CSSProperties = { background: 'none', border: 'none', color: 'var(--color-text-dim)', cursor: 'pointer', fontSize: '11px', padding: 0 };
+    const linkBtn: React.CSSProperties = { background: 'none', border: 'none', color: 'var(--color-text-sub)', cursor: 'pointer', fontSize: '12px', padding: 0 };
     const inputStyle: React.CSSProperties = { flex: 1, minWidth: 0, padding: '7px 10px', border: '1px solid var(--color-border)', background: 'var(--color-bg-card)', outline: 'none', borderRadius: 0, color: 'var(--color-text-main)', fontFamily: 'inherit' };
 
     return (
@@ -211,7 +211,7 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel, com
                 )}
                 <span style={{ fontWeight: 600, color: 'var(--color-text-main)' }}>{compactName}</span>
                 {isAdmin && (
-                  <span style={{ fontSize: '10px', padding: '1px 6px', background: 'var(--color-primary)', color: '#fff' }}>管理员</span>
+                  <span style={{ fontSize: '10px', padding: '1px 6px', background: 'var(--color-primary)', color: 'var(--color-primary-text, #fff)' }}>管理员</span>
                 )}
                 {!isAdmin && passportIdentity?.identified && (
                   <span style={{ fontSize: '10px', padding: '1px 6px', background: '#f3e5f5', color: '#7b1fa2', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
@@ -264,7 +264,7 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel, com
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginLeft: 'auto' }}>
               {onCancel && <button onClick={onCancel} style={{ padding: '6px 14px', fontSize: '12px', border: '1px solid var(--color-border)', background: 'transparent', color: 'var(--color-text-sub)', cursor: 'pointer' }}>取消</button>}
               <button onClick={handleSubmit} disabled={submitting}
-                style={{ padding: '6px 14px', fontSize: '12px', fontWeight: 600, border: 'none', background: 'var(--color-primary)', color: '#fff', cursor: submitting ? 'wait' : 'pointer', opacity: submitting ? 0.6 : 1 }}>
+                style={{ padding: '6px 14px', fontSize: '12px', fontWeight: 600, border: 'none', background: 'var(--color-primary)', color: 'var(--color-primary-text, #fff)', cursor: submitting ? 'wait' : 'pointer', opacity: submitting ? 0.6 : 1 }}>
                 {submitting ? '...' : '回复'}
               </button>
             </div>
@@ -423,9 +423,9 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel, com
         <CommentCaptcha key={captchaVersion} onVerified={setCaptchaResult} onReset={() => { setCaptchaResult(null); setCaptchaVersion((value) => value + 1); }} />
       )}
       <button onClick={handleSubmit} disabled={submitting} className="comment-submit-button"
-        style={{ padding: '8px 20px', fontSize: '13px', fontWeight: 600, border: 'none', background: 'var(--color-primary)', color: '#fff', cursor: submitting ? 'wait' : 'pointer', opacity: submitting ? 0.6 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '80px' }}>
+        style={{ padding: '8px 20px', fontSize: '13px', fontWeight: 600, border: 'none', background: 'var(--color-primary)', color: 'var(--color-primary-text, #fff)', cursor: submitting ? 'wait' : 'pointer', opacity: submitting ? 0.6 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '80px' }}>
         {submitting ? (
-          <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#fff">
+          <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
             <path d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" opacity=".25"/>
             <path d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z">
               <animateTransform attributeName="transform" type="rotate" dur="0.75s" values="0 12 12;360 12 12" repeatCount="indefinite"/>
