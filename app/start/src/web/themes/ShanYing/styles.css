@@ -4456,11 +4456,10 @@ html[data-theme='ShanYing'] .sy-notfound-actions .sy-btn--solid {
 html[data-theme='ShanYing'] .sy-footer {
   position: relative;
   flex: 0 0 auto;
-  width: min(var(--sy-frame), calc(100% - 48px));
-  margin-inline: auto;
+  /* 通栏背景：占满视口宽；内容列见 .sy-footer-inner（与页头/正文同宽） */
+  width: 100%;
   margin-top: 40px;
   overflow: hidden;
-  border-radius: var(--sy-radius-panel) var(--sy-radius-panel) 0 0;
   isolation: isolate;
 }
 
@@ -4485,6 +4484,9 @@ html[data-theme='ShanYing'] .sy-footer-veil {
 html[data-theme='ShanYing'] .sy-footer-inner {
   display: flex;
   flex-direction: column;
+  /* 通栏页脚里的内容列：与页头胶囊、正文 .sy-frame 完全同宽对齐 */
+  width: min(var(--sy-frame), calc(100% - 48px));
+  margin-inline: auto;
   /* 2026-09-27：页脚整体压掉 30%。实测原高 185px，拆开是
    *     padding-top 46 + gap 26 + 主行 26 + (法务行 padding-top 22 + 内容 36) + padding-bottom 30
    * 主行与法务行的内容高度是文字撑出来的、不能动，只能从三处留白里挤：
@@ -5090,10 +5092,6 @@ html[data-theme='ShanYing'] .sy-auth-menu-item:hover i {
     margin-inline: -24px;
   }
 
-  html[data-theme='ShanYing'] .sy-footer {
-    width: calc(100% - 32px);
-  }
-
   html[data-theme='ShanYing'] .sy-footer-main {
     flex-wrap: wrap;
   }
@@ -5171,10 +5169,6 @@ html[data-theme='ShanYing'] .sy-auth-menu-item:hover i {
   /* 手机上访客面板左右太挤，改为上下堆叠 */
   html[data-theme='ShanYing'] .sy-hero-visitors {
     grid-template-columns: 1fr;
-  }
-
-  html[data-theme='ShanYing'] .sy-footer {
-    width: calc(100% - 24px);
   }
 
   html[data-theme='ShanYing'] .sy-footer-main {
@@ -7396,7 +7390,8 @@ html[data-theme='ShanYing'] .sy-otd {
 
 /* 「年度报告」页：/annual —— 深色默认观感，浅色跟随系统偏好。 */
 html[data-theme='ShanYing'] .sy-annual {
-  max-width: 880px;
+  /* 与页头/页脚内容列同宽（此前 880px 偏窄，未与全站对齐） */
+  max-width: var(--sy-frame);
   margin: 0 auto;
   padding: 40px 20px 64px;
 }
