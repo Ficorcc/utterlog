@@ -46,6 +46,7 @@ import { Route as AuthenticatedPostsCategoriesRouteImport } from './routes/_auth
 import { Route as AuthenticatedPagesCreateRouteImport } from './routes/_authenticated/pages_.create'
 import { Route as AuthenticatedMusicPlaylistsRouteImport } from './routes/_authenticated/music_.playlists'
 import { Route as AuthenticatedFilmsCreateRouteImport } from './routes/_authenticated/films_.create'
+import { Route as AuthenticatedCommentsMomentsRouteImport } from './routes/_authenticated/comments_.moments'
 import { Route as AuthenticatedCommentsAiRouteImport } from './routes/_authenticated/comments_.ai'
 import { Route as AuthenticatedCommentsStatusRouteImport } from './routes/_authenticated/comments_.$status'
 import { Route as AuthenticatedAiLogsRouteImport } from './routes/_authenticated/ai_.logs'
@@ -243,6 +244,12 @@ const AuthenticatedFilmsCreateRoute =
     path: '/films/create',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedCommentsMomentsRoute =
+  AuthenticatedCommentsMomentsRouteImport.update({
+    id: '/comments_/moments',
+    path: '/comments/moments',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedCommentsAiRoute = AuthenticatedCommentsAiRouteImport.update({
   id: '/comments_/ai',
   path: '/comments/ai',
@@ -310,6 +317,7 @@ export interface FileRoutesByFullPath {
   '/ai/logs': typeof AuthenticatedAiLogsRoute
   '/comments/$status': typeof AuthenticatedCommentsStatusRoute
   '/comments/ai': typeof AuthenticatedCommentsAiRoute
+  '/comments/moments': typeof AuthenticatedCommentsMomentsRoute
   '/films/create': typeof AuthenticatedFilmsCreateRoute
   '/music/playlists': typeof AuthenticatedMusicPlaylistsRoute
   '/pages/create': typeof AuthenticatedPagesCreateRoute
@@ -353,6 +361,7 @@ export interface FileRoutesByTo {
   '/ai/logs': typeof AuthenticatedAiLogsRoute
   '/comments/$status': typeof AuthenticatedCommentsStatusRoute
   '/comments/ai': typeof AuthenticatedCommentsAiRoute
+  '/comments/moments': typeof AuthenticatedCommentsMomentsRoute
   '/films/create': typeof AuthenticatedFilmsCreateRoute
   '/music/playlists': typeof AuthenticatedMusicPlaylistsRoute
   '/pages/create': typeof AuthenticatedPagesCreateRoute
@@ -399,6 +408,7 @@ export interface FileRoutesById {
   '/_authenticated/ai_/logs': typeof AuthenticatedAiLogsRoute
   '/_authenticated/comments_/$status': typeof AuthenticatedCommentsStatusRoute
   '/_authenticated/comments_/ai': typeof AuthenticatedCommentsAiRoute
+  '/_authenticated/comments_/moments': typeof AuthenticatedCommentsMomentsRoute
   '/_authenticated/films_/create': typeof AuthenticatedFilmsCreateRoute
   '/_authenticated/music_/playlists': typeof AuthenticatedMusicPlaylistsRoute
   '/_authenticated/pages_/create': typeof AuthenticatedPagesCreateRoute
@@ -445,6 +455,7 @@ export interface FileRouteTypes {
     | '/ai/logs'
     | '/comments/$status'
     | '/comments/ai'
+    | '/comments/moments'
     | '/films/create'
     | '/music/playlists'
     | '/pages/create'
@@ -488,6 +499,7 @@ export interface FileRouteTypes {
     | '/ai/logs'
     | '/comments/$status'
     | '/comments/ai'
+    | '/comments/moments'
     | '/films/create'
     | '/music/playlists'
     | '/pages/create'
@@ -533,6 +545,7 @@ export interface FileRouteTypes {
     | '/_authenticated/ai_/logs'
     | '/_authenticated/comments_/$status'
     | '/_authenticated/comments_/ai'
+    | '/_authenticated/comments_/moments'
     | '/_authenticated/films_/create'
     | '/_authenticated/music_/playlists'
     | '/_authenticated/pages_/create'
@@ -813,6 +826,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFilmsCreateRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/comments_/moments': {
+      id: '/_authenticated/comments_/moments'
+      path: '/comments/moments'
+      fullPath: '/comments/moments'
+      preLoaderRoute: typeof AuthenticatedCommentsMomentsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/comments_/ai': {
       id: '/_authenticated/comments_/ai'
       path: '/comments/ai'
@@ -903,6 +923,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAiLogsRoute: typeof AuthenticatedAiLogsRoute
   AuthenticatedCommentsStatusRoute: typeof AuthenticatedCommentsStatusRoute
   AuthenticatedCommentsAiRoute: typeof AuthenticatedCommentsAiRoute
+  AuthenticatedCommentsMomentsRoute: typeof AuthenticatedCommentsMomentsRoute
   AuthenticatedFilmsCreateRoute: typeof AuthenticatedFilmsCreateRoute
   AuthenticatedMusicPlaylistsRoute: typeof AuthenticatedMusicPlaylistsRoute
   AuthenticatedPagesCreateRoute: typeof AuthenticatedPagesCreateRoute
@@ -943,6 +964,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAiLogsRoute: AuthenticatedAiLogsRoute,
   AuthenticatedCommentsStatusRoute: AuthenticatedCommentsStatusRoute,
   AuthenticatedCommentsAiRoute: AuthenticatedCommentsAiRoute,
+  AuthenticatedCommentsMomentsRoute: AuthenticatedCommentsMomentsRoute,
   AuthenticatedFilmsCreateRoute: AuthenticatedFilmsCreateRoute,
   AuthenticatedMusicPlaylistsRoute: AuthenticatedMusicPlaylistsRoute,
   AuthenticatedPagesCreateRoute: AuthenticatedPagesCreateRoute,

@@ -137,7 +137,7 @@ export async function toggleMomentLike(id: number, visitorToken: string) {
 export async function listMomentComments(momentId: number) {
   if (!Number.isInteger(momentId) || momentId <= 0) throw new MomentServiceError(400, '无效的说说 ID');
   return many(
-    `select id, author_name, author_email, author_url, content, created_at
+    `select id, author_name, author_email, author_url, content, created_at, is_admin
      from ${table('moment_comments')}
      where moment_id = $1 and status = 'approved'
      order by created_at asc, id asc
@@ -167,10 +167,60 @@ export async function createMomentComment(momentId: number, body: Record<string,
   const content = String(body.content || '').trim();
   if (!content) throw new MomentServiceError(400, '评论内容不能为空');
   if (content.length > 1000) throw new MomentServiceError(400, '评论内容过长（最多 1000 字）');
+  // 博主免登录：邮箱与站长一致即标记为博主（前台徽标、后台列表高亮）
+  const admin = email
+    ? await one<{ name: string }>(
+        `select coalesce(nullif(nickname, ''), username) as name
+         from ${table('users')} where role = 'admin' and lower(email) = lower($1) limit 1`,
+        [email],
+      ).catch(() => null)
+    : null;
   const rows = await many<{ id: number }>(
-    `insert into ${table('moment_comments')} (moment_id, author_name, author_email, author_url, content, visitor_id, created_at)
-     values ($1, $2, $3, $4, $5, $6, $7) returning id`,
-    [momentId, name, email, url, content, String(visitorId || '').slice(0, 64), nowUnix()],
+    `insert into ${table('moment_comments')} (moment_id, author_name, author_email, author_url, content, visitor_id, created_at, is_admin)
+     values ($1, $2, $3, $4, $5, $6, $7, $8) returning id`,
+    [momentId, name, email, url, content, String(visitorId || '').slice(0, 64), nowUnix(), Boolean(admin)],
   );
-  return { id: rows[0]?.id || 0 };
+  return { id: rows[0]?.id || 0, is_admin: Boolean(admin) };
+}
+
+// ── 说说评论 · 后台管理 ────────────────────────────────────
+export async function listMomentCommentsAdmin(params: { page?: number; perPage?: number; search?: string } = {}) {
+  const page = Math.max(1, params.page || 1);
+  const perPage = Math.min(100, Math.max(1, params.perPage || 20));
+  const search = String(params.search || '').trim();
+  const like = `%${search}%`;
+  const where = search
+    ? `where mc.author_name ilike $1 or mc.content ilike $1 or mc.author_email ilike $1`
+    : '';
+  const args = search ? [like] : [];
+  const total = await one<{ count: string }>(
+    `select count(*)::text as count from ${table('moment_comments')} mc ${where}`,
+    args,
+  ).catch(() => null);
+  const rows = await many(
+    `select mc.id, mc.author_name, mc.author_email, mc.author_url, mc.content,
+            mc.is_admin, mc.created_at,
+            left(regexp_replace(coalesce(m.content, ''), E'\\s+', ' ', 'g'), 80) as moment_content,
+            m.id as moment_id
+     from ${table('moment_comments')} mc
+     left join ${table('moments')} m on m.id = mc.moment_id
+     ${where}
+     order by mc.created_at desc, mc.id desc
+     limit  ${args.length + 1} offset  ${args.length + 2}`,
+    [...args, perPage, (page - 1) * perPage],
+  ).catch(() => []);
+  const count = Number(total?.count || 0);
+  return {
+    data: rows,
+    meta: { total: count, page, per_page: perPage, total_pages: Math.max(1, Math.ceil(count / perPage)) },
+  };
+}
+
+export async function deleteMomentComment(id: number) {
+  if (!Number.isInteger(id) || id <= 0) throw new MomentServiceError(400, '无效的评论 ID');
+  const rows = await many<{ id: number }>(
+    `delete from ${table('moment_comments')} where id = $1 returning id`, [id],
+  ).catch(() => []);
+  if (!rows[0]) throw new MomentServiceError(404, '评论不存在');
+  return { id: rows[0].id };
 }

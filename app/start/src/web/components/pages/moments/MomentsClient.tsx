@@ -731,6 +731,7 @@ export default function MomentsPage({
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
                                     <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--community-text, #2b2a28)' }}>{c.author_name}</span>
+                                    {c.is_admin && <span style={{ fontSize: '9px', fontWeight: 700, padding: '1px 5px', borderRadius: '4px', background: 'var(--color-primary)', color: 'var(--color-primary-text, #fff)', letterSpacing: '0.04em' }}>博主</span>}
                                     <span style={{ fontSize: '10px', color: 'var(--community-muted, #b8b4ad)' }}>{relativeTime(Number(c.created_at))}</span>
                                   </div>
                                   <p style={{ margin: '2px 0 0', fontSize: '12.5px', lineHeight: 1.7, color: 'var(--community-text, #3a3936)', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{c.content}</p>

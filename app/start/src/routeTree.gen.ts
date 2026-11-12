@@ -72,6 +72,7 @@ import { Route as ApiV1PostsRouteImport } from './routes/api/v1/posts'
 import { Route as ApiV1OwnerRouteImport } from './routes/api/v1/owner'
 import { Route as ApiV1OptionsRouteImport } from './routes/api/v1/options'
 import { Route as ApiV1OnlineRouteImport } from './routes/api/v1/online'
+import { Route as ApiV1MomentCommentsRouteImport } from './routes/api/v1/moment-comments'
 import { Route as ApiV1HealthRouteImport } from './routes/api/v1/health'
 import { Route as ApiV1FootprintsRouteImport } from './routes/api/v1/footprints'
 import { Route as ApiV1FeedRouteImport } from './routes/api/v1/feed'
@@ -127,6 +128,7 @@ import { Route as ApiV1NotificationsIdRouteImport } from './routes/api/v1/notifi
 import { Route as ApiV1MusicSearchRouteImport } from './routes/api/v1/music/search'
 import { Route as ApiV1MomentsRecentTagsRouteImport } from './routes/api/v1/moments/recent-tags'
 import { Route as ApiV1MomentsIdRouteImport } from './routes/api/v1/moments/$id'
+import { Route as ApiV1MomentCommentsIdRouteImport } from './routes/api/v1/moment-comments/$id'
 import { Route as ApiV1MediaUploadBrandingRouteImport } from './routes/api/v1/media/upload-branding'
 import { Route as ApiV1MediaUploadRouteImport } from './routes/api/v1/media/upload'
 import { Route as ApiV1MediaTestConnectionRouteImport } from './routes/api/v1/media/test-connection'
@@ -534,6 +536,11 @@ const ApiV1OnlineRoute = ApiV1OnlineRouteImport.update({
   path: '/api/v1/online',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1MomentCommentsRoute = ApiV1MomentCommentsRouteImport.update({
+  id: '/api/v1/moment-comments',
+  path: '/api/v1/moment-comments',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1HealthRoute = ApiV1HealthRouteImport.update({
   id: '/api/v1/health',
   path: '/api/v1/health',
@@ -814,6 +821,11 @@ const ApiV1MomentsIdRoute = ApiV1MomentsIdRouteImport.update({
   id: '/api/v1/moments/$id',
   path: '/api/v1/moments/$id',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1MomentCommentsIdRoute = ApiV1MomentCommentsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiV1MomentCommentsRoute,
 } as any)
 const ApiV1MediaUploadBrandingRoute =
   ApiV1MediaUploadBrandingRouteImport.update({
@@ -1356,6 +1368,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/feed': typeof ApiV1FeedRoute
   '/api/v1/footprints': typeof ApiV1FootprintsRoute
   '/api/v1/health': typeof ApiV1HealthRoute
+  '/api/v1/moment-comments': typeof ApiV1MomentCommentsRouteWithChildren
   '/api/v1/online': typeof ApiV1OnlineRoute
   '/api/v1/options': typeof ApiV1OptionsRouteWithChildren
   '/api/v1/owner': typeof ApiV1OwnerRoute
@@ -1413,6 +1426,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/media/test-connection': typeof ApiV1MediaTestConnectionRoute
   '/api/v1/media/upload': typeof ApiV1MediaUploadRoute
   '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
+  '/api/v1/moment-comments/$id': typeof ApiV1MomentCommentsIdRoute
   '/api/v1/moments/$id': typeof ApiV1MomentsIdRouteWithChildren
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/music/search': typeof ApiV1MusicSearchRoute
@@ -1567,6 +1581,7 @@ export interface FileRoutesByTo {
   '/api/v1/feed': typeof ApiV1FeedRoute
   '/api/v1/footprints': typeof ApiV1FootprintsRoute
   '/api/v1/health': typeof ApiV1HealthRoute
+  '/api/v1/moment-comments': typeof ApiV1MomentCommentsRouteWithChildren
   '/api/v1/online': typeof ApiV1OnlineRoute
   '/api/v1/options': typeof ApiV1OptionsRouteWithChildren
   '/api/v1/owner': typeof ApiV1OwnerRoute
@@ -1624,6 +1639,7 @@ export interface FileRoutesByTo {
   '/api/v1/media/test-connection': typeof ApiV1MediaTestConnectionRoute
   '/api/v1/media/upload': typeof ApiV1MediaUploadRoute
   '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
+  '/api/v1/moment-comments/$id': typeof ApiV1MomentCommentsIdRoute
   '/api/v1/moments/$id': typeof ApiV1MomentsIdRouteWithChildren
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/music/search': typeof ApiV1MusicSearchRoute
@@ -1779,6 +1795,7 @@ export interface FileRoutesById {
   '/api/v1/feed': typeof ApiV1FeedRoute
   '/api/v1/footprints': typeof ApiV1FootprintsRoute
   '/api/v1/health': typeof ApiV1HealthRoute
+  '/api/v1/moment-comments': typeof ApiV1MomentCommentsRouteWithChildren
   '/api/v1/online': typeof ApiV1OnlineRoute
   '/api/v1/options': typeof ApiV1OptionsRouteWithChildren
   '/api/v1/owner': typeof ApiV1OwnerRoute
@@ -1836,6 +1853,7 @@ export interface FileRoutesById {
   '/api/v1/media/test-connection': typeof ApiV1MediaTestConnectionRoute
   '/api/v1/media/upload': typeof ApiV1MediaUploadRoute
   '/api/v1/media/upload-branding': typeof ApiV1MediaUploadBrandingRoute
+  '/api/v1/moment-comments/$id': typeof ApiV1MomentCommentsIdRoute
   '/api/v1/moments/$id': typeof ApiV1MomentsIdRouteWithChildren
   '/api/v1/moments/recent-tags': typeof ApiV1MomentsRecentTagsRoute
   '/api/v1/music/search': typeof ApiV1MusicSearchRoute
@@ -1992,6 +2010,7 @@ export interface FileRouteTypes {
     | '/api/v1/feed'
     | '/api/v1/footprints'
     | '/api/v1/health'
+    | '/api/v1/moment-comments'
     | '/api/v1/online'
     | '/api/v1/options'
     | '/api/v1/owner'
@@ -2049,6 +2068,7 @@ export interface FileRouteTypes {
     | '/api/v1/media/test-connection'
     | '/api/v1/media/upload'
     | '/api/v1/media/upload-branding'
+    | '/api/v1/moment-comments/$id'
     | '/api/v1/moments/$id'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/music/search'
@@ -2203,6 +2223,7 @@ export interface FileRouteTypes {
     | '/api/v1/feed'
     | '/api/v1/footprints'
     | '/api/v1/health'
+    | '/api/v1/moment-comments'
     | '/api/v1/online'
     | '/api/v1/options'
     | '/api/v1/owner'
@@ -2260,6 +2281,7 @@ export interface FileRouteTypes {
     | '/api/v1/media/test-connection'
     | '/api/v1/media/upload'
     | '/api/v1/media/upload-branding'
+    | '/api/v1/moment-comments/$id'
     | '/api/v1/moments/$id'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/music/search'
@@ -2414,6 +2436,7 @@ export interface FileRouteTypes {
     | '/api/v1/feed'
     | '/api/v1/footprints'
     | '/api/v1/health'
+    | '/api/v1/moment-comments'
     | '/api/v1/online'
     | '/api/v1/options'
     | '/api/v1/owner'
@@ -2471,6 +2494,7 @@ export interface FileRouteTypes {
     | '/api/v1/media/test-connection'
     | '/api/v1/media/upload'
     | '/api/v1/media/upload-branding'
+    | '/api/v1/moment-comments/$id'
     | '/api/v1/moments/$id'
     | '/api/v1/moments/recent-tags'
     | '/api/v1/music/search'
@@ -2622,6 +2646,7 @@ export interface RootRouteChildren {
   ApiV1FeedRoute: typeof ApiV1FeedRoute
   ApiV1FootprintsRoute: typeof ApiV1FootprintsRoute
   ApiV1HealthRoute: typeof ApiV1HealthRoute
+  ApiV1MomentCommentsRoute: typeof ApiV1MomentCommentsRouteWithChildren
   ApiV1OnlineRoute: typeof ApiV1OnlineRoute
   ApiV1OptionsRoute: typeof ApiV1OptionsRouteWithChildren
   ApiV1OwnerRoute: typeof ApiV1OwnerRoute
@@ -3186,6 +3211,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1OnlineRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/moment-comments': {
+      id: '/api/v1/moment-comments'
+      path: '/api/v1/moment-comments'
+      fullPath: '/api/v1/moment-comments'
+      preLoaderRoute: typeof ApiV1MomentCommentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/health': {
       id: '/api/v1/health'
       path: '/api/v1/health'
@@ -3570,6 +3602,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/v1/moments/$id'
       preLoaderRoute: typeof ApiV1MomentsIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/moment-comments/$id': {
+      id: '/api/v1/moment-comments/$id'
+      path: '/$id'
+      fullPath: '/api/v1/moment-comments/$id'
+      preLoaderRoute: typeof ApiV1MomentCommentsIdRouteImport
+      parentRoute: typeof ApiV1MomentCommentsRoute
     }
     '/api/v1/media/upload-branding': {
       id: '/api/v1/media/upload-branding'
@@ -4301,6 +4340,17 @@ const ApiV1CategoriesRouteWithChildren = ApiV1CategoriesRoute._addFileChildren(
   ApiV1CategoriesRouteChildren,
 )
 
+interface ApiV1MomentCommentsRouteChildren {
+  ApiV1MomentCommentsIdRoute: typeof ApiV1MomentCommentsIdRoute
+}
+
+const ApiV1MomentCommentsRouteChildren: ApiV1MomentCommentsRouteChildren = {
+  ApiV1MomentCommentsIdRoute: ApiV1MomentCommentsIdRoute,
+}
+
+const ApiV1MomentCommentsRouteWithChildren =
+  ApiV1MomentCommentsRoute._addFileChildren(ApiV1MomentCommentsRouteChildren)
+
 interface ApiV1OptionsRouteChildren {
   ApiV1OptionsTestCredentialRoute: typeof ApiV1OptionsTestCredentialRoute
   ApiV1OptionsTestEmailRoute: typeof ApiV1OptionsTestEmailRoute
@@ -4571,6 +4621,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1FeedRoute: ApiV1FeedRoute,
   ApiV1FootprintsRoute: ApiV1FootprintsRoute,
   ApiV1HealthRoute: ApiV1HealthRoute,
+  ApiV1MomentCommentsRoute: ApiV1MomentCommentsRouteWithChildren,
   ApiV1OnlineRoute: ApiV1OnlineRoute,
   ApiV1OptionsRoute: ApiV1OptionsRouteWithChildren,
   ApiV1OwnerRoute: ApiV1OwnerRoute,

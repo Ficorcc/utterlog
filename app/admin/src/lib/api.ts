@@ -143,6 +143,13 @@ export const tagsApi = {
 };
 
 // Comments API
+// 说说评论（独立表，与文章评论分离）：博主凭邮箱免登录识别
+export const momentCommentsApi = {
+  list: (params?: { page?: number; per_page?: number; search?: string }) =>
+    api.get('/moment-comments', { params }),
+  delete: (id: number) => api.delete(`/moment-comments/${id}`),
+};
+
 export const commentsApi = {
   list: (params?: { page?: number; per_page?: number; status?: string; post_id?: number; user_id?: number; search?: string }) =>
     api.get('/comments', { params }),

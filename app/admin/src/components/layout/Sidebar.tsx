@@ -69,6 +69,7 @@ const menuItems: MenuItem[] = [
     children: [
       { to: '/comments', label: '全部评论', icon: MessageSquareIcon },
       { to: '/comments/ai', label: 'AI 队列', icon: BotIcon },
+      { to: '/comments/moments', label: '说说评论', icon: MessageSquareIcon },
     ],
   },
   { to: '/links', icon: LinkIcon, label: '友链', sub: 'Links' },

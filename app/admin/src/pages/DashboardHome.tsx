@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, type ReactNode } from 'react';
 import { useNavigate } from '@/lib/router';
 import {
-  FileText, MessageSquare, SquarePen, FolderOpen, Settings as SettingsIcon,
+  FileText, MessageSquare, MessageCircle, SquarePen, FolderOpen, Settings as SettingsIcon,
   ArrowRight, Plus, Eye, TrendingUp, FolderTree, Tags, Type, CalendarDays,
   BarChart3, Zap, type LucideIcon,
 } from 'lucide-react';
@@ -54,6 +54,7 @@ export default function DashboardPage() {
   const [todo, setTodo] = useState<Todo>({ pending_comments: 0, drafts: 0, link_requests: 0 });
   const [recentPosts, setRecentPosts] = useState<RecentPost[]>([]);
   const [recentComments, setRecentComments] = useState<any[]>([]);
+  const [recentMomentComments, setRecentMomentComments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // 加载态上报给 header 的统一 spinner；离开本页时清掉。
@@ -97,6 +98,7 @@ export default function DashboardPage() {
       setSparkline(days30);
       setRecentPosts((bootstrap.recent_posts || []).filter((p: any) => p.id != null).slice(0, 5));
       setRecentComments((bootstrap.recent_comments || []).filter((c: any) => c.id != null).slice(0, 5));
+      setRecentMomentComments((bootstrap.recent_moment_comments || []).filter((c: any) => c.id != null).slice(0, 5));
     } catch { /* interceptor handles expired sessions */ } finally { setLoading(false); }
 
   };
@@ -345,6 +347,31 @@ export default function DashboardPage() {
                 </div>
               );
             })
+          )}
+        </div>
+
+        {/* Moment comments —— 说说评论独立列表 */}
+        <div className="overflow-hidden border border-border bg-card">
+          <div className="flex items-center justify-between border-b border-border px-4 py-3 md:px-5 md:py-4">
+            <SectionTitle icon={MessageCircle}>说说评论</SectionTitle>
+            <ViewAll to="/comments/moments" label={t('admin.dashboard.viewAll', '全部')} />
+          </div>
+          {loading ? null : recentMomentComments.length === 0 ? (
+            <div className="px-5 py-12 text-center text-sm text-muted-foreground">暂无说说评论</div>
+          ) : (
+            recentMomentComments.map((c, idx) => (
+              <div key={c.id} className={`flex min-h-18 items-center px-4 py-3 md:px-5 md:py-3.5 ${idx < recentMomentComments.length - 1 ? 'border-b border-border' : ''}`}>
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-primary">{(c.author || '?')[0]}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex items-center">
+                    <span className="shrink-0 text-xs-plus font-medium text-muted-foreground">{c.author}</span>
+                    {c.is_admin && <span className="ml-1.5 rounded bg-primary px-1 py-px text-2xs font-semibold text-primary-foreground">博主</span>}
+                    <span className="ml-auto shrink-0 text-xs text-muted-foreground">{formatRelativeTime(c.created_at, t)}</span>
+                  </div>
+                  <p className="truncate text-xs-plus leading-normal text-foreground">{c.content}</p>
+                </div>
+              </div>
+            ))
           )}
         </div>
 

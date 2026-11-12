@@ -242,6 +242,8 @@ export async function runCoreMigrations() {
     created_at bigint not null
   )`);
   await sql.unsafe(`create index if not exists idx_moment_comments_moment on ${table('moment_comments')} (moment_id, created_at asc)`);
+  // 博主凭邮箱识别（免登录）：说说评论的发布者若是站长本人则带徽标
+  await sql.unsafe(`alter table ${table('moment_comments')} add column if not exists is_admin boolean not null default false`);
   // comment_id 要唯一：原来的去重是「先查后插」，两步之间没有锁，并发重复提交
   // （双击 / 客户端重试）会给同一条评论生成两次回复。换成唯一索引 + insert 端
   // on conflict do nothing，数据库层兜底。先清掉可能已存在的重复行（保留最早的）。

@@ -130,9 +130,17 @@ export async function adminDashboardPayload() {
     // owner replies.
     listComments({ page: 1, perPage: 5, status: 'approved', excludeAdmin: true, authed: true }),
   ]);
+  const momentComments = await many(
+    `select mc.id, mc.author_name as author, mc.content, mc.created_at, mc.is_admin,
+            left(regexp_replace(coalesce(m.content, ''), E'\\s+', ' ', 'g'), 40) as moment_content
+     from ${table('moment_comments')} mc
+     left join ${table('moments')} m on m.id = mc.moment_id
+     order by mc.created_at desc, mc.id desc limit 5`,
+  ).catch(() => []);
   return {
     stats,
     recent_posts: posts.data,
     recent_comments: comments.data,
+    recent_moment_comments: momentComments,
   };
 }

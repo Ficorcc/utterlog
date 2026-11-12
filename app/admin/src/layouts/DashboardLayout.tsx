@@ -56,6 +56,7 @@ const pageTitleMap: Record<string, PageMeta> = {
   '/footprints':     { label: '足迹管理',      en: 'Footprints',      icon: MapPin },
   '/comments':       { label: '评论管理',      en: 'Comments',        icon: MessagesSquare },
   '/comments/ai':    { label: 'AI 评论队列',    en: 'AI Comment Queue', icon: Bot },
+  '/comments/moments': { label: '说说评论',       en: 'Moment Comments', icon: MessagesSquare },
   '/links':          { label: '友链管理',      en: 'Links',           icon: LinkIcon },
   '/media':          { label: '媒体库',        en: 'Media',           icon: Images },
   '/albums':         { label: '相册管理',      en: 'Albums',          icon: GalleryVerticalEnd },
