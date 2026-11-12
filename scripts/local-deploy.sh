@@ -75,6 +75,12 @@ if [ "$BEFORE" != "$AFTER" ]; then
   sudo -u utterlog /opt/bun/bin/bun install --frozen-lockfile >/dev/null 2>&1 || sudo -u utterlog /opt/bun/bin/bun install >/dev/null
 fi
 chown -R utterlog:utterlog "$DIR"
+# 防回退校验：部署后源码必须与 HEAD 一致（曾发生工作区被静默回退的事故）
+if ! git diff --quiet; then
+  echo "⚠ 警告：服务器工作区与 HEAD 不一致，可能被回退！"
+  git status --porcelain | head -5
+  exit 1
+fi
 systemctl restart utterlog-app.service
 sleep 3
 systemctl is-active --quiet utterlog-app.service || { echo "✗ 服务未启动"; exit 1; }
