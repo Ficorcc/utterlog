@@ -17,6 +17,9 @@
 
 html[data-theme='ShanYing'] {
   --sy-frame: 1000px;
+  /* 页头/内容/页脚内容列共用的列宽：三线全断点对齐的唯一真源。
+     断点覆盖见各 @media（900px→32px 沟槽，700px→24px）。 */
+  --sy-col: min(var(--sy-frame), calc(100% - 48px));
   --sy-reading: 880px;
 
   --sy-bg: #faf9f7;
@@ -155,7 +158,7 @@ html[data-theme='ShanYing'] .sy-main {
 }
 
 html[data-theme='ShanYing'] .sy-frame {
-  width: min(var(--sy-frame), calc(100% - 48px));
+  width: var(--sy-col);
   margin-inline: auto;
   padding: 100px 0 0;
   display: flex;
@@ -234,9 +237,13 @@ html[data-theme='ShanYing'] .sy-header {
   --sy-hd-accent: var(--sy-accent);
   --sy-hd-shadow: none;
 
-  position: fixed;
+  /* sticky（在 .blog-main 滚动容器内，见 Layout）：百分比宽度解析
+     到滚动容器内容盒，与内容列/页脚内容列精确同轴，消除 fixed 按
+     视口居中的半个滚动条偏移。负下边距抵消自身占位，正文顶部留白
+     （.sy-frame padding-top 100px）维持原视觉。 */
+  position: sticky;
   top: 18px;
-  left: 50%;
+  margin: 18px auto -80px;
   z-index: 60;
   display: grid;
   /* 2026-09-27：站名要落在正中。原来写的是 `1fr auto 1fr`，但 `1fr` 的真身是
@@ -248,12 +255,11 @@ html[data-theme='ShanYing'] .sy-header {
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 10px;
-  width: min(var(--sy-frame), calc(100% - 48px));
+  width: var(--sy-col);
   height: 62px;
   /* 2026-09-27：原来是 `0 10px 0 14px`（左侧多 4px 去抵消导航自身的 4px 内边距），
      但左右不等 = 内容框中心偏离头部中心 2px，站名就不是正中了。改成对称值。 */
   padding: 0 12px;
-  transform: translateX(-50%);
   border-radius: 999px;
   text-shadow: var(--sy-hd-shadow);
   transition: width 0.55s var(--sy-ease), padding 0.45s var(--sy-ease), color 0.3s;
@@ -4439,7 +4445,7 @@ html[data-theme='ShanYing'] .sy-footer-inner {
   display: flex;
   flex-direction: column;
   /* 通栏页脚里的内容列：与页头胶囊、正文 .sy-frame 完全同宽对齐 */
-  width: min(var(--sy-frame), calc(100% - 48px));
+  width: var(--sy-col);
   margin-inline: auto;
   /* 2026-09-27：页脚整体压掉 30%。实测原高 185px，拆开是
    *     padding-top 46 + gap 26 + 主行 26 + (法务行 padding-top 22 + 内容 36) + padding-bottom 30
@@ -5032,8 +5038,8 @@ html[data-theme='ShanYing'] .sy-auth-menu-item:hover i {
     display: flex;
   }
 
-  html[data-theme='ShanYing'] .sy-frame {
-    width: calc(100% - 32px);
+  html[data-theme='ShanYing'] {
+    --sy-col: calc(100% - 32px);
   }
 
   html[data-theme='ShanYing'] .sy-hero {
@@ -5070,13 +5076,15 @@ html[data-theme='ShanYing'] .sy-auth-menu-item:hover i {
 }
 
 @media (max-width: 700px) {
+  html[data-theme='ShanYing'] {
+    --sy-col: calc(100% - 24px);
+  }
+
   html[data-theme='ShanYing'] .sy-frame {
-    width: calc(100% - 24px);
     gap: 18px;
   }
 
   html[data-theme='ShanYing'] .sy-header {
-    width: calc(100% - 24px);
     height: 56px;
     padding: 0 6px 0 8px;
   }
