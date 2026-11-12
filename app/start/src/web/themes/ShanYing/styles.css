@@ -1129,6 +1129,62 @@ html[data-theme='ShanYing'] .sy-visitor:hover {
   border-color: #fff;
 }
 
+/* ═══ 桌面端（≥1051px）「最近来聊天的朋友」的悬停展开 ═══════════════════
+   问题：悬停时原来靠 `margin-left: 2px` 把头像摊开，头像占位一变宽，flex 的
+   换行点跟着变，10 个头像从 5+5 被挤成 4 行（实测 4+1+3+2），面板被撑高、
+   整页跟着跳一下；而且摊开是往两边挤，把「发现更多博客」那一列的图标压住。
+
+   做法：这一档改用固定 5 列的 grid 接管排版（每行恒 5 个 → 恒 2 行），
+   「摊开」改成把轨道从 28px 拉宽到 40px：
+     · 28px 轨道 + 38px 头像 = 露出的 10px 恰好是原来 -10px 负边距的重叠量，
+       静止态的像素位置与旧版 flex 完全一致（观感不变）；
+     · 轨道拉宽到 40px = 原来悬停时 margin-left:2px 的间距（摊开的观感不变），
+       但换行点由固定列数决定，不会再掉到第 3、4 行；
+     · grid 轨道变宽时整体向右溢出「访客」这一列，挤进右边「发现更多博客」
+       的地盘（实测头像右缘从 986px 推到 1044px）。
+
+   同时右边的图标整体右移 23px 让位 —— 23px = 访客列宽 169.4px - 图标宽 146px
+   （4 个 32px 图标 + 3 个 6px 间距），移完正好贴住面板内容区右缘。
+
+   只在 ≥1051px 生效：这一档面板宽度固定（容器 1000px），列宽与每行个数都恒定，
+   上面换算出来的数值才准；更窄的档位面板本身是流式的，行数会变，另算。 */
+@media (min-width: 1051px) {
+  html[data-theme='ShanYing'] .sy-visitor-row {
+    display: grid;
+    grid-template-columns: repeat(5, 28px);
+    justify-content: start;
+    align-content: start;
+    row-gap: 0;
+    transition: grid-template-columns 0.36s var(--sy-ease);
+  }
+
+  /* 重叠改由轨道宽度表达，负边距全部归零（否则 grid 里会再往左挪 10px） */
+  html[data-theme='ShanYing'] .sy-visitor {
+    margin-left: 0;
+  }
+
+  html[data-theme='ShanYing'] .sy-visitor-row:hover {
+    grid-template-columns: repeat(5, 40px);
+  }
+
+  html[data-theme='ShanYing'] .sy-visitor-row:hover .sy-visitor {
+    margin-left: 0;
+  }
+
+  /* 没有访客时的占位文案要占满整行，别挤在 28px 的窄轨道里 */
+  html[data-theme='ShanYing'] .sy-visitor-empty {
+    grid-column: 1 / -1;
+  }
+
+  html[data-theme='ShanYing'] .sy-discover-links {
+    transition: transform 0.36s var(--sy-ease);
+  }
+
+  html[data-theme='ShanYing'] .sy-hero-visitors:has(.sy-visitor-row:hover) .sy-discover-links {
+    transform: translateX(23px);
+  }
+}
+
 html[data-theme='ShanYing'] .sy-visitor-empty {
   color: rgb(255 255 255 / 0.5);
   font-size: 12px;

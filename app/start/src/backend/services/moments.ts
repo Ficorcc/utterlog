@@ -206,7 +206,7 @@ export async function listMomentCommentsAdmin(params: { page?: number; perPage?:
      left join ${table('moments')} m on m.id = mc.moment_id
      ${where}
      order by mc.created_at desc, mc.id desc
-     limit  ${args.length + 1} offset  ${args.length + 2}`,
+     limit $${args.length + 1} offset $${args.length + 2}`,
     [...args, perPage, (page - 1) * perPage],
   ).catch(() => []);
   const count = Number(total?.count || 0);
