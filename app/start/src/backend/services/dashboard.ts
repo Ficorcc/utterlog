@@ -130,11 +130,16 @@ export async function adminDashboardPayload() {
     // owner replies.
     listComments({ page: 1, perPage: 5, status: 'approved', excludeAdmin: true, authed: true }),
   ]);
+  // 概览页说说评论只列「外来读者」的评论：博主免登录时自己的评论也会落库
+  // （is_admin 按邮箱匹配站长标记），概览是给站长看外部反馈的入口，
+  // 自己的回复混进来没意义。is_admin 才是博主身份的唯一真源，
+  // 不要按昵称/邮箱再猜一遍（站长可能换昵称）。
   const momentComments = await many(
     `select mc.id, mc.author_name as author, mc.content, mc.created_at, mc.is_admin,
             left(regexp_replace(coalesce(m.content, ''), E'\\s+', ' ', 'g'), 40) as moment_content
      from ${table('moment_comments')} mc
      left join ${table('moments')} m on m.id = mc.moment_id
+     where coalesce(mc.is_admin, false) = false
      order by mc.created_at desc, mc.id desc limit 5`,
   ).catch(() => []);
   return {
