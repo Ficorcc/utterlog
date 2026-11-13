@@ -134,6 +134,29 @@ body {
   margin: 0;
 }
 
+/* 关掉整屏的 I 型文本光标。
+   Chrome / Safari 在「可选中的文字」上默认把鼠标指针渲染成 I 型文本光标
+   （cursor:auto 在文字上下文里解析成 text），后台整屏都是文字，于是鼠标
+   移到哪都是一根竖线。这里把根元素的光标钉死成箭头（default），
+   再给真正能输入的位置（input / textarea / contenteditable）单独恢复 text，
+   保证编辑时该有的插入光标还在。
+
+   放 @layer base 而不是裸规则：Tailwind 的 cursor-pointer 等工具类在
+   utilities 层，层级更高，个别可点元素想用手型照样覆盖得过。
+   链接是 UA 显式声明 cursor:auto → pointer，不受这条影响。 */
+@layer base {
+  html,
+  body {
+    cursor: default;
+  }
+
+  input,
+  textarea,
+  [contenteditable='true'] {
+    cursor: text;
+  }
+}
+
 /* 手机端布局退回普通文档流（.dashboard-shell 为 max-md:block、内容区
    max-md:overflow-y-visible），必须同步解除 html 的内部滚动锁定，
    否则仪表盘在手机上无法下拉查看最近文章和评论。 */

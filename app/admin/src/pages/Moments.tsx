@@ -331,7 +331,7 @@ export default function MomentsPage() {
                       type="button"
                       onClick={() => setEditingTag({ old: tag, draft: tag })}
                       title={t('admin.common.edit', '编辑')}
-                      className="cursor-text border-none bg-transparent p-0 font-[inherit] text-inherit"
+                      className="cursor-pointer border-none bg-transparent p-0 font-[inherit] text-inherit"
                     >
                       {tag}
                     </button>
