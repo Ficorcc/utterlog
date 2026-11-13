@@ -18,6 +18,27 @@ body {
   margin: 0;
 }
 
+/* 关掉整屏的 I 型文本光标（与后台 admin/src/styles/globals.css 同一条规则）。
+   Chrome / Edge / Safari 在「可选中的文字」上默认把鼠标指针渲染成 I 型文本
+   光标（cursor:auto 在文字上下文里解析成 text），正文密集的页面于是鼠标移到
+   哪都是一根竖线。这里把根元素的光标钉死成箭头（default），再给真正能输入
+   的位置（input / textarea / contenteditable）单独恢复 text。
+
+   放 @layer base 而不是裸规则：Tailwind 的 cursor-pointer 等工具类在
+   utilities 层、层级更高，链接与可点元素想用手型照样覆盖得过。 */
+@layer base {
+  html,
+  body {
+    cursor: default;
+  }
+
+  input,
+  textarea,
+  [contenteditable='true'] {
+    cursor: text;
+  }
+}
+
 /* Blog main: scrollbar always visible, footer sticks to bottom.
    `.lightbox-active` on <html> locks the scroll so opening / closing
    an image lightbox can't shift the underlying article position —
