@@ -1,9 +1,9 @@
 import { useEffect, useState, useRef, type ReactNode } from 'react';
 import { useNavigate } from '@/lib/router';
 import {
-  FileText, MessageSquare, MessageCircle, SquarePen, FolderOpen, Settings as SettingsIcon,
+  FileText, MessageSquare, MessageCircle, SquarePen,
   ArrowRight, Plus, Eye, TrendingUp, FolderTree, Tags, Type, CalendarDays,
-  BarChart3, Zap, type LucideIcon,
+  BarChart3, type LucideIcon,
 } from 'lucide-react';
 
 function AnimatedNumber({ value }: { value: number }) {
@@ -133,13 +133,6 @@ export default function DashboardPage() {
     { count: todo.link_requests, label: t('admin.dashboard.todo.linkRequests', '条友链申请待处理'), href: '/links?status=0' },
   ].filter((item) => item.count > 0);
 
-  const quickActions = [
-    { label: t('admin.dashboard.quick.writePost', '写文章'), Icon: SquarePen, href: '/posts/create' },
-    { label: t('admin.dashboard.quick.categories', '管分类'), Icon: FolderOpen, href: '/posts/categories' },
-    { label: t('admin.dashboard.quick.comments', '看评论'), Icon: MessageSquare, href: '/comments' },
-    { label: t('admin.nav.settings', '设置'), Icon: SettingsIcon, href: '/settings' },
-  ];
-
   // 状态改成纯文字：列表里绝大多数是「已发布」，彩色底块只是噪音。
   // 只有需要动作的状态（草稿 / 待审）才用主色点出来。
   const statusMap: Record<string, { text: string; cls: string }> = {
@@ -245,7 +238,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Trend + Quick actions */}
+      {/* Trend + Recent posts */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-[2fr_1fr] items-stretch">
         {/* Trend chart */}
         <div className="flex flex-col border border-border bg-card p-3 pb-2.5 md:p-5 md:pb-2.5">
@@ -286,32 +279,9 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Quick actions —— 从 4 个大图标块改成一列可点的行，靠分隔线区分 */}
-        <div className="flex flex-col border border-border bg-card">
-          <div className="px-4 py-3 md:px-5 md:py-4">
-            <SectionTitle icon={Zap}>{t('admin.dashboard.quickActions', '快捷操作')}</SectionTitle>
-          </div>
-          <div className="flex flex-1 flex-col divide-y divide-border border-t border-border">
-            {quickActions.map((a) => (
-              <button
-                key={a.label}
-                type="button"
-                onClick={() => navigate(a.href)}
-                className="group flex flex-1 items-center gap-3 bg-transparent px-4 py-2.5 text-left transition-colors hover:bg-muted/40 md:px-5 md:py-3"
-              >
-                <a.Icon className="size-4 shrink-0 text-muted-foreground group-hover:text-primary" />
-                <span className="text-xs-plus text-foreground">{a.label}</span>
-                <ArrowRight className="ml-auto size-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Recent content —— 最近文章 / 最新评论 / 说说评论 三块纵向依次排列 */}
-      <div className="flex flex-col gap-4">
-        {/* Recent posts */}
-        <div className="overflow-hidden border border-border bg-card">
+        {/* Recent posts —— 原本独占下方整行，窄栏更合适：
+            标题 + 紧凑列表，和左侧趋势图并排。 */}
+        <div className="flex flex-col overflow-hidden border border-border bg-card">
           <div className="flex items-center justify-between border-b border-border px-4 py-3 md:px-5 md:py-4">
             <SectionTitle icon={SquarePen}>{t('admin.dashboard.recentPosts', '最近文章')}</SectionTitle>
             <ViewAll to="/posts" label={t('admin.dashboard.viewAll', '全部')} />
@@ -325,31 +295,36 @@ export default function DashboardPage() {
               </Button>
             </div>
           ) : (
-            recentPosts.map((post, idx) => {
-              const st = statusMap[post.status] || statusMap.draft;
-              return (
-                <div key={post.id} onClick={() => openPostPage(post)}
-                  className={`flex min-h-18 cursor-pointer items-center px-4 py-3 transition-colors hover:bg-muted/50 md:px-5 md:py-3.5 ${idx < recentPosts.length - 1 ? 'border-b border-border' : ''}`}>
-                  <div className="flex w-full items-center justify-between gap-4">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5 overflow-hidden">
-                        {post.categories?.[0]?.icon && <CatIcon icon={post.categories[0].icon} className="size-3 shrink-0 text-muted-foreground" />}
-                        <p className="truncate text-sm font-medium text-foreground">{post.title}</p>
+            <div className="flex flex-1 flex-col">
+              {recentPosts.map((post, idx) => {
+                const st = statusMap[post.status] || statusMap.draft;
+                return (
+                  <div key={post.id} onClick={() => openPostPage(post)}
+                    className={`flex min-h-16 cursor-pointer items-center px-4 py-3 transition-colors hover:bg-muted/50 md:px-5 ${idx < recentPosts.length - 1 ? 'border-b border-border' : ''}`}>
+                    <div className="flex w-full min-w-0 items-center justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 overflow-hidden">
+                          {post.categories?.[0]?.icon && <CatIcon icon={post.categories[0].icon} className="size-3 shrink-0 text-muted-foreground" />}
+                          <p className="truncate text-sm font-medium text-foreground">{post.title}</p>
+                        </div>
+                        <p className="mt-1 truncate text-xs text-muted-foreground">
+                          {formatRelativeTime(post.published_at || post.created_at, t)}
+                          {post.view_count != null && ` · ${t('post.views', '{count} 阅读', { count: post.view_count })}`}
+                          {post.comment_count != null && ` · ${t('post.commentCount', '{count} 评论', { count: post.comment_count })}`}
+                        </p>
                       </div>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {formatRelativeTime(post.published_at || post.created_at, t)}
-                        {post.view_count != null && ` · ${t('post.views', '{count} 阅读', { count: post.view_count })}`}
-                        {post.comment_count != null && ` · ${t('post.commentCount', '{count} 评论', { count: post.comment_count })}`}
-                      </p>
+                      <span className={`shrink-0 text-xs ${st.cls}`}>{st.text}</span>
                     </div>
-                    <span className={`shrink-0 text-xs ${st.cls}`}>{st.text}</span>
                   </div>
-                </div>
-              );
-            })
+                );
+              })}
+            </div>
           )}
         </div>
+      </div>
 
+      {/* Recent comments —— 最新评论 / 说说评论 左右并列 */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {/* Recent comments */}
         <div className="overflow-hidden border border-border bg-card">
           <div className="flex items-center justify-between border-b border-border px-4 py-3 md:px-5 md:py-4">

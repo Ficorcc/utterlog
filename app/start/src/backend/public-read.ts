@@ -6,6 +6,7 @@ import { parsePermalinkPath } from './services/permalink';
 import { readOptionMap } from './services/options';
 import { siteTotalViews } from './services/analytics';
 import { friendLinkAvatar, friendLinkIndex, matchFriendBadge } from './services/friend-links';
+import { avatarCandidates } from './services/avatar';
 import { type ReadVisitor } from './services/tracking';
 import { defaultWeatherLocation, fetchVisitorWeather, visitorWeatherLocation, type VisitorWeatherResponse } from './weather';
 
@@ -720,7 +721,15 @@ export async function listPublicFootprints(filters: { city?: string; country?: s
 
 export async function listPostComments(postId: number) {
   const rows = await many<Record<string, unknown>>(
-    `select * from ${table('comments')} where post_id = $1 and status = 'approved' order by created_at asc, id asc`,
+    `select c.*, coalesce((
+          select u.avatar from ${table('users')} u
+          where lower(trim(u.email)) = lower(trim(coalesce(c.author_email,'')))
+            and coalesce(u.avatar, '') <> ''
+          limit 1
+        ), '') as site_avatar
+     from ${table('comments')} c
+     where c.post_id = $1 and c.status = 'approved'
+     order by c.created_at asc, c.id asc`,
     [postId],
   ).catch(() => []);
   const friendIndex = await friendLinkIndex();
@@ -729,6 +738,7 @@ export async function listPostComments(postId: number) {
     geo: commentGeoFromRow(row.geo),
     friend: matchFriendBadge(String(row.author_url || ''), friendIndex),
     avatar_url: gravatarUrlForEmail(String(row.author_email || ''), 64),
+    avatar_candidates: avatarCandidates(String(row.author_email || ''), String(row.site_avatar || ''), 64),
     ...ANONYMOUS_COMMENT_REDACTIONS,
   }));
 }
@@ -890,7 +900,13 @@ export async function listComments(params: {
             p.comment_count as post_comment_count,
             coalesce(u.role,'') as user_role,
             coalesce(visitor_stats.comment_count, 1) as visitor_comment_count,
-            pc.author_name as parent_author, pc.content as parent_content, pc.created_at as parent_created_at
+            pc.author_name as parent_author, pc.content as parent_content, pc.created_at as parent_created_at,
+            coalesce((
+              select au.avatar from ${table('users')} au
+              where lower(trim(au.email)) = lower(trim(coalesce(c.author_email,'')))
+                and coalesce(au.avatar, '') <> ''
+              limit 1
+            ), '') as site_avatar
      from ${table('comments')} c
      left join ${table('posts')} p on p.id = c.post_id
      left join ${table('users')} u on u.id = c.user_id
@@ -921,6 +937,7 @@ export async function listComments(params: {
       user_agent: row.author_agent,
       avatar_url: gravatarUrlForEmail(String(row.author_email || ''), 64),
       author_avatar: gravatarUrlForEmail(String(row.author_email || ''), 48),
+      avatar_candidates: avatarCandidates(String(row.author_email || ''), String(row.site_avatar || ''), 64),
       is_admin: row.user_role === 'admin',
       comment_count: commentCount,
       level: commentLevelFromCount(commentCount),

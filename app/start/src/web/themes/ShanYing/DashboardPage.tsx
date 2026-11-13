@@ -27,6 +27,7 @@ import {
 } from '@/lib/timezone';
 import { postDateInput } from '@/lib/post-date';
 import { Icon, plainText, relativeTime, renderCatIcon, useReveal } from './shanying-shared';
+import CommentAvatar from '@/components/CommentAvatar';
 import { useMemo, useState } from 'react';
 
 const WEEK_LABELS = ['一', '二', '三', '四', '五', '六', '日'];
@@ -292,12 +293,12 @@ export default function DashboardPage({
                     className="sy-dash-comment"
                   >
                     <span className="sy-dash-avatar" aria-hidden="true">
-                      <img
+                      <CommentAvatar
+                        name={comment.author || '访客'}
+                        candidates={comment.avatar_candidates}
                         src={comment.author_avatar || comment.avatar_url || ''}
+                        size={32}
                         alt=""
-                        loading="lazy"
-                        decoding="async"
-                        onError={(event) => { event.currentTarget.style.visibility = 'hidden'; }}
                       />
                     </span>
                     <span className="sy-dash-comment-body">

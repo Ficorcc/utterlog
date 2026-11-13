@@ -14,11 +14,11 @@ import {
 } from '@/components/ui/shadcn';
 import { RowAction, RowActionGroup } from '@/components/ui/row-actions';
 import { cn, formatDate } from '@/lib/utils';
+import CommentAvatar from '@/components/CommentAvatar';
 import { useI18n } from '@/lib/i18n';
 import { postUrlOf } from '@/lib/site';
 import { usePageBadge } from '@/layouts/DashboardLayout';
 
-const defaultAvatar = 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=64';
 
 function commentPostUrl(row: any) {
   if (row.post_type === 'guestbook') return `/guestbook#comment-${row.id}`;
@@ -494,12 +494,14 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
                         onChange={() => toggleSelect(row.id)}
                         className="mt-2.5"
                       />
-                      <img
-                        src={row.avatar_url || defaultAvatar}
+                      <CommentAvatar
+                        name={row.author}
+                        candidates={row.avatar_candidates}
+                        src={row.avatar_url}
+                        size={32}
                         alt=""
-                        className="mt-0.5 size-8 shrink-0 bg-muted object-cover"
+                        className="mt-0.5 bg-muted object-cover"
                         style={{ clipPath: 'url(#squircle)' }}
-                        onError={e => { (e.target as HTMLImageElement).src = defaultAvatar; }}
                       />
                       <div className="min-w-0 overflow-hidden text-xs leading-relaxed">
                         <div className="flex flex-wrap items-center gap-1">

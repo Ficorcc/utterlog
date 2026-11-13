@@ -6,37 +6,11 @@ import PostLink from '@/components/blog/PostLink';
 import { useThemeContext } from '@/lib/theme-context';
 import { useLazyVisible } from '@/lib/use-lazy-visible';
 import AzureProfileCard from './ProfileCard';
+import CommentAvatar from '@/components/CommentAvatar';
 
 const API = '/api/v1';
 
 let latestCommentsCache: any[] | null = null;
-
-// Simple MD5 for gravatar hash
-function md5(s: string): string {
-  function L(k: number, d: number) { return (k << d) | (k >>> (32 - d)); }
-  function K(G: number, k: number) { const I = G & 2147483648, d = k & 2147483648, F = G & 1073741824, E = k & 1073741824, B = (G & 1073741823) + (k & 1073741823); if (F & E) return B ^ 2147483648 ^ I ^ d; if (F | E) { if (B & 1073741824) return B ^ 3221225472 ^ I ^ d; else return B ^ 1073741824 ^ I ^ d; } return B ^ I ^ d; }
-  function r(d: number, F: number, E: number) { return (d & F) | (~d & E); }
-  function q(d: number, F: number, E: number) { return (d & E) | (F & ~E); }
-  function p(d: number, F: number, E: number) { return d ^ F ^ E; }
-  function n(d: number, F: number, E: number) { return F ^ (d | ~E); }
-  function u(G: number, F: number, aa: number, Z: number, k: number, H: number, I: number) { G = K(G, K(K(r(F, aa, Z), k), I)); return K(L(G, H), F); }
-  function f(G: number, F: number, aa: number, Z: number, k: number, H: number, I: number) { G = K(G, K(K(q(F, aa, Z), k), I)); return K(L(G, H), F); }
-  function D(G: number, F: number, aa: number, Z: number, k: number, H: number, I: number) { G = K(G, K(K(p(F, aa, Z), k), I)); return K(L(G, H), F); }
-  function t(G: number, F: number, aa: number, Z: number, k: number, H: number, I: number) { G = K(G, K(K(n(F, aa, Z), k), I)); return K(L(G, H), F); }
-  function e(G: string) { let Z; const F = G.length; const x = F + 8; const k = (((x - (x % 64)) / 64) + 1) * 16; const I = new Array(k - 1); let aa = 0; let d = 0; while (d < F) { Z = (d - (d % 4)) / 4; aa = (d % 4) * 8; I[Z] = (I[Z] | (G.charCodeAt(d) << aa)); d++; } Z = (d - (d % 4)) / 4; aa = (d % 4) * 8; I[Z] = I[Z] | (128 << aa); I[k - 2] = F << 3; I[k - 1] = F >>> 29; return I; }
-  function B(d: number) { let k = '', F = '', G, I; for (I = 0; I <= 3; I++) { G = (d >>> (I * 8)) & 255; F = '0' + G.toString(16); k = k + F.substr(F.length - 2, 2); } return k; }
-  const C = e(unescape(encodeURIComponent(s)));
-  let a = 1732584193, b = 4023233417, c = 2562383102, d = 271733878;
-  for (let S = 0; S < C.length; S += 16) {
-    const AA = a, BB = b, CC = c, DD = d;
-    a=u(a,b,c,d,C[S+0],7,3614090360);d=u(d,a,b,c,C[S+1],12,3905402710);c=u(c,d,a,b,C[S+2],17,606105819);b=u(b,c,d,a,C[S+3],22,3250441966);a=u(a,b,c,d,C[S+4],7,4118548399);d=u(d,a,b,c,C[S+5],12,1200080426);c=u(c,d,a,b,C[S+6],17,2821735955);b=u(b,c,d,a,C[S+7],22,4249261313);a=u(a,b,c,d,C[S+8],7,1770035416);d=u(d,a,b,c,C[S+9],12,2336552879);c=u(c,d,a,b,C[S+10],17,4294925233);b=u(b,c,d,a,C[S+11],22,2304563134);a=u(a,b,c,d,C[S+12],7,1804603682);d=u(d,a,b,c,C[S+13],12,4254626195);c=u(c,d,a,b,C[S+14],17,2792965006);b=u(b,c,d,a,C[S+15],22,1236535329);
-    a=f(a,b,c,d,C[S+1],5,4129170786);d=f(d,a,b,c,C[S+6],9,3225465664);c=f(c,d,a,b,C[S+11],14,643717713);b=f(b,c,d,a,C[S+0],20,3921069994);a=f(a,b,c,d,C[S+5],5,3593408605);d=f(d,a,b,c,C[S+10],9,38016083);c=f(c,d,a,b,C[S+15],14,3634488961);b=f(b,c,d,a,C[S+4],20,3889429448);a=f(a,b,c,d,C[S+9],5,568446438);d=f(d,a,b,c,C[S+14],9,3275163606);c=f(c,d,a,b,C[S+3],14,4107603335);b=f(b,c,d,a,C[S+8],20,1163531501);a=f(a,b,c,d,C[S+13],5,2850285829);d=f(d,a,b,c,C[S+2],9,4243563512);c=f(c,d,a,b,C[S+7],14,1735328473);b=f(b,c,d,a,C[S+12],20,2368359562);
-    a=D(a,b,c,d,C[S+5],4,4294588738);d=D(d,a,b,c,C[S+8],11,2272392833);c=D(c,d,a,b,C[S+11],16,1839030562);b=D(b,c,d,a,C[S+14],23,4259657740);a=D(a,b,c,d,C[S+1],4,2763975236);d=D(d,a,b,c,C[S+4],11,1272893353);c=D(c,d,a,b,C[S+7],16,4139469664);b=D(b,c,d,a,C[S+10],23,3200236656);a=D(a,b,c,d,C[S+13],4,681279174);d=D(d,a,b,c,C[S+0],11,3936430074);c=D(c,d,a,b,C[S+3],16,3572445317);b=D(b,c,d,a,C[S+6],23,76029189);a=D(a,b,c,d,C[S+9],4,3654602809);d=D(d,a,b,c,C[S+12],11,3873151461);c=D(c,d,a,b,C[S+15],16,530742520);b=D(b,c,d,a,C[S+2],23,3299628645);
-    a=t(a,b,c,d,C[S+0],6,4096336452);d=t(d,a,b,c,C[S+7],10,1126891415);c=t(c,d,a,b,C[S+14],15,2878612391);b=t(b,c,d,a,C[S+5],21,4237533241);a=t(a,b,c,d,C[S+12],6,1700485571);d=t(d,a,b,c,C[S+3],10,2399980690);c=t(c,d,a,b,C[S+10],15,4293915773);b=t(b,c,d,a,C[S+1],21,2240044497);a=t(a,b,c,d,C[S+8],6,1873313359);d=t(d,a,b,c,C[S+15],10,4264355552);c=t(c,d,a,b,C[S+6],15,2734768916);b=t(b,c,d,a,C[S+13],21,1309151649);a=t(a,b,c,d,C[S+4],6,4149444226);d=t(d,a,b,c,C[S+11],10,3174756917);c=t(c,d,a,b,C[S+2],15,718787259);b=t(b,c,d,a,C[S+9],21,3951481745);
-    a=K(a,AA);b=K(b,BB);c=K(c,CC);d=K(d,DD);
-  }
-  return (B(a)+B(b)+B(c)+B(d)).toLowerCase();
-}
 
 import { getCategoryIcon } from './constants';
 
@@ -124,9 +98,14 @@ export default function Sidebar({ initialComments = [] }: { initialComments?: an
             onMouseEnter={(e: any) => { e.currentTarget.style.background = '#f8f9fa'; }}
             onMouseLeave={(e: any) => { e.currentTarget.style.background = 'transparent'; }}
           >
-            <img
-              src={c.avatar_url || `https://gravatar.bluecdn.com/avatar/${c.author_email ? md5(String(c.author_email).trim().toLowerCase()) : '0'}?s=40&d=mp`}
-              alt="" style={{ width: 32, height: 32, objectFit: 'cover', flexShrink: 0, clipPath: 'url(#squircle)' }}
+            <CommentAvatar
+              name={c.author_name || c.author}
+              candidates={c.avatar_candidates}
+              src={c.avatar_url}
+              size={32}
+              alt=""
+              shape="square"
+              style={{ clipPath: 'url(#squircle)' }}
             />
             <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

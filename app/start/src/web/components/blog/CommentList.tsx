@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import api from '@/lib/api';
 import CommentForm from './CommentForm';
+import CommentAvatar from '@/components/CommentAvatar';
 import CommentPagination from './CommentPagination';
 import { commentFloorPage, commentPageForId, loadApprovedComments } from '@/lib/comment-pages';
 import { BrowserIcon, OSIcon } from '@/lib/tech-icons';
@@ -88,6 +89,7 @@ interface Comment {
   content: string;
   status: string;
   avatar_url?: string;
+  avatar_candidates?: string[];
   geo?: GeoInfo;
   is_admin?: boolean;
   comment_count?: number;
@@ -240,8 +242,7 @@ function ReplyMention({ parent, compact = false }: { parent: Comment; compact?: 
         display: 'none', fontSize: '12px', lineHeight: 1.6, color: 'var(--color-text-sub, #666)',
       }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-          <img src={parent.avatar_url || 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=40'} alt=""
-            style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#f0f0f0', objectFit: 'cover' }} />
+          <CommentAvatar name={parent.author} candidates={parent.avatar_candidates} src={parent.avatar_url} size={20} alt="" />
           <span style={{ fontWeight: 600, color: 'var(--color-text-main, #333)' }}>{parent.author}</span>
         </span>
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' as const }}>
@@ -342,12 +343,14 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
         {/* 头像 */}
         {!isReply && (
           <div className="comment-avatar-wrap" style={{ flexShrink: 0 }}>
-            <img
-              src={comment.avatar_url || 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=80'}
+            <CommentAvatar
+              name={comment.author}
+              candidates={comment.avatar_candidates}
+              src={comment.avatar_url}
+              size={40}
               alt=""
               className="comment-avatar"
-              style={{ width: '40px', height: '40px', objectFit: 'cover', background: '#f0f0f0', borderRadius: '50%', transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)', transform: hovered ? 'scale(1.15)' : 'scale(1)' }}
-              onError={e => { (e.target as HTMLImageElement).src = 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=80'; }}
+              style={{ transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)', transform: hovered ? 'scale(1.15)' : 'scale(1)' }}
             />
             {comment.is_admin && isShanYing && (
               <span className="comment-avatar-check" title="博主" aria-label="博主"><i className="fa-solid fa-check" /></span>
@@ -360,12 +363,13 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
           <div className="comment-meta" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px', marginBottom: '6px', fontSize: '12px' }}>
             {isReply && (
               <>
-                <img
-                  src={comment.avatar_url || 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=80'}
+                <CommentAvatar
+                  name={comment.author}
+                  candidates={comment.avatar_candidates}
+                  src={comment.avatar_url}
+                  size={24}
                   alt=""
                   className="comment-avatar comment-avatar--reply"
-                  style={{ width: '24px', height: '24px', objectFit: 'cover', background: '#f0f0f0', borderRadius: '50%' }}
-                  onError={e => { (e.target as HTMLImageElement).src = 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=80'; }}
                 />
                 {comment.is_admin && isShanYing && (
                   <span className="comment-avatar-check comment-avatar-check--reply" title="博主" aria-label="博主"><i className="fa-solid fa-check" /></span>

@@ -8,8 +8,9 @@ import toast from 'react-hot-toast';
 import emojiPack from '@/public/emoji/bilibili/pack-bilibili.json';
 import CommentCaptcha from './CommentCaptcha';
 import { useThemeContext } from '@/lib/theme-context';
+import CommentAvatar from '@/components/CommentAvatar';
+import { avatarCandidatesForEmail } from '@/lib/avatar';
 
-function md5(s:string){let h0=1732584193,h1=-271733879,h2=-1732584194,h3=271733878;const k=[],w=[];for(let i=0;i<64;i++)k[i]=Math.floor(2**32*Math.abs(Math.sin(i+1)));const bytes=[];for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);if(c<128)bytes.push(c);else if(c<2048){bytes.push(192|(c>>6));bytes.push(128|(c&63));}else{bytes.push(224|(c>>12));bytes.push(128|((c>>6)&63));bytes.push(128|(c&63));}}const bl=bytes.length*8;bytes.push(128);while(bytes.length%64!==56)bytes.push(0);bytes.push(bl&0xff,(bl>>8)&0xff,(bl>>16)&0xff,(bl>>24)&0xff,0,0,0,0);for(let i=0;i<bytes.length;i+=64){for(let j=0;j<16;j++)w[j]=bytes[i+j*4]|(bytes[i+j*4+1]<<8)|(bytes[i+j*4+2]<<16)|(bytes[i+j*4+3]<<24);let[a,b,c,d]=[h0,h1,h2,h3];for(let i=0;i<64;i++){let f,g;if(i<16){f=(b&c)|((~b)&d);g=i;}else if(i<32){f=(d&b)|((~d)&c);g=(5*i+1)%16;}else if(i<48){f=b^c^d;g=(3*i+5)%16;}else{f=c^(b|(~d));g=(7*i)%16;}const r=[7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21];const t=d;d=c;c=b;const x=(a+f+k[i]+w[g])>>>0;b=(b+(((x<<r[i])|(x>>>(32-r[i])))>>>0))>>>0;a=t;}h0=(h0+a)>>>0;h1=(h1+b)>>>0;h2=(h2+c)>>>0;h3=(h3+d)>>>0;}const hex=(n:number)=>[0,8,16,24].map(s=>((n>>>s)&0xff).toString(16).padStart(2,'0')).join('');return hex(h0)+hex(h1)+hex(h2)+hex(h3);}
 
 function getGreeting(timeZone?: string): string {
   // hour of day 按 site_timezone 取 —— 否则跨时区访客（"+8 站长 / 美西
@@ -174,14 +175,21 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel, com
     }
   };
 
-  const avatarHash = email.trim() ? md5(email.trim().toLowerCase()) : '';
-  const avatarUrl = email.trim() ? `https://gravatar.bluecdn.com/avatar/${avatarHash}?d=mp&s=80` : '';
+  // 预览「这个邮箱会显示哪个头像」：候选链与后端同序，全挂了退回昵称首字
+  const [avatarPreview, setAvatarPreview] = useState<string[]>([]);
+  useEffect(() => {
+    const mail = email.trim();
+    if (!mail) { setAvatarPreview([]); return; }
+    let cancelled = false;
+    avatarCandidatesForEmail(mail, 80).then((list) => { if (!cancelled) setAvatarPreview(list); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [email]);
   const showInfoFields = !isAdmin && !passportIdentity?.identified && (!hasCached || editing);
 
   // Compact mode (reply form)
   if (compact) {
     const identified = isAdmin || passportIdentity?.identified || (hasCached && !editing);
-    const compactAvatarUrl = isAdmin && user?.avatar ? user.avatar : avatarUrl;
+    const compactAvatarUrl = isAdmin && user?.avatar ? user.avatar : '';
     const compactName = isAdmin
       ? (user?.nickname || user?.username || '')
       : passportIdentity?.identified ? passportIdentity.nickname
@@ -202,8 +210,15 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel, com
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--color-text-dim)' }}>
             {identified && (
               <>
-                {compactAvatarUrl ? (
-                  <img src={compactAvatarUrl} alt="" style={{ width: '22px', height: '22px', objectFit: 'cover', flexShrink: 0 }} />
+                {compactAvatarUrl || avatarPreview.length > 0 ? (
+                  <CommentAvatar
+                    name={compactName || name}
+                    candidates={avatarPreview}
+                    src={compactAvatarUrl}
+                    size={22}
+                    alt=""
+                    shape="square"
+                  />
                 ) : (
                   <div style={{ width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg-card)', flexShrink: 0 }}>
                     <i className="fa-regular fa-user" style={{ fontSize: '11px', color: '#bbb' }} />
@@ -282,8 +297,8 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel, com
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {isAdmin && user?.avatar ? (
             <img src={user.avatar} alt="" style={{ width: '32px', height: '32px', objectFit: 'cover', flexShrink: 0 }} />
-          ) : avatarUrl ? (
-            <img src={avatarUrl} alt="" style={{ width: '32px', height: '32px', objectFit: 'cover', flexShrink: 0 }} />
+          ) : avatarPreview.length > 0 ? (
+            <CommentAvatar name={name} candidates={avatarPreview} size={32} alt="" shape="square" />
           ) : (
             <i className="fa-regular fa-comment-dots" style={{ fontSize: '20px', color: 'var(--color-primary, #0052D9)' }} />
           )}

@@ -183,7 +183,9 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
             const ChildIcon = child.icon;
             const childHoverKey = `child:${child.to}`;
             return (
-              <NavLink key={child.to} to={child.to} className="block no-underline">
+              // 「全部评论」(/comments) 是「说说评论」(/comments/moments) 的路径前缀，
+              // 不加 end 的话前缀匹配会让两个子项同时高亮 —— 只能精确匹配。
+              <NavLink key={child.to} to={child.to} end={child.to === item.to} className="block no-underline">
                 {({ isActive }) => (
                   <span
                     onMouseEnter={() => setHoveredMenuItem(childHoverKey)}

@@ -1,6 +1,7 @@
 import { table } from '../config';
 import { exec, many, nowUnix, one } from '../db/helpers';
 import { optionValue, saveOption } from '../db/options';
+import { avatarCandidates } from './avatar';
 
 export class MomentServiceError extends Error {
   constructor(public status: number, message: string) {
@@ -136,14 +137,30 @@ export async function toggleMomentLike(id: number, visitorToken: string) {
 
 export async function listMomentComments(momentId: number) {
   if (!Number.isInteger(momentId) || momentId <= 0) throw new MomentServiceError(400, '无效的说说 ID');
-  return many(
-    `select id, author_name, author_email, author_url, content, created_at, is_admin
-     from ${table('moment_comments')}
-     where moment_id = $1 and status = 'approved'
-     order by created_at asc, id asc
+  const rows = await many<Record<string, unknown>>(
+    `select mc.id, mc.author_name, mc.author_email, mc.author_url, mc.content, mc.created_at, mc.is_admin,
+            coalesce((
+              select u.avatar from ${table('users')} u
+              where lower(trim(u.email)) = lower(trim(coalesce(mc.author_email,'')))
+                and coalesce(u.avatar, '') <> ''
+              limit 1
+            ), '') as site_avatar
+     from ${table('moment_comments')} mc
+     where mc.moment_id = $1 and mc.status = 'approved'
+     order by mc.created_at asc, mc.id asc
      limit 200`,
     [momentId],
   ).catch(() => []);
+  // 邮箱只用来在服务端算头像候选，前台不给（文章评论区同样脱敏）
+  return rows.map((row) => ({
+    id: row.id,
+    author_name: row.author_name,
+    author_url: row.author_url,
+    content: row.content,
+    created_at: row.created_at,
+    is_admin: row.is_admin,
+    avatar_candidates: avatarCandidates(String(row.author_email || ''), String(row.site_avatar || ''), 64),
+  }));
 }
 
 function commentAuthorField(value: unknown, label: string, max: number) {
@@ -200,6 +217,12 @@ export async function listMomentCommentsAdmin(params: { page?: number; perPage?:
   const rows = await many(
     `select mc.id, mc.author_name, mc.author_email, mc.author_url, mc.content,
             mc.is_admin, mc.created_at,
+            coalesce((
+              select u.avatar from ${table('users')} u
+              where lower(trim(u.email)) = lower(trim(coalesce(mc.author_email,'')))
+                and coalesce(u.avatar, '') <> ''
+              limit 1
+            ), '') as site_avatar,
             left(regexp_replace(coalesce(m.content, ''), E'\\s+', ' ', 'g'), 80) as moment_content,
             m.id as moment_id
      from ${table('moment_comments')} mc
@@ -211,7 +234,10 @@ export async function listMomentCommentsAdmin(params: { page?: number; perPage?:
   ).catch(() => []);
   const count = Number(total?.count || 0);
   return {
-    data: rows,
+    data: rows.map((row: any) => ({
+      ...row,
+      avatar_candidates: avatarCandidates(String(row.author_email || ''), String(row.site_avatar || ''), 64),
+    })),
     meta: { total: count, page, per_page: perPage, total_pages: Math.max(1, Math.ceil(count / perPage)) },
   };
 }

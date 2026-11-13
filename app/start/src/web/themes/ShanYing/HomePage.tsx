@@ -42,6 +42,7 @@ import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { heroSocialLinks } from '@shared/hero-social-links';
 import { discoverLinks, type DiscoverLink } from '@shared/discover-links';
+import CommentAvatar from '@/components/CommentAvatar';
 
 type SortKey = 'latest' | 'comments' | 'views';
 type ViewKey = 'list' | 'grid';
@@ -324,7 +325,13 @@ export default function HomePage({
                     className="sy-visitor"
                     title={`${comment.author || '访客'}：${plainText(comment.content).slice(0, 40)}`}
                   >
-                    <img src={comment.author_avatar || comment.avatar_url || ''} alt={comment.author || '访客'} loading="lazy" decoding="async" />
+                    <CommentAvatar
+                      name={comment.author || '访客'}
+                      candidates={comment.avatar_candidates}
+                      src={comment.author_avatar || comment.avatar_url || ''}
+                      size={36}
+                      alt={comment.author || '访客'}
+                    />
                   </Link>
                 ))}
               </div>

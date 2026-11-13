@@ -8,6 +8,7 @@ import { datePartsInTimeZone } from '@/lib/timezone';
 import PageTitle from '@/components/blog/PageTitle';
 import Lightbox from '@/components/blog/Lightbox';
 import ResilientImage from '@/components/blog/ResilientImage';
+import { MomentCommentRow, MomentReplyCard } from './MomentComments';
 import { ShanYingRecentHeatmap } from '@/themes/ShanYing/shanying-shared';
 import toast from 'react-hot-toast';
 
@@ -169,6 +170,8 @@ export default function MomentsPage({
   const [commentsCache, setCommentsCache] = useState<Record<number, any[]>>({});
   const [commentLoadingIds, setCommentLoadingIds] = useState<number[]>([]);
   const [commentModal, setCommentModal] = useState<number | null>(null);
+  // 被回复的那条评论：轻量 @提及模式，提交时把 @昵称 拼到内容最前面
+  const [replyTarget, setReplyTarget] = useState<{ id: number; author_name: string; author_url?: string; content: string } | null>(null);
   const [commentForm, setCommentForm] = useState({ author_name: '', author_email: '', author_url: '', content: '' });
   const [commentFormError, setCommentFormError] = useState('');
   const [commentSubmitting, setCommentSubmitting] = useState(false);
@@ -200,14 +203,26 @@ export default function MomentsPage({
     });
   };
 
-  const openCommentModal = (event: React.MouseEvent, momentId: number) => {
-    event.stopPropagation();
+  const openCommentModal = (event: React.MouseEvent | undefined, momentId: number, target?: any) => {
+    event?.stopPropagation();
     setCommentFormError('');
     try {
       const saved = JSON.parse(localStorage.getItem('moment_commenter') || '{}');
       setCommentForm((f) => ({ ...f, author_name: saved.n || '', author_email: saved.e || '', author_url: saved.u || '' }));
     } catch {}
+    // 回复模式：只记住被回复的那条，@提及在提交时拼进内容
+    setReplyTarget(target ? {
+      id: Number(target.id),
+      author_name: String(target.author_name || '').trim(),
+      author_url: target.author_url ? String(target.author_url) : '',
+      content: String(target.content || ''),
+    } : null);
     setCommentModal(momentId);
+  };
+
+  const closeCommentModal = () => {
+    setCommentModal(null);
+    setReplyTarget(null);
   };
 
   const submitMomentComment = async () => {
@@ -217,15 +232,18 @@ export default function MomentsPage({
     setCommentSubmitting(true);
     setCommentFormError('');
     const momentId = commentModal;
+    // 回复：内容以 @昵称 开头（轻量提及，不改表结构）
+    const mention = replyTarget ? `@${replyTarget.author_name} ` : '';
     try {
-      await momentsApi.addComment(momentId, commentForm);
+      await momentsApi.addComment(momentId, { ...commentForm, content: `${mention}${commentForm.content.trim()}` });
       try {
         localStorage.setItem('moment_commenter', JSON.stringify({
           n: commentForm.author_name.trim(), e: commentForm.author_email.trim(), u: commentForm.author_url.trim(),
         }));
       } catch {}
-      toast.success('评论成功');
+      toast.success(replyTarget ? '回复成功' : '评论成功');
       setCommentModal(null);
+      setReplyTarget(null);
       setCommentForm((f) => ({ ...f, content: '' }));
       setCommentsCache((cache) => ({ ...cache, [momentId]: undefined as any })); // 强制重拉
       void loadMomentComments(momentId);
@@ -240,7 +258,7 @@ export default function MomentsPage({
 
   useEffect(() => {
     if (commentModal === null) return;
-    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setCommentModal(null); };
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closeCommentModal(); };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [commentModal]);
@@ -721,22 +739,12 @@ export default function MomentsPage({
                         ) : (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '12px' }}>
                             {(commentsCache[Number(m.id)] || []).map((c: any) => (
-                              <div key={c.id} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                                <span aria-hidden="true" style={{
-                                  flexShrink: 0, width: '26px', height: '26px', borderRadius: '50%',
-                                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                                  fontSize: '12px', fontWeight: 700, color: '#fff',
-                                  background: ['#4a9e8e', '#c4956a', '#8b7ec8', '#d4837a', '#6b9dbd'][String(c.author_name || '?').length % 5],
-                                }}>{String(c.author_name || '?').slice(0, 1).toUpperCase()}</span>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                                    <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--community-text, #2b2a28)' }}>{c.author_name}</span>
-                                    {c.is_admin && <span style={{ fontSize: '9px', fontWeight: 700, padding: '1px 5px', borderRadius: '4px', background: 'var(--color-primary)', color: 'var(--color-primary-text, #fff)', letterSpacing: '0.04em' }}>博主</span>}
-                                    <span style={{ fontSize: '10px', color: 'var(--community-muted, #b8b4ad)' }}>{relativeTime(Number(c.created_at))}</span>
-                                  </div>
-                                  <p style={{ margin: '2px 0 0', fontSize: '12.5px', lineHeight: 1.7, color: 'var(--community-text, #3a3936)', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{c.content}</p>
-                                </div>
-                              </div>
+                              <MomentCommentRow
+                                key={c.id}
+                                comment={c}
+                                timeText={relativeTime(Number(c.created_at))}
+                                onReply={(target) => openCommentModal(undefined, Number(m.id), target)}
+                              />
                             ))}
                           </div>
                         )}
@@ -1164,7 +1172,7 @@ export default function MomentsPage({
           全部由组件负责。说说 / 文章正文用同一份代码同一种体感。 */}
       {commentModal !== null && (
         <div
-          onClick={() => setCommentModal(null)}
+          onClick={closeCommentModal}
           style={{ position: 'fixed', inset: 0, zIndex: 3000, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}
         >
           <div
@@ -1174,11 +1182,17 @@ export default function MomentsPage({
             style={{ width: 'min(440px, 100%)', background: 'var(--community-surface, #fff)', borderRadius: '14px', boxShadow: '0 24px 80px rgba(0,0,0,0.3)', padding: '22px 24px 20px', maxHeight: '86vh', overflowY: 'auto' }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <strong style={{ fontSize: '15px', color: 'var(--community-text, #2b2a28)' }}>评论说说</strong>
-              <button type="button" onClick={() => setCommentModal(null)} aria-label="关闭" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--community-muted, #9e9a93)', fontSize: '16px', padding: '2px 6px' }}>
+              <strong style={{ fontSize: '15px', color: 'var(--community-text, #2b2a28)' }}>
+                {replyTarget ? `回复 @${replyTarget.author_name}` : '评论说说'}
+              </strong>
+              <button type="button" onClick={closeCommentModal} aria-label="关闭" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--community-muted, #9e9a93)', fontSize: '16px', padding: '2px 6px' }}>
                 <i className="fa-regular fa-xmark" aria-hidden="true" />
               </button>
             </div>
+            {/* 被回复的那条：昵称同样可点（填了网站的访客走 /go 确认页） */}
+            {replyTarget && (
+              <MomentReplyCard target={replyTarget} onCancel={() => setReplyTarget(null)} />
+            )}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
               <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px', color: 'var(--community-muted, #7a7670)' }}>
                 昵称 *
@@ -1195,13 +1209,13 @@ export default function MomentsPage({
             </label>
             <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px', color: 'var(--community-muted, #7a7670)', marginBottom: '6px' }}>
               评论 *
-              <textarea value={commentForm.content} maxLength={1000} rows={4} onChange={(e) => setCommentForm((f) => ({ ...f, content: e.target.value }))} placeholder="理性讨论，友善交流…" style={{ padding: '8px 10px', fontSize: '13px', lineHeight: 1.7, border: '1px solid var(--community-border, #dedad4)', borderRadius: '8px', background: 'var(--community-soft, #faf9f6)', color: 'var(--community-text, #2b2a28)', font: 'inherit', outline: 'none', resize: 'vertical' }} />
+              <textarea value={commentForm.content} maxLength={1000} rows={4} onChange={(e) => setCommentForm((f) => ({ ...f, content: e.target.value }))} placeholder={replyTarget ? `回复 @${replyTarget.author_name}…` : '理性讨论，友善交流…'} style={{ padding: '8px 10px', fontSize: '13px', lineHeight: 1.7, border: '1px solid var(--community-border, #dedad4)', borderRadius: '8px', background: 'var(--community-soft, #faf9f6)', color: 'var(--community-text, #2b2a28)', font: 'inherit', outline: 'none', resize: 'vertical' }} />
             </label>
             {commentFormError && <p style={{ margin: '0 0 8px', fontSize: '12px', color: '#d94f66' }}>{commentFormError}</p>}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-              <button type="button" onClick={() => setCommentModal(null)} style={{ padding: '7px 16px', fontSize: '12px', border: '1px solid var(--community-border, #dedad4)', borderRadius: '999px', background: 'transparent', color: 'var(--community-muted, #7a7670)', cursor: 'pointer', font: 'inherit' }}>取消</button>
+              <button type="button" onClick={closeCommentModal} style={{ padding: '7px 16px', fontSize: '12px', border: '1px solid var(--community-border, #dedad4)', borderRadius: '999px', background: 'transparent', color: 'var(--community-muted, #7a7670)', cursor: 'pointer', font: 'inherit' }}>取消</button>
               <button type="button" onClick={submitMomentComment} disabled={commentSubmitting} style={{ padding: '7px 18px', fontSize: '12px', fontWeight: 600, border: 'none', borderRadius: '999px', background: '#4a9e8e', color: '#fff', cursor: commentSubmitting ? 'wait' : 'pointer', font: 'inherit', opacity: commentSubmitting ? 0.6 : 1 }}>
-                {commentSubmitting ? '发布中…' : '发表评论'}
+                {commentSubmitting ? '发布中…' : (replyTarget ? '发表回复' : '发表评论')}
               </button>
             </div>
           </div>

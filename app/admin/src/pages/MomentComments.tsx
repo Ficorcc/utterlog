@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import CommentAvatar from '@/components/CommentAvatar';
 import { momentCommentsApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Trash2, Search, MessageCircle } from 'lucide-react';
@@ -11,7 +12,6 @@ import { RowAction, RowActionGroup } from '@/components/ui/row-actions';
 import { formatDate } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 
-const defaultAvatar = 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=64';
 
 // 说说评论管理：数据在独立的 ul_moment_comments 表（与文章评论分离），
 // 参照「全部评论」的列表形态实现 —— 搜索、分页、删除。
@@ -99,7 +99,13 @@ export default function MomentComments() {
               <TableRow key={row.id}>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <img src={defaultAvatar} alt="" className="size-6 shrink-0 rounded-full" />
+                    <CommentAvatar
+                      name={row.author_name}
+                      candidates={row.avatar_candidates}
+                      size={24}
+                      alt=""
+                      className="shrink-0 rounded-full"
+                    />
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
                         <span className="truncate text-xs-plus font-medium">{row.author_name}</span>
