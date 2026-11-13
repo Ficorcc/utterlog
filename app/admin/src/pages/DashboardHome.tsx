@@ -308,8 +308,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Recent content */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      {/* Recent content —— 最近文章 / 最新评论 / 说说评论 三块纵向依次排列 */}
+      <div className="flex flex-col gap-4">
         {/* Recent posts */}
         <div className="overflow-hidden border border-border bg-card">
           <div className="flex items-center justify-between border-b border-border px-4 py-3 md:px-5 md:py-4">
@@ -350,31 +350,6 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Moment comments —— 说说评论独立列表 */}
-        <div className="overflow-hidden border border-border bg-card">
-          <div className="flex items-center justify-between border-b border-border px-4 py-3 md:px-5 md:py-4">
-            <SectionTitle icon={MessageCircle}>说说评论</SectionTitle>
-            <ViewAll to="/comments/moments" label={t('admin.dashboard.viewAll', '全部')} />
-          </div>
-          {loading ? null : recentMomentComments.length === 0 ? (
-            <div className="px-5 py-12 text-center text-sm text-muted-foreground">暂无说说评论</div>
-          ) : (
-            recentMomentComments.map((c, idx) => (
-              <div key={c.id} className={`flex min-h-18 items-center px-4 py-3 md:px-5 md:py-3.5 ${idx < recentMomentComments.length - 1 ? 'border-b border-border' : ''}`}>
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-primary">{(c.author || '?')[0]}</div>
-                <div className="min-w-0 flex-1">
-                  <div className="mb-1 flex items-center">
-                    <span className="shrink-0 text-xs-plus font-medium text-muted-foreground">{c.author}</span>
-                    {c.is_admin && <span className="ml-1.5 rounded bg-primary px-1 py-px text-2xs font-semibold text-primary-foreground">博主</span>}
-                    <span className="ml-auto shrink-0 text-xs text-muted-foreground">{formatRelativeTime(c.created_at, t)}</span>
-                  </div>
-                  <p className="truncate text-xs-plus leading-normal text-foreground">{c.content}</p>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
         {/* Recent comments */}
         <div className="overflow-hidden border border-border bg-card">
           <div className="flex items-center justify-between border-b border-border px-4 py-3 md:px-5 md:py-4">
@@ -406,6 +381,31 @@ export default function DashboardPage() {
                     </div>
                     <p className="truncate text-xs-plus leading-normal text-foreground">{comment.content}</p>
                   </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Moment comments —— 说说评论独立列表 */}
+        <div className="overflow-hidden border border-border bg-card">
+          <div className="flex items-center justify-between border-b border-border px-4 py-3 md:px-5 md:py-4">
+            <SectionTitle icon={MessageCircle}>说说评论</SectionTitle>
+            <ViewAll to="/comments/moments" label={t('admin.dashboard.viewAll', '全部')} />
+          </div>
+          {loading ? null : recentMomentComments.length === 0 ? (
+            <div className="px-5 py-12 text-center text-sm text-muted-foreground">暂无说说评论</div>
+          ) : (
+            recentMomentComments.map((c, idx) => (
+              <div key={c.id} className={`flex min-h-18 items-center px-4 py-3 md:px-5 md:py-3.5 ${idx < recentMomentComments.length - 1 ? 'border-b border-border' : ''}`}>
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-primary">{(c.author || '?')[0]}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex items-center">
+                    <span className="shrink-0 text-xs-plus font-medium text-muted-foreground">{c.author}</span>
+                    {c.is_admin && <span className="ml-1.5 rounded bg-primary px-1 py-px text-2xs font-semibold text-primary-foreground">博主</span>}
+                    <span className="ml-auto shrink-0 text-xs text-muted-foreground">{formatRelativeTime(c.created_at, t)}</span>
+                  </div>
+                  <p className="truncate text-xs-plus leading-normal text-foreground">{c.content}</p>
                 </div>
               </div>
             ))
