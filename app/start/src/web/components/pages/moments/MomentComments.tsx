@@ -40,7 +40,7 @@ export interface MomentComment {
   avatar_candidates?: string[];
 }
 
-/** 单条评论：头像（多平台回退）+ 昵称（带链接时走 /go）+ 时间 + 回复按钮 + 可点击回复的正文。 */
+/** 单条评论：头像（多平台回退）+ 昵称（带链接时走 /go）+ 时间 + 点正文即回复。 */
 export function MomentCommentRow({ comment, timeText, onReply }: {
   comment: MomentComment;
   timeText: string;
@@ -67,16 +67,8 @@ export function MomentCommentRow({ comment, timeText, onReply }: {
             <span style={{ fontSize: '9px', fontWeight: 700, padding: '1px 5px', borderRadius: '4px', background: 'var(--color-primary)', color: 'var(--color-primary-text, #fff)', letterSpacing: '0.04em' }}>博主</span>
           )}
           <span style={{ fontSize: '10px', color: 'var(--community-muted, #b8b4ad)' }}>{timeText}</span>
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); onReply(comment); }}
-            title="回复这条评论"
-            style={{ marginLeft: 'auto', padding: '1px 7px', fontSize: '10px', fontWeight: 600, border: '1px solid var(--community-border, #dedad4)', borderRadius: '999px', background: 'transparent', color: 'var(--community-muted, #7a7670)', cursor: 'pointer', font: 'inherit' }}
-          >
-            回复
-          </button>
         </div>
-        {/* 点评论正文也能回复 */}
+        {/* 点评论正文即回复（不再另设「回复」按钮） */}
         <p
           onClick={() => onReply(comment)}
           title="点击回复"
