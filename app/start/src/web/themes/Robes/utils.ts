@@ -69,6 +69,20 @@ export function formatShortDate(value: string | number | null | undefined) {
   return `${date.getMonth() + 1}月${date.getDate()}日`;
 }
 
+/** 归档行里的「日」：11 */
+export function formatDay(value: string | number | null | undefined) {
+  const date = toDate(value);
+  if (!date) return '';
+  return String(date.getDate());
+}
+
+/** 归档行里的星期：周三 */
+export function formatWeek(value: string | number | null | undefined) {
+  const date = toDate(value);
+  if (!date) return '';
+  return `周${WEEK[date.getDay()]}`;
+}
+
 /** 按中文阅读速度估算阅读时长（分钟）。 */
 export function readMinutes(wordCount: number | undefined | null) {
   const words = Number(wordCount || 0);

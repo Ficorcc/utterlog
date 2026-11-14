@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import PostLink from '@/components/blog/PostLink';
 import { useThemeContext } from '@/lib/theme-context';
 import { IconArchive, IconChat, IconEye } from './Icons';
-import { formatShortDate, toDate } from './utils';
+import { formatDay, formatWeek, toDate } from './utils';
 
 interface ArchivePost {
   id: number;
@@ -130,8 +130,8 @@ export default function ArchivePage({ posts, stats }: ArchiveProps) {
                     <PostLink className="pg-arch-row" key={post.id} post={post}>
                       <span className="pg-arch-row-dot" />
                       <span className="pg-arch-row-date">
-                        <b>{formatShortDate(post.published_at || post.created_at).replace(/\d+月/, '')}</b>
-                        <i>{formatShortDate(post.published_at || post.created_at).replace(/^\d+月/, '')}</i>
+                        <b>{formatDay(post.published_at || post.created_at)}</b>
+                        <i>{formatWeek(post.published_at || post.created_at)}</i>
                       </span>
                       <span className="pg-arch-row-title">{post.title}</span>
                       <span className="pg-arch-row-meta">
