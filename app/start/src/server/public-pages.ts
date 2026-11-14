@@ -19,7 +19,7 @@ import {
 } from '@backend/public-read';
 import { requestIp } from '@backend/request-ip';
 import { bumpSiteViewOnRender, type ReadVisitor } from '@backend/services/tracking';
-import { guestbookThread } from '@backend/services/guestbook';
+import { guestbookStats, guestbookThread } from '@backend/services/guestbook';
 import { loadStartThemeContextDirect } from './theme';
 
 export type PublicPageRequest =
@@ -143,8 +143,8 @@ export type PublicPageBody =
   | { kind: 'category'; category: any; posts: any[] }
   | { kind: 'tags' }
   | { kind: 'tag'; tag: any; posts: any[] }
-  | { kind: 'about' }
-  | { kind: 'guestbook'; postId: number; commentCount: number }
+  | { kind: 'about'; recentPosts: any[] }
+  | { kind: 'guestbook'; postId: number; commentCount: number; commentAuthors: number; lastCommentAt: number }
   | { kind: 'coding'; data: any; timeZone: string }
   | { kind: 'footprints'; rows: any[] }
   | { kind: 'moments'; moments: any[]; tags: string[]; fetchedAt: number }
@@ -383,12 +383,23 @@ async function resolvePublicPage(ctx: ThemeContextData | null, data: PublicPageR
       return { kind: 'search', query, results, mode: body.mode || '', total: body.total || results.length, timeZone };
     }
 
-    if (data.kind === 'about') return { kind: 'about' };
+    if (data.kind === 'about') {
+      // 「最近更新」列表：随页面一起下发最新三篇文章，主题的关于页直接渲染。
+      const res = await safe(listPosts({ perPage: 3, status: 'publish' }), emptyPostList(1, 3));
+      return { kind: 'about', recentPosts: dataOf<any[]>(res, []) };
+    }
 
     if (data.kind === 'guestbook') {
       if (ctx?.options.page_guestbook === 'false') return { kind: 'not-found', pathname: '/guestbook' };
       const thread = await guestbookThread();
-      return { kind: 'guestbook', postId: thread.id, commentCount: Number(thread.comment_count || 0) };
+      const stats = await safe(guestbookStats(thread.id), { authors: 0, lastAt: 0 });
+      return {
+        kind: 'guestbook',
+        postId: thread.id,
+        commentCount: Number(thread.comment_count || 0),
+        commentAuthors: stats.authors,
+        lastCommentAt: stats.lastAt,
+      };
     }
 
     if (data.kind === 'coding') {

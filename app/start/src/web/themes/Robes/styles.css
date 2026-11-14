@@ -8501,3 +8501,41 @@ html[data-theme='Robes'] .toc-wrap .blog-toc-list a.active {
   background: var(--accent);
   font-weight: 600;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ROBES PAGES EXTRA
+   关于页 / 友链页 / 留言板页的补充适配：原主题这几页用 Remix Icon 字体图标，
+   复刻版换成内联 SVG，尺寸改由 font-size 驱动；另有几个原为 <a> 的元素在
+   复刻版里换成了 <button>，补齐按钮重置。
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* 原主题把图标放在 <i> 里靠 font-size 控制大小，内联 SVG 需要跟随 1em */
+html[data-theme='Robes'] i > svg {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: -0.12em;
+}
+
+/* 原主题的申请按钮是 <a>，复刻版用 <button>，补回浏览器默认样式重置 */
+html[data-theme='Robes'] button.link-apply-btn {
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* 友链页空状态 */
+html[data-theme='Robes'] .links-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 48px 20px;
+  color: var(--text-light);
+  font-size: 13px;
+}
+
+/* 留言板统计里的时间值不折行 */
+html[data-theme='Robes'] .gb-stat-time {
+  white-space: nowrap;
+}

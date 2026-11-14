@@ -46,8 +46,8 @@ export function toDate(value: string | number | null | undefined): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-export function formatDate(value: string | number | null | undefined, pattern = 'yyyy-MM-dd') {
-  const date = toDate(value);
+export function formatDate(value: string | number | Date | null | undefined, pattern = 'yyyy-MM-dd') {
+  const date = value instanceof Date ? (Number.isNaN(value.getTime()) ? null : value) : toDate(value);
   if (!date) return '';
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -88,6 +88,19 @@ export function readMinutes(wordCount: number | undefined | null) {
   const words = Number(wordCount || 0);
   if (words <= 0) return 1;
   return Math.max(1, Math.ceil(words / 500));
+}
+
+/** 相对时间：刚刚 / N 分钟前 / N 小时前 / N 天前 / M-D（对齐原主题 guestbook.php）。 */
+export function relativeTime(timestamp: number | string | null | undefined) {
+  const value = Number(timestamp || 0);
+  if (!value) return '';
+  const diff = Date.now() - value * 1000;
+  if (diff < 60_000) return '刚刚';
+  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)} 分钟前`;
+  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)} 小时前`;
+  if (diff < 2_592_000_000) return `${Math.floor(diff / 86_400_000)} 天前`;
+  const date = new Date(value * 1000);
+  return `${date.getMonth() + 1}-${date.getDate()}`;
 }
 
 /** WMO weather code → 中文描述 + 图标键。 */

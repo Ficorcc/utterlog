@@ -66,7 +66,11 @@ export interface ThemeComponents {
   TagsPage?: ThemeComponent;
   NotFoundPage?: ThemeComponent;
   DashboardPage?: ThemeComponent;
-  GuestbookPage?: ThemeComponent<{ postId: number; commentCount: number }>;
+  GuestbookPage?: ThemeComponent<{ postId: number; commentCount: number; commentAuthors?: number; lastCommentAt?: number }>;
+  /** 主题可以接管「关于」页；不提供时回落到应用层默认的 AboutContent。 */
+  AboutPage?: ThemeComponent<{ recentPosts?: any[] }>;
+  /** 主题可以接管「友链」页；不提供时回落到应用层默认的 LinksClient。 */
+  LinksPage?: ThemeComponent<{ initialLinks?: any[]; initialOptions?: Record<string, string> }>;
 }
 
 const SharedCommentSection = lazy(() => import('@/components/blog/CommentList'));
@@ -139,6 +143,8 @@ const Robes: ThemeComponents = {
   TagsPage: lazy(() => import('@/themes/Robes/TagsPage')),
   NotFoundPage: lazy(() => import('@/themes/Robes/NotFoundPage')),
   GuestbookPage: lazy(() => import('@/themes/Robes/GuestbookPage')),
+  AboutPage: lazy(() => import('@/themes/Robes/AboutPage')),
+  LinksPage: lazy(() => import('@/themes/Robes/LinksPage')),
 };
 
 const Whono: ThemeComponents = {

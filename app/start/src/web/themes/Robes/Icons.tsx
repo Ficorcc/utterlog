@@ -323,6 +323,111 @@ export function IconBook(props: IconProps) {
   );
 }
 
+export function IconUser(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <circle cx="12" cy="8.2" r="3.6" />
+      <path d="M4.8 20.2c.7-3.6 3.6-5.6 7.2-5.6s6.5 2 7.2 5.6" />
+    </Svg>
+  );
+}
+
+export function IconMail(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <rect x="3.2" y="5.4" width="17.6" height="13.2" rx="2.4" />
+      <path d="m4.4 7.2 7.6 5.3 7.6-5.3" />
+    </Svg>
+  );
+}
+
+export function IconHandshake(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="m8.6 12.4 2.2 2.2a1.7 1.7 0 0 0 2.4 0l4.6-4.6" />
+      <path d="m3.6 9.4 3-2.4a2 2 0 0 1 2.5 0l1.3 1 1.3-1a2 2 0 0 1 2.5 0l3 2.4" />
+      <path d="m9.4 13.8 1.6 1.6M11.4 15.6l1.3 1.3M13.4 15.4l1 1" />
+      <path d="M3.6 9.4v3.4c0 .5.2 1 .6 1.3l1.8 1.5M20.4 9.4v3.4c0 .5-.2 1-.6 1.3l-1.4 1.2" />
+    </Svg>
+  );
+}
+
+export function IconCheck(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="m5 12.8 4.4 4.4L19 7.2" />
+    </Svg>
+  );
+}
+
+export function IconLightbulb(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M9.2 17.4h5.6" />
+      <path d="M10 20.4h4" />
+      <path d="M12 3.2a5.8 5.8 0 0 0-3.4 10.5c.6.5 1 1.2 1 2h4.8c0-.8.4-1.5 1-2A5.8 5.8 0 0 0 12 3.2Z" />
+    </Svg>
+  );
+}
+
+export function IconLock(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <rect x="4.8" y="10.4" width="14.4" height="9.8" rx="2.4" />
+      <path d="M8.4 10.4V7.8a3.6 3.6 0 0 1 7.2 0v2.6" />
+    </Svg>
+  );
+}
+
+export function IconPriceTag(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M3.8 11.4 11.4 3.8h6.4v6.4l-7.6 7.6a1.6 1.6 0 0 1-2.3 0l-4.1-4.1a1.6 1.6 0 0 1 0-2.3Z" />
+      <circle cx="15.4" cy="8.6" r="1.3" />
+    </Svg>
+  );
+}
+
+export function IconPlug(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M9 3.4v5.2M15 3.4v5.2" />
+      <path d="M6.6 8.6h10.8v3.1a5.4 5.4 0 0 1-10.8 0Z" />
+      <path d="M12 17.1v3.5" />
+    </Svg>
+  );
+}
+
+export function IconEdit(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M4.4 19.6h4.2L19 9.2l-4.2-4.2L4.4 15.4Z" />
+      <path d="m13.4 6.4 4.2 4.2" />
+    </Svg>
+  );
+}
+
+export function IconInfoCircle(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <circle cx="12" cy="12" r="8.6" />
+      <path d="M12 11.2v5" />
+      <circle cx="12" cy="8" r="1" fill="currentColor" stroke="none" />
+    </Svg>
+  );
+}
+
+export function IconListCheck(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="m3.4 6.6 1.8 1.8 3-3" />
+      <path d="m3.4 12.4 1.8 1.8 3-3" />
+      <path d="m3.4 18.2 1.8 1.8 3-3" />
+      <path d="M12.4 6.8h8.2M12.4 12.6h8.2M12.4 18.4h8.2" />
+    </Svg>
+  );
+}
+
 /** 按菜单标题挑一个语义图标，对应原主题 pageNavIcon() 的做法。 */
 export function navIcon(label: string) {
   const text = String(label || '').trim();

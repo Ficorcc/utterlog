@@ -9,6 +9,7 @@ interface RobesSettings {
   accent: string;
   footerText: string;
   icp: string;
+  siteStart: string;
 }
 
 const initial: RobesSettings = {
@@ -17,10 +18,11 @@ const initial: RobesSettings = {
   accent: '#839ac9',
   footerText: '',
   icp: '',
+  siteStart: '',
 };
 
 /**
- * Robes 主题设置：站内公告、站长心情、强调色、页脚文案、备案号。
+ * Robes 主题设置：站内公告、站长心情、强调色、页脚文案、备案号、建站日期。
  *
  * 这些值写进 options 表，前台主题通过 ThemeContext.options 读取：
  *   robes_notice     多行公告，每行一条，可写「2026-11-05｜公告内容」
@@ -28,6 +30,7 @@ const initial: RobesSettings = {
  *   robes_accent     主题强调色（覆盖默认 #839ac9）
  *   robes_footer_text 页脚版权文案
  *   robes_icp        备案号
+ *   robes_site_start 建站日期（关于页「建于 xxxx.xx.xx」）
  */
 export default function RobesNoticeSettings() {
   const [settings, setSettings] = useState(initial);
@@ -45,6 +48,7 @@ export default function RobesNoticeSettings() {
           accent: String(options.robes_accent || '#839ac9'),
           footerText: String(options.robes_footer_text || ''),
           icp: String(options.robes_icp || ''),
+          siteStart: String(options.robes_site_start || ''),
         });
       })
       .catch(() => toast.error('加载 Robes 设置失败'))
@@ -60,6 +64,7 @@ export default function RobesNoticeSettings() {
         robes_accent: settings.accent.trim() || '#839ac9',
         robes_footer_text: settings.footerText,
         robes_icp: settings.icp,
+        robes_site_start: settings.siteStart.trim(),
       });
       toast.success('Robes 设置已保存');
     } catch {
@@ -99,6 +104,24 @@ export default function RobesNoticeSettings() {
               placeholder="今天也在认真生活，慢慢来，别着急。"
             />
             <p className="m-0 text-xs text-muted-foreground">留空则使用站点简介。</p>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="p-5">
+        <h3 className="m-0 text-sm font-semibold text-foreground">站点信息</h3>
+        <p className="mb-0 mt-1.5 text-xs leading-relaxed text-muted-foreground">
+          建站日期会显示在关于页的「建于 xxxx.xx.xx」位置，留空则按最早一篇文章推算。
+        </p>
+        <div className="mt-5 grid max-w-3xl gap-4 border-t border-border pt-4 sm:grid-cols-3">
+          <div className="space-y-2">
+            <Label htmlFor="robes-site-start">建站日期</Label>
+            <Input
+              id="robes-site-start"
+              type="date"
+              value={settings.siteStart}
+              onChange={(event) => setSettings((current) => ({ ...current, siteStart: event.target.value }))}
+            />
           </div>
         </div>
       </Card>

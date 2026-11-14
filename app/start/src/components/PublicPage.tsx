@@ -280,10 +280,15 @@ export function PublicPage({ data }: { data: PublicPageData }) {
             );
           }
         }
-        if (data.kind === 'about') return <AboutContent />;
+        if (data.kind === 'about') {
+          // 主题可以接管关于页（Robes 复刻了原站的 about.php 结构），没接管时用应用层默认页。
+          const Component = ctx ? getThemeComponents(ctx.theme.name).AboutPage : undefined;
+          if (Component) return <Component recentPosts={data.recentPosts} />;
+          return <AboutContent />;
+        }
         if (data.kind === 'guestbook') {
           const Component = ctx ? getThemeComponents(ctx.theme.name).GuestbookPage : undefined;
-          if (Component) return <Component postId={data.postId} commentCount={data.commentCount} />;
+          if (Component) return <Component postId={data.postId} commentCount={data.commentCount} commentAuthors={data.commentAuthors} lastCommentAt={data.lastCommentAt} />;
           return <div style={{ maxWidth: 960, margin: '0 auto', padding: 32 }}>
             <PageTitle title="留言板" icon="fa-regular fa-message-lines" />
             <DefaultGuestbookComments postId={data.postId} title="留言板" formPlacement="bottom" />
@@ -292,7 +297,12 @@ export function PublicPage({ data }: { data: PublicPageData }) {
         if (data.kind === 'coding') return <CodingPage data={data.data} timeZone={data.timeZone} />;
         if (data.kind === 'footprints') return <FootprintsClient initialRows={data.rows} options={ctx?.options || {}} />;
         if (data.kind === 'moments') return <MomentsClient initialLoaded initialMoments={data.moments} initialTags={data.tags} initialFetchedAt={data.fetchedAt} />;
-        if (data.kind === 'client' && data.page === 'links') return <LinksClient initialLinks={data.items || []} initialOptions={ctx?.options || {}} />;
+        if (data.kind === 'client' && data.page === 'links') {
+          // 主题可以接管友链页（Robes 复刻了原站的 links.php 结构），没接管时用应用层默认页。
+          const Component = ctx ? getThemeComponents(ctx.theme.name).LinksPage : undefined;
+          if (Component) return <Component initialLinks={data.items || []} initialOptions={ctx?.options || {}} />;
+          return <LinksClient initialLinks={data.items || []} initialOptions={ctx?.options || {}} />;
+        }
         if (data.kind === 'client' && data.page === 'feeds') return <FeedsClient />;
         if (data.kind === 'client' && data.page === 'albums') return <AlbumsClient initialAlbums={data.items || []} />;
         if (data.kind === 'client' && data.page === 'music') return <MusicClient initialItems={data.items || []} />;

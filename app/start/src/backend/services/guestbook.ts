@@ -55,3 +55,25 @@ export function commentPagePath(post: { type?: string | null; slug?: string | nu
     : `/posts/${encodeURIComponent(post?.slug || String(postId))}`;
   return `${path}#comment-${commentId}`;
 }
+
+/**
+ * 留言板概览：留言人数与最近一条留言的时间。
+ *
+ * 原主题 guestbook.php 的「位留言者 / 最近留言」两格统计来自 Typecho 表，
+ * 这里换成 Utterlog 的 comments 表：同一个人按昵称 → 邮箱 → IP 依次去重。
+ */
+export async function guestbookStats(postId: number) {
+  const rows = await sql
+    .unsafe<{ authors: string; last_at: string | null }[]>(
+      `select count(distinct coalesce(nullif(author_name, ''), nullif(coalesce(author_email, ''), ''), author_ip::text))::text as authors,
+              max(created_at)::text as last_at
+         from ${table('comments')}
+        where post_id = $1 and status = 'approved'`,
+      [postId],
+    )
+    .catch(() => [] as { authors: string; last_at: string | null }[]);
+  return {
+    authors: Number(rows[0]?.authors || 0),
+    lastAt: Number(rows[0]?.last_at || 0),
+  };
+}

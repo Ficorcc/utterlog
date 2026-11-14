@@ -4,7 +4,7 @@ import { useState } from 'react';
 import PageTitle from '@/components/blog/PageTitle';
 import CommentList from '@/components/blog/CommentList';
 
-export default function GuestbookPage({ postId, commentCount }: { postId: number; commentCount: number }) {
+export default function GuestbookPage({ postId, commentCount }: { postId: number; commentCount: number; commentAuthors?: number; lastCommentAt?: number }) {
   const [count, setCount] = useState(commentCount);
   return (
     <div className="sy-guestbook" id="guestbook">
