@@ -64,6 +64,7 @@ type FriendRow = {
   post_link: string;
   post_desc: string;
   post_pub_date: number;
+  post_id: number;
 };
 
 export async function friendsFeed(): Promise<FriendsFeedResult> {
@@ -81,19 +82,26 @@ export async function friendsFeed(): Promise<FriendsFeedResult> {
             coalesce(p.title, '') as post_title,
             coalesce(p.link, '') as post_link,
             coalesce(p.description, '') as post_desc,
-            coalesce(p.pub_date, 0) as post_pub_date
+            coalesce(p.pub_date, 0) as post_pub_date,
+            coalesce(p.id, 0) as post_id
        from ${table('rss_subscriptions')} rs
        left join ${table('links')} l on coalesce(l.url, '') = rs.site_url
        left join lateral (
-            select fi.title, fi.link, fi.description, fi.pub_date
+            select fi.id, fi.title, fi.link, fi.description, fi.pub_date
               from ${table('feed_items')} fi
              where fi.subscription_id = rs.id
              order by fi.pub_date desc, fi.id desc
              limit ${POSTS_PER_FRIEND}
        ) p on true
       where rs.user_id = 1
+      -- 卡片顺序：按该好友最新一篇的时间倒序（同原版 usort）；
+      -- 组内再按时间倒序排文章 —— 外层 ORDER BY 会盖掉 lateral 内部的顺序，
+      -- 不在这里补一条的话，好友卡片里的动态顺序就是随机的。
       order by (select max(fi.pub_date) from ${table('feed_items')} fi
-                 where fi.subscription_id = rs.id) desc nulls last, rs.id asc`,
+                 where fi.subscription_id = rs.id) desc nulls last,
+               rs.id asc,
+               p.pub_date desc,
+               p.id desc`,
   ).catch(() => [] as FriendRow[]);
 
   const groups = new Map<number, FriendFeedFriend>();
@@ -125,11 +133,26 @@ export async function friendsFeed(): Promise<FriendsFeedResult> {
     });
   }
 
+  // 组内文章按时间倒序（最新在前）。SQL 的 ORDER BY 已经排过一次，
+  // 这里再排一遍是兜底 —— 排序是这份数据的核心契约，不能只靠数据库。
+  for (const friend of groups.values()) {
+    friend.posts.sort((a, b) => b.pubDate - a.pubDate);
+  }
+
   const friends = Array.from(groups.values()).filter((friend) => {
     if (!friend.url) return false;
     // 「已失效」分类的友链不参与动态展示 —— 原版 friends.php 也是按
     // sort 字段这样过滤的（'已失效' 分类的友链不再参与动态抓取）。
     return !isDeadGroup(friend.group);
+  });
+
+  // 卡片顺序：该好友最新一篇动态的时间倒序（与原版 usort 一致）；
+  // 没有动态的排在最后。
+  friends.sort((a, b) => {
+    const aTime = a.posts.length ? a.posts[0].pubDate : 0;
+    const bTime = b.posts.length ? b.posts[0].pubDate : 0;
+    if (aTime !== bTime) return bTime - aTime;
+    return a.id - b.id;
   });
 
   return {
