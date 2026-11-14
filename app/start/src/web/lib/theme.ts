@@ -45,6 +45,7 @@ import {
 import AzureManifest from '@/themes/Azure/theme.json';
 import EmberManifest from '@/theme-renderers/Ember/theme.json';
 import RenascentManifest from '@/themes/Renascent/theme.json';
+import RobesManifest from '@/themes/Robes/theme.json';
 import ShanYingManifest from '@/themes/ShanYing/theme.json';
 import WhonoManifest from '@/themes/Whono/theme.json';
 
@@ -123,6 +124,23 @@ const ShanYing: ThemeComponents = {
   GuestbookPage: lazy(() => import('@/themes/ShanYing/GuestbookPage')),
 };
 
+const Robes: ThemeComponents = {
+  Header: lazy(() => import('@/themes/Robes/Header')),
+  Footer: lazy(() => import('@/themes/Robes/Footer')),
+  Layout: lazy(() => import('@/themes/Robes/Layout')),
+  HomePage: lazy(() => import('@/themes/Robes/HomePage')),
+  PostPage: lazy(() => import('@/themes/Robes/PostPage')),
+  PostCard: lazy(() => import('@/themes/Robes/PostCard')),
+  CommentSection: SharedCommentSection,
+  ArchivePage: lazy(() => import('@/themes/Robes/ArchivePage')),
+  CategoryPage: lazy(() => import('@/themes/Robes/CategoryPage')),
+  TagPage: lazy(() => import('@/themes/Robes/TagPage')),
+  CategoriesPage: lazy(() => import('@/themes/Robes/CategoriesPage')),
+  TagsPage: lazy(() => import('@/themes/Robes/TagsPage')),
+  NotFoundPage: lazy(() => import('@/themes/Robes/NotFoundPage')),
+  GuestbookPage: lazy(() => import('@/themes/Robes/GuestbookPage')),
+};
+
 const Whono: ThemeComponents = {
   Header: lazy(() => import('@/themes/Whono/Header')),
   Footer: lazy(() => import('@/themes/Whono/Footer')),
@@ -143,6 +161,7 @@ const themeRegistry: Record<string, ThemeComponents> = {
   Azure,
   Ember,
   Renascent,
+  Robes,
   ShanYing,
   Whono,
 };
@@ -151,6 +170,7 @@ const manifestRegistry: Record<string, ThemeManifest> = {
   Azure: AzureManifest as ThemeManifest,
   Ember: EmberManifest as ThemeManifest,
   Renascent: RenascentManifest as ThemeManifest,
+  Robes: RobesManifest as ThemeManifest,
   ShanYing: ShanYingManifest as ThemeManifest,
   Whono: WhonoManifest as ThemeManifest,
 };

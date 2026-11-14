@@ -1,0 +1,34 @@
+{
+  "id": "Robes",
+  "name": "Robes",
+  "version": "2.7.1",
+  "description": "移植自 Typecho 主题「Robes」—— 毛玻璃三栏结构（左侧栏 + 顶栏 + 内容区）、首页封面轮播、通知面板（公告 / 最新评论 / 小站）与深浅色切换",
+  "author": "Robes · 移植至 Utterlog",
+  "screenshot": "screenshot.svg",
+  "colors": {
+    "primary": "#839ac9",
+    "background": "#cfcfcf"
+  },
+  "layout": {
+    "maxWidth": "920px",
+    "headerStyle": "glass"
+  },
+  "menuPositions": [
+    { "key": "header", "label": "主菜单", "description": "顶栏品牌区与侧栏导航使用的菜单（首页 / 页面 / 分类 / 标签）" },
+    { "key": "footer", "label": "页脚链接", "description": "底部版权栏上的辅助链接" }
+  ],
+  "adminPanels": ["robes_notice"],
+  "features": [
+    "dark_mode",
+    "search",
+    "notice_panel",
+    "hero_carousel",
+    "weather_widget",
+    "archive",
+    "toc",
+    "reading_tools",
+    "guestbook",
+    "mobile_tabbar",
+    "responsive"
+  ]
+}
