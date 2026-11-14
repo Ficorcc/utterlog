@@ -8439,3 +8439,65 @@ html[data-theme='Robes'] .arch-deco {
   opacity: .18;
   pointer-events: none;
 }
+
+/* ── 文章页目录：把 Utterlog 的 .blog-toc 摆成 Robes 的横向胶囊条 ───────────
+   Robes 原主题的目录是 .toc-wrap 里一条横向胶囊列表（.toc-list / .toc-item），
+   Utterlog 提供的是竖排悬浮目录，这里在主题作用域内改写成同样的胶囊形态。 */
+html[data-theme='Robes'] .toc-wrap {
+  padding: 10px 14px 12px;
+}
+html[data-theme='Robes'] .toc-wrap .blog-toc {
+  /* 这三条 Utterlog 组件用行内样式写着（position/opacity/pointer-events），
+     行内优先级更高，必须 !important 才能改回 Robes 的静态胶囊条。 */
+  position: static !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  padding: 0;
+  max-height: none;
+  overflow: visible;
+}
+html[data-theme='Robes'] .toc-wrap .blog-toc-header { display: none; }
+html[data-theme='Robes'] .toc-wrap .blog-toc-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+}
+html[data-theme='Robes'] .toc-wrap .blog-toc-list li { margin: 0; }
+html[data-theme='Robes'] .toc-wrap .blog-toc-item,
+html[data-theme='Robes'] .toc-wrap .blog-toc-list a {
+  display: inline-block;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  text-decoration: none;
+  transition: color .15s, background .15s;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+html[data-theme='Robes'] .toc-wrap .blog-toc-item:hover,
+html[data-theme='Robes'] .toc-wrap .blog-toc-list a:hover {
+  color: var(--text);
+  background: rgba(0,0,0,0.04);
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .toc-wrap .blog-toc-item:hover,
+html[data-theme='Robes'][data-robes-mode='dark'] .toc-wrap .blog-toc-list a:hover {
+  background: rgba(255,255,255,0.04);
+}
+html[data-theme='Robes'] .toc-wrap .blog-toc-item.active,
+html[data-theme='Robes'] .toc-wrap .blog-toc-list a.active {
+  color: #fff;
+  background: var(--accent);
+  font-weight: 600;
+}
