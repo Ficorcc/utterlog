@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useThemeContext } from '@/lib/theme-context';
@@ -51,10 +51,22 @@ function truncate(text: string, limit: number) {
 /** 友链头像：加载失败时回落到首字，和原主题 links.php 的 onerror 处理一致。 */
 function LinkAvatar({ src, name }: { src: string; name: string }) {
   const [failed, setFailed] = useState(false);
+  const ref = useRef<HTMLImageElement>(null);
   const initial = String(name || '友').slice(0, 1);
+
+  // SSR 输出的 <img> 可能在 React 接管之前就加载失败（对方站点防盗链
+  // 返回 403、或者图被删了），那时 onError 还没绑上，事件就丢了。
+  // 挂载后主动查一次 complete/naturalWidth，把这类漏网的补上。
+  useEffect(() => {
+    const img = ref.current;
+    if (!img) return;
+    if (img.complete && img.naturalWidth === 0) setFailed(true);
+  }, [src]);
+
   if (!src || failed) return <div className="link-avatar-text">{initial}</div>;
   return (
     <img
+      ref={ref}
       src={src}
       alt={name}
       loading="lazy"
