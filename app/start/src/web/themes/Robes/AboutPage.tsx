@@ -99,7 +99,9 @@ export default function AboutPage({ recentPosts = [] }: AboutProps) {
   }, [options, owner?.socials, owner?.email]);
 
   const avatar = site?.logo || owner?.avatar || '';
-  const title = site?.description || owner?.bio || '关于这个站点';
+  // 原版这一行放的是站点简介（一句短句）。Utterlog 的 site.description 可能为空，
+  // 依次回落到副标题、站长简介的第一段。
+  const title = site?.description || site?.subtitle || String(owner?.bio || '').split('\n')[0].trim() || '关于这个站点';
 
   return (
     <article className="article standalone-page">

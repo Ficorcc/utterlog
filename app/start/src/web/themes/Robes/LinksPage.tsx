@@ -37,7 +37,7 @@ interface LinksProps {
   initialOptions?: Record<string, string>;
 }
 
-const DEFAULT_GROUP = '默认';
+const DEFAULT_GROUP = '未分类';
 
 function groupOf(link: Link) {
   return String(link.group_name || '').trim() || DEFAULT_GROUP;
@@ -48,8 +48,23 @@ function truncate(text: string, limit: number) {
   return value.length > limit ? `${value.slice(0, limit)}…` : value;
 }
 
+/** 友链头像：加载失败时回落到首字，和原主题 links.php 的 onerror 处理一致。 */
+function LinkAvatar({ src, name }: { src: string; name: string }) {
+  const [failed, setFailed] = useState(false);
+  const initial = String(name || '友').slice(0, 1);
+  if (!src || failed) return <div className="link-avatar-text">{initial}</div>;
+  return (
+    <img
+      src={src}
+      alt={name}
+      loading="lazy"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
 export default function LinksPage({ initialLinks = [] }: LinksProps) {
-  const { site } = useThemeContext();
+  const { site, owner } = useThemeContext();
   const links = Array.isArray(initialLinks) ? initialLinks : [];
 
   const groups = useMemo(() => {
@@ -140,11 +155,7 @@ export default function LinksPage({ initialLinks = [] }: LinksProps) {
                   data-url={link.url}
                 >
                   <div className="link-avatar">
-                    {avatar ? (
-                      <img src={avatar} alt={link.name} loading="lazy" />
-                    ) : (
-                      <div className="link-avatar-text">{String(link.name || '友').slice(0, 1)}</div>
-                    )}
+                    <LinkAvatar src={avatar} name={link.name} />
                   </div>
                   <div className="link-info">
                     <div className="link-name">{link.name}</div>
@@ -212,7 +223,7 @@ export default function LinksPage({ initialLinks = [] }: LinksProps) {
               ) : null}
               <li>
                 <span className="lk">简介</span>
-                <span className="lv">{site?.description || ''}</span>
+                <span className="lv">{site?.description || owner?.bio || ''}</span>
               </li>
             </ul>
           </div>
