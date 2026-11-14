@@ -22,6 +22,7 @@ const FootprintsClient = lazy(() => import('@/components/pages/footprints/Footpr
 const MomentsClient = lazy(() => import('@/components/pages/moments/MomentsClient'));
 const LinksClient = lazy(() => import('@/components/pages/links/LinksClient'));
 const FeedsClient = lazy(() => import('@/components/pages/feeds/FeedsClient'));
+const FriendsClient = lazy(() => import('@/components/pages/friends/FriendsClient'));
 const AlbumsClient = lazy(() => import('@/components/pages/albums/AlbumsClient'));
 const MusicClient = lazy(() => import('@/components/pages/music/MusicClient'));
 const AboutContent = lazy(() => import('@/components/pages/about/AboutContent'));
@@ -303,7 +304,18 @@ export function PublicPage({ data }: { data: PublicPageData }) {
           if (Component) return <Component initialLinks={data.items || []} initialOptions={ctx?.options || {}} />;
           return <LinksClient initialLinks={data.items || []} initialOptions={ctx?.options || {}} />;
         }
-        if (data.kind === 'client' && data.page === 'feeds') return <FeedsClient />;
+        if (data.kind === 'client' && data.page === 'feeds') {
+          // Robes 把订阅页当朋友圈渲染（按订阅源分组），其他主题用各自的时间线视图。
+          const Component = ctx ? getThemeComponents(ctx.theme.name).FriendsPage : undefined;
+          if (Component) return <Component friends={data.friends || []} />;
+          return <FeedsClient />;
+        }
+        if (data.kind === 'friends') {
+          // 主题可以接管朋友圈页（Robes 复刻了原站的 friends.php 结构），没接管时用应用层默认页。
+          const Component = ctx ? getThemeComponents(ctx.theme.name).FriendsPage : undefined;
+          if (Component) return <Component friends={data.friends} total={data.total} withPosts={data.withPosts} />;
+          return <FriendsClient friends={data.friends} />;
+        }
         if (data.kind === 'client' && data.page === 'albums') return <AlbumsClient initialAlbums={data.items || []} />;
         if (data.kind === 'client' && data.page === 'music') return <MusicClient initialItems={data.items || []} />;
         if (data.kind === 'shelf') return <MediaGrid data={data} />;

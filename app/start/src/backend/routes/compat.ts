@@ -13,6 +13,7 @@ import { ephemeral } from '../store/ephemeral';
 import { appVersion } from '../system/metrics';
 import { runSyncFinishWorker } from '../sync/worker';
 import { sendFollowTelegram } from '../telegram';
+import { sendFollowWechat } from '../wechat';
 import { botSqlPattern } from '../bot-detect';
 
 function parseJsonOption<T>(value: string, fallback: T): T {
@@ -2218,6 +2219,7 @@ export async function acceptFederationFollow(input: Record<string, unknown>) {
     ).catch(() => {});
   }
   void sendFollowTelegram({ name: String(input.follower_name || ''), site: followerSite });
+  void sendFollowWechat({ name: String(input.follower_name || ''), site: followerSite });
   return { accepted: true, mutual };
 }
 

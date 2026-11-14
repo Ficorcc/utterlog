@@ -7,6 +7,7 @@ import { commentModerationUrl } from '../email/comment-moderation';
 import { emailSite, newCommentEmail } from '../email/templates';
 import { aiAuditFailAction, auditCommentContent, enqueueAiCommentReply, logAuditDecision } from '../ai/comments';
 import { sendCommentModerationTelegram } from '../telegram';
+import { sendCommentModerationWechat } from '../wechat';
 import { notifyCommentReply } from './comments';
 import { commentPagePath } from './guestbook';
 import { createNotification } from './notifications';
@@ -195,6 +196,15 @@ export async function createPublicComment(input: unknown, request: PublicComment
   }
   if (status === 'pending') {
     void sendCommentModerationTelegram({
+      commentId: id,
+      postTitle: post.title,
+      author: String(body.author_name || body.author || body.name || '访客'),
+      email: authorEmail,
+      url: authorUrl,
+      ip: request.ip,
+      content,
+    });
+    void sendCommentModerationWechat({
       commentId: id,
       postTitle: post.title,
       author: String(body.author_name || body.author || body.name || '访客'),

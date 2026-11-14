@@ -5,6 +5,7 @@ import { initDb } from './db/client';
 import { startFeedFetchCron } from './social/feed-cron';
 import { startCpuMonitor } from './system/metrics';
 import { startTelegramDailyReport } from './telegram';
+import { startWechatDailyReport } from './wechat';
 import { startBackupScheduler } from './routes/backup';
 import { startAiQueueRecovery } from './ai/comments';
 import { handleStartRequest, preloadStartServer, warmStartFrontend } from './web/start';
@@ -19,6 +20,7 @@ if (ready) {
   });
   startAnalyticsRollup();
   startTelegramDailyReport();
+  startWechatDailyReport();
   startFeedFetchCron();
   startBackupScheduler();
   startAiQueueRecovery();

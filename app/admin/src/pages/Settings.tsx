@@ -17,6 +17,7 @@ import { GlobeIcon } from '@/components/ui/globe';
 import { SearchIcon } from '@/components/ui/search';
 import { MailIcon } from '@/components/ui/mail';
 import { SendIcon } from '@/components/ui/send';
+import { MessageCircleIcon } from '@/components/ui/message-circle';
 import { MessagesSquareIcon } from '@/components/ui/messages-square';
 import { DatabaseIcon } from '@/components/ui/database';
 import { ImageIcon as AnimatedImageIcon } from '@/components/ui/image';
@@ -33,6 +34,7 @@ import UpdateTab from './settings/UpdateTab';
 import ServicesTab from './settings/ServicesTab';
 import SeoTab from './settings/SeoTab';
 import TelegramTab from './settings/TelegramTab';
+import WeChatTab from './settings/WeChatTab';
 import EmailTab from './settings/EmailTab';
 import CommentTab from './settings/CommentTab';
 import GeneralTab, { brandingPreviewSrc } from './settings/GeneralTab';
@@ -42,7 +44,7 @@ import ImageTab from './settings/ImageTab';
 // Native <select> styled like the shadcn Input so it stays compatible
 // with react-hook-form register() (Base UI Select can't take register).
 const Tools = lazy(() => import('./Tools'));
-const VALID_TABS = new Set(['general', 'seo', 'email', 'telegram', 'comment', 'media', 'image', 'services', 'tools', 'plugins', 'update']);
+const VALID_TABS = new Set(['general', 'seo', 'email', 'telegram', 'wechat', 'comment', 'media', 'image', 'services', 'tools', 'plugins', 'update']);
 function initialTabFromHash(): string {
   if (typeof window === 'undefined') return 'general';
   const h = window.location.hash.replace(/^#/, '');
@@ -73,6 +75,11 @@ const TAB_FIELDS: Record<string, string[]> = {
     'tg_notify_comment', 'tg_notify_follow', 'tg_notify_publish', 'tg_daily_report',
     'tg_comment_approve', 'tg_comment_reply', 'tg_publish_moment',
     'tg_ai_chat', 'tg_auto_upload_image',
+  ],
+  wechat: [
+    'wechat_gateway_url', 'wechat_gateway_token', 'wechat_owner_id', 'wechat_allowed_users',
+    'wx_notify_comment', 'wx_notify_follow', 'wx_notify_publish', 'wx_daily_report',
+    'wx_publish_moment', 'wx_auto_upload_image',
   ],
   comment: [
     'allow_comments', 'comment_moderation', 'comment_trust_returning',
@@ -265,6 +272,17 @@ export default function SettingsPage() {
         tg_publish_moment: s.tg_publish_moment ?? false,
         tg_ai_chat: s.tg_ai_chat ?? false,
         tg_auto_upload_image: s.tg_auto_upload_image ?? false,
+        // 微信（个人微信网关）
+        wechat_gateway_url: s.wechat_gateway_url || '',
+        wechat_gateway_token: s.wechat_gateway_token || '',
+        wechat_owner_id: s.wechat_owner_id || '',
+        wechat_allowed_users: s.wechat_allowed_users || '',
+        wx_notify_comment: s.wx_notify_comment ?? false,
+        wx_notify_follow: s.wx_notify_follow ?? false,
+        wx_notify_publish: s.wx_notify_publish ?? false,
+        wx_daily_report: s.wx_daily_report ?? false,
+        wx_publish_moment: s.wx_publish_moment ?? false,
+        wx_auto_upload_image: s.wx_auto_upload_image ?? false,
         // 媒体
         storage_limit_gb: s.storage_limit_gb || 10,
         media_driver: s.media_driver || 'local',
@@ -459,6 +477,7 @@ export default function SettingsPage() {
     { id: 'seo', label: t('admin.settings.tabs.seo', 'SEO 与 AI'), icon: SearchIcon },
     { id: 'email', label: t('admin.settings.tabs.email', '邮件设置'), icon: MailIcon },
     { id: 'telegram', label: 'Telegram', icon: SendIcon },
+    { id: 'wechat', label: t('admin.settings.tabs.wechat', '微信'), icon: MessageCircleIcon },
     { id: 'comment', label: t('admin.settings.tabs.comment', '评论设置'), icon: MessagesSquareIcon },
     { id: 'media', label: t('admin.settings.tabs.media', '存储设置'), icon: DatabaseIcon },
     { id: 'image', label: t('admin.settings.tabs.image', '图片处理'), icon: AnimatedImageIcon },
@@ -553,6 +572,17 @@ export default function SettingsPage() {
               setTgChats={setTgChats}
               fetchingChatId={fetchingChatId}
               setFetchingChatId={setFetchingChatId}
+            />
+          )}
+
+          {/* ==================== 微信 ==================== */}
+          {activeTab === 'wechat' && (
+            <WeChatTab
+              t={t}
+              register={register}
+              watch={watch}
+              setValue={setValue}
+              getValues={getValues}
             />
           )}
 

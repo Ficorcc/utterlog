@@ -20,12 +20,13 @@ import {
 import { requestIp } from '@backend/request-ip';
 import { bumpSiteViewOnRender, type ReadVisitor } from '@backend/services/tracking';
 import { guestbookStats, guestbookThread } from '@backend/services/guestbook';
+import { friendsFeed } from '@backend/services/friends-feed';
 import { loadStartThemeContextDirect } from './theme';
 
 export type PublicPageRequest =
   | { kind: 'home'; page?: number }
   | { kind: 'post' | 'film'; slug: string }
-  | { kind: 'archives' | 'categories' | 'tags' | 'about' | 'coding' | 'footprints' | 'moments' | 'guestbook' | 'links' | 'feeds' | 'albums' | 'music' | 'dashboard' }
+  | { kind: 'archives' | 'categories' | 'tags' | 'about' | 'coding' | 'footprints' | 'moments' | 'guestbook' | 'links' | 'feeds' | 'friends' | 'albums' | 'music' | 'dashboard' }
   | { kind: 'category' | 'tag'; slug: string }
   | { kind: 'search'; query?: string }
   | { kind: 'shelf'; shelf: 'movies' | 'books' | 'games' | 'goods' }
@@ -35,7 +36,7 @@ export type PublicPageRequest =
 
 const staticPageKinds = new Set([
   'archives', 'categories', 'tags', 'about', 'coding', 'footprints',
-  'moments', 'guestbook', 'links', 'feeds', 'albums', 'music', 'dashboard',
+  'moments', 'guestbook', 'links', 'feeds', 'friends', 'albums', 'music', 'dashboard',
 ]);
 const shelfKinds = new Set(['movies', 'books', 'games', 'goods']);
 
@@ -148,7 +149,8 @@ export type PublicPageBody =
   | { kind: 'coding'; data: any; timeZone: string }
   | { kind: 'footprints'; rows: any[] }
   | { kind: 'moments'; moments: any[]; tags: string[]; fetchedAt: number }
-  | { kind: 'client'; page: 'links' | 'feeds' | 'albums' | 'music'; items?: any[] }
+  | { kind: 'client'; page: 'links' | 'feeds' | 'albums' | 'music'; items?: any[]; friends?: any[] }
+  | { kind: 'friends'; friends: any[]; total: number; withPosts: number }
   | { kind: 'shelf'; shelf: 'movies' | 'books' | 'games' | 'goods'; items: any[] }
   | { kind: 'search'; query: string; results: any[]; mode: string; total: number; timeZone: string }
   | { kind: 'films'; items: any[]; total: number; page: number; perPage: number; totalPages: number; filters: Record<string, string> }
@@ -423,7 +425,18 @@ async function resolvePublicPage(ctx: ThemeContextData | null, data: PublicPageR
       const res = await safe(listPublicContent('links', { perPage: 500 }), emptyContentList(1, 500));
       return { kind: 'client', page: 'links', items: dataOf<any[]>(res, []) };
     }
-    if (data.kind === 'feeds') return { kind: 'client', page: 'feeds' };
+    if (data.kind === 'feeds') {
+      // 订阅页。Robes 主题把这一页渲染成原站的「朋友圈」（按订阅源分组），
+      // 所以顺手把分组数据一起下发；其他主题仍走各自的时间线视图。
+      const feed = await safe(friendsFeed(), { friends: [], total: 0, withPosts: 0 });
+      return { kind: 'client', page: 'feeds', friends: feed.friends };
+    }
+    if (data.kind === 'friends') {
+      // 朋友圈：按订阅源分组的最近动态。数据来自现成的 RSS 订阅体系
+      // （友链 rss_url → rss_subscriptions → feed_items），不再另建抓取器。
+      const feed = await safe(friendsFeed(), { friends: [], total: 0, withPosts: 0 });
+      return { kind: 'friends', friends: feed.friends, total: feed.total, withPosts: feed.withPosts };
+    }
     if (data.kind === 'albums') {
       const res = await safe(listPublicContent('albums', { perPage: 500 }), emptyContentList(1, 500));
       return { kind: 'client', page: 'albums', items: dataOf<any[]>(res, []) };

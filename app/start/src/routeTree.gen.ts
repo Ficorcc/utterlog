@@ -28,6 +28,7 @@ import { Route as GuestbookRouteImport } from './routes/guestbook'
 import { Route as GoodsRouteImport } from './routes/goods'
 import { Route as GoRouteImport } from './routes/go'
 import { Route as GamesRouteImport } from './routes/games'
+import { Route as FriendsRouteImport } from './routes/friends'
 import { Route as FootprintsRouteImport } from './routes/footprints'
 import { Route as FilmsRouteImport } from './routes/films'
 import { Route as FeedsRouteImport } from './routes/feeds'
@@ -89,6 +90,9 @@ import { Route as ApiV1MediaIndexRouteImport } from './routes/api/v1/media/index
 import { Route as ApiV1CommentsIndexRouteImport } from './routes/api/v1/comments/index'
 import { Route as ApiV1AnalyticsIndexRouteImport } from './routes/api/v1/analytics/index'
 import { Route as DateYearMonthDayRouteImport } from './routes/date/$year/$month/$day'
+import { Route as ApiV1WechatTestRouteImport } from './routes/api/v1/wechat/test'
+import { Route as ApiV1WechatStatusRouteImport } from './routes/api/v1/wechat/status'
+import { Route as ApiV1WechatInboundRouteImport } from './routes/api/v1/wechat/inbound'
 import { Route as ApiV1VisitorWeatherRouteImport } from './routes/api/v1/visitor/weather'
 import { Route as ApiV1VisitorGeoRouteImport } from './routes/api/v1/visitor/geo'
 import { Route as ApiV1UnsubscribeCommentReplyRouteImport } from './routes/api/v1/unsubscribe/comment-reply'
@@ -314,6 +318,11 @@ const GoRoute = GoRouteImport.update({
 const GamesRoute = GamesRouteImport.update({
   id: '/games',
   path: '/games',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FriendsRoute = FriendsRouteImport.update({
+  id: '/friends',
+  path: '/friends',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FootprintsRoute = FootprintsRouteImport.update({
@@ -620,6 +629,21 @@ const DateYearMonthDayRoute = DateYearMonthDayRouteImport.update({
   id: '/$day',
   path: '/$day',
   getParentRoute: () => DateYearMonthRoute,
+} as any)
+const ApiV1WechatTestRoute = ApiV1WechatTestRouteImport.update({
+  id: '/api/v1/wechat/test',
+  path: '/api/v1/wechat/test',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1WechatStatusRoute = ApiV1WechatStatusRouteImport.update({
+  id: '/api/v1/wechat/status',
+  path: '/api/v1/wechat/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1WechatInboundRoute = ApiV1WechatInboundRouteImport.update({
+  id: '/api/v1/wechat/inbound',
+  path: '/api/v1/wechat/inbound',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1VisitorWeatherRoute = ApiV1VisitorWeatherRouteImport.update({
   id: '/api/v1/visitor/weather',
@@ -1326,6 +1350,7 @@ export interface FileRoutesByFullPath {
   '/feeds': typeof FeedsRoute
   '/films': typeof FilmsRouteWithChildren
   '/footprints': typeof FootprintsRoute
+  '/friends': typeof FriendsRoute
   '/games': typeof GamesRoute
   '/go': typeof GoRoute
   '/goods': typeof GoodsRoute
@@ -1466,6 +1491,9 @@ export interface FileRoutesByFullPath {
   '/api/v1/unsubscribe/comment-reply': typeof ApiV1UnsubscribeCommentReplyRoute
   '/api/v1/visitor/geo': typeof ApiV1VisitorGeoRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
+  '/api/v1/wechat/inbound': typeof ApiV1WechatInboundRoute
+  '/api/v1/wechat/status': typeof ApiV1WechatStatusRoute
+  '/api/v1/wechat/test': typeof ApiV1WechatTestRoute
   '/date/$year/$month/$day': typeof DateYearMonthDayRoute
   '/api/v1/analytics/': typeof ApiV1AnalyticsIndexRoute
   '/api/v1/comments/': typeof ApiV1CommentsIndexRoute
@@ -1539,6 +1567,7 @@ export interface FileRoutesByTo {
   '/feeds': typeof FeedsRoute
   '/films': typeof FilmsRouteWithChildren
   '/footprints': typeof FootprintsRoute
+  '/friends': typeof FriendsRoute
   '/games': typeof GamesRoute
   '/go': typeof GoRoute
   '/goods': typeof GoodsRoute
@@ -1679,6 +1708,9 @@ export interface FileRoutesByTo {
   '/api/v1/unsubscribe/comment-reply': typeof ApiV1UnsubscribeCommentReplyRoute
   '/api/v1/visitor/geo': typeof ApiV1VisitorGeoRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
+  '/api/v1/wechat/inbound': typeof ApiV1WechatInboundRoute
+  '/api/v1/wechat/status': typeof ApiV1WechatStatusRoute
+  '/api/v1/wechat/test': typeof ApiV1WechatTestRoute
   '/date/$year/$month/$day': typeof DateYearMonthDayRoute
   '/api/v1/analytics': typeof ApiV1AnalyticsIndexRoute
   '/api/v1/comments': typeof ApiV1CommentsIndexRoute
@@ -1753,6 +1785,7 @@ export interface FileRoutesById {
   '/feeds': typeof FeedsRoute
   '/films': typeof FilmsRouteWithChildren
   '/footprints': typeof FootprintsRoute
+  '/friends': typeof FriendsRoute
   '/games': typeof GamesRoute
   '/go': typeof GoRoute
   '/goods': typeof GoodsRoute
@@ -1893,6 +1926,9 @@ export interface FileRoutesById {
   '/api/v1/unsubscribe/comment-reply': typeof ApiV1UnsubscribeCommentReplyRoute
   '/api/v1/visitor/geo': typeof ApiV1VisitorGeoRoute
   '/api/v1/visitor/weather': typeof ApiV1VisitorWeatherRoute
+  '/api/v1/wechat/inbound': typeof ApiV1WechatInboundRoute
+  '/api/v1/wechat/status': typeof ApiV1WechatStatusRoute
+  '/api/v1/wechat/test': typeof ApiV1WechatTestRoute
   '/date/$year/$month/$day': typeof DateYearMonthDayRoute
   '/api/v1/analytics/': typeof ApiV1AnalyticsIndexRoute
   '/api/v1/comments/': typeof ApiV1CommentsIndexRoute
@@ -1968,6 +2004,7 @@ export interface FileRouteTypes {
     | '/feeds'
     | '/films'
     | '/footprints'
+    | '/friends'
     | '/games'
     | '/go'
     | '/goods'
@@ -2108,6 +2145,9 @@ export interface FileRouteTypes {
     | '/api/v1/unsubscribe/comment-reply'
     | '/api/v1/visitor/geo'
     | '/api/v1/visitor/weather'
+    | '/api/v1/wechat/inbound'
+    | '/api/v1/wechat/status'
+    | '/api/v1/wechat/test'
     | '/date/$year/$month/$day'
     | '/api/v1/analytics/'
     | '/api/v1/comments/'
@@ -2181,6 +2221,7 @@ export interface FileRouteTypes {
     | '/feeds'
     | '/films'
     | '/footprints'
+    | '/friends'
     | '/games'
     | '/go'
     | '/goods'
@@ -2321,6 +2362,9 @@ export interface FileRouteTypes {
     | '/api/v1/unsubscribe/comment-reply'
     | '/api/v1/visitor/geo'
     | '/api/v1/visitor/weather'
+    | '/api/v1/wechat/inbound'
+    | '/api/v1/wechat/status'
+    | '/api/v1/wechat/test'
     | '/date/$year/$month/$day'
     | '/api/v1/analytics'
     | '/api/v1/comments'
@@ -2394,6 +2438,7 @@ export interface FileRouteTypes {
     | '/feeds'
     | '/films'
     | '/footprints'
+    | '/friends'
     | '/games'
     | '/go'
     | '/goods'
@@ -2534,6 +2579,9 @@ export interface FileRouteTypes {
     | '/api/v1/unsubscribe/comment-reply'
     | '/api/v1/visitor/geo'
     | '/api/v1/visitor/weather'
+    | '/api/v1/wechat/inbound'
+    | '/api/v1/wechat/status'
+    | '/api/v1/wechat/test'
     | '/date/$year/$month/$day'
     | '/api/v1/analytics/'
     | '/api/v1/comments/'
@@ -2608,6 +2656,7 @@ export interface RootRouteChildren {
   FeedsRoute: typeof FeedsRoute
   FilmsRoute: typeof FilmsRouteWithChildren
   FootprintsRoute: typeof FootprintsRoute
+  FriendsRoute: typeof FriendsRoute
   GamesRoute: typeof GamesRoute
   GoRoute: typeof GoRoute
   GoodsRoute: typeof GoodsRoute
@@ -2734,6 +2783,9 @@ export interface RootRouteChildren {
   ApiV1UnsubscribeCommentReplyRoute: typeof ApiV1UnsubscribeCommentReplyRoute
   ApiV1VisitorGeoRoute: typeof ApiV1VisitorGeoRoute
   ApiV1VisitorWeatherRoute: typeof ApiV1VisitorWeatherRoute
+  ApiV1WechatInboundRoute: typeof ApiV1WechatInboundRoute
+  ApiV1WechatStatusRoute: typeof ApiV1WechatStatusRoute
+  ApiV1WechatTestRoute: typeof ApiV1WechatTestRoute
   ApiV1AnalyticsIndexRoute: typeof ApiV1AnalyticsIndexRoute
   ApiV1CommentsIndexRoute: typeof ApiV1CommentsIndexRoute
   ApiV1MediaIndexRoute: typeof ApiV1MediaIndexRoute
@@ -2901,6 +2953,13 @@ declare module '@tanstack/react-router' {
       path: '/games'
       fullPath: '/games'
       preLoaderRoute: typeof GamesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/friends': {
+      id: '/friends'
+      path: '/friends'
+      fullPath: '/friends'
+      preLoaderRoute: typeof FriendsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/footprints': {
@@ -3329,6 +3388,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/date/$year/$month/$day'
       preLoaderRoute: typeof DateYearMonthDayRouteImport
       parentRoute: typeof DateYearMonthRoute
+    }
+    '/api/v1/wechat/test': {
+      id: '/api/v1/wechat/test'
+      path: '/api/v1/wechat/test'
+      fullPath: '/api/v1/wechat/test'
+      preLoaderRoute: typeof ApiV1WechatTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/wechat/status': {
+      id: '/api/v1/wechat/status'
+      path: '/api/v1/wechat/status'
+      fullPath: '/api/v1/wechat/status'
+      preLoaderRoute: typeof ApiV1WechatStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/wechat/inbound': {
+      id: '/api/v1/wechat/inbound'
+      path: '/api/v1/wechat/inbound'
+      fullPath: '/api/v1/wechat/inbound'
+      preLoaderRoute: typeof ApiV1WechatInboundRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/v1/visitor/weather': {
       id: '/api/v1/visitor/weather'
@@ -4583,6 +4663,7 @@ const rootRouteChildren: RootRouteChildren = {
   FeedsRoute: FeedsRoute,
   FilmsRoute: FilmsRouteWithChildren,
   FootprintsRoute: FootprintsRoute,
+  FriendsRoute: FriendsRoute,
   GamesRoute: GamesRoute,
   GoRoute: GoRoute,
   GoodsRoute: GoodsRoute,
@@ -4709,6 +4790,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1UnsubscribeCommentReplyRoute: ApiV1UnsubscribeCommentReplyRoute,
   ApiV1VisitorGeoRoute: ApiV1VisitorGeoRoute,
   ApiV1VisitorWeatherRoute: ApiV1VisitorWeatherRoute,
+  ApiV1WechatInboundRoute: ApiV1WechatInboundRoute,
+  ApiV1WechatStatusRoute: ApiV1WechatStatusRoute,
+  ApiV1WechatTestRoute: ApiV1WechatTestRoute,
   ApiV1AnalyticsIndexRoute: ApiV1AnalyticsIndexRoute,
   ApiV1CommentsIndexRoute: ApiV1CommentsIndexRoute,
   ApiV1MediaIndexRoute: ApiV1MediaIndexRoute,

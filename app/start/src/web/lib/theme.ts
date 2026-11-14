@@ -71,6 +71,11 @@ export interface ThemeComponents {
   AboutPage?: ThemeComponent<{ recentPosts?: any[] }>;
   /** 主题可以接管「友链」页；不提供时回落到应用层默认的 LinksClient。 */
   LinksPage?: ThemeComponent<{ initialLinks?: any[]; initialOptions?: Record<string, string> }>;
+  /**
+   * 主题可以接管「朋友圈」页（友链动态聚合）。
+   * 不提供时回落到应用层默认的 FriendsClient。
+   */
+  FriendsPage?: ThemeComponent<{ friends?: any[]; total?: number; withPosts?: number }>;
 }
 
 const SharedCommentSection = lazy(() => import('@/components/blog/CommentList'));
@@ -145,6 +150,7 @@ const Robes: ThemeComponents = {
   GuestbookPage: lazy(() => import('@/themes/Robes/GuestbookPage')),
   AboutPage: lazy(() => import('@/themes/Robes/AboutPage')),
   LinksPage: lazy(() => import('@/themes/Robes/LinksPage')),
+  FriendsPage: lazy(() => import('@/themes/Robes/FriendsPage')),
 };
 
 const Whono: ThemeComponents = {

@@ -2,6 +2,7 @@ import { config, table } from '../config';
 import { exec, many, nowUnix, one } from '../db/helpers';
 import { optionValue } from '../db/options';
 import { sendPostPublishedTelegram } from '../telegram';
+import { sendPostPublishedWechat } from '../wechat';
 import { readResolvedOptionMap } from './options';
 
 export class PostServiceError extends Error {
@@ -428,7 +429,7 @@ async function savePostExtras(postId: number, body: Record<string, unknown>) {
   await savePostFootprints(postId, body);
 }
 
-function postPath(post: Record<string, unknown>, template: string, timeZone: string) {
+export function postPath(post: Record<string, unknown>, template: string, timeZone: string) {
   const rawDate = post.published_at || (Number(post.created_at || 0) > 0 ? new Date(Number(post.created_at) * 1000) : new Date());
   const date = rawDate instanceof Date ? rawDate : new Date(String(rawDate));
   const parts = new Intl.DateTimeFormat('en', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(date);
@@ -456,6 +457,7 @@ async function notifyPublished(postId: number, wasPublished: boolean) {
   const path = postPath(post, options.permalink_structure || '/posts/%postname%', options.site_timezone || 'Asia/Shanghai');
   const origin = String(options.site_url || config.appUrl || '').replace(/\/+$/, '');
   void sendPostPublishedTelegram({ title: String(post.title || '未命名文章'), url: origin ? `${origin}${path}` : path });
+  void sendPostPublishedWechat({ title: String(post.title || '未命名文章'), url: origin ? `${origin}${path}` : path });
 }
 
 export async function createPost(body: Record<string, unknown>, userId: number) {

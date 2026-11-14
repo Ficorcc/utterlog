@@ -440,7 +440,7 @@ export function navIcon(label: string) {
   if (/留言|说说|moment|评论/i.test(text)) return <IconChat />;
   if (/书|读|book/i.test(text)) return <IconBook />;
   if (/关于|about/i.test(text)) return <IconInfo />;
-  if (/订阅|rss/i.test(text)) return <IconRss />;
+  if (/订阅|朋友圈|友圈|动态|rss/i.test(text)) return <IconRss />;
   if (/归档|足迹|travel/i.test(text)) return <IconArchive />;
   return <IconFileText />;
 }

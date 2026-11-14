@@ -1,8 +1,8 @@
 {
   "id": "Robes",
   "name": "Robes",
-  "version": "2.7.3",
-  "description": "移植自 Typecho 主题「Robes」—— 毛玻璃三栏结构（左侧栏 + 顶栏 + 内容区）、首页封面轮播、通知面板（公告 / 最新评论 / 小站）、关于 / 友链 / 归档 / 留言板页与深浅色切换",
+  "version": "2.7.4",
+  "description": "移植自 Typecho 主题「Robes」—— 毛玻璃三栏结构（左侧栏 + 顶栏 + 内容区）、首页封面轮播、通知面板（公告 / 最新评论 / 小站）、关于 / 友链 / 朋友圈 / 归档 / 留言板页与深浅色切换",
   "author": "Robes · 移植至 Utterlog",
   "screenshot": "screenshot.svg",
   "colors": {

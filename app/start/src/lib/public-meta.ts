@@ -8,6 +8,7 @@ const pageTitles: Partial<Record<PublicPageData['kind'], string>> = {
   moments: '说说',
   guestbook: '留言板',
   about: '关于',
+  friends: '朋友圈',
   coding: 'Coding',
   search: '搜索',
   films: '影视',
