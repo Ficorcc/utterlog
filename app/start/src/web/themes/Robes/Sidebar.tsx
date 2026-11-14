@@ -40,7 +40,10 @@ export default function Sidebar() {
     document.body.classList.remove('sidebar-open');
   }, [pathname]);
 
-  const pageItems: MenuItem[] = (menus.header || []).filter((item) => item && item.href);
+  // 菜单里可能也有指向首页的项，这里过滤掉，避免和固定的「首页」重复。
+  const pageItems: MenuItem[] = (menus.header || []).filter(
+    (item) => item && item.href && item.href !== '/' && !/首页/.test(item.label || ''),
+  );
   const year = new Date().getFullYear();
   const footerText = String(options?.robes_footer_text || '').trim() || `© ${year} ${site.title}`;
   const icp = String(options?.robes_icp || '').trim();

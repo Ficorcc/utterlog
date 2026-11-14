@@ -120,7 +120,7 @@ export default function PostPage({ post }: { post: PostData; options?: Record<st
           </div>
         </div>
 
-        <div className="toc-wrap" id="articleTOC">
+        <div className="toc-wrap open" id="articleTOC">
           <TableOfContents content={post?.content || ''} />
         </div>
 

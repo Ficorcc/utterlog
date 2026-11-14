@@ -5,6 +5,7 @@ import { useThemeContext } from '@/lib/theme-context';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import Footer from './Footer';
+import useCardReveal from './useCardReveal';
 
 /**
  * Robes 的骨架：光晕背景 + 一张玻璃卡片，卡片里是「顶栏 / 侧栏 + 内容区 / 底栏」。
@@ -16,6 +17,8 @@ import Footer from './Footer';
 export default function Layout({ children }: { children: ReactNode }) {
   const { options } = useThemeContext();
   const accent = String(options?.robes_accent || '').trim();
+
+  useCardReveal();
 
   return (
     <>

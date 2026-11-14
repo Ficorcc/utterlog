@@ -58,10 +58,15 @@ export default function HomePage({ posts, page, totalPages }: HomeProps) {
   const list = Array.isArray(posts) ? posts : [];
   const total = Math.max(1, Number(totalPages) || 1);
 
-  const featured = useMemo(
-    () => list.filter((post) => post?.cover_url).slice(0, HERO_LIMIT),
-    [list],
-  );
+  const featured = useMemo(() => {
+    // 有封面就优先用封面文章做轮播；一篇封面都没有时退化成纯色 Hero，
+    // 但列表依然展示（对应原主题的 hero-plain 形态）。
+    const withCover = list.filter((post) => post?.cover_url);
+    const pool = withCover.length ? withCover : list;
+    return pool.slice(0, HERO_LIMIT);
+  }, [list]);
+
+  const hasCover = featured.some((post) => post?.cover_url);
 
   const [active, setActive] = useState(0);
   useEffect(() => {
@@ -86,8 +91,8 @@ export default function HomePage({ posts, page, totalPages }: HomeProps) {
 
   return (
     <>
-      {featured.length ? (
-        <section className="hero hero-standard" id="hero">
+      {list.length ? (
+        <section className={hasCover ? 'hero hero-standard' : 'hero hero-standard hero-plain'} id="hero">
           <div className="hero-bgs" id="heroBgs">
             <div
               className="hero-bg-layer is-active"

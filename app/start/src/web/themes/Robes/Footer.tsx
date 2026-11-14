@@ -19,7 +19,9 @@ export default function Footer() {
   const footerText = String(options?.robes_footer_text || '').trim() || `© ${year} ${site.title}`;
   const icp = String(options?.robes_icp || '').trim();
 
-  const pages = (menus.header || []).filter((item) => item && item.href);
+  const pages = (menus.header || []).filter(
+    (item) => item && item.href && item.href !== '/' && !/首页/.test(item.label || ''),
+  );
   const primary = pages.slice(0, 3);
   const overflow = pages.slice(3);
 
