@@ -173,7 +173,7 @@ export default function PostPage({ post }: { post: PostData; options?: Record<st
       </article>
 
       {/* 评论区（对齐原站 comments.php 的 .cmt-section） */}
-      <PostComments postId={post?.id} />
+      <PostComments postId={post?.id} initialCount={Number(post?.comment_count || 0)} />
     </>
   );
 }

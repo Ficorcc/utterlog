@@ -240,7 +240,7 @@ type EmojiTab = (typeof EMOJI_TABS)[number]['key'];
 
 /* ── 组件 ─────────────────────────────────────────────────────────────── */
 
-export default function PostComments({ postId }: { postId: number }) {
+export default function PostComments({ postId, initialCount }: { postId: number; initialCount?: number }) {
   const { user, accessToken } = useAuthStore();
   const isAdmin = Boolean(accessToken && user);
 
@@ -668,7 +668,9 @@ export default function PostComments({ postId }: { postId: number }) {
     );
   };
 
-  const total = comments.length;
+  // 评论总数：列表拉到之前先用文章自带的 comment_count 占位，
+  // 避免首屏闪一下「0条评论」。
+  const total = comments.length || Number(initialCount || 0);
 
   return (
     <div className="cmt-section" id="comments">
@@ -834,7 +836,7 @@ export default function PostComments({ postId }: { postId: number }) {
         <div className="cmt-empty">
           <p>评论加载中…</p>
         </div>
-      ) : total === 0 ? (
+      ) : comments.length === 0 ? (
         <div className="cmt-empty">
           <IconChat size={32} />
           <p>还没有评论，来说点什么吧~</p>
