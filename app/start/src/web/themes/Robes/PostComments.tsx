@@ -318,37 +318,51 @@ export default function PostComments({ postId, initialCount }: { postId: number;
   useEffect(() => {
     const root = listRef.current;
     if (!root) return;
-    const nodes = Array.from(root.querySelectorAll<HTMLElement>('.cmt-item, .cmt-card'));
-    if (!nodes.length) return;
-    if (typeof IntersectionObserver === 'undefined') {
-      nodes.forEach((node) => node.classList.add('card-visible'));
-      return;
+    let observer: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver !== 'undefined') {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('card-visible');
+            observer?.unobserve(entry.target);
+          });
+        },
+        { rootMargin: '120px 0px', threshold: 0.02 },
+      );
     }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          entry.target.classList.add('card-visible');
-          observer.unobserve(entry.target);
-        });
-      },
-      { rootMargin: '120px 0px', threshold: 0.02 },
-    );
-    nodes.forEach((node, index) => {
-      node.style.animationDelay = `${Math.min(index, 10) * 0.04}s`;
-      observer.observe(node);
-    });
+
+    // 观察列表里的所有评论节点（含后续渲染/翻页插入的新节点）。
+    const observeAll = () => {
+      root.querySelectorAll<HTMLElement>('.cmt-item, .cmt-card').forEach((node, index) => {
+        if (node.classList.contains('card-visible')) return;
+        if (!node.style.animationDelay) node.style.animationDelay = `${Math.min(index, 10) * 0.04}s`;
+        observer?.observe(node);
+      });
+    };
 
     // 兜底：按几何位置扫一遍已经进入视口的评论（含刚被跳过的）。
     const sweep = () => sweepRevealCards(root);
+    observeAll();
     sweep();
+
+    const mutations = new MutationObserver(() => {
+      observeAll();
+      sweep();
+    });
+    mutations.observe(root, { childList: true, subtree: true });
+
     document.addEventListener('scroll', sweep, { capture: true, passive: true });
     window.addEventListener('resize', sweep);
+    // 程序化跳转可能不派发 scroll 事件，定时再兜一次底。
+    const timer = window.setInterval(sweep, 600);
 
     return () => {
-      observer.disconnect();
+      observer?.disconnect();
+      mutations.disconnect();
       document.removeEventListener('scroll', sweep, { capture: true });
       window.removeEventListener('resize', sweep);
+      window.clearInterval(timer);
     };
   }, [roots, page]);
 
@@ -583,7 +597,7 @@ export default function PostComments({ postId, initialCount }: { postId: number;
             ? '无需验证'
             : '正在验证…';
 
-  const renderComment = (comment: Comment, isChild: boolean) => {
+  const renderComment = (comment: Comment, isChild: boolean, parentAuthor?: string) => {
     const device = deviceOf(comment);
     const like = likes[String(comment.id)] || { liked: Boolean(comment.liked), count: Number(comment.like_count || 0) };
     const liked = like.liked;
@@ -610,6 +624,11 @@ export default function PostComments({ postId, initialCount }: { postId: number;
           <div className="cmt-body">
             <div className="cmt-header">
               <div className="cmt-user">
+                {isChild && parentAuthor ? (
+                  <span className="cmt-reply-to" title={`回复 @${parentAuthor}`}>
+                    回复 <b>@{parentAuthor}</b>
+                  </span>
+                ) : null}
                 <span className="cmt-name">
                   {comment.url ? (
                     <a href={comment.url} target="_blank" rel="external nofollow noopener">
@@ -702,7 +721,7 @@ export default function PostComments({ postId, initialCount }: { postId: number;
         </div>
         {comment.children && comment.children.length ? (
           <ol className="cmt-children">
-            {comment.children.map((child) => renderComment(child, true))}
+            {comment.children.map((child) => renderComment(child, true, nameText))}
           </ol>
         ) : null}
       </li>

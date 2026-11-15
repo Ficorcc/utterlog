@@ -484,6 +484,18 @@ export function IconListCheck(props: IconProps) {
 
 /* ── 评论区（对齐原站 comments.php 的 .cmt-* 契约） ────────────────────── */
 
+/** 后台入口：四宫格仪表盘。 */
+export function IconDashboard(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <rect x="3.6" y="3.6" width="7" height="7" rx="2" />
+      <rect x="13.4" y="3.6" width="7" height="4.6" rx="1.6" />
+      <rect x="3.6" y="13.4" width="7" height="7" rx="2" />
+      <path d="M13.4 13.4h3.2M13.4 16.9h7M13.4 20.4h4.6" />
+    </Svg>
+  );
+}
+
 /** 回复：原站 ri-reply-line，尾巴在左、箭头朝右。 */
 export function IconReply(props: IconProps) {
   return (

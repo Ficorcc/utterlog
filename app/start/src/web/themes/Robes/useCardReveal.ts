@@ -39,16 +39,24 @@ const REVEAL_SELECTORS = [
  * 观察器只汇报一次「不相交」。结果就是中间那一整段内容永远停在
  * opacity:0 上：DOM 里在、看不见。
  *
- * 所以这里按几何位置再扫一遍，凡是落在视口范围内（含已经滚过去的）
+ * 所以这里按几何位置再扫一遍，凡是落在视口范围内的（含已经滚过去的）
  * 都补上 .card-visible。
  */
 export function sweepRevealCards(scope: ParentNode = document) {
   if (typeof window === 'undefined') return;
   const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+  const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
   scope.querySelectorAll<HTMLElement>(REVEAL_SELECTORS).forEach((el) => {
     if (el.classList.contains('card-visible')) return;
     const rect = el.getBoundingClientRect();
-    if (rect.top < viewportHeight && rect.bottom > 0) el.classList.add('card-visible');
+    if (
+      rect.top < viewportHeight &&
+      rect.bottom > 0 &&
+      rect.left < viewportWidth &&
+      rect.right > 0
+    ) {
+      el.classList.add('card-visible');
+    }
   });
 }
 
@@ -85,24 +93,48 @@ export default function useCardReveal() {
       });
     };
 
+    /**
+     * 兜底扫描要在整个文档上做，不能只扫 #feed：
+     * 文章页的评论区挂在内容区里，不一定在 #feed 下面。
+     */
+    const sweep = () => sweepRevealCards(document);
+
     scan();
+    sweep();
 
     // 路由切换 / 异步加载后会插入新卡片，观察新节点。
-    const mutations = new MutationObserver(scan);
-    const root = document.getElementById('feed') || document.body;
-    mutations.observe(root, { childList: true, subtree: true });
+    // 变更很频繁（输入框、表情面板等），用 rAF 合并成一次处理。
+    let pending = 0;
+    const mutations = new MutationObserver(() => {
+      if (pending) return;
+      pending = window.requestAnimationFrame(() => {
+        pending = 0;
+        scan();
+        sweep();
+      });
+    });
+    mutations.observe(document.body, { childList: true, subtree: true });
 
     // 滚动兜底。scroll 事件不冒泡，但会在捕获阶段被祖先收到，
     // 所以这里用 capture 监听（内容区 .content-scroll 才是真正的滚动容器）。
-    const onScroll = () => sweepRevealCards(root);
-    document.addEventListener('scroll', onScroll, { capture: true, passive: true });
-    window.addEventListener('resize', onScroll);
+    document.addEventListener('scroll', sweep, { capture: true, passive: true });
+    window.addEventListener('resize', sweep);
+
+    /**
+     * 最后一道兜底：定时扫描。
+     * 程序化跳转（锚点、恢复滚动位置、拖动滚动条、脚本 scrollTo）
+     * 有时根本不会派发 scroll 事件 —— 那一整段内容就永远停在 opacity:0。
+     * 每 600ms 按几何位置扫一次，保证「跳过去的那一段」也会被点亮。
+     */
+    const timer = window.setInterval(sweep, 600);
 
     return () => {
       observer.disconnect();
       mutations.disconnect();
-      document.removeEventListener('scroll', onScroll, { capture: true });
-      window.removeEventListener('resize', onScroll);
+      if (pending) window.cancelAnimationFrame(pending);
+      document.removeEventListener('scroll', sweep, { capture: true });
+      window.removeEventListener('resize', sweep);
+      window.clearInterval(timer);
     };
   }, []);
 }

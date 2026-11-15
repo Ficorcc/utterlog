@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from '@/components/AppLink';
 import { usePathname } from '@/lib/navigation';
 import { useThemeContext } from '@/lib/theme-context';
-import { IconMore, navIcon } from './Icons';
+import { IconDashboard, IconMore, navIcon } from './Icons';
 
 /**
  * 页脚：桌面端一条版权栏，移动端（≤920px）变成底部 Tab 栏。
@@ -52,6 +52,11 @@ export default function Footer() {
             Robes
           </a>
         </span>
+        <div className="dot" />
+        <a className="bottom-bar-admin" href="/admin/" title="进入后台管理（未登录会跳转到登录页）">
+          <IconDashboard size={12} />
+          后台
+        </a>
       </div>
 
       <nav className="mobile-tabbar" aria-label="移动端导航">
@@ -71,36 +76,37 @@ export default function Footer() {
             <span>{item.label}</span>
           </Link>
         ))}
-        {overflow.length ? (
-          <button
-            type="button"
-            className={moreOpen ? 'mtab mtab-more active' : 'mtab mtab-more'}
-            onClick={() => setMoreOpen((value) => !value)}
-            aria-expanded={moreOpen}
-            aria-controls="mtabMorePanel"
-          >
-            <IconMore size={17} />
-            <span>更多</span>
-          </button>
-        ) : null}
+        {/* 「更多」永远存在：里面除了溢出页面，还放着「后台」入口。 */}
+        <button
+          type="button"
+          className={moreOpen ? 'mtab mtab-more active' : 'mtab mtab-more'}
+          onClick={() => setMoreOpen((value) => !value)}
+          aria-expanded={moreOpen}
+          aria-controls="mtabMorePanel"
+        >
+          <IconMore size={17} />
+          <span>更多</span>
+        </button>
       </nav>
 
-      {overflow.length ? (
-        <div className={moreOpen ? 'mtab-more-panel open' : 'mtab-more-panel'} id="mtabMorePanel">
-          {overflow.map((item, index) => (
-            <Link
-              key={`${item.href}-${index}`}
-              className={isActive(item.href) ? 'mtab-more-item active' : 'mtab-more-item'}
-              href={item.href}
-              target={item.target}
-              rel={item.target === '_blank' ? 'noopener noreferrer' : undefined}
-            >
-              {navIcon(item.label)}
-              <span className="mtab-more-title">{item.label}</span>
-            </Link>
-          ))}
-        </div>
-      ) : null}
+      <div className={moreOpen ? 'mtab-more-panel open' : 'mtab-more-panel'} id="mtabMorePanel">
+        {overflow.map((item, index) => (
+          <Link
+            key={`${item.href}-${index}`}
+            className={isActive(item.href) ? 'mtab-more-item active' : 'mtab-more-item'}
+            href={item.href}
+            target={item.target}
+            rel={item.target === '_blank' ? 'noopener noreferrer' : undefined}
+          >
+            {navIcon(item.label)}
+            <span className="mtab-more-title">{item.label}</span>
+          </Link>
+        ))}
+        <Link className="mtab-more-item mtab-more-admin" href="/admin/" title="进入后台管理">
+          <IconDashboard size={17} />
+          <span className="mtab-more-title">后台</span>
+        </Link>
+      </div>
     </>
   );
 }

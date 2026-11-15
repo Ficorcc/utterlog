@@ -1,10 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from '@/components/AppLink';
 import { usePathname } from '@/lib/navigation';
 import { useThemeContext, type MenuItem } from '@/lib/theme-context';
 import { IconClose, IconFolder, IconTag, navIcon } from './Icons';
+
+/** 侧栏标签最多展示的数量（按文章数降序取前 N 个）。 */
+const TAG_LIMIT = 20;
 
 /**
  * 左侧栏：首页 + 页面（后台菜单）+ 分类 + 标签 + 版权信息。
@@ -53,6 +56,23 @@ export default function Sidebar() {
     if (href === '/') return pathname === '/';
     return pathname === href || pathname.startsWith(`${href}/`);
   };
+
+  /**
+   * 标签只展示文章数最多的前 20 个（侧栏空间有限）。
+   * 服务端 listMetas 的排序是 order_num asc, count desc —— 不是纯按文章数，
+   * 所以这里自己按 count 降序排一次，数量相同再按名称排，保证顺序稳定。
+   */
+  const sortedTags = useMemo(
+    () =>
+      [...tags].sort(
+        (a, b) =>
+          Number(b.count || 0) - Number(a.count || 0) ||
+          a.name.localeCompare(b.name, 'zh-Hans-CN'),
+      ),
+    [tags],
+  );
+  const visibleTags = sortedTags.slice(0, TAG_LIMIT);
+  const hiddenTagCount = Math.max(0, sortedTags.length - visibleTags.length);
 
   return (
     <>
@@ -139,11 +159,16 @@ export default function Sidebar() {
               </div>
               <div className="section-list" id="tagList" hidden={!tagOpen}>
                 <div className="sidebar-tags">
-                  {tags.map((tag) => (
+                  {visibleTags.map((tag) => (
                     <Link key={tag.id} className="sidebar-tag" href={`/tags/${encodeURIComponent(tag.slug)}`} title={`${tag.count} 篇文章`}>
                       {tag.name}
                     </Link>
                   ))}
+                  {hiddenTagCount ? (
+                    <Link className="sidebar-tags-more" href="/tags" title={`查看全部 ${sortedTags.length} 个标签`}>
+                      还有 {hiddenTagCount} 个
+                    </Link>
+                  ) : null}
                 </div>
               </div>
             </div>
