@@ -16,7 +16,7 @@ import {
   IconHeart,
   IconTime,
 } from './Icons';
-import { formatLongDate, readMinutes } from './utils';
+import { formatCnDate, firstImageFromContent, readMinutes } from './utils';
 
 interface PostData {
   id: number;
@@ -79,18 +79,32 @@ export default function PostPage({ post }: { post: PostData; options?: Record<st
   const categories = post?.categories || [];
   const tags = post?.tags || [];
   const minutes = readMinutes(post?.word_count);
+  // 封面：优先文章封面，没有就退回正文首图（对齐原站 .article-hero-bg 的表现）。
+  const cover = post?.cover_url || firstImageFromContent(post?.content);
+  // 没有标题层级时不展开目录容器，避免顶部题目区下面留一条空白卡片。
+  const headingCount =
+    (String(post?.content || '').match(/^\s{0,3}#{2,4}\s+\S/gm)?.length || 0) +
+    (String(post?.content || '').match(/<h[2-4][^>]*>/gi)?.length || 0);
+  const hasHeadings = headingCount >= 2;
 
   return (
     <>
       <article className="article">
         <div className="article-hero">
-          {post?.cover_url ? (
-            <img className="article-hero-bg" src={post.cover_url} alt="" loading="eager" decoding="async" />
+          {cover ? (
+            <img className="article-hero-bg" src={cover} alt="" loading="eager" decoding="async" />
           ) : null}
           <div className="article-hero-scrim" />
           <div className="article-hero-content">
             <div className="article-hero-kicker">
-              {categories.length ? categories.map((category) => category.name).join(' · ') : '文章'}
+              {categories.length
+                ? categories.map((category, index) => (
+                    <span key={category.id}>
+                      {index ? ' · ' : null}
+                      <Link href={`/categories/${encodeURIComponent(category.slug)}`}>{category.name}</Link>
+                    </span>
+                  ))
+                : '文章'}
             </div>
             <div className="article-title-row">
               <h1 className="article-title">{post?.title}</h1>
@@ -98,7 +112,7 @@ export default function PostPage({ post }: { post: PostData; options?: Record<st
             <div className="article-meta">
               <span className="article-meta-item">
                 <IconCalendar size={13} />
-                {formatLongDate(post?.published_at || post?.created_at)}
+                {formatCnDate(post?.published_at || post?.created_at)}
               </span>
               <span className="article-meta-item">
                 <IconEye size={13} />
@@ -120,9 +134,11 @@ export default function PostPage({ post }: { post: PostData; options?: Record<st
           </div>
         </div>
 
-        <div className="toc-wrap open" id="articleTOC">
-          <TableOfContents content={post?.content || ''} />
-        </div>
+        {hasHeadings ? (
+          <div className="toc-wrap open" id="articleTOC">
+            <TableOfContents content={post?.content || ''} />
+          </div>
+        ) : null}
 
         {post?.type === 'video' ? (
           <VideoPostBody post={{ ...post, title: post?.title || '' }} />

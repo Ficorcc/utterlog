@@ -62,6 +62,31 @@ export function formatLongDate(value: string | number | null | undefined) {
   return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 周${WEEK[date.getDay()]}`;
 }
 
+/** 文章页顶部题目区的日期：2026年11月09日（对齐原站 article.php 的输出格式）。 */
+export function formatCnDate(value: string | number | null | undefined) {
+  const date = toDate(value);
+  if (!date) return '';
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${date.getFullYear()}年${month}月${day}日`;
+}
+
+/**
+ * 取正文里的第一张图片，当作文章顶部题目区的封面。
+ *
+ * 原站 post.php 的 .article-hero-bg 取的是文章封面字段；
+ * Utterlog 侧很多文章没单独设封面，就退回正文首图，保证顶部题目区不是一块纯色渐变。
+ */
+export function firstImageFromContent(content: string | undefined | null) {
+  const raw = String(content || '');
+  if (!raw) return '';
+  const html = raw.match(/<img[^>]+src=["']([^"']+)["']/i);
+  if (html?.[1]) return html[1];
+  const markdown = raw.match(/!\[[^\]]*\]\(([^)\s]+)/);
+  if (markdown?.[1]) return markdown[1];
+  return '';
+}
+
 /** 中文短日期：11月14日 */
 export function formatShortDate(value: string | number | null | undefined) {
   const date = toDate(value);

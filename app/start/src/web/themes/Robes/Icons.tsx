@@ -341,6 +341,28 @@ export function IconMail(props: IconProps) {
   );
 }
 
+export function IconHeadphone(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M4.2 14.6v-2.4a7.8 7.8 0 0 1 15.6 0v2.4" />
+      <path d="M4.2 13.4h1.6a1.4 1.4 0 0 1 1.4 1.4v3.4a1.4 1.4 0 0 1-1.4 1.4H5.6a1.4 1.4 0 0 1-1.4-1.4Z" />
+      <path d="M19.8 13.4h-1.6a1.4 1.4 0 0 0-1.4 1.4v3.4a1.4 1.4 0 0 0 1.4 1.4h1.6a1.4 1.4 0 0 0 1.4-1.4Z" />
+    </Svg>
+  );
+}
+
+export function IconShuffle(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M3.6 6.6h3.2c1.2 0 2.1.5 2.9 1.5l3.4 4.8c.8 1 1.7 1.5 2.9 1.5h3.4" />
+      <path d="M3.6 17.4h3.2c1.2 0 2.1-.5 2.9-1.5l.7-1" />
+      <path d="m14.6 10.1.7-1c.8-1 1.7-1.5 2.9-1.5h3.4" />
+      <path d="m18.4 4.9 2.8 2.7-2.8 2.7" />
+      <path d="m18.4 13.7 2.8 2.7-2.8 2.7" />
+    </Svg>
+  );
+}
+
 export function IconHandshake(props: IconProps) {
   return (
     <Svg {...props}>

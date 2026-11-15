@@ -468,30 +468,41 @@ html[data-theme='Robes'] .notice-badge.is-pop {
 /* 面板由 JS 挂到 body 下并定位（见 main.v2.js 的 placePanel）：
    .shell 自带 backdrop-filter，面板若留在里面会受 backdrop root 限制，
    自己的模糊采样不到页面内容，看起来就和移动端悬浮栏不一致。 */
+/* ================= 通知中心（对齐原站 2.19.47 DOM 契约） =================
+   面板结构：.notice-head(.notice-head-top + .notice-tabs)
+             → .notice-board-view / .notice-mood / .notice-vibe / .notice-list
+             → .notice-foot
+   动效时间轴：展开下坠放大 → 头部先入场 → 条目按阶梯淡入。 */
 html[data-theme='Robes'] .notice-pop {
 
   --notice-open: cubic-bezier(.16,1,.3,1);
   --notice-ease: cubic-bezier(.33,1,.68,1);
   position: fixed; top: 0; right: 0;
-  width: min(344px, calc(100vw - 32px));
+  width: min(400px, calc(100vw - 32px));
   display: flex; flex-direction: column;
-  /* 与移动端悬浮栏（.mobile-tabbar）同一套玻璃底 */
+  /* 与移动端悬浮栏（.mobile-tabbar）同一档玻璃底 */
   background: var(--glass-bg-strong);
   backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
-  border: 1px solid var(--glass-border);
-  border-radius: 16px;
-  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(255,255,255,0.72);
+  border-radius: 18px;
+  box-shadow: 0 28px 56px -22px rgba(20,30,45,0.55), 0 4px 16px -10px rgba(20,30,45,0.32), inset 0 1px 0 rgba(255,255,255,0.9);
   max-height: min(60vh, 432px);
   opacity: 0;
-  transform: translateY(-8px) scale(.97);
-  transform-origin: top right;
+  transform: translateY(-10px) scale(.94);
+  transform-origin: calc(100% - 18px) 0;
+  filter: blur(6px);
   visibility: hidden;
   pointer-events: none;
   overflow: hidden; z-index: 200;
-  transition: opacity .16s var(--notice-ease),
-              transform .24s cubic-bezier(.4,0,.7,1),
-              visibility 0s linear .24s;
+  transition: opacity .15s var(--notice-ease),
+              transform .2s cubic-bezier(.4,0,.7,1),
+              filter .16s ease,
+              visibility 0s linear .2s;
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .notice-pop {
+ border-color: rgba(255,255,255,0.1);
+ box-shadow: 0 28px 56px -22px #000, 0 4px 16px -10px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
 }
 /* 和移动端悬浮栏一致的玻璃高光层 */
 html[data-theme='Robes'] .notice-pop::before {
@@ -505,51 +516,83 @@ html[data-theme='Robes'] .notice-pop > * {
 }
 html[data-theme='Robes'] .notice-pop.active {
 
-  opacity: 1; transform: none;
+  opacity: 1; transform: none; filter: blur(0);
   visibility: visible; pointer-events: auto;
   will-change: transform, opacity;
   transition: opacity .2s var(--notice-ease),
-              transform .4s var(--notice-open),
+              transform .42s var(--notice-open),
+              filter .26s var(--notice-ease),
               height .4s var(--notice-open),
               visibility 0s;
+}
+/* 心情 / 漂流瓶：面板跟随内容长高 */
+html[data-theme='Robes'] .notice-pop.is-tall {
+ max-height: min(calc(100vh - 28px), 760px); 
+}
+html[data-theme='Robes'] .notice-pop.is-tall .notice-mood,
+html[data-theme='Robes'] .notice-pop.is-tall .notice-vibe {
+ flex: 0 1 auto; overflow: visible auto; 
 }
 @media (prefers-reduced-motion: reduce) {
   html[data-theme='Robes'] .notice-pop, html[data-theme='Robes'] .notice-pop.active {
 
     transition: opacity .12s linear, visibility 0s;
-    transform: none;
+    transform: none; filter: none;
   
   }
   html[data-theme='Robes'] .notice-pop.active .notice-head, html[data-theme='Robes'] .notice-pop.active .notice-item, html[data-theme='Robes'] .notice-pop.active .notice-board-item {
- animation: none !important; 
+    animation: none !important; 
   }
 }
 /* 头部比面板慢半拍出现，让「揭开」有先后而不是整块闪现 */
 html[data-theme='Robes'] .notice-pop.active .notice-head {
- animation: noticeHeadIn .4s var(--notice-open) both; 
+ animation: noticeHeadIn .38s var(--notice-open) both; 
 }
 @keyframes noticeHeadIn {
 
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: none; }
+  from { opacity: 0; transform: translateY(-7px); }
+  to   { opacity: 1; transform: none; }
 }
+/* ---- 头部：标题 + 操作 ---- */
 html[data-theme='Robes'] .notice-head {
 
-  flex-shrink: 0; display: flex; align-items: center;
-  justify-content: space-between; gap: 8px; padding: 11px 12px 9px;
-  border-bottom: 1px solid rgba(20,30,45,0.055);
+  flex-shrink: 0; display: flex; flex-direction: column; gap: 9px;
+  padding: 12px 14px 10px;
+  background: rgba(255,255,255,0.4);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
 }
 html[data-theme='Robes'][data-robes-mode='dark'] .notice-head {
- border-bottom-color: rgba(255,255,255,0.07); 
+ background: rgba(255,255,255,0.04); border-bottom-color: rgba(255,255,255,0.08); 
 }
-html[data-theme='Robes'] .notice-tabs {
+html[data-theme='Robes'] .notice-head-top {
+ display: flex; align-items: center; justify-content: space-between; gap: 8px; 
+}
+html[data-theme='Robes'] .notice-head-title {
 
-  display: flex; gap: 2px; min-width: 0;
-  padding: 3px; border-radius: 999px;
-  background: rgba(20,30,45,0.045);
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 12.5px; font-weight: 700; letter-spacing: .02em; color: var(--text);
 }
-html[data-theme='Robes'][data-robes-mode='dark'] .notice-tabs {
- background: rgba(255,255,255,0.06); 
+html[data-theme='Robes'] .notice-head-ico {
+
+  width: 21px; height: 21px; border-radius: 7px;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--text-secondary); background: rgba(0,0,0,0.05);
+}
+html[data-theme='Robes'] .notice-head-ico svg {
+ width: 13px; height: 13px; display: block; 
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .notice-head-ico {
+ background: rgba(255,255,255,0.08); color: var(--text-secondary); 
+}
+html[data-theme='Robes'] .notice-head-count {
+
+  display: inline-flex; align-items: center; height: 17px; padding: 0 8px;
+  border-radius: 999px; background: rgba(0,0,0,0.05); border: 1px solid transparent;
+  font-size: 9.5px; font-weight: 700; line-height: 1; letter-spacing: 0;
+  color: var(--text-secondary);
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .notice-head-count {
+ background: rgba(255,255,255,0.08); color: var(--text-secondary); 
 }
 html[data-theme='Robes'] .notice-head-actions {
  display: flex; align-items: center; gap: 1px; flex-shrink: 0; 
@@ -565,18 +608,24 @@ html[data-theme='Robes'] .notice-markall {
 html[data-theme='Robes'] .notice-markall:hover {
  color: var(--accent); background: var(--accent-soft); 
 }
-html[data-theme='Robes'] .notice-refresh {
+html[data-theme='Robes'] .notice-refresh,
+html[data-theme='Robes'] .notice-close {
 
   width: 24px; height: 24px; padding: 0; border: none; background: transparent;
   cursor: pointer; color: var(--text-secondary); border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   transition: color .18s, background .18s, transform .2s;
 }
-html[data-theme='Robes'] .notice-refresh svg {
- width: 14px; height: 14px; display: block; fill: currentColor; 
+html[data-theme='Robes'] .notice-refresh svg,
+html[data-theme='Robes'] .notice-close svg {
+ width: 14px; height: 14px; display: block; 
 }
-html[data-theme='Robes'] .notice-refresh:hover {
+html[data-theme='Robes'] .notice-refresh:hover,
+html[data-theme='Robes'] .notice-close:hover {
  color: var(--accent); background: var(--accent-soft); 
+}
+html[data-theme='Robes'] .notice-close:active {
+ transform: scale(.9); 
 }
 html[data-theme='Robes'] .notice-refresh.is-spinning svg {
  animation: noticeSpin .6s linear; 
@@ -584,53 +633,87 @@ html[data-theme='Robes'] .notice-refresh.is-spinning svg {
 @keyframes noticeSpin {
  to { transform: rotate(360deg); } 
 }
-html[data-theme='Robes'] .notice-tab-count {
+/* ---- 五段等宽分段控件：与归档页年份切换同款的轨道 + 玻璃滑块 ---- */
+html[data-theme='Robes'] .notice-tabs {
 
-  display: inline-flex; align-items: center; justify-content: center;
-  min-width: 14px; height: 14px; padding: 0 4px; margin-left: 4px;
-  border-radius: 999px; background: #e5484d; color: #fff;
-  font-size: 9px; line-height: 1; vertical-align: middle;
+  position: relative; display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  padding: 3px; border-radius: 999px;
+  background: rgba(0,0,0,0.045);
+  border: 1px solid rgba(0,0,0,0.045);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
 }
-html[data-theme='Robes'] .notice-tab-count[hidden] {
- display: none; 
+html[data-theme='Robes'][data-robes-mode='dark'] .notice-tabs {
+ background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.05); box-shadow: none; 
 }
-html[data-theme='Robes'] .notice-tab.is-active .notice-tab-count {
- background: rgba(255,255,255,0.3); 
+html[data-theme='Robes'] .notice-tab-thumb {
+
+  position: absolute; top: 3px; bottom: 3px; left: 3px;
+  width: 0; border-radius: 999px;
+  background: var(--glass-thumb);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
+  box-shadow: inset 0 1px 0 var(--glass-thumb-line), inset 0 0 0 1px var(--glass-border), 0 1px 3px rgba(0,0,0,.05);
+  opacity: 0; pointer-events: none;
+  transition: transform .32s var(--ease-spring-soft), width .32s var(--ease-spring-soft), opacity .2s;
+}
+html[data-theme='Robes'] .notice-tab-thumb.is-ready {
+ opacity: 1; 
 }
 html[data-theme='Robes'] .notice-tab {
 
+  position: relative; z-index: 1;
+  display: inline-flex; align-items: center; justify-content: center; gap: 3px;
   border: none; background: transparent; cursor: pointer;
-  font-size: 11.5px; font-weight: 500; color: var(--text-secondary);
-  padding: 5px 10px; border-radius: 999px; line-height: 1.35;
-  transition: color .18s, background .18s, box-shadow .18s;
+  font-size: 11px; font-weight: 500; color: var(--text-secondary);
+  padding: 6px 2px; border-radius: 999px; line-height: 1.3; white-space: nowrap;
+  transition: color .22s;
   -webkit-tap-highlight-color: transparent;
 }
 html[data-theme='Robes'] .notice-tab:hover {
  color: var(--text); 
 }
 html[data-theme='Robes'] .notice-tab.is-active {
+ color: var(--text); font-weight: 600; 
+}
+html[data-theme='Robes'] .notice-tab-count {
 
-  background: var(--accent-strong); color: #fff;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+  position: absolute; top: -1px; right: 1px;
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 12px; height: 12px; padding: 0 3px;
+  border-radius: 999px; background: #e5484d; color: #fff;
+  font-size: 8px; line-height: 1; font-weight: 600;
+  box-shadow: 0 0 0 1.5px var(--glass-bg-strong);
 }
 html[data-theme='Robes'] .notice-new-dot {
 
-  width: 6px; height: 6px; margin-left: 4px;
+  width: 5px; height: 5px; margin-left: 1px;
   border-radius: 50%; background: #e5484d;
   display: inline-block; vertical-align: middle;
+  flex-shrink: 0;
 }
 html[data-theme='Robes'] .notice-new-dot[hidden] {
  display: none; 
 }
-/* 站内公告视图：与评论列表共用同一块区域 */
+/* 切换 Tab：内容按方向轻推一下再落位，和滑块的横向移动呼应 */
+html[data-theme='Robes'] .notice-view-in {
+ animation: noticeViewIn .3s var(--notice-open) both; 
+}
+@keyframes noticeViewIn {
+ from { opacity: 0; transform: translateX(var(--tab-dx, 9px)); }
+ to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme='Robes'] .notice-view-in {
+ animation: none; 
+  }
+}
+/* ---- 站内公告：每条一张轻玻璃卡，日期作为卡片顶部元信息 ---- */
 html[data-theme='Robes'] .notice-board-view {
 
   flex: 1; overflow-y: auto; overscroll-behavior: contain;
-  padding: 6px 10px 12px;
+  padding: 12px 14px 16px;
   scrollbar-width: thin; scrollbar-color: var(--sb-thumb) transparent;
-}
-html[data-theme='Robes'] .notice-board-view[hidden] {
- display: none; 
 }
 html[data-theme='Robes'] .notice-board-view::-webkit-scrollbar {
  width: 4px; 
@@ -639,51 +722,75 @@ html[data-theme='Robes'] .notice-board-view::-webkit-scrollbar-thumb {
  background: var(--sb-thumb); border-radius: 4px; 
 }
 html[data-theme='Robes'] .notice-board-list {
- display: flex; flex-direction: column; gap: 7px; 
+
+  position: relative;
+  display: flex; flex-direction: column; gap: 8px;
 }
 html[data-theme='Robes'] .notice-board-item {
 
-  display: flex; gap: 9px; padding: 10px 11px;
-  border-radius: 11px; background: var(--accent-soft);
+  position: relative; padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.55);
+  border: 1px solid rgba(255,255,255,0.65);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.035);
+  transition: background .28s, border-color .28s, box-shadow .28s;
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .notice-board-item {
+ background: rgba(255,255,255,0.05);
+ border-color: rgba(255,255,255,0.08);
+ box-shadow: none;
+}
+html[data-theme='Robes'] .notice-board-item:hover {
+ background: rgba(255,255,255,0.75);
+ border-color: rgba(255,255,255,0.9);
+ box-shadow: 0 6px 18px rgba(0,0,0,0.055);
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .notice-board-item:hover {
+ background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.13); 
 }
 html[data-theme='Robes'] .notice-pop.active .notice-board-item {
  animation: noticeItemIn .4s var(--notice-open) both; 
 }
 html[data-theme='Robes'] .notice-pop.active .notice-board-item:nth-child(2) {
- animation-delay: .12s; 
+ animation-delay: .1s; 
 }
 html[data-theme='Robes'] .notice-pop.active .notice-board-item:nth-child(3) {
- animation-delay: .16s; 
+ animation-delay: .14s; 
 }
 html[data-theme='Robes'] .notice-pop.active .notice-board-item:nth-child(n+4) {
- animation-delay: .2s; 
+ animation-delay: .18s; 
 }
 html[data-theme='Robes'] .notice-board-bullet {
-
-  flex-shrink: 0; width: 5px; height: 5px; margin-top: 7px;
-  border-radius: 50%; background: var(--accent);
+ display: none; 
 }
 html[data-theme='Robes'] .notice-board-main {
- min-width: 0; flex: 1; 
-}
-html[data-theme='Robes'] .notice-board-text {
-
-  margin: 0; font-size: 12px; line-height: 1.65;
-  color: var(--text); word-break: break-word;
+ min-width: 0; display: flex; flex-direction: column; 
 }
 html[data-theme='Robes'] .notice-board-date {
 
-  display: block; margin-top: 4px;
-  font-size: 10px; color: var(--text-secondary); letter-spacing: .2px;
+  order: -1;
+  display: inline-flex; align-items: center; gap: 5px;
+  margin: 0 0 4px; padding: 0;
+  background: none; border: 0;
+  font-size: 9px; font-weight: 600; line-height: 1.4;
+  letter-spacing: .06em; color: var(--text-light);
 }
-/* 点击后立即展开，先给三行骨架，数据回来再替换 */
+html[data-theme='Robes'] .notice-board-date::before {
+ content: ''; width: 4px; height: 4px; border-radius: 50%;
+ background: currentColor; opacity: .5; flex: none;
+}
+html[data-theme='Robes'] .notice-board-text {
+ margin: 0; font-size: 12.5px; line-height: 1.6;
+ color: var(--text); word-break: break-word;
+}
+/* ---- 骨架 ---- */
 html[data-theme='Robes'] .notice-skeleton {
 
   display: flex; flex-direction: column; gap: 7px; padding: 8px 6px 4px;
   animation: noticeFadeIn var(--dur-fast) var(--ease-out-quint) both;
 }
 @keyframes noticeFadeIn {
- from { opacity: 0; } 
+ from { opacity: 0; }
 }
 html[data-theme='Robes'] .notice-skeleton span {
 
@@ -693,18 +800,19 @@ html[data-theme='Robes'] .notice-skeleton span {
   animation: noticeShimmer 1.2s ease infinite;
 }
 html[data-theme='Robes'][data-robes-mode='dark'] .notice-skeleton span {
-
-  background-image: linear-gradient(90deg, rgba(255,255,255,0.055) 25%, rgba(255,255,255,0.11) 37%, rgba(255,255,255,0.055) 63%);
+ background-image: linear-gradient(90deg, rgba(255,255,255,0.055) 25%, rgba(255,255,255,0.11) 37%, rgba(255,255,255,0.055) 63%);
 }
 @keyframes noticeShimmer {
-
-  0% { background-position: 100% 50%; }
-  100% { background-position: 0 50%; }
+ 0% { background-position: 100% 50%; }
+ 100% { background-position: 0 50%; }
 }
+/* ---- 评论列表 ---- */
 html[data-theme='Robes'] .notice-list {
 
   flex: 1; overflow-y: auto; overscroll-behavior: contain;
-  padding: 6px 8px 10px; scrollbar-width: thin;
+  padding: 8px 0 10px 10px;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
   scrollbar-color: var(--sb-thumb) transparent;
 }
 html[data-theme='Robes'] .notice-list::-webkit-scrollbar {
@@ -719,61 +827,68 @@ html[data-theme='Robes'][data-robes-mode='dark'] .notice-list::-webkit-scrollbar
 html[data-theme='Robes'] .notice-item {
 
   position: relative;
-  display: flex; gap: 9px; padding: 9px;
-  border-radius: 12px; text-decoration: none; color: inherit;
-  transition: background .18s;
+  display: flex; gap: 9px; padding: 10px;
+  border-radius: 13px; text-decoration: none; color: inherit;
+  background: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.6);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  margin-bottom: 7px;
+  transition: background .3s, border-color .3s, box-shadow .3s;
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .notice-item {
+ background: rgba(255,255,255,0.04);
+ border-color: rgba(255,255,255,0.07);
+ box-shadow: none;
+}
+html[data-theme='Robes'] .notice-item:last-child {
+ margin-bottom: 0; 
 }
 html[data-theme='Robes'] .notice-item:hover {
- background: rgba(0,0,0,0.045); 
+ background: rgba(255,255,255,0.68);
+ border-color: rgba(255,255,255,0.8);
+ box-shadow: 0 8px 20px rgba(0,0,0,0.06);
 }
 html[data-theme='Robes'][data-robes-mode='dark'] .notice-item:hover {
- background: rgba(255,255,255,0.06); 
+ background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12); 
 }
-/* 未读：淡色底 + 左侧竖条，比整条高亮更克制 */
-html[data-theme='Robes'] .notice-item.is-new {
- background: var(--accent-soft); 
+html[data-theme='Robes'] .notice-row1 {
+ display: flex; align-items: center; gap: 6px; min-width: 0;
+ padding-bottom: 5px; margin-bottom: 5px;
 }
-html[data-theme='Robes'] .notice-item.is-new::before {
-
-  content: ''; position: absolute; left: 3px; top: 10px; bottom: 10px;
-  width: 2px; border-radius: 2px; background: var(--accent);
-}
-html[data-theme='Robes'][data-robes-mode='dark'] .notice-item.is-new {
- background: rgba(148,200,216,0.08); 
-}
-/* 展开后列表项依次淡入，让「揭开」更有层次；延迟从头部动画之后接上 */
 html[data-theme='Robes'] .notice-pop.active .notice-item {
  animation: noticeItemIn .4s var(--notice-open) both; 
 }
 html[data-theme='Robes'] .notice-pop.active .notice-item:nth-child(1) {
- animation-delay: .09s; 
+ animation-delay: .08s; 
 }
 html[data-theme='Robes'] .notice-pop.active .notice-item:nth-child(2) {
- animation-delay: .125s; 
+ animation-delay: .115s; 
 }
 html[data-theme='Robes'] .notice-pop.active .notice-item:nth-child(3) {
- animation-delay: .16s; 
+ animation-delay: .15s; 
 }
 html[data-theme='Robes'] .notice-pop.active .notice-item:nth-child(4) {
- animation-delay: .195s; 
+ animation-delay: .185s; 
 }
 html[data-theme='Robes'] .notice-pop.active .notice-item:nth-child(n+5) {
- animation-delay: .23s; 
+ animation-delay: .22s; 
 }
 @keyframes noticeItemIn {
-
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: none; }
+ from { opacity: 0; transform: translateY(10px); }
+ to { opacity: 1; transform: none; }
 }
 html[data-theme='Robes'] .notice-avatar {
-
-  position: relative; flex-shrink: 0; width: 30px; height: 30px;
-  border-radius: 50%; overflow: hidden;
-  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-  display: flex; align-items: center; justify-content: center;
+ position: relative; flex-shrink: 0; width: 32px; height: 32px;
+ border-radius: 50%; overflow: hidden;
+ background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+ display: flex; align-items: center; justify-content: center;
+ box-shadow: 0 0 0 1px rgba(255,255,255,0.9);
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .notice-avatar {
+ box-shadow: 0 0 0 1px rgba(255,255,255,0.12); 
 }
 html[data-theme='Robes'] .notice-avatar-text {
- font-size: 12px; font-weight: 600; color: #fff; 
+ font-size: 12px; font-weight: 700; color: #fff; 
 }
 html[data-theme='Robes'] .notice-avatar img {
  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; 
@@ -781,350 +896,512 @@ html[data-theme='Robes'] .notice-avatar img {
 html[data-theme='Robes'] .notice-main {
  min-width: 0; flex: 1; display: block; 
 }
-html[data-theme='Robes'] .notice-row1 {
- display: flex; align-items: center; gap: 6px; min-width: 0; 
-}
 html[data-theme='Robes'] .notice-name {
-
-  font-size: 12.5px; font-weight: 600; color: var(--text);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-html[data-theme='Robes'] .notice-tag {
-
-  flex-shrink: 0; font-size: 9.5px; line-height: 1;
-  padding: 2px 5px; border-radius: 4px;
-  color: var(--accent); border: 1px solid currentColor; opacity: .85;
-}
-html[data-theme='Robes'] .notice-dot {
- flex-shrink: 0; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); 
+ font-size: 12px; font-weight: 700; color: var(--text); letter-spacing: .01em;
+ white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 html[data-theme='Robes'] .notice-time {
- margin-left: auto; flex-shrink: 0; font-size: 10px; color: var(--text-light); white-space: nowrap; 
+ margin-left: auto; flex-shrink: 0; font-size: 9px; color: var(--text-light); white-space: nowrap; 
 }
 html[data-theme='Robes'] .notice-text {
 
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-  overflow: hidden; margin-top: 2px;
-  font-size: 12px; line-height: 1.55; color: var(--text-secondary); word-break: break-word;
-}
-html[data-theme='Robes'] .notice-text i {
- font-size: 10px; margin-right: 2px; opacity: .8; 
-}
-html[data-theme='Robes'] .notice-post {
-
-  display: block; margin-top: 3px; font-size: 10.5px; color: var(--text-light);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  overflow: hidden; margin-top: 0;
+  font-size: 11.5px; line-height: 1.55; color: var(--text-secondary); word-break: break-word;
 }
 html[data-theme='Robes'] .notice-empty {
 
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  /* 空状态收短一点，避免「我的评论」只有一条时面板大片留白 */
   min-height: 96px; box-sizing: border-box;
-  padding: 18px 10px 20px; text-align: center;
-  color: var(--text-light); font-size: 12px;
+  padding: 16px 10px 18px; text-align: center;
+  color: var(--text-light); font-size: 11.5px;
 }
-html[data-theme='Robes'] .notice-empty i {
- display: block; font-size: 16px; opacity: .45; margin-bottom: 7px; 
+html[data-theme='Robes'] .notice-empty svg {
+ display: block; margin-bottom: 8px;
+ width: 40px; height: 40px; padding: 11px;
+ border-radius: 50%; background: rgba(0,0,0,0.05);
+ color: var(--text-light);
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .notice-empty svg {
+ background: rgba(255,255,255,0.07); 
 }
 html[data-theme='Robes'] .notice-empty p {
- margin: 0; 
+ margin: 0; font-size: 12px; font-weight: 600; color: var(--text); 
 }
-html[data-theme='Robes'] .notice-loading {
- padding: 24px 0; text-align: center; font-size: 12px; color: var(--text-light); 
+html[data-theme='Robes'] .notice-empty-desc {
+ margin-top: 4px; font-size: 10.5px; line-height: 1.7; color: var(--text-light);
 }
 html[data-theme='Robes'] .notice-foot {
-
-  flex-shrink: 0; border-top: 1px solid var(--glass-border);
-  padding: 6px; display: flex; justify-content: center;
+ flex-shrink: 0; border-top: 1px solid rgba(0,0,0,0.05);
+ padding: 7px; display: flex; justify-content: center;
 }
-html[data-theme='Robes'] .notice-foot[hidden] {
- display: none; 
+html[data-theme='Robes'][data-robes-mode='dark'] .notice-foot {
+ border-top-color: rgba(255,255,255,0.08); 
 }
-html[data-theme='Robes'] .notice-more {
-
-  border: none; background: transparent; cursor: pointer;
-  color: var(--text-secondary); font-size: 11.5px; padding: 4px 12px; border-radius: 999px;
-  transition: color .18s;
+html[data-theme='Robes'] .notice-foot-tip {
+ font-size: 10.5px; color: var(--text-light);
 }
-html[data-theme='Robes'] .notice-more:hover {
+html[data-theme='Robes'] .notice-foot-tip a {
+ color: var(--text-secondary); text-decoration: none;
+}
+html[data-theme='Robes'] .notice-foot-tip a:hover {
  color: var(--accent); 
 }
-html[data-theme='Robes'] .notice-more:disabled {
- cursor: default; color: var(--text-light); 
+html[data-theme='Robes'] .notice-more {
+ border: 1px solid rgba(0,0,0,0.07); background: rgba(255,255,255,0.7); cursor: pointer;
+ color: var(--text-secondary); font-size: 11px; font-weight: 600; padding: 5px 16px; border-radius: 999px;
+ transition: color .18s, background .18s, border-color .18s, transform .18s;
 }
-/* ================= 小站：心情 / 漂流瓶 ================= */
+html[data-theme='Robes'][data-robes-mode='dark'] .notice-more {
+ background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); 
+}
+html[data-theme='Robes'] .notice-more:hover {
+ color: var(--text); border-color: transparent; background: rgba(0,0,0,0.06); 
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .notice-more:hover {
+ background: rgba(255,255,255,0.1); 
+}
+/* ================= 心情 Tab：站长情绪卡片 ================= */
+html[data-theme='Robes'] .notice-mood,
 html[data-theme='Robes'] .notice-vibe {
 
-  flex: 1; overflow-y: auto; overscroll-behavior: contain;
+  flex: 1; overflow: hidden auto; overscroll-behavior: contain;
   display: flex; flex-direction: column; gap: 10px;
   padding: 10px 11px 14px;
-  background: radial-gradient(120% 66% at 50% -8%, var(--accent-soft), transparent 68%);
   scrollbar-width: thin; scrollbar-color: var(--sb-thumb) transparent;
 }
-html[data-theme='Robes'] .notice-vibe[hidden] {
- display: none; 
-}
+html[data-theme='Robes'] .notice-mood::-webkit-scrollbar,
 html[data-theme='Robes'] .notice-vibe::-webkit-scrollbar {
  width: 4px; 
 }
+html[data-theme='Robes'] .notice-mood::-webkit-scrollbar-thumb,
 html[data-theme='Robes'] .notice-vibe::-webkit-scrollbar-thumb {
  background: rgba(0,0,0,0.14); border-radius: 4px; 
 }
+html[data-theme='Robes'][data-robes-mode='dark'] .notice-mood::-webkit-scrollbar-thumb,
 html[data-theme='Robes'][data-robes-mode='dark'] .notice-vibe::-webkit-scrollbar-thumb {
  background: rgba(255,255,255,0.18); 
 }
-/* 站长心情：整块做成一张有光晕的卡片 */
-html[data-theme='Robes'] .vibe-hero {
+html[data-theme='Robes'] .mood-card {
 
-  position: relative; overflow: hidden; flex-shrink: 0;
-  padding: 11px 13px 13px; border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.55);
-  background:
-    radial-gradient(128% 150% at 104% -12%, var(--accent-glow), transparent 62%),
-    linear-gradient(140deg, rgba(255,255,255,0.74), rgba(255,255,255,0.42));
-  box-shadow: 0 8px 20px -16px rgba(28,42,66,0.7);
-}
-html[data-theme='Robes'][data-robes-mode='dark'] .vibe-hero {
-
-  border-color: rgba(255,255,255,0.08);
-  background:
-    radial-gradient(128% 150% at 104% -12%, var(--accent-glow), transparent 62%),
-    linear-gradient(140deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03));
-  box-shadow: none;
-}
-html[data-theme='Robes'] .vibe-hero-quote {
-
-  position: absolute; right: 10px; bottom: -16px;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 62px; line-height: 1; color: var(--accent);
-  opacity: .1; pointer-events: none; user-select: none;
-}
-html[data-theme='Robes'] .vibe-hero-top {
-
-  position: relative; z-index: 1;
-  display: flex; align-items: center; gap: 6px; margin-bottom: 7px;
-}
-html[data-theme='Robes'] .vibe-hero-tag {
-
-  display: inline-flex; align-items: center; gap: 4px;
-  font-size: 10px; font-weight: 600; letter-spacing: .04em;
-  color: var(--accent-strong);
-  padding: 2px 8px; border-radius: 999px;
-  background: rgba(255,255,255,0.55);
+  position: relative; flex-shrink: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  column-gap: 13px; row-gap: 7px; align-items: start;
+  margin: 2px 0 0; padding: 14px 14px 13px; border-radius: 16px;
+  background: rgba(255,255,255,0.5);
   border: 1px solid rgba(255,255,255,0.6);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  animation: moodCardIn .42s var(--ease-out-quint) both;
 }
-html[data-theme='Robes'] .vibe-hero-tag i {
- font-size: 10px; 
+html[data-theme='Robes'] .mood-card.has-status {
+ border-color: rgba(0,0,0,0.06); 
 }
-html[data-theme='Robes'][data-robes-mode='dark'] .vibe-hero-tag {
- color: var(--accent); background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.08); 
+html[data-theme='Robes'][data-robes-mode='dark'] .mood-card {
+ background: rgba(255,255,255,0.05);
+ border-color: rgba(255,255,255,0.08);
+ box-shadow: none;
 }
-html[data-theme='Robes'] .vibe-hero-dot {
-
-  width: 5px; height: 5px; margin-left: 1px; border-radius: 50%;
-  background: #43b581;
-  box-shadow: 0 0 0 3px rgba(67,181,129,0.15);
-  animation: vibeMoodPulse 2.6s ease-in-out infinite;
+html[data-theme='Robes'][data-robes-mode='dark'] .mood-card.has-status {
+ border-color: rgba(255,255,255,0.1); 
 }
-@keyframes vibeMoodPulse {
-
-  0%, 100% { box-shadow: 0 0 0 3px rgba(67,181,129,0.15); }
-  50% { box-shadow: 0 0 0 5px rgba(67,181,129,0.05); }
+@keyframes moodCardIn {
+ from { opacity: 0; transform: translateY(6px) scale(.99); }
+ to   { opacity: 1; transform: none; }
 }
-html[data-theme='Robes'] .vibe-hero-date {
-
-  margin-left: auto; font-size: 10px; letter-spacing: .02em;
-  color: var(--text-light); white-space: nowrap;
+/* —— 顶栏：大头像 + 名字/日期 + 状态胶囊 —— */
+html[data-theme='Robes'] .mood-ava-wrap {
+ position: relative; grid-column: 1; grid-row: 1; align-self: start;
 }
-html[data-theme='Robes'] .vibe-hero-text {
-
-  position: relative; z-index: 1; margin: 0;
-  font-size: 13px; line-height: 1.72; font-weight: 500;
-  color: var(--text); letter-spacing: .01em; word-break: break-word;
+html[data-theme='Robes'] .mood-ava {
+ width: 62px; height: 62px; border-radius: 50%;
+ display: flex; align-items: center; justify-content: center;
+ font-size: 21px; font-weight: 700; letter-spacing: .01em; color: #fff;
+ background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+ overflow: hidden;
+ box-shadow: 0 0 0 3px rgba(255,255,255,0.92), 0 6px 16px -10px rgba(20,30,45,.55);
 }
-/* 通用分区 */
-html[data-theme='Robes'] .vibe-sec {
-
-  flex-shrink: 0; padding: 10px 12px 12px; border-radius: 14px;
-  background: rgba(255,255,255,0.4);
-  border: 1px solid rgba(255,255,255,0.5);
+html[data-theme='Robes'][data-robes-mode='dark'] .mood-ava {
+ box-shadow: 0 0 0 3px rgba(255,255,255,0.12); 
 }
-html[data-theme='Robes'][data-robes-mode='dark'] .vibe-sec {
-
-  background: rgba(255,255,255,0.045);
-  border-color: rgba(255,255,255,0.07);
+html[data-theme='Robes'] .mood-ava img {
+ width: 100%; height: 100%; object-fit: cover; display: block; 
 }
-html[data-theme='Robes'] .vibe-sec-head {
- display: flex; align-items: center; gap: 6px; 
+html[data-theme='Robes'] .mood-online {
+ position: absolute; right: 1px; bottom: 1px;
+ width: 11px; height: 11px; border-radius: 50%;
+ background: #43b581;
+ box-shadow: 0 0 0 2px rgba(255,255,255,0.95), 0 0 0 3px rgba(67,181,129,0.2);
+ animation: moodOnline 2.6s ease-out infinite;
 }
-html[data-theme='Robes'] .vibe-sec-title {
-
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: 11.5px; font-weight: 600; color: var(--text);
+html[data-theme='Robes'][data-robes-mode='dark'] .mood-online {
+ box-shadow: 0 0 0 2px rgba(30,36,47,0.95), 0 0 0 3px rgba(67,181,129,0.18); 
 }
-html[data-theme='Robes'] .vibe-sec-title i {
- font-size: 12.5px; color: var(--accent); 
+@keyframes moodOnline {
+ 0%, 100% { box-shadow: 0 0 0 2px rgba(255,255,255,0.95), 0 0 0 3px rgba(67,181,129,0.2); }
+ 60%      { box-shadow: 0 0 0 2px rgba(255,255,255,0.95), 0 0 0 6px rgba(67,181,129,0); }
 }
-html[data-theme='Robes'] .vibe-ghost-btn {
-
-  margin-left: auto; display: inline-flex; align-items: center;
-  border: 1px solid transparent; cursor: pointer;
-  font-size: 10.5px; line-height: 1.4; padding: 3px 9px; border-radius: 999px;
-  color: var(--accent-strong); background: var(--accent-soft);
-  transition: background .18s, color .18s, transform .18s;
-  -webkit-tap-highlight-color: transparent;
+html[data-theme='Robes'] .mood-card-body {
+ display: contents; 
 }
-html[data-theme='Robes'] .vibe-ghost-btn:hover {
- background: var(--accent); color: #fff; 
+html[data-theme='Robes'] .mood-card-top {
+ grid-column: 2; grid-row: 1;
+ display: flex; flex-wrap: wrap; align-items: center; gap: 2px 7px;
+ min-width: 0; padding-top: 4px;
 }
-html[data-theme='Robes'] .vibe-ghost-btn:active {
+html[data-theme='Robes'] .mood-owner {
+ max-width: 100%;
+ font-size: 19px; font-weight: 700; letter-spacing: -0.01em; color: var(--text);
+ overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+html[data-theme='Robes'] .mood-badge {
+ flex-shrink: 0; padding: 1px 7px 2px; border-radius: 999px;
+ font-size: 8.5px; font-weight: 700; line-height: 1.6;
+ color: var(--text-secondary);
+ background: rgba(0,0,0,0.05);
+ border: none;
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .mood-badge {
+ color: var(--text-secondary); background: rgba(255,255,255,0.08); 
+}
+html[data-theme='Robes'] .mood-card-date {
+ flex: 1 0 100%; margin-left: 0; margin-top: 1px;
+ font-size: 11.5px; color: var(--text-light); opacity: .9;
+}
+/* —— 状态胶囊 —— */
+html[data-theme='Robes'] .mood-status-pill {
+ grid-column: 3; grid-row: 1; justify-self: end; align-self: start;
+ margin-top: 4px;
+ display: inline-flex; align-items: center; gap: 6px;
+ max-width: 100%;
+ padding: 3px 13px 3px 4px;
+ border-radius: 999px;
+ border: 1px solid rgba(0,0,0,0.04);
+ background: rgba(0,0,0,0.05);
+ font-size: 12.5px; font-weight: 600; line-height: 1.3;
+ color: var(--text);
+ animation: moodPillIn .42s var(--ease-out-quint) both;
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .mood-status-pill {
+ color: var(--text);
+ background: rgba(255,255,255,0.08);
+ border-color: rgba(255,255,255,0.06);
+}
+html[data-theme='Robes'] .mood-status-emoji {
+ display: inline-flex; align-items: center; justify-content: center;
+ flex: 0 0 22px; width: 22px; height: 22px; border-radius: 50%;
+ background: rgba(255,255,255,0.95);
+ font-size: 12px; line-height: 1;
+ color: var(--text-secondary);
+ box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 2px 6px -3px rgba(20,30,45,.4);
+}
+html[data-theme='Robes'] .mood-status-emoji svg {
+ width: 14px; height: 14px; display: block; 
+}
+html[data-theme='Robes'] .mood-status-text {
+ overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+ color: inherit;
+}
+@keyframes moodPillIn {
+ from { opacity: 0; transform: translateY(3px) scale(.95); }
+ to   { opacity: 1; transform: none; }
+}
+/* —— 正文 —— */
+html[data-theme='Robes'] .mood-text {
+ grid-column: 1 / -1;
+ margin: 3px 0 0;
+ font-size: 13px; line-height: 1.7; letter-spacing: .005em;
+ color: var(--text); word-break: break-word;
+}
+/* —— 歌曲条 —— */
+html[data-theme='Robes'] .mood-song {
+ position: relative;
+ grid-column: 1 / -1;
+ display: flex; align-items: center; gap: 10px;
+ padding: 6px 12px 6px 6px;
+ border-radius: 999px;
+ background: rgba(255,255,255,0.72);
+ border: 1px solid rgba(255,255,255,0.8);
+ box-shadow: 0 3px 12px -9px rgba(20,30,45,.4);
+ transition: background .3s ease, border-color .3s ease, box-shadow .3s ease;
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .mood-song {
+ background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08);
+}
+html[data-theme='Robes'] .mood-song:hover {
+ background: rgba(255,255,255,0.88);
+ box-shadow: 0 6px 18px -12px rgba(20,30,45,.55);
+}
+html[data-theme='Robes'] .mood-song-cover {
+ flex: 0 0 40px; width: 40px; height: 40px; border-radius: 50%;
+ overflow: hidden; display: flex; align-items: center; justify-content: center;
+ background: rgba(0,0,0,0.06);
+ color: var(--text-light); font-size: 15px;
+ box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
+}
+html[data-theme='Robes'] .mood-song-cover img {
+ width: 100%; height: 100%; object-fit: cover; display: block; 
+}
+html[data-theme='Robes'] .mood-song-meta {
+ flex: 1; min-width: 0; display: flex; align-items: baseline;
+ gap: 0; white-space: nowrap; overflow: hidden;
+}
+html[data-theme='Robes'] .mood-song-name {
+ min-width: 0; font-size: 12.5px; font-weight: 700; letter-spacing: .01em;
+ color: var(--text);
+ overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+html[data-theme='Robes'] .mood-song-artist {
+ flex: 0 0 auto; font-size: 12px; font-weight: 500; color: var(--text-light);
+ overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+html[data-theme='Robes'] .mood-song-artist:not(:empty)::before {
+ content: ' - '; color: var(--text-light); 
+}
+html[data-theme='Robes'] .mood-song-play {
+ position: relative;
+ flex: 0 0 32px; width: 32px; height: 32px; border-radius: 50%;
+ display: flex; align-items: center; justify-content: center;
+ background: #fff; color: var(--text); font-size: 12px;
+ border: 0; cursor: pointer; padding: 0;
+ box-shadow: 0 1px 3px rgba(20,30,45,.16);
+ transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .mood-song-play {
+ background: rgba(255,255,255,0.12); color: var(--text); box-shadow: none;
+}
+html[data-theme='Robes'] .mood-song-play:hover {
+ box-shadow: 0 2px 8px -2px rgba(20,30,45,.3); 
+}
+html[data-theme='Robes'] .mood-song-play:active {
+ transform: scale(.94); 
+}
+html[data-theme='Robes'] .mood-play-glyph {
+ width: 0; height: 0; margin-left: 2px;
+ border-style: solid; border-width: 5px 0 5px 8px;
+ border-color: transparent transparent transparent currentColor;
+}
+html[data-theme='Robes'] .mood-song-play.is-playing .mood-play-glyph {
+ width: 8px; height: 9px; margin-left: 0; border: 0;
+ background: linear-gradient(90deg, currentColor 0 3px, transparent 3px 5px, currentColor 5px 8px);
+}
+html[data-theme='Robes'] .mood-song-play.is-playing {
+ animation: moodSongPulse 2s ease-out infinite; 
+}
+@keyframes moodSongPulse {
+ 0%   { box-shadow: 0 1px 3px rgba(20,30,45,.16), 0 0 0 0 rgba(131,154,201,0.35); }
+ 70%  { box-shadow: 0 1px 3px rgba(20,30,45,.16), 0 0 0 7px rgba(131,154,201,0); }
+ 100% { box-shadow: 0 1px 3px rgba(20,30,45,.16), 0 0 0 0 rgba(131,154,201,0); }
+}
+/* —— 底部元信息 —— */
+html[data-theme='Robes'] .mood-card-foot {
+ grid-column: 1 / -1;
+ display: flex; align-items: center; gap: 6px;
+ min-height: 16px;
+}
+html[data-theme='Robes'] .mood-updated {
+ font-size: 10px; color: var(--text-light); opacity: .75;
+}
+html[data-theme='Robes'] .mood-updated:empty {
+ display: none; 
+}
+html[data-theme='Robes'] .mood-text + .mood-card-foot {
+ position: relative;
+ padding-top: 8px;
+ margin-top: 2px;
+}
+html[data-theme='Robes'] .mood-text + .mood-card-foot::before {
+ content: ''; position: absolute; left: 0; right: 0; top: 3px;
+ height: 1px; background: rgba(0,0,0,0.06);
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .mood-text + .mood-card-foot::before {
+ background: rgba(255,255,255,0.08); 
+}
+/* ================= 漂流瓶 ================= */
+html[data-theme='Robes'] .vibe-chat-head {
+ position: relative; overflow: hidden; z-index: 0;
+ flex-shrink: 0; display: flex; align-items: center; gap: 8px;
+ padding: 9px 10px; border-radius: 15px;
+ background: rgba(255,255,255,0.5);
+ border: 1px solid rgba(255,255,255,0.6);
+ box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .vibe-chat-head {
+ background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.08); box-shadow: none;
+}
+html[data-theme='Robes'] .vibe-hero-ico {
+ position: relative; z-index: 1;
+ flex: 0 0 30px; width: 30px; height: 30px; border-radius: 9px;
+ display: flex; align-items: center; justify-content: center;
+ color: var(--text-secondary); background: rgba(0,0,0,0.05);
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .vibe-hero-ico {
+ background: rgba(255,255,255,0.08); color: var(--text-secondary);
+}
+html[data-theme='Robes'] .vibe-chat-txt {
+ position: relative; z-index: 1; display: flex; flex-direction: column; min-width: 0;
+}
+html[data-theme='Robes'] .vibe-chat-title {
+ display: inline-flex; align-items: center; gap: 5px;
+ font-size: 13px; font-weight: 700; color: var(--text); letter-spacing: .3px;
+}
+html[data-theme='Robes'] .vibe-chat-sub {
+ font-size: 10px; line-height: 1.5; color: var(--text-light);
+ white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+html[data-theme='Robes'] .vibe-pick {
+ position: relative; z-index: 1;
+ margin-left: auto; flex-shrink: 0;
+ display: inline-flex; align-items: center; gap: 4px;
+ border: 1px solid rgba(0,0,0,0.06); cursor: pointer; padding: 5px 12px 5px 10px;
+ border-radius: 999px; font-size: 10.5px; font-weight: 700; line-height: 1.5;
+ color: var(--text-secondary); background: rgba(255,255,255,.72);
+ transition: transform .18s, filter .18s, opacity .18s, background .18s;
+}
+html[data-theme='Robes'] .vibe-pick svg {
+ width: 12px; height: 12px; display: block; 
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .vibe-pick {
+ background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.12); color: var(--text-secondary);
+}
+html[data-theme='Robes'] .vibe-pick:hover {
+ background: #fff; transform: translateY(-1px); 
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .vibe-pick:hover {
+ background: rgba(255,255,255,0.16); 
+}
+html[data-theme='Robes'] .vibe-pick:active {
  transform: scale(.95); 
 }
-html[data-theme='Robes'] .vibe-ghost-btn:disabled {
- opacity: .55; cursor: default; transform: none; 
+html[data-theme='Robes'] .vibe-pick:disabled {
+ opacity: .7; cursor: default; transform: none; 
 }
-html[data-theme='Robes'][data-robes-mode='dark'] .vibe-ghost-btn {
- color: var(--accent); background: rgba(255,255,255,0.07); 
-}
-html[data-theme='Robes'][data-robes-mode='dark'] .vibe-ghost-btn:hover {
- background: var(--accent); color: #12161f; 
-}
-/* 漂流瓶 */
 html[data-theme='Robes'] .vibe-bottle-body {
- margin-top: 8px; transition: opacity .2s; 
-}
-html[data-theme='Robes'] .vibe-bottle-body.is-loading {
- opacity: .4; 
+ flex: 1; display: flex; flex-direction: column; justify-content: center;
+ gap: 9px; padding: 4px 1px 2px; transition: opacity .2s;
 }
 html[data-theme='Robes'] .vibe-bottle-empty {
-
-  display: flex; align-items: center; gap: 8px;
-  padding: 11px 12px; border-radius: 10px;
-  border: 1px dashed rgba(20,30,45,0.14);
-  font-size: 11px; line-height: 1.6; color: var(--text-light);
-}
-html[data-theme='Robes'] .vibe-bottle-empty i {
-
-  flex-shrink: 0; font-size: 16px; color: var(--accent); opacity: .85;
-  animation: vibeFloat 3.4s ease-in-out infinite;
-}
-@keyframes vibeFloat {
-
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-2.5px); }
+ display: flex; flex-direction: column; align-items: center; justify-content: center;
+ gap: 7px; min-height: 130px; padding: 16px 12px; text-align: center;
+ border: 1px dashed rgba(0,0,0,0.14); border-radius: 16px;
+ background: rgba(255,255,255,.35);
 }
 html[data-theme='Robes'][data-robes-mode='dark'] .vibe-bottle-empty {
- border-color: rgba(255,255,255,0.12); 
+ border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.03);
+}
+html[data-theme='Robes'] .vibe-empty-ico {
+ width: 44px; height: 44px; border-radius: 50%;
+ display: flex; align-items: center; justify-content: center;
+ color: var(--text-light); background: rgba(0,0,0,0.05);
+ animation: vibeFloat 3s ease-in-out infinite alternate;
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .vibe-empty-ico {
+ background: rgba(255,255,255,0.07); color: var(--text-light);
+}
+html[data-theme='Robes'] .vibe-empty-ico svg {
+ width: 20px; height: 20px; display: block;
+}
+@keyframes vibeFloat {
+ 0%, 100% { transform: translateY(0); }
+ 50% { transform: translateY(-2.5px); }
+}
+html[data-theme='Robes'] .vibe-bottle-empty strong {
+ font-size: 12.5px; font-weight: 700; color: var(--text);
+}
+html[data-theme='Robes'] .vibe-empty-desc {
+ font-size: 10px; line-height: 1.7; color: var(--text-light); max-width: 240px;
 }
 html[data-theme='Robes'] .vibe-note {
-
-  position: relative; padding: 10px 12px; border-radius: 11px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0.58));
-  border: 1px solid rgba(255,255,255,0.7);
-  box-shadow: 0 6px 16px -14px rgba(20,30,45,0.8);
-  animation: noticeItemIn .38s var(--notice-open, cubic-bezier(.16,1,.3,1)) both;
+ flex: 1; min-width: 0;
+ padding: 10px 12px;
+ border-radius: 14px; border-top-left-radius: 5px;
+ background: rgba(255,255,255,0.55);
+ border: 1px solid rgba(255,255,255,0.65);
+ box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 html[data-theme='Robes'][data-robes-mode='dark'] .vibe-note {
-
-  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.035));
-  border-color: rgba(255,255,255,0.08);
-  box-shadow: none;
+ background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.08); box-shadow: none;
 }
 html[data-theme='Robes'] .vibe-note-text {
-
-  margin: 0; font-size: 12.5px; line-height: 1.7;
-  color: var(--text); word-break: break-word;
+ margin: 0; font-size: 13px; line-height: 1.8;
+ color: var(--text); word-break: break-word;
 }
 html[data-theme='Robes'] .vibe-note-meta {
-
-  display: flex; align-items: center; gap: 5px;
-  margin-top: 7px; padding-top: 6px;
-  border-top: 1px dashed rgba(20,30,45,0.1);
-  font-size: 10px; color: var(--text-light);
+ display: flex; align-items: center; gap: 5px;
+ margin-top: 7px; font-size: 9.5px; color: var(--text-light);
 }
-html[data-theme='Robes'][data-robes-mode='dark'] .vibe-note-meta {
- border-top-color: rgba(255,255,255,0.1); 
-}
-html[data-theme='Robes'] .vibe-note-meta i {
- font-size: 10px; opacity: .8; 
+html[data-theme='Robes'] .vibe-note-meta svg {
+ width: 11px; height: 11px; opacity: .8; display: block;
 }
 html[data-theme='Robes'] .vibe-meta-dot {
  width: 2px; height: 2px; border-radius: 50%; background: currentColor; opacity: .5; 
 }
-/* 扔瓶子 */
-html[data-theme='Robes'] .vibe-drop-count {
-
-  margin-left: auto; font-size: 10px; color: var(--text-light);
-  font-variant-numeric: tabular-nums;
+html[data-theme='Robes'] .vibe-composer {
+ margin-top: auto; flex-shrink: 0; display: flex; flex-direction: column; gap: 7px;
 }
-html[data-theme='Robes'] .vibe-drop-form {
- margin-top: 8px; display: flex; flex-direction: column; gap: 6px; 
+html[data-theme='Robes'] .vibe-composer-bar {
+ display: flex; align-items: flex-end; gap: 6px;
+ padding: 6px 6px 6px 8px; border-radius: 16px;
+ background: rgba(255,255,255,0.5);
+ border: 1px solid rgba(255,255,255,0.6);
+ box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+ transition: border-color .3s, box-shadow .3s, background .3s;
 }
-html[data-theme='Robes'] .vibe-drop-form input[type="text"], html[data-theme='Robes'] .vibe-drop-form textarea {
-
-  width: 100%; box-sizing: border-box;
-  padding: 7px 10px; border-radius: 9px;
-  border: 1px solid transparent;
-  background: rgba(255,255,255,0.56);
-  font-family: inherit; font-size: 11.5px; line-height: 1.6;
-  color: var(--text); outline: none; resize: none;
-  transition: background .18s, box-shadow .18s, border-color .18s;
+html[data-theme='Robes'][data-robes-mode='dark'] .vibe-composer-bar {
+ background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.08);
 }
-html[data-theme='Robes'] .vibe-drop-form textarea {
- min-height: 52px; 
+html[data-theme='Robes'] .vibe-composer-bar:focus-within {
+ background: rgba(255,255,255,0.68);
+ border-color: var(--accent);
+ box-shadow: 0 0 0 3px var(--accent-soft);
 }
-html[data-theme='Robes'][data-robes-mode='dark'] .vibe-drop-form input[type="text"], html[data-theme='Robes'][data-robes-mode='dark'] .vibe-drop-form textarea {
- background: rgba(255,255,255,0.06); 
+html[data-theme='Robes'] .vibe-composer-bar textarea {
+ flex: 1; min-width: 0; min-height: 0; max-height: 66px;
+ padding: 3px 0; border: none; background: transparent; box-shadow: none;
+ font-family: inherit; font-size: 11.5px; line-height: 1.7; color: var(--text);
+ resize: none; outline: none;
 }
-html[data-theme='Robes'] .vibe-drop-form input::placeholder, html[data-theme='Robes'] .vibe-drop-form textarea::placeholder {
+html[data-theme='Robes'] .vibe-composer-bar textarea::placeholder {
  color: var(--text-light); 
 }
-html[data-theme='Robes'] .vibe-drop-form input:focus, html[data-theme='Robes'] .vibe-drop-form textarea:focus {
-
-  background: rgba(255,255,255,0.82);
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+html[data-theme='Robes'] .vibe-drop-count {
+ flex: 0 0 auto; padding: 1px 7px 2px;
+ font-size: 9.5px; font-weight: 600; color: var(--text-light);
+ background: rgba(0,0,0,0.04); border-radius: 999px;
+ margin-bottom: 4px;
+ font-variant-numeric: tabular-nums;
 }
-html[data-theme='Robes'][data-robes-mode='dark'] .vibe-drop-form input:focus, html[data-theme='Robes'][data-robes-mode='dark'] .vibe-drop-form textarea:focus {
- background: rgba(255,255,255,0.1); 
-}
-html[data-theme='Robes'] .vibe-drop-foot {
- display: flex; align-items: center; gap: 8px; 
-}
-html[data-theme='Robes'] .vibe-drop-tip {
- font-size: 10px; color: var(--text-light); 
+html[data-theme='Robes'][data-robes-mode='dark'] .vibe-drop-count {
+ background: rgba(255,255,255,0.07); color: var(--text-light);
 }
 html[data-theme='Robes'] .vibe-send {
-
-  margin-left: auto; display: inline-flex; align-items: center; gap: 4px;
-  border: none; cursor: pointer; font-size: 11px; font-weight: 500;
-  color: #fff; line-height: 1.5; padding: 5px 13px; border-radius: 999px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-  box-shadow: 0 6px 14px -8px var(--accent-glow);
-  transition: filter .18s, transform .18s, opacity .18s;
-  -webkit-tap-highlight-color: transparent;
+ flex: 0 0 30px; width: 30px; height: 30px; padding: 0;
+ display: inline-flex; align-items: center; justify-content: center;
+ border: none; border-radius: 50%; cursor: pointer; color: #fff;
+ background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+ box-shadow: 0 8px 16px -8px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,.35);
+ transition: filter .18s, transform .18s, opacity .18s;
+ -webkit-tap-highlight-color: transparent;
 }
-html[data-theme='Robes'] .vibe-send i {
- font-size: 11px; 
-}
-@keyframes vibeSpin {
- to { transform: rotate(360deg); } 
+html[data-theme='Robes'] .vibe-send svg {
+ width: 13px; height: 13px; display: block;
 }
 html[data-theme='Robes'] .vibe-send:hover {
- filter: brightness(1.06); 
+ filter: brightness(1.06); transform: translateY(-1px); 
 }
 html[data-theme='Robes'] .vibe-send:active {
- transform: scale(.96); 
+ transform: scale(.94); 
 }
 html[data-theme='Robes'] .vibe-send:disabled {
- opacity: .55; cursor: default; box-shadow: none; 
+ opacity: .55; cursor: default; box-shadow: none; transform: none; 
 }
 @media (prefers-reduced-motion: reduce) {
-  html[data-theme='Robes'] .vibe-hero-dot, html[data-theme='Robes'] .vibe-bottle-empty i {
+  html[data-theme='Robes'] .vibe-empty-ico, html[data-theme='Robes'] .mood-online {
  animation: none; 
   }
 }
+
 html[data-theme='Robes'] #editPostBtn {
 
   color: var(--text-secondary); text-decoration: none;
