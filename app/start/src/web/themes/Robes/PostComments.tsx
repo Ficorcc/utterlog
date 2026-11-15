@@ -203,8 +203,9 @@ function renderContent(content: string, keyBase: string) {
         return;
       }
     }
-    // @提及 单独包一层，原站用 .cmt-mention 高亮
-    const chunks = part.split(/(@[^\s@]{1,20})/g);
+    // @提及 单独包一层，原站用 .cmt-mention 高亮。
+    // 用否定回顾断言排除邮箱（xxx@yy.com 里的 @ 不是提及）。
+    const chunks = part.split(/(?<![\w@])@[^\s@]{1,20}/g);
     chunks.forEach((chunk, chunkIndex) => {
       if (chunk.startsWith('@') && chunk.length > 1) {
         nodes.push(
@@ -647,8 +648,12 @@ export default function PostComments({ postId }: { postId: number }) {
                 <span className="cmt-device" title="评论设备">
                   {deviceIcon(device.os, 12, 'cmt-dev-icon')}
                   <span className="cmt-device-os">{device.os}</span>
-                  <span className="cmt-device-dot" />
-                  <span className="cmt-device-br">{device.browser}</span>
+                  {device.browser ? (
+                    <>
+                      <span className="cmt-device-dot" />
+                      <span className="cmt-device-br">{device.browser}</span>
+                    </>
+                  ) : null}
                 </span>
               ) : null}
             </div>
