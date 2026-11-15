@@ -352,6 +352,17 @@ export function IconHeadphone(props: IconProps) {
   );
 }
 
+/** 图片（矩形 + 太阳，remixicon ri-image-2-line 语义）。 */
+export function IconImage(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <rect x="3.2" y="4.6" width="17.6" height="14.8" rx="2.4" />
+      <circle cx="8.6" cy="9.6" r="1.6" />
+      <path d="m4.4 17.4 4.6-4.2 3.4 3 2.6-2.2 4.6 3.8" />
+    </Svg>
+  );
+}
+
 /** 上一首（双三角 + 竖线，remixicon ri-skip-prev-fill 语义）。 */
 export function IconSkipPrev(props: IconProps) {
   return (

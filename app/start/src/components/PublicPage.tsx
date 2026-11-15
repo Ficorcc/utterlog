@@ -297,7 +297,13 @@ export function PublicPage({ data }: { data: PublicPageData }) {
         }
         if (data.kind === 'coding') return <CodingPage data={data.data} timeZone={data.timeZone} />;
         if (data.kind === 'footprints') return <FootprintsClient initialRows={data.rows} options={ctx?.options || {}} />;
-        if (data.kind === 'moments') return <MomentsClient initialLoaded initialMoments={data.moments} initialTags={data.tags} initialFetchedAt={data.fetchedAt} />;
+        if (data.kind === 'moments') {
+          // 主题可以接管说说页（Robes 改成了主题自己的卡片流，正文不截断），
+          // 没接管时用应用层默认的散落式瀑布。
+          const Component = ctx ? getThemeComponents(ctx.theme.name).MomentsPage : undefined;
+          if (Component) return <Component initialMoments={data.moments} />;
+          return <MomentsClient initialLoaded initialMoments={data.moments} initialTags={data.tags} initialFetchedAt={data.fetchedAt} />;
+        }
         if (data.kind === 'client' && data.page === 'links') {
           // 主题可以接管友链页（Robes 复刻了原站的 links.php 结构），没接管时用应用层默认页。
           const Component = ctx ? getThemeComponents(ctx.theme.name).LinksPage : undefined;

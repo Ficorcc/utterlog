@@ -76,6 +76,11 @@ export interface ThemeComponents {
    * 不提供时回落到应用层默认的 FriendsClient。
    */
   FriendsPage?: ThemeComponent<{ friends?: any[]; total?: number; withPosts?: number }>;
+  /**
+   * 主题可以接管「说说」页。
+   * 不提供时回落到应用层默认的 MomentsClient（散落式瀑布）。
+   */
+  MomentsPage?: ThemeComponent<{ initialMoments?: any[] }>;
 }
 
 const SharedCommentSection = lazy(() => import('@/components/blog/CommentList'));
@@ -151,6 +156,7 @@ const Robes: ThemeComponents = {
   AboutPage: lazy(() => import('@/themes/Robes/AboutPage')),
   LinksPage: lazy(() => import('@/themes/Robes/LinksPage')),
   FriendsPage: lazy(() => import('@/themes/Robes/FriendsPage')),
+  MomentsPage: lazy(() => import('@/themes/Robes/MomentsPage')),
 };
 
 const Whono: ThemeComponents = {

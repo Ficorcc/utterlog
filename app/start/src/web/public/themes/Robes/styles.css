@@ -8884,3 +8884,274 @@ html[data-theme='Robes'] .cmt-emoji-item {
 html[data-theme='Robes'] .cmt-tag-private svg { vertical-align: -1px; }
 /* 设备徽章里的图标尺寸由 .cmt-dev-icon 控制，这里补上竖直对齐 */
 html[data-theme='Robes'] .cmt-device .cmt-dev-icon { vertical-align: -2px; }
+
+/* ═══ 说说页（Robes 自有卡片流） ═══════════════════════════════════════════
+   应用层默认的说说页是散落式瀑布（绝对定位 + 固定 250px 卡片 + 文字截断），
+   在 Robes 的窄正文列里会溢出裁切。这里改成主题自己的玻璃卡片流：
+   全部条目列出、正文完整显示、配图全部展示。 */
+html[data-theme='Robes'] {
+  /* 说说评论是共享组件（MomentCommentRow），它用 --community-* 取色，
+     这里把社区色映射到 Robes 主题色，深浅色都跟得住。 */
+  --community-text: var(--text);
+  --community-muted: var(--text-light);
+  --community-surface: var(--glass-bg-strong);
+  --community-soft: rgba(255,255,255,0.45);
+  --community-border: var(--border);
+  --community-active: var(--accent-soft);
+  --community-hover: rgba(0,0,0,0.04);
+  --community-glass: var(--glass-bg-strong);
+}
+html[data-theme='Robes'][data-robes-mode='dark'] {
+  --community-soft: rgba(255,255,255,0.05);
+  --community-hover: rgba(255,255,255,0.06);
+}
+html[data-theme='Robes'] .rb-moments {
+  display: flex; flex-direction: column; gap: 14px;
+  padding: 4px 0 48px;
+}
+/* —— 标题行 —— */
+html[data-theme='Robes'] .rb-mom-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+html[data-theme='Robes'] .rb-mom-head-main {
+  display: flex; align-items: center; gap: 8px; min-width: 0;
+}
+html[data-theme='Robes'] .rb-mom-head-ico {
+  flex: 0 0 26px; width: 26px; height: 26px; border-radius: 9px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--accent-soft); color: var(--accent-strong);
+}
+html[data-theme='Robes'] .rb-mom-title {
+  font-size: 19px; font-weight: 700; letter-spacing: .01em; color: var(--text);
+}
+html[data-theme='Robes'] .rb-mom-count {
+  font-size: 12px; color: var(--text-light);
+}
+html[data-theme='Robes'] .rb-mom-write {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 30px; padding: 0 13px; border-radius: 999px;
+  border: 1px solid var(--glass-border); background: var(--glass-bg-strong);
+  color: var(--text-secondary); font: inherit; font-size: 12.5px; font-weight: 600;
+  cursor: pointer;
+  transition: background .22s ease, color .22s ease, transform .18s ease;
+}
+html[data-theme='Robes'] .rb-mom-write:hover {
+  color: var(--text); transform: translateY(-1px);
+}
+html[data-theme='Robes'] .rb-mom-write.is-active {
+  background: var(--accent); border-color: transparent; color: #fff;
+}
+/* —— 筛选 —— */
+html[data-theme='Robes'] .rb-mom-filters {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; flex-wrap: wrap;
+}
+html[data-theme='Robes'] .rb-mom-chips {
+  display: flex; flex-wrap: wrap; gap: 6px; min-width: 0;
+}
+html[data-theme='Robes'] .rb-mom-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  height: 26px; padding: 0 11px; border-radius: 999px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text-light); font: inherit; font-size: 12px; cursor: pointer;
+  transition: color .18s ease, background .18s ease, border-color .18s ease;
+}
+html[data-theme='Robes'] .rb-mom-chip:hover { color: var(--text); }
+html[data-theme='Robes'] .rb-mom-chip.is-active {
+  background: var(--accent-soft); border-color: var(--accent-glow); color: var(--accent-strong);
+}
+html[data-theme='Robes'] .rb-mom-chip-n {
+  font-size: 10px; opacity: .7;
+}
+/* —— 表单控件 —— */
+html[data-theme='Robes'] .rb-mom-input,
+html[data-theme='Robes'] .rb-mom-textarea,
+html[data-theme='Robes'] .rb-mom-select {
+  width: 100%; font: inherit; font-size: 13px; color: var(--text);
+  background: rgba(255,255,255,0.6);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 8px 10px; line-height: 1.6;
+  transition: border-color .18s ease, background .18s ease;
+}
+html[data-theme='Robes'] .rb-mom-textarea {
+  min-height: 76px; resize: vertical;
+}
+html[data-theme='Robes'] .rb-mom-textarea-sm { min-height: 52px; }
+html[data-theme='Robes'] .rb-mom-input::placeholder,
+html[data-theme='Robes'] .rb-mom-textarea::placeholder { color: var(--text-light); }
+html[data-theme='Robes'] .rb-mom-input:focus,
+html[data-theme='Robes'] .rb-mom-textarea:focus,
+html[data-theme='Robes'] .rb-mom-select:focus {
+  border-color: var(--accent-glow); background: rgba(255,255,255,0.8);
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .rb-mom-input,
+html[data-theme='Robes'][data-robes-mode='dark'] .rb-mom-textarea,
+html[data-theme='Robes'][data-robes-mode='dark'] .rb-mom-select {
+  background: rgba(255,255,255,0.05);
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .rb-mom-input:focus,
+html[data-theme='Robes'][data-robes-mode='dark'] .rb-mom-textarea:focus,
+html[data-theme='Robes'][data-robes-mode='dark'] .rb-mom-select:focus {
+  background: rgba(255,255,255,0.08);
+}
+html[data-theme='Robes'] .rb-mom-select {
+  width: auto; min-width: 130px; height: 28px; padding: 0 8px; font-size: 12px;
+  cursor: pointer;
+}
+/* —— 发布器 —— */
+html[data-theme='Robes'] .rb-mom-composer {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 14px 16px; border-radius: var(--radius);
+  background: var(--glass-bg-strong); border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-sm);
+}
+html[data-theme='Robes'] .rb-mom-composer-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+}
+html[data-theme='Robes'] .rb-mom-composer-row .rb-mom-input { width: 150px; }
+html[data-theme='Robes'] .rb-mom-file {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 30px; padding: 0 12px; border-radius: 999px;
+  border: 1px solid var(--border); color: var(--text-secondary);
+  font-size: 12.5px; font-weight: 600; cursor: pointer;
+  transition: color .18s ease, background .18s ease;
+}
+html[data-theme='Robes'] .rb-mom-file:hover { color: var(--text); }
+html[data-theme='Robes'] .rb-mom-submit {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 30px; padding: 0 14px; border-radius: 999px; border: 0;
+  background: var(--accent); color: #fff; font: inherit;
+  font-size: 12.5px; font-weight: 600; cursor: pointer;
+  transition: background .18s ease, transform .18s ease;
+}
+html[data-theme='Robes'] .rb-mom-submit:hover { background: var(--accent-hover); }
+html[data-theme='Robes'] .rb-mom-submit:active { transform: scale(.96); }
+html[data-theme='Robes'] .rb-mom-submit:disabled { opacity: .6; cursor: wait; }
+html[data-theme='Robes'] .rb-mom-previews {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+html[data-theme='Robes'] .rb-mom-preview {
+  position: relative; width: 64px; height: 64px; padding: 0;
+  border-radius: 10px; overflow: hidden; border: 1px solid var(--border);
+  background: transparent; cursor: pointer;
+}
+html[data-theme='Robes'] .rb-mom-preview img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+html[data-theme='Robes'] .rb-mom-preview-x {
+  position: absolute; top: 3px; right: 3px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: rgba(0,0,0,0.55); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+/* —— 说说卡片 —— */
+html[data-theme='Robes'] .rb-mom-list {
+  display: flex; flex-direction: column; gap: 12px;
+}
+html[data-theme='Robes'] .rb-mom-card {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 14px 16px; border-radius: var(--radius);
+  background: var(--glass-bg-strong); border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-sm);
+  animation: rbMomIn .38s var(--ease-out-quint) both;
+}
+@keyframes rbMomIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+html[data-theme='Robes'] .rb-mom-card-top {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+  font-size: 11.5px; color: var(--text-light);
+}
+html[data-theme='Robes'] .rb-mom-avatar {
+  flex: 0 0 22px; width: 22px; height: 22px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--accent-soft); color: var(--accent-strong);
+  font-size: 11px; font-weight: 700;
+}
+html[data-theme='Robes'] .rb-mom-tag {
+  padding: 2px 8px; border-radius: 999px;
+  background: var(--accent-soft); color: var(--accent-strong);
+  font-size: 11px; font-weight: 600;
+}
+html[data-theme='Robes'] .rb-mom-loc { color: var(--text-light); }
+html[data-theme='Robes'] .rb-mom-src { margin-left: auto; opacity: .75; }
+/* 正文：完整显示，不做行数截断 */
+html[data-theme='Robes'] .rb-mom-text {
+  font-size: 13.5px; line-height: 1.85; color: var(--text);
+  white-space: pre-wrap; word-break: break-word;
+}
+/* —— 配图 —— */
+html[data-theme='Robes'] .rb-mom-media {
+  display: grid; gap: 6px; border-radius: 12px; overflow: hidden;
+}
+html[data-theme='Robes'] .rb-mom-media-1 { grid-template-columns: 1fr; }
+html[data-theme='Robes'] .rb-mom-media-2,
+html[data-theme='Robes'] .rb-mom-media-3,
+html[data-theme='Robes'] .rb-mom-media-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+html[data-theme='Robes'] .rb-mom-media-3 > :first-child,
+html[data-theme='Robes'] .rb-mom-media-4 > :first-child {
+  grid-column: 1 / -1; aspect-ratio: 16 / 9;
+}
+html[data-theme='Robes'] .rb-mom-media-cell {
+  padding: 0; margin: 0; border: 0; display: block;
+  aspect-ratio: 1; overflow: hidden; cursor: zoom-in;
+  background: rgba(0,0,0,0.04);
+}
+html[data-theme='Robes'] .rb-mom-media-1 .rb-mom-media-cell { aspect-ratio: 16 / 9; }
+html[data-theme='Robes'] .rb-mom-media-cell img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+/* —— 操作条 —— */
+html[data-theme='Robes'] .rb-mom-actions {
+  display: flex; align-items: center; gap: 8px;
+}
+html[data-theme='Robes'] .rb-mom-act {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 28px; padding: 0 11px; border-radius: 999px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text-light); font: inherit; font-size: 12px; font-weight: 600;
+  cursor: pointer;
+  transition: color .18s ease, background .18s ease, border-color .18s ease;
+}
+html[data-theme='Robes'] .rb-mom-act:hover { color: var(--text); }
+html[data-theme='Robes'] .rb-mom-act.is-liked {
+  color: #d94f66; border-color: rgba(217,79,102,0.35); background: rgba(217,79,102,0.08);
+}
+html[data-theme='Robes'] .rb-mom-act.is-open {
+  color: var(--accent-strong); border-color: var(--accent-glow); background: var(--accent-soft);
+}
+html[data-theme='Robes'] .rb-mom-act:disabled { opacity: .6; cursor: wait; }
+/* —— 评论区 —— */
+html[data-theme='Robes'] .rb-mom-comments {
+  display: flex; flex-direction: column; gap: 10px;
+  padding-top: 10px; border-top: 1px solid var(--border);
+}
+html[data-theme='Robes'] .rb-mom-comment-list {
+  display: flex; flex-direction: column; gap: 10px;
+}
+html[data-theme='Robes'] .rb-mom-hint {
+  font-size: 12px; color: var(--text-light);
+}
+html[data-theme='Robes'] .rb-mom-form {
+  display: flex; flex-direction: column; gap: 8px;
+}
+html[data-theme='Robes'] .rb-mom-form-row {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;
+}
+html[data-theme='Robes'] .rb-mom-form-foot {
+  display: flex; justify-content: flex-end;
+}
+html[data-theme='Robes'] .rb-mom-error {
+  font-size: 12px; color: #d94f66;
+}
+/* —— 空态 —— */
+html[data-theme='Robes'] .rb-mom-empty {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 48px 0; color: var(--text-light); font-size: 13px;
+}
+@media (max-width: 640px) {
+  html[data-theme='Robes'] .rb-mom-form-row { grid-template-columns: 1fr; }
+  html[data-theme='Robes'] .rb-mom-composer-row .rb-mom-input { width: 100%; }
+  html[data-theme='Robes'] .rb-mom-src { margin-left: 0; }
+}
