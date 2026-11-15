@@ -18,6 +18,7 @@ import {
   IconShieldCheck,
   IconSmile,
 } from './Icons';
+import { sweepRevealCards } from './useCardReveal';
 
 /**
  * 文章评论区 —— 复刻原主题 comments.php 的 DOM 契约。
@@ -309,6 +310,10 @@ export default function PostComments({ postId, initialCount }: { postId: number;
    * .cmt-card / .cmt-item 在 CSS 里默认 opacity:0，要等 JS 补上 .card-visible
    * 才会走 cardFadeIn 显形（和原站 main.v2.js 的做法一致）。这里自己盯一次
    * 列表容器：元素滚进视口时才点亮，避免整段评论在页面加载时就全部亮起来。
+   *
+   * 另外加一层兜底扫描：一次性大距离跳转（锚点 / 恢复滚动位置 / 拖滚动条）
+   * 会让中间跨过的评论从来没被观察器判定为相交 —— 那一整段就停在 opacity:0
+   * 上看不见了。按几何位置再扫一遍，凡是落在视口范围内的都点亮。
    */
   useEffect(() => {
     const root = listRef.current;
@@ -333,7 +338,18 @@ export default function PostComments({ postId, initialCount }: { postId: number;
       node.style.animationDelay = `${Math.min(index, 10) * 0.04}s`;
       observer.observe(node);
     });
-    return () => observer.disconnect();
+
+    // 兜底：按几何位置扫一遍已经进入视口的评论（含刚被跳过的）。
+    const sweep = () => sweepRevealCards(root);
+    sweep();
+    document.addEventListener('scroll', sweep, { capture: true, passive: true });
+    window.addEventListener('resize', sweep);
+
+    return () => {
+      observer.disconnect();
+      document.removeEventListener('scroll', sweep, { capture: true });
+      window.removeEventListener('resize', sweep);
+    };
   }, [roots, page]);
 
   /* 表单预填：管理员用登录资料，其它访客用本机记住的评论资料。 */

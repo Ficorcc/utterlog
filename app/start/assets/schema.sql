@@ -36,6 +36,8 @@ ALTER TABLE IF EXISTS ONLY public.ul_followers DROP CONSTRAINT IF EXISTS ul_foll
 ALTER TABLE IF EXISTS ONLY public.ul_followers DROP CONSTRAINT IF EXISTS ul_followers_follower_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.ul_feed_items DROP CONSTRAINT IF EXISTS ul_feed_items_subscription_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.ul_federated_users DROP CONSTRAINT IF EXISTS ul_federated_users_local_user_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.ul_comment_likes DROP CONSTRAINT IF EXISTS ul_comment_likes_comment_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.ul_comment_likes DROP CONSTRAINT IF EXISTS ul_comment_likes_pkey;
 ALTER TABLE IF EXISTS ONLY public.ul_comments DROP CONSTRAINT IF EXISTS ul_comments_post_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.ul_books DROP CONSTRAINT IF EXISTS ul_books_blog_author_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.ul_ai_messages DROP CONSTRAINT IF EXISTS ul_ai_messages_conversation_id_fkey;
@@ -109,6 +111,8 @@ DROP INDEX IF EXISTS public.idx_comments_user;
 DROP INDEX IF EXISTS public.idx_comments_status;
 DROP INDEX IF EXISTS public.idx_comments_source;
 DROP INDEX IF EXISTS public.idx_comments_post_status_parent;
+DROP INDEX IF EXISTS public.idx_comment_likes_comment;
+DROP INDEX IF EXISTS public.idx_comments_private;
 DROP INDEX IF EXISTS public.idx_comments_post;
 DROP INDEX IF EXISTS public.idx_comments_parent;
 DROP INDEX IF EXISTS public.idx_comments_created;
@@ -254,6 +258,7 @@ DROP TABLE IF EXISTS public.ul_federation_tokens;
 DROP SEQUENCE IF EXISTS public.ul_federated_users_id_seq;
 DROP TABLE IF EXISTS public.ul_federated_users;
 DROP SEQUENCE IF EXISTS public.ul_comments_id_seq;
+DROP TABLE IF EXISTS public.ul_comment_likes;
 DROP TABLE IF EXISTS public.ul_comments;
 DROP SEQUENCE IF EXISTS public.ul_books_id_seq;
 DROP TABLE IF EXISTS public.ul_books;
@@ -629,6 +634,17 @@ ALTER SEQUENCE public.ul_books_id_seq OWNED BY public.ul_books.id;
 
 
 --
+-- Name: ul_comment_likes; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.ul_comment_likes (
+    comment_id integer NOT NULL,
+    visitor_token character varying(64) NOT NULL,
+    created_at integer DEFAULT 0 NOT NULL
+);
+
+
+--
 -- Name: ul_comments; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -654,7 +670,8 @@ CREATE TABLE public.ul_comments (
     geo text,
     visitor_id character varying(64) DEFAULT ''::character varying,
     is_ai_reply boolean DEFAULT false NOT NULL,
-    client_hints text DEFAULT ''::text
+    client_hints text DEFAULT ''::text,
+    is_private boolean DEFAULT false NOT NULL
 );
 
 
@@ -1948,6 +1965,14 @@ ALTER TABLE ONLY public.ul_books
 
 
 --
+-- Name: ul_comment_likes ul_comment_likes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ul_comment_likes
+    ADD CONSTRAINT ul_comment_likes_pkey PRIMARY KEY (comment_id, visitor_token);
+
+
+--
 -- Name: ul_comments ul_comments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2352,6 +2377,20 @@ CREATE INDEX idx_comments_created ON public.ul_comments USING btree (created_at 
 --
 
 CREATE INDEX idx_comments_parent ON public.ul_comments USING btree (parent_id);
+
+
+--
+-- Name: idx_comment_likes_comment; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_comment_likes_comment ON public.ul_comment_likes USING btree (comment_id);
+
+
+--
+-- Name: idx_comments_private; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_comments_private ON public.ul_comments USING btree (post_id, is_private);
 
 
 --
@@ -2890,6 +2929,14 @@ ALTER TABLE ONLY public.ul_ai_messages
 
 ALTER TABLE ONLY public.ul_books
     ADD CONSTRAINT ul_books_blog_author_id_fkey FOREIGN KEY (blog_author_id) REFERENCES public.ul_users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: ul_comment_likes ul_comment_likes_comment_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ul_comment_likes
+    ADD CONSTRAINT ul_comment_likes_comment_id_fkey FOREIGN KEY (comment_id) REFERENCES public.ul_comments(id) ON DELETE CASCADE;
 
 
 --

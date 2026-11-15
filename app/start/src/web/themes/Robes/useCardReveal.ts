@@ -30,6 +30,28 @@ const REVEAL_SELECTORS = [
   '.abt-cta',
 ].join(',');
 
+/**
+ * 兜底扫描：把「已经进入视口、或已经被滚过视口顶部」的卡片直接点亮。
+ *
+ * 只靠 IntersectionObserver 有一个真实的坑：一次性大距离跳转（点锚点、
+ * 浏览器恢复上次的滚动位置、拖动滚动条、程序化 scrollTo）不会让中间
+ * 跨过的元素经历「相交 → 不相交」的状态变化 —— 浏览器直接算出新位置，
+ * 观察器只汇报一次「不相交」。结果就是中间那一整段内容永远停在
+ * opacity:0 上：DOM 里在、看不见。
+ *
+ * 所以这里按几何位置再扫一遍，凡是落在视口范围内（含已经滚过去的）
+ * 都补上 .card-visible。
+ */
+export function sweepRevealCards(scope: ParentNode = document) {
+  if (typeof window === 'undefined') return;
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+  scope.querySelectorAll<HTMLElement>(REVEAL_SELECTORS).forEach((el) => {
+    if (el.classList.contains('card-visible')) return;
+    const rect = el.getBoundingClientRect();
+    if (rect.top < viewportHeight && rect.bottom > 0) el.classList.add('card-visible');
+  });
+}
+
 export default function useCardReveal() {
   useEffect(() => {
     if (typeof IntersectionObserver === 'undefined') {
@@ -70,9 +92,17 @@ export default function useCardReveal() {
     const root = document.getElementById('feed') || document.body;
     mutations.observe(root, { childList: true, subtree: true });
 
+    // 滚动兜底。scroll 事件不冒泡，但会在捕获阶段被祖先收到，
+    // 所以这里用 capture 监听（内容区 .content-scroll 才是真正的滚动容器）。
+    const onScroll = () => sweepRevealCards(root);
+    document.addEventListener('scroll', onScroll, { capture: true, passive: true });
+    window.addEventListener('resize', onScroll);
+
     return () => {
       observer.disconnect();
       mutations.disconnect();
+      document.removeEventListener('scroll', onScroll, { capture: true });
+      window.removeEventListener('resize', onScroll);
     };
   }, []);
 }
