@@ -66,22 +66,15 @@ interface Comment {
   created_at: number;
   children?: Comment[];
   floor?: number;
+  /** 服务端点赞态：liked 是「我点过赞」，like_count 是总赞数。 */
+  liked?: boolean;
+  like_count?: number;
+  /** 私密评论：masked 表示正文已被服务端遮罩（我不是作者也不是站长）。 */
+  is_private?: boolean;
+  masked?: boolean;
 }
 
-const LIKES_KEY = 'robes-cmt-likes';
 const USER_KEY = 'comment_user';
-
-/* ── 本地点赞（原站点赞走服务端；Utterlog 侧评论暂无点赞接口，先按浏览器本地记忆） ── */
-
-function readLikes(): Record<string, boolean> {
-  if (typeof window === 'undefined') return {};
-  try {
-    const raw = localStorage.getItem(LIKES_KEY);
-    return raw ? (JSON.parse(raw) as Record<string, boolean>) : {};
-  } catch {
-    return {};
-  }
-}
 
 /* ── 人机校验（PoW） ──────────────────────────────────────────────────── */
 
@@ -259,21 +252,29 @@ export default function PostComments({ postId, initialCount }: { postId: number;
   const [replyTo, setReplyTo] = useState<{ id: number; author: string } | null>(null);
   const [showEmoji, setShowEmoji] = useState(false);
   const [emojiTab, setEmojiTab] = useState<EmojiTab>('face');
-  const [likes, setLikes] = useState<Record<string, boolean>>({});
+  const [likes, setLikes] = useState<Record<string, { liked: boolean; count: number }>>({});
+  const [isPrivate, setIsPrivate] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLOListElement>(null);
 
-  /* 读取评论 —— 按时间升序取全量，楼层号按升序分配，展示时倒序（对齐原站）。 */
+  /* 读取评论 —— 按时间升序取全量，楼层号按升序分配，展示时倒序（对齐原站）。
+     带上本机 visitor_id：私密评论只有作者本人看得到正文，服务端靠它认人。 */
   const load = useCallback(async () => {
     if (!postId) return;
     try {
-      const list = await loadApprovedComments<Comment>(postId, 'asc');
+      const list = await loadApprovedComments<Comment>(postId, 'asc', getVisitorId());
       list.forEach((item, index) => {
         item.floor = index + 1;
       });
       setComments(list);
+      // 点赞态用服务端返回的（cookie 里的访客身份决定「我点过赞」）。
+      const likeState: Record<string, { liked: boolean; count: number }> = {};
+      list.forEach((item) => {
+        likeState[String(item.id)] = { liked: Boolean(item.liked), count: Number(item.like_count || 0) };
+      });
+      setLikes(likeState);
       const map = new Map<number, Comment>();
       list.forEach((item) => map.set(item.id, { ...item, children: [] }));
       const top: Comment[] = [];
@@ -301,10 +302,6 @@ export default function PostComments({ postId, initialCount }: { postId: number;
     setLoading(true);
     load();
   }, [load]);
-
-  useEffect(() => {
-    setLikes(readLikes());
-  }, []);
 
   /**
    * 卡片入场动画。
@@ -396,16 +393,22 @@ export default function PostComments({ postId, initialCount }: { postId: number;
     if (page > totalPages) setPage(totalPages);
   }, [page, totalPages]);
 
-  const toggleLike = (id: number) => {
-    const key = String(id);
-    const next = { ...likes };
-    if (next[key]) delete next[key];
-    else next[key] = true;
-    setLikes(next);
+  /** 点赞：走服务端（POST /comments/:id/like），访客身份在 cookie 里。 */
+  const toggleLike = async (comment: Comment) => {
+    const key = String(comment.id);
+    const current = likes[key] || { liked: false, count: 0 };
+    // 先本地翻转，接口回来再按服务端结果校正（点快了也不会卡住）。
+    setLikes((prev) => ({ ...prev, [key]: { liked: !current.liked, count: current.count + (current.liked ? -1 : 1) } }));
     try {
-      localStorage.setItem(LIKES_KEY, JSON.stringify(next));
-    } catch {
-      /* 隐私模式写不进去，界面照样切换 */
+      const res: any = await api.post(`/comments/${comment.id}/like`);
+      const data = res?.data || res;
+      setLikes((prev) => ({
+        ...prev,
+        [key]: { liked: Boolean(data?.liked), count: Number(data?.like_count || 0) },
+      }));
+    } catch (err: any) {
+      setLikes((prev) => ({ ...prev, [key]: current }));
+      toast.error(err?.response?.data?.message || '点赞失败，请稍后再试');
     }
   };
 
@@ -500,6 +503,8 @@ export default function PostComments({ postId, initialCount }: { postId: number;
         content: text,
         visitor_id: getVisitorId(),
         client_hints: clientHints || undefined,
+        // 私密评论：服务端按 visitor_id 认作者，只有作者本人和站长看得到正文。
+        private: isPrivate,
         captcha_challenge: captcha.challenge || '',
         captcha_nonce: captcha.nonce || '',
         captcha_id: '',
@@ -564,7 +569,9 @@ export default function PostComments({ postId, initialCount }: { postId: number;
 
   const renderComment = (comment: Comment, isChild: boolean) => {
     const device = deviceOf(comment);
-    const liked = Boolean(likes[String(comment.id)]);
+    const like = likes[String(comment.id)] || { liked: Boolean(comment.liked), count: Number(comment.like_count || 0) };
+    const liked = like.liked;
+    const likeCount = like.count;
     const nameText = comment.author || '匿名';
     return (
       <li
@@ -598,6 +605,11 @@ export default function PostComments({ postId, initialCount }: { postId: number;
                 </span>
                 {comment.is_admin ? <span className="cmt-tag cmt-tag-admin">站长</span> : null}
                 {comment.friend ? <span className="cmt-tag cmt-tag-friend">好友</span> : null}
+                {comment.is_private ? (
+                  <span className="cmt-tag cmt-tag-private" title="私密评论：仅站长与作者本人可见">
+                    <IconLock size={8} style={{ marginRight: '1px' }} /> 私密
+                  </span>
+                ) : null}
                 {comment.level && comment.level > 0 ? (
                   <span className="cmt-tag cmt-tag-lv">Lv{comment.level}</span>
                 ) : null}
@@ -615,21 +627,34 @@ export default function PostComments({ postId, initialCount }: { postId: number;
               )}
               <time className="cmt-time">{timeAgo(comment.created_at)}</time>
             </div>
-            <div className="cmt-text">
-              <p>{renderContent(comment.content, `c${comment.id}`)}</p>
-            </div>
+            {comment.masked ? (
+              // 私密评论的正文被服务端遮罩了 —— 这里只渲染打码骨架（原站 .cmt-mosaic）。
+              <div className="cmt-text-masked">
+                <div className="cmt-mosaic">
+                  <span className="cmt-mosaic-bar cmt-mosaic-bar-1" />
+                  <span className="cmt-mosaic-bar cmt-mosaic-bar-2" />
+                  <span className="cmt-mosaic-hint">
+                    <IconLock size={10} /> 这是一条私密评论
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="cmt-text">
+                <p>{renderContent(comment.content, `c${comment.id}`)}</p>
+              </div>
+            )}
             <div className="cmt-actions">
               <button
                 type="button"
                 className={`cmt-like-btn${liked ? ' liked' : ''}`}
                 data-coid={comment.id}
-                data-likes={liked ? '1' : '0'}
+                data-likes={likeCount}
                 title="点赞"
-                onClick={() => toggleLike(comment.id)}
+                onClick={() => toggleLike(comment)}
               >
                 <IconHeart size={11} />
                 <span className="cmt-like-text">点赞</span>
-                <span className="cmt-like-count" />
+                <span className="cmt-like-count">{likeCount > 0 ? likeCount : ''}</span>
               </button>
               <a
                 href="javascript:;"
@@ -754,10 +779,17 @@ export default function PostComments({ postId, initialCount }: { postId: number;
                   <span className="vf-text">{captchaText}</span>
                 </span>
                 <label
-                  className="cmt-private-toggle is-disabled"
-                  title="私密评论：站点暂未开放该功能，勾选后仍按公开评论发布"
+                  className="cmt-private-toggle"
+                  title="勾选后仅站长和你本人可见"
                 >
-                  <input type="checkbox" name="private" value="1" id="comment-private" disabled />
+                  <input
+                    type="checkbox"
+                    name="private"
+                    value="1"
+                    id="comment-private"
+                    checked={isPrivate}
+                    onChange={(event) => setIsPrivate(event.target.checked)}
+                  />
                   <span className="cmt-private-pill">
                     <IconLock size={11} />
                     <span>私密</span>

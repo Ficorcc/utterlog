@@ -833,6 +833,12 @@ export async function listComments(params: {
   search?: string;
   /** 后台管理界面要看邮箱和 IP；匿名访客拿到的是脱敏版本。 */
   authed?: boolean;
+  /** 点赞访客 token（cookie utterlog_comment_like），用来标出「我点过赞」。 */
+  likeVisitor?: string;
+  /** 当前访客的 visitor_id —— 私密评论只有本人能看到正文。 */
+  viewerVisitorId?: string;
+  /** 当前访客是不是站长 —— 站长能看所有私密评论。 */
+  viewerIsAdmin?: boolean;
 } = {}) {
   // A visitor may comment from another browser, so an authenticated account or
   // email takes precedence over the browser-local visitor id. Comments without
@@ -893,6 +899,10 @@ export async function listComments(params: {
      ${whereSql}`,
     queryParams,
   ).catch(() => null);
+  // 点赞态要在 count 查询之后再加参数 —— count 用的是同一批 whereSql 占位符，
+  // 提前塞参数会让两处的参数个数对不上。
+  queryParams.push(String(params.likeVisitor || ''));
+  const likeVisitorParam = `$${queryParams.length}`;
   const rows = await many<Record<string, unknown>>(
     `select c.*,
             p.title as post_title, p.slug as post_slug, p.type as post_type, p.display_id as post_display_id,
@@ -901,6 +911,9 @@ export async function listComments(params: {
             coalesce(u.role,'') as user_role,
             coalesce(visitor_stats.comment_count, 1) as visitor_comment_count,
             pc.author_name as parent_author, pc.content as parent_content, pc.created_at as parent_created_at,
+            (select count(*)::int from ${table('comment_likes')} cl where cl.comment_id = c.id) as like_count,
+            exists(select 1 from ${table('comment_likes')} cl2
+                   where cl2.comment_id = c.id and cl2.visitor_token = ${likeVisitorParam}) as liked,
             coalesce((
               select au.avatar from ${table('users')} au
               where lower(trim(au.email)) = lower(trim(coalesce(c.author_email,'')))
@@ -923,9 +936,15 @@ export async function listComments(params: {
     [...queryParams, perPage, offset],
   ).catch(() => []);
   const friendIndex = await friendLinkIndex();
+  const viewerVisitorId = String(params.viewerVisitorId || '');
   const data = rows.map((row) => {
     const parentContent = String(row.parent_content || '');
     const commentCount = Math.max(1, Number(row.visitor_comment_count || 1));
+    // 私密评论：正文只给站长和作者本人看，别人拿到的是空串 + masked 标记，
+    // 前端据此渲染打码骨架（原站 .cmt-mosaic 的效果）。
+    const isPrivate = row.is_private === true || row.is_private === 't';
+    const isOwner = Boolean(viewerVisitorId) && String(row.visitor_id || '') === viewerVisitorId;
+    const masked = isPrivate && !params.viewerIsAdmin && !isOwner;
     return {
       ...row,
       geo: commentGeoFromRow(row.geo),
@@ -941,6 +960,11 @@ export async function listComments(params: {
       is_admin: row.user_role === 'admin',
       comment_count: commentCount,
       level: commentLevelFromCount(commentCount),
+      like_count: Number(row.like_count || 0),
+      liked: Boolean(row.liked),
+      is_private: isPrivate,
+      masked,
+      content: masked ? '' : String(row.content || ''),
       parent: row.parent_id ? {
         id: row.parent_id,
         author: row.parent_author,

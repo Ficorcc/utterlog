@@ -6,9 +6,9 @@
  * 在浅色 / 深色下都跟着文字色走，也不会因为字体没加载而出现豆腐块。
  */
 
-type IconProps = { size?: number; className?: string };
+type IconProps = { size?: number; className?: string; style?: React.CSSProperties };
 
-function Svg({ size = 16, className, children }: IconProps & { children: React.ReactNode }) {
+function Svg({ size = 16, className, style, children }: IconProps & { children: React.ReactNode }) {
   return (
     <svg
       width={size}
@@ -20,6 +20,7 @@ function Svg({ size = 16, className, children }: IconProps & { children: React.R
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
+      style={style}
       aria-hidden="true"
       focusable="false"
     >

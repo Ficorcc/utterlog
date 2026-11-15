@@ -439,6 +439,19 @@ export async function runCoreMigrations() {
     created_at integer not null default 0,
     primary key (moment_id, visitor_token)
   )`);
+  // 评论点赞（原站评论区的「♡ 点赞」）：每个访客一个 token，
+  // 主键 (comment_id, visitor_token) 保证同一个人重复点不会插出多行。
+  // ul_comments.like_count 是冗余计数，写入时一起维护，列表页直接读它。
+  await sql.unsafe(`create table if not exists ${table('comment_likes')} (
+    comment_id integer not null references ${table('comments')}(id) on delete cascade,
+    visitor_token varchar(64) not null,
+    created_at integer not null default 0,
+    primary key (comment_id, visitor_token)
+  )`);
+  await sql.unsafe(`create index if not exists idx_comment_likes_comment on ${table('comment_likes')} (comment_id)`);
+  // 私密评论：仅站长与作者本人可见，其余访客只看到打码骨架。
+  await sql.unsafe(`alter table ${table('comments')} add column if not exists is_private boolean not null default false`);
+  await sql.unsafe(`create index if not exists idx_comments_private on ${table('comments')} (post_id, is_private)`);
   // 安全中心（IP 封禁 / 安全事件 / IP 信誉）整体下线，schema.sql 里已经不再建
   // 这三张表；老库升上来还留着，在这里清掉。ip_reputation 早就没代码碰了。
   await sql.unsafe(`drop table if exists ${table('ip_bans')}`);

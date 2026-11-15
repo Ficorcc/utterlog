@@ -201,6 +201,7 @@ import { Route as ApiV1NotificationsIdReadRouteImport } from './routes/api/v1/no
 import { Route as ApiV1MomentsIdLikeRouteImport } from './routes/api/v1/moments/$id/like'
 import { Route as ApiV1MomentsIdCommentsRouteImport } from './routes/api/v1/moments/$id/comments'
 import { Route as ApiV1CommentsIdReplyRouteImport } from './routes/api/v1/comments/$id/reply'
+import { Route as ApiV1CommentsIdLikeRouteImport } from './routes/api/v1/comments/$id/like'
 import { Route as ApiV1CommentsIdEditRouteImport } from './routes/api/v1/comments/$id/edit'
 import { Route as ApiV1CommentsIdApproveRouteImport } from './routes/api/v1/comments/$id/approve'
 import { Route as ApiV1BackupDownloadFilenameRouteImport } from './routes/api/v1/backup/download/$filename'
@@ -1199,6 +1200,11 @@ const ApiV1CommentsIdReplyRoute = ApiV1CommentsIdReplyRouteImport.update({
   path: '/reply',
   getParentRoute: () => ApiV1CommentsIdRoute,
 } as any)
+const ApiV1CommentsIdLikeRoute = ApiV1CommentsIdLikeRouteImport.update({
+  id: '/like',
+  path: '/like',
+  getParentRoute: () => ApiV1CommentsIdRoute,
+} as any)
 const ApiV1CommentsIdEditRoute = ApiV1CommentsIdEditRouteImport.update({
   id: '/edit',
   path: '/edit',
@@ -1518,6 +1524,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/backup/download/$filename': typeof ApiV1BackupDownloadFilenameRoute
   '/api/v1/comments/$id/approve': typeof ApiV1CommentsIdApproveRoute
   '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
+  '/api/v1/comments/$id/like': typeof ApiV1CommentsIdLikeRoute
   '/api/v1/comments/$id/reply': typeof ApiV1CommentsIdReplyRoute
   '/api/v1/moments/$id/comments': typeof ApiV1MomentsIdCommentsRoute
   '/api/v1/moments/$id/like': typeof ApiV1MomentsIdLikeRoute
@@ -1735,6 +1742,7 @@ export interface FileRoutesByTo {
   '/api/v1/backup/download/$filename': typeof ApiV1BackupDownloadFilenameRoute
   '/api/v1/comments/$id/approve': typeof ApiV1CommentsIdApproveRoute
   '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
+  '/api/v1/comments/$id/like': typeof ApiV1CommentsIdLikeRoute
   '/api/v1/comments/$id/reply': typeof ApiV1CommentsIdReplyRoute
   '/api/v1/moments/$id/comments': typeof ApiV1MomentsIdCommentsRoute
   '/api/v1/moments/$id/like': typeof ApiV1MomentsIdLikeRoute
@@ -1953,6 +1961,7 @@ export interface FileRoutesById {
   '/api/v1/backup/download/$filename': typeof ApiV1BackupDownloadFilenameRoute
   '/api/v1/comments/$id/approve': typeof ApiV1CommentsIdApproveRoute
   '/api/v1/comments/$id/edit': typeof ApiV1CommentsIdEditRoute
+  '/api/v1/comments/$id/like': typeof ApiV1CommentsIdLikeRoute
   '/api/v1/comments/$id/reply': typeof ApiV1CommentsIdReplyRoute
   '/api/v1/moments/$id/comments': typeof ApiV1MomentsIdCommentsRoute
   '/api/v1/moments/$id/like': typeof ApiV1MomentsIdLikeRoute
@@ -2172,6 +2181,7 @@ export interface FileRouteTypes {
     | '/api/v1/backup/download/$filename'
     | '/api/v1/comments/$id/approve'
     | '/api/v1/comments/$id/edit'
+    | '/api/v1/comments/$id/like'
     | '/api/v1/comments/$id/reply'
     | '/api/v1/moments/$id/comments'
     | '/api/v1/moments/$id/like'
@@ -2389,6 +2399,7 @@ export interface FileRouteTypes {
     | '/api/v1/backup/download/$filename'
     | '/api/v1/comments/$id/approve'
     | '/api/v1/comments/$id/edit'
+    | '/api/v1/comments/$id/like'
     | '/api/v1/comments/$id/reply'
     | '/api/v1/moments/$id/comments'
     | '/api/v1/moments/$id/like'
@@ -2606,6 +2617,7 @@ export interface FileRouteTypes {
     | '/api/v1/backup/download/$filename'
     | '/api/v1/comments/$id/approve'
     | '/api/v1/comments/$id/edit'
+    | '/api/v1/comments/$id/like'
     | '/api/v1/comments/$id/reply'
     | '/api/v1/moments/$id/comments'
     | '/api/v1/moments/$id/like'
@@ -4166,6 +4178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1CommentsIdReplyRouteImport
       parentRoute: typeof ApiV1CommentsIdRoute
     }
+    '/api/v1/comments/$id/like': {
+      id: '/api/v1/comments/$id/like'
+      path: '/like'
+      fullPath: '/api/v1/comments/$id/like'
+      preLoaderRoute: typeof ApiV1CommentsIdLikeRouteImport
+      parentRoute: typeof ApiV1CommentsIdRoute
+    }
     '/api/v1/comments/$id/edit': {
       id: '/api/v1/comments/$id/edit'
       path: '/edit'
@@ -4529,12 +4548,14 @@ const ApiV1AiProvidersRouteWithChildren =
 interface ApiV1CommentsIdRouteChildren {
   ApiV1CommentsIdApproveRoute: typeof ApiV1CommentsIdApproveRoute
   ApiV1CommentsIdEditRoute: typeof ApiV1CommentsIdEditRoute
+  ApiV1CommentsIdLikeRoute: typeof ApiV1CommentsIdLikeRoute
   ApiV1CommentsIdReplyRoute: typeof ApiV1CommentsIdReplyRoute
 }
 
 const ApiV1CommentsIdRouteChildren: ApiV1CommentsIdRouteChildren = {
   ApiV1CommentsIdApproveRoute: ApiV1CommentsIdApproveRoute,
   ApiV1CommentsIdEditRoute: ApiV1CommentsIdEditRoute,
+  ApiV1CommentsIdLikeRoute: ApiV1CommentsIdLikeRoute,
   ApiV1CommentsIdReplyRoute: ApiV1CommentsIdReplyRoute,
 }
 

@@ -5,7 +5,7 @@ const COMMENT_FETCH_BATCH = 500;
 
 // The API paginates individual comments. Gather its batches before paginating
 // top-level threads, so replies never split from their parent or use a floor.
-export async function loadApprovedComments<T>(postId: number, order: 'asc' | 'desc'): Promise<T[]> {
+export async function loadApprovedComments<T>(postId: number, order: 'asc' | 'desc', visitorId?: string): Promise<T[]> {
   const comments: T[] = [];
   let page = 1;
   let totalPages = 1;
@@ -16,6 +16,8 @@ export async function loadApprovedComments<T>(postId: number, order: 'asc' | 'de
       per_page: COMMENT_FETCH_BATCH,
       order,
       page,
+      // 私密评论只有作者本人能看到正文，服务端靠这个 visitor_id 认人。
+      ...(visitorId ? { visitor_id: visitorId } : {}),
     } });
     const batch = result.data || result.comments || [];
     if (!Array.isArray(batch)) throw new Error('Invalid comments response');

@@ -8848,8 +8848,7 @@ html[data-theme='Robes'] .cmt-emoji-item {
   padding: 0;
   color: inherit;
 }
-/* 私密开关：站点暂未开放该能力，置灰并禁止点击 */
-html[data-theme='Robes'] .cmt-private-toggle.is-disabled { cursor: not-allowed; }
-html[data-theme='Robes'] .cmt-private-toggle.is-disabled .cmt-private-pill { opacity: .5; }
+/* 私密徽标里的锁是内联 SVG（原站规则挂在 i 上），补一下间距 */
+html[data-theme='Robes'] .cmt-tag-private svg { vertical-align: -1px; }
 /* 设备徽章里的图标尺寸由 .cmt-dev-icon 控制，这里补上竖直对齐 */
 html[data-theme='Robes'] .cmt-device .cmt-dev-icon { vertical-align: -2px; }

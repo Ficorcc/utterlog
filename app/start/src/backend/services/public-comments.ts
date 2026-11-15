@@ -168,15 +168,19 @@ export async function createPublicComment(input: unknown, request: PublicComment
   }
   const geo = await resolveCommentGeo(request.ip);
   const now = nowUnix();
+  // 私密评论：只有站长和作者本人看得到正文（列表接口按访客身份遮罩）。
+  const isPrivate = body.private === true || body.private === 1 || body.private === '1'
+    || body.is_private === true || body.is_private === 1 || body.is_private === '1';
   const rows = await many<{ id: number }>(
     `insert into ${table('comments')}
       (post_id, parent_id, author_name, author_email, author_url, content, status, author_ip,
-       author_agent, user_id, visitor_id, client_hints, geo, created_at, updated_at)
-     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::jsonb,$14,$14) returning id`,
+       author_agent, user_id, visitor_id, client_hints, geo, created_at, updated_at, is_private)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::jsonb,$14,$14,$15) returning id`,
     [
       postId, parentId > 0 ? parentId : 0, body.author_name || body.author || body.name || '', authorEmail,
       authorUrl, content, status, request.ip, request.userAgent, request.userId,
       String(body.visitor_id || ''), String(body.client_hints || ''), geo ? JSON.stringify(geo) : null, now,
+      isPrivate,
     ],
   );
   const id = Number(rows[0]?.id || 0);
