@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from '@/components/AppLink';
 import PostLink from '@/components/blog/PostLink';
 import { useThemeContext } from '@/lib/theme-context';
@@ -72,13 +72,64 @@ export default function HomePage({ posts, page, totalPages }: HomeProps) {
   const hasCover = featured.some((post) => post?.cover_url);
 
   const [active, setActive] = useState(0);
-  useEffect(() => {
+  const heroRef = useRef<HTMLElement | null>(null);
+  const nextRef = useRef<HTMLButtonElement | null>(null);
+  const timerRef = useRef<number | null>(null);
+
+  /**
+   * 右箭头上的进度环：每次换片后从 0 重新走一圈（对齐原站 home.v2.js 的 resetRing）。
+   * 动画本身由 CSS 的 @property --hr-ring + conic-gradient 驱动，
+   * 这里只负责在换片时把 .is-running 摘掉再挂上，逼浏览器重启动画。
+   */
+  const resetRing = useCallback(() => {
+    const button = nextRef.current;
+    if (!button) return;
+    button.classList.remove('is-running');
+    void button.offsetWidth;
+    button.classList.add('is-running');
+  }, []);
+
+  /** 暂停：鼠标悬停 / 键盘聚焦时停住自动切换，同时把进度环定格。 */
+  const stop = useCallback(() => {
+    if (timerRef.current !== null) {
+      window.clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    heroRef.current?.classList.add('is-paused');
+  }, []);
+
+  /** 继续：重新计时并让进度环从头走。 */
+  const play = useCallback(() => {
+    if (timerRef.current !== null) window.clearInterval(timerRef.current);
+    timerRef.current = null;
+    heroRef.current?.classList.remove('is-paused');
+    resetRing();
     if (featured.length < 2) return;
-    const timer = window.setInterval(() => {
+    timerRef.current = window.setInterval(() => {
       setActive((value) => (value + 1) % featured.length);
     }, HERO_INTERVAL);
-    return () => window.clearInterval(timer);
-  }, [featured.length]);
+  }, [featured.length, resetRing]);
+
+  useEffect(() => {
+    play();
+    return () => {
+      if (timerRef.current !== null) {
+        window.clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [play]);
+
+  // 换片（含自动与手动）后进度环重新计时。
+  useEffect(() => {
+    resetRing();
+  }, [active, resetRing]);
+
+  /** 手动切换到指定封面。 */
+  const goTo = (index: number) => {
+    if (featured.length < 2) return;
+    setActive(((index % featured.length) + featured.length) % featured.length);
+  };
 
   // 首页翻页后回到顶部。
   useEffect(() => {
@@ -95,7 +146,14 @@ export default function HomePage({ posts, page, totalPages }: HomeProps) {
   return (
     <>
       {list.length ? (
-        <section className={hasCover ? 'hero hero-standard' : 'hero hero-standard hero-plain'} id="hero">
+        <section
+          className={hasCover ? 'hero hero-standard' : 'hero hero-standard hero-plain'}
+          id="hero"
+          ref={heroRef}
+          onMouseEnter={stop}
+          onMouseLeave={play}
+          onFocus={stop}
+        >
           <div className="hero-bgs" id="heroBgs">
             <div
               className="hero-bg-layer is-active"
@@ -161,7 +219,7 @@ export default function HomePage({ posts, page, totalPages }: HomeProps) {
                         key={post.id}
                         type="button"
                         className={index === active ? 'hero-dot is-active' : 'hero-dot'}
-                        onClick={() => setActive(index)}
+                        onClick={() => goTo(index)}
                         aria-label={`切换到第 ${index + 1} 篇`}
                       />
                     ))}
@@ -176,7 +234,10 @@ export default function HomePage({ posts, page, totalPages }: HomeProps) {
                   <button
                     type="button"
                     className="hero-rec-nav"
-                    onClick={() => setActive((value) => (value - 1 + featured.length) % featured.length)}
+                    onClick={() => {
+                      goTo(active - 1);
+                      play();
+                    }}
                     aria-label="上一篇"
                   >
                     <IconArrowLeft size={16} />
@@ -184,7 +245,11 @@ export default function HomePage({ posts, page, totalPages }: HomeProps) {
                   <button
                     type="button"
                     className="hero-rec-nav"
-                    onClick={() => setActive((value) => (value + 1) % featured.length)}
+                    ref={nextRef}
+                    onClick={() => {
+                      goTo(active + 1);
+                      play();
+                    }}
                     aria-label="下一篇"
                   >
                     <IconArrowRight size={16} />

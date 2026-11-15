@@ -3087,7 +3087,7 @@ html[data-theme='Robes'] .hero-rec-nav::before {
   transition: opacity .3s;
 }
 html[data-theme='Robes'] .hero-rec-nav.is-running::before {
- opacity: 1; animation: hrRing 5s linear forwards; 
+ opacity: 1; animation: hrRing 10s linear forwards; 
 }
 html[data-theme='Robes'] .hero-rec-wrap.paused .hero-rec-nav.is-running::before {
  animation-play-state: paused; 
