@@ -199,11 +199,19 @@ export default function NoticePanel({ onClose }: { onClose: () => void }) {
     };
   }, [tab]);
 
-  const loadComments = useCallback(async (size: number) => {
+  /**
+   * 拉评论。
+   *
+   * excludeAdmin = true 时走服务端的 exclude_admin：把博主（站长）自己发的评论
+   * 和回复整条滤掉，「最新评论」里只留访客的留言 —— 站点自己顶帖没有意义。
+   * 「我的评论」不传这个参数：博主用本站身份留言时，那条评论本来就该出现在自己名下。
+   */
+  const loadComments = useCallback(async (size: number, excludeAdmin: boolean) => {
     setLoading(true);
     setFailed(false);
     try {
-      const response = await fetch(`/api/v1/comments/?per_page=${size}&order=desc`, {
+      const query = `per_page=${size}&order=desc${excludeAdmin ? '&exclude_admin=1' : ''}`;
+      const response = await fetch(`/api/v1/comments/?${query}`, {
         headers: { accept: 'application/json' },
       });
       const payload = await response.json();
@@ -219,7 +227,7 @@ export default function NoticePanel({ onClose }: { onClose: () => void }) {
   // 评论相关的两个 Tab 才去拉数据。
   useEffect(() => {
     if (tab !== 'latest' && tab !== 'mine') return;
-    void loadComments(perPage);
+    void loadComments(perPage, tab === 'latest');
   }, [tab, perPage, loadComments]);
 
   // 本机身份（评论昵称）与本机漂流瓶。
@@ -329,7 +337,7 @@ export default function NoticePanel({ onClose }: { onClose: () => void }) {
               onClick={() => {
                 setSpinning(true);
                 window.setTimeout(() => setSpinning(false), 600);
-                void loadComments(perPage);
+                void loadComments(perPage, tab === 'latest');
               }}
               title="刷新"
               aria-label="刷新"
