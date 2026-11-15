@@ -46,6 +46,9 @@ interface HomeProps {
 /** 首页顶部轮播：取有封面的文章，最多 5 篇。 */
 const HERO_LIMIT = 5;
 
+/** 封面轮播自动切换间隔（毫秒）。 */
+const HERO_INTERVAL = 10000;
+
 function WeatherIcon({ icon }: { icon: 'sun' | 'suncloud' | 'cloudy' | 'rain' }) {
   if (icon === 'sun') return <IconSun size={18} />;
   if (icon === 'suncloud') return <IconSunCloud size={18} />;
@@ -73,7 +76,7 @@ export default function HomePage({ posts, page, totalPages }: HomeProps) {
     if (featured.length < 2) return;
     const timer = window.setInterval(() => {
       setActive((value) => (value + 1) % featured.length);
-    }, 6000);
+    }, HERO_INTERVAL);
     return () => window.clearInterval(timer);
   }, [featured.length]);
 
