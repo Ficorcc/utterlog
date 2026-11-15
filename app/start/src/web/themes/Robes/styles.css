@@ -1194,6 +1194,38 @@ html[data-theme='Robes'] .mood-song-play.is-playing {
  70%  { box-shadow: 0 1px 3px rgba(20,30,45,.16), 0 0 0 7px rgba(131,154,201,0); }
  100% { box-shadow: 0 1px 3px rgba(20,30,45,.16), 0 0 0 0 rgba(131,154,201,0); }
 }
+
+/* —— 播放器控制组（上一首 / 下一首 / 播放） —— */
+html[data-theme='Robes'] .mood-song-ctrl {
+ flex: 0 0 auto; display: flex; align-items: center; gap: 1px;
+}
+html[data-theme='Robes'] .mood-song-skip {
+ flex: 0 0 24px; width: 24px; height: 24px; border-radius: 50%;
+ display: inline-flex; align-items: center; justify-content: center;
+ padding: 0; border: 0; background: transparent;
+ color: var(--text-light); cursor: pointer;
+ transition: color .18s ease, background .18s ease, transform .18s ease;
+}
+html[data-theme='Robes'] .mood-song-skip:hover {
+ color: var(--text); background: rgba(0,0,0,.05);
+}
+html[data-theme='Robes'][data-robes-mode='dark'] .mood-song-skip:hover {
+ background: rgba(255,255,255,.1);
+}
+html[data-theme='Robes'] .mood-song-skip:active {
+ transform: scale(.9);
+}
+html[data-theme='Robes'] .mood-song-skip svg {
+ width: 13px; height: 13px; display: block;
+}
+/* —— 无封面时的占位（歌名首字） —— */
+html[data-theme='Robes'] .mood-song-cover-text {
+ font-size: 15px; font-weight: 700; letter-spacing: .02em;
+ color: var(--text-secondary); user-select: none;
+}
+html[data-theme='Robes'] .mood-song-cover:has(.mood-song-cover-text) {
+ background: linear-gradient(135deg, rgba(131,154,201,.28), rgba(131,154,201,.12));
+}
 /* —— 底部元信息 —— */
 html[data-theme='Robes'] .mood-card-foot {
  grid-column: 1 / -1;

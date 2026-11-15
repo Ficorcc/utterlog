@@ -352,6 +352,26 @@ export function IconHeadphone(props: IconProps) {
   );
 }
 
+/** 上一首（双三角 + 竖线，remixicon ri-skip-prev-fill 语义）。 */
+export function IconSkipPrev(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M18 5.6v12.8L9.4 12z" fill="currentColor" stroke="none" />
+      <path d="M6.4 5.4v13.2" />
+    </Svg>
+  );
+}
+
+/** 下一首（竖线 + 双三角）。 */
+export function IconSkipNext(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M6 5.6v12.8L14.6 12z" fill="currentColor" stroke="none" />
+      <path d="M17.6 5.4v13.2" />
+    </Svg>
+  );
+}
+
 export function IconShuffle(props: IconProps) {
   return (
     <Svg {...props}>

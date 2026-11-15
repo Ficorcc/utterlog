@@ -17,6 +17,7 @@ import {
   IconWater,
 } from './Icons';
 import { parseNoticeBoard, plainText } from './utils';
+import MoodPlayer, { type MoodSong } from './MoodPlayer';
 
 interface LatestComment {
   id: number;
@@ -75,6 +76,68 @@ function readMyName(): string {
 }
 
 /**
+ * 站点选项 robes_mood_song —— 站长显式指定的「此刻在听」歌单。
+ * 可以是单个对象 {name,title,artist,cover,url}，也可以是这类对象的数组。
+ */
+function parseMoodOption(raw: string): MoodSong[] {
+  const text = String(raw || '').trim();
+  if (!text) return [];
+  try {
+    const data = JSON.parse(text);
+    const rows = Array.isArray(data) ? data : [data];
+    const songs: MoodSong[] = [];
+    for (const row of rows) {
+      if (!row || typeof row !== 'object') continue;
+      const item = row as Record<string, unknown>;
+      const title = String(item.title || item.name || '').trim();
+      const url = String(item.url || item.play_url || '').trim();
+      if (!title || !url) continue;
+      songs.push({
+        title,
+        artist: String(item.artist || '').trim(),
+        cover: String(item.cover || item.cover_url || '').trim(),
+        url,
+      });
+    }
+    return songs;
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * 站内音乐库（/api/v1/music，已发布歌曲）→ 心情卡播放列表。
+ * 平台歌曲（网易云 / QQ 等）走站内代理取封面与音频流，本地文件直接用 uploads 地址。
+ */
+function toMoodSongs(rows: unknown): MoodSong[] {
+  const list = Array.isArray(rows) ? rows : [];
+  const songs: MoodSong[] = [];
+  for (const row of list) {
+    if (!row || typeof row !== 'object') continue;
+    const item = row as Record<string, unknown>;
+    const title = String(item.title || '').trim();
+    if (!title) continue;
+    const platform = String(item.platform || '').trim();
+    const platformId = String(item.platform_id || '').trim();
+    const proxy =
+      platform && platformId && platform !== 'local'
+        ? `/api/v1/music/proxy/${encodeURIComponent(platform)}/songs/${encodeURIComponent(platformId)}`
+        : '';
+    const url = String(item.play_url || '').trim() || (proxy ? `${proxy}/stream` : '');
+    if (!url) continue;
+    const cover = String(item.cover_url || '').trim() || (proxy ? `${proxy}/cover` : '');
+    songs.push({
+      id: item.id as number | undefined,
+      title,
+      artist: String(item.artist || '').trim(),
+      cover,
+      url,
+    });
+  }
+  return songs;
+}
+
+/**
  * 顶栏信封面板：通知中心（公告 / 心情 / 漂流瓶 / 我的评论 / 最新评论）。
  *
  * 结构对齐原主题 notice.php 的 DOM 契约：
@@ -99,35 +162,42 @@ export default function NoticePanel({ onClose }: { onClose: () => void }) {
   const [picked, setPicked] = useState<Bottle | null>(null);
   const [draft, setDraft] = useState('');
   const [spinning, setSpinning] = useState(false);
+  const [librarySongs, setLibrarySongs] = useState<MoodSong[]>([]);
 
   const tabsRef = useRef<HTMLDivElement>(null);
   const thumbRef = useRef<HTMLSpanElement>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [playing, setPlaying] = useState(false);
   const [thumbReady, setThumbReady] = useState(false);
 
   const board = parseNoticeBoard(String(options?.robes_notice || ''));
   const mood = String(options?.robes_mood || '').trim() || site.description || owner.bio || '今天也在认真生活，慢慢来，别着急。';
 
-  // 心情卡的歌曲信息（可选）：{"name":"拾忆","artist":"张翰","cover":"...","url":"..."}
-  const song = useMemo(() => {
-    const raw = String(options?.robes_mood_song || '').trim();
-    if (!raw) return null;
-    try {
-      const data = JSON.parse(raw);
-      if (!data || typeof data !== 'object' || !data.name) return null;
-      return {
-        name: String(data.name || ''),
-        artist: String(data.artist || ''),
-        cover: String(data.cover || ''),
-        url: String(data.url || ''),
-      };
-    } catch {
-      return null;
-    }
-  }, [options?.robes_mood_song]);
+  // 心情卡的歌曲：优先用站长指定的 robes_mood_song，否则取站内音乐库。
+  const optionSongs = useMemo(
+    () => parseMoodOption(String(options?.robes_mood_song || '')),
+    [options?.robes_mood_song],
+  );
+  const playerSongs = optionSongs.length ? optionSongs : librarySongs;
 
-  const statusText = String(options?.robes_mood_status || '').trim() || (song ? '听歌' : '记录生活');
+  const statusText = String(options?.robes_mood_status || '').trim() || (playerSongs.length ? '听歌' : '记录生活');
+
+  // 心情页才去读音乐库。
+  useEffect(() => {
+    if (tab !== 'mood') return;
+    let alive = true;
+    fetch('/api/v1/music?per_page=20', { headers: { accept: 'application/json' } })
+      .then((response) => response.json())
+      .then((payload) => {
+        if (!alive) return;
+        const rows = payload?.data?.items || payload?.data?.data || payload?.data || payload?.items || [];
+        setLibrarySongs(toMoodSongs(rows));
+      })
+      .catch(() => {
+        /* 读不到音乐库就只留站长配置的歌单 */
+      });
+    return () => {
+      alive = false;
+    };
+  }, [tab]);
 
   const loadComments = useCallback(async (size: number) => {
     setLoading(true);
@@ -237,23 +307,6 @@ export default function NoticePanel({ onClose }: { onClose: () => void }) {
     }
   };
 
-  const toggleSong = () => {
-    if (!song?.url) return;
-    if (!audioRef.current) {
-      audioRef.current = new Audio(song.url);
-      audioRef.current.addEventListener('ended', () => setPlaying(false));
-    }
-    if (playing) {
-      audioRef.current.pause();
-      setPlaying(false);
-      return;
-    }
-    void audioRef.current.play().then(
-      () => setPlaying(true),
-      () => setPlaying(false),
-    );
-  };
-
   return (
     <div
       className={tab === 'mood' || tab === 'vibe' ? 'notice-pop active is-tall' : 'notice-pop active'}
@@ -351,32 +404,16 @@ export default function NoticePanel({ onClose }: { onClose: () => void }) {
               </div>
               <span className="mood-status-pill">
                 <span className="mood-status-emoji">
-                  {song ? <IconHeadphone size={14} className="mood-ico" /> : <IconSparkle size={13} className="mood-ico" />}
+                  {playerSongs.length ? <IconHeadphone size={14} className="mood-ico" /> : <IconSparkle size={13} className="mood-ico" />}
                 </span>
                 <span className="mood-status-text">{statusText}</span>
               </span>
               <p className="mood-text">{mood}</p>
-              {song ? (
-                <div className="mood-song">
-                  <span className="mood-song-cover">
-                    {song.cover ? <img src={song.cover} alt="" loading="lazy" /> : null}
-                  </span>
-                  <span className="mood-song-meta">
-                    <span className="mood-song-name">{song.name}</span>
-                    <span className="mood-song-artist">{song.artist}</span>
-                  </span>
-                  <button
-                    type="button"
-                    className={playing ? 'mood-song-play is-playing' : 'mood-song-play'}
-                    onClick={toggleSong}
-                    aria-label={playing ? '暂停' : '播放试听'}
-                  >
-                    <span className="mood-play-glyph" aria-hidden="true" />
-                  </button>
-                </div>
-              ) : null}
+              {playerSongs.length ? <MoodPlayer songs={playerSongs} /> : null}
               <div className="mood-card-foot">
-                <span className="mood-updated">{String(options?.robes_mood_updated || '').trim()}</span>
+                <span className="mood-updated">
+                  {String(options?.robes_mood_updated || '').trim() || `更新于 ${vibeDate}`}
+                </span>
               </div>
             </div>
           </div>
