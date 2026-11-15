@@ -450,6 +450,109 @@ export function IconListCheck(props: IconProps) {
   );
 }
 
+/* ── 评论区（对齐原站 comments.php 的 .cmt-* 契约） ────────────────────── */
+
+/** 回复：原站 ri-reply-line，尾巴在左、箭头朝右。 */
+export function IconReply(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M9.5 7.5 4 12l5.5 4.5" />
+      <path d="M4.6 12h8.1a6.3 6.3 0 0 1 6.3 6.3v.7" />
+    </Svg>
+  );
+}
+
+/** 表情：原站 ri-emotion-happy-line。 */
+export function IconSmile(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <circle cx="12" cy="12" r="8.6" />
+      <path d="M8.6 13.6a4.2 4.2 0 0 0 6.8 0" />
+      <path d="M9.3 9.4h.01M14.7 9.4h.01" strokeWidth="2" />
+    </Svg>
+  );
+}
+
+/** 人机校验盾牌：原站 ri-shield-check-line。 */
+export function IconShieldCheck(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M12 3.4 19 6v5.4c0 4-2.9 7.6-7 9.2-4.1-1.6-7-5.2-7-9.2V6l7-2.6Z" />
+      <path d="m9.2 12 2 2 3.6-3.8" />
+    </Svg>
+  );
+}
+
+/** 删除：原站 ri-delete-bin-line。 */
+export function IconTrash(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M4.5 6.6h15M9.4 6.6V4.8h5.2v1.8M6.6 6.6l.9 12.1a1.4 1.4 0 0 0 1.4 1.3h6.2a1.4 1.4 0 0 0 1.4-1.3l.9-12.1" />
+      <path d="M10.4 10.4v6M13.6 10.4v6" />
+    </Svg>
+  );
+}
+
+/**
+ * 设备徽章图标。
+ *
+ * 路径直接取自原站 comments.php 里 <symbol id="cmt-ico-*"> 的数据 ——
+ * Windows / Android / Apple 是填充图形，Linux / 显示器是描边图形，
+ * 所以这几个不走上面那套 fill="none" 的 Svg 包装，各自单独写。
+ */
+type DeviceIconProps = { size?: number; className?: string };
+
+export function IconWindows({ size = 12, className }: DeviceIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M2.5 4.9l8.2-1.1v7.6H2.5V4.9zm9.3-1.3L22 2v9.4h-10.2V3.6zM2.5 12.5h8.2v7.6L2.5 19V12.5zm9.3 0H22V22l-10.2-1.4v-8.1z" />
+    </svg>
+  );
+}
+
+export function IconAndroid({ size = 12, className }: DeviceIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M8 9h8v6a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V9zm1-2.9l-.9-1.6a.5.5 0 0 1 .8-.5l1 1.7c.3-.1.7-.2 1.1-.2s.8.1 1.1.2l1-1.7a.5.5 0 0 1 .8.5l-.9 1.6c.9.5 1.6 1.2 1.9 2.1H6.1c.3-.9 1-1.6 1.9-2.1zM9.7 8.4a.6.6 0 1 0 0-1.2.6.6 0 0 0 0 1.2zm4.6 0a.6.6 0 1 0 0-1.2.6.6 0 0 0 0 1.2zM5.8 10a1 1 0 0 1 2 0v5a1 1 0 0 1-2 0v-5zm10.4 0a1 1 0 0 1 2 0v5a1 1 0 0 1-2 0v-5z" />
+    </svg>
+  );
+}
+
+export function IconApple({ size = 12, className }: DeviceIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M17.05 12.54c-.03-2.5 2.04-3.7 2.13-3.76-1.16-1.7-2.97-1.93-3.61-1.96-1.54-.16-3 .9-3.78.9-.78 0-1.98-.88-3.26-.86-1.68.02-3.23.98-4.1 2.48-1.75 3.03-.45 7.52 1.26 9.98.83 1.2 1.82 2.55 3.12 2.5 1.25-.05 1.72-.81 3.23-.81 1.5 0 1.93.81 3.25.79 1.34-.02 2.19-1.22 3.01-2.43.95-1.39 1.34-2.73 1.36-2.8-.03-.01-2.6-1-2.63-4.03zM14.75 5.35c.69-.84 1.15-2 1.02-3.16-.99.04-2.18.66-2.89 1.49-.63.73-1.19 1.91-1.04 3.04 1.1.09 2.23-.56 2.91-1.37z" />
+    </svg>
+  );
+}
+
+export function IconLinux({ size = 12, className }: DeviceIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} aria-hidden="true" focusable="false">
+      <path fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" d="M3.2 4.5h17.6a1.6 1.6 0 0 1 1.6 1.6v11.8a1.6 1.6 0 0 1-1.6 1.6H3.2a1.6 1.6 0 0 1-1.6-1.6V6.1a1.6 1.6 0 0 1 1.6-1.6z" />
+      <path fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" d="M6.4 9.4l3 2.6-3 2.6M11.8 14.6h4.6" />
+    </svg>
+  );
+}
+
+export function IconDisplay({ size = 12, className }: DeviceIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} aria-hidden="true" focusable="false">
+      <path fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" d="M3.2 4.5h17.6a1.4 1.4 0 0 1 1.4 1.4v9.6a1.4 1.4 0 0 1-1.4 1.4H3.2a1.4 1.4 0 0 1-1.4-1.4V5.9a1.4 1.4 0 0 1 1.4-1.4zM8.6 20.5h6.8M12 16.9v3.6" />
+    </svg>
+  );
+}
+
+/** 按操作系统名挑设备图标。 */
+export function deviceIcon(os: string, size = 12, className?: string) {
+  const name = String(os || '').toLowerCase();
+  if (/windows|win/.test(name)) return <IconWindows size={size} className={className} />;
+  if (/android/.test(name)) return <IconAndroid size={size} className={className} />;
+  if (/ios|iphone|ipad|mac|apple/.test(name)) return <IconApple size={size} className={className} />;
+  if (/linux|ubuntu/.test(name)) return <IconLinux size={size} className={className} />;
+  return <IconDisplay size={size} className={className} />;
+}
+
 /** 按菜单标题挑一个语义图标，对应原主题 pageNavIcon() 的做法。 */
 export function navIcon(label: string) {
   const text = String(label || '').trim();

@@ -8827,3 +8827,29 @@ html[data-theme='Robes'] .links-empty {
 html[data-theme='Robes'] .gb-stat-time {
   white-space: nowrap;
 }
+
+/* ==================== 评论区：内联 SVG 图标与状态兜底 ==================== */
+/* 原站用 Remix Icon 字体（ri-*.css + woff2），字体文件没跟主题一起移植，
+   .cmt-is-child .cmt-name::before 的回车箭头会变成豆腐块 —— 换成纯字符。 */
+html[data-theme='Robes'] .cmt-is-child .cmt-name::before {
+  content: '\21AA';
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 11px;
+}
+/* 点赞心形是内联 SVG，原站的 cmtHeartPop 挂在 i 上，这里补到 svg 上 */
+html[data-theme='Robes'] .cmt-like-btn.liked svg { animation: cmtHeartPop .45s ease; }
+/* 空态图标同理（原站是 <i>，我们是 svg） */
+html[data-theme='Robes'] .cmt-empty svg { display: block; margin: 0 auto 10px; opacity: .4; }
+/* 表情格子是 <button>，原站 CSS 没重置按钮外观 */
+html[data-theme='Robes'] .cmt-emoji-item {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+/* 私密开关：站点暂未开放该能力，置灰并禁止点击 */
+html[data-theme='Robes'] .cmt-private-toggle.is-disabled { cursor: not-allowed; }
+html[data-theme='Robes'] .cmt-private-toggle.is-disabled .cmt-private-pill { opacity: .5; }
+/* 设备徽章里的图标尺寸由 .cmt-dev-icon 控制，这里补上竖直对齐 */
+html[data-theme='Robes'] .cmt-device .cmt-dev-icon { vertical-align: -2px; }

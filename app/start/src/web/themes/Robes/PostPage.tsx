@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from '@/components/AppLink';
 import PostContent from '@/components/blog/PostContent';
-import CommentList from '@/components/blog/CommentList';
-import PostNavigation from '@/components/blog/PostNavigation';
+import PostComments from './PostComments';
+import PostNav from './PostNav';
 import TableOfContents from '@/components/blog/TableOfContents';
 import AISummary from '@/components/blog/AISummary';
 import VideoPostBody from '@/components/blog/VideoPostBody';
@@ -168,14 +168,12 @@ export default function PostPage({ post }: { post: PostData; options?: Record<st
           </div>
         ) : null}
 
-        <div className="post-nav">
-          <PostNavigation postId={post?.id} />
-        </div>
+        {/* 文章底部：上一篇 / 下一篇（对齐原站 post.php 的 .post-nav） */}
+        <PostNav postId={post?.id} />
       </article>
 
-      <div id="comments">
-        <CommentList postId={post?.id} formPlacement="bottom" />
-      </div>
+      {/* 评论区（对齐原站 comments.php 的 .cmt-section） */}
+      <PostComments postId={post?.id} />
     </>
   );
 }
