@@ -16,7 +16,7 @@ import {
   IconUser,
   IconWater,
 } from './Icons';
-import { parseNoticeBoard, plainText } from './utils';
+import { parseNoticeBoard, plainText, relativeTime } from './utils';
 import MoodPlayer, { type MoodSong } from './MoodPlayer';
 
 interface LatestComment {
@@ -30,7 +30,19 @@ interface LatestComment {
   avatar_url?: string;
 }
 
-type Tab = 'board' | 'mood' | 'vibe' | 'mine' | 'latest';
+/** 说说（moments）条目。 */
+interface MomentItem {
+  id: number;
+  content?: string;
+  mood?: string;
+  location?: string;
+  images?: string[];
+  like_count?: number;
+  comment_count?: number;
+  created_at?: string | number;
+}
+
+type Tab = 'board' | 'mood' | 'vibe' | 'mine' | 'latest' | 'moment';
 
 const TABS: { key: Tab; label: string }[] = [
   { key: 'board', label: '公告' },
@@ -38,6 +50,7 @@ const TABS: { key: Tab; label: string }[] = [
   { key: 'vibe', label: '漂流瓶' },
   { key: 'mine', label: '我的评论' },
   { key: 'latest', label: '最新评论' },
+  { key: 'moment', label: '说说' },
 ];
 
 const BOTTLE_KEY = 'robes-bottles';
@@ -154,6 +167,10 @@ export default function NoticePanel({ onClose }: { onClose: () => void }) {
   const { site, options, owner } = useThemeContext();
   const [tab, setTab] = useState<Tab>('board');
   const [comments, setComments] = useState<LatestComment[]>([]);
+  const [moments, setMoments] = useState<MomentItem[]>([]);
+  const [momentsLoading, setMomentsLoading] = useState(false);
+  const [momentsFailed, setMomentsFailed] = useState(false);
+  const [momentPerPage, setMomentPerPage] = useState(6);
   const [perPage, setPerPage] = useState(8);
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -229,6 +246,32 @@ export default function NoticePanel({ onClose }: { onClose: () => void }) {
     if (tab !== 'latest' && tab !== 'mine') return;
     void loadComments(perPage, tab === 'latest');
   }, [tab, perPage, loadComments]);
+
+  /**
+   * 说说：站内说说列表（/api/v1/moments），只在切到「说说」标签时拉。
+   * 与说说页共用同一份数据源，这里只做摘要展示。
+   */
+  const loadMoments = useCallback(async (size: number) => {
+    setMomentsLoading(true);
+    setMomentsFailed(false);
+    try {
+      const response = await fetch(`/api/v1/moments?per_page=${size}`, {
+        headers: { accept: 'application/json' },
+      });
+      const payload = await response.json();
+      const rows = payload?.data?.items || payload?.data?.data || payload?.data || payload?.items || [];
+      setMoments(Array.isArray(rows) ? rows : []);
+    } catch {
+      setMomentsFailed(true);
+    } finally {
+      setMomentsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (tab !== 'moment') return;
+    void loadMoments(momentPerPage);
+  }, [tab, momentPerPage, loadMoments]);
 
   // 本机身份（评论昵称）与本机漂流瓶。
   useEffect(() => {
@@ -365,6 +408,9 @@ export default function NoticePanel({ onClose }: { onClose: () => void }) {
               <span className="notice-tab-label">{item.label}</span>
               {item.key === 'latest' && comments.length ? (
                 <span className="notice-tab-count">{comments.length}</span>
+              ) : null}
+              {item.key === 'moment' && moments.length ? (
+                <span className="notice-tab-count">{moments.length}</span>
               ) : null}
             </button>
           ))}
@@ -581,6 +627,61 @@ export default function NoticePanel({ onClose }: { onClose: () => void }) {
           <button type="button" className="notice-more" onClick={() => setPerPage((value) => value + 8)}>
             加载更多
           </button>
+        </div>
+      ) : null}
+
+      {tab === 'moment' ? (
+        <div className="notice-list">
+          {momentsLoading ? (
+            <div className="notice-skeleton">
+              <span />
+              <span />
+              <span />
+            </div>
+          ) : momentsFailed ? (
+            <div className="notice-empty">
+              <p>加载失败，请稍后重试</p>
+            </div>
+          ) : moments.length ? (
+            moments.map((moment) => (
+              <Link className="notice-item" key={moment.id} href="/moments">
+                <span className="notice-avatar">
+                  {owner.avatar ? (
+                    <img src={owner.avatar} alt="" loading="lazy" />
+                  ) : (
+                    <span className="notice-avatar-text">
+                      {String(owner.nickname || site.title || '说').slice(0, 1)}
+                    </span>
+                  )}
+                </span>
+                <span className="notice-main">
+                  <span className="notice-row1">
+                    <span className="notice-name">
+                      {moment.mood ? `#${moment.mood}` : '说说'}
+                    </span>
+                    <span className="notice-time">{relativeTime(moment.created_at)}</span>
+                  </span>
+                  <span className="notice-text">
+                    {moment.location ? `📍${moment.location} · ` : ''}
+                    {plainText(moment.content, 80)}
+                  </span>
+                </span>
+              </Link>
+            ))
+          ) : (
+            <div className="notice-empty">
+              <IconSparkle size={17} />
+              <p>还没有说说</p>
+            </div>
+          )}
+        </div>
+      ) : null}
+
+      {tab === 'moment' ? (
+        <div className="notice-foot">
+          <span className="notice-foot-tip">
+            <Link href="/moments">去说说页看全部</Link>
+          </span>
         </div>
       ) : null}
 

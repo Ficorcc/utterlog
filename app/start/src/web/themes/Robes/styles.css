@@ -637,7 +637,7 @@ html[data-theme='Robes'] .notice-refresh.is-spinning svg {
 html[data-theme='Robes'] .notice-tabs {
 
   position: relative; display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   padding: 3px; border-radius: 999px;
   background: rgba(0,0,0,0.045);
   border: 1px solid rgba(0,0,0,0.045);
