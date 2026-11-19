@@ -21,9 +21,11 @@
 // 本文件不影响它们。
 
 import { useEffect, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import PageTitle from '@/components/blog/PageTitle';
 import { siteFaviconUrl } from '@/lib/site-favicon';
+import { useAuthStore } from '@/lib/store';
 
 interface FeedItem {
   title: string;
@@ -88,6 +90,15 @@ function formatEntryDate(d: Date | null) {
   return `${pad2(d.getMonth() + 1)} 月 ${pad2(d.getDate())} 日 ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
 }
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** 接口返回体统一是 { success, data, meta }，取真正的那层。 */
+function payloadOf(response: any) {
+  return response?.data ?? response;
+}
+
 function isSameDay(a: Date | null, b: Date) {
   return !!a && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
@@ -109,13 +120,26 @@ export default function ShanYingFeedsView() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [autoLoadExhausted, setAutoLoadExhausted] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshText, setRefreshText] = useState('');
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  // 强制刷新订阅要走管理员接口（/social/fetch-feeds 是 withAdmin 保护的），
+  // 所以只有站长登录后才允许触发；访客点按钮只会得到提示。
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  const loadStats = async () => {
+    try {
+      const r: any = await api.get('/social/feed-stats');
+      setStats(payloadOf(r) as FeedStats);
+    } catch {
+      /* 统计拿不到不影响列表 */
+    }
+  };
 
   useEffect(() => {
     // 统计单独取：接口很轻（四个 count），失败也不该拖住列表渲染
-    api.get('/social/feed-stats')
-      .then((r: any) => setStats((r?.data ?? r) as FeedStats))
-      .catch(() => {});
+    loadStats();
   }, []);
 
   // 切换「全部动态 / 今日更新」时重新拉第一页 —— 服务端按 period 过滤，
@@ -177,6 +201,56 @@ export default function ShanYingFeedsView() {
     setPeriod(next);
   };
 
+  /**
+   * 强制刷新订阅：清掉各订阅源的旧缓存，重新抓一遍所有源的最新文章。
+   * 后台的「刷新订阅」按钮走的是同一套接口，这里只是把进度搬到前台页面上。
+   */
+  const refreshFeeds = async () => {
+    if (!isAuthenticated) {
+      toast.error('请先登录后再刷新订阅');
+      return;
+    }
+    if (refreshing) return;
+    setRefreshing(true);
+    setRefreshText('正在启动…');
+    try {
+      const start: any = await api.post('/social/fetch-feeds', { force: true });
+      let d: any = payloadOf(start);
+      const startedAt = Date.now();
+      // 抓 95 个源要一会儿，最多等 5 分钟；每 1.2 秒拉一次进度
+      while (d?.running && Date.now() - startedAt < 5 * 60 * 1000) {
+        await sleep(1200);
+        const status: any = await api.get('/social/fetch-feeds/status');
+        d = payloadOf(status);
+        const done = Number(d?.done || 0);
+        const total = Number(d?.total || 0);
+        setRefreshText(total ? `刷新中 ${done}/${total}` : '刷新中…');
+      }
+      if (d?.running) {
+        toast.error('刷新仍在进行，请稍后再看');
+        return;
+      }
+      const fetched = Number(d?.fetched || 0);
+      const newItems = Number(d?.new_items || 0);
+      const failed = Number(d?.failed || 0);
+      if (failed > 0) {
+        toast.error(`已刷新 ${fetched} 个订阅，失败 ${failed} 个，新增 ${newItems} 条`);
+      } else {
+        toast.success(`已刷新 ${fetched} 个订阅，新增 ${newItems} 条`);
+      }
+      // 缓存被清了，列表和统计都要重新拉
+      setAutoLoadExhausted(false);
+      setItems([]);
+      await loadStats();
+      await loadFeeds(1, true, period);
+    } catch {
+      toast.error('刷新失败，请稍后再试');
+    } finally {
+      setRefreshing(false);
+      setRefreshText('');
+    }
+  };
+
   const today = new Date();
   const rssCount = stats?.rss_count ?? 0;
   const todayCount = stats?.count_today ?? 0;
@@ -231,6 +305,22 @@ export default function ShanYingFeedsView() {
       <PageTitle
         title="订阅"
         icon="fa-sharp fa-light fa-rss"
+        actions={
+          <div className="sy-feeds-refresh-wrap">
+            <button
+              type="button"
+              className="sy-feeds-refresh"
+              onClick={refreshFeeds}
+              disabled={refreshing}
+              aria-live="polite"
+              title={isAuthenticated ? '清空缓存并重新抓取全部订阅源' : '需要站长登录后才能刷新订阅'}
+            >
+              <i className={`fa-solid fa-rotate ${refreshing ? 'sy-feeds-refresh-spin' : ''}`} aria-hidden="true" />
+              <span>{refreshing ? (refreshText || '刷新中…') : '强制刷新订阅'}</span>
+            </button>
+            {!isAuthenticated && <span className="sy-feeds-refresh-hint">需登录</span>}
+          </div>
+        }
         meta={
           <>
             <span className="sy-feeds-stat">

@@ -6183,6 +6183,49 @@ html[data-theme='ShanYing'] .sy-feeds-stat > strong {
   text-align: right;
 }
 
+/* ── 标题行右侧：强制刷新订阅 ── */
+html[data-theme='ShanYing'] .sy-feeds-refresh-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+html[data-theme='ShanYing'] .sy-feeds-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border: 1px solid var(--sy-line);
+  border-radius: 999px;
+  background: var(--sy-surface);
+  color: var(--sy-muted);
+  font: inherit;
+  font-size: 11.5px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.35s var(--sy-gentle), color 0.35s var(--sy-gentle),
+    border-color 0.35s var(--sy-gentle);
+}
+html[data-theme='ShanYing'] .sy-feeds-refresh:hover:not(:disabled) {
+  color: var(--sy-accent);
+  border-color: color-mix(in srgb, var(--sy-accent) 32%, var(--sy-line));
+  background: color-mix(in srgb, var(--sy-accent) 7%, var(--sy-surface));
+}
+html[data-theme='ShanYing'] .sy-feeds-refresh:focus-visible {
+  outline: 1px solid var(--sy-focus);
+  outline-offset: 2px;
+}
+html[data-theme='ShanYing'] .sy-feeds-refresh:disabled { opacity: 0.72; cursor: progress; }
+html[data-theme='ShanYing'] .sy-feeds-refresh i { font-size: 11px; }
+html[data-theme='ShanYing'] .sy-feeds-refresh-spin { animation: sy-feeds-refresh-spin 0.9s linear infinite; }
+html[data-theme='ShanYing'] .sy-feeds-refresh-hint {
+  color: var(--sy-muted);
+  font-size: 11px;
+  opacity: 0.7;
+}
+@keyframes sy-feeds-refresh-spin {
+  to { transform: rotate(360deg); }
+}
+
 /* ── 圆角面板 ── */
 html[data-theme='ShanYing'] .sy-feeds-panel {
   padding: 30px 34px 26px;
@@ -6381,6 +6424,7 @@ html[data-theme='ShanYing'] .sy-feeds-footer {
 }
 @media (prefers-reduced-motion: reduce) {
   html[data-theme='ShanYing'] .sy-feeds * { transition: none !important; }
+  html[data-theme='ShanYing'] .sy-feeds-refresh-spin { animation: none !important; }
 }
 
 /* ═══ 首页：文章列表与页脚之间的留白减半 ═══════════════════════════════
