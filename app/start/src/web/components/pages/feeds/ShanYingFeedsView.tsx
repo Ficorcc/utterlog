@@ -314,11 +314,16 @@ export default function ShanYingFeedsView() {
               onClick={refreshFeeds}
               disabled={refreshing}
               aria-live="polite"
-              title={isAuthenticated ? '清空缓存并重新抓取全部订阅源' : '需要站长登录后才能刷新订阅'}
+              aria-label="强制刷新订阅"
+              title={isAuthenticated ? '强制刷新订阅：清空缓存并重新抓取全部订阅源' : '需要站长登录后才能刷新订阅'}
             >
               <i className={`fa-solid fa-rotate ${refreshing ? 'sy-feeds-refresh-spin' : ''}`} aria-hidden="true" />
-              <span>{refreshing ? (refreshText || '刷新中…') : '强制刷新订阅'}</span>
             </button>
+            {refreshing && (
+              <span className="sy-feeds-refresh-text" role="status">
+                {refreshText || '刷新中…'}
+              </span>
+            )}
             {!isAuthenticated && <span className="sy-feeds-refresh-hint">需登录</span>}
           </div>
         }

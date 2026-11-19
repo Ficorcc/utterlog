@@ -6192,15 +6192,16 @@ html[data-theme='ShanYing'] .sy-feeds-refresh-wrap {
 html[data-theme='ShanYing'] .sy-feeds-refresh {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 7px 14px;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
   border: 1px solid var(--sy-line);
-  border-radius: 999px;
+  border-radius: 50%;
   background: var(--sy-surface);
   color: var(--sy-muted);
   font: inherit;
-  font-size: 11.5px;
-  white-space: nowrap;
+  font-size: 13px;
   cursor: pointer;
   transition: background 0.35s var(--sy-gentle), color 0.35s var(--sy-gentle),
     border-color 0.35s var(--sy-gentle);
@@ -6215,8 +6216,16 @@ html[data-theme='ShanYing'] .sy-feeds-refresh:focus-visible {
   outline-offset: 2px;
 }
 html[data-theme='ShanYing'] .sy-feeds-refresh:disabled { opacity: 0.72; cursor: progress; }
-html[data-theme='ShanYing'] .sy-feeds-refresh i { font-size: 11px; }
+html[data-theme='ShanYing'] .sy-feeds-refresh i { font-size: 13px; }
 html[data-theme='ShanYing'] .sy-feeds-refresh-spin { animation: sy-feeds-refresh-spin 0.9s linear infinite; }
+/* 刷新中的进度文字：比旁边那排灰色统计更重更醒目 */
+html[data-theme='ShanYing'] .sy-feeds-refresh-text {
+  color: var(--sy-text);
+  font-size: 15.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
 html[data-theme='ShanYing'] .sy-feeds-refresh-hint {
   color: var(--sy-muted);
   font-size: 11px;
