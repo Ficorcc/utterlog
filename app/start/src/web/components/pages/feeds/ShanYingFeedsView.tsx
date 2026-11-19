@@ -212,7 +212,7 @@ export default function ShanYingFeedsView() {
     }
     if (refreshing) return;
     setRefreshing(true);
-    setRefreshText('正在启动…');
+    setRefreshText('');
     try {
       const start: any = await api.post('/social/fetch-feeds', { force: true });
       let d: any = payloadOf(start);
@@ -225,7 +225,7 @@ export default function ShanYingFeedsView() {
         d = payloadOf(status);
         const done = Number(d?.done || 0);
         const total = Number(d?.total || 0);
-        setRefreshText(total ? `刷新中 ${done}/${total}` : '刷新中…');
+        setRefreshText(total ? `${done}/${total}` : '');
       }
       if (d?.running) {
         toast.error('刷新仍在进行，请稍后再看');
@@ -321,7 +321,7 @@ export default function ShanYingFeedsView() {
             </button>
             {refreshing && (
               <span className="sy-feeds-refresh-text" role="status">
-                {refreshText || '刷新中…'}
+                {refreshText ? <>刷新中 <strong>{refreshText}</strong></> : '正在启动…'}
               </span>
             )}
             {!isAuthenticated && <span className="sy-feeds-refresh-hint">需登录</span>}

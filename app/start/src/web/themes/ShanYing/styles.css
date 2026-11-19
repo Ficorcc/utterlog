@@ -6218,13 +6218,17 @@ html[data-theme='ShanYing'] .sy-feeds-refresh:focus-visible {
 html[data-theme='ShanYing'] .sy-feeds-refresh:disabled { opacity: 0.72; cursor: progress; }
 html[data-theme='ShanYing'] .sy-feeds-refresh i { font-size: 13px; }
 html[data-theme='ShanYing'] .sy-feeds-refresh-spin { animation: sy-feeds-refresh-spin 0.9s linear infinite; }
-/* 刷新中的进度文字：比旁边那排灰色统计更重更醒目 */
+/* 刷新中的进度文字：跟右边那排统计（95 个订阅 · 9 篇今日更新）同一个字号字体 */
 html[data-theme='ShanYing'] .sy-feeds-refresh-text {
-  color: var(--sy-text);
-  font-size: 15.5px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+  color: var(--sy-muted);
+  font-size: 12px;
+  font-weight: 400;
   white-space: nowrap;
+}
+html[data-theme='ShanYing'] .sy-feeds-refresh-text strong {
+  color: var(--sy-text);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 html[data-theme='ShanYing'] .sy-feeds-refresh-hint {
   color: var(--sy-muted);
