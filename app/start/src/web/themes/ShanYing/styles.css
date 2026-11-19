@@ -6196,20 +6196,16 @@ html[data-theme='ShanYing'] .sy-feeds-refresh {
   width: 28px;
   height: 28px;
   padding: 0;
-  border: 1px solid var(--sy-line);
-  border-radius: 50%;
-  background: var(--sy-surface);
+  border: 0;
+  background: transparent;
   color: var(--sy-muted);
   font: inherit;
   font-size: 13px;
   cursor: pointer;
-  transition: background 0.35s var(--sy-gentle), color 0.35s var(--sy-gentle),
-    border-color 0.35s var(--sy-gentle);
+  transition: color 0.35s var(--sy-gentle);
 }
 html[data-theme='ShanYing'] .sy-feeds-refresh:hover:not(:disabled) {
   color: var(--sy-accent);
-  border-color: color-mix(in srgb, var(--sy-accent) 32%, var(--sy-line));
-  background: color-mix(in srgb, var(--sy-accent) 7%, var(--sy-surface));
 }
 html[data-theme='ShanYing'] .sy-feeds-refresh:focus-visible {
   outline: 1px solid var(--sy-focus);
