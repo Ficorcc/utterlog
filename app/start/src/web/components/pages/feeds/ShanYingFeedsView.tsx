@@ -217,8 +217,9 @@ export default function ShanYingFeedsView() {
       const start: any = await api.post('/social/fetch-feeds', { force: true });
       let d: any = payloadOf(start);
       const startedAt = Date.now();
-      // 抓 95 个源要一会儿，最多等 5 分钟；每 1.2 秒拉一次进度
-      while (d?.running && Date.now() - startedAt < 5 * 60 * 1000) {
+      // 抓 95 个源要四五分钟（每个源一次外网请求），最多等 10 分钟；
+      // 每 1.2 秒拉一次进度。超时也不会中断服务端任务，只是页面不再跟踪。
+      while (d?.running && Date.now() - startedAt < 10 * 60 * 1000) {
         await sleep(1200);
         const status: any = await api.get('/social/fetch-feeds/status');
         d = payloadOf(status);
