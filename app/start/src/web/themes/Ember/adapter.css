@@ -82,3 +82,52 @@ body .blog-main {
 .blog-main::-webkit-scrollbar-thumb:hover {
   background: rgba(26, 26, 26, 0.3);
 }
+
+/* 9) 共享组件的应用层色彩令牌映射到 Ember 调色板。
+   评论区、留言板、友链等共享组件用的是 globals.css 的 --color-* 变量，
+   上游 ember 只有自己的 --c-*，不映射的话这些组件在深色模式下仍是
+   浅色底 + 深色字（留言板那行白底统计条就是这么来的）。 */
+body {
+  --color-primary: var(--c-primary);
+  --color-primary-hover: var(--c-primary-dark);
+  --color-bg-main: var(--c-bg);
+  --color-bg-card: var(--c-card);
+  --color-bg-soft: var(--c-card-soft);
+  --color-border: var(--c-border);
+  --color-divider: var(--c-divider);
+  --color-text-main: var(--c-text);
+  --color-text-sub: var(--c-text-soft);
+  --color-text-dim: var(--c-text-muted);
+  --color-focus-ring: var(--c-primary);
+}
+
+/* 10) 文章页没有封面时，标题要落回常规流。
+   上游的标题是压在封面图上的绝对定位白字；没有封面时 .post-hero-card
+   高度塌成 0，overflow 又裁掉绝对定位的标题 —— 标题整块看不见，
+   还会顶到固定导航下面。改成常规流的标题块，位置跟正文左对齐。 */
+.post-detail:not(.has-cover) .post-hero-card {
+  height: auto;
+  overflow: visible;
+}
+
+.post-detail:not(.has-cover) .post-hero-title {
+  position: static;
+  padding: 36px 44px 0;
+  color: var(--c-text);
+}
+
+.post-detail:not(.has-cover) .post-hero-title .post-title {
+  color: var(--c-text);
+  text-shadow: none;
+}
+
+/* 11) 首页文章卡：上游把卡片锁在 270px 高（内容顶端对齐），
+   摘要短的时候时间行下面会空一大块。这里解除定高，让卡片贴着内容收。 */
+.home-list .post-card,
+.home-list .post-card.has-cover {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding-bottom: var(--sp-14) !important;
+}

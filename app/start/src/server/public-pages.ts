@@ -149,7 +149,7 @@ export type PublicPageBody =
   | { kind: 'coding'; data: any; timeZone: string }
   | { kind: 'footprints'; rows: any[] }
   | { kind: 'moments'; moments: any[]; tags: string[]; fetchedAt: number }
-  | { kind: 'client'; page: 'links' | 'feeds' | 'albums' | 'music'; items?: any[]; friends?: any[] }
+  | { kind: 'client'; page: 'links' | 'feeds' | 'albums' | 'music'; items?: any[]; friends?: any[]; total?: number; withPosts?: number }
   | { kind: 'friends'; friends: any[]; total: number; withPosts: number }
   | { kind: 'shelf'; shelf: 'movies' | 'books' | 'games' | 'goods'; items: any[] }
   | { kind: 'search'; query: string; results: any[]; mode: string; total: number; timeZone: string }
@@ -427,10 +427,10 @@ async function resolvePublicPage(ctx: ThemeContextData | null, data: PublicPageR
       return { kind: 'client', page: 'links', items: dataOf<any[]>(res, []) };
     }
     if (data.kind === 'feeds') {
-      // 订阅页。Robes 主题把这一页渲染成原站的「朋友圈」（按订阅源分组），
-      // 所以顺手把分组数据一起下发；其他主题仍走各自的时间线视图。
+      // 订阅页。主题可以自己渲染这一页（Ember 用动态流结构），
+      // 所以把分组数据连同统计一起下发；没接管的主题仍走各自的时间线视图。
       const feed = await safe(friendsFeed(), { friends: [], total: 0, withPosts: 0 });
-      return { kind: 'client', page: 'feeds', friends: feed.friends };
+      return { kind: 'client', page: 'feeds', friends: feed.friends, total: feed.total, withPosts: feed.withPosts };
     }
     if (data.kind === 'friends') {
       // 朋友圈：按订阅源分组的最近动态。数据来自现成的 RSS 订阅体系

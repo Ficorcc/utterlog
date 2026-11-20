@@ -311,9 +311,12 @@ export function PublicPage({ data }: { data: PublicPageData }) {
           return <LinksClient initialLinks={data.items || []} initialOptions={ctx?.options || {}} />;
         }
         if (data.kind === 'client' && data.page === 'feeds') {
-          // Robes 把订阅页当朋友圈渲染（按订阅源分组），其他主题用各自的时间线视图。
-          const Component = ctx ? getThemeComponents(ctx.theme.name).FriendsPage : undefined;
-          if (Component) return <Component friends={data.friends || []} />;
+          // 主题可以接管订阅页（Ember 复刻了上游的动态流结构，不铺好友标签栏）；
+          // 没接管时，Robes 那样把订阅页当朋友圈渲染，再不行回到应用层默认时间线。
+          const Feeds = ctx ? getThemeComponents(ctx.theme.name).FeedsPage : undefined;
+          if (Feeds) return <Feeds friends={data.friends || []} total={data.total} withPosts={data.withPosts} />;
+          const Friends = ctx ? getThemeComponents(ctx.theme.name).FriendsPage : undefined;
+          if (Friends) return <Friends friends={data.friends || []} />;
           return <FeedsClient />;
         }
         if (data.kind === 'friends') {

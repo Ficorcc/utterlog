@@ -77,6 +77,12 @@ export interface ThemeComponents {
    */
   FriendsPage?: ThemeComponent<{ friends?: any[]; total?: number; withPosts?: number }>;
   /**
+   * 主题可以接管「订阅」页。
+   * 数据与朋友圈页同源（友链 + RSS 订阅），但订阅页不铺好友筛选标签栏。
+   * 不提供时回落到 FriendsPage（Robes 那样）或应用层默认的 FeedsClient。
+   */
+  FeedsPage?: ThemeComponent<{ friends?: any[]; total?: number; withPosts?: number }>;
+  /**
    * 主题可以接管「说说」页。
    * 不提供时回落到应用层默认的 MomentsClient（散落式瀑布）。
    */
@@ -116,6 +122,7 @@ const Ember: ThemeComponents = {
   AboutPage: lazy(() => import('@/themes/Ember/AboutPage')),
   LinksPage: lazy(() => import('@/themes/Ember/LinksPage')),
   FriendsPage: lazy(() => import('@/themes/Ember/FriendsPage')),
+  FeedsPage: lazy(() => import('@/themes/Ember/FeedsPage')),
   MomentsPage: lazy(() => import('@/themes/Ember/MomentsPage')),
   NotFoundPage: lazy(() => import('@/themes/Ember/NotFoundPage')),
   GuestbookPage: lazy(() => import('@/themes/Ember/GuestbookPage')),

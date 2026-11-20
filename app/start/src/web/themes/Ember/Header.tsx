@@ -17,7 +17,6 @@ const MORE_ITEMS: { label: string; href: string; icon: string }[] = [
 ];
 
 const FALLBACK_MENUS: MenuItem[] = [
-  { href: '/', label: '首页', icon: 'fa-solid fa-house' },
   { href: '/moments', label: '说说', icon: 'fa-solid fa-head-side-speak' },
   { href: '/archives', label: '归档', icon: 'fa-solid fa-box-archive' },
 ];
@@ -29,9 +28,15 @@ export default function Header() {
   const [moreOpen, setMoreOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mode, setMode] = useState<'light' | 'dark'>('light');
+  const [identityOpen, setIdentityOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const identityTimerRef = useRef<number | null>(null);
 
-  const navItems = menus.header?.length ? menus.header : FALLBACK_MENUS;
+  // 首页入口由头像承担（点头像回首页），导航条里不再重复一个「首页」项，
+  // 否则头像和首页入口指向同一处，两边都在顶部会互相压。
+  const navItems = (menus.header?.length ? menus.header : FALLBACK_MENUS).filter(
+    (item) => item.href !== '/' && item.label !== '首页',
+  );
 
   useEffect(() => {
     const saved = (() => {
@@ -65,10 +70,17 @@ export default function Header() {
         setSearchOpen(false);
         setMoreOpen(false);
         setNavOpen(false);
+        setIdentityOpen(false);
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (identityTimerRef.current) window.clearTimeout(identityTimerRef.current);
+    };
   }, []);
 
   const toggleMode = () => {
@@ -91,6 +103,24 @@ export default function Header() {
   // 按钮文案始终指向「点击后将切换到的模式」
   const modeToggleLabel = mode === 'dark' ? '切换浅色模式' : '切换深色模式';
 
+  // 头像快捷菜单（上游：悬停头像展开，2 秒无操作自动收起）
+  const openIdentityMenu = () => {
+    if (identityTimerRef.current) {
+      window.clearTimeout(identityTimerRef.current);
+      identityTimerRef.current = null;
+    }
+    setIdentityOpen(true);
+    identityTimerRef.current = window.setTimeout(() => setIdentityOpen(false), 2600);
+  };
+
+  const closeIdentityMenu = () => {
+    if (identityTimerRef.current) {
+      window.clearTimeout(identityTimerRef.current);
+      identityTimerRef.current = null;
+    }
+    setIdentityOpen(false);
+  };
+
   const avatarUrl = owner?.avatar || site?.logo || '';
 
   return (
@@ -98,8 +128,22 @@ export default function Header() {
       <nav className="site-nav-bar">
         <div className={`nav-pill${navOpen ? ' nav-open' : ''}`} id="nav-shell">
           <div className="nav-row">
-            <div className="nav-identity-orb" data-nav-identity data-nav-admin="0">
-              <Link href="/" className={`nav-avatar${pathname === '/' ? ' active' : ''}`} title={owner?.nickname || site?.title || '首页'} aria-label="返回首页">
+            <div
+              className={`nav-identity-orb${identityOpen ? ' is-menu-open' : ''}`}
+              data-nav-identity
+              data-nav-admin="0"
+              onMouseEnter={openIdentityMenu}
+              onMouseLeave={closeIdentityMenu}
+            >
+              <Link
+                href="/"
+                className={`nav-avatar${pathname === '/' ? ' active' : ''}`}
+                title={owner?.nickname || site?.title || '首页'}
+                aria-label="返回首页"
+                aria-haspopup="true"
+                aria-expanded={identityOpen}
+                onFocus={openIdentityMenu}
+              >
                 {avatarUrl ? (
                   <img className="nav-avatar-img" src={avatarUrl} alt={owner?.nickname || site?.title || ''} width={32} height={32} loading="lazy" />
                 ) : (
