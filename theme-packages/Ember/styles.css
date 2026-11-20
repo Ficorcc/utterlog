@@ -16643,11 +16643,25 @@ html[data-theme="Ember"] body .blog-main {
 }
 
 
-/* 3) 内容列撑满可视高度，页脚贴在底部（上游靠 .site-main 的 flex:1 撑开） */
-html[data-theme="Ember"] .ember-main {
+/* 3) 外壳固定为视口高度，滚动交给 .blog-main。
+   本项目 html/body 是 100% 固定高 + overflow:hidden（globals.css），整页不滚动，
+   必须由 .blog-main 自己滚。所以外壳要钉在视口高度上、.blog-main 用
+   flex:1 + min-height:0 拿到「视口高 − 导航」的高度，超出的内容才会溢出滚动。
+   少了 min-height:0，flex 子项会被内容撑高，滚动容器退化成普通块，整页卡死。 */
+html[data-theme="Ember"] .ember-shell {
+  position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100dvh;
+  min-height: 100dvh;
+}
+
+
+html[data-theme="Ember"] .ember-main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 
@@ -16659,10 +16673,6 @@ html[data-theme="Ember"] .ember-main > .container {
 /* 4) 固定导航在滚动容器之外，滚动时上游靠 body.nav-scrolled 换样式；
    这里补一条：滚动容器自身是布局上下文，导航的 fixed 定位需要相对视口，
    不能被祖先的 transform/filter 变成相对容器定位 */
-html[data-theme="Ember"] .ember-shell {
-  position: relative;
-}
-
 
 /* 5) 上游首页信息流的加载更多按钮（本项目用分页代替，按钮保留样式不渲染） */
 html[data-theme="Ember"] .home-feed-more {

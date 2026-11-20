@@ -88,6 +88,9 @@ export default function Header() {
     return pathname.startsWith(href);
   };
 
+  // 按钮文案始终指向「点击后将切换到的模式」
+  const modeToggleLabel = mode === 'dark' ? '切换浅色模式' : '切换深色模式';
+
   const avatarUrl = owner?.avatar || site?.logo || '';
 
   return (
@@ -189,7 +192,7 @@ export default function Header() {
         <button type="button" className="side-search-toggle" aria-label="搜索" title="搜索" onClick={() => setSearchOpen(true)}>
           <i className="fa-solid fa-magnifying-glass" aria-hidden="true" />
         </button>
-        <button type="button" className="side-theme-toggle" aria-label="切换深色模式" title="切换深色模式" onClick={toggleMode}>
+        <button type="button" className="side-theme-toggle" aria-label={modeToggleLabel} title={modeToggleLabel} onClick={toggleMode}>
           <span className="side-theme-icon" aria-hidden="true">
             <i className="fa-solid fa-moon theme-icon-moon" aria-hidden="true" />
             <i className="fa-solid fa-sun theme-icon-sun" aria-hidden="true" />
