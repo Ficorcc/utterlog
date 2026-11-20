@@ -11,7 +11,8 @@
 # 任何一步失败即中止，构建不成功不会碰服务器。
 set -euo pipefail
 
-SERVER="${UTTERLOG_SERVER:-root@47.83.251.61}"
+# 2026-11-20 起应用主机迁到 195.245.241.137；47.83.251.61 只留作反代边缘。
+SERVER="${UTTERLOG_SERVER:-root@195.245.241.137}"
 KEY="${UTTERLOG_KEY:-/Volumes/文件/文稿/gentpan.pem}"
 REMOTE_DIR="/opt/utterlog-v1.6.0"
 SSH_CMD="ssh -i $KEY -o BatchMode=yes"
