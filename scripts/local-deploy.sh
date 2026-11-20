@@ -47,12 +47,19 @@ fi
 echo "── 3/4 同步到服务器 ──"
 # 依赖指纹（变化才在服务器重装）
 LOCK_BEFORE=$(md5 -q bun.lock 2>/dev/null || echo none)
+# REMOTE_DIR 是指向发布目录的符号链接（/opt/utterlog-v1.6.0 -> /opt/utterlog-releases/<sha>）。
+# rsync 3.5 起默认拒绝跟随「非调用者拥有」的符号链接，会报
+# "refusing to follow a symlink owned by an untrusted user" 并以 ELOOP 收场，
+# 所以这里先解析出真实路径再同步（服务端步骤仍用 REMOTE_DIR，等价）。
+REMOTE_REAL=$($SSH_CMD "$SERVER" "readlink -f '$REMOTE_DIR'")
+[ -n "$REMOTE_REAL" ] || { echo "✗ 无法解析远端部署目录"; exit 1; }
+echo "  远端目标: $REMOTE_REAL"
 # --exclude .env/.runtime：服务器专属文件（符号链接与运行时目录），
 # 本地仓库没有它们，不加排除会被 --delete 删掉导致服务起不来。
 rsync -az --delete \
   --exclude node_modules --exclude .git --exclude .bun --exclude backups \
   --exclude .env --exclude .runtime \
-  -e "$RSYNC_SSH" ./ "$SERVER:$REMOTE_DIR/"
+  -e "$RSYNC_SSH" ./ "$SERVER:$REMOTE_REAL/"
 echo "✓ 文件已同步"
 
 echo "── 4/4 服务器收尾 ──"
