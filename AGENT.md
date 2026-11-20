@@ -165,7 +165,7 @@ checkout 直接跑 dev，那个文件不存在，Bun.serve 会对所有请求返
 
 ## 7. 主题系统
 
-5 套内置主题：
+内置主题：
 
 | 主题 | 状态 | 说明 |
 |---|---|---|
@@ -174,8 +174,26 @@ checkout 直接跑 dev，那个文件不存在，Bun.serve 会对所有请求返
 | **Flux** | 实验 | 绿 `#00C767`，Stripe Link 风格 |
 | **Nebula** | 暗色科技 | 天蓝 `#7FCFFF` 强调 + 纯黑底 + 玻璃质感卡片 |
 | **Utterlog** | 旗舰参考 | 默认基线 |
+| **Ember** | 复刻主题 | 复刻自 lawpan.cc 的 ember（LiteNote 内置主题），源码在 `theme-renderers/Ember/` |
 
 **Chred 已废弃**，`blog-theme.ts` 把老站点的 `chred` 映射回 Azure + 红色强调。
+
+### Ember 主题（复刻主题，样式是生成的）
+
+- 组件源码：`app/start/src/web/themes/Ember/*.tsx`（和其余内置主题同目录，
+  `BUILTIN_THEMES_DIR` 默认就指这里）；`styles.css` / `theme.json` 也在这个目录，
+  由 `scripts/sync-ember-theme-css.mjs` 生成。
+- `bun run scripts/sync-ember-theme-css.mjs` 会抓 lawpan.cc 的
+  `main.css / pages.css / home.css`，做两处机械改写后落盘：
+  1. `data-theme="light|dark"` → `data-ember-mode="light|dark"`
+     （根元素 `data-theme` 被主题系统占用，承载主题名）；
+  2. 每条规则加 `html[data-theme="Ember"]` 作用域 —— 线上加载顺序是
+     「主题 styles.css → app bundle(globals.css)」，同优先级下后加载的
+     globals 会盖掉主题，必须靠作用域抬优先级。
+- 手写部分只有 `adapter.css`：把上游的「整页滚动 + body 背景」接到本项目的
+  `.blog-main` 内滚动容器上。改样式请改 `adapter.css` 或上游 CSS，
+  **不要手改 `styles.css`**（下次生成会被覆盖）。
+- 启用方式：`options.active_theme = 'Ember'`（后台「主题」页切换，或直接改库）。
 
 ### 改主题前必须先分清：副本还是转发
 

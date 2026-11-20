@@ -229,7 +229,7 @@ export function PublicPage({ data }: { data: PublicPageData }) {
       {(() => {
         if (data.kind === 'home' && ctx) {
           const theme = getThemeComponents(ctx.theme.name);
-          return <theme.HomePage posts={data.posts} page={data.page} totalPages={data.totalPages} categories={ctx.categories} archiveStats={ctx.archiveStats} latestMoment={data.latestMoment} latestComments={data.latestComments} perPage={data.perPage} />;
+          return <theme.HomePage posts={data.posts} page={data.page} totalPages={data.totalPages} categories={ctx.categories} archiveStats={ctx.archiveStats} latestMoment={data.latestMoment} recentMoments={data.recentMoments} latestComments={data.latestComments} perPage={data.perPage} />;
         }
         if (data.kind === 'post' && ctx) {
           const theme = getThemeComponents(ctx.theme.name);
@@ -328,7 +328,11 @@ export function PublicPage({ data }: { data: PublicPageData }) {
         if (data.kind === 'search') return <SearchPage data={data} />;
         if (data.kind === 'films') return <FilmsPage data={data} />;
         if (data.kind === 'date') return <DateArchive data={data} />;
-        if (data.kind === 'not-found' && ctx) return <DefaultNotFoundPage />;
+        if (data.kind === 'not-found' && ctx) {
+          // 主题可以接管 404 页；没接管时用应用层默认页。
+          const NotFound = getThemeComponents(ctx.theme.name).NotFoundPage || DefaultNotFoundPage;
+          return <NotFound />;
+        }
         if (data.kind === 'post') return (
           <article className="start-article">
             <Link to="/" className="text-link">返回首页</Link>

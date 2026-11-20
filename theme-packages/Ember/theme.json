@@ -1,12 +1,12 @@
 {
   "id": "Ember",
   "name": "Ember",
-  "version": "1.0.0",
-  "description": "移植自 LiteNote Ember 的温暖纸张风格主题",
-  "author": "LiteNote / Utterlog",
+  "version": "2.0.0",
+  "description": "复刻自 lawpan.cc 的 ember 主题（LiteNote 内置 ember）：居中胶囊导航 + 分类抽屉、首页文章/说说混排信息流、文章页侧栏数据条与 CC 授权卡、归档热力图、暖灰纸感配色与深浅色切换",
+  "author": "lawpan.cc / LiteNote · 复刻至 Utterlog",
   "screenshot": "screenshot.svg",
-  "colors": { "primary": "#b85f3f", "background": "#f3eee6" },
-  "layout": { "maxWidth": "920px", "headerStyle": "paper" },
-  "menuPositions": [{ "key": "header", "label": "顶部导航", "description": "网站顶部导航菜单" }],
-  "features": ["darkMode", "responsive", "comments"]
+  "colors": { "primary": "#e65a4c", "background": "#f0eee9" },
+  "layout": { "maxWidth": "800px", "headerStyle": "pill" },
+  "menuPositions": [{ "key": "header", "label": "顶部导航", "description": "胶囊导航里的主菜单；未配置时回退到首页 / 说说 / 归档" }],
+  "features": ["dark_mode", "search", "responsive", "mobile_tabbar", "archive_heatmap", "guestbook", "site_dashboard", "toc"]
 }

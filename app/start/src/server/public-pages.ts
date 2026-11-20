@@ -137,7 +137,7 @@ export type PublicPageSite = { title: string; subtitle: string };
 
 export type PublicPageBody =
   | { kind: 'not-found'; pathname: string }
-  | { kind: 'home'; posts: any[]; page: number; totalPages: number; latestMoment: any | null; latestComments: any[]; perPage: number }
+  | { kind: 'home'; posts: any[]; page: number; totalPages: number; latestMoment: any | null; recentMoments: any[]; latestComments: any[]; perPage: number }
   | { kind: 'post'; post: any }
   | { kind: 'archives'; posts: any[] }
   | { kind: 'categories' }
@@ -275,6 +275,7 @@ async function homeRoute(ctx: ThemeContextData | null, page: number): Promise<Pu
     page: home?.page || page,
     totalPages: home?.totalPages || 1,
     latestMoment: home?.latestMoment || null,
+    recentMoments: home?.recentMoments || [],
     latestComments: home?.latestComments || [],
     perPage: home?.perPage || 10,
   };

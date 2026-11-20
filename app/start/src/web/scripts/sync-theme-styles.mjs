@@ -24,7 +24,7 @@
  *   - 跳过：内容一致 → 静默跳过（避免 mtime 抖动让 Next watcher 误重启）
  *   - 复制：内容不一致或 public 不存在 → 复制
  */
-import { copyFileSync, existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -43,14 +43,14 @@ const themes = readdirSync(SRC_DIR).filter((name) => {
   return statSync(p).isDirectory();
 });
 
-const SYNC_FILES = ['styles.css', 'theme.json'];
+const SYNC_FILES = ['styles.css', 'theme.json', 'screenshot.svg'];
 let copied = 0;
 let skipped = 0;
 
-for (const t of themes) {
+function syncTheme(srcDir, name) {
   for (const file of SYNC_FILES) {
-    const src = join(SRC_DIR, t, file);
-    const dest = join(PUBLIC_DIR, t, file);
+    const src = join(srcDir, name, file);
+    const dest = join(PUBLIC_DIR, name, file);
     if (!existsSync(src)) continue;
     if (existsSync(dest)) {
       try {
@@ -67,10 +67,15 @@ for (const t of themes) {
     // Make sure public/themes/<T>/ exists (it does by convention but be safe).
     // Use copyFileSync — if dest is a symlink, this will overwrite the link
     // target, which is what we want when migrating away from symlink layout.
+    mkdirSync(dirname(dest), { recursive: true });
     copyFileSync(src, dest);
     copied++;
-    console.log(`[sync-theme-styles] ${t}/${file}: src → public`);
+    console.log(`[sync-theme-styles] ${name}/${file}: src → public`);
   }
+}
+
+for (const t of themes) {
+  syncTheme(SRC_DIR, t);
 }
 
 if (copied === 0) {

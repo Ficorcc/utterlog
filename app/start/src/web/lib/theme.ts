@@ -43,7 +43,7 @@ import {
   type BlogThemeAccent,
 } from '@shared/blog-theme';
 import AzureManifest from '@/themes/Azure/theme.json';
-import EmberManifest from '@/theme-renderers/Ember/theme.json';
+import EmberManifest from '@/themes/Ember/theme.json';
 import RenascentManifest from '@/themes/Renascent/theme.json';
 import RobesManifest from '@/themes/Robes/theme.json';
 import ShanYingManifest from '@/themes/ShanYing/theme.json';
@@ -98,16 +98,28 @@ const Azure: ThemeComponents = {
   GuestbookPage: lazy(() => import('@/themes/Azure/GuestbookPage')),
 };
 
-// Ember's renderer is compiled once into Utterlog. Its installable ZIP lives
-// separately under content/themes/Ember and supplies the runtime assets.
+// Ember 是内置主题：组件与样式表都在 themes/Ember/，styles.css 由
+// scripts/sync-ember-theme-css.mjs 从上游生成。
 const Ember: ThemeComponents = {
-  Header: lazy(() => import('@/theme-renderers/Ember/Header')),
-  Footer: lazy(() => import('@/theme-renderers/Ember/Footer')),
-  Layout: lazy(() => import('@/theme-renderers/Ember/Layout')),
-  HomePage: lazy(() => import('@/theme-renderers/Ember/HomePage')),
-  PostPage: lazy(() => import('@/theme-renderers/Ember/PostPage')),
-  PostCard: lazy(() => import('@/theme-renderers/Ember/PostCard')),
+  Header: lazy(() => import('@/themes/Ember/Header')),
+  Footer: lazy(() => import('@/themes/Ember/Footer')),
+  Layout: lazy(() => import('@/themes/Ember/Layout')),
+  HomePage: lazy(() => import('@/themes/Ember/HomePage')),
+  PostPage: lazy(() => import('@/themes/Ember/PostPage')),
+  PostCard: lazy(() => import('@/themes/Ember/PostCard')),
   CommentSection: SharedCommentSection,
+  ArchivePage: lazy(() => import('@/themes/Ember/ArchivePage')),
+  CategoryPage: lazy(() => import('@/themes/Ember/CategoryPage')),
+  CategoriesPage: lazy(() => import('@/themes/Ember/CategoriesPage')),
+  TagPage: lazy(() => import('@/themes/Ember/TagPage')),
+  TagsPage: lazy(() => import('@/themes/Ember/TagsPage')),
+  AboutPage: lazy(() => import('@/themes/Ember/AboutPage')),
+  LinksPage: lazy(() => import('@/themes/Ember/LinksPage')),
+  FriendsPage: lazy(() => import('@/themes/Ember/FriendsPage')),
+  MomentsPage: lazy(() => import('@/themes/Ember/MomentsPage')),
+  NotFoundPage: lazy(() => import('@/themes/Ember/NotFoundPage')),
+  GuestbookPage: lazy(() => import('@/themes/Ember/GuestbookPage')),
+  DashboardPage: lazy(() => import('@/themes/Ember/DashboardPage')),
 };
 
 const Renascent: ThemeComponents = {

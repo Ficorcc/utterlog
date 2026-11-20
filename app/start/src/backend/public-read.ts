@@ -987,7 +987,7 @@ export async function loadHomePageDataDirect(page: number) {
   const perPage = Number(await optionValue('posts_per_page', '10').catch(() => '10')) || 10;
   const [postsRes, momentsRes, commentsRes] = await Promise.all([
     listPosts({ page, perPage, status: 'publish' }),
-    listMoments({ perPage: 1 }),
+    listMoments({ perPage: 12 }),
     listComments({ perPage: 10, status: 'approved', excludeAdmin: true, order: 'desc' }),
   ]);
   const moments = momentsRes.data.moments || [];
@@ -996,6 +996,8 @@ export async function loadHomePageDataDirect(page: number) {
     page,
     totalPages: postsRes.meta.total_pages || 1,
     latestMoment: moments[0] || null,
+    // 首页信息流要混排说说，主题按时间合并文章与说说
+    recentMoments: moments,
     latestComments: commentsRes.data || [],
     perPage,
   };

@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" width="1200" height="760" role="img" aria-label="Ember 主题预览">
+  <rect width="1200" height="760" fill="#f0eee9"/>
+
+  <!-- 顶部胶囊导航 -->
+  <g>
+    <rect x="370" y="26" width="460" height="52" rx="26" fill="#0b0b0d"/>
+    <circle cx="400" cy="52" r="15" fill="#3a3a3f"/>
+    <circle cx="400" cy="52" r="15" fill="none" stroke="#e65a4c" stroke-width="2"/>
+    <rect x="470" y="46" width="46" height="11" rx="5" fill="#f5f5f7"/>
+    <rect x="545" y="47" width="38" height="10" rx="5" fill="#9a9aa2"/>
+    <rect x="608" y="47" width="38" height="10" rx="5" fill="#9a9aa2"/>
+    <rect x="742" y="38" width="74" height="28" rx="14" fill="#e65a4c"/>
+  </g>
+
+  <!-- 说说卡 -->
+  <g>
+    <rect x="200" y="120" width="800" height="104" rx="20" fill="#ffffff" stroke="#e5e2de"/>
+    <rect x="228" y="152" width="150" height="13" rx="6" fill="#2a2a2a"/>
+    <rect x="228" y="186" width="96" height="10" rx="5" fill="#b5b0a9"/>
+  </g>
+
+  <!-- 文章卡（带封面） -->
+  <g>
+    <rect x="200" y="248" width="800" height="240" rx="20" fill="#ffffff" stroke="#e5e2de"/>
+    <rect x="200" y="248" width="800" height="150" rx="20" fill="#d8cfc6"/>
+    <rect x="200" y="378" width="800" height="20" fill="#d8cfc6"/>
+    <rect x="228" y="418" width="210" height="18" rx="7" fill="#1a1a1a"/>
+    <rect x="228" y="450" width="520" height="10" rx="5" fill="#b5b0a9"/>
+    <rect x="228" y="470" width="380" height="10" rx="5" fill="#d8d3cc"/>
+    <rect x="940" y="258" width="46" height="22" rx="6" fill="#e65a4c"/>
+  </g>
+
+  <!-- 文章卡（无封面） -->
+  <g>
+    <rect x="200" y="512" width="800" height="96" rx="20" fill="#ffffff" stroke="#e5e2de"/>
+    <rect x="228" y="538" width="260" height="16" rx="7" fill="#1a1a1a"/>
+    <rect x="228" y="568" width="460" height="10" rx="5" fill="#b5b0a9"/>
+  </g>
+
+  <!-- 右侧快捷操作 -->
+  <g>
+    <rect x="1020" y="300" width="44" height="88" rx="22" fill="#0b0b0d"/>
+    <circle cx="1042" cy="326" r="9" fill="none" stroke="#f5f5f7" stroke-width="2"/>
+    <circle cx="1042" cy="366" r="9" fill="#f5f5f7"/>
+  </g>
+
+  <!-- 底部分页 -->
+  <g>
+    <rect x="500" y="636" width="40" height="34" rx="10" fill="#ffffff" stroke="#e5e2de"/>
+    <rect x="548" y="636" width="40" height="34" rx="10" fill="#e65a4c"/>
+    <rect x="596" y="636" width="40" height="34" rx="10" fill="#ffffff" stroke="#e5e2de"/>
+  </g>
+</svg>

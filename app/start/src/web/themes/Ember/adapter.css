@@ -1,0 +1,74 @@
+/* ============================================================
+ * Utterlog 适配层 —— 手写，不随上游更新
+ *
+ * 上游（lawpan.cc 的 ember）是「整页滚动 + body 背景」的经典博客布局：
+ * 固定导航挂在视口顶部，.container 靠 116px 顶部留白避让它，页脚跟在
+ * 正文后面。本项目的滚动容器是 .blog-main（body 固定 100% 不滚动），
+ * 所以需要在这里把「谁在滚、背景挂哪、导航怎么知道滚过了」三件事接上。
+ *
+ * 本文件由 scripts/sync-ember-theme-css.mjs 读入并统一加
+ * html[data-theme="Ember"] 作用域后拼到 styles.css 末尾。
+ * ============================================================ */
+
+/* 1) 滚动容器：上游的滚动监听挂在 body 上，本项目要挂 .blog-main */
+body .blog-main {
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+}
+
+/* 2) 页面底色：上游挂在 body 上，本项目 body 不滚动，
+   背景要透到滚动容器里，否则正文区会盖住 body 的暖色底 */
+body .blog-main {
+  background: transparent;
+}
+
+/* 3) 内容列撑满可视高度，页脚贴在底部（上游靠 .site-main 的 flex:1 撑开） */
+.ember-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.ember-main > .container {
+  flex: 1 0 auto;
+}
+
+/* 4) 固定导航在滚动容器之外，滚动时上游靠 body.nav-scrolled 换样式；
+   这里补一条：滚动容器自身是布局上下文，导航的 fixed 定位需要相对视口，
+   不能被祖先的 transform/filter 变成相对容器定位 */
+.ember-shell {
+  position: relative;
+}
+
+/* 5) 上游首页信息流的加载更多按钮（本项目用分页代替，按钮保留样式不渲染） */
+.home-feed-more {
+  display: none;
+}
+
+/* 6) 共享评论组件（components/blog/CommentList）与上游 .comment-* 视觉对齐 */
+.comment-list-header {
+  display: none;
+}
+
+.comments-title-stats {
+  display: inline-flex;
+  gap: 12px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--c-text-muted);
+}
+
+/* 7) 文章正文：上游正文容器是 .post-content，共享正文组件渲染 .blog-prose，
+   两者叠加时以 .post-content 的排版为准（作用域已抬高优先级） */
+.post-content .blog-prose {
+  font-family: var(--article-font-family);
+}
+
+/* 8) 主题内的滚动条跟随上游配色 */
+.blog-main::-webkit-scrollbar-thumb {
+  background: rgba(26, 26, 26, 0.18);
+}
+
+.blog-main::-webkit-scrollbar-thumb:hover {
+  background: rgba(26, 26, 26, 0.3);
+}
