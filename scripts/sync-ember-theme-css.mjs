@@ -250,6 +250,8 @@ try {
  * 各页面（归档页、动态页、关于页…）的样式补丁单独放在 parts/ 下，
  * 纯 CSS、不带主题作用域前缀，统一在这里按文件名顺序拼到适配层后面，
  * 便于按页面维护，同时保证补丁落在上游样式之后、优先级更高。
+ * 拼进来时同样要加 html[data-theme="Ember"] 作用域 —— 否则补丁的优先级
+ * 会低于应用层 globals.css 里同名的规则，改不动共享组件的样式。
  */
 const PARTS_DIR = join(THEME_DIR, 'parts');
 let partsCss = '';
@@ -259,7 +261,7 @@ try {
     .sort();
   for (const name of files) {
     const body = readFileSync(join(PARTS_DIR, name), 'utf-8').trim();
-    if (body) partsCss += `/* ---------- part: ${name} ---------- */\n${body}\n\n`;
+    if (body) partsCss += `/* ---------- part: ${name} ---------- */\n${scopeCss(body)}\n\n`;
   }
 } catch {
   console.warn('[sync-ember-theme-css] parts 目录不存在，跳过分页补丁');
