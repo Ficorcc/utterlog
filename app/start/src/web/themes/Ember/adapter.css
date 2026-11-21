@@ -164,7 +164,9 @@ html[data-ember-mode="dark"] .blog-main::-webkit-scrollbar-thumb:hover {
    顶部是一条黑胶囊压着浅色页面，跟页面的暖灰底色完全不搭。
    这里改成：日间浅色磨砂、夜间保持原来的黑胶囊，
    胶囊里的分类抽屉、头像菜单、「更多」菜单一起跟着换色。 */
-html:not([data-ember-mode="dark"]) .nav-pill {
+/* 导航胶囊本体：上游这条是 .site-nav-bar .nav-pill（权重更高），
+   这里保持同样的结构，权重对齐后靠「写在后面」取胜。 */
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-pill {
   background: rgba(255, 255, 255, 0.82);
   border-color: rgba(26, 26, 26, 0.08);
   box-shadow:
@@ -172,47 +174,49 @@ html:not([data-ember-mode="dark"]) .nav-pill {
     0 1px 0 rgba(255, 255, 255, 0.72) inset;
 }
 
-/* 导航文字与图标：白底浅色胶囊上要用深色字 */
-html:not([data-ember-mode="dark"]) .nav-link,
-html:not([data-ember-mode="dark"]) .nav-dd-trigger,
-html:not([data-ember-mode="dark"]) .nav-row a {
+/* 导航文字与图标：白底浅色胶囊上要用深色字。
+   .nav-row a 这条同时覆盖桌面与移动端上游那条「tab 内容统一浅色」的规则。 */
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-row a,
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-dd-trigger,
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-actions .nav-more-toggle {
   color: var(--c-text-soft);
 }
 
-html:not([data-ember-mode="dark"]) .nav-link i,
-html:not([data-ember-mode="dark"]) .nav-row a i {
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-row a i,
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-dd-trigger i,
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-actions .nav-more-toggle i {
   color: var(--c-text-muted);
 }
 
 /* 悬停 / 选中 */
-html:not([data-ember-mode="dark"]) .nav-link:hover,
-html:not([data-ember-mode="dark"]) .nav-link.active,
-html:not([data-ember-mode="dark"]) .nav-dd-trigger:hover {
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-link:hover,
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-link.active,
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-dd-trigger:hover {
   color: var(--c-text);
   background: rgba(26, 26, 26, 0.06);
 }
 
-html:not([data-ember-mode="dark"]) .nav-link:hover i,
-html:not([data-ember-mode="dark"]) .nav-link.active i {
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-link:hover i,
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-link.active i {
   color: var(--c-primary);
 }
 
 /* 「文章」下拉展开时的触发按钮 */
-html:not([data-ember-mode="dark"]) .nav-pill.nav-open .nav-dd-trigger {
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-pill.nav-open .nav-dd-trigger {
   color: var(--c-text);
   background: rgba(26, 26, 26, 0.06);
 }
 
-html:not([data-ember-mode="dark"]) .nav-pill.nav-open .nav-dd-trigger i {
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-pill.nav-open .nav-dd-trigger i {
   color: var(--c-text);
 }
 
 /* 分类抽屉里的标题与描述 */
-html:not([data-ember-mode="dark"]) .nav-cat-name {
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-pill .nav-cat-name {
   color: var(--c-text);
 }
 
-html:not([data-ember-mode="dark"]) .nav-cat-desc {
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-pill .nav-cat-desc {
   color: var(--c-text-muted);
 }
 
@@ -233,7 +237,8 @@ html:not([data-ember-mode="dark"]) .site-nav-bar .nav-more-item:active {
   background: rgba(26, 26, 26, 0.06);
 }
 
-/* 「动态」按钮是主色实心，文字保持白色 */
-html:not([data-ember-mode="dark"]) .site-nav-bar .nav-actions .nav-cta {
+/* 「动态」按钮是主色实心，文字与图标保持白色 */
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-actions .nav-cta,
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-actions .nav-cta i {
   color: var(--c-white);
 }
