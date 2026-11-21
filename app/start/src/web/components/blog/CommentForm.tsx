@@ -106,7 +106,7 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel, com
   }
 
   const handleLogout = () => { logout(); setHasCached(false); setName(''); setEmail(''); setUrl(''); setEditing(false); };
-  const handleClearCache = () => { localStorage.removeItem('comment_user'); setHasCached(false); setName(''); setEmail(''); setUrl(''); setEditing(false); };
+  const handleClearCache = () => { localStorage.removeItem('comment_user'); setHasCached(false); setName(''); setEmail(''); setUrl(''); setEditing(false); window.dispatchEvent(new CustomEvent('utterlog-comment-user')); };
 
   const handleSubmit = async () => {
     if (!name.trim()) { toast.error('请输入昵称'); return; }
@@ -146,6 +146,8 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel, com
       localStorage.setItem('comment_user', JSON.stringify({ name, email, url }));
       setHasCached(true);
       setEditing(false);
+      // 通知悬浮条上的「评论身份」入口刷新头像与昵称
+      window.dispatchEvent(new CustomEvent('utterlog-comment-user'));
 
       const status = res?.status || res?.data?.status;
       if (status === 'approved') {

@@ -7,7 +7,6 @@ import AISummary from './AISummary';
 import PostNavigation from './PostNavigation';
 import CommentSection from './CommentSection';
 import VideoPostBody from '@/components/blog/VideoPostBody';
-import { useAuthStore } from '@/lib/store';
 import { resolveSiteTimeZone } from '@/lib/timezone';
 import { postDateInput } from '@/lib/post-date';
 import { categoryHref, coverOf, firstCategory, postDateTimeLabel, postMonthDay } from './utils';
@@ -21,35 +20,8 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
   const publishedFull = postDateTimeLabel(post, timeZone);
   const commentCount = Number(post.comment_count || 0);
 
-  // 站点主人（已登录）看得到后台入口，普通访客看到的是自己的评论者资料
-  const { user, accessToken } = useAuthStore();
-  const isOwner = !!accessToken && !!user;
-
   const scrollToComments = () => {
     document.getElementById('comments')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  const focusCommenterInfo = () => {
-    const form = document.querySelector('#comments .comment-form');
-    form?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    const scope = (form || document) as ParentNode;
-    const nickname = scope.querySelector('input[placeholder*="昵称"]') as HTMLInputElement | null;
-    const firstInput = scope.querySelector('input:not([type="hidden"])') as HTMLInputElement | null;
-    const target = nickname || firstInput;
-    if (target) {
-      window.setTimeout(() => target.focus({ preventScroll: true }), 400);
-      return;
-    }
-    const textarea = scope.querySelector('textarea') as HTMLTextAreaElement | null;
-    if (textarea) window.setTimeout(() => textarea.focus({ preventScroll: true }), 400);
-  };
-
-  const handleCommenterInfo = () => {
-    if (isOwner) {
-      window.location.href = '/admin/comments';
-      return;
-    }
-    focusCommenterInfo();
   };
 
   return (
@@ -92,15 +64,6 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
               <button type="button" className="post-side-stat" title={`${commentCount} 评论`} onClick={scrollToComments}>
                 <i className="fa-regular fa-comment" aria-hidden="true" />
                 <span>{commentCount}</span>
-              </button>
-              <button
-                type="button"
-                className="post-side-stat"
-                title="编辑评论者信息"
-                onClick={handleCommenterInfo}
-              >
-                <i className="fa-regular fa-circle-user" aria-hidden="true" />
-                <span>身份</span>
               </button>
             </aside>
 
