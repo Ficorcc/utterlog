@@ -17197,10 +17197,29 @@ html[data-theme="Ember"] .activity-item-title a:hover .activity-item-ext {
 
 /* 摘要最多两行，超出省略 */
 html[data-theme="Ember"] .activity-timeline-feeds .activity-item-content {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  position: relative;
+}
+
+
+/* 内层按行高精确裁切。
+   -webkit-line-clamp 在这里不管用：时间线是 grid 容器，节点里的
+   legacy box 会被 blockify 成 flow-root，行截断只剩高度约束、
+   不截文字，溢出的半行反而盖到下内边距上。改成按行高（1.65em）
+   卡死高度，裁切边界正好落在行边界上。 */
+html[data-theme="Ember"] .activity-timeline-feeds .activity-item-summary {
+  display: block;
+  max-height: 3.3em;
   overflow: hidden;
+}
+
+
+/* 截断时补的省略号，放在容器剩下的下内边距里，不压住正文 */
+html[data-theme="Ember"] .activity-timeline-feeds .activity-item-more {
+  position: absolute;
+  right: var(--sp-14);
+  bottom: var(--sp-8);
+  color: var(--c-text-faint);
+  pointer-events: none;
 }
 
 

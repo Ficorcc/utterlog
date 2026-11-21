@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { datePartsInTimeZone, formatDateInTimeZone } from '@/lib/timezone';
 
 /**
@@ -96,6 +96,37 @@ function TimelineNode({ friend, variant }: { friend: FriendItem; variant: Timeli
   );
 }
 
+/**
+ * 订阅摘要：最多留两行。
+ *
+ * 这里没用 -webkit-line-clamp —— 时间线是 grid 容器，节点里的 legacy box
+ * 会被 blockify 成 flow-root，行截断只剩高度约束、不会真的截断文字，
+ * 溢出的那半行反而会盖到下内边距上。改成内层按行高精确裁切，
+ * 再在剩下的内边距里补一个省略号，截断与否由实际溢出情况决定。
+ */
+function FeedSummary({ text }: { text: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [clipped, setClipped] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (el) setClipped(el.scrollHeight > el.clientHeight + 1);
+  }, [text]);
+
+  return (
+    <>
+      <span ref={ref} className="activity-item-summary">
+        {text}
+      </span>
+      {clipped ? (
+        <span className="activity-item-more" aria-hidden="true">
+          …
+        </span>
+      ) : null}
+    </>
+  );
+}
+
 export type TimelineVariant = 'timeline' | 'feeds';
 
 export default function ActivityTimeline({
@@ -161,7 +192,15 @@ export default function ActivityTimeline({
                   <span>{post.title}</span>
                 )}
               </div>
-              {post.description ? <div className="activity-item-content">{post.description}</div> : null}
+              {post.description ? (
+                isFeeds ? (
+                  <div className="activity-item-content">
+                    <FeedSummary text={post.description} />
+                  </div>
+                ) : (
+                  <div className="activity-item-content">{post.description}</div>
+                )
+              ) : null}
             </div>
           </article>
         );
