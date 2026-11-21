@@ -1,7 +1,7 @@
 {
   "id": "Ember",
   "name": "Ember",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "复刻自 lawpan.cc 的 ember 主题（LiteNote 内置 ember）：居中胶囊导航 + 分类抽屉、首页文章/说说混排信息流、文章页侧栏数据条与 CC 授权卡、归档热力图、暖灰纸感配色与深浅色切换",
   "author": "lawpan.cc / LiteNote · 复刻至 Utterlog",
   "screenshot": "screenshot.svg",

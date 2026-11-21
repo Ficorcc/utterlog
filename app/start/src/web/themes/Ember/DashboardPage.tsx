@@ -15,7 +15,6 @@ import { postDateInput } from '@/lib/post-date';
  *     .activity-hero              标题
  *     .activity-panel              概览统计
  *     .activity-panel              最新文章 / 热门阅读 / 最近说说 / 最近评论 / 最近说说评论
- *     .activity-panel              友情链接
  */
 
 /** 相对时间：面板里只关心「什么时候」 */
@@ -38,7 +37,6 @@ export default function DashboardPage({
   momentTotal = 0,
   comments = [],
   momentComments = [],
-  links = [],
   stats = {},
   timeZone = 'UTC',
   siteTitle = '',
@@ -49,7 +47,6 @@ export default function DashboardPage({
   momentTotal?: number;
   comments?: any[];
   momentComments?: any[];
-  links?: any[];
   stats?: any;
   timeZone?: string;
   siteTitle?: string;
@@ -60,7 +57,6 @@ export default function DashboardPage({
   const momentList = Array.isArray(moments) ? moments : [];
   const commentList = Array.isArray(comments) ? comments : [];
   const momentCommentList = Array.isArray(momentComments) ? momentComments : [];
-  const linkList = Array.isArray(links) ? links : [];
 
   // 面板只展示前 6 条，其余内容去对应的归档页 / 说说页看
   const visiblePosts = postList.slice(0, 6);
@@ -88,7 +84,7 @@ export default function DashboardPage({
             <b>DASHBOARD</b>
             <em>控制台</em>
           </div>
-          <p>{title} 的文章、说说、评论与友链，都在这里。</p>
+          <p>{title} 的文章、说说与评论，都在这里。</p>
         </div>
       </header>
 
@@ -242,53 +238,6 @@ export default function DashboardPage({
               </span>
             </div>
           ))}
-        </div>
-      </section>
-
-      <section className="activity-panel">
-        <div className="activity-panel-head">
-          <h3>
-            <i className="fa-solid fa-user-group" aria-hidden="true" /> 友情链接
-          </h3>
-          <Link prefetch={false} href="/links">
-            全部友链
-          </Link>
-        </div>
-        {linkList.length === 0 ? <p className="empty">还没有友情链接</p> : null}
-        <div className="friend-list">
-          {linkList.map((link: any) => {
-            const host = String(link.url || '').replace(/^https?:\/\//i, '').replace(/^www\./i, '').split('/')[0];
-            const logo = link.logo || link.avatar || (host ? `https://favicon.im/${encodeURIComponent(host)}` : '');
-            return (
-              <a key={link.id} className="friend-row" href={link.url} target="_blank" rel="nofollow noopener">
-                {logo ? (
-                  <img
-                    className="friend-logo"
-                    src={logo}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    referrerPolicy="no-referrer"
-                    onError={(event) => {
-                      event.currentTarget.style.visibility = 'hidden';
-                    }}
-                  />
-                ) : (
-                  <span className="friend-logo" aria-hidden="true" />
-                )}
-                <span className="friend-info">
-                  <strong>{link.name}</strong>
-                  {link.description ? (
-                    <>
-                      <span>-</span>
-                      <em>{link.description}</em>
-                    </>
-                  ) : null}
-                </span>
-                <span className="friend-host">{host}</span>
-              </a>
-            );
-          })}
         </div>
       </section>
     </section>
