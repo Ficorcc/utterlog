@@ -131,3 +131,30 @@ body {
   overflow: visible !important;
   padding-bottom: var(--sp-14) !important;
 }
+
+/* 12) 深色模式下残留的固定白底。
+   上游的 --c-white 是个固定色值，暗色模式里不会跟着变，
+   .archive-stats / .archive-post-list 直接拿它当底色 —— 暗色下就成了一
+   块刺眼的白色面板（浅色字压白底）。这里改成跟随主题的卡片色。 */
+html[data-ember-mode="dark"] .archive-stats,
+html[data-ember-mode="dark"] .archive-post-list {
+  background: var(--c-card);
+  border-color: var(--c-border);
+}
+
+html[data-ember-mode="dark"] .archive-stats {
+  color: var(--c-text-soft);
+}
+
+html[data-ember-mode="dark"] .archive-post-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* 13) 深色模式下的滚动条 */
+html[data-ember-mode="dark"] .blog-main::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+html[data-ember-mode="dark"] .blog-main::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.28);
+}

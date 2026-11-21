@@ -12,10 +12,10 @@ import { useThemeContext } from '@/lib/theme-context';
  *   .friend-page
  *     .friend-header > .friend-hero      标题 + 页面切换
  *     .friend-panel
- *       .friend-panel-head                面板标题
- *       .friend-list > .friend-row       站点列表
- *       .friend-request-box               申请 / 修改入口
  *       .friend-site-info                 本站信息（可复制）
+ *       .friend-request-box               申请 / 修改入口
+ *       .friend-panel-head                站点列表标题
+ *       .friend-list > .friend-row       站点列表
  *     .friend-request-modal               申请友链弹窗
  */
 
@@ -129,6 +129,43 @@ export default function LinksPage({
 
       <div className="friend-tab-panel" data-friend-panel="links">
         <div className="friend-panel">
+          <div className="friend-site-info">
+            <div className="friend-site-head">
+              <h3>
+                <i className="fa-regular fa-address-card" aria-hidden="true" /> 本站信息
+              </h3>
+            </div>
+            <div className="friend-site-grid">
+              {siteFields.length === 0 ? <p className="empty">还没有填写本站信息</p> : null}
+              {siteFields.map((item) => (
+                <div className="friend-site-field" key={item.label}>
+                  <span className="friend-site-label">
+                    <i className="fa-regular fa-copy" aria-hidden="true" /> {item.label}
+                  </span>
+                  <code>{item.value}</code>
+                  <button
+                    type="button"
+                    className="friend-copy-btn"
+                    onClick={() => void copy(item.label, item.value)}
+                    title={`复制${item.label}`}
+                    aria-label={`复制${item.label}`}
+                  >
+                    <i className={copied === item.label ? 'fa-solid fa-check' : 'fa-regular fa-copy'} aria-hidden="true" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="friend-request-box" id="friend-link-request">
+            <div className="friend-request-actions" aria-label="友链申请方式">
+              <button type="button" className="friend-request-btn" onClick={() => setShowApply(true)}>
+                <i className="fa-solid fa-user-plus" aria-hidden="true" />
+                <span>申请链接</span>
+              </button>
+            </div>
+          </div>
+
           <div className="friend-panel-head">
             <div>
               <h3>
@@ -181,42 +218,6 @@ export default function LinksPage({
             })}
           </div>
 
-          <div className="friend-request-box" id="friend-link-request">
-            <div className="friend-request-actions" aria-label="友链申请方式">
-              <button type="button" className="friend-request-btn" onClick={() => setShowApply(true)}>
-                <i className="fa-solid fa-user-plus" aria-hidden="true" />
-                <span>申请链接</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="friend-site-info">
-            <div className="friend-site-head">
-              <h3>
-                <i className="fa-regular fa-address-card" aria-hidden="true" /> 本站信息
-              </h3>
-            </div>
-            <div className="friend-site-grid">
-              {siteFields.length === 0 ? <p className="empty">还没有填写本站信息</p> : null}
-              {siteFields.map((item) => (
-                <div className="friend-site-field" key={item.label}>
-                  <span className="friend-site-label">
-                    <i className="fa-regular fa-copy" aria-hidden="true" /> {item.label}
-                  </span>
-                  <code>{item.value}</code>
-                  <button
-                    type="button"
-                    className="friend-copy-btn"
-                    onClick={() => void copy(item.label, item.value)}
-                    title={`复制${item.label}`}
-                    aria-label={`复制${item.label}`}
-                  >
-                    <i className={copied === item.label ? 'fa-solid fa-check' : 'fa-regular fa-copy'} aria-hidden="true" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
 

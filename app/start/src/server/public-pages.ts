@@ -18,6 +18,8 @@ import {
   searchPublicPosts,
 } from '@backend/public-read';
 import { requestIp } from '@backend/request-ip';
+import { table } from '@backend/config';
+import { many } from '@backend/db/helpers';
 import { bumpSiteViewOnRender, type ReadVisitor } from '@backend/services/tracking';
 import { guestbookStats, guestbookThread } from '@backend/services/guestbook';
 import { friendsFeed } from '@backend/services/friends-feed';
@@ -155,7 +157,7 @@ export type PublicPageBody =
   | { kind: 'search'; query: string; results: any[]; mode: string; total: number; timeZone: string }
   | { kind: 'films'; items: any[]; total: number; page: number; perPage: number; totalPages: number; filters: Record<string, string> }
   | { kind: 'date'; posts: any[]; year: number; month?: number; day?: number; timeZone: string }
-  | { kind: 'dashboard'; posts: any[]; hotPosts: any[]; moments: any[]; momentTotal: number; comments: any[]; links: any[] };
+  | { kind: 'dashboard'; posts: any[]; hotPosts: any[]; moments: any[]; momentTotal: number; comments: any[]; momentComments: any[]; links: any[] };
 
 export type PublicPageData = PublicPageBody & { site: PublicPageSite };
 
@@ -283,14 +285,26 @@ async function homeRoute(ctx: ThemeContextData | null, page: number): Promise<Pu
 
 async function dashboardRoute(ctx: ThemeContextData | null): Promise<PublicPageBody> {
   // 站点控制面板（对照 WP 原主题 template-parts/dashboard.php）：
-  // 最新 9 篇 / 热门 5 篇 / 最近 4 条说说 / 最近 6 条评论 / 全部友链。
+  // 最新 9 篇 / 热门 5 篇 / 最近 4 条说说 / 最近 6 条评论 / 最近 6 条说说评论 / 全部友链。
   // 统计、分类、标签、日历（heatmap 已含近一年按天计数）走 ThemeContext，不重复取。
-  const [recentRes, hotRes, momentsRes, commentsRes, linksRes] = await Promise.all([
+  const [recentRes, hotRes, momentsRes, commentsRes, linksRes, momentCommentsRes] = await Promise.all([
     safe(listPosts({ perPage: 9, status: 'publish' }), emptyPostList(1, 9)),
     safe(listPosts({ perPage: 5, status: 'publish', orderBy: 'view_count' }), emptyPostList(1, 5)),
     safe(listMoments({ perPage: 4 }), emptyMomentList(1, 4)),
     safe(listComments({ perPage: 6, status: 'approved', excludeAdmin: true }), emptyContentList(1, 6)),
     safe(listPublicContent('links', { perPage: 500 }), emptyContentList(1, 500)),
+    // 说说评论与文章评论分表存放（moment_comments / comments），所以这里单独查。
+    // 只取过审的外来读者评论，和上面的「最近评论」保持同一个口径。
+    safe(many<Record<string, unknown>>(
+      `select mc.id, mc.author_name as author, mc.content, mc.created_at, mc.moment_id,
+              left(regexp_replace(coalesce(m.content, ''), E'\\s+', ' ', 'g'), 40) as moment_content
+       from ${table('moment_comments')} mc
+       left join ${table('moments')} m on m.id = mc.moment_id
+       where mc.status = 'approved' and coalesce(mc.is_admin, false) = false
+       order by mc.created_at desc, mc.id desc
+       limit $1`,
+      [6],
+    ).then((rows) => Array.from(rows)), []),
   ]);
   const momentBody = dataOf<any>(momentsRes, []);
   const moments = Array.isArray(momentBody) ? momentBody : momentBody.moments || [];
@@ -301,6 +315,7 @@ async function dashboardRoute(ctx: ThemeContextData | null): Promise<PublicPageB
     momentTotal: Number((momentsRes as any)?.meta?.total || (momentsRes as any)?.pagination?.total || moments.length),
     moments,
     comments: dataOf<any[]>(commentsRes, []),
+    momentComments: dataOf<any[]>(momentCommentsRes, []),
     links: dataOf<any[]>(linksRes, []).filter((link: any) => String(link?.status || 'publish') === 'publish' || link?.status === 1),
   };
 }

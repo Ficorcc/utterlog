@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { datePartsInTimeZone, formatDateInTimeZone } from '@/lib/timezone';
 
 /**
@@ -9,6 +10,10 @@ import { datePartsInTimeZone, formatDateInTimeZone } from '@/lib/timezone';
  *   friends[].posts[] = 每个订阅源最近的文章。
  * 朋友圈页（/friends）和订阅页（/feeds）用的是同一份数据，差别只是
  * 朋友圈页多一条「按好友筛选」的好友标签栏，订阅页不要。
+ *
+ * variant：
+ *   'timeline' —— 朋友圈页，时间线节点用文件图标
+ *   'feeds'    —— 订阅页，节点换成订阅站自己的头像，站点名可点回原站
  */
 
 export interface FriendPost {
@@ -70,26 +75,53 @@ export function buildTimeline(friends: any[], activeFriend: number | null): Time
   return rows.sort((a, b) => Number(b.post.pubDate || 0) - Number(a.post.pubDate || 0));
 }
 
+/** 时间线节点：订阅页显示订阅站自己的头像，加载失败退回文件图标 */
+function TimelineNode({ friend, variant }: { friend: FriendItem; variant: TimelineVariant }) {
+  const [broken, setBroken] = useState(false);
+  const avatar = variant === 'feeds' ? String(friend.avatar || '').trim() : '';
+
+  if (!avatar || broken) {
+    return <i className="fa-regular fa-file-lines" aria-hidden="true" />;
+  }
+  return (
+    <img
+      className="activity-item-avatar"
+      src={avatar}
+      alt=""
+      loading="lazy"
+      decoding="async"
+      referrerPolicy="no-referrer"
+      onError={() => setBroken(true)}
+    />
+  );
+}
+
+export type TimelineVariant = 'timeline' | 'feeds';
+
 export default function ActivityTimeline({
   friends,
   activeFriend = null,
   timeZone,
   emptyText = '还没有动态',
+  variant = 'timeline',
 }: {
   friends: any[];
   activeFriend?: number | null;
   timeZone: string;
   emptyText?: string;
+  variant?: TimelineVariant;
 }) {
   const items = buildTimeline(friends, activeFriend);
+  const isFeeds = variant === 'feeds';
 
   if (items.length === 0) return <p className="empty">{emptyText}</p>;
 
   return (
-    <div className="activity-timeline">
+    <div className={`activity-timeline${isFeeds ? ' activity-timeline-feeds' : ''}`}>
       {items.map((item, index) => {
         const { friend, post } = item;
         const published = Number(post.pubDate || 0);
+        const siteUrl = String(friend.url || '').trim();
         return (
           <article className="activity-item activity-type-blog" id={`activity-${friend.id}-${index}`} key={`${friend.id}-${index}`}>
             <time className="activity-item-time" dateTime={published ? String(published) : undefined}>
@@ -98,19 +130,32 @@ export default function ActivityTimeline({
             </time>
             <span className="activity-item-line" aria-hidden="true" />
             <span className="activity-item-icon">
-              <i className="fa-regular fa-file-lines" aria-hidden="true" />
+              <TimelineNode friend={friend} variant={variant} />
             </span>
             <div className="activity-item-body">
               <div className="activity-item-meta">
                 <span>{hourMinute(published, timeZone)}</span>
                 <span>发布了</span>
                 <span>文章</span>
-                <span>{friend.name}</span>
+                {siteUrl ? (
+                  <a
+                    className="activity-item-site"
+                    href={siteUrl}
+                    target="_blank"
+                    rel="nofollow noopener"
+                    title={`访问 ${friend.name}`}
+                  >
+                    {friend.name}
+                  </a>
+                ) : (
+                  <span>{friend.name}</span>
+                )}
               </div>
               <div className="activity-item-title">
                 {post.link ? (
                   <a href={post.link} target="_blank" rel="nofollow noopener">
                     {post.title}
+                    {isFeeds ? <i className="fa-solid fa-arrow-up-right-from-square activity-item-ext" aria-hidden="true" /> : null}
                   </a>
                 ) : (
                   <span>{post.title}</span>

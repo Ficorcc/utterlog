@@ -1,10 +1,13 @@
+'use client';
+
 import Link from '@/components/AppLink';
 import PostContent from './PostContent';
 import TableOfContents from './TableOfContents';
 import AISummary from './AISummary';
 import PostNavigation from './PostNavigation';
-import CommentList from '@/components/blog/CommentList';
+import CommentSection from './CommentSection';
 import VideoPostBody from '@/components/blog/VideoPostBody';
+import { useAuthStore } from '@/lib/store';
 import { resolveSiteTimeZone } from '@/lib/timezone';
 import { postDateInput } from '@/lib/post-date';
 import { categoryHref, coverOf, firstCategory, postDateTimeLabel, postMonthDay } from './utils';
@@ -17,6 +20,37 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
   const { month, day } = postMonthDay({ published_at: displayDate }, timeZone);
   const publishedFull = postDateTimeLabel(post, timeZone);
   const commentCount = Number(post.comment_count || 0);
+
+  // 站点主人（已登录）看得到后台入口，普通访客看到的是自己的评论者资料
+  const { user, accessToken } = useAuthStore();
+  const isOwner = !!accessToken && !!user;
+
+  const scrollToComments = () => {
+    document.getElementById('comments')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const focusCommenterInfo = () => {
+    const form = document.querySelector('#comments .comment-form');
+    form?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const scope = (form || document) as ParentNode;
+    const nickname = scope.querySelector('input[placeholder*="昵称"]') as HTMLInputElement | null;
+    const firstInput = scope.querySelector('input:not([type="hidden"])') as HTMLInputElement | null;
+    const target = nickname || firstInput;
+    if (target) {
+      window.setTimeout(() => target.focus({ preventScroll: true }), 400);
+      return;
+    }
+    const textarea = scope.querySelector('textarea') as HTMLTextAreaElement | null;
+    if (textarea) window.setTimeout(() => textarea.focus({ preventScroll: true }), 400);
+  };
+
+  const handleCommenterInfo = () => {
+    if (isOwner) {
+      window.location.href = '/admin/comments';
+      return;
+    }
+    focusCommenterInfo();
+  };
 
   return (
     // 外层 relative 包裹：TOC 用 absolute 定位在卡片右侧空白区
@@ -55,10 +89,19 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
                 <i className="fa-regular fa-eye" aria-hidden="true" />
                 <span>{post.view_count || 0}</span>
               </span>
-              <span className="post-side-stat" title={`${commentCount} 评论`}>
+              <button type="button" className="post-side-stat" title={`${commentCount} 评论`} onClick={scrollToComments}>
                 <i className="fa-regular fa-comment" aria-hidden="true" />
                 <span>{commentCount}</span>
-              </span>
+              </button>
+              <button
+                type="button"
+                className="post-side-stat"
+                title="编辑评论者信息"
+                onClick={handleCommenterInfo}
+              >
+                <i className="fa-regular fa-circle-user" aria-hidden="true" />
+                <span>身份</span>
+              </button>
             </aside>
 
             {post.type === 'video' ? (
@@ -89,8 +132,6 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
               </div>
             ) : null}
 
-            <PostNavigation postId={post.id} pageSize={3} />
-
             <div className="post-license-card">
               <div className="post-license-info">
                 <strong className="post-license-author">{post.author_name || '作者'}</strong>
@@ -112,19 +153,9 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
               <span className="post-end-tag" aria-hidden="true">THE END</span>
             </div>
 
-            <section className="comments" id="comments">
-              <h3>
-                <span className="comments-title-label">
-                  <i className="fa-regular fa-comment" aria-hidden="true" />
-                  <span>{post.title}</span>
-                </span>
-                <span className="comments-title-stats">
-                  <span><i className="fa-solid fa-people-group" aria-hidden="true" />{commentCount} 人参与</span>
-                  <span><i className="fa-regular fa-comment" aria-hidden="true" />{commentCount} 条评论</span>
-                </span>
-              </h3>
-              <CommentList postId={post.id} />
-            </section>
+            <PostNavigation postId={post.id} pageSize={6} />
+
+            <CommentSection postId={post.id} title={post.title} />
           </div>
         </div>
       </article>

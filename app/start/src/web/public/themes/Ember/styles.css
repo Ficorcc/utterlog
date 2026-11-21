@@ -16766,3 +16766,774 @@ html[data-theme="Ember"] .home-list .post-card, html[data-theme="Ember"] .home-l
 }
 
 
+/* 12) 深色模式下残留的固定白底。
+   上游的 --c-white 是个固定色值，暗色模式里不会跟着变，
+   .archive-stats / .archive-post-list 直接拿它当底色 —— 暗色下就成了一
+   块刺眼的白色面板（浅色字压白底）。这里改成跟随主题的卡片色。 */
+html[data-theme="Ember"][data-ember-mode="dark"] .archive-stats, html[data-theme="Ember"][data-ember-mode="dark"] .archive-post-list {
+  background: var(--c-card);
+  border-color: var(--c-border);
+}
+
+
+html[data-theme="Ember"][data-ember-mode="dark"] .archive-stats {
+  color: var(--c-text-soft);
+}
+
+
+html[data-theme="Ember"][data-ember-mode="dark"] .archive-post-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+
+/* 13) 深色模式下的滚动条 */
+html[data-theme="Ember"][data-ember-mode="dark"] .blog-main::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+
+html[data-theme="Ember"][data-ember-mode="dark"] .blog-main::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+
+/* ---------- part: about.css ---------- */
+/* ============================================================
+ * 关于页样式补丁
+ *
+ * 结构沿用动态页的 .activity-hero / .activity-panel 面板，
+ * 这里只补主题里没有的几块：hero 头像、站点简介排版、社交图标按钮、
+ * 留言板入口。颜色全部走主题变量，浅色 / 深色模式自动适配。
+ * ============================================================ */
+
+/* hero：左侧标题与说明，右侧博主头像 */
+.about-hero-main {
+  display: flex;
+  gap: var(--sp-18);
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+/* hero 左侧文字块，长句换行不撑破面板 */
+.about-hero-text {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+/* 博主头像 */
+.about-hero-avatar {
+  flex: 0 0 auto;
+  width: 88px;
+  height: 88px;
+  overflow: hidden;
+  background: var(--c-card-soft);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.about-hero-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 关于本站：导语 + 简介 + Markdown 自述 */
+.about-intro-lead {
+  margin: 0;
+  font-size: var(--fs-base);
+  line-height: 1.7;
+  color: var(--c-text);
+}
+
+.about-intro-bio {
+  margin: var(--sp-10) 0 0;
+  font-size: var(--fs-md);
+  line-height: 1.75;
+  color: var(--c-text-soft);
+}
+
+/* Markdown 自述与上面的简介之间加一条分隔线 */
+.about-markdown {
+  margin-top: var(--sp-14);
+  padding-top: var(--sp-14);
+  border-top: 1px solid var(--c-border-soft);
+}
+
+/* 自述里的长链接、长串不撑破面板 */
+.about-markdown .blog-prose {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* 空状态 */
+.about-empty {
+  margin: 0;
+  font-size: var(--fs-md);
+  color: var(--c-text-muted);
+}
+
+/* 统计：沿用归档页的 .archive-stats，底色改成跟随主题的柔和卡片色 */
+.about-stats {
+  background: var(--c-card-soft);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+}
+
+/* 社交链接：图标 + 名称的胶囊按钮 */
+.about-socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-10);
+}
+
+.about-social {
+  display: inline-flex;
+  gap: var(--sp-8);
+  align-items: center;
+  padding: var(--sp-8) var(--sp-14);
+  font-size: var(--fs-sm);
+  color: var(--c-text-soft);
+  text-decoration: none;
+  background: var(--c-card-soft);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-pill);
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.about-social > i {
+  flex: 0 0 auto;
+  font-size: var(--fs-base);
+  color: var(--c-primary);
+}
+
+.about-social:hover {
+  color: var(--c-text);
+  background: var(--c-card);
+  border-color: var(--c-primary);
+}
+
+/* 最近更新：紧凑文章行之间留出间距 */
+.about-post-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-8);
+}
+
+/* 面板里的紧凑行用柔和底色，避免和面板同色糊成一片 */
+.about-post-list .post-compact-row {
+  background: var(--c-card-soft);
+}
+
+/* 最后一个面板不留多余的下边距 */
+.about-panel-last {
+  margin-bottom: 0;
+}
+
+/* 留言板入口 */
+.about-guestbook {
+  display: flex;
+  gap: var(--sp-14);
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.about-guestbook p {
+  flex: 1 1 260px;
+  margin: 0;
+  font-size: var(--fs-md);
+  line-height: 1.7;
+  color: var(--c-text-muted);
+}
+
+.about-guestbook-btn {
+  display: inline-flex;
+  gap: var(--sp-8);
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 var(--sp-18);
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--c-white);
+  text-decoration: none;
+  background: var(--c-primary);
+  border: 1px solid var(--c-primary);
+  border-radius: var(--radius-pill);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.about-guestbook-btn:hover {
+  color: var(--c-white);
+  background: var(--c-primary-dark);
+  border-color: var(--c-primary-dark);
+}
+
+@media (max-width: 720px) {
+  /* 头像在窄屏缩小 */
+  .about-hero-avatar {
+    width: 64px;
+    height: 64px;
+  }
+
+  /* 留言板入口改为上下排列，按钮撑满一行 */
+  .about-guestbook {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .about-guestbook-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  /* 窄屏允许文章标题换行，避免长标题被截断 */
+  .about-post-list .post-compact-title {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+}
+
+/* ---------- part: archive.css ---------- */
+/* ============================================================
+ * 归档页样式补丁
+ *
+ * 标签区块：标签渲染成小胶囊（图标 + 名称 + 文章数），按行流式排列，
+ * 颜色全部走主题变量，浅色 / 深色模式自动适配。
+ * ============================================================ */
+
+/* 标签区块：放在页面最底部，与其它归档区块拉开间距 */
+.archive-tags {
+  margin-top: 30px;
+}
+
+/* 标签云：胶囊按行换行排列，不用卡片网格 */
+.archive-tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-8);
+}
+
+/* 单个标签胶囊 */
+.archive-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-5);
+  padding: 3px var(--sp-10);
+  font-size: var(--fs-xs);
+  line-height: 1.7;
+  color: var(--c-text-soft);
+  text-decoration: none;
+  background: var(--c-card-soft);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-pill);
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* 胶囊前的标签图标 */
+.archive-tag-chip > i {
+  flex: 0 0 auto;
+  font-size: 10px;
+  color: var(--c-primary);
+}
+
+/* 标签名称 */
+.archive-tag-name {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 文章数 */
+.archive-tag-count {
+  flex: 0 0 auto;
+  color: var(--c-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 悬停：描边与文字跟随主题主色 */
+.archive-tag-chip:hover {
+  color: var(--c-text);
+  background: var(--c-card);
+  border-color: var(--c-primary);
+}
+
+.archive-tag-chip:hover .archive-tag-count {
+  color: var(--c-primary);
+}
+
+/* ---------- part: dashboard.css ---------- */
+/* ============================================================
+ * 动态页样式补丁
+ *
+ * 说说评论行的右侧元信息里带了一段说说正文摘要，
+ * 固定宽度 + 省略号收尾，避免把左侧的标题列挤扁。
+ * ============================================================ */
+
+.activity-page .archive-post-meta .dashboard-moment-ref {
+    display: block;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ---------- part: feeds.css ---------- */
+/* ============================================================
+ * 订阅页样式补丁
+ *
+ * 订阅页的每条动态都来自一个具体的订阅站，所以时间线上的节点
+ * 换成该站自己的头像，站点名也变成可点回原站的链接；
+ * 摘要最长只留两行，避免一条长摘要把整条时间线撑得很高。
+ * 颜色全部走主题变量，浅色 / 深色模式自动适配。
+ * ============================================================ */
+
+/* 订阅页的节点：保留时间线上的圆点位置，内容换成站点头像 */
+.activity-timeline-feeds .activity-item-icon {
+  padding: 0;
+  overflow: hidden;
+  background: var(--c-card-soft);
+}
+
+/* 头像铺满圆点，圆角跟节点一致 */
+.activity-timeline-feeds .activity-item-avatar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* 站点名：可点回订阅站，跟正文里的链接区分开 */
+.activity-item-site {
+  display: inline-flex;
+  gap: var(--sp-7);
+  align-items: center;
+  max-width: 220px;
+  overflow: hidden;
+  color: var(--c-text-soft);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+/* 站点名前沿用时间线原有的分隔圆点 */
+.activity-item-meta span + .activity-item-site::before {
+  flex: 0 0 auto;
+  width: 3px;
+  height: 3px;
+  content: "";
+  background: var(--c-text-faint);
+  border-radius: 50%;
+}
+
+.activity-item-site:hover {
+  color: var(--c-primary);
+}
+
+/* 标题右侧的外链角标 */
+.activity-item-ext {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: var(--c-text-faint);
+}
+
+.activity-item-title a:hover .activity-item-ext {
+  color: var(--c-primary);
+}
+
+/* 摘要最多两行，超出省略 */
+.activity-timeline-feeds .activity-item-content {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+/* ---------- part: post.css ---------- */
+/* ============================================================
+ * 文章页样式补丁（评论区 / 上下篇导航）
+ *
+ * 评论区沿用上游的 .comment-list / .comment-item / .comment-body /
+ * .comment-meta / .comment-content 结构，这里只补上游没有的部分：
+ * 排序切换、加载更多、博主标记、回复框容器。
+ *
+ * 上下篇导航是本主题自有的紧凑条：小方图 + 标题 + 日期，
+ * 不再使用共享组件的全宽大封面。
+ * ============================================================ */
+
+/* ---------- 评论区：排序切换 ---------- */
+
+.comment-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin: var(--sp-12) 0 var(--sp-4);
+}
+
+.comment-order-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  font-family: inherit;
+  font-size: var(--fs-xs);
+  line-height: 1.6;
+  color: var(--c-text-muted);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-pill);
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.comment-order-toggle:hover {
+  color: var(--c-primary);
+  border-color: var(--c-primary);
+}
+
+/* ---------- 评论区：加载态 / 空态 ---------- */
+
+.comment-loading,
+.comment-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-8);
+  padding: var(--sp-24) 0;
+  font-size: var(--fs-sm);
+  color: var(--c-text-muted);
+}
+
+.comment-empty i {
+  font-size: var(--fs-lg);
+  color: var(--c-border);
+}
+
+/* ---------- 评论区：加载更多 ---------- */
+
+.comment-load-more-wrap {
+  display: flex;
+  justify-content: center;
+  margin: var(--sp-16) 0 0;
+}
+
+.comment-load-more {
+  padding: var(--sp-9) var(--sp-28);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  color: var(--c-text-soft);
+  cursor: pointer;
+  background: var(--c-card-soft);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-pill);
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.comment-load-more:hover {
+  color: var(--c-primary);
+  border-color: var(--c-primary);
+}
+
+/* ---------- 评论区：博主标记 ---------- */
+
+.comment-admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 6px;
+  font-size: var(--fs-2xs);
+  line-height: 1.7;
+  color: var(--c-primary);
+  background: var(--c-primary-soft);
+  border-radius: var(--radius-pill);
+}
+
+.comment-admin-badge i {
+  font-size: 9px;
+}
+
+/* ---------- 评论区：正文里的表情与外链 ---------- */
+
+.comment-emoji {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin: 0 1px;
+  vertical-align: middle;
+  object-fit: contain;
+}
+
+.comment-content-link {
+  color: var(--c-primary);
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.comment-content-link:hover {
+  text-decoration: underline;
+}
+
+/* ---------- 评论区：回复框 ---------- */
+
+.comment-reply-form {
+  margin-top: var(--sp-10);
+  padding: var(--sp-10);
+  background: var(--c-card-soft);
+  border: 1px solid var(--c-border-soft);
+  border-radius: var(--radius-sm);
+}
+
+/* 回复框展开时，回复按钮保持可见（上游默认悬停才显示） */
+.comment-item.is-replying .comment-reply-btn {
+  opacity: 1;
+}
+
+/* ---------- 评论区：发表评论表单 ---------- */
+
+/* 共享表单自带边框，这里由外层卡片统一视觉 */
+.ember-comment-form {
+  margin-top: var(--sp-22);
+  overflow: hidden;
+  background: var(--c-card);
+  border: 1px solid var(--c-border-soft);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(26, 26, 26, 0.07);
+}
+
+.ember-comment-form .comment-form {
+  padding: 0 !important;
+  margin-top: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* 验证码 + 提交按钮那一行 */
+.ember-comment-form > div:not(.comment-form) {
+  padding: 0 var(--sp-20) var(--sp-18);
+}
+
+/* 完整版表单比上游高，收一点高度 */
+.ember-comment-form .comment-textarea-row {
+  min-height: 150px;
+}
+
+.ember-comment-form .comment-textarea {
+  min-height: 120px;
+}
+
+/* ---------- 上下篇导航 ---------- */
+
+.ember-post-nav {
+  margin-top: var(--sp-28);
+}
+
+.ember-post-nav-list {
+  display: grid;
+  gap: var(--sp-10);
+}
+
+.ember-post-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-14);
+  padding: var(--sp-12) var(--sp-14);
+  color: inherit;
+  text-decoration: none;
+  background: var(--c-card-soft);
+  border: 1px solid var(--c-border-soft);
+  border-radius: var(--radius);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+a.ember-post-nav-item:hover {
+  border-color: var(--c-primary);
+  transform: translateY(-1px);
+}
+
+.ember-post-nav-item--next {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.ember-post-nav-item--empty {
+  opacity: 0.55;
+}
+
+.ember-post-nav-thumb {
+  flex: 0 0 auto;
+  overflow: hidden;
+  background: var(--c-card);
+  border-radius: var(--radius-sm);
+}
+
+.ember-post-nav-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ember-post-nav-body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ember-post-nav-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-xs);
+  color: var(--c-text-muted);
+}
+
+.ember-post-nav-title {
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--c-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ember-post-nav-date {
+  font-size: var(--fs-2xs);
+  color: var(--c-text-muted);
+}
+
+/* ---------- 相关文章 ---------- */
+
+.ember-related {
+  margin-top: var(--sp-24);
+}
+
+.ember-related-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-8);
+  margin-bottom: var(--sp-14);
+}
+
+.ember-related-tab {
+  padding: 4px 12px;
+  font-family: inherit;
+  font-size: var(--fs-xs);
+  line-height: 1.7;
+  color: var(--c-text-muted);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-pill);
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.ember-related-tab:hover:not(:disabled) {
+  color: var(--c-primary);
+  border-color: var(--c-primary);
+}
+
+.ember-related-tab.is-active {
+  color: var(--c-white);
+  background: var(--c-primary);
+  border-color: var(--c-primary);
+}
+
+.ember-related-tab:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ember-related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--sp-12);
+}
+
+.ember-related-card {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-12);
+  padding: var(--sp-10);
+  color: inherit;
+  text-decoration: none;
+  background: var(--c-card-soft);
+  border: 1px solid var(--c-border-soft);
+  border-radius: var(--radius);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+a.ember-related-card:hover {
+  border-color: var(--c-primary);
+  transform: translateY(-1px);
+}
+
+.ember-related-card-thumb {
+  flex: 0 0 auto;
+  overflow: hidden;
+  background: var(--c-card);
+  border-radius: var(--radius-sm);
+}
+
+.ember-related-card-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ember-related-card-body {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ember-related-card-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--c-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ember-related-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-8);
+  font-size: var(--fs-2xs);
+  color: var(--c-text-muted);
+}
+
+.ember-related-card-cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.ember-related-empty {
+  padding: var(--sp-20);
+  font-size: var(--fs-sm);
+  color: var(--c-text-muted);
+  text-align: center;
+}
+
+/* ---------- 窄屏 ---------- */
+
+@media (max-width: 680px) {
+  .ember-post-nav-thumb {
+    width: 64px !important;
+    height: 64px !important;
+  }
+
+  .ember-related-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

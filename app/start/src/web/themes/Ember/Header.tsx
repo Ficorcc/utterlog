@@ -32,10 +32,10 @@ export default function Header() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const identityTimerRef = useRef<number | null>(null);
 
-  // 首页入口由头像承担（点头像回首页），导航条里不再重复一个「首页」项，
-  // 否则头像和首页入口指向同一处，两边都在顶部会互相压。
+  // 首页入口由头像承担（点头像回首页），归档与关于收进头像菜单 / 移动端「更多」，
+  // 导航条里不再重复摆这几个入口，否则顶部挤满同义项。
   const navItems = (menus.header?.length ? menus.header : FALLBACK_MENUS).filter(
-    (item) => item.href !== '/' && item.label !== '首页',
+    (item) => item.href !== '/' && item.href !== '/archives' && item.href !== '/about' && item.label !== '首页',
   );
 
   useEffect(() => {

@@ -13,6 +13,7 @@ import { categoryColor, firstCategory } from './utils';
  *     .archive-heat-panel      近一年更新热力图
  *     .archive-categories      分类卡片网格
  *     .archive-years           按年 / 月分组的文章列表
+ *     .archive-tags            标签胶囊云（放在页面最后）
  */
 
 const HEAT_WEEKS = 53;
@@ -244,37 +245,6 @@ export default function ArchivePage({
           </div>
         </section>
 
-        {tagList.length ? (
-          <section className="archive-categories">
-            <div className="archive-section-head archive-section-head-row">
-              <h2>
-                <i className="fa-solid fa-tags" aria-hidden="true" /> 标签
-              </h2>
-              <p>{tagList.length} 个</p>
-            </div>
-            <div className="archive-category-grid">
-              {tagList.map((tag: any, index: number) => (
-                <Link
-                  key={tag.id}
-                  prefetch={false}
-                  href={`/tags/${tag.slug}`}
-                  className={`archive-category-card cat-color-${categoryColor(index)}`}
-                >
-                  <div className="archive-category-main">
-                    <span className="archive-category-icon">
-                      <i className="fa-solid fa-tag" aria-hidden="true" />
-                    </span>
-                    <div>
-                      <h3>#{tag.name}</h3>
-                      <span>{Number(tag.count || 0)} 篇</span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        ) : null}
-
         <section className="archive-years">
           {years.length === 0 ? <p className="empty">还没有文章</p> : null}
           {years.map((group) => {
@@ -320,6 +290,33 @@ export default function ArchivePage({
             );
           })}
         </section>
+
+        {/* 标签云放在页面最底部，按小胶囊流式排列 */}
+        {tagList.length ? (
+          <section className="archive-tags">
+            <div className="archive-section-head archive-section-head-row">
+              <h2>
+                <i className="fa-solid fa-tags" aria-hidden="true" /> 标签
+              </h2>
+              <p>{tagList.length} 个</p>
+            </div>
+            <div className="archive-tag-cloud">
+              {tagList.map((tag: any) => (
+                <Link
+                  key={tag.id}
+                  prefetch={false}
+                  href={`/tags/${tag.slug}`}
+                  className="archive-tag-chip"
+                  title={`#${tag.name} · ${Number(tag.count || 0)} 篇`}
+                >
+                  <i className="fa-solid fa-tag" aria-hidden="true" />
+                  <span className="archive-tag-name">{tag.name}</span>
+                  <span className="archive-tag-count">{Number(tag.count || 0)}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
       </div>
     </section>
   );

@@ -20,7 +20,7 @@
  * 产物：app/start/src/web/themes/Ember/styles.css
  * 该文件由本脚本生成，请勿手改；改样式请改 adapter.css 或上游 CSS。
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -246,5 +246,28 @@ try {
   console.warn('[sync-ember-theme-css] adapter.css 不存在，跳过适配层');
 }
 
-writeFileSync(OUT, `${HEADER}\n${parts.join('\n\n')}\n\n/* ---------- adapter ---------- */\n${scopeCss(adapter)}\n`, 'utf-8');
+/* ---------- 分页补丁：parts/*.css ----------
+ * 各页面（归档页、动态页、关于页…）的样式补丁单独放在 parts/ 下，
+ * 纯 CSS、不带主题作用域前缀，统一在这里按文件名顺序拼到适配层后面，
+ * 便于按页面维护，同时保证补丁落在上游样式之后、优先级更高。
+ */
+const PARTS_DIR = join(THEME_DIR, 'parts');
+let partsCss = '';
+try {
+  const files = readdirSync(PARTS_DIR)
+    .filter((name) => name.endsWith('.css'))
+    .sort();
+  for (const name of files) {
+    const body = readFileSync(join(PARTS_DIR, name), 'utf-8').trim();
+    if (body) partsCss += `/* ---------- part: ${name} ---------- */\n${body}\n\n`;
+  }
+} catch {
+  console.warn('[sync-ember-theme-css] parts 目录不存在，跳过分页补丁');
+}
+
+writeFileSync(
+  OUT,
+  `${HEADER}\n${parts.join('\n\n')}\n\n/* ---------- adapter ---------- */\n${scopeCss(adapter)}\n${partsCss}`,
+  'utf-8',
+);
 console.log(`[sync-ember-theme-css] 已生成 ${OUT}`);

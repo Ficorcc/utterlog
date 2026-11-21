@@ -1,0 +1,379 @@
+/* ============================================================
+ * 文章页样式补丁（评论区 / 上下篇导航）
+ *
+ * 评论区沿用上游的 .comment-list / .comment-item / .comment-body /
+ * .comment-meta / .comment-content 结构，这里只补上游没有的部分：
+ * 排序切换、加载更多、博主标记、回复框容器。
+ *
+ * 上下篇导航是本主题自有的紧凑条：小方图 + 标题 + 日期，
+ * 不再使用共享组件的全宽大封面。
+ * ============================================================ */
+
+/* ---------- 评论区：排序切换 ---------- */
+
+.comment-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin: var(--sp-12) 0 var(--sp-4);
+}
+
+.comment-order-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  font-family: inherit;
+  font-size: var(--fs-xs);
+  line-height: 1.6;
+  color: var(--c-text-muted);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-pill);
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.comment-order-toggle:hover {
+  color: var(--c-primary);
+  border-color: var(--c-primary);
+}
+
+/* ---------- 评论区：加载态 / 空态 ---------- */
+
+.comment-loading,
+.comment-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-8);
+  padding: var(--sp-24) 0;
+  font-size: var(--fs-sm);
+  color: var(--c-text-muted);
+}
+
+.comment-empty i {
+  font-size: var(--fs-lg);
+  color: var(--c-border);
+}
+
+/* ---------- 评论区：加载更多 ---------- */
+
+.comment-load-more-wrap {
+  display: flex;
+  justify-content: center;
+  margin: var(--sp-16) 0 0;
+}
+
+.comment-load-more {
+  padding: var(--sp-9) var(--sp-28);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  color: var(--c-text-soft);
+  cursor: pointer;
+  background: var(--c-card-soft);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-pill);
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.comment-load-more:hover {
+  color: var(--c-primary);
+  border-color: var(--c-primary);
+}
+
+/* ---------- 评论区：博主标记 ---------- */
+
+.comment-admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 6px;
+  font-size: var(--fs-2xs);
+  line-height: 1.7;
+  color: var(--c-primary);
+  background: var(--c-primary-soft);
+  border-radius: var(--radius-pill);
+}
+
+.comment-admin-badge i {
+  font-size: 9px;
+}
+
+/* ---------- 评论区：正文里的表情与外链 ---------- */
+
+.comment-emoji {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin: 0 1px;
+  vertical-align: middle;
+  object-fit: contain;
+}
+
+.comment-content-link {
+  color: var(--c-primary);
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.comment-content-link:hover {
+  text-decoration: underline;
+}
+
+/* ---------- 评论区：回复框 ---------- */
+
+.comment-reply-form {
+  margin-top: var(--sp-10);
+  padding: var(--sp-10);
+  background: var(--c-card-soft);
+  border: 1px solid var(--c-border-soft);
+  border-radius: var(--radius-sm);
+}
+
+/* 回复框展开时，回复按钮保持可见（上游默认悬停才显示） */
+.comment-item.is-replying .comment-reply-btn {
+  opacity: 1;
+}
+
+/* ---------- 评论区：发表评论表单 ---------- */
+
+/* 共享表单自带边框，这里由外层卡片统一视觉 */
+.ember-comment-form {
+  margin-top: var(--sp-22);
+  overflow: hidden;
+  background: var(--c-card);
+  border: 1px solid var(--c-border-soft);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(26, 26, 26, 0.07);
+}
+
+.ember-comment-form .comment-form {
+  padding: 0 !important;
+  margin-top: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* 验证码 + 提交按钮那一行 */
+.ember-comment-form > div:not(.comment-form) {
+  padding: 0 var(--sp-20) var(--sp-18);
+}
+
+/* 完整版表单比上游高，收一点高度 */
+.ember-comment-form .comment-textarea-row {
+  min-height: 150px;
+}
+
+.ember-comment-form .comment-textarea {
+  min-height: 120px;
+}
+
+/* ---------- 上下篇导航 ---------- */
+
+.ember-post-nav {
+  margin-top: var(--sp-28);
+}
+
+.ember-post-nav-list {
+  display: grid;
+  gap: var(--sp-10);
+}
+
+.ember-post-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-14);
+  padding: var(--sp-12) var(--sp-14);
+  color: inherit;
+  text-decoration: none;
+  background: var(--c-card-soft);
+  border: 1px solid var(--c-border-soft);
+  border-radius: var(--radius);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+a.ember-post-nav-item:hover {
+  border-color: var(--c-primary);
+  transform: translateY(-1px);
+}
+
+.ember-post-nav-item--next {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.ember-post-nav-item--empty {
+  opacity: 0.55;
+}
+
+.ember-post-nav-thumb {
+  flex: 0 0 auto;
+  overflow: hidden;
+  background: var(--c-card);
+  border-radius: var(--radius-sm);
+}
+
+.ember-post-nav-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ember-post-nav-body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ember-post-nav-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-xs);
+  color: var(--c-text-muted);
+}
+
+.ember-post-nav-title {
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--c-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ember-post-nav-date {
+  font-size: var(--fs-2xs);
+  color: var(--c-text-muted);
+}
+
+/* ---------- 相关文章 ---------- */
+
+.ember-related {
+  margin-top: var(--sp-24);
+}
+
+.ember-related-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-8);
+  margin-bottom: var(--sp-14);
+}
+
+.ember-related-tab {
+  padding: 4px 12px;
+  font-family: inherit;
+  font-size: var(--fs-xs);
+  line-height: 1.7;
+  color: var(--c-text-muted);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-pill);
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.ember-related-tab:hover:not(:disabled) {
+  color: var(--c-primary);
+  border-color: var(--c-primary);
+}
+
+.ember-related-tab.is-active {
+  color: var(--c-white);
+  background: var(--c-primary);
+  border-color: var(--c-primary);
+}
+
+.ember-related-tab:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ember-related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--sp-12);
+}
+
+.ember-related-card {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-12);
+  padding: var(--sp-10);
+  color: inherit;
+  text-decoration: none;
+  background: var(--c-card-soft);
+  border: 1px solid var(--c-border-soft);
+  border-radius: var(--radius);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+a.ember-related-card:hover {
+  border-color: var(--c-primary);
+  transform: translateY(-1px);
+}
+
+.ember-related-card-thumb {
+  flex: 0 0 auto;
+  overflow: hidden;
+  background: var(--c-card);
+  border-radius: var(--radius-sm);
+}
+
+.ember-related-card-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ember-related-card-body {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ember-related-card-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--c-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ember-related-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-8);
+  font-size: var(--fs-2xs);
+  color: var(--c-text-muted);
+}
+
+.ember-related-card-cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.ember-related-empty {
+  padding: var(--sp-20);
+  font-size: var(--fs-sm);
+  color: var(--c-text-muted);
+  text-align: center;
+}
+
+/* ---------- 窄屏 ---------- */
+
+@media (max-width: 680px) {
+  .ember-post-nav-thumb {
+    width: 64px !important;
+    height: 64px !important;
+  }
+
+  .ember-related-grid {
+    grid-template-columns: 1fr;
+  }
+}

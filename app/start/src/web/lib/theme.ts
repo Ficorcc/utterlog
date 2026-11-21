@@ -113,7 +113,7 @@ const Ember: ThemeComponents = {
   HomePage: lazy(() => import('@/themes/Ember/HomePage')),
   PostPage: lazy(() => import('@/themes/Ember/PostPage')),
   PostCard: lazy(() => import('@/themes/Ember/PostCard')),
-  CommentSection: SharedCommentSection,
+  CommentSection: lazy(() => import('@/themes/Ember/CommentSection')),
   ArchivePage: lazy(() => import('@/themes/Ember/ArchivePage')),
   CategoryPage: lazy(() => import('@/themes/Ember/CategoryPage')),
   CategoriesPage: lazy(() => import('@/themes/Ember/CategoriesPage')),

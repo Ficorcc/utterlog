@@ -48,7 +48,12 @@ export default function FeedsPage({
         </div>
       </section>
 
-      <ActivityTimeline friends={list} timeZone={timeZone} emptyText="还没有订阅内容，在后台友链管理里添加 RSS 地址即可" />
+      <ActivityTimeline
+        friends={list}
+        timeZone={timeZone}
+        variant="feeds"
+        emptyText="还没有订阅内容，在后台友链管理里添加 RSS 地址即可"
+      />
     </section>
   );
 }

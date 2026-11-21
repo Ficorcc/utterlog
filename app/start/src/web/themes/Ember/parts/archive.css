@@ -1,0 +1,67 @@
+/* ============================================================
+ * 归档页样式补丁
+ *
+ * 标签区块：标签渲染成小胶囊（图标 + 名称 + 文章数），按行流式排列，
+ * 颜色全部走主题变量，浅色 / 深色模式自动适配。
+ * ============================================================ */
+
+/* 标签区块：放在页面最底部，与其它归档区块拉开间距 */
+.archive-tags {
+  margin-top: 30px;
+}
+
+/* 标签云：胶囊按行换行排列，不用卡片网格 */
+.archive-tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-8);
+}
+
+/* 单个标签胶囊 */
+.archive-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-5);
+  padding: 3px var(--sp-10);
+  font-size: var(--fs-xs);
+  line-height: 1.7;
+  color: var(--c-text-soft);
+  text-decoration: none;
+  background: var(--c-card-soft);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-pill);
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* 胶囊前的标签图标 */
+.archive-tag-chip > i {
+  flex: 0 0 auto;
+  font-size: 10px;
+  color: var(--c-primary);
+}
+
+/* 标签名称 */
+.archive-tag-name {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 文章数 */
+.archive-tag-count {
+  flex: 0 0 auto;
+  color: var(--c-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 悬停：描边与文字跟随主题主色 */
+.archive-tag-chip:hover {
+  color: var(--c-text);
+  background: var(--c-card);
+  border-color: var(--c-primary);
+}
+
+.archive-tag-chip:hover .archive-tag-count {
+  color: var(--c-primary);
+}

@@ -271,6 +271,7 @@ export function PublicPage({ data }: { data: PublicPageData }) {
                 moments={data.moments}
                 momentTotal={data.momentTotal}
                 comments={data.comments}
+                momentComments={data.momentComments}
                 links={data.links}
                 categories={ctx.categories}
                 tags={ctx.tags}

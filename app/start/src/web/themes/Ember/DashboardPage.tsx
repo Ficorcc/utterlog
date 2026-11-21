@@ -5,7 +5,6 @@ import PostLink from '@/components/blog/PostLink';
 import { useThemeContext } from '@/lib/theme-context';
 import { datePartsInTimeZone } from '@/lib/timezone';
 import { postDateInput } from '@/lib/post-date';
-import { categoryColor } from './utils';
 
 /**
  * 站点控制面板：上游没有独立的仪表盘页，这里借用动态页
@@ -15,8 +14,8 @@ import { categoryColor } from './utils';
  *   .activity-page
  *     .activity-hero              标题
  *     .activity-panel              概览统计
- *     .activity-panel              最新文章 / 热门阅读 / 最近说说 / 最近评论
- *     .activity-panel              分类 / 标签 / 友情链接
+ *     .activity-panel              最新文章 / 热门阅读 / 最近说说 / 最近评论 / 最近说说评论
+ *     .activity-panel              友情链接
  */
 
 /** 相对时间：面板里只关心「什么时候」 */
@@ -38,9 +37,8 @@ export default function DashboardPage({
   moments = [],
   momentTotal = 0,
   comments = [],
+  momentComments = [],
   links = [],
-  categories = [],
-  tags = [],
   stats = {},
   timeZone = 'UTC',
   siteTitle = '',
@@ -50,9 +48,8 @@ export default function DashboardPage({
   moments?: any[];
   momentTotal?: number;
   comments?: any[];
+  momentComments?: any[];
   links?: any[];
-  categories?: any[];
-  tags?: any[];
   stats?: any;
   timeZone?: string;
   siteTitle?: string;
@@ -62,9 +59,13 @@ export default function DashboardPage({
   const hotList = Array.isArray(hotPosts) ? hotPosts : [];
   const momentList = Array.isArray(moments) ? moments : [];
   const commentList = Array.isArray(comments) ? comments : [];
+  const momentCommentList = Array.isArray(momentComments) ? momentComments : [];
   const linkList = Array.isArray(links) ? links : [];
-  const categoryList = Array.isArray(categories) ? categories : [];
-  const tagList = Array.isArray(tags) ? tags : [];
+
+  // 面板只展示前 6 条，其余内容去对应的归档页 / 说说页看
+  const visiblePosts = postList.slice(0, 6);
+  const visibleHotPosts = hotList.slice(0, 6);
+  const visibleMoments = momentList.slice(0, 6);
 
   const title = siteTitle || site?.title || 'Utterlog';
 
@@ -114,9 +115,9 @@ export default function DashboardPage({
             全部归档
           </Link>
         </div>
-        {postList.length === 0 ? <p className="empty">还没有文章</p> : null}
+        {visiblePosts.length === 0 ? <p className="empty">还没有文章</p> : null}
         <div className="archive-post-list">
-          {postList.map((post: any) => {
+          {visiblePosts.map((post: any) => {
             const { month, day } = datePartsInTimeZone(postDateInput(post), timeZone);
             return (
               <PostLink key={post.id} post={post} className="archive-post-row">
@@ -146,9 +147,9 @@ export default function DashboardPage({
           </h3>
           <span>按阅读量排序</span>
         </div>
-        {hotList.length === 0 ? <p className="empty">还没有公开文章</p> : null}
+        {visibleHotPosts.length === 0 ? <p className="empty">还没有公开文章</p> : null}
         <div className="archive-post-list">
-          {hotList.map((post: any) => (
+          {visibleHotPosts.map((post: any) => (
             <PostLink key={post.id} post={post} className="archive-post-row">
               <time dateTime={String(postDateInput(post) || '')}>{relativeTime(post.published_at || post.created_at)}</time>
               <i className="fa-solid fa-fire" aria-hidden="true" />
@@ -172,9 +173,9 @@ export default function DashboardPage({
             全部说说
           </Link>
         </div>
-        {momentList.length === 0 ? <p className="empty">还没有说说</p> : null}
+        {visibleMoments.length === 0 ? <p className="empty">还没有说说</p> : null}
         <div className="archive-post-list">
-          {momentList.map((moment: any) => (
+          {visibleMoments.map((moment: any) => (
             <div className="archive-post-row" key={moment.id}>
               <time dateTime={String(moment.created_at || '')}>{relativeTime(moment.created_at)}</time>
               <i className="fa-solid fa-comment-dots" aria-hidden="true" />
@@ -218,63 +219,28 @@ export default function DashboardPage({
       <section className="activity-panel">
         <div className="activity-panel-head">
           <h3>
-            <i className="fa-solid fa-folder-tree" aria-hidden="true" /> 分类
+            <i className="fa-solid fa-comment-dots" aria-hidden="true" /> 最近说说评论
           </h3>
-          <Link prefetch={false} href="/categories">
-            全部分类
+          <Link prefetch={false} href="/moments">
+            全部说说
           </Link>
         </div>
-        {categoryList.length === 0 ? <p className="empty">还没有分类</p> : null}
-        <div className="archive-category-grid">
-          {categoryList.map((category: any, index: number) => (
-            <Link
-              key={category.id}
-              prefetch={false}
-              href={`/categories/${category.slug}`}
-              className={`archive-category-card cat-color-${categoryColor(index)}`}
-            >
-              <div className="archive-category-main">
-                <span className="archive-category-icon">
-                  <i className={category.icon || 'fa-regular fa-folder'} aria-hidden="true" />
+        {momentCommentList.length === 0 ? <p className="empty">还没有说说评论</p> : null}
+        <div className="archive-post-list">
+          {momentCommentList.map((comment: any, index: number) => (
+            <div className="archive-post-row" key={comment.id || index}>
+              <time dateTime={String(comment.created_at || '')}>{relativeTime(comment.created_at)}</time>
+              <i className="fa-regular fa-comment" aria-hidden="true" />
+              <span className="archive-post-title">
+                {comment.author || '访客'}：{String(comment.content || '').slice(0, 60)}
+              </span>
+              <span className="archive-post-meta">
+                <span>
+                  <i className="fa-solid fa-comment-dots" aria-hidden="true" />
+                  <span className="dashboard-moment-ref">{comment.moment_content || '说说'}</span>
                 </span>
-                <div>
-                  <h3>{category.name}</h3>
-                  <span>{Number(category.count || 0)} 篇</span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="activity-panel">
-        <div className="activity-panel-head">
-          <h3>
-            <i className="fa-solid fa-tags" aria-hidden="true" /> 标签
-          </h3>
-          <Link prefetch={false} href="/tags">
-            全部标签
-          </Link>
-        </div>
-        {tagList.length === 0 ? <p className="empty">还没有标签</p> : null}
-        <div className="archive-category-grid">
-          {tagList.map((tag: any, index: number) => (
-            <Link
-              key={tag.id}
-              prefetch={false}
-              href={`/tags/${tag.slug}`}
-              className={`archive-category-card cat-color-${categoryColor(index)}`}
-            >
-              <div className="archive-category-main">
-                <span className="archive-category-icon">
-                  <i className="fa-solid fa-tag" aria-hidden="true" />
-                </span>
-                <div>
-                  <h3>#{tag.name}</h3>
-                  <span>{Number(tag.count || 0)} 篇</span>
-                </div>
-              </div>
-            </Link>
+              </span>
+            </div>
           ))}
         </div>
       </section>

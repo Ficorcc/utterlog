@@ -1,0 +1,200 @@
+/* ============================================================
+ * 关于页样式补丁
+ *
+ * 结构沿用动态页的 .activity-hero / .activity-panel 面板，
+ * 这里只补主题里没有的几块：hero 头像、站点简介排版、社交图标按钮、
+ * 留言板入口。颜色全部走主题变量，浅色 / 深色模式自动适配。
+ * ============================================================ */
+
+/* hero：左侧标题与说明，右侧博主头像 */
+.about-hero-main {
+  display: flex;
+  gap: var(--sp-18);
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+/* hero 左侧文字块，长句换行不撑破面板 */
+.about-hero-text {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+/* 博主头像 */
+.about-hero-avatar {
+  flex: 0 0 auto;
+  width: 88px;
+  height: 88px;
+  overflow: hidden;
+  background: var(--c-card-soft);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.about-hero-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 关于本站：导语 + 简介 + Markdown 自述 */
+.about-intro-lead {
+  margin: 0;
+  font-size: var(--fs-base);
+  line-height: 1.7;
+  color: var(--c-text);
+}
+
+.about-intro-bio {
+  margin: var(--sp-10) 0 0;
+  font-size: var(--fs-md);
+  line-height: 1.75;
+  color: var(--c-text-soft);
+}
+
+/* Markdown 自述与上面的简介之间加一条分隔线 */
+.about-markdown {
+  margin-top: var(--sp-14);
+  padding-top: var(--sp-14);
+  border-top: 1px solid var(--c-border-soft);
+}
+
+/* 自述里的长链接、长串不撑破面板 */
+.about-markdown .blog-prose {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* 空状态 */
+.about-empty {
+  margin: 0;
+  font-size: var(--fs-md);
+  color: var(--c-text-muted);
+}
+
+/* 统计：沿用归档页的 .archive-stats，底色改成跟随主题的柔和卡片色 */
+.about-stats {
+  background: var(--c-card-soft);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+}
+
+/* 社交链接：图标 + 名称的胶囊按钮 */
+.about-socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-10);
+}
+
+.about-social {
+  display: inline-flex;
+  gap: var(--sp-8);
+  align-items: center;
+  padding: var(--sp-8) var(--sp-14);
+  font-size: var(--fs-sm);
+  color: var(--c-text-soft);
+  text-decoration: none;
+  background: var(--c-card-soft);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-pill);
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.about-social > i {
+  flex: 0 0 auto;
+  font-size: var(--fs-base);
+  color: var(--c-primary);
+}
+
+.about-social:hover {
+  color: var(--c-text);
+  background: var(--c-card);
+  border-color: var(--c-primary);
+}
+
+/* 最近更新：紧凑文章行之间留出间距 */
+.about-post-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-8);
+}
+
+/* 面板里的紧凑行用柔和底色，避免和面板同色糊成一片 */
+.about-post-list .post-compact-row {
+  background: var(--c-card-soft);
+}
+
+/* 最后一个面板不留多余的下边距 */
+.about-panel-last {
+  margin-bottom: 0;
+}
+
+/* 留言板入口 */
+.about-guestbook {
+  display: flex;
+  gap: var(--sp-14);
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.about-guestbook p {
+  flex: 1 1 260px;
+  margin: 0;
+  font-size: var(--fs-md);
+  line-height: 1.7;
+  color: var(--c-text-muted);
+}
+
+.about-guestbook-btn {
+  display: inline-flex;
+  gap: var(--sp-8);
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 var(--sp-18);
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--c-white);
+  text-decoration: none;
+  background: var(--c-primary);
+  border: 1px solid var(--c-primary);
+  border-radius: var(--radius-pill);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.about-guestbook-btn:hover {
+  color: var(--c-white);
+  background: var(--c-primary-dark);
+  border-color: var(--c-primary-dark);
+}
+
+@media (max-width: 720px) {
+  /* 头像在窄屏缩小 */
+  .about-hero-avatar {
+    width: 64px;
+    height: 64px;
+  }
+
+  /* 留言板入口改为上下排列，按钮撑满一行 */
+  .about-guestbook {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .about-guestbook-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  /* 窄屏允许文章标题换行，避免长标题被截断 */
+  .about-post-list .post-compact-title {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+}

@@ -1,0 +1,70 @@
+/* ============================================================
+ * 订阅页样式补丁
+ *
+ * 订阅页的每条动态都来自一个具体的订阅站，所以时间线上的节点
+ * 换成该站自己的头像，站点名也变成可点回原站的链接；
+ * 摘要最长只留两行，避免一条长摘要把整条时间线撑得很高。
+ * 颜色全部走主题变量，浅色 / 深色模式自动适配。
+ * ============================================================ */
+
+/* 订阅页的节点：保留时间线上的圆点位置，内容换成站点头像 */
+.activity-timeline-feeds .activity-item-icon {
+  padding: 0;
+  overflow: hidden;
+  background: var(--c-card-soft);
+}
+
+/* 头像铺满圆点，圆角跟节点一致 */
+.activity-timeline-feeds .activity-item-avatar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* 站点名：可点回订阅站，跟正文里的链接区分开 */
+.activity-item-site {
+  display: inline-flex;
+  gap: var(--sp-7);
+  align-items: center;
+  max-width: 220px;
+  overflow: hidden;
+  color: var(--c-text-soft);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+/* 站点名前沿用时间线原有的分隔圆点 */
+.activity-item-meta span + .activity-item-site::before {
+  flex: 0 0 auto;
+  width: 3px;
+  height: 3px;
+  content: "";
+  background: var(--c-text-faint);
+  border-radius: 50%;
+}
+
+.activity-item-site:hover {
+  color: var(--c-primary);
+}
+
+/* 标题右侧的外链角标 */
+.activity-item-ext {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: var(--c-text-faint);
+}
+
+.activity-item-title a:hover .activity-item-ext {
+  color: var(--c-primary);
+}
+
+/* 摘要最多两行，超出省略 */
+.activity-timeline-feeds .activity-item-content {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}

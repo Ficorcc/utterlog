@@ -1,0 +1,14 @@
+/* ============================================================
+ * 动态页样式补丁
+ *
+ * 说说评论行的右侧元信息里带了一段说说正文摘要，
+ * 固定宽度 + 省略号收尾，避免把左侧的标题列挤扁。
+ * ============================================================ */
+
+.activity-page .archive-post-meta .dashboard-moment-ref {
+    display: block;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
