@@ -87,6 +87,18 @@ export interface ThemeComponents {
    * 不提供时回落到应用层默认的 MomentsClient（散落式瀑布）。
    */
   MomentsPage?: ThemeComponent<{ initialMoments?: any[] }>;
+  /**
+   * 主题可以接管「外链跳转确认」页（/go）。
+   * 不提供时回落到应用层默认的确认页（用的是 ShanYing 的样式类）。
+   */
+  GoPage?: ThemeComponent<{
+    target: URL | null;
+    countdown: number;
+    countdownTotal?: number;
+    confirmed: boolean;
+    onConfirm: () => void;
+    onBack: () => void;
+  }>;
 }
 
 const SharedCommentSection = lazy(() => import('@/components/blog/CommentList'));
@@ -124,6 +136,7 @@ const Ember: ThemeComponents = {
   FriendsPage: lazy(() => import('@/themes/Ember/FriendsPage')),
   FeedsPage: lazy(() => import('@/themes/Ember/FeedsPage')),
   MomentsPage: lazy(() => import('@/themes/Ember/MomentsPage')),
+  GoPage: lazy(() => import('@/themes/Ember/GoPage')),
   NotFoundPage: lazy(() => import('@/themes/Ember/NotFoundPage')),
   GuestbookPage: lazy(() => import('@/themes/Ember/GuestbookPage')),
   DashboardPage: lazy(() => import('@/themes/Ember/DashboardPage')),

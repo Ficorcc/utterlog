@@ -158,3 +158,82 @@ html[data-ember-mode="dark"] .blog-main::-webkit-scrollbar-thumb {
 html[data-ember-mode="dark"] .blog-main::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.28);
 }
+
+/* 14) 导航胶囊跟随深浅色。
+   上游把胶囊写死成黑色（CodexIsland 风格），日夜都一样 —— 日间模式下
+   顶部是一条黑胶囊压着浅色页面，跟页面的暖灰底色完全不搭。
+   这里改成：日间浅色磨砂、夜间保持原来的黑胶囊，
+   胶囊里的分类抽屉、头像菜单、「更多」菜单一起跟着换色。 */
+html:not([data-ember-mode="dark"]) .nav-pill {
+  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(26, 26, 26, 0.08);
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.12),
+    0 1px 0 rgba(255, 255, 255, 0.72) inset;
+}
+
+/* 导航文字与图标：白底浅色胶囊上要用深色字 */
+html:not([data-ember-mode="dark"]) .nav-link,
+html:not([data-ember-mode="dark"]) .nav-dd-trigger,
+html:not([data-ember-mode="dark"]) .nav-row a {
+  color: var(--c-text-soft);
+}
+
+html:not([data-ember-mode="dark"]) .nav-link i,
+html:not([data-ember-mode="dark"]) .nav-row a i {
+  color: var(--c-text-muted);
+}
+
+/* 悬停 / 选中 */
+html:not([data-ember-mode="dark"]) .nav-link:hover,
+html:not([data-ember-mode="dark"]) .nav-link.active,
+html:not([data-ember-mode="dark"]) .nav-dd-trigger:hover {
+  color: var(--c-text);
+  background: rgba(26, 26, 26, 0.06);
+}
+
+html:not([data-ember-mode="dark"]) .nav-link:hover i,
+html:not([data-ember-mode="dark"]) .nav-link.active i {
+  color: var(--c-primary);
+}
+
+/* 「文章」下拉展开时的触发按钮 */
+html:not([data-ember-mode="dark"]) .nav-pill.nav-open .nav-dd-trigger {
+  color: var(--c-text);
+  background: rgba(26, 26, 26, 0.06);
+}
+
+html:not([data-ember-mode="dark"]) .nav-pill.nav-open .nav-dd-trigger i {
+  color: var(--c-text);
+}
+
+/* 分类抽屉里的标题与描述 */
+html:not([data-ember-mode="dark"]) .nav-cat-name {
+  color: var(--c-text);
+}
+
+html:not([data-ember-mode="dark"]) .nav-cat-desc {
+  color: var(--c-text-muted);
+}
+
+/* 移动端「更多」菜单 */
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-more-menu {
+  background: var(--c-card);
+  border-color: var(--c-border);
+  box-shadow: var(--shadow-md);
+}
+
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-more-item {
+  color: var(--c-text-soft);
+}
+
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-more-item:hover,
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-more-item:active {
+  color: var(--c-text);
+  background: rgba(26, 26, 26, 0.06);
+}
+
+/* 「动态」按钮是主色实心，文字保持白色 */
+html:not([data-ember-mode="dark"]) .site-nav-bar .nav-actions .nav-cta {
+  color: var(--c-white);
+}

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createFileRoute, useNavigate, useMatch } from '@tanstack/react-router';
 import { StartThemeShell } from '../components/StartThemeShell';
+import { getThemeComponents } from '@/lib/theme';
 import type { ThemeContextData } from '@/lib/theme-context';
 
 export const Route = createFileRoute('/go')({
@@ -9,6 +10,9 @@ export const Route = createFileRoute('/go')({
   }),
   component: GoConfirmPage,
 });
+
+/** 自动跳转前的等待秒数 */
+const COUNTDOWN_TOTAL = 8;
 
 function parseTarget(raw: string) {
   if (!raw) return null;
@@ -26,7 +30,7 @@ function GoConfirmPage() {
   // 主题外壳与站点信息直接复用根路由的文档上下文，无需再发一次请求。
   const rootMatch = useMatch({ from: '__root__' });
   const ctx = rootMatch.loaderData as ThemeContextData | null;
-  const [countdown, setCountdown] = useState(8);
+  const [countdown, setCountdown] = useState(COUNTDOWN_TOTAL);
 
   const target = useMemo(() => parseTarget(url), [url]);
 
@@ -80,40 +84,54 @@ function GoConfirmPage() {
     );
   }
 
+  // 主题可以接管这一页（Ember 有自己的版本），没有接管时用应用层默认页
+  const ThemeGoPage = getThemeComponents(ctx.theme.name).GoPage;
+
   return (
     <StartThemeShell ctx={ctx}>
-      <div className="sy-go-wrap">
-        <div className="sy-go-card">
-          <span className="sy-go-icon" aria-hidden="true">
-            <i className={confirmed ? 'fa-solid fa-paper-plane' : 'fa-regular fa-circle-question'} />
-          </span>
-          <h1 className="sy-go-title">
-            {confirmed ? `即将离开 ${ctx.site.title || '本站'}` : !target ? '链接无效' : '正在前往站内页面…'}
-          </h1>
-          {confirmed ? (
-            <>
-              <p className="sy-go-text">
-                你即将访问外部网站，请注意核对目标地址，谨防钓鱼与诈骗信息。
-              </p>
-              <p className="sy-go-domain">{target!.hostname}</p>
-              <p className="sy-go-url" dir="ltr">{target!.href}</p>
-              <div className="sy-go-actions">
-                <button type="button" className="sy-go-btn sy-go-primary" onClick={() => window.location.assign(target!.href)}>
-                  继续访问{countdown > 0 ? `（${countdown} 秒）` : ''}
-                </button>
-                <button type="button" className="sy-go-btn" onClick={back}>返回</button>
-              </div>
-            </>
-          ) : !target ? (
-            <>
-              <p className="sy-go-text">缺少有效的跳转地址，仅支持 http/https 外链。</p>
-              <div className="sy-go-actions">
-                <button type="button" className="sy-go-btn" onClick={back}>返回</button>
-              </div>
-            </>
-          ) : null}
+      {ThemeGoPage ? (
+        <ThemeGoPage
+          target={target}
+          countdown={countdown}
+          countdownTotal={COUNTDOWN_TOTAL}
+          confirmed={confirmed}
+          onConfirm={() => target && window.location.assign(target.href)}
+          onBack={back}
+        />
+      ) : (
+        <div className="sy-go-wrap">
+          <div className="sy-go-card">
+            <span className="sy-go-icon" aria-hidden="true">
+              <i className={confirmed ? 'fa-solid fa-paper-plane' : 'fa-regular fa-circle-question'} />
+            </span>
+            <h1 className="sy-go-title">
+              {confirmed ? `即将离开 ${ctx.site.title || '本站'}` : !target ? '链接无效' : '正在前往站内页面…'}
+            </h1>
+            {confirmed ? (
+              <>
+                <p className="sy-go-text">
+                  你即将访问外部网站，请注意核对目标地址，谨防钓鱼与诈骗信息。
+                </p>
+                <p className="sy-go-domain">{target!.hostname}</p>
+                <p className="sy-go-url" dir="ltr">{target!.href}</p>
+                <div className="sy-go-actions">
+                  <button type="button" className="sy-go-btn sy-go-primary" onClick={() => window.location.assign(target!.href)}>
+                    继续访问{countdown > 0 ? `（${countdown} 秒）` : ''}
+                  </button>
+                  <button type="button" className="sy-go-btn" onClick={back}>返回</button>
+                </div>
+              </>
+            ) : !target ? (
+              <>
+                <p className="sy-go-text">缺少有效的跳转地址，仅支持 http/https 外链。</p>
+                <div className="sy-go-actions">
+                  <button type="button" className="sy-go-btn" onClick={back}>返回</button>
+                </div>
+              </>
+            ) : null}
+          </div>
         </div>
-      </div>
+      )}
     </StartThemeShell>
   );
 }

@@ -1,0 +1,156 @@
+/* ============================================================
+ * 外链跳转确认页样式补丁
+ *
+ * 卡片与标题条直接复用上游的 .page-detail / .activity-title-mark，
+ * 这里只补本主题缺的几块：目标地址块、倒计时进度条、按钮与提示。
+ * 颜色全部走主题变量，浅色 / 深色模式自动适配。
+ * ============================================================ */
+
+/* 整页居中，内容不贴着顶部 */
+.ember-go {
+  display: flex;
+  justify-content: center;
+  padding: 120px 24px 60px;
+}
+
+.ember-go .ember-go-card {
+  width: min(100%, 620px);
+}
+
+/* 标题：跟上游 .page-detail h1 一致的字号，去掉它默认的下边框 */
+.ember-go .ember-go-title {
+  padding-bottom: 0;
+  margin-bottom: var(--sp-14);
+  font-size: 26px;
+}
+
+/* 说明文字 */
+.ember-go .ember-go-text {
+  margin: 0 0 var(--sp-16);
+  font-size: var(--fs-md);
+  line-height: 1.75;
+  color: var(--c-text-soft);
+}
+
+/* 目标地址块：域名加粗，完整地址等宽字体换行 */
+.ember-go .ember-go-target {
+  display: grid;
+  gap: var(--sp-6);
+  padding: var(--sp-14) var(--sp-16);
+  margin-bottom: var(--sp-16);
+  background: var(--c-card-soft);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+}
+
+.ember-go .ember-go-target-label {
+  display: inline-flex;
+  gap: var(--sp-7);
+  align-items: center;
+  font-size: var(--fs-xs);
+  color: var(--c-text-muted);
+}
+
+.ember-go .ember-go-target-label i {
+  color: var(--c-primary);
+}
+
+.ember-go .ember-go-host {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--c-text);
+  overflow-wrap: anywhere;
+}
+
+.ember-go .ember-go-url {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--c-text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* 倒计时进度条：随剩余时间收窄 */
+.ember-go .ember-go-progress {
+  height: 4px;
+  margin-bottom: var(--sp-16);
+  overflow: hidden;
+  background: var(--c-border-soft);
+  border-radius: var(--radius-pill);
+}
+
+.ember-go .ember-go-progress span {
+  display: block;
+  height: 100%;
+  background: var(--c-primary);
+  border-radius: inherit;
+  transition: width 1s linear;
+}
+
+/* 按钮 */
+.ember-go .ember-go-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-10);
+}
+
+.ember-go .ember-go-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 var(--sp-20);
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--c-text-soft);
+  cursor: pointer;
+  background: var(--c-card);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-pill);
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.ember-go .ember-go-btn:hover {
+  color: var(--c-text);
+  border-color: var(--c-primary);
+}
+
+.ember-go .ember-go-btn-primary {
+  color: var(--c-white);
+  background: var(--c-primary);
+  border-color: var(--c-primary);
+}
+
+.ember-go .ember-go-btn-primary:hover {
+  color: var(--c-white);
+  background: var(--c-primary-dark);
+  border-color: var(--c-primary-dark);
+}
+
+/* 底部提示 */
+.ember-go .ember-go-tip {
+  display: flex;
+  gap: var(--sp-7);
+  align-items: center;
+  margin: var(--sp-16) 0 0;
+  font-size: var(--fs-xs);
+  color: var(--c-text-faint);
+}
+
+@media (max-width: 600px) {
+  .ember-go {
+    padding: 96px 16px 40px;
+  }
+
+  .ember-go .ember-go-title {
+    font-size: 22px;
+  }
+
+  .ember-go .ember-go-actions {
+    flex-direction: column;
+  }
+
+  .ember-go .ember-go-btn {
+    width: 100%;
+  }
+}
