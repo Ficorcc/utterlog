@@ -162,6 +162,7 @@ function participantKey(comment: GlazeComment): string {
 function CommentItem({
   comment,
   parentAuthor,
+  parentId,
   isReply,
   floor,
   postId,
@@ -173,6 +174,7 @@ function CommentItem({
 }: {
   comment: GlazeComment;
   parentAuthor?: string;
+  parentId?: number;
   isReply?: boolean;
   floor?: number;
   postId: number;
@@ -200,9 +202,9 @@ function CommentItem({
     >
       <article id={`div-comment-${comment.id}`} className="comment-body">
         <header className="comment-meta">
-          <div className="comment-meta-details" role="group">
+          <div className="comment-meta-details" role="group" aria-label="评论信息">
             <span className={`comment-avatar ${isReply ? 'comment-avatar-inline' : 'comment-avatar-compact'}`}>
-              <span className="comment-avatar-photo">
+              <span className="comment-avatar-photo" aria-hidden="true">
                 <CommentAvatar
                   name={comment.author}
                   candidates={comment.avatar_candidates}
@@ -211,36 +213,58 @@ function CommentItem({
                   alt={comment.author}
                 />
               </span>
-              {comment.is_admin ? <span className="comment-avatar-badge comment-admin-badge" aria-hidden="true" /> : null}
+              {comment.is_admin ? (
+                <span className="comment-avatar-badge comment-admin-badge" role="img" aria-label="管理员" />
+              ) : null}
             </span>
-            <div className="comment-author vcard">
-              {location ? (
-                <span className="comment-location">
-                  <span className="comment-location-name">{location}</span>
-                </span>
-              ) : null}
-              {typeof floor === 'number' ? (
-                <span className="comment-floor">
-                  <span className="comment-floor-watermark" aria-hidden="true">#</span>
-                  {floor}
-                </span>
-              ) : null}
-              <div className="comment-meta-actions">
-                <a className="comment-metadata" href={`#comment-${comment.id}`} title={fullTime}>
-                  <time dateTime={new Date(comment.created_at * 1000).toISOString()}>{relativeTime(comment.created_at)}</time>
-                </a>
-                <span className="comment-reply-action">
-                  {isReply && parentAuthor ? <span className="comment-reply-date">回复 {parentAuthor}</span> : null}
-                  <button type="button" className="comment-reply-link" onClick={() => onToggleReply(comment)}>
-                    回复
-                  </button>
-                </span>
-              </div>
+            <div className="comment-author vcard" title={comment.author}>
+              {comment.author}
             </div>
+            {location ? (
+              <span className="comment-location" tabIndex={0} aria-label={location}>
+                <span className="comment-location-name">{location}</span>
+              </span>
+            ) : null}
           </div>
-          {comment.status === 'pending' ? <em className="comment-awaiting-moderation">待审核</em> : null}
-          <div className="comment-content">{renderContent(comment.content || '')}</div>
+
+          {!isReply && typeof floor === 'number' ? (
+            <span className="comment-floor" title={`第 ${floor} 楼`}>
+              <span className="comment-floor-watermark" aria-hidden="true">#</span>
+              {floor}
+            </span>
+          ) : null}
+
+          <div className="comment-meta-actions">
+            <a className="comment-metadata" href={`#comment-${comment.id}`} title={fullTime} aria-label={fullTime}>
+              <time dateTime={new Date(comment.created_at * 1000).toISOString()}>{relativeTime(comment.created_at)}</time>
+            </a>
+            <span className="comment-reply-action">
+              <button
+                type="button"
+                className="comment-reply-link squircle"
+                aria-label={`回复 ${comment.author}`}
+                title={`回复 ${comment.author}`}
+                onClick={() => onToggleReply(comment)}
+              >
+                <i className="fa-regular fa-comment" aria-hidden="true" />
+              </button>
+            </span>
+          </div>
         </header>
+
+        {comment.status === 'pending' ? <em className="comment-awaiting-moderation">待审核</em> : null}
+
+        <div className="comment-content">
+          {isReply && parentAuthor ? (
+            <>
+              <a className="comment-reply-mention" href={`#comment-${parentId || comment.parent_id || 0}`}>
+                @{parentAuthor}
+              </a>{' '}
+            </>
+          ) : null}
+          {renderContent(comment.content || '')}
+        </div>
+
         {replying ? (
           <div className="comment-reply-form">
             <CommentForm
@@ -368,6 +392,7 @@ export default function CommentSection({ postId, title }: { postId: number; titl
                           key={reply.id}
                           comment={reply}
                           parentAuthor={parent.author}
+                          parentId={parent.id}
                           isReply
                           postId={postId}
                           timeZone={timeZone}

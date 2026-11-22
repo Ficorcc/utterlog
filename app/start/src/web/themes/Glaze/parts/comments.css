@@ -1,149 +1,32 @@
 /* ============================================================
  * Glaze · 评论区补丁
  *
- * 评论列表沿用上游 DOM（comment-thread / comment-body / comment-meta …），
- * 评论表单复用站点的共享表单组件，这里把共享组件的视觉压回主题语言：
- * 面板底色、圆角、边框、主色按钮。
+ * 评论列表完全沿用上游 DOM 与样式（comment-thread / comment-body /
+ * comment-meta / comment-meta-details / comment-floor / comment-meta-actions …），
+ * 这里不重复定义上游已经给过的规则，避免把上游的版式改掉。
+ *
+ * 本文件只负责两件事：
+ *   1. 列表里上游没有的少量补充（空态、加载态、表情尺寸）；
+ *   2. 评论表单复用站点共享组件，把它的视觉压回主题语言。
  * ============================================================ */
 
-/* 评论区标题条 */
-html[data-theme="Glaze"] .comments-summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-block-end: 14px;
-}
-
-html[data-theme="Glaze"] .comments-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--glaze-text);
-}
-
-html[data-theme="Glaze"] .comments-title-icon {
-  color: var(--glaze-link);
-}
-
-html[data-theme="Glaze"] .comments-write-link {
-  font-size: 13px;
-  color: var(--glaze-link);
-}
-
-/* 列表 */
-html[data-theme="Glaze"] .comment-list,
-html[data-theme="Glaze"] .comment-list .children {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 14px;
-}
-
-html[data-theme="Glaze"] .comment-list .children {
-  margin-block-start: 12px;
-  padding-inline-start: 14px;
-  border-inline-start: 1px solid var(--glaze-border);
-}
-
-html[data-theme="Glaze"] .comment-body {
-  display: grid;
-  gap: 6px;
-}
-
-html[data-theme="Glaze"] .comment-meta-details {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-html[data-theme="Glaze"] .comment-avatar {
-  display: inline-flex;
-  flex: none;
-}
-
-html[data-theme="Glaze"] .comment-avatar-photo {
-  display: inline-flex;
-  overflow: hidden;
-  border-radius: 50%;
-}
-
-html[data-theme="Glaze"] .comment-avatar-photo img,
-html[data-theme="Glaze"] .comment-avatar-photo span {
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-html[data-theme="Glaze"] .comment-author {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: var(--glaze-text);
-}
-
-html[data-theme="Glaze"] .comment-location {
-  font-size: 12px;
+/* 列表补充：上游没有空态与加载态 */
+html[data-theme="Glaze"] .comment-empty,
+html[data-theme="Glaze"] .comment-loading {
   color: var(--glaze-muted);
-}
-
-html[data-theme="Glaze"] .comment-floor {
-  font-size: 12px;
-  color: var(--glaze-muted);
-}
-
-html[data-theme="Glaze"] .comment-floor-watermark {
-  opacity: 0.6;
-}
-
-html[data-theme="Glaze"] .comment-meta-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-inline-start: auto;
-  font-size: 12px;
-  color: var(--glaze-muted);
-}
-
-html[data-theme="Glaze"] .comment-reply-link {
-  border: 0;
-  background: transparent;
-  padding: 0;
-  color: var(--glaze-link);
-  font-size: 12px;
-}
-
-html[data-theme="Glaze"] .comment-content {
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--glaze-text);
-  overflow-wrap: anywhere;
-}
-
-html[data-theme="Glaze"] .comment-content a {
-  color: var(--glaze-link);
+  font-size: 0.875rem;
+  padding-block: 12px;
 }
 
 html[data-theme="Glaze"] .comment-emoji {
-  inline-size: 20px;
-  block-size: 20px;
-  vertical-align: -4px;
+  inline-size: 1.15em;
+  block-size: 1.15em;
+  vertical-align: -0.22em;
 }
 
-html[data-theme="Glaze"] .comment-awaiting-moderation {
-  font-size: 12px;
-  color: var(--glaze-muted);
-}
-
-html[data-theme="Glaze"] .comment-empty,
-html[data-theme="Glaze"] .comment-loading {
-  font-size: 13px;
-  color: var(--glaze-muted);
-  padding-block: 12px;
+/* 回复框（嵌在评论下方的折叠表单） */
+html[data-theme="Glaze"] .comment-reply-form {
+  margin-block-start: 10px;
 }
 
 /* 表单：共享组件 → 主题外观 */
@@ -205,15 +88,4 @@ html[data-theme="Glaze"] .glaze-comment-form .comment-submit-button {
 
 html[data-theme="Glaze"] .glaze-comment-heading {
   margin-block-start: 22px;
-}
-
-html[data-theme="Glaze"] .glaze-comment-title-icon {
-  margin-inline-end: 6px;
-  color: var(--glaze-link);
-}
-
-html[data-theme="Glaze"] .glaze-comment-guidance {
-  margin-block-start: 4px;
-  font-size: 12px;
-  color: var(--glaze-muted);
 }

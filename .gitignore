@@ -45,6 +45,9 @@ content/themes/*
 content/plugins/*
 !content/plugins/.gitkeep
 
+# 订阅源抓取状态（运行时产物，每次抓取都会改写，不入库）
+content/feed-fetch-status.json
+
 # TypeScript incremental build info
 *.tsbuildinfo
 

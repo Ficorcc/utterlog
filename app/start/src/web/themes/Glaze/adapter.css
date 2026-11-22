@@ -32,6 +32,7 @@ html[data-theme="Glaze"] .site-content a:any-link {
 
 /* 评论区与表单里的按钮需要主题主色，而不是应用层的 Azure 蓝 */
 html[data-theme="Glaze"] .comments-area,
+html[data-theme="Glaze"] .glaze-comment-form,
 html[data-theme="Glaze"] .comments-area button,
 html[data-theme="Glaze"] .comments-area input,
 html[data-theme="Glaze"] .comments-area textarea {
@@ -39,6 +40,25 @@ html[data-theme="Glaze"] .comments-area textarea {
   --color-text-main: var(--glaze-text);
   --color-text-dim: var(--glaze-muted);
   --color-border: var(--glaze-border);
+}
+
+/* 应用层共享组件（搜索页、共享评论列表等）依赖 globals.css 的 --color-* 变量。
+   不映射的话，这些区域在当前主题下仍然是默认的 Azure 蓝 + 白色卡片，
+   与主题的釉色面板割裂。这里把应用层令牌接到当前主题的令牌上。 */
+html[data-theme="Glaze"] {
+  --color-primary: var(--glaze-accent);
+  --color-primary-hover: var(--glaze-accent-middle);
+  --color-primary-active: var(--glaze-accent);
+  --color-focus-ring: var(--glaze-accent);
+  --color-bg-main: var(--glaze-background);
+  --color-bg-card: var(--glaze-panel);
+  --color-bg-soft: var(--glaze-surface);
+  --color-border: var(--glaze-border);
+  --color-divider: var(--glaze-border);
+  --color-border-input: var(--glaze-border);
+  --color-text-main: var(--glaze-text);
+  --color-text-sub: var(--glaze-text);
+  --color-text-dim: var(--glaze-muted);
 }
 
 /* 应用层全局样式里给正文图片加的懒加载动效在主题里不需要 */

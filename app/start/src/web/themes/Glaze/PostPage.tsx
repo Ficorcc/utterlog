@@ -142,11 +142,7 @@ export default function PostPage({ post }: { post: any; options?: Record<string,
       </header>
 
       <div className="entry-main glaze-panel">
-        <div
-          className="entry-reading-controls squircle"
-          data-glaze-reading-size
-          style={{ opacity: readingSize === 0 ? 0.85 : 1 }}
-        >
+        <div className="entry-reading-controls squircle" data-glaze-reading-size>
           <div className="entry-reading-size" role="group" aria-label="正文字号">
             <button type="button" className="squircle" aria-label="缩小正文字号" data-glaze-reading-smaller onClick={() => bumpSize(-1)}>
               A−
@@ -239,21 +235,27 @@ export default function PostPage({ post }: { post: any; options?: Record<string,
           <div className="nav-previous">
             {navigation?.prev ? (
               <PostLink post={navigation.prev}>
-                <span className="post-nav-arrow" aria-hidden="true">←</span>
+                <span className="post-nav-arrow" aria-hidden="true" />
                 <span className="post-nav-title">{navigation.prev.title}</span>
               </PostLink>
             ) : (
-              <span className="post-nav-placeholder squircle">没有更早的文章</span>
+              <span className="post-nav-placeholder squircle">
+                <span className="post-nav-arrow" aria-hidden="true" />
+                <span className="post-nav-title">没有更早的文章</span>
+              </span>
             )}
           </div>
           <div className="nav-next">
             {navigation?.next ? (
               <PostLink post={navigation.next}>
                 <span className="post-nav-title">{navigation.next.title}</span>
-                <span className="post-nav-arrow" aria-hidden="true">→</span>
+                <span className="post-nav-arrow" aria-hidden="true" />
               </PostLink>
             ) : (
-              <span className="post-nav-placeholder squircle">没有更新的文章</span>
+              <span className="post-nav-placeholder squircle">
+                <span className="post-nav-title">没有更新的文章</span>
+                <span className="post-nav-arrow" aria-hidden="true" />
+              </span>
             )}
           </div>
         </div>

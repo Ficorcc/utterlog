@@ -7029,11 +7029,31 @@ html[data-theme="Glaze"][data-theme="Glaze"] .site-content a:any-link {
 
 
 /* 评论区与表单里的按钮需要主题主色，而不是应用层的 Azure 蓝 */
-html[data-theme="Glaze"][data-theme="Glaze"] .comments-area, html[data-theme="Glaze"][data-theme="Glaze"] .comments-area button, html[data-theme="Glaze"][data-theme="Glaze"] .comments-area input, html[data-theme="Glaze"][data-theme="Glaze"] .comments-area textarea {
+html[data-theme="Glaze"][data-theme="Glaze"] .comments-area, html[data-theme="Glaze"][data-theme="Glaze"] .glaze-comment-form, html[data-theme="Glaze"][data-theme="Glaze"] .comments-area button, html[data-theme="Glaze"][data-theme="Glaze"] .comments-area input, html[data-theme="Glaze"][data-theme="Glaze"] .comments-area textarea {
   --color-primary: var(--glaze-link);
   --color-text-main: var(--glaze-text);
   --color-text-dim: var(--glaze-muted);
   --color-border: var(--glaze-border);
+}
+
+
+/* 应用层共享组件（搜索页、共享评论列表等）依赖 globals.css 的 --color-* 变量。
+   不映射的话，这些区域在当前主题下仍然是默认的 Azure 蓝 + 白色卡片，
+   与主题的釉色面板割裂。这里把应用层令牌接到当前主题的令牌上。 */
+html[data-theme="Glaze"][data-theme="Glaze"] {
+  --color-primary: var(--glaze-accent);
+  --color-primary-hover: var(--glaze-accent-middle);
+  --color-primary-active: var(--glaze-accent);
+  --color-focus-ring: var(--glaze-accent);
+  --color-bg-main: var(--glaze-background);
+  --color-bg-card: var(--glaze-panel);
+  --color-bg-soft: var(--glaze-surface);
+  --color-border: var(--glaze-border);
+  --color-divider: var(--glaze-border);
+  --color-border-input: var(--glaze-border);
+  --color-text-main: var(--glaze-text);
+  --color-text-sub: var(--glaze-text);
+  --color-text-dim: var(--glaze-muted);
 }
 
 
@@ -7240,167 +7260,33 @@ html[data-theme="Glaze"] .tag-chip {
 /* ============================================================
  * Glaze · 评论区补丁
  *
- * 评论列表沿用上游 DOM（comment-thread / comment-body / comment-meta …），
- * 评论表单复用站点的共享表单组件，这里把共享组件的视觉压回主题语言：
- * 面板底色、圆角、边框、主色按钮。
+ * 评论列表完全沿用上游 DOM 与样式（comment-thread / comment-body /
+ * comment-meta / comment-meta-details / comment-floor / comment-meta-actions …），
+ * 这里不重复定义上游已经给过的规则，避免把上游的版式改掉。
+ *
+ * 本文件只负责两件事：
+ *   1. 列表里上游没有的少量补充（空态、加载态、表情尺寸）；
+ *   2. 评论表单复用站点共享组件，把它的视觉压回主题语言。
  * ============================================================ */
 
-/* 评论区标题条 */
-html[data-theme="Glaze"][data-theme="Glaze"] .comments-summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-block-end: 14px;
-}
-
-
-html[data-theme="Glaze"][data-theme="Glaze"] .comments-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--glaze-text);
-}
-
-
-html[data-theme="Glaze"][data-theme="Glaze"] .comments-title-icon {
-  color: var(--glaze-link);
-}
-
-
-html[data-theme="Glaze"][data-theme="Glaze"] .comments-write-link {
-  font-size: 13px;
-  color: var(--glaze-link);
-}
-
-
-/* 列表 */
-html[data-theme="Glaze"][data-theme="Glaze"] .comment-list, html[data-theme="Glaze"][data-theme="Glaze"] .comment-list .children {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 14px;
-}
-
-
-html[data-theme="Glaze"][data-theme="Glaze"] .comment-list .children {
-  margin-block-start: 12px;
-  padding-inline-start: 14px;
-  border-inline-start: 1px solid var(--glaze-border);
-}
-
-
-html[data-theme="Glaze"][data-theme="Glaze"] .comment-body {
-  display: grid;
-  gap: 6px;
-}
-
-
-html[data-theme="Glaze"][data-theme="Glaze"] .comment-meta-details {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-
-html[data-theme="Glaze"][data-theme="Glaze"] .comment-avatar {
-  display: inline-flex;
-  flex: none;
-}
-
-
-html[data-theme="Glaze"][data-theme="Glaze"] .comment-avatar-photo {
-  display: inline-flex;
-  overflow: hidden;
-  border-radius: 50%;
-}
-
-
-html[data-theme="Glaze"][data-theme="Glaze"] .comment-avatar-photo img, html[data-theme="Glaze"][data-theme="Glaze"] .comment-avatar-photo span {
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-
-html[data-theme="Glaze"][data-theme="Glaze"] .comment-author {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: var(--glaze-text);
-}
-
-
-html[data-theme="Glaze"][data-theme="Glaze"] .comment-location {
-  font-size: 12px;
+/* 列表补充：上游没有空态与加载态 */
+html[data-theme="Glaze"][data-theme="Glaze"] .comment-empty, html[data-theme="Glaze"][data-theme="Glaze"] .comment-loading {
   color: var(--glaze-muted);
-}
-
-
-html[data-theme="Glaze"][data-theme="Glaze"] .comment-floor {
-  font-size: 12px;
-  color: var(--glaze-muted);
-}
-
-
-html[data-theme="Glaze"][data-theme="Glaze"] .comment-floor-watermark {
-  opacity: 0.6;
-}
-
-
-html[data-theme="Glaze"][data-theme="Glaze"] .comment-meta-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-inline-start: auto;
-  font-size: 12px;
-  color: var(--glaze-muted);
-}
-
-
-html[data-theme="Glaze"][data-theme="Glaze"] .comment-reply-link {
-  border: 0;
-  background: transparent;
-  padding: 0;
-  color: var(--glaze-link);
-  font-size: 12px;
-}
-
-
-html[data-theme="Glaze"][data-theme="Glaze"] .comment-content {
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--glaze-text);
-  overflow-wrap: anywhere;
-}
-
-
-html[data-theme="Glaze"][data-theme="Glaze"] .comment-content a {
-  color: var(--glaze-link);
+  font-size: 0.875rem;
+  padding-block: 12px;
 }
 
 
 html[data-theme="Glaze"][data-theme="Glaze"] .comment-emoji {
-  inline-size: 20px;
-  block-size: 20px;
-  vertical-align: -4px;
+  inline-size: 1.15em;
+  block-size: 1.15em;
+  vertical-align: -0.22em;
 }
 
 
-html[data-theme="Glaze"][data-theme="Glaze"] .comment-awaiting-moderation {
-  font-size: 12px;
-  color: var(--glaze-muted);
-}
-
-
-html[data-theme="Glaze"][data-theme="Glaze"] .comment-empty, html[data-theme="Glaze"][data-theme="Glaze"] .comment-loading {
-  font-size: 13px;
-  color: var(--glaze-muted);
-  padding-block: 12px;
+/* 回复框（嵌在评论下方的折叠表单） */
+html[data-theme="Glaze"][data-theme="Glaze"] .comment-reply-form {
+  margin-block-start: 10px;
 }
 
 
@@ -7471,19 +7357,6 @@ html[data-theme="Glaze"][data-theme="Glaze"] .glaze-comment-form .comment-submit
 
 html[data-theme="Glaze"][data-theme="Glaze"] .glaze-comment-heading {
   margin-block-start: 22px;
-}
-
-
-html[data-theme="Glaze"][data-theme="Glaze"] .glaze-comment-title-icon {
-  margin-inline-end: 6px;
-  color: var(--glaze-link);
-}
-
-
-html[data-theme="Glaze"][data-theme="Glaze"] .glaze-comment-guidance {
-  margin-block-start: 4px;
-  font-size: 12px;
-  color: var(--glaze-muted);
 }
 
 
@@ -7876,36 +7749,7 @@ html[data-theme="Glaze"][data-theme="Glaze"] .entry-content {
 }
 
 
-/* 阅读控件固定在正文右上角 */
-html[data-theme="Glaze"][data-theme="Glaze"] .entry-reading-controls {
-  position: absolute;
-  z-index: 4;
-  inset-block-start: 12px;
-  inset-inline-end: 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-
-html[data-theme="Glaze"][data-theme="Glaze"] .entry-reading-size {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-
-html[data-theme="Glaze"][data-theme="Glaze"] .entry-reading-controls button {
-  inline-size: 30px;
-  block-size: 30px;
-  border: 1px solid var(--glaze-border);
-  background: var(--glaze-panel);
-  color: var(--glaze-text);
-  font-size: 12px;
-  line-height: 1;
-}
-
-
+/* 阅读控件沿用上游：sticky 竖排在正文左侧栏，不覆盖上游定位 */
 html[data-theme="Glaze"][data-theme="Glaze"] .entry-main {
   position: relative;
 }

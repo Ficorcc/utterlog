@@ -69,9 +69,8 @@ export default function PostCard({ post }: { post: any }) {
       </div>
       {comments ? (
         <a className="post-card-comment-group t-avatar-group" href="#comments" aria-label={`${comments} 条评论`}>
-          <span className="post-card-comment-count t-avatar">
-            <i className="fa-regular fa-comment" aria-hidden="true" />
-            <span>{comments > 999 ? '999+' : comments}</span>
+          <span className="post-card-comment-count t-avatar" aria-hidden="true" dir="ltr" title={`${comments} 条评论`}>
+            {comments > 999 ? '999+' : comments}
           </span>
         </a>
       ) : null}

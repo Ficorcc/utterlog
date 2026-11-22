@@ -1,16 +1,16 @@
 'use client';
 
-import CommentList from '@/components/blog/CommentList';
 import { useThemeContext } from '@/lib/theme-context';
+import CommentSection from './CommentSection';
 import { dateTimeLabel } from './utils';
 
 /**
- * 留言板页：统计条 + 共享评论区。
+ * 留言板页：统计条 + 主题私有的评论区。
  *
  *   header.page-heading.glaze-panel
  *     h1.glaze-page-title > span.glaze-page-title-icon.squircle + span
  *   ul.archive-stats[role=list]        评论数 / 参与人数 / 最后留言时间
- *   CommentList（共享组件，表单放在底部）
+ *   CommentSection（主题私有，评论列表与表单都走当前主题的外观）
  */
 
 export default function GuestbookPage({
@@ -53,9 +53,7 @@ export default function GuestbookPage({
         </li>
       </ul>
 
-      <section className="glaze-guestbook-comments glaze-panel">
-        <CommentList postId={postId} title="留言板" formPlacement="bottom" />
-      </section>
+      <CommentSection postId={postId} title="留言板" />
     </div>
   );
 }
