@@ -20,8 +20,29 @@ export function themeAssetRoots(themeId: string): string[] {
   ];
 }
 
+/** 拒绝越界路径（../ 或绝对路径），避免资源解析逃出主题目录 */
+function isSafeAssetPath(file: string): boolean {
+  if (!file) return false;
+  const normalized = file.replace(/\\/g, '/');
+  if (normalized.startsWith('/') || normalized.includes(':')) return false;
+  return !normalized.split('/').some((part) => part === '..');
+}
+
 export function resolveThemeAssetPath(themeId: string, file: string): string | null {
-  for (const base of themeAssetRoots(themeId)) {
+  if (!isSafeAssetPath(file)) return null;
+  const roots = themeAssetRoots(themeId);
+
+  // 先按请求的原名逐个根查找，命中即返回。
+  // 顺序不能反：截图兜底名（screenshot.svg）排在候选里，若在「原名」之前
+  // 逐根匹配，一个只存在于源码目录的深层资源（图标、字体）会被 public 根下的
+  // screenshot.svg 顶掉 —— 线上表现为图标请求返回预览图。
+  for (const base of roots) {
+    const path = join(base, file);
+    if (existsSync(path)) return path;
+  }
+
+  // 再退回截图候选：主题列表里的预览图只声明了 .png，实际是 .svg。
+  for (const base of roots) {
     for (const name of screenshotCandidates(file)) {
       const path = join(base, name);
       if (existsSync(path)) return path;
