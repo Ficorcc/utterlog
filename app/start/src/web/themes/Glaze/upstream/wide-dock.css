@@ -1,0 +1,30 @@
+/* src/css/wide-dock.css */
+.site-dock {
+  --glaze-dock-padding: 4px;
+  inset-block: 50% auto;
+  inset-inline-start: calc(50% + var(--glaze-content-width) / 2 + 24px);
+  width: 48px;
+  transform: translateY(-50%);
+}
+.site-navigation .site-menu {
+  flex-direction: column;
+  gap: 12px;
+}
+.site-dock:has(.site-jump-navigation) .site-menu {
+  max-height: calc(100dvh - 180px);
+}
+.site-jump-navigation {
+  flex-direction: column;
+}
+.entry-main > .entry-content {
+  --glaze-heading-label-space: 0px;
+  --glaze-heading-line-start: calc(0px - var(--glaze-panel-padding) - 1px);
+  --glaze-heading-label-start: calc(var(--glaze-heading-line-start) - 36px);
+}
+.site-footer,
+body:has(.site-jump-navigation) .site-footer {
+  padding-block-end: 24px;
+}
+.post-toc-trigger {
+  inset-block-end: calc(1rem + env(safe-area-inset-bottom, 0px));
+}

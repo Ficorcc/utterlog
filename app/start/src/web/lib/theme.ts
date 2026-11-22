@@ -44,6 +44,7 @@ import {
 } from '@shared/blog-theme';
 import AzureManifest from '@/themes/Azure/theme.json';
 import EmberManifest from '@/themes/Ember/theme.json';
+import GlazeManifest from '@/themes/Glaze/theme.json';
 import RenascentManifest from '@/themes/Renascent/theme.json';
 import RobesManifest from '@/themes/Robes/theme.json';
 import ShanYingManifest from '@/themes/ShanYing/theme.json';
@@ -142,6 +143,32 @@ const Ember: ThemeComponents = {
   DashboardPage: lazy(() => import('@/themes/Ember/DashboardPage')),
 };
 
+// Glaze 是内置主题：组件与样式表都在 themes/Glaze/，styles.css 由
+// scripts/sync-glaze-theme-css.mjs 从上游 glaze 样式生成。
+const Glaze: ThemeComponents = {
+  Header: lazy(() => import('@/themes/Glaze/Header')),
+  Footer: lazy(() => import('@/themes/Glaze/Footer')),
+  Layout: lazy(() => import('@/themes/Glaze/Layout')),
+  HomePage: lazy(() => import('@/themes/Glaze/HomePage')),
+  PostPage: lazy(() => import('@/themes/Glaze/PostPage')),
+  PostCard: lazy(() => import('@/themes/Glaze/PostCard')),
+  CommentSection: lazy(() => import('@/themes/Glaze/CommentSection')),
+  ArchivePage: lazy(() => import('@/themes/Glaze/ArchivePage')),
+  CategoryPage: lazy(() => import('@/themes/Glaze/CategoryPage')),
+  CategoriesPage: lazy(() => import('@/themes/Glaze/CategoriesPage')),
+  TagPage: lazy(() => import('@/themes/Glaze/TagPage')),
+  TagsPage: lazy(() => import('@/themes/Glaze/TagsPage')),
+  AboutPage: lazy(() => import('@/themes/Glaze/AboutPage')),
+  LinksPage: lazy(() => import('@/themes/Glaze/LinksPage')),
+  FriendsPage: lazy(() => import('@/themes/Glaze/FriendsPage')),
+  FeedsPage: lazy(() => import('@/themes/Glaze/FeedsPage')),
+  MomentsPage: lazy(() => import('@/themes/Glaze/MomentsPage')),
+  GoPage: lazy(() => import('@/themes/Glaze/GoPage')),
+  NotFoundPage: lazy(() => import('@/themes/Glaze/NotFoundPage')),
+  GuestbookPage: lazy(() => import('@/themes/Glaze/GuestbookPage')),
+  DashboardPage: lazy(() => import('@/themes/Glaze/DashboardPage')),
+};
+
 const Renascent: ThemeComponents = {
   Header: lazy(() => import('@/themes/Renascent/Header')),
   Footer: lazy(() => import('@/themes/Renascent/Footer')),
@@ -210,6 +237,7 @@ const Whono: ThemeComponents = {
 const themeRegistry: Record<string, ThemeComponents> = {
   Azure,
   Ember,
+  Glaze,
   Renascent,
   Robes,
   ShanYing,
@@ -219,6 +247,7 @@ const themeRegistry: Record<string, ThemeComponents> = {
 const manifestRegistry: Record<string, ThemeManifest> = {
   Azure: AzureManifest as ThemeManifest,
   Ember: EmberManifest as ThemeManifest,
+  Glaze: GlazeManifest as ThemeManifest,
   Renascent: RenascentManifest as ThemeManifest,
   Robes: RobesManifest as ThemeManifest,
   ShanYing: ShanYingManifest as ThemeManifest,

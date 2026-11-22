@@ -1,0 +1,27 @@
+{
+  "id": "Glaze",
+  "name": "Glaze",
+  "version": "1.0.0",
+  "description": "深度复刻 glaze（WestNote 风格 WordPress 主题）的独立主题：顶栏 + 底部图标 dock + 居中窄栏 + 首页双侧轨，正文含目录、字号调节与阅读控件，支持 14 套配色、深浅色切换、圆角模式与内容宽度可调",
+  "author": "glaze（WestNote 风格 WordPress 主题）· 复刻至 Utterlog",
+  "screenshot": "screenshot.svg",
+  "colors": { "primary": "#09c849", "background": "#f0f2f0" },
+  "layout": { "maxWidth": "600px", "headerStyle": "dock" },
+  "menuPositions": [
+    { "key": "header", "label": "底部主菜单", "description": "底部 dock 的图标式主菜单；未配置时回退到 首页 / 归档 / 说说 / 友链 / 关于" },
+    { "key": "footer", "label": "页脚菜单", "description": "页脚右侧的补充链接" }
+  ],
+  "features": [
+    "dark_mode",
+    "search",
+    "responsive",
+    "palette_switcher",
+    "home_rails",
+    "toc",
+    "reading_size",
+    "guestbook",
+    "moments",
+    "links"
+  ],
+  "adminPanels": ["glaze_settings"]
+}

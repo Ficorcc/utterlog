@@ -1,0 +1,87 @@
+/* ============================================================
+ * 仪表盘样式补丁
+ *
+ * 概览条沿用上游的 .archive-stats，文章卡片沿用 .post-list / .post-card，
+ * 这里只补四个区块容器与评论 / 说说两行列表。
+ * 颜色全部走主题变量，浅色 / 深色模式自动适配。
+ * ============================================================ */
+
+/* 概览条与标题之间留白 */
+html[data-theme="Glaze"] .glaze-dashboard > .archive-stats {
+  margin-block-end: 1.15rem;
+}
+
+/* 卡片页脚里的评论数 */
+html[data-theme="Glaze"] .dashboard-post-comments {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  color: var(--glaze-muted);
+  font-size: 12px;
+}
+
+/* 区块容器 */
+html[data-theme="Glaze"] .dashboard-section {
+  margin-block-end: 1.15rem;
+  padding: var(--glaze-panel-padding);
+}
+
+/* 区块标题 */
+html[data-theme="Glaze"] .dashboard-section-title {
+  margin: 0 0 0.8rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+/* 空态文案 */
+html[data-theme="Glaze"] .dashboard-empty {
+  margin: 0;
+  color: var(--glaze-muted);
+  font-size: 0.88rem;
+}
+
+/* 评论 / 说说列表 */
+html[data-theme="Glaze"] .dashboard-comments,
+html[data-theme="Glaze"] .dashboard-moments {
+  display: grid;
+  gap: 0.1rem;
+}
+
+html[data-theme="Glaze"] .dashboard-comment,
+html[data-theme="Glaze"] .dashboard-moment {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.35rem 0.75rem;
+  align-items: baseline;
+  padding: 0.55rem 0.15rem;
+  font-size: 0.88rem;
+}
+
+html[data-theme="Glaze"] .dashboard-comment + .dashboard-comment,
+html[data-theme="Glaze"] .dashboard-moment + .dashboard-moment {
+  border-block-start: 1px solid var(--glaze-border);
+}
+
+html[data-theme="Glaze"] .dashboard-comment-author {
+  color: var(--glaze-link);
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+html[data-theme="Glaze"] .dashboard-comment-excerpt,
+html[data-theme="Glaze"] .dashboard-moment-excerpt {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--glaze-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html[data-theme="Glaze"] .dashboard-comment time,
+html[data-theme="Glaze"] .dashboard-moment time {
+  color: var(--glaze-muted);
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}

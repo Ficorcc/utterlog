@@ -1,0 +1,91 @@
+/* ============================================================
+ * 关于页样式补丁
+ *
+ * 结构：.page-heading（标题）+ .glaze-about-intro（站点介绍 + 站长）
+ *      + .glaze-about-recent（最近文章列表）。
+ * 上游没有「关于」模板，这里只补主题里没有的几块排版。
+ * 颜色全部走主题变量，浅色 / 深色模式自动适配。
+ * ============================================================ */
+
+/* 站点介绍面板：左边头像，右边文字 */
+html[data-theme="Glaze"] .glaze-about-intro {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1rem;
+  align-items: flex-start;
+  margin-block-end: 1.15rem;
+  padding: var(--glaze-panel-padding);
+}
+
+/* 站长头像 */
+html[data-theme="Glaze"] .glaze-about-avatar {
+  flex: none;
+  width: 4.5rem;
+  height: 4.5rem;
+  border: 1px solid var(--glaze-border);
+  border-radius: calc(var(--glaze-corner-small) * var(--glaze-radius-factor));
+  corner-shape: var(--glaze-corner-shape);
+  object-fit: cover;
+}
+
+/* 介绍文字块，长句换行不撑破面板 */
+html[data-theme="Glaze"] .glaze-about-copy {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+html[data-theme="Glaze"] .glaze-about-site-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+html[data-theme="Glaze"] .glaze-about-desc {
+  margin: 0 0 0.55rem;
+  color: var(--glaze-muted);
+  line-height: 1.75;
+}
+
+/* 站长昵称 + 简介 */
+html[data-theme="Glaze"] .glaze-about-owner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.6rem;
+  align-items: baseline;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+html[data-theme="Glaze"] .glaze-about-owner-name {
+  color: var(--glaze-link);
+  font-weight: 650;
+}
+
+html[data-theme="Glaze"] .glaze-about-owner-bio {
+  color: var(--glaze-muted);
+}
+
+/* 区块小标题 */
+html[data-theme="Glaze"] .glaze-about-section-title {
+  margin: 0 0 0.7rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+/* ============================================================
+ * 留言板评论区面板
+ * ============================================================ */
+
+/* 评论区外壳 */
+html[data-theme="Glaze"] .glaze-guestbook-comments {
+  margin-block-start: 1.15rem;
+  padding: var(--glaze-panel-padding);
+}
+
+/* 共享评论区的标题条自带负边距（它假定父级有 32px 内边距），
+   这里改回面板内边距，免得标题条溢出面板。 */
+html[data-theme="Glaze"] .glaze-guestbook-comments .comment-list-header {
+  margin-inline: 0 !important;
+  padding-inline: 0 !important;
+}

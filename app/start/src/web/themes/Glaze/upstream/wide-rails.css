@@ -1,0 +1,14 @@
+/* src/css/wide-rails.css */
+.home-rails {
+  --glaze-rail-position: fixed;
+  --glaze-rail-block-offset: 50%;
+  --glaze-rail-inline-offset: 10px;
+  --glaze-rail-transform: translateY(-50%);
+  --glaze-rail-width: min(252px, calc((100vw - var(--glaze-content-width)) / 2 - 88px));
+  --glaze-rail-max-height: calc(100dvh - 2 * max(24px, var(--rail-viewport-inset, 0px)));
+  --glaze-rail-flow-actions-space: 0px;
+  --glaze-rail-padding: 10px;
+  --glaze-rail-overflow: auto;
+  --glaze-rail-overscroll: contain;
+  margin: 0;
+}

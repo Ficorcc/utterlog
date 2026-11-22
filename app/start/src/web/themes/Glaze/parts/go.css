@@ -1,0 +1,54 @@
+/* ============================================================
+ * 外链跳转确认页样式补丁
+ *
+ * 卡片沿用上游的 .page-heading / .error-page，这里只补目标域名、
+ * 倒计时与按钮组的排版。
+ * 颜色全部走主题变量，浅色 / 深色模式自动适配。
+ * ============================================================ */
+
+/* 目标域名 */
+html[data-theme="Glaze"] .glaze-go-host {
+  margin-block: 0.9rem 0.2rem;
+  color: var(--glaze-text);
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+/* 完整地址 */
+html[data-theme="Glaze"] .glaze-go-url {
+  margin-block: 0 0.9rem;
+  color: var(--glaze-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+/* 倒计时 */
+html[data-theme="Glaze"] .glaze-go-countdown {
+  margin-block: 0 1.1rem;
+  color: var(--glaze-link);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 按钮组 */
+html[data-theme="Glaze"] .glaze-go-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-block-start: 1.2rem;
+}
+
+html[data-theme="Glaze"] .glaze-go-actions .control-button {
+  margin-block-start: 0;
+}
+
+/* 底部提示 */
+html[data-theme="Glaze"] .glaze-go-tip {
+  margin-block: 1.1rem 0;
+  color: var(--glaze-muted);
+  font-size: 0.8rem;
+}

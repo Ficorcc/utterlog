@@ -7,7 +7,7 @@ import {
 
 describe('built-in blog themes', () => {
   test('keeps every shipped theme selectable', () => {
-    expect(BLOG_THEME_NAMES).toEqual(['Azure', 'Ember', 'Renascent', 'ShanYing', 'Whono']);
+    expect(BLOG_THEME_NAMES).toEqual(['Azure', 'Ember', 'Glaze', 'Renascent', 'Robes', 'ShanYing', 'Whono']);
     for (const theme of BLOG_THEME_NAMES) expect(normalizeThemeName(theme)).toBe(theme);
   });
 

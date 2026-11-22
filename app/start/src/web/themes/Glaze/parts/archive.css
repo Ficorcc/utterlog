@@ -1,0 +1,67 @@
+/* ============================================================
+ * 归档 / 分类 / 标签页样式补丁
+ *
+ * 上游样式表只覆盖了归档页（archive-*）与文章卡片（post-card），
+ * 分类总览（category-grid / category-card）与标签总览
+ * （tag-cloud / tag-chip）没有对应规则，这里补上，
+ * 变量全部走主题变量，浅色 / 深色模式自动适配。
+ * ============================================================ */
+
+/* 分类总览：自适应列数的卡片网格 */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0.75rem;
+}
+
+/* 单个分类卡片：图标 + 名称 + 文章数 */
+.category-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 0.9rem;
+  color: var(--glaze-text);
+  text-decoration: none;
+}
+
+.category-card > span:nth-child(2) {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.category-card > span:last-child {
+  color: var(--glaze-muted);
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.category-card .glaze-icon {
+  color: var(--glaze-link);
+  font-size: 1.05rem;
+}
+
+/* 用站点 Font Awesome 图标时不需要主题图标的遮罩底色 */
+.category-card .glaze-icon:not([data-glaze-icon]) {
+  inline-size: 1.1em;
+  block-size: 1.1em;
+  background: none;
+}
+
+/* 标签总览：胶囊云 */
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.3rem 0.7rem;
+  color: var(--glaze-text);
+  font-size: 0.85rem;
+  text-decoration: none;
+}

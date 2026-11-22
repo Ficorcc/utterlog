@@ -1,0 +1,97 @@
+/* ============================================================
+ * Glaze · 文章页补丁
+ * 正文字号调节、目录弹层、阅读控件
+ * ============================================================ */
+
+/* 正文字号：PostPage 通过 --glaze-reading-scale 调整 */
+html[data-theme="Glaze"] .entry-content {
+  font-size: calc(1em * var(--glaze-reading-scale, 1));
+}
+
+/* 阅读控件固定在正文右上角 */
+html[data-theme="Glaze"] .entry-reading-controls {
+  position: absolute;
+  z-index: 4;
+  inset-block-start: 12px;
+  inset-inline-end: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+html[data-theme="Glaze"] .entry-reading-size {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+html[data-theme="Glaze"] .entry-reading-controls button {
+  inline-size: 30px;
+  block-size: 30px;
+  border: 1px solid var(--glaze-border);
+  background: var(--glaze-panel);
+  color: var(--glaze-text);
+  font-size: 12px;
+  line-height: 1;
+}
+
+html[data-theme="Glaze"] .entry-main {
+  position: relative;
+}
+
+/* 目录弹层 */
+html[data-theme="Glaze"] .post-toc-trigger {
+  position: fixed;
+  z-index: 12;
+  inset-block-end: calc(1rem + env(safe-area-inset-bottom, 0px));
+  inset-inline-end: 1rem;
+  border: 1px solid var(--glaze-border);
+  background: var(--glaze-panel);
+  color: var(--glaze-text);
+}
+
+html[data-theme="Glaze"] .post-toc-dialog {
+  inline-size: min(420px, calc(100vw - 32px));
+  border: 1px solid var(--glaze-border);
+  background: var(--glaze-panel);
+  color: var(--glaze-text);
+  padding: 0;
+}
+
+html[data-theme="Glaze"] .post-toc-inner {
+  padding: 16px 18px 20px;
+}
+
+html[data-theme="Glaze"] .post-toc-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-block-end: 10px;
+}
+
+html[data-theme="Glaze"] .post-toc-heading h2 {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+html[data-theme="Glaze"] .post-toc-close {
+  border: 0;
+  background: transparent;
+  color: var(--glaze-muted);
+}
+
+html[data-theme="Glaze"] .post-toc-list {
+  margin: 0;
+  padding-inline-start: 18px;
+  display: grid;
+  gap: 6px;
+  max-block-size: 60vh;
+  overflow-y: auto;
+  font-size: 13px;
+}
+
+html[data-theme="Glaze"] .post-toc-item.post-toc-level-3 {
+  padding-inline-start: 12px;
+  color: var(--glaze-muted);
+}

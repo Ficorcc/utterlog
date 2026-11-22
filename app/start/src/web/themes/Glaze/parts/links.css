@@ -1,0 +1,142 @@
+/* ============================================================
+ * 友链 / 朋友圈样式补丁
+ *
+ * 友链列表沿用上游的 .friend-list / .friend-link / .collection-site-icon，
+ * 这里只补朋友圈卡片（.friend-card / .friend-posts）——上游没有这一页。
+ * 颜色全部走主题变量，浅色 / 深色模式自动适配。
+ * ============================================================ */
+
+/* 上游图标集里没有 friends.svg，朋友圈页先用 misc 顶上。
+   补上 friends.svg 后删掉这条规则即可。 */
+html[data-theme="Glaze"] [data-glaze-icon=friends] {
+  --glaze-icon-image: url(assets/images/menu-icons/misc.svg);
+}
+
+/* 上游把 .friend-list 的列表重置限定在 .entry-content 里，
+   本主题的友链页不套 .entry-content，这里补一次。 */
+html[data-theme="Glaze"] .friend-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+html[data-theme="Glaze"] .friend-list > li {
+  margin: 0;
+  min-width: 0;
+}
+
+/* 朋友圈：好友卡片列表 */
+html[data-theme="Glaze"] .glaze-friend-list {
+  display: grid;
+  gap: 0.9rem;
+  margin-block-start: 0.9rem;
+}
+
+/* 一个好友 */
+html[data-theme="Glaze"] .friend-card {
+  padding: var(--glaze-panel-padding);
+}
+
+/* 头部：站点图标 + 名字 + 分组 */
+html[data-theme="Glaze"] .friend-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+/* 好友名同时是跳转链接 */
+html[data-theme="Glaze"] .friend-card-head .friend-name {
+  color: var(--glaze-text);
+  font-size: 1rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+html[data-theme="Glaze"] .friend-card-head .friend-name:is(:hover, :focus-visible) {
+  color: var(--glaze-link);
+}
+
+/* 分组标签 */
+html[data-theme="Glaze"] .friend-card-group {
+  padding: 0.2rem 0.5rem;
+  border-radius: calc(var(--glaze-corner-small) * var(--glaze-radius-factor));
+  color: var(--glaze-link);
+  background: var(--glaze-accent-fill);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+/* 好友简介 */
+html[data-theme="Glaze"] .friend-card > .friend-description {
+  display: block;
+  margin-block-start: 0.4rem;
+  color: var(--glaze-muted);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+/* 好友动态列表 */
+html[data-theme="Glaze"] .friend-posts {
+  margin: 0.7rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+html[data-theme="Glaze"] .friend-posts > li {
+  margin: 0;
+}
+
+html[data-theme="Glaze"] .friend-posts > li + li {
+  border-block-start: 1px solid var(--glaze-border);
+}
+
+/* 一条动态 */
+html[data-theme="Glaze"] .friend-post {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0.5rem 0.15rem;
+  color: var(--glaze-text);
+  text-decoration: none;
+}
+
+html[data-theme="Glaze"] .friend-post:is(:hover, :focus-visible) {
+  color: var(--glaze-link);
+}
+
+html[data-theme="Glaze"] .friend-post-title {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html[data-theme="Glaze"] .friend-post-time {
+  flex: none;
+  color: var(--glaze-muted);
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* 订阅列表：上游只给了条目样式，这里补列表间距 */
+html[data-theme="Glaze"] .subscription-list {
+  margin-block-start: 0.9rem;
+}
+
+html[data-theme="Glaze"] .subscription-item {
+  padding: 0;
+}
+
+html[data-theme="Glaze"] .subscription-link {
+  text-decoration: none;
+}
+
+html[data-theme="Glaze"] .subscription-copy h2 {
+  color: var(--glaze-text);
+}

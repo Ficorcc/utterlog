@@ -1,0 +1,59 @@
+/* ============================================================
+ * Glaze 适配层
+ *
+ * 上游样式表是给 WordPress 整页滚动准备的，这里把站点骨架（.blog-main 滚动容器、
+ * 应用层 globals.css 的变量与通用样式）接上，规则挂在 html[data-theme="Glaze"] 下。
+ * ============================================================ */
+
+/* 站点滚动容器：内容在 .blog-main 里滚，body 保持满屏 */
+html[data-theme="Glaze"] .glaze-shell {
+  min-height: 100%;
+}
+
+html[data-theme="Glaze"] .glaze-main {
+  min-height: 100%;
+  background: var(--glaze-background);
+}
+
+/* 应用层把 body 设为满屏并锁滚动，这里让页面底色跟随主题 */
+html[data-theme="Glaze"] body {
+  background: var(--glaze-background);
+}
+
+/* 上游的 <main id="content"> 才是内容容器，滚动条不要落在它上面 */
+html[data-theme="Glaze"] .site-content {
+  overflow: visible;
+}
+
+/* 站点通用链接样式（globals.css）会盖住主题里的 a 规则，这里收回 */
+html[data-theme="Glaze"] .site-content a:any-link {
+  text-decoration: none;
+}
+
+/* 评论区与表单里的按钮需要主题主色，而不是应用层的 Azure 蓝 */
+html[data-theme="Glaze"] .comments-area,
+html[data-theme="Glaze"] .comments-area button,
+html[data-theme="Glaze"] .comments-area input,
+html[data-theme="Glaze"] .comments-area textarea {
+  --color-primary: var(--glaze-link);
+  --color-text-main: var(--glaze-text);
+  --color-text-dim: var(--glaze-muted);
+  --color-border: var(--glaze-border);
+}
+
+/* 应用层全局样式里给正文图片加的懒加载动效在主题里不需要 */
+html[data-theme="Glaze"] .entry-content img {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* 表单控件在窄屏必须 ≥16px，否则 iOS Safari 聚焦会放大整页 */
+@media screen and (max-width: 640px) {
+  html[data-theme="Glaze"] .entry-content input,
+  html[data-theme="Glaze"] .entry-content textarea,
+  html[data-theme="Glaze"] .comments-area input,
+  html[data-theme="Glaze"] .comments-area textarea,
+  html[data-theme="Glaze"] .search-field {
+    font-size: 16px;
+  }
+}

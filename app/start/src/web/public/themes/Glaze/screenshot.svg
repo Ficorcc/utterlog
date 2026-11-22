@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400" role="img" aria-label="Glaze 主题预览">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f4f6f4" />
+      <stop offset="1" stop-color="#eef2ef" />
+    </linearGradient>
+    <linearGradient id="ripple" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#48e76a" stop-opacity="0.25" />
+      <stop offset="1" stop-color="#48e76a" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#bg)" />
+  <circle cx="540" cy="120" r="150" fill="url(#ripple)" />
+
+  <!-- 顶栏 -->
+  <rect x="60" y="28" width="480" height="52" rx="14" fill="#ffffff" stroke="#e8ece8" />
+  <rect x="76" y="44" width="26" height="26" rx="9" fill="#09c849" />
+  <rect x="112" y="50" width="86" height="12" rx="6" fill="#2f3a33" />
+  <circle cx="512" cy="54" r="13" fill="#f1f4f1" stroke="#e2e7e2" />
+  <circle cx="524" cy="54" r="5" fill="#c9d3cb" />
+
+  <!-- 内容列 -->
+  <rect x="150" y="100" width="300" height="104" rx="14" fill="#ffffff" stroke="#e8ece8" />
+  <rect x="168" y="120" width="150" height="13" rx="6" fill="#2f3a33" />
+  <rect x="168" y="146" width="240" height="8" rx="4" fill="#dfe5df" />
+  <rect x="168" y="162" width="200" height="8" rx="4" fill="#dfe5df" />
+  <rect x="168" y="182" width="70" height="8" rx="4" fill="#b6e7bd" />
+
+  <rect x="150" y="216" width="300" height="104" rx="14" fill="#ffffff" stroke="#e8ece8" />
+  <rect x="168" y="236" width="190" height="13" rx="6" fill="#2f3a33" />
+  <rect x="168" y="262" width="240" height="8" rx="4" fill="#dfe5df" />
+  <rect x="168" y="278" width="170" height="8" rx="4" fill="#dfe5df" />
+  <rect x="168" y="298" width="70" height="8" rx="4" fill="#b6e7bd" />
+
+  <!-- 侧轨 -->
+  <rect x="20" y="100" width="112" height="92" rx="12" fill="#ffffff" stroke="#e8ece8" />
+  <rect x="32" y="116" width="56" height="9" rx="4" fill="#2f3a33" />
+  <rect x="32" y="134" width="86" height="7" rx="3" fill="#e3e8e3" />
+  <rect x="32" y="148" width="70" height="7" rx="3" fill="#e3e8e3" />
+  <rect x="32" y="162" width="80" height="7" rx="3" fill="#e3e8e3" />
+
+  <rect x="468" y="100" width="112" height="92" rx="12" fill="#ffffff" stroke="#e8ece8" />
+  <rect x="480" y="116" width="56" height="9" rx="4" fill="#2f3a33" />
+  <rect x="480" y="134" width="86" height="7" rx="3" fill="#e3e8e3" />
+  <rect x="480" y="148" width="60" height="7" rx="3" fill="#e3e8e3" />
+
+  <!-- 底部 dock -->
+  <rect x="240" y="348" width="120" height="34" rx="17" fill="#ffffff" stroke="#e2e7e2" />
+  <circle cx="266" cy="365" r="7" fill="#09c849" />
+  <circle cx="300" cy="365" r="7" fill="#cfd8d1" />
+  <circle cx="334" cy="365" r="7" fill="#cfd8d1" />
+</svg>

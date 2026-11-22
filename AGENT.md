@@ -175,8 +175,26 @@ checkout 直接跑 dev，那个文件不存在，Bun.serve 会对所有请求返
 | **Nebula** | 暗色科技 | 天蓝 `#7FCFFF` 强调 + 纯黑底 + 玻璃质感卡片 |
 | **Utterlog** | 旗舰参考 | 默认基线 |
 | **Ember** | 复刻主题 | 复刻自 lawpan.cc 的 ember（LiteNote 内置主题），源码在 `theme-renderers/Ember/` |
+| **Glaze** | 复刻主题 | 复刻自 glaze（WestNote 风格 WordPress 主题），组件在 `themes/Glaze/`，样式由 `scripts/sync-glaze-theme-css.mjs` 从仓库内置的上游 CSS 生成 |
 
 **Chred 已废弃**，`blog-theme.ts` 把老站点的 `chred` 映射回 Azure + 红色强调。
+
+### Glaze 主题（复刻主题，样式是生成的）
+
+- 组件源码：`app/start/src/web/themes/Glaze/*.tsx`；`styles.css` / `theme.json` / `screenshot.svg`
+  也在这个目录。上游 CSS 与图标/字体资源 vendor 在 `themes/Glaze/upstream/` 与
+  `themes/Glaze/assets/`，**不联网**构建。
+- `bun run scripts/sync-glaze-theme-css.mjs` 读取上游 CSS，做三件事后落盘：
+  1. 资源路径改写：`../fonts/`、`../images/` → `assets/fonts/`、`assets/images/`
+     （样式表发布在 `/themes/Glaze/styles.css`，资源在同目录的 `assets/` 下）；
+  2. 每条规则加 `html[data-theme="Glaze"]` 作用域（原因同 Ember）；
+  3. 末尾拼上 `adapter.css` 与 `parts/*.css`（手写补丁，分页面维护）。
+- 改样式请改 `adapter.css` / `parts/` 或上游文件，**不要手改 `styles.css`**。
+- 外观参数（配色 / 深浅色 / 背景 / 圆角 / 内容宽度）存在 options 表的
+  `glaze_*` 键，后台面板是 `admin/src/components/GlazeSettings.tsx`
+  （`theme.json` 的 `adminPanels: ["glaze_settings"]` 声明才会在后台出现该 tab）。
+  访客在前台配色器的选择记在 localStorage，优先级高于后台默认值。
+- 启用方式：`options.active_theme = 'Glaze'`（后台「主题」页切换，或直接改库）。
 
 ### Ember 主题（复刻主题，样式是生成的）
 
