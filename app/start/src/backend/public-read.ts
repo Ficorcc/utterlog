@@ -8,6 +8,7 @@ import { siteTotalViews } from './services/analytics';
 import { friendLinkAvatar, friendLinkIndex, matchFriendBadge } from './services/friend-links';
 import { avatarCandidates } from './services/avatar';
 import { type ReadVisitor } from './services/tracking';
+import { naiveWallClockString } from './wall-clock';
 import { defaultWeatherLocation, fetchVisitorWeather, visitorWeatherLocation, type VisitorWeatherResponse } from './weather';
 
 type MetaType = 'category' | 'tag';
@@ -122,23 +123,14 @@ async function siteTimeZone() {
   return isValidTimeZone(configured) ? configured : 'Asia/Shanghai';
 }
 
-function siteWallClockTimestamp(date: Date, timeZone: string) {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone,
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
-  }).formatToParts(date);
-  const part = (type: string) => parts.find((item) => item.type === type)?.value || '00';
-  return `${part('year')}-${part('month')}-${part('day')}T${part('hour')}:${part('minute')}:${part('second')}`;
-}
-
 function sanitizePostForResponse(row: Record<string, unknown>, detail: boolean, timeZone: string) {
   const next = { ...row };
-  // PostgreSQL `timestamp without time zone` represents a site wall-clock
-  // publish time. Return the same no-zone value regardless of this process's
-  // own timezone, so clients can parse it with site_timezone.
+  // PostgreSQL `timestamp without time zone` 存的是站点墙上时间。postgres.js
+  // 用 `new Date(x)` 读它（按进程本地时区当成一个时刻），若再按站点时区重排
+  // 一次，服务器时区（UTC）和站点时区（Asia/Shanghai）不一致时就会凭空多出
+  // 一个时区差 —— 线上正好 +8 小时，发布时间全被推后。这里按墙上时间原样返回。
   if (next.published_at instanceof Date) {
-    next.published_at = siteWallClockTimestamp(next.published_at, timeZone);
+    next.published_at = naiveWallClockString(next.published_at);
   }
   delete next.password;
   next.meta = next.meta || {};

@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { config, table } from '../config';
 import { many, one } from '../db/helpers';
 import { readResolvedOptionMap } from '../services/options';
+import { naiveWallClockString } from '../wall-clock';
 
 async function optionMap(includeSensitive: boolean) {
   return readResolvedOptionMap(includeSensitive);
@@ -100,6 +101,14 @@ function parsePostPublishedDate(
   timeZone = 'UTC',
 ): Date {
   const raw = post.published_at ?? post.created_at ?? 0;
+  // postgres.js 读 `timestamp without time zone` 时用 new Date(x) 解析（按进程
+  // 本地时区当成一个时刻），本地分量就是库里存的墙上时间。直接把它当绝对
+  // 时刻再按站点时区换算，服务器 UTC / 站点 Asia/Shanghai 时会多出 8 小时。
+  if (raw instanceof Date) {
+    if (Number.isNaN(raw.getTime())) return new Date();
+    const wallClock = parseNaiveWallClock(naiveWallClockString(raw), timeZone);
+    return wallClock || raw;
+  }
   if (typeof raw === 'number' || /^\d+$/.test(String(raw))) {
     const n = Number(raw);
     const date = new Date(n > 1e9 && n < 1e10 ? n * 1000 : n);

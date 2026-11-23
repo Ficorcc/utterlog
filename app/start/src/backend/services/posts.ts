@@ -4,6 +4,7 @@ import { optionValue } from '../db/options';
 import { sendPostPublishedTelegram } from '../telegram';
 import { sendPostPublishedWechat } from '../wechat';
 import { readResolvedOptionMap } from './options';
+import { publishedWallClockParts } from '../wall-clock';
 
 export class PostServiceError extends Error {
   constructor(public status: number, public code: string, message: string) {
@@ -431,16 +432,18 @@ async function savePostExtras(postId: number, body: Record<string, unknown>) {
 
 export function postPath(post: Record<string, unknown>, template: string, timeZone: string) {
   const rawDate = post.published_at || (Number(post.created_at || 0) > 0 ? new Date(Number(post.created_at) * 1000) : new Date());
-  const date = rawDate instanceof Date ? rawDate : new Date(String(rawDate));
-  const parts = new Intl.DateTimeFormat('en', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(date);
-  const part = (type: string) => parts.find((item) => item.type === type)?.value || '';
+  // published_at 是 `timestamp without time zone`，存的是站点墙上时间。
+  // postgres.js 按进程本地时区把它读成 Date（服务器 UTC），再按站点时区换算
+  // 会凭空多出 8 小时，日期型固定链接（/%year%/%month%/%day%/）就指到错的日子。
+  const parts = publishedWallClockParts(rawDate, timeZone);
+  const pad2 = (value: number) => String(value).padStart(2, '0');
   const path = (template.trim() || '/posts/%postname%')
     .replace(/%postname%/g, encodeURIComponent(String(post.slug || post.id || '')))
     .replace(/%post_id%/g, String(post.id || ''))
     .replace(/%display_id%/g, String(post.display_id || post.id || ''))
-    .replace(/%year%/g, part('year'))
-    .replace(/%month%/g, part('month'))
-    .replace(/%day%/g, part('day'))
+    .replace(/%year%/g, parts ? String(parts.year) : '')
+    .replace(/%month%/g, parts ? pad2(parts.month) : '')
+    .replace(/%day%/g, parts ? pad2(parts.day) : '')
     .replace(/%category%/g, encodeURIComponent(String(post.category_slug || 'uncategorized')));
   return path.startsWith('/') ? path : `/${path}`;
 }
