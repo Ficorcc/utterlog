@@ -8105,6 +8105,8 @@ html[data-theme='Robes'] {
   --color-primary: var(--accent);
   --color-primary-hover: var(--accent-hover);
   --color-primary-active: var(--accent-strong);
+  /* 强调色是浅蓝，白字压在上面对比度不足，改用深色字 */
+  --color-primary-text: #10151f;
   --color-focus-ring: var(--accent);
   --color-bg-code-block: #1D1F21;
   --color-text-code-block: #C5C8C6;

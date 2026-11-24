@@ -156,6 +156,8 @@ html.lightbox-active body {
   --color-primary: #0052D9;
   --color-primary-hover: #0044B8;
   --color-primary-active: #003A9E;
+  /* 强调色背景上的文字用色：主题可以覆盖（亮强调色下白字看不清） */
+  --color-primary-text: #fff;
   --color-secondary: #6B7280;
   --color-bg-main: #FFFFFF;
   --color-bg-card: #FFFFFF;

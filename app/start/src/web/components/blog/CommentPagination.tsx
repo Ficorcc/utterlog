@@ -28,7 +28,8 @@ export default function CommentPagination({ page, totalPages, onPageChange }: {
     border: '1px solid var(--color-border, #ddd)',
     borderRadius: theme.name === 'Azure' ? 0 : 10,
     background: active ? 'var(--color-primary, #0052d9)' : 'transparent',
-    color: active ? '#fff' : 'var(--color-text-main, #222)',
+    // 强调色背景上的文字用主题提供的对比色：亮色强调色（荧光绿、嫩绿等）下白字看不清
+    color: active ? 'var(--color-primary-text, #fff)' : 'var(--color-text-main, #222)',
     fontSize: 12,
     fontWeight: active ? 700 : 500,
     cursor: disabled ? 'not-allowed' : 'pointer',

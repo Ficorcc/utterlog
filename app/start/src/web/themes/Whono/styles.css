@@ -17,6 +17,7 @@ html[data-theme="Whono"] {
   --wh-faint: #a8a29e;
   --wh-border: #e7e5e4;
   --wh-accent: #b91c1c;
+  --wh-accent-text: #fff;
   --wh-panel: #f2f2f0;
   --wh-code-bg: #fcfcfb;
   --wh-sidebar: 320px;
@@ -39,6 +40,7 @@ html[data-theme="Whono"][data-whono-color="dark"] {
   --wh-faint: #737373;
   --wh-border: #333333;
   --wh-accent: #f87171;
+  --wh-accent-text: #1a0d0d;
   --wh-panel: #2a2a2a;
   --wh-code-bg: #222222;
   color-scheme: dark;
@@ -64,6 +66,8 @@ html[data-theme="Whono"] {
   --color-primary: var(--wh-accent);
   --color-primary-hover: var(--wh-accent);
   --color-primary-active: var(--wh-accent);
+  /* 强调色背景上的文字用色：亮色下强调色深，配白字；暗色下强调色浅，必须配深字 */
+  --color-primary-text: var(--wh-accent-text);
   --color-focus-ring: var(--wh-accent);
   --color-bg-main: var(--wh-bg);
   --color-bg-card: var(--wh-bg);

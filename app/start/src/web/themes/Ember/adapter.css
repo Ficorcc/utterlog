@@ -90,6 +90,8 @@ body .blog-main {
 body {
   --color-primary: var(--c-primary);
   --color-primary-hover: var(--c-primary-dark);
+  /* 强调色是中等亮度的砖红，白字对比度不足，改用深色字 */
+  --color-primary-text: #1a0a06;
   --color-bg-main: var(--c-bg);
   --color-bg-card: var(--c-card);
   --color-bg-soft: var(--c-card-soft);

@@ -42,6 +42,15 @@ html[data-theme="Glaze"] .comments-area textarea {
   --color-border: var(--glaze-border);
 }
 
+/* 评论区主色是链接色：亮色下是深色（配白字），暗色下是浅色（配深字） */
+html[data-theme="Glaze"] .comments-area {
+  --color-primary-text: #fff;
+}
+
+html[data-theme="Glaze"][data-glaze-scheme=dark] .comments-area {
+  --color-primary-text: #07130d;
+}
+
 /* 应用层共享组件（搜索页、共享评论列表等）依赖 globals.css 的 --color-* 变量。
    不映射的话，这些区域在当前主题下仍然是默认的 Azure 蓝 + 白色卡片，
    与主题的釉色面板割裂。这里把应用层令牌接到当前主题的令牌上。 */
@@ -49,6 +58,8 @@ html[data-theme="Glaze"] {
   --color-primary: var(--glaze-accent);
   --color-primary-hover: var(--glaze-accent-middle);
   --color-primary-active: var(--glaze-accent);
+  /* 强调色背景上的文字：釉色板每套配色的明暗不同，交给 --glaze-button-text */
+  --color-primary-text: var(--glaze-button-text);
   --color-focus-ring: var(--glaze-accent);
   --color-bg-main: var(--glaze-background);
   --color-bg-card: var(--glaze-panel);
