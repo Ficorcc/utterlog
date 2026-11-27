@@ -281,7 +281,15 @@ html[data-theme='ShanYing'] .sy-header::before {
 }
 
 html[data-theme='ShanYing'] .sy-header[data-scrolled='1'] {
-  width: min(calc(var(--sy-frame) - 100px), calc(100% - 64px));
+  /* 2026-11-12：原来收窄 100px（1000 → 900）。头部是
+     `minmax(0,1fr) auto minmax(0,1fr)` 三列，站名严格居中，
+     于是左右两列等宽、导航列 = (头部内容宽 - 站名宽 - 间距) / 2。
+     900px 时导航列只剩 373.5px，而 8 项导航需要 412px → 溢出 39px，
+     横向滚动条冒出来、末项「历史」被裁掉。
+     现在收窄幅度改成 40px（1000 → 960）：导航列回到 403.5px，
+     配合下面收紧的导航内边距（380px）刚好放得下，还留 23px 余量，
+     同时保留「滚动后胶囊收窄」的视觉。 */
+  width: min(calc(var(--sy-frame) - 40px), calc(100% - 64px));
   /* 同理对称化：原来 8/6，站名偏右 1px */
   padding-inline: 7px;
 }
@@ -300,13 +308,23 @@ html[data-theme='ShanYing'] .sy-nav {
   position: relative;
   min-width: 0;
   max-width: 100%;
+  /* 兜底仍保留横向滚动能力（超窄屏 / 超长站名时不会把菜单挤掉），
+     但滚动条外观一律隐藏：横向滚动条压在胶囊下沿很难看，且菜单项
+     本来就该全部露出来。 */
   overflow-x: auto;
-  scrollbar-width: thin;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   justify-self: start;
   display: flex;
   align-items: center;
   gap: 2px;
   padding: 4px;
+}
+
+html[data-theme='ShanYing'] .sy-nav::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 html[data-theme='ShanYing'] .sy-nav-glider {
@@ -330,8 +348,12 @@ html[data-theme='ShanYing'] .sy-nav-link {
   height: 34px;
   /* 2026-09-27：横向内边距 14 → 10。相邻两项的文字间距从 30px 收到 22px，
      六项一共省下 48px，正好给上面「站名居中」腾出余量。字号不动，
-     免得整条导航看着变小一号。 */
-  padding: 0 10px;
+     免得整条导航看着变小一号。
+     2026-11-12：菜单从 6 项涨到 8 项，10px 内边距下整条导航要 412px，
+     超过滚动态导航列的 373.5px，最后一项被裁掉并顶出横向滚动条。
+     内边距收到 8px（文字间距 22 → 18px），整条导航 380px，
+     在 403.5px 的列里还留 23px 余量，8 项一次全露。 */
+  padding: 0 8px;
   border-radius: 999px;
   color: var(--sy-hd-muted);
   font-size: 13.5px;
@@ -5065,10 +5087,22 @@ html[data-theme='ShanYing'] .sy-auth-menu-item:hover i {
    会越过中线压到站名盒子上（实测 nav.right=397 > brand.x=391）。
    这里把内边距再收到 8px，导航降到 321px，留出 11px 余量。
    1000px 以上两列有 382px，用不上这条；900px 以下文字导航整个收进汉堡，
-   这条自动失效。 */
+   这条自动失效。
+
+   2026-11-12：菜单涨到 8 项后上面那套数字全部作废。901px 下导航列只有
+   342px（滚动态 837px 宽的头部），8px 内边距的导航要 380px，装不下。
+   这里再收一档：内边距 6px、间距 1px、字号 13.5 → 13px，
+   整条导航降到 333px，901px 下还剩 9px 余量，最窄时也不会被裁。
+   滚动条外观已在 .sy-nav 处隐藏，这里装不下时也只是内容可横向滚，
+   不会冒出那条难看的横条。 */
 @media (max-width: 1000px) {
   html[data-theme='ShanYing'] .sy-nav-link {
-    padding: 0 8px;
+    padding: 0 6px;
+    font-size: 13px;
+  }
+
+  html[data-theme='ShanYing'] .sy-nav {
+    gap: 1px;
   }
 }
 
